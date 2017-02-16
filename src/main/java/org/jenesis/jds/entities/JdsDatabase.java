@@ -1,0 +1,389 @@
+package org.jenesis.jds.entities;
+
+
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleListProperty;
+import org.jenesis.jds.enums.JdsImplementation;
+import org.jenesis.jds.enums.JdsTable;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+/**
+ * Created by ifunga on 12/02/2017.
+ */
+public abstract class JdsDatabase {
+
+    private static JdsDatabase implementation;
+    private String className;
+    private String url;
+    private String userName;
+    private String passWord;
+    private boolean logEdits;
+    private boolean propertiesSet;
+
+    public final void init() {
+        init(true,JdsTable.StoreTextArray);
+        init(true,JdsTable.StoreFloatArray);
+        init(true,JdsTable.StoreIntegerArray);
+        init(true,JdsTable.StoreLongArray);
+        init(true,JdsTable.StoreDoubleArray);
+        init(true,JdsTable.StoreDateTimeArray);
+        init(true,JdsTable.StoreText);
+        init(true,JdsTable.StoreFloat);
+        init(true,JdsTable.StoreInteger);
+        init(true,JdsTable.StoreLong);
+        init(true,JdsTable.StoreDouble);
+        init(true,JdsTable.StoreDateTime);
+        init(true,JdsTable.StoreEntities);
+        init(true,JdsTable.StoreEntitySubclass);
+        init(true,JdsTable.RefEnumValues);
+        init(true,JdsTable.RefFields);
+        init(true,JdsTable.RefFieldTypes);
+        init(true,JdsTable.BindEntityFields);
+        init(true,JdsTable.BindEntityEnums);
+        init(true,JdsTable.RefEntityOverview);
+        init(true,JdsTable.RefOldFieldValues);
+    }
+
+    public final void setConnectionProperties(String className, String url, String userName, String passWord) {
+        if (className == null || url == null || userName == null || passWord == null)
+            throw new RuntimeException("Please supply valid values. Nulls not permitted");
+        this.className = className;
+        this.url = url;
+        this.userName = userName;
+        this.passWord = passWord;
+        this.propertiesSet = true;
+    }
+
+    public void setConnectionProperties(String url) {
+        if (url == null)
+            throw new RuntimeException("Please supply valid values. Nulls not permitted");
+        this.url = url;
+        this.propertiesSet = true;
+    }
+
+    public final Connection getConnection() throws ClassNotFoundException, SQLException {
+        if (!propertiesSet)
+            throw new RuntimeException("Please set connection properties before requesting a database connection");
+        if (userName != null && passWord != null) {
+            Class.forName(className);
+            return DriverManager.getConnection(url, userName, passWord);
+        } else
+            return DriverManager.getConnection(url);
+    }
+
+    public final static JdsDatabase getImplementation(JdsImplementation implementation) {
+        switch (implementation) {
+            case SQLITE:
+                return new JdsSqliteDatabase();
+            case POSTGRES:
+                return new JdsPostgresDatabase();
+            case TSQL:
+                return new JdsTransactionalSqlDatabase();
+        }
+        return null;
+    }
+
+    private final void init(boolean isTable,JdsTable jdsTable) {
+        boolean tableExists = isTable?doesTableExist(jdsTable.getName()):doesProcedureExist(jdsTable.getName());
+        if (!tableExists)
+            createTable(jdsTable);
+    }
+
+    private final void createTable(JdsTable jdsTable) {
+        switch (jdsTable) {
+            case StoreTextArray:
+                createStoreTextArray();
+                break;
+            case StoreFloatArray:
+                createStoreFloatArray();
+                break;
+            case StoreIntegerArray:
+                createStoreIntegerArray();
+                break;
+            case StoreLongArray:
+                createStoreLongArray();
+                break;
+            case StoreDoubleArray:
+                createStoreDoubleArray();
+                break;
+            case StoreDateTimeArray:
+                createStoreDateTimeArray();
+                break;
+            case StoreText:
+                createStoreText();
+                break;
+            case StoreFloat:
+                createStoreFloat();
+                break;
+            case StoreInteger:
+                createStoreInteger();
+                break;
+            case StoreLong:
+                createStoreLong();
+                break;
+            case StoreDouble:
+                createStoreDouble();
+                break;
+            case StoreDateTime:
+                createStoreDateTime();
+                break;
+            case StoreEntities:
+                createStoreEntities();
+                break;
+            case StoreEntitySubclass:
+                createStoreEntitySubclass();
+                break;
+            case RefEnumValues:
+                createRefEnumValues();
+                break;
+            case RefFields:
+                createRefFields();
+                break;
+            case RefFieldTypes:
+                createRefFieldTypes();
+                break;
+            case BindEntityFields:
+                createBindEntityFields();
+                break;
+            case BindEntityEnums:
+                createBindEntityEnums();
+                break;
+            case RefEntityOverview:
+                createRefEntityOverview();
+                break;
+            case RefOldFieldValues:
+                createRefOldFieldValues();
+                break;
+        }
+    }
+
+    private final boolean doesTableExist(String tableName) {
+        int answer = tableExists(tableName);
+        return answer == 1;
+    }
+
+    private final boolean doesProcedureExist(String tableName) {
+        int answer = procedureExists(tableName);
+        return answer == 1;
+    }
+
+    protected final void createTableFromFile(String fileName) {
+        try (Connection connection = getConnection(); Statement innerStmt = connection.createStatement();) {
+            String innerSql = fileToString(this.getClass().getClassLoader().getResourceAsStream(fileName));
+            innerStmt.executeUpdate(innerSql);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    private String fileToString(InputStream inputStream) throws Exception{
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int result = bis.read();
+        while(result != -1) {
+            buf.write((byte) result);
+            result = bis.read();
+        }
+        return buf.toString();
+    }
+
+    protected final String createArray(final SimpleListProperty<String> textValues) {
+        List<String> list = textValues.stream().map(textValue -> "'" + textValue.replace("%", "[%]").replace("'", "''") + "'").collect(Collectors.toList());
+        return String.join(",", list);
+    }
+
+    abstract int tableExists(String tableName);
+
+    public int procedureExists(String procedureName)
+    {return 0;}
+
+    abstract void createStoreText();
+
+    abstract void createStoreDateTime();
+
+    abstract void createStoreInteger();
+
+    abstract void createStoreFloat();
+
+    abstract void createStoreDouble();
+
+    abstract void createStoreLong();
+
+    abstract void createStoreTextArray();
+
+    abstract void createStoreDateTimeArray();
+
+    abstract void createStoreIntegerArray();
+
+    abstract void createStoreFloatArray();
+
+    abstract void createStoreDoubleArray();
+
+    abstract void createStoreLongArray();
+
+    abstract void createStoreEntities();
+
+    abstract void createStoreEntitySubclass();
+
+    abstract void createRefEnumValues();
+
+    abstract void createRefFields();
+
+    abstract void createRefFieldTypes();
+
+    abstract void createBindEntityFields();
+
+    abstract void createBindEntityEnums();
+
+    abstract void createRefEntityOverview();
+
+    abstract void createRefOldFieldValues();
+
+    public final synchronized boolean mapClassFields(final long entityCode, final HashSet<Long> fields) {
+        int rowsWritten = 0;
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ? and FieldId = ?";
+        String insertSql = "INSERT INTO JdsBindEntityFields (EntityId,FieldId) VALUES (?,?)";
+        try (Connection connection = getConnection();
+             PreparedStatement check = connection.prepareStatement(checkSql);
+             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            for (Long field : fields) {
+                check.clearParameters();
+                check.setLong(1, entityCode);
+                check.setLong(2, field);
+                ResultSet resultSet = check.executeQuery();
+                while (resultSet.next()) {
+                    if (resultSet.getInt("Result") == 0) {
+                        insert.clearParameters();
+                        insert.setLong(1, entityCode);
+                        insert.setLong(2, field);
+                        rowsWritten += insert.executeUpdate();
+                    }
+                }
+                resultSet.close();
+            }
+            System.out.printf("Mapped Fields for Entity[%s]\n", entityCode);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+            return false;
+        }
+        return rowsWritten > 0;
+    }
+
+    public final synchronized boolean mapClassEnums(final long entityCode, final HashSet<JdsFieldEnum> fields) {
+        SimpleIntegerProperty firstResult = new SimpleIntegerProperty(0);
+        SimpleIntegerProperty secondResult = new SimpleIntegerProperty(0);
+        if (mapEnumValues(fields, firstResult)) return false;
+        if (mapEntityEnums(entityCode, fields, secondResult)) return false;
+        System.out.printf("Mapped Enums for Entity[%s]\n", entityCode);
+        return firstResult.get() > 0 && secondResult.get() > 0;
+    }
+
+    private final synchronized boolean mapEntityEnums(long entityCode, HashSet<JdsFieldEnum> fields, SimpleIntegerProperty secondResult) {
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityEnums WHERE EntityId=? AND FieldId=?";
+        String insertSql = "INSERT INTO JdsBindEntityEnums(EntityId,FieldId) VALUES (?,?)";
+        try (Connection connection = getConnection();
+             PreparedStatement check = connection.prepareStatement(checkSql);
+             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            for (JdsFieldEnum field : fields)
+                for (int index = 0; index < field.getSequenceValues().size(); index++) {
+                    check.clearParameters();
+                    check.setLong(1, entityCode);
+                    check.setLong(2, field.getField().getId());
+                    ResultSet resultSet = check.executeQuery();
+                    while (resultSet.next()) {
+                        if (resultSet.getInt("Result") == 0) {
+                            insert.clearParameters();
+                            insert.setLong(1, entityCode);
+                            insert.setLong(2, field.getField().getId());
+                            secondResult.set(secondResult.get() + insert.executeUpdate());
+                        }
+                    }
+                    resultSet.close();
+                }
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+            return true;
+        }
+        return false;
+    }
+
+    private final synchronized boolean mapEnumValues(HashSet<JdsFieldEnum> fields, SimpleIntegerProperty firstResult) {
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsRefEnumValues WHERE FieldId=? AND EnumSeq=? AND EnumValue=?";
+        String insertSql = "INSERT INTO JdsRefEnumValues (FieldId,EnumSeq,EnumValue) VALUES (?,?,?)";
+        try (Connection connection = getConnection(); PreparedStatement check = connection.prepareStatement(checkSql); PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            for (JdsFieldEnum field : fields) {
+                for (int index = 0; index < field.getSequenceValues().size(); index++) {
+                    check.clearParameters();
+                    check.setLong(1, field.getField().getId());
+                    check.setInt(2, index);
+                    check.setString(3, field.getSequenceValues().get(index));
+                    ResultSet resultSet = check.executeQuery();
+                    while (resultSet.next()) {
+                        if (resultSet.getInt("Result") == 0) {
+                            insert.clearParameters();
+                            insert.setLong(1, field.getField().getId());
+                            insert.setInt(2, index);
+                            insert.setString(3, field.getSequenceValues().get(index));
+                            firstResult.set(firstResult.get() + insert.executeUpdate());
+                        }
+                    }
+                    resultSet.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+            return true;
+        }
+        return false;
+    }
+
+    public final synchronized boolean mapClassName(final long entityCode, final String entityName) {
+        int result = 0;
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsStoreEntities WHERE EntityId = ? AND EntityName = ?";
+        String insertSql = "INSERT INTO JdsStoreEntities(EntityId,EntityName) VALUES (?,?)";
+        try (Connection connection = getConnection();
+             PreparedStatement check = connection.prepareStatement(checkSql);
+             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            check.setLong(1, entityCode);
+            check.setString(2, entityName);
+            ResultSet resultSet = check.executeQuery();
+            while (resultSet.next()) {
+                if (resultSet.getInt("Result") == 0) {
+                    insert.clearParameters();
+                    insert.setLong(1, entityCode);
+                    insert.setString(2, entityName);
+                    result += insert.executeUpdate();
+                }
+            }
+            System.out.printf("Mapped Entity [%S - %s]", entityName, entityCode);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return result > 0;
+    }
+
+    public static JdsDatabase instance(JdsDatabase jdsDatabase) {
+        implementation = jdsDatabase;
+        return implementation;
+    }
+
+    public static JdsDatabase instance() {
+        return implementation;
+    }
+
+    public final boolean logEdits() {
+        return logEdits;
+    }
+
+    public final void logEdits(boolean logEdits) {
+        this.logEdits = logEdits;
+    }
+}
