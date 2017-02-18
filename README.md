@@ -331,10 +331,10 @@ I plan to introduce a method that can load entities based on one or more propert
 I plan on adding this functionality soon.
 
 #License
-JDS is used the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
+JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
 #Development
-I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) 
+I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.
 
 #Special Thanks
 To all the users and contributors!
