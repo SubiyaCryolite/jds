@@ -53,6 +53,7 @@ public class JdsSave {
             }
         } else {
             //single large batch, good luck
+            currentBatch = 1;
             createBatchCollection(dateTimeProperties, stringProperties, floatProperties, doubleProperties, longProperties, integerProperties, objectArrayProperties, stringArrayProperties, dateTimeArrayProperties, floatArrayProperties, doubleArrayProperties, longArrayProperties, integerArrayProperties, enumProperties, objectProperties, overviews, batchEntities);
             for (JdsEntity jdsEntity : entities) {
                 batchEntities.get(0).add(jdsEntity);
@@ -60,9 +61,9 @@ public class JdsSave {
         }
 
         //process batches
-        for (int batch = 0; batch <= currentBatch; batch++) {
+        for (int batch = 0; batch < currentBatch; batch++) {
             saveInner(database, batchEntities.get(batch), dateTimeProperties.get(batch), stringProperties.get(batch), floatProperties.get(batch), doubleProperties.get(batch), longProperties.get(batch), integerProperties.get(batch), objectArrayProperties.get(batch), stringArrayProperties.get(batch), dateTimeArrayProperties.get(batch), floatArrayProperties.get(batch), doubleArrayProperties.get(batch), longArrayProperties.get(batch), integerArrayProperties.get(batch), enumProperties.get(batch), objectProperties.get(batch), overviews.get(batch));
-            System.out.printf("Processed batch [%s of %s]", batch, currentBatch);
+            System.out.printf("Processed batch [%s of %s]\n", (batch + 1), currentBatch);
         }
     }
 
@@ -92,7 +93,6 @@ public class JdsSave {
     }
 
     /**
-     *
      * @param database
      * @param entities
      * @param dateTimeProperties

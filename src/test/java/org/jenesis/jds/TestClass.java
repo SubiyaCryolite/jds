@@ -66,12 +66,20 @@ public class TestClass {
         jdsDatabase.logEdits(false);
     }
 
+    @Test
+    public void testSaveAndLoad()
+    {
+        initialise();
+        testSaves();
+        testLoads();
+    }
+
     /**
      *
      */
     @Test
-    public void testMassiveSaves() {
-        initialise();
+    public void testSaves() {
+
 
         SimpleAddress primaryAddress1 = new SimpleAddress();
         primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
@@ -110,11 +118,14 @@ public class TestClass {
         simpleAddressBook.getAddresses().add(primaryAddress3);
 
         JdsSave.save(jdsDatabase, 1, simpleAddressBook);
-        System.out.printf("Saved %s", simpleAddressBook);
+        System.out.printf("Saved %s\n", simpleAddressBook);
+    }
 
+    @Test
+    public void testLoads()
+    {
         List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
         List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
-
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
