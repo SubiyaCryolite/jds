@@ -268,6 +268,7 @@ You only have to do this once at startup but it is vital that you do so. Without
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
     SimpleAddress primaryAddress1 = new SimpleAddress();
+    primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
     primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
     primaryAddress1.setArea("Norte Broad");
     primaryAddress1.setCity("Livingstone");
@@ -277,6 +278,7 @@ Once you have defined your class you can initialise them. A dynamic **Entity Gui
     primaryAddress1.setStreetName("East Street");
     
     SimpleAddress primaryAddress2 = new SimpleAddress();
+    primaryAddress2.setEntityGuid("primaryAddress2"); //setting a custom Entity Guid
     primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
     primaryAddress2.setArea("Roma");
     primaryAddress2.setCity("Lusaka");
@@ -286,6 +288,7 @@ Once you have defined your class you can initialise them. A dynamic **Entity Gui
     primaryAddress2.setStreetName("West Street");
     
     SimpleAddress primaryAddress3 = new SimpleAddress();
+    primaryAddress3.setEntityGuid("primaryAddress3"); //setting a custom Entity Guid
     primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
     primaryAddress3.setArea("Riverdale");
     primaryAddress3.setCity("Ndola");

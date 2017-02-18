@@ -74,6 +74,7 @@ public class TestClass {
         initialise();
 
         SimpleAddress primaryAddress1 = new SimpleAddress();
+        primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
         primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
         primaryAddress1.setArea("Norte Broad");
         primaryAddress1.setCity("Livingstone");
@@ -83,6 +84,7 @@ public class TestClass {
         primaryAddress1.setStreetName("East Street");
 
         SimpleAddress primaryAddress2 = new SimpleAddress();
+        primaryAddress2.setEntityGuid("primaryAddress2"); //setting a custom Entity Guid
         primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
         primaryAddress2.setArea("Roma");
         primaryAddress2.setCity("Lusaka");
@@ -92,6 +94,7 @@ public class TestClass {
         primaryAddress2.setStreetName("West Street");
 
         SimpleAddress primaryAddress3 = new SimpleAddress();
+        primaryAddress3.setEntityGuid("primaryAddress3"); //setting a custom Entity Guid
         primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
         primaryAddress3.setArea("Riverdale");
         primaryAddress3.setCity("Ndola");

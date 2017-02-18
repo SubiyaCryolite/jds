@@ -259,7 +259,6 @@ public abstract class JdsDatabase {
             for (Long field : fields) {
                 check.clearParameters();
                 check.setLong(1, entityCode);
-                check.setLong(2, field);
                 ResultSet resultSet = check.executeQuery();
                 while (resultSet.next()) {
                     if (resultSet.getInt("Result") == 0) {
