@@ -16,15 +16,15 @@ public enum JdsTable {
     StoreLong("JdsStoreLong"),
     StoreDouble("JdsStoreDouble"),
     StoreDateTime("JdsStoreDateTime"),
-    StoreEntities("JdsStoreEntities"),
     StoreEntitySubclass("JdsStoreEntitySubclass"),
+    StoreOldFieldValues("JdsStoreOldFieldValues"),
+    RefEntities("JdsRefEntities"),
     RefEnumValues("JdsRefEnumValues"),
     RefFields("JdsRefFields"),
     RefFieldTypes("JdsRefFieldTypes"),
-    BindEntityFields("JdsBindEntityFields"),
-    BindEntityEnums("JdsBindEntityEnums"),
     RefEntityOverview("JdsRefEntityOverview"),
-    RefOldFieldValues("JdsRefOldFieldValues");
+    BindEntityFields("JdsBindEntityFields"),
+    BindEntityEnums("JdsBindEntityEnums");
 
     private String name;
 
