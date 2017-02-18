@@ -38,7 +38,7 @@ Entity codes MUST be unique in your application, any value of type long is valid
 JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be refeenced to mine data. Every field that you define can be one of the following types.
 
 |Field Type|Java Type|Description|
-|-----|-----|
+|-----|-----|-----|
 |FLOAT|float|Numeric float values|
 |INT|int|Numeric integer values|
 |DOUBLE|double|Numeric double values|
@@ -56,12 +56,13 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 I recommend defining your fields as static constants
 
 ```java
-public class MyFields
+public class TestFields
 {
-    public static final JdsField FirstName = new JdsField(1, "first_name", JdsFieldType.TEXT);
-    public static final JdsField MiddleName = new JdsField(2, "middle_name", JdsFieldType.TEXT);
-    public static final JdsField SurName = new JdsField(3, "surname_name", JdsFieldType.TEXT);
-    public static final JdsField MaidenName = new JdsField(4, "maiden_name", JdsFieldType.TEXT);
+    public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
+    public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
+    public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);
+    public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.TEXT);
+    public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
 }
 ```
 
@@ -69,18 +70,18 @@ public class MyFields
 JdsEnums are an extension of fields. However they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enummerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard field of type ENUM_TEXT.
 ```java
-public class MyFields
+public class TestFields
 {
     ... 
     ...
-    public static final JdsField SexEnum = new JdsField(5, "sex", JdsFieldType.ENUM_TEXT);
+    public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM_TEXT);
 }
 ```
 Then, we can define our actual enum in the following manner.
 ```java
-public class MyEnumss
+public class TestEnums
 {
-    public final static JdsFieldEnum SexEnums = new JdsFieldEnum(MyFields.SexEnum, "Male", "Female", "Other");
+    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(TestFields.SEX_ENUM, "Male", "Female", "Other");
 }
 ```
 Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the deined values.
@@ -109,18 +110,20 @@ Depending on the type of field JDS will require that you set you objects propert
  The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
 ```java
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import org.jenesis.jds.annotations.JdsEntityAnnotation;
+
 @JdsEntityAnnotation(entityCode = 1, entityName = "Simple Address")
-public class SimpleAddress extends JdsEntity
-{
+public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty streetName;
     private final SimpleIntegerProperty plotNumber;
     private final SimpleStringProperty area;
     private final SimpleStringProperty city;
     private final SimpleStringProperty provinceOrState;
     private final SimpleStringProperty country;
-    
-    public SimpleAddress()
-    {
+
+    public SimpleAddress() {
         this.streetName = new SimpleStringProperty("");
         this.plotNumber = new SimpleIntegerProperty(0);
         this.area = new SimpleStringProperty("");
@@ -128,72 +131,60 @@ public class SimpleAddress extends JdsEntity
         this.provinceOrState = new SimpleStringProperty("");
         this.country = new SimpleStringProperty("");
         //map your properties
-        map(MyFields.StreetName, streetName);
-        map(MyFields.PlotNameOrNumber, plotNumber);
-        map(MyFields.AreaName, area);
-        map(MyFields.CityName, city);
-        map(MyFields.ProvinceName, provinceOrState);
+        map(TestFields.STREET_NAME, streetName);
+        map(TestFields.PLOT_NUMBER, plotNumber);
+        map(TestFields.AREA_NAME, area);
+        map(TestFields.CITY_NAME, city);
+        map(TestFields.PROVINCE_NAME, provinceOrState);
     }
-    
-    public String getStreetName()
-    {
-    	return this.streetName.get(); 
-    }
-    
-    public int getPlotNumber()
-    {
-    	return this.plotNumber.get();
-    }
-    
-    public String getArea()
-    {
-    	return this.area().get();
-    }
-    
-    public String getCity()
-    {
-    	return this.city.get();
-    }
-    
-    public String getProvinceOrState()
-    {
-    	return this.provinceOrState.get();
-    }
-    
-    public String getCountry()
-    {
-    	return this.country.get();
-    }
-	
-	public void setStreetName(String value)
-	{
-		this.streetName.get(value);
-	}
 
-	public void setPlotNumber(int value)
-	{
-		this.plotNumber.get(value);
-	}
+    public String getStreetName() {
+        return this.streetName.get();
+    }
 
-	public void setArea(String value)
-	{
-		this.area().get(value);
-	}
+    public void setStreetName(String value) {
+        this.streetName.set(value);
+    }
 
-	public void setCity(String value)
-	{
-		this.city.get(value);
-	}
+    public int getPlotNumber() {
+        return this.plotNumber.get();
+    }
 
-	public void setProvinceOrState(String value)
-	{
-		this.provinceOrState.get(value);
-	}
+    public void setPlotNumber(int value) {
+        this.plotNumber.set(value);
+    }
 
-	public void setCountry(String value)
-	{
-		this.country.get(value);
-	}
+    public String getArea() {
+        return this.area.get();
+    }
+
+    public void setArea(String value) {
+        this.area.set(value);
+    }
+
+    public String getCity() {
+        return this.city.get();
+    }
+
+    public void setCity(String value) {
+        this.city.set(value);
+    }
+
+    public String getProvinceOrState() {
+        return this.provinceOrState.get();
+    }
+
+    public void setProvinceOrState(String value) {
+        this.provinceOrState.set(value);
+    }
+
+    public String getCountry() {
+        return this.country.get();
+    }
+
+    public void setCountry(String value) {
+        this.country.set(value);
+    }
 }
 ```
 ###1.1.5 Binding Objects and Object Arrays
@@ -202,39 +193,37 @@ Beyond saving numeric, string and date values JDS can also persist embedded obje
 The class below shows how you can achieve this.
 
 ```java
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.jenesis.jds.JdsEntity;
+import org.jenesis.jds.annotations.JdsEntityAnnotation;
+
+import java.util.List;
+
 @JdsEntityAnnotation(entityCode = 2, entityName = "Simple Address Book")
-public class SimpleAddressBook extends JdsEntity
-{
-    private final SimpleObjectProperty<SimpleAddress> primaryAddress;
-    private final SimpleListProperty<SimpleAddress> alternativeAddresses;
-    
-    public SimpleAddressBook()
-    {
-        this.primaryAddress = new SimpleObjectProperty(new SimpleAddress());//avoid nulls
-        this.alternativeAddresses = new SimpleListProperty<>(FXCollections.observableArrayList());
+public class SimpleAddressBook extends JdsEntity {
+    private final SimpleListProperty<SimpleAddress> addresses;
+
+    public SimpleAddressBook() {
+        this.addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
         //map your objects
-        map(SimpleAddress.class, primaryAddress);
-        map(SimpleAddress.class, alternativeAddresses);
+        map(SimpleAddress.class, addresses);
     }
-    
-    public SimpleAddressBook getPrimaryAddress()
-    {
-        return this.primaryAddress.get();
+
+    public List<SimpleAddress> getAddresses() {
+        return this.addresses.get();
     }
-    
-    public void setPrimaryAddress(SimpleAddressBook value)
-    {
-        this.primaryAddress.set(value);  
+
+    public void SetAlternativeAddresses(List<SimpleAddress> value) {
+        this.addresses.set((ObservableList<SimpleAddress>) value);
     }
-    
-    public List<SimpleAddress> getAlternativeAddresses()
-    {
-        return this.primaryAddress.get();
-    }
-        
-    public void SetAlternativeAddresses(List<SimpleAddress> value)
-    {
-        this.primaryAddress.set(value);  
+
+    @Override
+    public String toString() {
+        return "SimpleAddressBook{" +
+                ", addresses=" + addresses.get() +
+                '}';
     }
 }
 ```
@@ -262,29 +251,87 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
     jdsDatabase.setConnectionProperties(databaseLocation); //Note the difference for SQLite. Its a file based database with different connection parameters
     jdsDatabase.init();
 ```
-
-With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the "getConnection()" method from your JdsDatabase instance in order to return a standard "java.sql.Connection" in your application. 
+With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
 
 ###1.2.2 Initialising JDS
-
 Once you have initialised your database you can go ahead and init all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
-
 ```java
     public void initialiseJdsClasses()
     {
-    JdsEntityClasses.map(SimpleAddress.class);
-    JdsEntityClasses.map(SimpleAddressBook.class);
+        JdsEntityClasses.map(SimpleAddress.class);
+        JdsEntityClasses.map(SimpleAddressBook.class);
     }
 ```
-
 You only have to do this once at startup but it is vital that you do so. Without this you will face problems when loading or saving records
 
-###1.2.3 Load
-###1.2.4 Load with Args
-###1.2.5 Save
+###1.2.3 Creating objects
+Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
+```java
+    SimpleAddress primaryAddress1 = new SimpleAddress();
+    primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
+    primaryAddress1.setArea("Norte Broad");
+    primaryAddress1.setCity("Livingstone");
+    primaryAddress1.setCountry("Zambia");
+    primaryAddress1.setPlotNumber(23);
+    primaryAddress1.setProvinceOrState("Southern");
+    primaryAddress1.setStreetName("East Street");
+    
+    SimpleAddress primaryAddress2 = new SimpleAddress();
+    primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
+    primaryAddress2.setArea("Roma");
+    primaryAddress2.setCity("Lusaka");
+    primaryAddress2.setCountry("Zambia");
+    primaryAddress2.setPlotNumber(2);
+    primaryAddress2.setProvinceOrState("Lusaka");
+    primaryAddress2.setStreetName("West Street");
+    
+    SimpleAddress primaryAddress3 = new SimpleAddress();
+    primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
+    primaryAddress3.setArea("Riverdale");
+    primaryAddress3.setCity("Ndola");
+    primaryAddress3.setCountry("Zambia");
+    primaryAddress3.setPlotNumber(9);
+    primaryAddress3.setProvinceOrState("Copperbelt");
+    primaryAddress3.setStreetName("West Street");
+    
+    SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
+    simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
+    simpleAddressBook.getAddresses().add(primaryAddress1);
+    simpleAddressBook.getAddresses().add(primaryAddress2);
+    simpleAddressBook.getAddresses().add(primaryAddress3);
+```
+
+###1.2.3 Save
+The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection<JdsEntity> entities)**. The method also expects the user to supply a batch size.
+```java
+    SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
+    simpleAddressBook.setEntityGuid("testGuid0001");        //setting a custom Entity Guid        
+    simpleAddressBook.getAddresses().add(primaryAddress1);
+    simpleAddressBook.getAddresses().add(primaryAddress2);
+    simpleAddressBook.getAddresses().add(primaryAddress3);
+    
+    JdsSave.save(jdsDatabase, 1, simpleAddressBook);
+    System.out.printf("Saved %s\n", simpleAddressBook);
+```
+
+###1.2.4 Load
+The system currently has two variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user.
+```java
+    List<SimpleAddressBook> allAddressBooks;
+    List<SimpleAddressBook> specificAddressBook;
+    
+    allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
+    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+```
+
+###1.2.5 Load with Args
+I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
+
 ###1.2.6 Delete [W.I.P]
+I plan on adding this functionality soon.
 
 #License
+JDS is used the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
 #Development
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) 

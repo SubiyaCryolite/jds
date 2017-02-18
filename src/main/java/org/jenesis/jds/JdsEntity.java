@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
  */
 public abstract class JdsEntity extends Jds_Entity {
     private final SimpleStringProperty name;
+
     public JdsEntity() {
         this.name = new SimpleStringProperty();
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
@@ -19,17 +20,17 @@ public abstract class JdsEntity extends Jds_Entity {
             JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
             setEntityCode(je.entityCode());
             setEntityName(je.entityName());
-            //ClassMappings.add(getClass());
+            //ClassMappings.map(getClass());
         } else
             throw new RuntimeException("You must annotate the class [" + getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }
 
-    public String getActionId() {
-        return getOverview().getActionId();
+    public String getEntityGuid() {
+        return getOverview().getEntityGuid();
     }
 
-    public void setActionId(String actionId) {
-        getOverview().setActionId(actionId);
+    public void setEntityGuid(String actionId) {
+        getOverview().setEntityGuid(actionId);
     }
 
     public LocalDateTime getDateCreated() {
@@ -52,7 +53,7 @@ public abstract class JdsEntity extends Jds_Entity {
         return this.getOverview().getEntityCode();
     }
 
-    public void setEntityCode(long serviceCode) {
+    private void setEntityCode(long serviceCode) {
         this.getOverview().setEntityCode(serviceCode);
     }
 
@@ -131,8 +132,11 @@ public abstract class JdsEntity extends Jds_Entity {
     protected final void map(Class<? extends Object> entity, final SimpleObjectProperty<? extends JdsEntity> properties) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
-            objectProperties.put(je.entityCode(), properties);
+            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
+            if (!objectArrayProperties.containsKey(entityAnnotation.entityCode()) && !objectProperties.containsKey(entityAnnotation.entityCode()))
+                objectProperties.put(entityAnnotation.entityCode(), properties);
+            else
+                throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
         } else
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }
@@ -140,8 +144,11 @@ public abstract class JdsEntity extends Jds_Entity {
     protected final void map(Class<? extends Object> entity, final SimpleListProperty<? extends JdsEntity> properties) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
-            objectArrayProperties.put(je.entityCode(), properties);
+            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
+            if (!objectArrayProperties.containsKey(entityAnnotation.entityCode()) && !objectProperties.containsKey(entityAnnotation.entityCode()))
+                objectArrayProperties.put(entityAnnotation.entityCode(), properties);
+            else
+                throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
         } else
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }

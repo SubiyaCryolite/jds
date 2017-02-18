@@ -28,27 +28,27 @@ public abstract class JdsDatabase {
     private boolean propertiesSet;
 
     public final void init() {
-        init(true,JdsTable.StoreTextArray);
-        init(true,JdsTable.StoreFloatArray);
-        init(true,JdsTable.StoreIntegerArray);
-        init(true,JdsTable.StoreLongArray);
-        init(true,JdsTable.StoreDoubleArray);
-        init(true,JdsTable.StoreDateTimeArray);
-        init(true,JdsTable.StoreText);
-        init(true,JdsTable.StoreFloat);
-        init(true,JdsTable.StoreInteger);
-        init(true,JdsTable.StoreLong);
-        init(true,JdsTable.StoreDouble);
-        init(true,JdsTable.StoreDateTime);
-        init(true,JdsTable.RefEntities);
-        init(true,JdsTable.StoreEntitySubclass);
-        init(true,JdsTable.RefEnumValues);
-        init(true,JdsTable.RefFields);
-        init(true,JdsTable.RefFieldTypes);
-        init(true,JdsTable.BindEntityFields);
-        init(true,JdsTable.BindEntityEnums);
-        init(true,JdsTable.RefEntityOverview);
-        init(true,JdsTable.StoreOldFieldValues);
+        init(true, JdsTable.StoreTextArray);
+        init(true, JdsTable.StoreFloatArray);
+        init(true, JdsTable.StoreIntegerArray);
+        init(true, JdsTable.StoreLongArray);
+        init(true, JdsTable.StoreDoubleArray);
+        init(true, JdsTable.StoreDateTimeArray);
+        init(true, JdsTable.StoreText);
+        init(true, JdsTable.StoreFloat);
+        init(true, JdsTable.StoreInteger);
+        init(true, JdsTable.StoreLong);
+        init(true, JdsTable.StoreDouble);
+        init(true, JdsTable.StoreDateTime);
+        init(true, JdsTable.RefEntities);
+        init(true, JdsTable.StoreEntitySubclass);
+        init(true, JdsTable.RefEnumValues);
+        init(true, JdsTable.RefFields);
+        init(true, JdsTable.RefFieldTypes);
+        init(true, JdsTable.BindEntityFields);
+        init(true, JdsTable.BindEntityEnums);
+        init(true, JdsTable.RefEntityOverview);
+        init(true, JdsTable.StoreOldFieldValues);
     }
 
     public final void setConnectionProperties(String className, String url, String userName, String passWord) {
@@ -74,8 +74,10 @@ public abstract class JdsDatabase {
         if (userName != null && passWord != null) {
             Class.forName(className);
             return DriverManager.getConnection(url, userName, passWord);
-        } else
+        } else {
+            Class.forName("org.sqlite.JDBC");
             return DriverManager.getConnection(url);
+        }
     }
 
     public final static JdsDatabase getImplementation(JdsImplementation implementation) {
@@ -90,8 +92,8 @@ public abstract class JdsDatabase {
         return null;
     }
 
-    private final void init(boolean isTable,JdsTable jdsTable) {
-        boolean tableExists = isTable?doesTableExist(jdsTable.getName()):doesProcedureExist(jdsTable.getName());
+    private final void init(boolean isTable, JdsTable jdsTable) {
+        boolean tableExists = isTable ? doesTableExist(jdsTable.getName()) : doesProcedureExist(jdsTable.getName());
         if (!tableExists)
             createTable(jdsTable);
     }
@@ -183,11 +185,11 @@ public abstract class JdsDatabase {
         }
     }
 
-    private String fileToString(InputStream inputStream) throws Exception{
+    private String fileToString(InputStream inputStream) throws Exception {
         BufferedInputStream bis = new BufferedInputStream(inputStream);
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         int result = bis.read();
-        while(result != -1) {
+        while (result != -1) {
             buf.write((byte) result);
             result = bis.read();
         }
@@ -201,8 +203,9 @@ public abstract class JdsDatabase {
 
     abstract int tableExists(String tableName);
 
-    public int procedureExists(String procedureName)
-    {return 0;}
+    public int procedureExists(String procedureName) {
+        return 0;
+    }
 
     abstract void createStoreText();
 
@@ -248,7 +251,7 @@ public abstract class JdsDatabase {
 
     public final synchronized boolean mapClassFields(final long entityCode, final HashSet<Long> fields) {
         int rowsWritten = 0;
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ? and FieldId = ?";
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ?";
         String insertSql = "INSERT INTO JdsBindEntityFields (EntityId,FieldId) VALUES (?,?)";
         try (Connection connection = getConnection();
              PreparedStatement check = connection.prepareStatement(checkSql);

@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreDateTime(
 	FieldId     BIGINT,
 	ActionId    TEXT,
-	Value       TIMESTAMP
+	Value       TIMESTAMP,
 	PRIMARY KEY (FieldId,ActionId)
 );

@@ -14,10 +14,10 @@ public class JdsEntityOverview {
     private final SimpleObjectProperty<LocalDateTime> dateCreated;
     private final SimpleObjectProperty<LocalDateTime> dateModified;
     private final SimpleLongProperty serviceCode;
-    private final SimpleStringProperty actionId;
+    private final SimpleStringProperty entityGuid;
 
     JdsEntityOverview() {
-        this.actionId = new SimpleStringProperty(UUID.randomUUID().toString());
+        this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
         this.dateModified = new SimpleObjectProperty<>(LocalDateTime.now());
         this.serviceCode = new SimpleLongProperty();
@@ -47,11 +47,11 @@ public class JdsEntityOverview {
         this.serviceCode.set(serviceCode);
     }
 
-    public String getActionId() {
-        return actionId.get();
+    public String getEntityGuid() {
+        return entityGuid.get();
     }
 
-    public void setActionId(String actionId) {
-        this.actionId.set(actionId);
+    public void setEntityGuid(String entityGuid) {
+        this.entityGuid.set(entityGuid);
     }
 }

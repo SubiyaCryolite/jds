@@ -136,21 +136,21 @@ public class JdsSave {
             mapEntity(database, entity);
             entity.setDateModified(LocalDateTime.now());//update the modified date to time of commit
             overviews.add(entity.getOverview());
-            dateTimeProperties.put(entity.getActionId(), entity.dateProperties);
-            stringProperties.put(entity.getActionId(), entity.stringProperties);
-            floatProperties.put(entity.getActionId(), entity.floatProperties);
-            doubleProperties.put(entity.getActionId(), entity.doubleProperties);
-            longProperties.put(entity.getActionId(), entity.longProperties);
-            integerProperties.put(entity.getActionId(), entity.integerProperties);
-            objectArrayProperties.put(entity.getActionId(), entity.objectArrayProperties);
-            stringArrayProperties.put(entity.getActionId(), entity.stringArrayProperties);
-            dateTimeArrayProperties.put(entity.getActionId(), entity.dateTimeArrayProperties);
-            floatArrayProperties.put(entity.getActionId(), entity.floatArrayProperties);
-            doubleArrayProperties.put(entity.getActionId(), entity.doubleArrayProperties);
-            longArrayProperties.put(entity.getActionId(), entity.longArrayProperties);
-            integerArrayProperties.put(entity.getActionId(), entity.integerArrayProperties);
-            enumProperties.put(entity.getActionId(), entity.enumProperties);
-            objectProperties.put(entity.getActionId(), entity.objectProperties);
+            dateTimeProperties.put(entity.getEntityGuid(), entity.dateProperties);
+            stringProperties.put(entity.getEntityGuid(), entity.stringProperties);
+            floatProperties.put(entity.getEntityGuid(), entity.floatProperties);
+            doubleProperties.put(entity.getEntityGuid(), entity.doubleProperties);
+            longProperties.put(entity.getEntityGuid(), entity.longProperties);
+            integerProperties.put(entity.getEntityGuid(), entity.integerProperties);
+            objectArrayProperties.put(entity.getEntityGuid(), entity.objectArrayProperties);
+            stringArrayProperties.put(entity.getEntityGuid(), entity.stringArrayProperties);
+            dateTimeArrayProperties.put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
+            floatArrayProperties.put(entity.getEntityGuid(), entity.floatArrayProperties);
+            doubleArrayProperties.put(entity.getEntityGuid(), entity.doubleArrayProperties);
+            longArrayProperties.put(entity.getEntityGuid(), entity.longArrayProperties);
+            integerArrayProperties.put(entity.getEntityGuid(), entity.integerArrayProperties);
+            enumProperties.put(entity.getEntityGuid(), entity.enumProperties);
+            objectProperties.put(entity.getEntityGuid(), entity.objectProperties);
         }
         saveOverviews(database, overviews);
         //properties
@@ -190,11 +190,11 @@ public class JdsSave {
                 record++;
                 update.clearParameters();
                 update.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-                update.setString(2, overview.getActionId());
+                update.setString(2, overview.getEntityGuid());
                 update.setLong(3, overview.getEntityCode());
                 if (update.executeUpdate() == 0) {
                     insert.clearParameters();
-                    insert.setString(1, overview.getActionId());
+                    insert.setString(1, overview.getEntityGuid());
                     insert.setTimestamp(2, Timestamp.valueOf(overview.getDateCreated()));
                     insert.setTimestamp(3, Timestamp.valueOf(overview.getDateModified()));
                     insert.setLong(4, overview.getEntityCode());
@@ -246,7 +246,7 @@ public class JdsSave {
                     if (value == null) continue;
                     preparedStatement.clearParameters();
                     preparedStatement.setString(1, actionId);
-                    preparedStatement.setString(2, value.getActionId());
+                    preparedStatement.setString(2, value.getEntityGuid());
                     preparedStatement.setLong(3, entityCode);
                     preparedStatement.executeUpdate();
                     collection.add(value);
@@ -834,7 +834,7 @@ public class JdsSave {
                     jdsEntities.add(jdsEntity);
                     Jds_StoreEntitySubclass binding = new Jds_StoreEntitySubclass();
                     binding.setActionId(upperActionId);
-                    binding.setSubActionId(jdsEntity.getActionId());
+                    binding.setSubActionId(jdsEntity.getEntityGuid());
                     binding.setEntityId(serviceCode);
                     bindings.add(binding);
                 });

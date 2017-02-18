@@ -1,15 +1,20 @@
 apply plugin: 'java'
-apply plugin: 'idea' //run idea to resolve dependancies in intellij
+apply plugin: 'idea' //run idea to resolve dependencies in intellij
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+
 repositories {
     mavenCentral()
+    maven {
+        url "https://maven.atlassian.com/3rdparty/"
+    }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.xerial:sqlite-jdbc:3.16.1'
 }
 
 jar {
@@ -17,8 +22,7 @@ jar {
     manifest {
         attributes(
                 "Implementation-Title": "Jenesis Data Store",
-                "Implementation-Version": "alpha 0.1",
-                "Class-Path": configurations.compile.collect{ "$it.name" }.join(' ')
+                "Implementation-Version": "alpha 0.17.02.18"
         )
     }
 }

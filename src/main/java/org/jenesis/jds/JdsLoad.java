@@ -66,7 +66,7 @@ public class JdsLoad {
             for (String actionId : entityActionIds) {
                 if (initialiseInnerContent) {
                     JdsEntity instance = referenceType.newInstance();
-                    instance.setActionId(actionId);
+                    instance.setEntityGuid(actionId);
                     jdsEntities.add(instance);
                 }
                 //primitives
@@ -145,7 +145,7 @@ public class JdsLoad {
                     Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                     JdsEntity action = jdsEntityClass.newInstance();
                     //
-                    action.setActionId(subActionId);
+                    action.setEntityGuid(subActionId);
                     innerActionIds.add(subActionId);
                     propertyList.get().add(action);
                     innerObjects.add(action);
@@ -154,7 +154,7 @@ public class JdsLoad {
                     Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                     JdsEntity action = jdsEntityClass.newInstance();
                     //
-                    action.setActionId(subActionId);
+                    action.setEntityGuid(subActionId);
                     innerActionIds.add(subActionId);
                     property.set(action);
                     innerObjects.add(action);
@@ -171,8 +171,8 @@ public class JdsLoad {
     }
 
     private static JdsEntity optimalEntityLookup(final Collection<JdsEntity> jdsEntities, JdsEntity currentEntity, final String actionId) {
-        if (currentEntity == null || !currentEntity.getActionId().equals(actionId)) {
-            Optional<JdsEntity> optional = jdsEntities.parallelStream().filter(ent -> ent.getActionId().equals(actionId)).findAny();
+        if (currentEntity == null || !currentEntity.getEntityGuid().equals(actionId)) {
+            Optional<JdsEntity> optional = jdsEntities.parallelStream().filter(ent -> ent.getEntityGuid().equals(actionId)).findAny();
             if (optional.isPresent())
                 currentEntity = optional.get();
         }
