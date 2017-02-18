@@ -37,7 +37,7 @@ Entity codes MUST be unique in your application, any value of type long is valid
 ###1.1.2 Defining Fields
 JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be refeenced to mine data. Every field that you define can be one of the following types.
 
-|Field Type|Java Type|Description|
+|JDS Field Type|Java Type|Description|
 |-----|-----|-----|
 |FLOAT|float|Numeric float values|
 |INT|int|Numeric integer values|
@@ -87,9 +87,9 @@ public class TestEnums
 Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the deined values.
 
 ###1.1.4 Binding Properties
-Depending on the type of field JDS will require that you set you objects properties to one of the following container types.
+Depending on the type of field, JDS will require that you set you objects properties to one of the following container types.
 
-|Field Type|Java Property Type|
+|JDS Field Type|Java Property Type|
 |-----|-----|
 |FLOAT|[SimpleFloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleFloatProperty.html)|
 |INT|[SimpleIntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleIntegerProperty.html)|
@@ -105,7 +105,7 @@ Depending on the type of field JDS will require that you set you objects propert
 |ARRAY_DATE_TIME|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 |ENUM_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 
- After your class and its properties have been defined you must map the property to its corresponding field using the "map()" method. I recommend doing this in your constructor. 
+ After your class and its properties have been defined you must map the property to its corresponding field using the **map()** method. I recommend doing this in your constructor. 
  
  The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
@@ -231,7 +231,7 @@ public class SimpleAddressBook extends JdsEntity {
 
 ##1.2 CRUD Operations
 ###1.2.1 Initialising the database
-In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its classpath. The drivers that were used during development are listed under "Supported Databases" above.
+In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its classpath. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 ####Postgres example
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
@@ -256,11 +256,11 @@ With this you should have a valid connection to your database and JDS will setup
 ###1.2.2 Initialising JDS
 Once you have initialised your database you can go ahead and init all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
 ```java
-    public void initialiseJdsClasses()
-    {
-        JdsEntityClasses.map(SimpleAddress.class);
-        JdsEntityClasses.map(SimpleAddressBook.class);
-    }
+public void initialiseJdsClasses()
+{
+    JdsEntityClasses.map(SimpleAddress.class);
+    JdsEntityClasses.map(SimpleAddressBook.class);
+}
 ```
 You only have to do this once at startup but it is vital that you do so. Without this you will face problems when loading or saving records
 
@@ -301,7 +301,7 @@ Once you have defined your class you can initialise them. A dynamic **Entity Gui
     simpleAddressBook.getAddresses().add(primaryAddress3);
 ```
 
-###1.2.3 Save
+###1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection<JdsEntity> entities)**. The method also expects the user to supply a batch size.
 ```java
     SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
@@ -314,7 +314,7 @@ The API has a single **save()** method within the class **JdsSave**. The method 
     System.out.printf("Saved %s\n", simpleAddressBook);
 ```
 
-###1.2.4 Load
+###1.2.5 Load
 The system currently has two variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user.
 ```java
     List<SimpleAddressBook> allAddressBooks;
@@ -324,10 +324,10 @@ The system currently has two variants of the **load()** method. The first varian
     specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
 ```
 
-###1.2.5 Load with Args
+###1.2.6 Load with Args
 I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
 
-###1.2.6 Delete [W.I.P]
+###1.2.7 Delete [W.I.P]
 I plan on adding this functionality soon.
 
 #License
