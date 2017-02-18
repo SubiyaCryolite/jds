@@ -270,8 +270,11 @@ With this you should have a valid connection to your database and JDS will setup
 Once you have initialised your database you can go ahead and init all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
 
 ```java
+    public void initialiseJdsClasses()
+    {
     JdsEntityClasses.map(SimpleAddress.class);
     JdsEntityClasses.map(SimpleAddressBook.class);
+    }
 ```
 
 You only have to do this once at startup but it is vital that you do so. Without this you will face problems when loading or saving records
