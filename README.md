@@ -302,7 +302,7 @@ Once you have defined your class you can initialise them. A dynamic **Entity Gui
 ```
 
 ###1.2.4 Save
-The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection<JdsEntity> entities)**. The method also expects the user to supply a batch size.
+The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
     SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
     simpleAddressBook.setEntityGuid("testGuid0001");        //setting a custom Entity Guid        
