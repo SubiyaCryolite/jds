@@ -330,6 +330,9 @@ I plan to introduce a method that can load entities based on one or more propert
 ###1.2.7 Delete [W.I.P]
 I plan on adding this functionality soon.
 
+##1.3 Backend Design
+Section coming soon
+
 #License
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -337,4 +340,4 @@ JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.
 
 #Special Thanks
-To all the users and contributors!
+To all our users and contributors!
