@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import org.jenesis.jds.annotations.JdsEntityAnnotation;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -41,12 +42,14 @@ public class JdsLoad {
         String sqlDateTimeValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreDateTime WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         //array
         String sqlTextArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlIntegerArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
+        String sqlIntegerArrayAndEnumValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         String sqlLongArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         String sqlFloatArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         String sqlDoubleArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         String sqlDateTimeArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         String sqlEmbeddedAndArrayObjects = String.format("SELECT ActionId, SubActionId, EntityId FROM JdsStoreEntitySubclass WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
+        //overviews
+        String sqlOverviews = String.format("SELECT ActionId, DateCreated, DateModified, EntityId FROM JdsRefEntityOverview WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
@@ -55,12 +58,13 @@ public class JdsLoad {
              PreparedStatement doubles = connection.prepareStatement(sqlDoubleValues);
              PreparedStatement dateTimes = connection.prepareStatement(sqlDateTimeValues);
              PreparedStatement textArrays = connection.prepareStatement(sqlTextArrayValues);
-             PreparedStatement integerArrays = connection.prepareStatement(sqlIntegerArrayValues);
+             PreparedStatement integerArraysAndEnums = connection.prepareStatement(sqlIntegerArrayAndEnumValues);
              PreparedStatement longArrays = connection.prepareStatement(sqlLongArrayValues);
              PreparedStatement floatArrays = connection.prepareStatement(sqlFloatArrayValues);
              PreparedStatement doubleArrays = connection.prepareStatement(sqlDoubleArrayValues);
              PreparedStatement dateTimeArrays = connection.prepareStatement(sqlDateTimeArrayValues);
-             PreparedStatement embeddedAndArrayObjects = connection.prepareStatement(sqlEmbeddedAndArrayObjects)) {
+             PreparedStatement embeddedAndArrayObjects = connection.prepareStatement(sqlEmbeddedAndArrayObjects);
+             PreparedStatement overviews = connection.prepareStatement(sqlOverviews)) {
             //work in batches to not break prepared statement
             int index = 1;
             for (String actionId : entityActionIds) {
@@ -82,10 +86,11 @@ public class JdsLoad {
                 setParameterForStatement(floatArrays, index, actionId);
                 setParameterForStatement(doubleArrays, index, actionId);
                 setParameterForStatement(dateTimeArrays, index, actionId);
-                //integer array and enums
-                setParameterForStatement(integerArrays, index, actionId);
-                //object
+                setParameterForStatement(integerArraysAndEnums, index, actionId);
+                //object and object arrays
                 setParameterForStatement(embeddedAndArrayObjects, index, actionId);
+                //overview
+                setParameterForStatement(overviews, index, actionId);
                 index++;
             }
             //primitives
@@ -95,13 +100,99 @@ public class JdsLoad {
             populateFloat(jdsEntities, floats);
             populateDouble(jdsEntities, doubles);
             populateDateTime(jdsEntities, dateTimes);
+
             //integer arrays and enums
-            populateIntegerArraysAndEnums(jdsEntities, integerArrays);
-            //other arrays
+            populateIntegerArraysAndEnums(jdsEntities, integerArraysAndEnums);
+            populateFloatArrays(jdsEntities, floatArrays);
+            populateLongArrays(jdsEntities, longArrays);
+            populateStringArrays(jdsEntities, textArrays);
+            populateDoubleArrays(jdsEntities, doubleArrays);
+            populateDateTimeArrays(jdsEntities, dateTimeArrays);
             //objects
             populateObjectEntriesAndObjectArrays(jdsDatabase, jdsEntities, embeddedAndArrayObjects);
+            populateOverviews(jdsEntities, overviews);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        }
+    }
+
+    private static void populateFloatArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            float value = resultSet.getFloat("Value");
+            long fieldId = resultSet.getLong("FieldId");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            if (currentEntity.floatArrayProperties.containsKey(fieldId)) {
+                SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
+                property.add(value);
+            }
+        }
+    }
+
+    private static void populateDoubleArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            double value = resultSet.getDouble("Value");
+            long fieldId = resultSet.getLong("FieldId");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            if (currentEntity.doubleArrayProperties.containsKey(fieldId)) {
+                SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
+                property.add(value);
+            }
+        }
+    }
+
+    private static void populateLongArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            long value = resultSet.getLong("Value");
+            long fieldId = resultSet.getLong("FieldId");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            if (currentEntity.longArrayProperties.containsKey(fieldId)) {
+                SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
+                property.add(value);
+            }
+        }
+    }
+
+    private static void populateDateTimeArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            Timestamp value = resultSet.getTimestamp("Value");
+            long fieldId = resultSet.getLong("FieldId");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            if (currentEntity.dateTimeArrayProperties.containsKey(fieldId)) {
+                SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
+                property.add(value.toLocalDateTime());
+            }
+        }
+    }
+
+    private static void populateStringArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            String value = resultSet.getString("Value");
+            long fieldId = resultSet.getLong("FieldId");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            if (currentEntity.stringArrayProperties.containsKey(fieldId)) {
+                SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
+                property.add(value);
+            }
         }
     }
 
@@ -194,6 +285,20 @@ public class JdsLoad {
             index++;
         }
         return batches;
+    }
+
+    private static void populateOverviews(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
+        JdsEntity currentEntity = null;
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            String actionId = resultSet.getString("ActionId");
+            Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
+            Timestamp dateModified = resultSet.getTimestamp("DateModified");
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            if (currentEntity == null) continue;
+            currentEntity.setDateModified(dateModified.toLocalDateTime());
+            currentEntity.setDateCreated(dateCreated.toLocalDateTime());
+        }
     }
 
     private static void populateDateTime(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
