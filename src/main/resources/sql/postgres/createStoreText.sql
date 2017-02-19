@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreText(
 	FieldId     BIGINT,
-	ActionId    VARCHAR(48),
+	EntityGuid    VARCHAR(48),
 	Value       TEXT,
-	PRIMARY KEY (FieldId,ActionId)
+	PRIMARY KEY (FieldId,EntityGuid)
 );

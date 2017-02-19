@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreFloatArray(
     FieldId     BIGINT,
-    ActionId    VARCHAR(48),
+    EntityGuid    VARCHAR(48),
     Sequence   INTEGER,
     Value       REAL,
-    PRIMARY KEY (FieldId,ActionId,Sequence)
+    PRIMARY KEY (FieldId,EntityGuid,Sequence)
 );

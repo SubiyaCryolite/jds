@@ -16,13 +16,13 @@ public class JdsLoad {
 
     final private static int batchSize = 1000; //Java supports up to 1000 prepared statements depending on the driver
 
-    public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedActionIds) {
+    public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
         long code = annotation.entityCode();
         List<T> collections = new ArrayList<>();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
         List<JdsEntity> castCollection = (List<JdsEntity>) collections;
-        prepareActionBatches(jdsDatabase, batchSize, code, allBatches, suppliedActionIds);
+        prepareActionBatches(jdsDatabase, batchSize, code, allBatches, suppliedEntityGuids);
 
         boolean initialiseInnerContent = true;
         for (List<String> currentBatch : allBatches) {
@@ -31,25 +31,25 @@ public class JdsLoad {
         return collections;
     }
 
-    private static <T extends JdsEntity> void populateInner(final JdsDatabase jdsDatabase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityActionIds) {
-        String questionsString = getQuestions(entityActionIds.size());
+    private static <T extends JdsEntity> void populateInner(final JdsDatabase jdsDatabase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
+        String questionsString = getQuestions(entityEntityGuids.size());
         //primitives
-        String sqlTextValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreText WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlLongValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreLong WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlIntegerValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreInteger WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlFloatValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreFloat WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlDoubleValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreDouble WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlDateTimeValues = String.format("SELECT ActionId, Value, FieldId FROM JdsStoreDateTime WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
+        String sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlLongValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreLong WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlIntegerValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreInteger WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlFloatValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreFloat WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlDoubleValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDouble WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         //array
-        String sqlTextArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlIntegerArrayAndEnumValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlLongArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlFloatArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlDoubleArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlDateTimeArrayValues = String.format("SELECT ActionId, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
-        String sqlEmbeddedAndArrayObjects = String.format("SELECT ActionId, SubActionId, EntityId FROM JdsStoreEntitySubclass WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
+        String sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlIntegerArrayAndEnumValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlLongArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlEmbeddedAndArrayObjects = String.format("SELECT EntityGuid, SubEntityGuid, EntityId FROM JdsStoreEntitySubclass WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         //overviews
-        String sqlOverviews = String.format("SELECT ActionId, DateCreated, DateModified, EntityId FROM JdsRefEntityOverview WHERE ActionId IN (%s) ORDER BY ActionId", questionsString);
+        String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsRefEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
@@ -67,30 +67,30 @@ public class JdsLoad {
              PreparedStatement overviews = connection.prepareStatement(sqlOverviews)) {
             //work in batches to not break prepared statement
             int index = 1;
-            for (String actionId : entityActionIds) {
+            for (String EntityGuid : entityEntityGuids) {
                 if (initialiseInnerContent) {
                     JdsEntity instance = referenceType.newInstance();
-                    instance.setEntityGuid(actionId);
+                    instance.setEntityGuid(EntityGuid);
                     jdsEntities.add(instance);
                 }
                 //primitives
-                setParameterForStatement(strings, index, actionId);
-                setParameterForStatement(integers, index, actionId);
-                setParameterForStatement(longs, index, actionId);
-                setParameterForStatement(floats, index, actionId);
-                setParameterForStatement(doubles, index, actionId);
-                setParameterForStatement(dateTimes, index, actionId);
+                setParameterForStatement(strings, index, EntityGuid);
+                setParameterForStatement(integers, index, EntityGuid);
+                setParameterForStatement(longs, index, EntityGuid);
+                setParameterForStatement(floats, index, EntityGuid);
+                setParameterForStatement(doubles, index, EntityGuid);
+                setParameterForStatement(dateTimes, index, EntityGuid);
                 //array
-                setParameterForStatement(textArrays, index, actionId);
-                setParameterForStatement(longArrays, index, actionId);
-                setParameterForStatement(floatArrays, index, actionId);
-                setParameterForStatement(doubleArrays, index, actionId);
-                setParameterForStatement(dateTimeArrays, index, actionId);
-                setParameterForStatement(integerArraysAndEnums, index, actionId);
+                setParameterForStatement(textArrays, index, EntityGuid);
+                setParameterForStatement(longArrays, index, EntityGuid);
+                setParameterForStatement(floatArrays, index, EntityGuid);
+                setParameterForStatement(doubleArrays, index, EntityGuid);
+                setParameterForStatement(dateTimeArrays, index, EntityGuid);
+                setParameterForStatement(integerArraysAndEnums, index, EntityGuid);
                 //object and object arrays
-                setParameterForStatement(embeddedAndArrayObjects, index, actionId);
+                setParameterForStatement(embeddedAndArrayObjects, index, EntityGuid);
                 //overview
-                setParameterForStatement(overviews, index, actionId);
+                setParameterForStatement(overviews, index, EntityGuid);
                 index++;
             }
             //primitives
@@ -120,10 +120,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             float value = resultSet.getFloat("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.floatArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
@@ -136,10 +136,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             double value = resultSet.getDouble("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.doubleArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
@@ -152,10 +152,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             long value = resultSet.getLong("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.longArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
@@ -168,10 +168,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             Timestamp value = resultSet.getTimestamp("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.dateTimeArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
@@ -184,10 +184,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             String value = resultSet.getString("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.stringArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
@@ -200,10 +200,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             int value = resultSet.getInt("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.integerArrayProperties.containsKey(fieldId)) {
                 SimpleListProperty<Integer> property = currentEntity.integerArrayProperties.get(fieldId);
@@ -220,15 +220,15 @@ public class JdsLoad {
     }
 
     private static void populateObjectEntriesAndObjectArrays(JdsDatabase jdsDatabase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
-        Queue<String> innerActionIds = new ConcurrentLinkedQueue<>();
+        Queue<String> innerEntityGuids = new ConcurrentLinkedQueue<>();
         Queue<JdsEntity> innerObjects = new ConcurrentLinkedQueue<>();
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
-            String subActionId = resultSet.getString("SubActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
+            String subEntityGuid = resultSet.getString("SubEntityGuid");
             long entityId = resultSet.getLong("EntityId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             try {
                 if (currentEntity.objectArrayProperties.containsKey(entityId)) {
@@ -236,8 +236,8 @@ public class JdsLoad {
                     Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                     JdsEntity action = jdsEntityClass.newInstance();
                     //
-                    action.setEntityGuid(subActionId);
-                    innerActionIds.add(subActionId);
+                    action.setEntityGuid(subEntityGuid);
+                    innerEntityGuids.add(subEntityGuid);
                     propertyList.get().add(action);
                     innerObjects.add(action);
                 } else if (currentEntity.objectProperties.containsKey(entityId)) {
@@ -245,8 +245,8 @@ public class JdsLoad {
                     Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                     JdsEntity action = jdsEntityClass.newInstance();
                     //
-                    action.setEntityGuid(subActionId);
-                    innerActionIds.add(subActionId);
+                    action.setEntityGuid(subEntityGuid);
+                    innerEntityGuids.add(subEntityGuid);
                     property.set(action);
                     innerObjects.add(action);
                 }
@@ -254,27 +254,27 @@ public class JdsLoad {
                 ex.printStackTrace(System.err);
             }
         }
-        List<List<String>> batches = createProcessingBatches(innerActionIds);
+        List<List<String>> batches = createProcessingBatches(innerEntityGuids);
         batches.parallelStream().forEach(batch -> {
             populateInner(jdsDatabase, null, innerObjects, false, batch);
             jdsDatabase.toString();
         });
     }
 
-    private static JdsEntity optimalEntityLookup(final Collection<JdsEntity> jdsEntities, JdsEntity currentEntity, final String actionId) {
-        if (currentEntity == null || !currentEntity.getEntityGuid().equals(actionId)) {
-            Optional<JdsEntity> optional = jdsEntities.parallelStream().filter(ent -> ent.getEntityGuid().equals(actionId)).findAny();
+    private static JdsEntity optimalEntityLookup(final Collection<JdsEntity> jdsEntities, JdsEntity currentEntity, final String EntityGuid) {
+        if (currentEntity == null || !currentEntity.getEntityGuid().equals(EntityGuid)) {
+            Optional<JdsEntity> optional = jdsEntities.parallelStream().filter(ent -> ent.getEntityGuid().equals(EntityGuid)).findAny();
             if (optional.isPresent())
                 currentEntity = optional.get();
         }
         return currentEntity;
     }
 
-    private static List<List<String>> createProcessingBatches(Queue<String> innerActionIds) {
+    private static List<List<String>> createProcessingBatches(Queue<String> innerEntityGuids) {
         List<List<String>> batches = new ArrayList<>();
         int index = 0;
         int batch = 0;
-        for (String val : innerActionIds) {
+        for (String val : innerEntityGuids) {
             if (index == batchSize) {
                 batch++;
                 index = 0;
@@ -291,10 +291,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
             Timestamp dateModified = resultSet.getTimestamp("DateModified");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             currentEntity.setDateModified(dateModified.toLocalDateTime());
             currentEntity.setDateCreated(dateCreated.toLocalDateTime());
@@ -305,10 +305,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             Timestamp value = resultSet.getTimestamp("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.dateProperties.containsKey(fieldId))
                 currentEntity.dateProperties.get(fieldId).set(value.toLocalDateTime());
@@ -319,10 +319,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             double value = resultSet.getDouble("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.doubleProperties.containsKey(fieldId))
                 currentEntity.doubleProperties.get(fieldId).set(value);
@@ -333,10 +333,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             int value = resultSet.getInt("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.integerProperties.containsKey(fieldId))
                 currentEntity.integerProperties.get(fieldId).set(value);
@@ -348,10 +348,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             float value = resultSet.getFloat("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.floatProperties.containsKey(fieldId))
                 currentEntity.floatProperties.get(fieldId).set(value);
@@ -363,10 +363,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             long value = resultSet.getLong("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.longProperties.containsKey(fieldId))
                 currentEntity.longProperties.get(fieldId).set(value);
@@ -377,10 +377,10 @@ public class JdsLoad {
         JdsEntity currentEntity = null;
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
-            String actionId = resultSet.getString("ActionId");
+            String EntityGuid = resultSet.getString("EntityGuid");
             String value = resultSet.getString("Value");
             long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, actionId);
+            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
             if (currentEntity == null) continue;
             if (currentEntity.stringProperties.containsKey(fieldId))
                 currentEntity.stringProperties.get(fieldId).set(value);
@@ -389,13 +389,13 @@ public class JdsLoad {
         resultSet.close();
     }
 
-    private static void prepareActionBatches(final JdsDatabase jdsDatabase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedActionIds) {
+    private static void prepareActionBatches(final JdsDatabase jdsDatabase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
         int batchIndex = 0;
         int batchContents = 0;
         //if no ids supplied we are looking for all instances of the entity
-        String sql1 = "SELECT ActionId FROM JdsRefEntityOverview WHERE EntityId = ?";
+        String sql1 = "SELECT EntityGuid FROM JdsRefEntityOverview WHERE EntityId = ?";
         try (Connection connection = jdsDatabase.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
-            if (suppliedActionIds.length == 0) {
+            if (suppliedEntityGuids.length == 0) {
                 preparedStatement.setLong(1, code);
                 ResultSet rs = preparedStatement.executeQuery();
                 while (rs.next()) {
@@ -405,19 +405,19 @@ public class JdsLoad {
                     }
                     if (batchContents == 0)
                         allBatches.add(new ArrayList<>());
-                    allBatches.get(batchIndex).add(rs.getString("ActionId"));
+                    allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
                     batchContents++;
                 }
 
             } else {
-                for (String actionId : suppliedActionIds) {
+                for (String EntityGuid : suppliedEntityGuids) {
                     if (batchContents == batchSize) {
                         batchIndex++;
                         batchContents = 0;
                     }
                     if (batchContents == 0)
                         allBatches.add(new ArrayList<>());
-                    allBatches.get(batchIndex).add(actionId);
+                    allBatches.get(batchIndex).add(EntityGuid);
                     batchContents++;
                 }
             }
@@ -434,7 +434,7 @@ public class JdsLoad {
         return String.join(",", questionArray);
     }
 
-    private static void setParameterForStatement(final PreparedStatement textStatement, final int dex, final String actionId) throws SQLException {
-        textStatement.setString(dex, actionId);
+    private static void setParameterForStatement(final PreparedStatement textStatement, final int dex, final String EntityGuid) throws SQLException {
+        textStatement.setString(dex, EntityGuid);
     }
 }

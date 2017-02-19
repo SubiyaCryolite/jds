@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreFloat(
 	FieldId     BIGINT,
-	ActionId    TEXT,
+	EntityGuid    TEXT,
 	Value       REAL,
-	PRIMARY KEY (FieldId,ActionId)
+	PRIMARY KEY (FieldId,EntityGuid)
 );

@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreDouble(
 	FieldId     BIGINT,
-	ActionId    TEXT,
+	EntityGuid    TEXT,
 	Value       DOUBLE,
-	PRIMARY KEY (FieldId,ActionId)
+	PRIMARY KEY (FieldId,EntityGuid)
 );

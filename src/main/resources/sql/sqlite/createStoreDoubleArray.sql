@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreDoubleArray(
     FieldId     BIGINT,
-    ActionId    TEXT,
+    EntityGuid    TEXT,
     Sequence    INTEGER,
     Value       DOUBLE,
-    PRIMARY KEY (FieldId,ActionId,Sequence)
+    PRIMARY KEY (FieldId,EntityGuid,Sequence)
 );

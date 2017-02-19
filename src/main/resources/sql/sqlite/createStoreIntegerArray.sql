@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreIntegerArray(
     FieldId     BIGINT,
-    ActionId    TEXT,
+    EntityGuid    TEXT,
     Sequence    INTEGER,
     Value       INTEGER,
-    PRIMARY KEY (FieldId,ActionId,Sequence)
+    PRIMARY KEY (FieldId,EntityGuid,Sequence)
 );

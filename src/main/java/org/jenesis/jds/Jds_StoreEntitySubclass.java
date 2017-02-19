@@ -7,30 +7,30 @@ import javafx.beans.property.SimpleStringProperty;
  * Created by ifunga on 13/02/2017.
  */
 class Jds_StoreEntitySubclass {
-    private final SimpleStringProperty actionId;
-    private final SimpleStringProperty subActionId;
+    private final SimpleStringProperty entityGuid;
+    private final SimpleStringProperty subEntityGuid;
     private final SimpleLongProperty entityId;
 
     public Jds_StoreEntitySubclass() {
-        this.actionId = new SimpleStringProperty("");
-        this.subActionId = new SimpleStringProperty("");
+        this.entityGuid = new SimpleStringProperty("");
+        this.subEntityGuid = new SimpleStringProperty("");
         this.entityId = new SimpleLongProperty(0);
     }
 
-    public String getActionId() {
-        return actionId.get();
+    public String getEntityGuid() {
+        return entityGuid.get();
     }
 
-    public void setActionId(String actionId) {
-        this.actionId.set(actionId);
+    public void setEntityGuid(String EntityGuid) {
+        this.entityGuid.set(EntityGuid);
     }
 
-    public String getSubActionId() {
-        return subActionId.get();
+    public String getSubEntityGuid() {
+        return subEntityGuid.get();
     }
 
-    public void setSubActionId(String subActionId) {
-        this.subActionId.set(subActionId);
+    public void setSubEntityGuid(String subEntityGuid) {
+        this.subEntityGuid.set(subEntityGuid);
     }
 
     public long getEntityId() {

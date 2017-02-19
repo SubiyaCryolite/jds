@@ -1,8 +1,8 @@
 CREATE TABLE JdsRefEntityOverview
 (
-    ActionId        NVARCHAR(48),
+    EntityGuid        NVARCHAR(48),
     DateCreated     DATETIME,
     DateModified    DATETIME,
     EntityId        BIGINT,
-    PRIMARY KEY     (EntityId,ActionId)
+    PRIMARY KEY     (EntityId,EntityGuid)
 );

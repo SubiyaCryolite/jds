@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreEntitySubclass(
-    ActionId        VARCHAR(48),
-    SubActionId     VARCHAR(48),
+    EntityGuid        VARCHAR(48),
+    SubEntityGuid     VARCHAR(48),
     EntityId        BIGINT,
-    PRIMARY KEY     (ActionId,SubActionId,EntityId)
+    PRIMARY KEY     (EntityGuid,SubEntityGuid,EntityId)
 );

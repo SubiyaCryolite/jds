@@ -1,5 +1,5 @@
 CREATE TABLE JdsStoreOldFieldValues(
-    ActionId			NVARCHAR(48),
+    EntityGuid			NVARCHAR(48),
     FieldId				BIGINT,
     DateOfModification	DATETIME DEFAULT GETDATE(),
     Sequence            INTEGER,

@@ -1,8 +1,8 @@
 CREATE TABLE JdsRefEntityOverview
 (
-    ActionId        TEXT,
+    EntityGuid        TEXT,
     DateCreated     TIMESTAMP,
     DateModified    TIMESTAMP,
     EntityId        BIGINT,
-    PRIMARY KEY     (EntityId,ActionId)
+    PRIMARY KEY     (EntityId,EntityGuid)
 );
