@@ -27,15 +27,15 @@ public class Customer extends JdsEntity
 Following that the following steps need to be taken.
 
 ###1.1.1 Annotating Classes
-Every class that extends JdsEntity must have its own unique Entity Code as well as Entity Name. This is done by annotating the class in the following manner
+Every class that extends JdsEntity must have its own unique Entity Id as well as Entity Name. This is done by annotating the class in the following manner
 ```java
-@JdsEntityAnnotation(entityCode = 5, entityName = "Customer")
+@JdsEntityAnnotation(entityId = 5, entityName = "Customer")
 public class Customer extends JdsEntity
 ```
-Entity codes MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be refeenced to mine data.
+Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
 
 ###1.1.2 Defining Fields
-JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be refeenced to mine data. Every field that you define can be one of the following types.
+JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every field that you define can be one of the following types.
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
@@ -114,7 +114,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import org.jenesis.jds.annotations.JdsEntityAnnotation;
 
-@JdsEntityAnnotation(entityCode = 1, entityName = "Simple Address")
+@JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty streetName;
     private final SimpleIntegerProperty plotNumber;
@@ -201,7 +201,7 @@ import org.jenesis.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 
-@JdsEntityAnnotation(entityCode = 2, entityName = "Simple Address Book")
+@JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
 public class SimpleAddressBook extends JdsEntity {
     private final SimpleListProperty<SimpleAddress> addresses;
 

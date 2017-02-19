@@ -18,7 +18,7 @@ public class JdsLoad {
 
     public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
-        long code = annotation.entityCode();
+        long code = annotation.entityId();
         List<T> collections = new ArrayList<>();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
         List<JdsEntity> castCollection = (List<JdsEntity>) collections;

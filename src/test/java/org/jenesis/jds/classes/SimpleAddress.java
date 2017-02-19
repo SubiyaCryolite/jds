@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 import org.jenesis.jds.JdsEntity;
 import org.jenesis.jds.annotations.JdsEntityAnnotation;
 
-@JdsEntityAnnotation(entityCode = 1, entityName = "Simple Address")
+@JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty streetName;
     private final SimpleIntegerProperty plotNumber;

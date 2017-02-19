@@ -8,7 +8,7 @@ import org.jenesis.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 
-@JdsEntityAnnotation(entityCode = 2, entityName = "Simple Address Book")
+@JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
 public class SimpleAddressBook extends JdsEntity {
     private final SimpleListProperty<SimpleAddress> addresses;
 

@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface JdsEntityAnnotation {
     String entityName() default "";
-    long entityCode() default 1;
+    long entityId() default 1;
 }

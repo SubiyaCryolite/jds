@@ -18,7 +18,7 @@ public abstract class JdsEntity extends Jds_Entity {
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
             Annotation annotation = getClass().getAnnotation(JdsEntityAnnotation.class);
             JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
-            setEntityCode(je.entityCode());
+            setEntityCode(je.entityId());
             setEntityName(je.entityName());
             //ClassMappings.map(getClass());
         } else
@@ -133,8 +133,8 @@ public abstract class JdsEntity extends Jds_Entity {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
             JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
-            if (!objectArrayProperties.containsKey(entityAnnotation.entityCode()) && !objectProperties.containsKey(entityAnnotation.entityCode()))
-                objectProperties.put(entityAnnotation.entityCode(), properties);
+            if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId()))
+                objectProperties.put(entityAnnotation.entityId(), properties);
             else
                 throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
         } else
@@ -145,8 +145,8 @@ public abstract class JdsEntity extends Jds_Entity {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
             JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
-            if (!objectArrayProperties.containsKey(entityAnnotation.entityCode()) && !objectProperties.containsKey(entityAnnotation.entityCode()))
-                objectArrayProperties.put(entityAnnotation.entityCode(), properties);
+            if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId()))
+                objectArrayProperties.put(entityAnnotation.entityId(), properties);
             else
                 throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
         } else
