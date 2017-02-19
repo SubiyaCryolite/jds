@@ -2,7 +2,6 @@ package org.jenesis.jds;
 
 
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleListProperty;
 import org.jenesis.jds.enums.JdsImplementation;
 import org.jenesis.jds.enums.JdsTable;
 
@@ -11,8 +10,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -49,6 +46,7 @@ public abstract class JdsDatabase {
         init(true, JdsTable.BindEntityEnums);
         init(true, JdsTable.RefEntityOverview);
         init(true, JdsTable.StoreOldFieldValues);
+        initExtra();
     }
 
     public final void setConnectionProperties(String className, String url, String userName, String passWord) {
@@ -186,19 +184,19 @@ public abstract class JdsDatabase {
     }
 
     private String fileToString(InputStream inputStream) throws Exception {
-        BufferedInputStream bis = new BufferedInputStream(inputStream);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result = bis.read();
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int result = bufferedInputStream.read();
         while (result != -1) {
-            buf.write((byte) result);
-            result = bis.read();
+            byteArrayOutputStream.write((byte) result);
+            result = bufferedInputStream.read();
         }
-        return buf.toString();
+        byteArrayOutputStream.close();
+        bufferedInputStream.close();
+        return byteArrayOutputStream.toString();
     }
 
-    protected final String createArray(final SimpleListProperty<String> textValues) {
-        List<String> list = textValues.stream().map(textValue -> "'" + textValue.replace("%", "[%]").replace("'", "''") + "'").collect(Collectors.toList());
-        return String.join(",", list);
+    protected void initExtra() {
     }
 
     abstract int tableExists(String tableName);
@@ -249,22 +247,23 @@ public abstract class JdsDatabase {
 
     abstract void createRefOldFieldValues();
 
-    public final synchronized boolean mapClassFields(final long entityCode, final HashSet<Long> fields) {
+    public final synchronized boolean mapClassFields(final long entityCode, final HashSet<Long> fieldIds) {
         int rowsWritten = 0;
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ?";
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ? AND FieldId =?";
         String insertSql = "INSERT INTO JdsBindEntityFields (EntityId,FieldId) VALUES (?,?)";
         try (Connection connection = getConnection();
              PreparedStatement check = connection.prepareStatement(checkSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            for (Long field : fields) {
+            for (Long fieldId : fieldIds) {
                 check.clearParameters();
                 check.setLong(1, entityCode);
+                check.setLong(2, fieldId);
                 ResultSet resultSet = check.executeQuery();
                 while (resultSet.next()) {
                     if (resultSet.getInt("Result") == 0) {
                         insert.clearParameters();
                         insert.setLong(1, entityCode);
-                        insert.setLong(2, field);
+                        insert.setLong(2, fieldId);
                         rowsWritten += insert.executeUpdate();
                     }
                 }

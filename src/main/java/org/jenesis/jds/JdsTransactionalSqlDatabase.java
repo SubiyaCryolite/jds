@@ -29,6 +29,9 @@ public class JdsTransactionalSqlDatabase extends JdsDatabase {
         return toReturn;
     }
 
+    protected void initExtra() {
+    }
+
     protected void createStoreText() {
         createTableFromFile("sql/tsql/createStoreText.sql");
     }

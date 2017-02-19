@@ -25,6 +25,9 @@ public class JdsPostgresDatabase extends JdsDatabase {
         return toReturn;
     }
 
+    protected void initExtra() {
+    }
+
     protected void createStoreText() {
         createTableFromFile("sql/postgres/createStoreText.sql");
     }

@@ -10,17 +10,15 @@ import java.time.LocalDateTime;
 /**
  * Created by ifunga on 04/02/2017.
  */
-public abstract class JdsEntity extends Jds_Entity {
+public abstract class JdsEntity extends JdsEntityBase {
     private final SimpleStringProperty name;
 
     public JdsEntity() {
         this.name = new SimpleStringProperty();
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
-            Annotation annotation = getClass().getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
+            JdsEntityAnnotation je = getClass().getAnnotation(JdsEntityAnnotation.class);
             setEntityCode(je.entityId());
             setEntityName(je.entityName());
-            //ClassMappings.map(getClass());
         } else
             throw new RuntimeException("You must annotate the class [" + getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }

@@ -11,7 +11,7 @@ import java.util.HashSet;
  * This class simply hides all underlying data structures from the user
  * However, these fields are visible in package class JdsSave
  */
-abstract class Jds_Entity {
+abstract class JdsEntityBase {
     protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     //field and enum maps
     protected final static HashSet<Long> map = new HashSet<>();
