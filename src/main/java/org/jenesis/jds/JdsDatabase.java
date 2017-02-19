@@ -199,7 +199,7 @@ public abstract class JdsDatabase {
     protected void initExtra() {
     }
 
-    abstract int tableExists(String tableName);
+    public abstract int tableExists(String tableName);
 
     public int procedureExists(String procedureName) {
         return 0;

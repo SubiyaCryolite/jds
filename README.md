@@ -215,14 +215,14 @@ public class SimpleAddressBook extends JdsEntity {
         return this.addresses.get();
     }
 
-    public void SetAlternativeAddresses(List<SimpleAddress> value) {
+    public void setAddresses(List<SimpleAddress> value) {
         this.addresses.set((ObservableList<SimpleAddress>) value);
     }
 
     @Override
     public String toString() {
         return "SimpleAddressBook{" +
-                ", addresses=" + addresses.get() +
+                "addresses = " + getAddresses() +
                 '}';
     }
 }
