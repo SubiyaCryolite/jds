@@ -22,6 +22,7 @@ public abstract class JdsDatabase {
     private String userName;
     private String passWord;
     private boolean logEdits;
+    private boolean printOutput;
     private boolean propertiesSet;
 
     public final void init() {
@@ -376,5 +377,13 @@ public abstract class JdsDatabase {
 
     public final void logEdits(boolean logEdits) {
         this.logEdits = logEdits;
+    }
+
+    public final boolean printOutput() {
+        return printOutput;
+    }
+
+    public final void printOutput(boolean printOutput) {
+        this.printOutput = printOutput;
     }
 }

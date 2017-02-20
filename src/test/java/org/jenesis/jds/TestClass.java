@@ -45,6 +45,7 @@ public class TestClass {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
         jdsDatabase.setConnectionProperties(url);
         jdsDatabase.init();
+        jdsDatabase.logEdits();
     }
 
     /**

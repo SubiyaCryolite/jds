@@ -44,7 +44,8 @@ public class JdsSave {
         for (Collection<JdsEntity> current : batchEntities) {
             saveInner(database, current, dateTimeProperties.get(step), stringProperties.get(step), floatProperties.get(step), doubleProperties.get(step), longProperties.get(step), integerProperties.get(step), objectArrayProperties.get(step), stringArrayProperties.get(step), dateTimeArrayProperties.get(step), floatArrayProperties.get(step), doubleArrayProperties.get(step), longArrayProperties.get(step), integerArrayProperties.get(step), enumProperties.get(step), objectProperties.get(step), overviews.get(step));
             step++;
-            System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
+            if (database.printOutput())
+                System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
         }
     }
 
@@ -205,11 +206,11 @@ public class JdsSave {
                     insert.setTimestamp(3, Timestamp.valueOf(overview.getDateModified()));
                     insert.setLong(4, overview.getEntityCode());
                     insert.executeUpdate();
-                    System.out.printf("Saving Overview [%s of %s]", record, recordTotal);
-                    System.out.println();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
                 } else {
-                    System.out.printf("Updating Overview [%s of %s]", record, recordTotal);
-                    System.out.println();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Updating Overview [%s of %s]\n", record, recordTotal);
                 }
             }
         } catch (Exception ex) {
@@ -226,7 +227,8 @@ public class JdsSave {
             jdsDatabase.mapClassName(jdsEntity.getEntityCode(), jdsEntity.getEntityName());
             jdsDatabase.mapClassFields(jdsEntity.getEntityCode(), jdsEntity.allFields);
             jdsDatabase.mapClassEnums(jdsEntity.getEntityCode(), jdsEntity.allEnums);
-            System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
+            if (jdsDatabase.printOutput())
+                System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
         }
     }
 
@@ -257,8 +259,8 @@ public class JdsSave {
                     preparedStatement.executeUpdate();
                     collection.add(value);
                     innerRecord++;
-                    System.out.printf("Saving inner Object [%s]. Object field [%s of %s]", record, innerRecord, innerRecordSize);
-                    System.out.println();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Saving inner Object [%s]. Object field [%s of %s]\n", record, innerRecord, innerRecordSize);
                 }
                 record++;
             }
@@ -302,9 +304,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setInt(3, value);
                         insert.executeUpdate();
-                        System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -352,9 +356,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setFloat(3, value);
                         insert.executeUpdate();
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -402,9 +408,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setDouble(3, value);
                         insert.executeUpdate();
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -452,9 +460,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setLong(3, value);
                         insert.executeUpdate();
-                        System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Saving record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -502,9 +512,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setString(3, value);
                         insert.executeUpdate();
-                        System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -552,9 +564,11 @@ public class JdsSave {
                         insert.setString(2, EntityGuid);
                         insert.setTimestamp(3, Timestamp.valueOf(value));
                         insert.executeUpdate();
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     } else {
-                        System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Saving record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     }
                     if (!jdsDatabase.logEdits()) continue;
                     log.clearParameters();
@@ -603,7 +617,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
             }
@@ -645,7 +660,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal);
 
                     }
                 }
@@ -688,7 +704,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
             }
@@ -730,8 +747,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal);
-
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
             }
@@ -773,7 +790,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
             }
@@ -815,7 +833,8 @@ public class JdsSave {
                         insert.setString(4, EntityGuid);
                         insert.executeUpdate();
                         index.set(index.get() + 1);
-                        System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal);
+                        if (jdsDatabase.printOutput())
+                            System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
             }
@@ -866,8 +885,8 @@ public class JdsSave {
                 insert.setString(2, bind.getSubEntityGuid());
                 insert.setLong(3, bind.getEntityId());
                 insert.executeUpdate();
-                System.out.printf("Binding object array. [%s]", record);
-                System.out.println();
+                if (jdsDatabase.printOutput())
+                    System.out.printf("Binding object array. [%s]\n", record);
             }
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -877,17 +896,17 @@ public class JdsSave {
     }
 
     /**
-     * @param database
+     * @param jdsDatabase
      * @param enumStrings
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveEnums(final JdsDatabase database, final HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
+    private static void saveEnums(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String updateSql = "UPDATE JdsStoreIntegerArray SET Value = ? WHERE FieldId = ? AND EntityGuid = ? AND Sequence = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection outerConnection = database.getConnection();
+        try (Connection outerConnection = jdsDatabase.getConnection();
              PreparedStatement insert = outerConnection.prepareStatement(insertSql);
              PreparedStatement update = outerConnection.prepareStatement(updateSql)) {
             for (Map.Entry<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> entry : enumStrings.entrySet()) {
@@ -911,9 +930,11 @@ public class JdsSave {
                             insert.setInt(3, dex);
                             insert.setInt(4, fieldId.getIndex(enumText));
                             insert.executeUpdate();
-                            System.out.printf("Saving enum [%s]. Object field [%s of %s]\n", dex, record, recordTotal);
+                            if (jdsDatabase.printOutput())
+                                System.out.printf("Saving enum [%s]. Object field [%s of %s]\n", dex, record, recordTotal);
                         } else {
-                            System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", dex, record, recordTotal);
+                            if (jdsDatabase.printOutput())
+                                System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", dex, record, recordTotal);
                         }
                         dex++;
 
