@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -240,9 +241,11 @@ public class JdsSave {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         int record = 0;
         Collection<JdsEntity> collection = new ArrayList<>();
-        String sql = "INSERT INTO JdsStoreEntitySubclass (EntityGuid,SubEntityGuid,EntityId) VALUES (?,?,?)";
+        String checkSql = "SELECT COUNT(*) AS Result FROM JdsStoreEntitySubclass WHERE EntityGuid = ? AND SubEntityGuid = ? AND EntityId = ?";
+        String insertSql = "INSERT INTO JdsStoreEntitySubclass (EntityGuid,SubEntityGuid,EntityId) VALUES (?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+             PreparedStatement checkStatement = connection.prepareStatement(checkSql);
+             PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
             for (Map.Entry<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
                 String EntityGuid = entry.getKey();
                 int innerRecord = 0;
@@ -252,11 +255,20 @@ public class JdsSave {
                     long entityCode = recordEntry.getKey();
                     JdsEntity value = recordEntry.getValue().get();
                     if (value == null) continue;
-                    preparedStatement.clearParameters();
-                    preparedStatement.setString(1, EntityGuid);
-                    preparedStatement.setString(2, value.getEntityGuid());
-                    preparedStatement.setLong(3, entityCode);
-                    preparedStatement.executeUpdate();
+                    checkStatement.clearParameters();
+                    checkStatement.setString(1, EntityGuid);
+                    checkStatement.setString(2, value.getEntityGuid());
+                    checkStatement.setLong(3, entityCode);
+                    ResultSet rs = checkStatement.executeQuery();
+                    while (rs.next()) {
+                        if (rs.getInt("Result") == 0) {
+                            insertStatement.clearParameters();
+                            insertStatement.setString(1, EntityGuid);
+                            insertStatement.setString(2, value.getEntityGuid());
+                            insertStatement.setLong(3, entityCode);
+                            insertStatement.executeUpdate();
+                        }
+                    }
                     collection.add(value);
                     innerRecord++;
                     if (jdsDatabase.printOutput())
