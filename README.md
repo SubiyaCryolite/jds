@@ -6,6 +6,11 @@ Jenesis Data Store (JDS) was created to help developers persist their classes to
 #Dependancies
 The library depends on Java 8. Both 64 and 32 bit variants should suffice. Both the Development Kit and Runtime can be downloaded from [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 
+#Deployment ready?
+[![No, hell no](https://media.giphy.com/media/RA8gXeMaTqXIc/giphy.gif)]
+
+The library is not yet ready for use in projects. That said development is proceeding smoothly and usable alphas should be available in under 2 months.
+
 #Supported Databases
 The API currently supports the following Relational Databases, each of which has their own dependancies, versions and licensing requirements. Please consult the official sites for specifics.
 
