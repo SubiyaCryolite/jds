@@ -4,12 +4,15 @@ package org.jenesis.jds;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.jenesis.jds.enums.JdsImplementation;
 import org.jenesis.jds.enums.JdsTable;
+import org.jenesis.jds.listeners.BaseListener;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 
 /**
@@ -248,23 +251,23 @@ public abstract class JdsDatabase {
 
     abstract void createRefOldFieldValues();
 
-    public final synchronized boolean mapClassFields(final long entityCode, final HashSet<Long> fieldIds) {
+    public final synchronized boolean mapClassFields(final long entityCode, final HashMap<Long, BaseListener> listenerHashMap) {
         int rowsWritten = 0;
         String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ? AND FieldId =?";
         String insertSql = "INSERT INTO JdsBindEntityFields (EntityId,FieldId) VALUES (?,?)";
         try (Connection connection = getConnection();
              PreparedStatement check = connection.prepareStatement(checkSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            for (Long fieldId : fieldIds) {
+            for (Map.Entry<Long, BaseListener> fieldId : listenerHashMap.entrySet()) {
                 check.clearParameters();
                 check.setLong(1, entityCode);
-                check.setLong(2, fieldId);
+                check.setLong(2, fieldId.getKey());
                 ResultSet resultSet = check.executeQuery();
                 while (resultSet.next()) {
                     if (resultSet.getInt("Result") == 0) {
                         insert.clearParameters();
                         insert.setLong(1, entityCode);
-                        insert.setLong(2, fieldId);
+                        insert.setLong(2, fieldId.getKey());
                         rowsWritten += insert.executeUpdate();
                     }
                 }

@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by ifunga on 12/02/2017.
@@ -17,24 +18,24 @@ public class JdsSave {
 
     public static void save(final JdsDatabase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
         //strings, dates and numerics
-        List<HashMap<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleStringProperty>>> stringProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleFloatProperty>>> floatProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleDoubleProperty>>> doubleProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleLongProperty>>> longProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleIntegerProperty>>> integerProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleLongProperty>>> longProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties = new ArrayList<>();
         //arrays
-        List<HashMap<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<String>>>> stringArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<Float>>>> floatArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<Double>>>> doubleArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<Long>>>> longArrayProperties = new ArrayList<>();
-        List<HashMap<String, HashMap<Long, SimpleListProperty<Integer>>>> integerArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties = new ArrayList<>();
         //enums
-        List<HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties = new ArrayList<>();
+        List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties = new ArrayList<>();
         //objectProperties
-        List<HashMap<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties = new ArrayList<>();
+        List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties = new ArrayList<>();
         List<HashSet<JdsEntityOverview>> overviews = new LinkedList<>();
         List<Collection<JdsEntity>> batchEntities = new ArrayList<>();
 
@@ -50,7 +51,7 @@ public class JdsSave {
         }
     }
 
-    private static void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, List<HashMap<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<HashMap<String, HashMap<Long, SimpleStringProperty>>> stringProperties, List<HashMap<String, HashMap<Long, SimpleFloatProperty>>> floatProperties, List<HashMap<String, HashMap<Long, SimpleDoubleProperty>>> doubleProperties, List<HashMap<String, HashMap<Long, SimpleLongProperty>>> longProperties, List<HashMap<String, HashMap<Long, SimpleIntegerProperty>>> integerProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<String>>>> stringArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Long>>>> longArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<HashMap<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
+    private static void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
         //create batches
         int currentBatch = 0;
         int iteration = 0;
@@ -75,7 +76,7 @@ public class JdsSave {
         }
     }
 
-    private static void createBatchCollection(List<HashMap<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<HashMap<String, HashMap<Long, SimpleStringProperty>>> stringProperties, List<HashMap<String, HashMap<Long, SimpleFloatProperty>>> floatProperties, List<HashMap<String, HashMap<Long, SimpleDoubleProperty>>> doubleProperties, List<HashMap<String, HashMap<Long, SimpleLongProperty>>> longProperties, List<HashMap<String, HashMap<Long, SimpleIntegerProperty>>> integerProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<String>>>> stringArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Long>>>> longArrayProperties, List<HashMap<String, HashMap<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<HashMap<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
+    private static void createBatchCollection(List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
         batchEntities.add(new ArrayList<>());
         overviews.add(new HashSet<>());
         //primitives
@@ -122,21 +123,21 @@ public class JdsSave {
      */
     private static void saveInner(final JdsDatabase database,
                                   final Collection<? extends JdsEntity> entities,
-                                  final HashMap<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>> dateTimeProperties,
-                                  final HashMap<String, HashMap<Long, SimpleStringProperty>> stringProperties,
-                                  final HashMap<String, HashMap<Long, SimpleFloatProperty>> floatProperties,
-                                  final HashMap<String, HashMap<Long, SimpleDoubleProperty>> doubleProperties,
-                                  final HashMap<String, HashMap<Long, SimpleLongProperty>> longProperties,
-                                  final HashMap<String, HashMap<Long, SimpleIntegerProperty>> integerProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<String>>> stringArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<Float>>> floatArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<Double>>> doubleArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<Long>>> longArrayProperties,
-                                  final HashMap<String, HashMap<Long, SimpleListProperty<Integer>>> integerArrayProperties,
-                                  final HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> enumProperties,
-                                  final HashMap<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties,
+                                  final Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> dateTimeProperties,
+                                  final Map<String, Map<Long, SimpleStringProperty>> stringProperties,
+                                  final Map<String, Map<Long, SimpleFloatProperty>> floatProperties,
+                                  final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties,
+                                  final Map<String, Map<Long, SimpleLongProperty>> longProperties,
+                                  final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties,
+                                  final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties,
+                                  final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumProperties,
+                                  final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties,
                                   final HashSet<JdsEntityOverview> overviews) {
         //fire
         for (final JdsEntity entity : entities) {
@@ -144,21 +145,46 @@ public class JdsSave {
             mapEntity(database, entity);
             entity.setDateModified(LocalDateTime.now());//update the modified date to time of commit
             overviews.add(entity.getOverview());
-            dateTimeProperties.put(entity.getEntityGuid(), entity.dateProperties);
-            stringProperties.put(entity.getEntityGuid(), entity.stringProperties);
-            floatProperties.put(entity.getEntityGuid(), entity.floatProperties);
-            doubleProperties.put(entity.getEntityGuid(), entity.doubleProperties);
-            longProperties.put(entity.getEntityGuid(), entity.longProperties);
-            integerProperties.put(entity.getEntityGuid(), entity.integerProperties);
-            objectArrayProperties.put(entity.getEntityGuid(), entity.objectArrayProperties);
-            stringArrayProperties.put(entity.getEntityGuid(), entity.stringArrayProperties);
-            dateTimeArrayProperties.put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
-            floatArrayProperties.put(entity.getEntityGuid(), entity.floatArrayProperties);
-            doubleArrayProperties.put(entity.getEntityGuid(), entity.doubleArrayProperties);
-            longArrayProperties.put(entity.getEntityGuid(), entity.longArrayProperties);
-            integerArrayProperties.put(entity.getEntityGuid(), entity.integerArrayProperties);
-            enumProperties.put(entity.getEntityGuid(), entity.enumProperties);
-            objectProperties.put(entity.getEntityGuid(), entity.objectProperties);
+            final List<Long> modifiedFields = entity.modifiedFields();
+            final List<Long> modifiedEntities = entity.modifiedObjects();
+            //modified elements
+            Map<Long, SimpleObjectProperty<LocalDateTime>> modifiedDates = entity.dateProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleStringProperty> modifiedStrings = entity.stringProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleFloatProperty> modifiedFloats = entity.floatProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleDoubleProperty> modifiedDoubles = entity.doubleProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleLongProperty> modifiedLongs = entity.longProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleIntegerProperty> modifiedIntegers = entity.integerProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            //modified arrays
+            Map<Long, SimpleListProperty<String>> modifiedStringArrays = entity.stringArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<Float>> modifiedFloatArrays = entity.floatArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<Double>> modifiedDoubleArrays = entity.doubleArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<Integer>> modifiedIntegerArrays = entity.integerArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<Long>> modifiedLongArrays = entity.longArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<LocalDateTime>> modifiedLocalDateTimeArrays = entity.dateTimeArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            //modified enums
+            Map<JdsFieldEnum, SimpleListProperty<String>> modifiedEnums = entity.enumProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedFields.contains(entryPredicate.getKey().getField().getId())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            //modified objects
+            Map<Long, SimpleObjectProperty<? extends JdsEntity>> modifiedObjects = entity.objectProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedEntities.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            Map<Long, SimpleListProperty<? extends JdsEntity>> modifiedObjectArrays = entity.objectArrayProperties.entrySet().parallelStream().filter(entryPredicate -> modifiedEntities.contains(entryPredicate.getKey())).collect(Collectors.toMap(key -> key.getKey(), value -> value.getValue()));
+            //assign properties
+            dateTimeProperties.put(entity.getEntityGuid(), modifiedDates);
+            stringProperties.put(entity.getEntityGuid(), modifiedStrings);
+            floatProperties.put(entity.getEntityGuid(), modifiedFloats);
+            doubleProperties.put(entity.getEntityGuid(), modifiedDoubles);
+            longProperties.put(entity.getEntityGuid(), modifiedLongs);
+            integerProperties.put(entity.getEntityGuid(), modifiedIntegers);
+            //assign lists
+            stringArrayProperties.put(entity.getEntityGuid(), modifiedStringArrays);
+            dateTimeArrayProperties.put(entity.getEntityGuid(), modifiedLocalDateTimeArrays);
+            floatArrayProperties.put(entity.getEntityGuid(), modifiedFloatArrays);
+            doubleArrayProperties.put(entity.getEntityGuid(), modifiedDoubleArrays);
+            longArrayProperties.put(entity.getEntityGuid(), modifiedLongArrays);
+            integerArrayProperties.put(entity.getEntityGuid(), modifiedIntegerArrays);
+            //assign enums
+            enumProperties.put(entity.getEntityGuid(), modifiedEnums);
+            //assign objects
+            objectArrayProperties.put(entity.getEntityGuid(), modifiedObjectArrays);
+            objectProperties.put(entity.getEntityGuid(), modifiedObjects);
         }
         saveOverviews(database, overviews);
         //properties
@@ -237,7 +263,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param objectProperties
      */
-    private static void saveObjects(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
+    private static void saveObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         int record = 0;
         Collection<JdsEntity> collection = new ArrayList<>();
@@ -246,8 +272,8 @@ public class JdsSave {
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement checkStatement = connection.prepareStatement(checkSql);
              PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
-                String EntityGuid = entry.getKey();
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
+                String entityGuid = entry.getKey();
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
                 if (innerRecordSize == 0) continue;
@@ -256,14 +282,14 @@ public class JdsSave {
                     JdsEntity value = recordEntry.getValue().get();
                     if (value == null) continue;
                     checkStatement.clearParameters();
-                    checkStatement.setString(1, EntityGuid);
+                    checkStatement.setString(1, entityGuid);
                     checkStatement.setString(2, value.getEntityGuid());
                     checkStatement.setLong(3, entityCode);
                     ResultSet rs = checkStatement.executeQuery();
                     while (rs.next()) {
                         if (rs.getInt("Result") == 0) {
                             insertStatement.clearParameters();
-                            insertStatement.setString(1, EntityGuid);
+                            insertStatement.setString(1, entityGuid);
                             insertStatement.setString(2, value.getEntityGuid());
                             insertStatement.setLong(3, entityCode);
                             insertStatement.executeUpdate();
@@ -287,7 +313,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param integerProperties
      */
-    private static void saveIntegers(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleIntegerProperty>> integerProperties) {
+    private static void saveIntegers(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreInteger SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreInteger (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -296,7 +322,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -339,7 +365,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param floatProperties
      */
-    private static void saveFloats(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleFloatProperty>> floatProperties) {
+    private static void saveFloats(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreFloat SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloat (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -348,7 +374,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -391,7 +417,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param doubleProperties
      */
-    private static void saveDoubles(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleDoubleProperty>> doubleProperties) {
+    private static void saveDoubles(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreDouble SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDouble (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -400,7 +426,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -443,7 +469,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param longProperties
      */
-    private static void saveLongs(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleLongProperty>> longProperties) {
+    private static void saveLongs(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreLong SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreLong (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -452,7 +478,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -495,7 +521,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param stringProperties
      */
-    private static void saveStrings(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleStringProperty>> stringProperties) {
+    private static void saveStrings(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreText SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreText (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -504,7 +530,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -547,7 +573,7 @@ public class JdsSave {
      * @param jdsDatabase
      * @param dateProperties
      */
-    private static void saveDates(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>> dateProperties) {
+    private static void saveDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> dateProperties) {
         int record = 0;
         String updateSql = "UPDATE JdsStoreDateTime SET Value = ? WHERE FieldId =? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTime (FieldId,EntityGuid,Value) VALUES (?,?,?)";
@@ -556,7 +582,7 @@ public class JdsSave {
              PreparedStatement update = connection.prepareStatement(updateSql);
              PreparedStatement insert = connection.prepareStatement(insertSql);
              PreparedStatement log = connection.prepareStatement(logSql)) {
-            for (Map.Entry<String, HashMap<Long, SimpleObjectProperty<LocalDateTime>>> entry : dateProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> entry : dateProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -601,14 +627,14 @@ public class JdsSave {
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayDates(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private static void saveArrayDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<LocalDateTime>>> entry : dateTimeArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<LocalDateTime>>> entry : dateTimeArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -644,14 +670,14 @@ public class JdsSave {
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayFloats(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private static void saveArrayFloats(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<Float>>> entry : floatArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<Float>>> entry : floatArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -688,14 +714,14 @@ public class JdsSave {
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayIntegers(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private static void saveArrayIntegers(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<Integer>>> entry : integerArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<Integer>>> entry : integerArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -731,14 +757,14 @@ public class JdsSave {
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayDoubles(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private static void saveArrayDoubles(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<Double>>> entry : doubleArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<Double>>> entry : doubleArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -774,14 +800,14 @@ public class JdsSave {
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayLongs(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private static void saveArrayLongs(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<Long>>> entry : longArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<Long>>> entry : longArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -817,14 +843,14 @@ public class JdsSave {
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayStrings(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private static void saveArrayStrings(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             int record = 0;
-            for (Map.Entry<String, HashMap<Long, SimpleListProperty<String>>> entry : stringArrayProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleListProperty<String>>> entry : stringArrayProperties.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 final SimpleIntegerProperty index = new SimpleIntegerProperty(0);
@@ -860,10 +886,10 @@ public class JdsSave {
      * @param objectArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveArrayObjects(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
+    private static void saveArrayObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
         Collection<Jds_StoreEntitySubclass> bindings = new ArrayList<>();
         Collection<JdsEntity> jdsEntities = new ArrayList<>();
-        for (Map.Entry<String, HashMap<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
+        for (Map.Entry<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
             String upperEntityGuid = serviceCodeEntities.getKey();
             for (Map.Entry<Long, SimpleListProperty<? extends JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
                 long serviceCode = serviceCodeEntity.getKey();
@@ -913,7 +939,7 @@ public class JdsSave {
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
-    private static void saveEnums(final JdsDatabase jdsDatabase, final HashMap<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
+    private static void saveEnums(final JdsDatabase jdsDatabase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String updateSql = "UPDATE JdsStoreIntegerArray SET Value = ? WHERE FieldId = ? AND EntityGuid = ? AND Sequence = ?";
@@ -921,7 +947,7 @@ public class JdsSave {
         try (Connection outerConnection = jdsDatabase.getConnection();
              PreparedStatement insert = outerConnection.prepareStatement(insertSql);
              PreparedStatement update = outerConnection.prepareStatement(updateSql)) {
-            for (Map.Entry<String, HashMap<JdsFieldEnum, SimpleListProperty<String>>> entry : enumStrings.entrySet()) {
+            for (Map.Entry<String, Map<JdsFieldEnum, SimpleListProperty<String>>> entry : enumStrings.entrySet()) {
                 record++;
                 String EntityGuid = entry.getKey();
                 for (Map.Entry<JdsFieldEnum, SimpleListProperty<String>> fieldEnums : entry.getValue().entrySet()) {
