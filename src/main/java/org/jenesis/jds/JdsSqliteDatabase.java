@@ -9,6 +9,10 @@ import java.sql.ResultSet;
  */
 public class JdsSqliteDatabase extends JdsDatabase {
 
+    public JdsSqliteDatabase() {
+        supportsStatements = false;
+    }
+
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
@@ -108,5 +112,31 @@ public class JdsSqliteDatabase extends JdsDatabase {
     @Override
     void createRefOldFieldValues() {
         createTableFromFile("sql/sqlite/createStoreOldFieldValues.sql");
+    }
+
+    
+    
+    public String saveString() {
+        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveLong() {
+        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveDouble() {
+        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveFloat() {
+        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveInteger() {
+        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveDateTime() {
+        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
     }
 }

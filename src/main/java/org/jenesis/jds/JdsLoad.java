@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class JdsLoad {
 
-    final private static int batchSize = 1000; //Java supports up to 1000 prepared statements depending on the driver
+    final private static int batchSize = 1000; //Java supports up to 1000 prepared supportsStatements depending on the driver
 
     public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);

@@ -24,7 +24,13 @@ public enum JdsTable {
     RefFieldTypes("JdsRefFieldTypes"),
     RefEntityOverview("JdsRefEntityOverview"),
     BindEntityFields("JdsBindEntityFields"),
-    BindEntityEnums("JdsBindEntityEnums");
+    BindEntityEnums("JdsBindEntityEnums"),
+    SaveText("procJdsStoreText"),
+    SaveFloat("procJdsStoreFloat"),
+    SaveInteger("procJdsStoreInteger"),
+    SaveLong("procJdsStoreLong"),
+    SaveDouble("procJdsStoreDouble"),
+    SaveDateTime("procJdsStoreDateTime");
 
     private String name;
 

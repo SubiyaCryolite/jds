@@ -26,6 +26,7 @@ public class SimpleAddress extends JdsEntity {
         map(TestFields.PLOT_NUMBER, plotNumber);
         map(TestFields.AREA_NAME, area);
         map(TestFields.CITY_NAME, city);
+        map(TestFields.COUNTRY_NAME, country);
         map(TestFields.PROVINCE_NAME, provinceOrState);
     }
 

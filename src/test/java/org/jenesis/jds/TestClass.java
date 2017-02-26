@@ -36,16 +36,24 @@ public class TestClass {
     }
 
     /**
-     * We use postgres for tests because it is easy to setup anywhere
+     * We use postgresql for tests because it is easy to setup anywhere
      * Note, that SQLite requires extra caution in regards to multiple write connections
      */
     @Test
     public void initialiseSqlLiteBackend() {
-        String url = "jdbc:sqlite:" + getDatabaseFile();
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
-        jdsDatabase.setConnectionProperties(url);
+//        String url = "jdbc:sqlite:" + getDatabaseFile();
+//        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
+//        jdsDatabase.setConnectionProperties(url);
+//        jdsDatabase.init();
+//        jdsDatabase.logEdits(false);
+        //
+//        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
+//        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\SMARTCARE40;databaseName=testjds", "sa", "m7r@n$4mAz");
+//        jdsDatabase.init();
+//        jdsDatabase.logEdits(false);
+        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
+        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jdstest", "postgres", "");
         jdsDatabase.init();
-        jdsDatabase.logEdits();
     }
 
     /**

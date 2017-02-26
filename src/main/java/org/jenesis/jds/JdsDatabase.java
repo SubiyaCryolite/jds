@@ -27,6 +27,7 @@ public abstract class JdsDatabase {
     private boolean logEdits;
     private boolean printOutput;
     private boolean propertiesSet;
+    protected boolean supportsStatements;
 
     public final void init() {
         init(true, JdsTable.StoreTextArray);
@@ -94,7 +95,7 @@ public abstract class JdsDatabase {
         return null;
     }
 
-    private final void init(boolean isTable, JdsTable jdsTable) {
+    protected final void init(boolean isTable, JdsTable jdsTable) {
         boolean tableExists = isTable ? doesTableExist(jdsTable.getName()) : doesProcedureExist(jdsTable.getName());
         if (!tableExists)
             createTable(jdsTable);
@@ -166,7 +167,11 @@ public abstract class JdsDatabase {
                 createRefOldFieldValues();
                 break;
         }
+        createTableExtra(jdsTable);
     }
+
+    protected void createTableExtra(JdsTable jdsTable)
+    {}
 
     private final boolean doesTableExist(String tableName) {
         int answer = tableExists(tableName);
@@ -388,5 +393,33 @@ public abstract class JdsDatabase {
 
     public final void printOutput(boolean printOutput) {
         this.printOutput = printOutput;
+    }
+
+    public String saveString() {
+        return "{call procJdsStoreText(?,?,?)}";
+    }
+
+    public String saveLong() {
+        return "{call procJdsStoreLong(?,?,?)}";
+    }
+
+    public String saveDouble() {
+        return "{call procJdsStoreDouble(?,?,?)}";
+    }
+
+    public String saveFloat() {
+        return "{call procJdsStoreFloat(?,?,?)}";
+    }
+
+    public String saveInteger() {
+        return "{call procJdsStoreInteger(?,?,?)}";
+    }
+
+    public String saveDateTime() {
+        return "{call procJdsStoreDateTime(?,?,?)}";
+    }
+
+    public final boolean supportsStatements() {
+        return supportsStatements;
     }
 }
