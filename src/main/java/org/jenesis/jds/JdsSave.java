@@ -941,10 +941,8 @@ public class JdsSave {
                             log.addBatch();
                         }
                         //delete
-                        delete.setInt(1, fieldId.getIndex(enumText));
-                        delete.setLong(2, fieldId.getField().getId());
-                        delete.setString(3, entityGuid);
-                        delete.setInt(4, sequence);
+                        delete.setLong(1, fieldId.getField().getId());
+                        delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
                         insert.clearParameters();
