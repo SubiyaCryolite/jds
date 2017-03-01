@@ -162,6 +162,7 @@ public class JdsTransactionalSqlDatabase extends JdsDatabase {
         init(false, JdsTable.SaveFloat);
         init(false, JdsTable.SaveDouble);
         init(false, JdsTable.SaveDateTime);
+        init(false, JdsTable.SaveOverview);
     }
 
     @Override
@@ -184,6 +185,9 @@ public class JdsTransactionalSqlDatabase extends JdsDatabase {
                 break;
             case SaveDateTime:
                 createTableFromFile("sql/tsql/procedures/procJdsStoreDateTime.sql");
+                break;
+            case SaveOverview:
+                createTableFromFile("sql/tsql/procedures/procJdsRefEntityOverview.sql");
                 break;
         }
     }

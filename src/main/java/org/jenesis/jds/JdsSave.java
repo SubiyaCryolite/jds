@@ -217,31 +217,22 @@ public class JdsSave {
     private static void saveOverviews(final JdsDatabase jdsDatabase, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
-        String updateSql = "UPDATE JdsRefEntityOverview SET DateModified = ? WHERE EntityGuid = ? AND EntityId = ?;";
-        String insertSql = "INSERT INTO JdsRefEntityOverview(EntityGuid,DateCreated,DateModified,EntityId) VALUES (?,?,?,?);";
-        try (Connection outerConnection = jdsDatabase.getConnection();
-             PreparedStatement update = outerConnection.prepareStatement(updateSql);
-             PreparedStatement insert = outerConnection.prepareStatement(insertSql)) {
+        try (Connection connection = jdsDatabase.getConnection();
+             PreparedStatement preparedStatement = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveOverview()) : connection.prepareStatement(jdsDatabase.saveOverview())) {
+            connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
-                update.clearParameters();
-                update.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-                update.setString(2, overview.getEntityGuid());
-                update.setLong(3, overview.getEntityCode());
-                if (update.executeUpdate() == 0) {
-                    insert.clearParameters();
-                    insert.setString(1, overview.getEntityGuid());
-                    insert.setTimestamp(2, Timestamp.valueOf(overview.getDateCreated()));
-                    insert.setTimestamp(3, Timestamp.valueOf(overview.getDateModified()));
-                    insert.setLong(4, overview.getEntityCode());
-                    insert.executeUpdate();
-                    if (jdsDatabase.printOutput())
-                        System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
-                } else {
-                    if (jdsDatabase.printOutput())
-                        System.out.printf("Updating Overview [%s of %s]\n", record, recordTotal);
-                }
+                preparedStatement.setString(1, overview.getEntityGuid());
+                preparedStatement.setLong(2, overview.getEntityCode());
+                preparedStatement.setTimestamp(3, Timestamp.valueOf(overview.getDateCreated()));
+                preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                preparedStatement.addBatch();
+                if (jdsDatabase.printOutput())
+                    System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
+
             }
+            preparedStatement.executeBatch();
+            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -945,7 +936,6 @@ public class JdsSave {
                         delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
-                        insert.clearParameters();
                         insert.setLong(1, fieldId.getField().getId());
                         insert.setString(2, entityGuid);
                         insert.setInt(3, sequence);
@@ -994,23 +984,25 @@ public class JdsSave {
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
+            connection.setAutoCommit(false);
             for (Jds_StoreEntitySubclass bind : bindings) {
                 if (bind == null) continue;
                 if (bind.getEntityGuid() == null) continue;
-                delete.clearParameters();
                 delete.setString(1, bind.getEntityGuid());
                 delete.setString(2, bind.getSubEntityGuid());
                 delete.setLong(3, bind.getEntityId());
-                delete.executeUpdate();
+                delete.addBatch();
                 record++;
-                insert.clearParameters();
                 insert.setString(1, bind.getEntityGuid());
                 insert.setString(2, bind.getSubEntityGuid());
                 insert.setLong(3, bind.getEntityId());
-                insert.executeUpdate();
+                insert.addBatch();
                 if (jdsDatabase.printOutput())
                     System.out.printf("Binding object array. [%s]\n", record);
             }
+            delete.executeBatch();
+            insert.executeBatch();
+            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }

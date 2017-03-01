@@ -161,6 +161,7 @@ public class JdsPostgresDatabase extends JdsDatabase {
         init(false, JdsTable.SaveFloat);
         init(false, JdsTable.SaveDouble);
         init(false, JdsTable.SaveDateTime);
+        init(false, JdsTable.SaveOverview);
     }
 
     @Override
@@ -183,6 +184,9 @@ public class JdsPostgresDatabase extends JdsDatabase {
                 break;
             case SaveDateTime:
                 createTableFromFile("sql/postgresql/procedures/procJdsStoreDateTime.sql");
+                break;
+            case SaveOverview:
+                createTableFromFile("sql/postgresql/procedures/procJdsRefEntityOverview.sql");
                 break;
         }
     }

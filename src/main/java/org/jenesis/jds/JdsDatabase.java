@@ -419,6 +419,10 @@ public abstract class JdsDatabase {
         return "{call procJdsStoreDateTime(?,?,?)}";
     }
 
+    public String saveOverview() {
+        return "{call procJdsRefEntityOverview(?,?,?,?)}";
+    }
+
     public final boolean supportsStatements() {
         return supportsStatements;
     }

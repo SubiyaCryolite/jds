@@ -30,7 +30,8 @@ public enum JdsTable {
     SaveInteger("procJdsStoreInteger"),
     SaveLong("procJdsStoreLong"),
     SaveDouble("procJdsStoreDouble"),
-    SaveDateTime("procJdsStoreDateTime");
+    SaveDateTime("procJdsStoreDateTime"),
+    SaveOverview("procJdsRefEntityOverview");
 
     private String name;
 

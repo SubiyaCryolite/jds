@@ -1,6 +1,6 @@
 CREATE TABLE JdsRefEntityOverview
 (
-    EntityGuid        TEXT,
+    EntityGuid      TEXT,
     DateCreated     TIMESTAMP,
     DateModified    TIMESTAMP,
     EntityId        BIGINT,

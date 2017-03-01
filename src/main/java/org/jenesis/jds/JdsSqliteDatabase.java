@@ -114,8 +114,7 @@ public class JdsSqliteDatabase extends JdsDatabase {
         createTableFromFile("sql/sqlite/createStoreOldFieldValues.sql");
     }
 
-    
-    
+
     public String saveString() {
         return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(?,?,?);";
     }
@@ -138,5 +137,9 @@ public class JdsSqliteDatabase extends JdsDatabase {
 
     public String saveDateTime() {
         return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveOverview() {
+        return "INSERT OR REPLACE INTO JdsRefEntityOverview(EntityGuid,EntityId,DateCreated,DateModified) VALUES(?,?,?,?)";
     }
 }
