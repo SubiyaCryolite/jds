@@ -15,9 +15,11 @@ public class JdsEntityOverview {
     private final SimpleObjectProperty<LocalDateTime> dateModified;
     private final SimpleLongProperty serviceCode;
     private final SimpleStringProperty entityGuid;
+    private final SimpleStringProperty parentEntityGuid;
 
     JdsEntityOverview() {
         this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
+        this.parentEntityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
         this.dateModified = new SimpleObjectProperty<>(LocalDateTime.now());
         this.serviceCode = new SimpleLongProperty();
@@ -53,5 +55,13 @@ public class JdsEntityOverview {
 
     public void setEntityGuid(String entityGuid) {
         this.entityGuid.set(entityGuid);
+    }
+
+    public String getParentEntityGuid() {
+        return parentEntityGuid.get();
+    }
+
+    public void setParentEntityGuid(String parentEntityGuid) {
+        this.parentEntityGuid.set(parentEntityGuid);
     }
 }

@@ -1,7 +1,7 @@
-CREATE PROCEDURE procJdsStoreInteger(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value INTEGER)
+CREATE PROCEDURE procStoreDateTime(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value DATETIME)
 AS
 BEGIN
-	MERGE JdsStoreInteger AS dest
+	MERGE JdsStoreDateTime AS dest
 	USING (VALUES (@EntityGuid,  @FieldId, @Value)) AS src([EntityGuid],  [FieldId], [Value])
 	ON (src.EntityGuid = dest.EntityGuid AND src.FieldId = dest.FieldId)
 	WHEN MATCHED THEN

@@ -7,9 +7,9 @@ import java.sql.ResultSet;
 /**
  * Created by ifunga on 12/02/2017.
  */
-public class JdsSqliteDatabase extends JdsDatabase {
+public class JdsDatabaseSqlite extends JdsDatabase {
 
-    public JdsSqliteDatabase() {
+    public JdsDatabaseSqlite() {
         supportsStatements = false;
     }
 
@@ -81,10 +81,6 @@ public class JdsSqliteDatabase extends JdsDatabase {
         createTableFromFile("sql/sqlite/createRefEntities.sql");
     }
 
-    protected void createStoreEntitySubclass() {
-        createTableFromFile("sql/sqlite/createStoreEntitySubclass.sql");
-    }
-
     protected void createRefEnumValues() {
         createTableFromFile("sql/sqlite/createRefEnumValues.sql");
     }
@@ -106,7 +102,7 @@ public class JdsSqliteDatabase extends JdsDatabase {
     }
 
     protected void createRefEntityOverview() {
-        createTableFromFile("sql/sqlite/createRefEntityOverview.sql");
+        createTableFromFile("sql/sqlite/createStoreEntityOverview.sql");
     }
 
     @Override
@@ -140,6 +136,6 @@ public class JdsSqliteDatabase extends JdsDatabase {
     }
 
     public String saveOverview() {
-        return "INSERT OR REPLACE INTO JdsRefEntityOverview(EntityGuid,EntityId,DateCreated,DateModified) VALUES(?,?,?,?)";
+        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,ParentEntityGuid,DateCreated,DateModified,EntityId) VALUES(?,?,?,?,?)";
     }
 }

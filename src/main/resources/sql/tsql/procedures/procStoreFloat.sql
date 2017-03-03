@@ -1,7 +1,7 @@
-CREATE PROCEDURE procJdsStoreText(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value NVARCHAR(MAX))
+CREATE PROCEDURE procStoreFloat(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value REAL)
 AS
 BEGIN
-	MERGE JdsStoreText AS dest
+	MERGE JdsStoreFloat AS dest
 	USING (VALUES (@EntityGuid,  @FieldId, @Value)) AS src([EntityGuid],  [FieldId], [Value])
 	ON (src.EntityGuid = dest.EntityGuid AND src.FieldId = dest.FieldId)
 	WHEN MATCHED THEN

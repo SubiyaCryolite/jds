@@ -9,18 +9,18 @@ import java.sql.ResultSet;
 /**
  * Created by ifunga on 12/02/2017.
  */
-public class JdsPostgresDatabase extends JdsDatabase {
+public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
-    public JdsPostgresDatabase() {
+    protected JdsDatabaseTransactionalSql() {
         supportsStatements = true;
     }
 
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM information_schema.tables where table_name = ?";
+        String sql = "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, tableName.toLowerCase());
+            preparedStatement.setString(1, tableName);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -34,9 +34,9 @@ public class JdsPostgresDatabase extends JdsDatabase {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM pg_proc WHERE proname = ?";
+        String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, procedureName.toLowerCase());
+            preparedStatement.setString(1, procedureName);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -50,108 +50,104 @@ public class JdsPostgresDatabase extends JdsDatabase {
 
     @Override
     protected void createStoreText() {
-        createTableFromFile("sql/postgresql/createStoreText.sql");
+        createTableFromFile("sql/tsql/createStoreText.sql");
     }
 
     @Override
     protected void createStoreDateTime() {
-        createTableFromFile("sql/postgresql/createStoreDateTime.sql");
+        createTableFromFile("sql/tsql/createStoreDateTime.sql");
     }
 
     @Override
     protected void createStoreInteger() {
-        createTableFromFile("sql/postgresql/createStoreInteger.sql");
+        createTableFromFile("sql/tsql/createStoreInteger.sql");
     }
 
     @Override
     protected void createStoreFloat() {
-        createTableFromFile("sql/postgresql/createStoreFloat.sql");
+        createTableFromFile("sql/tsql/createStoreFloat.sql");
     }
 
     @Override
     protected void createStoreDouble() {
-        createTableFromFile("sql/postgresql/createStoreDouble.sql");
+        createTableFromFile("sql/tsql/createStoreDouble.sql");
     }
 
     @Override
     protected void createStoreLong() {
-        createTableFromFile("sql/postgresql/createStoreLong.sql");
+        createTableFromFile("sql/tsql/createStoreLong.sql");
     }
 
     @Override
     protected void createStoreTextArray() {
-        createTableFromFile("sql/postgresql/createStoreTextArray.sql");
+        createTableFromFile("sql/tsql/createStoreTextArray.sql");
     }
 
     @Override
     protected void createStoreDateTimeArray() {
-        createTableFromFile("sql/postgresql/createStoreDateTimeArray.sql");
+        createTableFromFile("sql/tsql/createStoreDateTimeArray.sql");
     }
 
     @Override
     protected void createStoreIntegerArray() {
-        createTableFromFile("sql/postgresql/createStoreIntegerArray.sql");
+        createTableFromFile("sql/tsql/createStoreIntegerArray.sql");
     }
 
     @Override
     protected void createStoreFloatArray() {
-        createTableFromFile("sql/postgresql/createStoreFloatArray.sql");
+        createTableFromFile("sql/tsql/createStoreFloatArray.sql");
     }
 
     @Override
     protected void createStoreDoubleArray() {
-        createTableFromFile("sql/postgresql/createStoreDoubleArray.sql");
+        createTableFromFile("sql/tsql/createStoreDoubleArray.sql");
     }
 
     @Override
     protected void createStoreLongArray() {
-        createTableFromFile("sql/postgresql/createStoreLongArray.sql");
+        createTableFromFile("sql/tsql/createStoreLongArray.sql");
     }
 
     @Override
     protected void createStoreEntities() {
-        createTableFromFile("sql/postgresql/createRefEntities.sql");
-    }
-
-    @Override
-    protected void createStoreEntitySubclass() {
-        createTableFromFile("sql/postgresql/createStoreEntitySubclass.sql");
+        createTableFromFile("sql/tsql/createRefEntities.sql");
     }
 
     @Override
     protected void createRefEnumValues() {
-        createTableFromFile("sql/postgresql/createRefEnumValues.sql");
+        createTableFromFile("sql/tsql/createRefEnumValues.sql");
     }
 
     @Override
     protected void createRefFields() {
-        createTableFromFile("sql/postgresql/createRefFields.sql");
+        createTableFromFile("sql/tsql/createRefFields.sql");
     }
 
     @Override
     protected void createRefFieldTypes() {
-        createTableFromFile("sql/postgresql/createRefFieldTypes.sql");
+        createTableFromFile("sql/tsql/createRefFieldTypes.sql");
     }
 
     @Override
     protected void createBindEntityFields() {
-        createTableFromFile("sql/postgresql/createBindEntityFields.sql");
+        createTableFromFile("sql/tsql/createBindEntityFields.sql");
     }
 
     @Override
     protected void createBindEntityEnums() {
-        createTableFromFile("sql/postgresql/createBindEntityEnums.sql");
+        createTableFromFile("sql/tsql/createBindEntityEnums.sql");
     }
 
     @Override
     protected void createRefEntityOverview() {
-        createTableFromFile("sql/postgresql/createRefEntityOverview.sql");
+        createTableFromFile("sql/tsql/createStoreEntityOverview.sql");
     }
 
     @Override
     protected void createRefOldFieldValues() {
-        createTableFromFile("sql/postgresql/createStoreOldFieldValues.sql");
+        createTableFromFile("sql/tsql/createStoreOldFieldValues.sql");
     }
+
 
     @Override
     protected void initExtra() {
@@ -161,32 +157,32 @@ public class JdsPostgresDatabase extends JdsDatabase {
         init(false, JdsTable.SaveFloat);
         init(false, JdsTable.SaveDouble);
         init(false, JdsTable.SaveDateTime);
-        init(false, JdsTable.SaveOverview);
+        init(false, JdsTable.SaveEntity);
     }
 
     @Override
     protected void createTableExtra(JdsTable jdsTable) {
         switch (jdsTable) {
             case SaveText:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreText.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreText.sql");
                 break;
             case SaveLong:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreLong.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreLong.sql");
                 break;
             case SaveInteger:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreInteger.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreInteger.sql");
                 break;
             case SaveFloat:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreFloat.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreFloat.sql");
                 break;
             case SaveDouble:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreDouble.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreDouble.sql");
                 break;
             case SaveDateTime:
-                createTableFromFile("sql/postgresql/procedures/procJdsStoreDateTime.sql");
+                createTableFromFile("sql/tsql/procedures/procStoreDateTime.sql");
                 break;
-            case SaveOverview:
-                createTableFromFile("sql/postgresql/procedures/procJdsRefEntityOverview.sql");
+            case SaveEntity:
+                createTableFromFile("sql/tsql/procedures/procStoreEntityOverview.sql");
                 break;
         }
     }

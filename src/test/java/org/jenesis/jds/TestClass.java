@@ -17,6 +17,14 @@ public class TestClass {
 
     private JdsDatabase jdsDatabase;
 
+
+    public TestClass()
+    {
+        initialiseSqlLiteBackend();
+        initialiseJdsClasses();
+        jdsDatabase.logEdits(false);
+    }
+
     /**
      * Setting up a simple database to use for our tests
      *
@@ -47,13 +55,15 @@ public class TestClass {
 //        jdsDatabase.init();
 //        jdsDatabase.logEdits(false);
         //
-//        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
-//        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\SMARTCARE40;databaseName=testjds", "sa", "m7r@n$4mAz");
-//        jdsDatabase.init();
-//        jdsDatabase.logEdits(false);
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
-        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jdstest", "postgres", "");
+        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
+        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\SMARTCARE40;databaseName=testjds", "sa", "m7r@n$4mAz");
         jdsDatabase.init();
+        //jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
+        //jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jdstest", "postgres", "");
+        //jdsDatabase.init();
+
+
+        jdsDatabase.logEdits(false);
     }
 
     /**
@@ -65,20 +75,9 @@ public class TestClass {
         JdsEntityClasses.map(SimpleAddressBook.class);
     }
 
-    /**
-     *
-     */
-    @Test
-    public void initialise() {
-        initialiseSqlLiteBackend();
-        initialiseJdsClasses();
-        jdsDatabase.logEdits(false);
-    }
-
     @Test
     public void testSaveAndLoad()
     {
-        initialise();
         testSaves();
         testLoads();
     }

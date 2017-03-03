@@ -251,9 +251,11 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
 ```
 ####Sqlite Example
 ```java
+    SQLiteConfig config = new SQLiteConfig();
+    config.enforceForeignKeys(true);
     String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
-    jdsDatabase.setConnectionProperties(databaseLocation); //Note the difference for SQLite. Its a file based database with different connection parameters
+    jdsDatabase.setConnectionProperties(databaseLocation, config.toProperties()); //You MUST enable foreign keys for SQLiteImplementation to work correctly
     jdsDatabase.init();
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 

@@ -13,6 +13,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 
 
 /**
@@ -28,8 +29,14 @@ public abstract class JdsDatabase {
     private boolean printOutput;
     private boolean propertiesSet;
     protected boolean supportsStatements;
+    private Properties properties;
 
     public final void init() {
+        init(true, JdsTable.RefEntities);
+        init(true, JdsTable.StoreEntityOverview);
+        init(true, JdsTable.RefEnumValues);
+        init(true, JdsTable.RefFields);
+        init(true, JdsTable.RefFieldTypes);
         init(true, JdsTable.StoreTextArray);
         init(true, JdsTable.StoreFloatArray);
         init(true, JdsTable.StoreIntegerArray);
@@ -42,15 +49,9 @@ public abstract class JdsDatabase {
         init(true, JdsTable.StoreLong);
         init(true, JdsTable.StoreDouble);
         init(true, JdsTable.StoreDateTime);
-        init(true, JdsTable.RefEntities);
-        init(true, JdsTable.StoreEntitySubclass);
-        init(true, JdsTable.RefEnumValues);
-        init(true, JdsTable.RefFields);
-        init(true, JdsTable.RefFieldTypes);
+        init(true, JdsTable.StoreOldFieldValues);
         init(true, JdsTable.BindEntityFields);
         init(true, JdsTable.BindEntityEnums);
-        init(true, JdsTable.RefEntityOverview);
-        init(true, JdsTable.StoreOldFieldValues);
         initExtra();
     }
 
@@ -64,14 +65,15 @@ public abstract class JdsDatabase {
         this.propertiesSet = true;
     }
 
-    public void setConnectionProperties(String url) {
+    public void setConnectionProperties(String url, java.util.Properties properties) {
         if (url == null)
             throw new RuntimeException("Please supply valid values. Nulls not permitted");
         this.url = url;
         this.propertiesSet = true;
+        this.properties = properties;
     }
 
-    public final Connection getConnection() throws ClassNotFoundException, SQLException {
+    public final synchronized Connection getConnection() throws ClassNotFoundException, SQLException {
         if (!propertiesSet)
             throw new RuntimeException("Please set connection properties before requesting a database connection");
         if (userName != null && passWord != null) {
@@ -79,18 +81,18 @@ public abstract class JdsDatabase {
             return DriverManager.getConnection(url, userName, passWord);
         } else {
             Class.forName("org.sqlite.JDBC");
-            return DriverManager.getConnection(url);
+            return DriverManager.getConnection(url, properties);
         }
     }
 
     public final static JdsDatabase getImplementation(JdsImplementation implementation) {
         switch (implementation) {
             case SQLITE:
-                return new JdsSqliteDatabase();
+                return new JdsDatabaseSqlite();
             case POSTGRES:
-                return new JdsPostgresDatabase();
+                return new JdsDatabasePostgres();
             case TSQL:
-                return new JdsTransactionalSqlDatabase();
+                return new JdsDatabaseTransactionalSql();
         }
         return null;
     }
@@ -142,9 +144,6 @@ public abstract class JdsDatabase {
             case RefEntities:
                 createStoreEntities();
                 break;
-            case StoreEntitySubclass:
-                createStoreEntitySubclass();
-                break;
             case RefEnumValues:
                 createRefEnumValues();
                 break;
@@ -160,7 +159,7 @@ public abstract class JdsDatabase {
             case BindEntityEnums:
                 createBindEntityEnums();
                 break;
-            case RefEntityOverview:
+            case StoreEntityOverview:
                 createRefEntityOverview();
                 break;
             case StoreOldFieldValues:
@@ -170,8 +169,8 @@ public abstract class JdsDatabase {
         createTableExtra(jdsTable);
     }
 
-    protected void createTableExtra(JdsTable jdsTable)
-    {}
+    protected void createTableExtra(JdsTable jdsTable) {
+    }
 
     private final boolean doesTableExist(String tableName) {
         int answer = tableExists(tableName);
@@ -240,7 +239,7 @@ public abstract class JdsDatabase {
 
     abstract void createStoreEntities();
 
-    abstract void createStoreEntitySubclass();
+    protected final void createStoreEntitySubclass(){}
 
     abstract void createRefEnumValues();
 
@@ -396,31 +395,31 @@ public abstract class JdsDatabase {
     }
 
     public String saveString() {
-        return "{call procJdsStoreText(?,?,?)}";
+        return "{call procStoreText(?,?,?)}";
     }
 
     public String saveLong() {
-        return "{call procJdsStoreLong(?,?,?)}";
+        return "{call procStoreLong(?,?,?)}";
     }
 
     public String saveDouble() {
-        return "{call procJdsStoreDouble(?,?,?)}";
+        return "{call procStoreDouble(?,?,?)}";
     }
 
     public String saveFloat() {
-        return "{call procJdsStoreFloat(?,?,?)}";
+        return "{call procStoreFloat(?,?,?)}";
     }
 
     public String saveInteger() {
-        return "{call procJdsStoreInteger(?,?,?)}";
+        return "{call procStoreInteger(?,?,?)}";
     }
 
     public String saveDateTime() {
-        return "{call procJdsStoreDateTime(?,?,?)}";
+        return "{call procStoreDateTime(?,?,?)}";
     }
 
     public String saveOverview() {
-        return "{call procJdsRefEntityOverview(?,?,?,?)}";
+        return "{call procStoreEntityOverview(?,?,?,?,?)}";
     }
 
     public final boolean supportsStatements() {

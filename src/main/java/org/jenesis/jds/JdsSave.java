@@ -5,7 +5,6 @@ import javafx.collections.ObservableList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -207,7 +206,7 @@ public class JdsSave {
         saveEnums(database, enumProperties);
         //objects and object arrays
         saveArrayObjects(database, objectArrayProperties);
-        saveObjects(database, objectProperties);
+        bindAndSaveInnerObjects(database, objectProperties);
     }
 
     public static void save(final JdsDatabase database, final int batchSize, final JdsEntity... entities) {
@@ -218,20 +217,22 @@ public class JdsSave {
         int record = 0;
         int recordTotal = overviews.size();
         try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement preparedStatement = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveOverview()) : connection.prepareStatement(jdsDatabase.saveOverview())) {
+             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveOverview()) : connection.prepareStatement(jdsDatabase.saveOverview())) {
             connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
-                preparedStatement.setString(1, overview.getEntityGuid());
-                preparedStatement.setLong(2, overview.getEntityCode());
-                preparedStatement.setTimestamp(3, Timestamp.valueOf(overview.getDateCreated()));
-                preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-                preparedStatement.addBatch();
+                //EntityGuid,ParentEntityGuid,DateCreated,DateModified,EntityId
+                upsert.setString(1, overview.getEntityGuid());
+                upsert.setString(2, overview.getParentEntityGuid());
+                upsert.setTimestamp(3, Timestamp.valueOf(overview.getDateCreated()));
+                upsert.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                upsert.setLong(5, overview.getEntityCode());
+                upsert.addBatch();
                 if (jdsDatabase.printOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
 
             }
-            preparedStatement.executeBatch();
+            upsert.executeBatch();
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -256,42 +257,24 @@ public class JdsSave {
      * @param jdsDatabase
      * @param objectProperties
      */
-    private static void saveObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
+    private static void bindAndSaveInnerObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         int record = 0;
         Collection<JdsEntity> collection = new ArrayList<>();
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsStoreEntitySubclass WHERE EntityGuid = ? AND SubEntityGuid = ? AND EntityId = ?";
-        String insertSql = "INSERT INTO JdsStoreEntitySubclass (EntityGuid,SubEntityGuid,EntityId) VALUES (?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement checkStatement = connection.prepareStatement(checkSql);
-             PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+        try {
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
                 String entityGuid = entry.getKey();
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
                 if (innerRecordSize == 0) continue;
                 for (Map.Entry<Long, SimpleObjectProperty<? extends JdsEntity>> recordEntry : entry.getValue().entrySet()) {
-                    long entityCode = recordEntry.getKey();
                     JdsEntity value = recordEntry.getValue().get();
                     if (value == null) continue;
-                    checkStatement.clearParameters();
-                    checkStatement.setString(1, entityGuid);
-                    checkStatement.setString(2, value.getEntityGuid());
-                    checkStatement.setLong(3, entityCode);
-                    ResultSet rs = checkStatement.executeQuery();
-                    while (rs.next()) {
-                        if (rs.getInt("Result") == 0) {
-                            insertStatement.clearParameters();
-                            insertStatement.setString(1, entityGuid);
-                            insertStatement.setString(2, value.getEntityGuid());
-                            insertStatement.setLong(3, entityCode);
-                            insertStatement.executeUpdate();
-                        }
-                    }
+                    value.setParentEntityGuid(entityGuid);
                     collection.add(value);
                     innerRecord++;
                     if (jdsDatabase.printOutput())
-                        System.out.printf("Saving inner Object [%s]. Object field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        System.out.printf("Binding inner Object [%s]. Object field [%s of %s]\n", record, innerRecord, innerRecordSize);
                 }
                 record++;
             }
@@ -590,7 +573,6 @@ public class JdsSave {
                         delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
-                        insert.clearParameters();
                         insert.setInt(1, index.get());
                         insert.setTimestamp(2, Timestamp.valueOf(value));
                         insert.setLong(3, fieldId);
@@ -700,12 +682,10 @@ public class JdsSave {
                             log.addBatch();
                         }
                         //delete
-                        delete.clearParameters();
                         delete.setLong(1, fieldId);
                         delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
-                        insert.clearParameters();
                         insert.setInt(1, index.get());
                         insert.setInt(2, value);
                         insert.setLong(3, fieldId);
@@ -814,12 +794,10 @@ public class JdsSave {
                             log.addBatch();
                         }
                         //delete
-                        delete.clearParameters();
                         delete.setLong(1, fieldId);
                         delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
-                        insert.clearParameters();
                         insert.setInt(1, index.get());
                         insert.setLong(2, value);
                         insert.setLong(3, fieldId);
@@ -872,12 +850,10 @@ public class JdsSave {
                             log.addBatch();
                         }
                         //delete
-                        delete.clearParameters();
                         delete.setLong(1, fieldId);
                         delete.setString(2, entityGuid);
                         delete.addBatch();
                         //insert
-                        insert.clearParameters();
                         insert.setInt(1, index.get());
                         insert.setString(2, value);
                         insert.setLong(3, fieldId);
@@ -962,49 +938,19 @@ public class JdsSave {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
      */
     private static void saveArrayObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
-        Collection<Jds_StoreEntitySubclass> bindings = new ArrayList<>();
         Collection<JdsEntity> jdsEntities = new ArrayList<>();
+        final IntegerProperty record = new SimpleIntegerProperty(0);
         for (Map.Entry<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
-            String upperEntityGuid = serviceCodeEntities.getKey();
+            String parentGuid = serviceCodeEntities.getKey();
             for (Map.Entry<Long, SimpleListProperty<? extends JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
-                long serviceCode = serviceCodeEntity.getKey();
                 serviceCodeEntity.getValue().filtered(jdsEntity -> jdsEntity != null).parallelStream().forEach(jdsEntity -> {
+                    record.set(record.get() + 1);
+                    jdsEntity.setParentEntityGuid(parentGuid);
                     jdsEntities.add(jdsEntity);
-                    Jds_StoreEntitySubclass binding = new Jds_StoreEntitySubclass();
-                    binding.setEntityGuid(upperEntityGuid);
-                    binding.setSubEntityGuid(jdsEntity.getEntityGuid());
-                    binding.setEntityId(serviceCode);
-                    bindings.add(binding);
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Binding object array. [%s]\n", record.get());
                 });
             }
-        }
-        int record = 0;
-        String deleteSql = "DELETE FROM JdsStoreEntitySubclass WHERE EntityGuid = ? AND SubEntityGuid = ? AND EntityId = ?";
-        String insertSql = "INSERT INTO JdsStoreEntitySubclass (EntityGuid,SubEntityGuid,EntityId) VALUES (?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement delete = connection.prepareStatement(deleteSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            connection.setAutoCommit(false);
-            for (Jds_StoreEntitySubclass bind : bindings) {
-                if (bind == null) continue;
-                if (bind.getEntityGuid() == null) continue;
-                delete.setString(1, bind.getEntityGuid());
-                delete.setString(2, bind.getSubEntityGuid());
-                delete.setLong(3, bind.getEntityId());
-                delete.addBatch();
-                record++;
-                insert.setString(1, bind.getEntityGuid());
-                insert.setString(2, bind.getSubEntityGuid());
-                insert.setLong(3, bind.getEntityId());
-                insert.addBatch();
-                if (jdsDatabase.printOutput())
-                    System.out.printf("Binding object array. [%s]\n", record);
-            }
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
         }
         if (jdsEntities.size() == 0) return;
         save(jdsDatabase, -1, jdsEntities);

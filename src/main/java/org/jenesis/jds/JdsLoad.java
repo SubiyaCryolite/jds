@@ -47,9 +47,9 @@ public class JdsLoad {
         String sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
-        String sqlEmbeddedAndArrayObjects = String.format("SELECT EntityGuid, SubEntityGuid, EntityId FROM JdsStoreEntitySubclass WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlEmbeddedAndArrayObjects = String.format("SELECT EntityGuid, ParentEntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE ParentEntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         //overviews
-        String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsRefEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlOverviews = String.format("SELECT EntityGuid, ParentEntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
@@ -118,109 +118,115 @@ public class JdsLoad {
 
     private static void populateFloatArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String entityGuid = resultSet.getString("EntityGuid");
-            float value = resultSet.getFloat("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.floatArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
-                property.add(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                float value = resultSet.getFloat("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.floatArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
+                    property.add(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateDoubleArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            double value = resultSet.getDouble("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.doubleArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
-                property.add(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                double value = resultSet.getDouble("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.doubleArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
+                    property.add(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateLongArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            long value = resultSet.getLong("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.longArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
-                property.add(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                long value = resultSet.getLong("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.longArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
+                    property.add(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateDateTimeArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            Timestamp value = resultSet.getTimestamp("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.dateTimeArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
-                property.add(value.toLocalDateTime());
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                Timestamp value = resultSet.getTimestamp("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.dateTimeArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
+                    property.add(value.toLocalDateTime());
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateStringArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            String value = resultSet.getString("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.stringArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
-                property.add(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                String value = resultSet.getString("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.stringArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
+                    property.add(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateIntegerArraysAndEnums(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            int value = resultSet.getInt("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.integerArrayProperties.containsKey(fieldId)) {
-                SimpleListProperty<Integer> property = currentEntity.integerArrayProperties.get(fieldId);
-                property.add(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
-            } else {
-                Optional<JdsFieldEnum> fx = currentEntity.enumProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
-                if (fx.isPresent()) {
-                    JdsFieldEnum fe = fx.get();
-                    SimpleListProperty<String> property = currentEntity.enumProperties.get(fe);
-                    property.add(fe.getValue(value));
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                int value = resultSet.getInt("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.integerArrayProperties.containsKey(fieldId)) {
+                    SimpleListProperty<Integer> property = currentEntity.integerArrayProperties.get(fieldId);
+                    property.add(value);
                     currentEntity.allFields.get(fieldId).setChanged(false);
+                } else {
+                    Optional<JdsFieldEnum> fx = currentEntity.enumProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
+                    if (fx.isPresent()) {
+                        JdsFieldEnum fe = fx.get();
+                        SimpleListProperty<String> property = currentEntity.enumProperties.get(fe);
+                        property.add(fe.getValue(value));
+                        currentEntity.allFields.get(fieldId).setChanged(false);
+                    }
                 }
             }
         }
@@ -230,37 +236,40 @@ public class JdsLoad {
         Queue<String> innerEntityGuids = new ConcurrentLinkedQueue<>();
         Queue<JdsEntity> innerObjects = new ConcurrentLinkedQueue<>();
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String entityGuid = resultSet.getString("EntityGuid");
-            String subEntityGuid = resultSet.getString("SubEntityGuid");
-            long entityId = resultSet.getLong("EntityId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
-            if (currentEntity == null) continue;
-            try {
-                if (currentEntity.objectArrayProperties.containsKey(entityId)) {
-                    SimpleListProperty<JdsEntity> propertyList = (SimpleListProperty<JdsEntity>) currentEntity.objectArrayProperties.get(entityId);
-                    Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
-                    JdsEntity action = jdsEntityClass.newInstance();
-                    //
-                    action.setEntityGuid(subEntityGuid);
-                    innerEntityGuids.add(subEntityGuid);
-                    propertyList.get().add(action);
-                    innerObjects.add(action);
-                    currentEntity.allObjects.get(entityId).setChanged(false);
-                } else if (currentEntity.objectProperties.containsKey(entityId)) {
-                    SimpleObjectProperty<JdsEntity> property = ((SimpleObjectProperty<JdsEntity>) currentEntity.objectProperties.get(entityId));
-                    Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
-                    JdsEntity action = jdsEntityClass.newInstance();
-                    //
-                    action.setEntityGuid(subEntityGuid);
-                    innerEntityGuids.add(subEntityGuid);
-                    property.set(action);
-                    innerObjects.add(action);
-                    currentEntity.allObjects.get(entityId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String parentEntityGuid = resultSet.getString("ParentEntityGuid");
+                String entityGuid = resultSet.getString("EntityGuid");
+                long entityId = resultSet.getLong("EntityId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, parentEntityGuid);
+                if (currentEntity == null) continue;
+                try {
+                    if (currentEntity.objectArrayProperties.containsKey(entityId)) {
+                        SimpleListProperty<JdsEntity> propertyList = (SimpleListProperty<JdsEntity>) currentEntity.objectArrayProperties.get(entityId);
+                        Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
+                        JdsEntity action = jdsEntityClass.newInstance();
+                        //
+                        action.setEntityGuid(entityGuid);
+                        action.setParentEntityGuid(parentEntityGuid);
+                        innerEntityGuids.add(entityGuid);
+                        propertyList.get().add(action);
+                        innerObjects.add(action);
+                        currentEntity.allObjects.get(entityId).setChanged(false);
+                    } else if (currentEntity.objectProperties.containsKey(entityId)) {
+                        SimpleObjectProperty<JdsEntity> property = ((SimpleObjectProperty<JdsEntity>) currentEntity.objectProperties.get(entityId));
+                        Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
+                        JdsEntity action = jdsEntityClass.newInstance();
+                        //
+                        action.setEntityGuid(entityGuid);
+                        action.setParentEntityGuid(parentEntityGuid);
+                        innerEntityGuids.add(entityGuid);
+                        property.set(action);
+                        innerObjects.add(action);
+                        currentEntity.allObjects.get(entityId).setChanged(false);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace(System.err);
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace(System.err);
             }
         }
         List<List<String>> batches = createProcessingBatches(innerEntityGuids);
@@ -298,133 +307,142 @@ public class JdsLoad {
 
     private static void populateOverviews(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
-            Timestamp dateModified = resultSet.getTimestamp("DateModified");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            currentEntity.setDateModified(dateModified.toLocalDateTime());
-            currentEntity.setDateCreated(dateCreated.toLocalDateTime());
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                String parentEntityGuid = resultSet.getString("ParentEntityGuid");
+                Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
+                Timestamp dateModified = resultSet.getTimestamp("DateModified");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                currentEntity.setParentEntityGuid(parentEntityGuid);
+                currentEntity.setDateModified(dateModified.toLocalDateTime());
+                currentEntity.setDateCreated(dateCreated.toLocalDateTime());
+            }
         }
     }
 
     private static void populateDateTime(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            Timestamp value = resultSet.getTimestamp("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.dateProperties.containsKey(fieldId)) {
-                currentEntity.dateProperties.get(fieldId).set(value.toLocalDateTime());
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                Timestamp value = resultSet.getTimestamp("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.dateProperties.containsKey(fieldId)) {
+                    currentEntity.dateProperties.get(fieldId).set(value.toLocalDateTime());
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateDouble(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            double value = resultSet.getDouble("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.doubleProperties.containsKey(fieldId)) {
-                currentEntity.doubleProperties.get(fieldId).set(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                double value = resultSet.getDouble("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.doubleProperties.containsKey(fieldId)) {
+                    currentEntity.doubleProperties.get(fieldId).set(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateInteger(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            int value = resultSet.getInt("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.integerProperties.containsKey(fieldId)) {
-                currentEntity.integerProperties.get(fieldId).set(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                int value = resultSet.getInt("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.integerProperties.containsKey(fieldId)) {
+                    currentEntity.integerProperties.get(fieldId).set(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateFloat(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            float value = resultSet.getFloat("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.floatProperties.containsKey(fieldId)) {
-                currentEntity.floatProperties.get(fieldId).set(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                float value = resultSet.getFloat("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.floatProperties.containsKey(fieldId)) {
+                    currentEntity.floatProperties.get(fieldId).set(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateLong(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            long value = resultSet.getLong("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.longProperties.containsKey(fieldId)) {
-                currentEntity.longProperties.get(fieldId).set(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                long value = resultSet.getLong("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.longProperties.containsKey(fieldId)) {
+                    currentEntity.longProperties.get(fieldId).set(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
     }
 
     private static void populateText(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         JdsEntity currentEntity = null;
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            String EntityGuid = resultSet.getString("EntityGuid");
-            String value = resultSet.getString("Value");
-            long fieldId = resultSet.getLong("FieldId");
-            currentEntity = optimalEntityLookup(jdsEntities, currentEntity, EntityGuid);
-            if (currentEntity == null) continue;
-            if (currentEntity.stringProperties.containsKey(fieldId)) {
-                currentEntity.stringProperties.get(fieldId).set(value);
-                currentEntity.allFields.get(fieldId).setChanged(false);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                String value = resultSet.getString("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
+                if (currentEntity == null) continue;
+                if (currentEntity.stringProperties.containsKey(fieldId)) {
+                    currentEntity.stringProperties.get(fieldId).set(value);
+                    currentEntity.allFields.get(fieldId).setChanged(false);
+                }
             }
         }
-        resultSet.close();
     }
 
     private static void prepareActionBatches(final JdsDatabase jdsDatabase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
         int batchIndex = 0;
         int batchContents = 0;
         //if no ids supplied we are looking for all instances of the entity
-        String sql1 = "SELECT EntityGuid FROM JdsRefEntityOverview WHERE EntityId = ?";
+        String sql1 = "SELECT EntityGuid FROM JdsStoreEntityOverview WHERE EntityId = ?";
         try (Connection connection = jdsDatabase.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
             if (suppliedEntityGuids.length == 0) {
                 preparedStatement.setLong(1, code);
-                ResultSet rs = preparedStatement.executeQuery();
-                while (rs.next()) {
-                    if (batchContents == batchSize) {
-                        batchIndex++;
-                        batchContents = 0;
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    while (rs.next()) {
+                        if (batchContents == batchSize) {
+                            batchIndex++;
+                            batchContents = 0;
+                        }
+                        if (batchContents == 0)
+                            allBatches.add(new ArrayList<>());
+                        allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
+                        batchContents++;
                     }
-                    if (batchContents == 0)
-                        allBatches.add(new ArrayList<>());
-                    allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
-                    batchContents++;
                 }
 
             } else {

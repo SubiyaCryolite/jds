@@ -16,22 +16,21 @@ public enum JdsTable {
     StoreLong("JdsStoreLong"),
     StoreDouble("JdsStoreDouble"),
     StoreDateTime("JdsStoreDateTime"),
-    StoreEntitySubclass("JdsStoreEntitySubclass"),
     StoreOldFieldValues("JdsStoreOldFieldValues"),
+    StoreEntityOverview("JdsStoreEntityOverview"),
     RefEntities("JdsRefEntities"),
     RefEnumValues("JdsRefEnumValues"),
     RefFields("JdsRefFields"),
     RefFieldTypes("JdsRefFieldTypes"),
-    RefEntityOverview("JdsRefEntityOverview"),
     BindEntityFields("JdsBindEntityFields"),
     BindEntityEnums("JdsBindEntityEnums"),
-    SaveText("procJdsStoreText"),
-    SaveFloat("procJdsStoreFloat"),
-    SaveInteger("procJdsStoreInteger"),
-    SaveLong("procJdsStoreLong"),
-    SaveDouble("procJdsStoreDouble"),
-    SaveDateTime("procJdsStoreDateTime"),
-    SaveOverview("procJdsRefEntityOverview");
+    SaveText("procStoreText"),
+    SaveFloat("procStoreFloat"),
+    SaveInteger("procStoreInteger"),
+    SaveLong("procStoreLong"),
+    SaveDouble("procStoreDouble"),
+    SaveDateTime("procStoreDateTime"),
+    SaveEntity("procStoreEntityOverview");
 
     private String name;
 
