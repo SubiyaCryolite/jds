@@ -19,7 +19,7 @@ public class TestClass {
     private JdsDatabase jdsDatabase;
 
     public TestClass() {
-        initialiseSqlLiteBackend();
+        initialiseTSqlBackend();
         initialiseJdsClasses();
         jdsDatabase.logEdits(false);
     }
@@ -36,14 +36,14 @@ public class TestClass {
 
     public void initialisePostgeSqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
-        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/testjds", "postgres", "");
+        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jdstest", "postgres", "");
         jdsDatabase.init();
         jdsDatabase.logEdits(false);
     }
 
     public void initialiseTSqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
-        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\SMARTCARE40;databaseName=testjds", "sa", "m7r@n$4mAz");
+        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jdstest", "sa", "p@nkP#55W0rd");
         jdsDatabase.init();
         jdsDatabase.logEdits(false);
     }
