@@ -13,6 +13,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     protected JdsDatabaseTransactionalSql() {
         supportsStatements = true;
+        deleteAsFunction = true;
     }
 
     @Override

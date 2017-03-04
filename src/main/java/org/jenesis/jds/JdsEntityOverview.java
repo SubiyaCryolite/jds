@@ -19,7 +19,7 @@ public class JdsEntityOverview {
 
     JdsEntityOverview() {
         this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
-        this.parentEntityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
+        this.parentEntityGuid = new SimpleStringProperty(null);//default should be null
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
         this.dateModified = new SimpleObjectProperty<>(LocalDateTime.now());
         this.serviceCode = new SimpleLongProperty();

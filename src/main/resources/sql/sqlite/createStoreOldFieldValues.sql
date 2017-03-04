@@ -8,5 +8,6 @@ CREATE TABLE JdsStoreOldFieldValues(
     FloatValue			REAL,
     DoubleValue			DOUBLE,
     LongValue			INTEGER,
-    DateTimeValue		TIMESTAMP
+    DateTimeValue		TIMESTAMP,
+    FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
 );

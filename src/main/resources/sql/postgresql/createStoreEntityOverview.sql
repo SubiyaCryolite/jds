@@ -6,5 +6,5 @@ CREATE TABLE JdsStoreEntityOverview
     DateModified        TIMESTAMP,
     EntityId            BIGINT,
     PRIMARY KEY         (EntityGuid),
-    FOREIGN KEY (ParentEntityGuid) REFERENCES JdsRefEntityOverview(EntityGuid) ON DELETE CASCADE
+    FOREIGN KEY (ParentEntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
 );

@@ -28,7 +28,7 @@ public abstract class JdsDatabase {
     private boolean logEdits;
     private boolean printOutput;
     private boolean propertiesSet;
-    protected boolean supportsStatements;
+    protected boolean supportsStatements, deleteAsFunction;
     private Properties properties;
 
     public final void init() {
