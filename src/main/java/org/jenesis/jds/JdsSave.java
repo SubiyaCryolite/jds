@@ -910,15 +910,22 @@ public class JdsSave {
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
         final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
         final IntegerProperty record = new SimpleIntegerProperty(0);
+        final BooleanProperty changesMade = new SimpleBooleanProperty(false);
         for (Map.Entry<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
             String parentGuid = serviceCodeEntities.getKey();
             for (Map.Entry<Long, SimpleListProperty<? extends JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
                 record.set(0);
-                JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
-                parentEntityBinding.parentGuid = parentGuid;
-                parentEntityBinding.EntityId = serviceCodeEntity.getKey();
-                parentEntityBindings.add(parentEntityBinding);
+                changesMade.set(false);
                 serviceCodeEntity.getValue().stream().filter(jdsEntity -> jdsEntity != null).forEach(jdsEntity -> {
+                    if (!changesMade.get()) {
+                        //only clear if changes are made. else you wipe out old bindings regardless
+                        changesMade.set(true);
+                        JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
+                        parentEntityBinding.parentGuid = parentGuid;
+                        parentEntityBinding.EntityId = serviceCodeEntity.getKey();
+                        parentEntityBindings.add(parentEntityBinding);
+
+                    }
                     JdsParentChildBinding parentChildBinding = new JdsParentChildBinding();
                     parentChildBinding.parentGuid = parentGuid;
                     parentChildBinding.childGuid = jdsEntity.getEntityGuid();
@@ -964,6 +971,7 @@ public class JdsSave {
     private static void bindAndSaveInnerObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
+        final BooleanProperty changesMade = new SimpleBooleanProperty(false);
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
         final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
@@ -971,17 +979,21 @@ public class JdsSave {
             String parentGuid = entry.getKey();
             for (Map.Entry<Long, SimpleObjectProperty<? extends JdsEntity>> recordEntry : entry.getValue().entrySet()) {
                 record.set(0);
-                JdsParentEntityBinding parentType = new JdsParentEntityBinding();
-                parentType.parentGuid = parentGuid;
-                parentType.EntityId = recordEntry.getKey();
-                parentEntityBindings.add(parentType);
                 JdsEntity jdsEntity = recordEntry.getValue().get();
+                changesMade.set(false);
                 if (jdsEntity != null) {
+                    if (!changesMade.get()) {
+                        changesMade.set(true);
+                        JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
+                        parentEntityBinding.parentGuid = parentGuid;
+                        parentEntityBinding.EntityId = recordEntry.getKey();
+                        parentEntityBindings.add(parentEntityBinding);
+                    }
                     jdsEntities.add(jdsEntity);
-                    JdsParentChildBinding jdsParentChildBinding = new JdsParentChildBinding();
-                    jdsParentChildBinding.parentGuid = parentGuid;
-                    jdsParentChildBinding.childGuid = jdsEntity.getEntityGuid();
-                    parentChildBindings.add(jdsParentChildBinding);
+                    JdsParentChildBinding parentChildBinding = new JdsParentChildBinding();
+                    parentChildBinding.parentGuid = parentGuid;
+                    parentChildBinding.childGuid = jdsEntity.getEntityGuid();
+                    parentChildBindings.add(parentChildBinding);
                     record.set(record.get() + 1);
                     System.out.printf("Binding object %s\n", record.get());
                 }
