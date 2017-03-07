@@ -1,6 +1,8 @@
 package org.jenesis.jds;
 
-import org.jenesis.jds.enums.JdsTable;
+import org.jenesis.jds.enums.JdsEnumTable;
+import org.jenesis.jds.enums.JdsImplementation;
+import org.jenesis.jds.enums.JdsSqlType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +16,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
     protected JdsDatabaseTransactionalSql() {
         supportsStatements = true;
         deleteAsFunction = true;
+        implementation= JdsImplementation.TSQL;
     }
 
     @Override
@@ -35,9 +38,27 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
+        String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName);
+            preparedStatement.setString(2, "P");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
+        return toReturn;
+    }
+
+    public int triggerExists(String triggerName) {
+        int toReturn = 0;
+        String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, triggerName);
+            preparedStatement.setString(2, "TR");
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -149,21 +170,30 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
         createTableFromFile("sql/tsql/createStoreOldFieldValues.sql");
     }
 
-
     @Override
-    protected void initExtra() {
-        init(false, JdsTable.SaveText);
-        init(false, JdsTable.SaveLong);
-        init(false, JdsTable.SaveInteger);
-        init(false, JdsTable.SaveFloat);
-        init(false, JdsTable.SaveDouble);
-        init(false, JdsTable.SaveDateTime);
-        init(false, JdsTable.SaveEntity);
+    protected void createStoreEntityBinding() {
+        createTableFromFile("sql/tsql/createStoreEntityBinding.sql");
     }
 
     @Override
-    protected void createTableExtra(JdsTable jdsTable) {
-        switch (jdsTable) {
+    protected void initExtra() {
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveText);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveLong);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapClassName);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
+        init(JdsSqlType.TRIGGER, JdsEnumTable.CascadeEntityBinding);
+    }
+
+    @Override
+    protected void initialiseExtra(JdsEnumTable jdsEnumTable) {
+        switch (jdsEnumTable) {
             case SaveText:
                 createTableFromFile("sql/tsql/procedures/procStoreText.sql");
                 break;
@@ -184,6 +214,21 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
                 break;
             case SaveEntity:
                 createTableFromFile("sql/tsql/procedures/procStoreEntityOverview.sql");
+                break;
+            case MapEntityFields:
+                createTableFromFile("sql/tsql/procedures/procBindEntityFields.sql");
+                break;
+            case MapEntityEnums:
+                createTableFromFile("sql/tsql/procedures/procBindEntityEnums.sql");
+                break;
+            case MapClassName:
+                createTableFromFile("sql/tsql/procedures/procRefEntities.sql");
+                break;
+            case MapEnumValues:
+                createTableFromFile("sql/tsql/procedures/procRefEnumValues.sql");
+                break;
+            case CascadeEntityBinding:
+                createTableFromFile("sql/tsql/triggers/createEntityBindingCascade.sql");
                 break;
         }
     }

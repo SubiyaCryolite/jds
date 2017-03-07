@@ -1,5 +1,5 @@
 CREATE TABLE JdsRefFieldTypes(
-     TypeId         INTEGER,
+     TypeId         BIGINT,
      TypeName       NVARCHAR(MAX),
      PRIMARY KEY    (TypeId)
 );

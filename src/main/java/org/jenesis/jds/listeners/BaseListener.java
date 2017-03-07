@@ -1,7 +1,7 @@
 package org.jenesis.jds.listeners;
 
 /**
- * Created by ifung on 25/02/2017.
+ * Created by ifunga on 25/02/2017.
  */
 public abstract class BaseListener {
     private boolean changed;

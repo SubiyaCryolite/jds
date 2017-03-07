@@ -223,14 +223,12 @@ public class JdsSave {
                 record++;
                 //EntityGuid,ParentEntityGuid,DateCreated,DateModified,EntityId
                 upsert.setString(1, overview.getEntityGuid());
-                upsert.setString(2, overview.getParentEntityGuid());
-                upsert.setTimestamp(3, Timestamp.valueOf(overview.getDateCreated()));
-                upsert.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-                upsert.setLong(5, overview.getEntityCode());
+                upsert.setTimestamp(2, Timestamp.valueOf(overview.getDateCreated()));
+                upsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                upsert.setLong(4, overview.getEntityCode());
                 upsert.addBatch();
                 if (jdsDatabase.printOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
-
             }
             upsert.executeBatch();
             connection.commit();
@@ -251,38 +249,6 @@ public class JdsSave {
             if (jdsDatabase.printOutput())
                 System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
         }
-    }
-
-    /**
-     * @param jdsDatabase
-     * @param objectProperties
-     */
-    private static void bindAndSaveInnerObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
-        if (objectProperties.size() == 0) return;//prevent stack overflow :)
-        int record = 0;
-        Collection<JdsEntity> collection = new ArrayList<>();
-        try {
-            for (Map.Entry<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
-                String entityGuid = entry.getKey();
-                int innerRecord = 0;
-                int innerRecordSize = entry.getValue().size();
-                if (innerRecordSize == 0) continue;
-                for (Map.Entry<Long, SimpleObjectProperty<? extends JdsEntity>> recordEntry : entry.getValue().entrySet()) {
-                    JdsEntity value = recordEntry.getValue().get();
-                    if (value == null) continue;
-                    value.setParentEntityGuid(entityGuid);
-                    collection.add(value);
-                    innerRecord++;
-                    if (jdsDatabase.printOutput())
-                        System.out.printf("Binding inner Object [%s]. Object field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                }
-                record++;
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
-        if (collection.size() == 0) return;
-        save(jdsDatabase, -1, collection);
     }
 
     /**
@@ -936,23 +902,120 @@ public class JdsSave {
      * @param jdsDatabase
      * @param objectArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]->[3,4]
+     * @implNote For the love of Christ don't use parallel stream here
      */
     private static void saveArrayObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
-        Collection<JdsEntity> jdsEntities = new ArrayList<>();
+        if (objectArrayProperties.size() == 0) return;
+        final Collection<JdsEntity> jdsEntities = new ArrayList<>();
+        final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
+        final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
         final IntegerProperty record = new SimpleIntegerProperty(0);
         for (Map.Entry<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
             String parentGuid = serviceCodeEntities.getKey();
             for (Map.Entry<Long, SimpleListProperty<? extends JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
-                serviceCodeEntity.getValue().filtered(jdsEntity -> jdsEntity != null).parallelStream().forEach(jdsEntity -> {
-                    record.set(record.get() + 1);
-                    jdsEntity.setParentEntityGuid(parentGuid);
+                record.set(0);
+                JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
+                parentEntityBinding.parentGuid = parentGuid;
+                parentEntityBinding.EntityId = serviceCodeEntity.getKey();
+                parentEntityBindings.add(parentEntityBinding);
+                serviceCodeEntity.getValue().stream().filter(jdsEntity -> jdsEntity != null).forEach(jdsEntity -> {
+                    JdsParentChildBinding parentChildBinding = new JdsParentChildBinding();
+                    parentChildBinding.parentGuid = parentGuid;
+                    parentChildBinding.childGuid = jdsEntity.getEntityGuid();
+                    parentChildBindings.add(parentChildBinding);
                     jdsEntities.add(jdsEntity);
-                    if (jdsDatabase.printOutput())
-                        System.out.printf("Binding object array. [%s]\n", record.get());
+                    record.set(record.get() + 1);
+                    System.out.printf("Binding array object %s\n", record.get());
                 });
             }
         }
-        if (jdsEntities.size() == 0) return;
+        //save children first
         save(jdsDatabase, -1, jdsEntities);
+
+        //bind children below
+        try (Connection connection = jdsDatabase.getConnection();
+             PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
+             PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
+            connection.setAutoCommit(false);
+            for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
+                clearOldBindings.setString(1, parentEntityBinding.parentGuid);
+                clearOldBindings.setLong(2, parentEntityBinding.EntityId);
+                clearOldBindings.addBatch();
+            }
+            for (JdsEntity jdsEntity : jdsEntities) {
+                writeNewBindings.setString(1, getParent(parentChildBindings, jdsEntity.getEntityGuid()));
+                writeNewBindings.setString(2, jdsEntity.getEntityGuid());
+                writeNewBindings.setLong(3, jdsEntity.getEntityCode());
+                writeNewBindings.addBatch();
+            }
+            int[] res2 = clearOldBindings.executeBatch();
+            int[] res3 = writeNewBindings.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * @param jdsDatabase
+     * @param objectProperties
+     * @implNote For the love of Christ don't use parallel stream here
+     */
+    private static void bindAndSaveInnerObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
+        if (objectProperties.size() == 0) return;//prevent stack overflow :)
+        final IntegerProperty record = new SimpleIntegerProperty(0);
+        final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
+        final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
+        final Collection<JdsEntity> jdsEntities = new ArrayList<>();
+        for (Map.Entry<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
+            String parentGuid = entry.getKey();
+            for (Map.Entry<Long, SimpleObjectProperty<? extends JdsEntity>> recordEntry : entry.getValue().entrySet()) {
+                record.set(0);
+                JdsParentEntityBinding parentType = new JdsParentEntityBinding();
+                parentType.parentGuid = parentGuid;
+                parentType.EntityId = recordEntry.getKey();
+                parentEntityBindings.add(parentType);
+                JdsEntity jdsEntity = recordEntry.getValue().get();
+                if (jdsEntity != null) {
+                    jdsEntities.add(jdsEntity);
+                    JdsParentChildBinding jdsParentChildBinding = new JdsParentChildBinding();
+                    jdsParentChildBinding.parentGuid = parentGuid;
+                    jdsParentChildBinding.childGuid = jdsEntity.getEntityGuid();
+                    parentChildBindings.add(jdsParentChildBinding);
+                    record.set(record.get() + 1);
+                    System.out.printf("Binding object %s\n", record.get());
+                }
+            }
+        }
+        //save children first
+        save(jdsDatabase, -1, jdsEntities);
+
+        //bind children below
+        try (Connection connection = jdsDatabase.getConnection();
+             PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
+             PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
+            connection.setAutoCommit(false);
+            for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
+                clearOldBindings.setString(1, parentEntityBinding.parentGuid);
+                clearOldBindings.setLong(2, parentEntityBinding.EntityId);
+                clearOldBindings.addBatch();
+            }
+            for (JdsEntity jdsEntity : jdsEntities) {
+                writeNewBindings.setString(1, getParent(parentChildBindings, jdsEntity.getEntityGuid()));
+                writeNewBindings.setString(2, jdsEntity.getEntityGuid());
+                writeNewBindings.setLong(3, jdsEntity.getEntityCode());
+                writeNewBindings.addBatch();
+            }
+            int[] res2 = clearOldBindings.executeBatch();
+            int[] res3 = writeNewBindings.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    private static String getParent(final Collection<JdsParentChildBinding> jdsParentChildBindings, final String childGuid) {
+        Optional<JdsParentChildBinding> any = jdsParentChildBindings.stream().filter(parentChildBinding -> parentChildBinding.childGuid.equals(childGuid)).findAny();
+        return any.isPresent() ? any.get().parentGuid : "";
     }
 }

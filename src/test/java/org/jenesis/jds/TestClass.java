@@ -19,38 +19,9 @@ public class TestClass {
     private JdsDatabase jdsDatabase;
 
     public TestClass() {
-        initialiseTSqlBackend();
         initialiseJdsClasses();
-        jdsDatabase.logEdits(false);
     }
 
-    public void initialiseSqlLiteBackend() {
-        String url = "jdbc:sqlite:" + getDatabaseFile();
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-        jdsDatabase.setConnectionProperties(url, sqLiteConfig.toProperties());
-        jdsDatabase.init();
-        jdsDatabase.logEdits(false);
-    }
-
-    public void initialisePostgeSqlBackend() {
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
-        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jdstest", "postgres", "");
-        jdsDatabase.init();
-        jdsDatabase.logEdits(false);
-    }
-
-    public void initialiseTSqlBackend() {
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
-        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jdstest", "sa", "p@nkP#55W0rd");
-        jdsDatabase.init();
-        jdsDatabase.logEdits(false);
-    }
-
-    /**
-     * Initialise JDS Entity Classes
-     */
     @Test
     public void initialiseJdsClasses() {
         JdsEntityClasses.map(SimpleAddress.class);
@@ -58,9 +29,59 @@ public class TestClass {
     }
 
     @Test
-    public void testSaveAndLoad() {
+    public void initialiseSqlLiteBackend() {
+        String url = "jdbc:sqlite:" + getDatabaseFile();
+        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
+        jdsDatabase.setConnectionProperties(url, sqLiteConfig.toProperties());
+        jdsDatabase.init();
+    }
+
+    @Test
+    public void initialisePostgeSqlBackend() {
+        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
+        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
+        jdsDatabase.init();
+    }
+
+    @Test
+    public void initialiseTSqlBackend() {
+        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
+        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
+        jdsDatabase.init();
+    }
+
+    @Test
+    public void saveAndLoad() {
         testSaves();
         testLoads();
+    }
+
+    @Test
+    public void saveAndLoadPostreSqlImplementation() {
+        initialisePostgeSqlBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadTsqlImplementation() {
+        initialiseTSqlBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadSqliteImplementation() {
+        initialiseSqlLiteBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadAllImplementations()
+    {
+        saveAndLoadSqliteImplementation();
+        saveAndLoadTsqlImplementation();
+        saveAndLoadPostreSqlImplementation();
     }
 
     /**
@@ -117,7 +138,7 @@ public class TestClass {
     }
 
     public String getDatabaseFile() {
-        File path = new File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "database_001d.db");
+        File path = new File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db");
         if (!path.exists()) {
             File directory = path.getParentFile();
             if (!directory.exists()) {
@@ -125,7 +146,7 @@ public class TestClass {
             }
         }
         String absolutePath = path.getAbsolutePath();
-        System.err.printf("You test database is available here [%s]\n", absolutePath);
+        System.err.printf("You're test database is available here [%s]\n", absolutePath);
         return absolutePath;
     }
 }

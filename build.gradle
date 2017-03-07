@@ -16,10 +16,10 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.+'
+    testCompile 'junit:junit:4.12'
     testCompile 'org.xerial:sqlite-jdbc:3.16.1'
     testCompile 'com.microsoft.sqlserver:sqljdbc4:4.0'
-    testCompile 'org.postgresql:postgresql:9.4.1212'
+    testCompile 'org.postgresql:postgresql:42.0.0'
 }
 
 jar {
@@ -27,7 +27,7 @@ jar {
     manifest {
         attributes(
                 "Implementation-Title": "Jenesis Data Store",
-                "Implementation-Version": "alpha 0.17.02.18"
+                "Implementation-Version": "alpha 0.2017.03.04"
         )
     }
 }

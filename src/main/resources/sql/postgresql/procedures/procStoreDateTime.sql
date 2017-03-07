@@ -3,7 +3,6 @@ RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreDateTime(EntityGuid, FieldId, Value)
     VALUES (pEntityGuid, pFieldId, pValue)
-    ON conflict (EntityGuid,FieldId) do
-    UPDATE SET Value = pValue;
+    ON CONFLICT (EntityGuid,FieldId) DO UPDATE SET Value = pValue;
 END;
 $$ LANGUAGE plpgsql;

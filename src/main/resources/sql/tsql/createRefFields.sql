@@ -1,5 +1,5 @@
 CREATE TABLE JdsRefFields(
-     FieldId        INTEGER,
+     FieldId        BIGINT,
      FieldName      NVARCHAR(MAX),
      PRIMARY KEY    (FieldId)
 );

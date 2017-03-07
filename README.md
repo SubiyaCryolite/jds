@@ -18,7 +18,7 @@ The API currently supports the following Relational Databases, each of which has
 |-------|-----------|-----------|-----------|
 | PostgreSQL 				| 9.5    		| [Official Site](https://www.postgresql.org/) 		| [org.postgresql](https://mvnrepository.com/artifact/org.postgresql/postgresql)|
 | Microsoft SQL Server	| 2008 R2		| [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 		| [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
-| SQLite 				| Windows 10 	| [Official Site](https://www.sqlite.org/)		| [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
+| SQLite 				| 3.16.1 	| [Official Site](https://www.sqlite.org/)		| [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
 
 Note: I plan on adding MySQL support soon.
 

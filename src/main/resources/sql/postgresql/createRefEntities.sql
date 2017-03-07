@@ -1,5 +1,5 @@
 CREATE TABLE JdsRefEntities(
-    EntityId    INTEGER,
+    EntityId    BIGINT,
     EntityName  TEXT,
     PRIMARY KEY (EntityId)
 );

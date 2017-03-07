@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Created by ifung on 14/02/2017.
+ * Created by ifunga on 14/02/2017.
  */
 public class JdsLoad {
 
@@ -47,9 +47,9 @@ public class JdsLoad {
         String sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
-        String sqlEmbeddedAndArrayObjects = String.format("SELECT EntityGuid, ParentEntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE ParentEntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s) ORDER BY ParentEntityGuid", questionsString);
         //overviews
-        String sqlOverviews = String.format("SELECT EntityGuid, ParentEntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
@@ -239,8 +239,8 @@ public class JdsLoad {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 String parentEntityGuid = resultSet.getString("ParentEntityGuid");
-                String entityGuid = resultSet.getString("EntityGuid");
-                long entityId = resultSet.getLong("EntityId");
+                String entityGuid = resultSet.getString("ChildEntityGuid");
+                long entityId = resultSet.getLong("ChildEntityId");
                 currentEntity = optimalEntityLookup(jdsEntities, currentEntity, parentEntityGuid);
                 if (currentEntity == null) continue;
                 try {
@@ -250,7 +250,6 @@ public class JdsLoad {
                         JdsEntity action = jdsEntityClass.newInstance();
                         //
                         action.setEntityGuid(entityGuid);
-                        action.setParentEntityGuid(parentEntityGuid);
                         innerEntityGuids.add(entityGuid);
                         propertyList.get().add(action);
                         innerObjects.add(action);
@@ -261,7 +260,6 @@ public class JdsLoad {
                         JdsEntity action = jdsEntityClass.newInstance();
                         //
                         action.setEntityGuid(entityGuid);
-                        action.setParentEntityGuid(parentEntityGuid);
                         innerEntityGuids.add(entityGuid);
                         property.set(action);
                         innerObjects.add(action);
@@ -310,12 +308,10 @@ public class JdsLoad {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
-                String parentEntityGuid = resultSet.getString("ParentEntityGuid");
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
                 Timestamp dateModified = resultSet.getTimestamp("DateModified");
                 currentEntity = optimalEntityLookup(jdsEntities, currentEntity, entityGuid);
                 if (currentEntity == null) continue;
-                currentEntity.setParentEntityGuid(parentEntityGuid);
                 currentEntity.setDateModified(dateModified.toLocalDateTime());
                 currentEntity.setDateCreated(dateCreated.toLocalDateTime());
             }

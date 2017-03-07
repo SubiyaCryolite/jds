@@ -1,6 +1,8 @@
 package org.jenesis.jds;
 
-import org.jenesis.jds.enums.JdsTable;
+import org.jenesis.jds.enums.JdsEnumTable;
+import org.jenesis.jds.enums.JdsImplementation;
+import org.jenesis.jds.enums.JdsSqlType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,7 @@ public class JdsDatabasePostgres extends JdsDatabase {
 
     public JdsDatabasePostgres() {
         supportsStatements = true;
+        implementation= JdsImplementation.POSTGRES;
     }
 
     @Override
@@ -149,19 +152,28 @@ public class JdsDatabasePostgres extends JdsDatabase {
     }
 
     @Override
-    protected void initExtra() {
-        init(false, JdsTable.SaveText);
-        init(false, JdsTable.SaveLong);
-        init(false, JdsTable.SaveInteger);
-        init(false, JdsTable.SaveFloat);
-        init(false, JdsTable.SaveDouble);
-        init(false, JdsTable.SaveDateTime);
-        init(false, JdsTable.SaveEntity);
+    protected void createStoreEntityBinding() {
+        createTableFromFile("sql/postgresql/createStoreEntityBinding.sql");
     }
 
     @Override
-    protected void createTableExtra(JdsTable jdsTable) {
-        switch (jdsTable) {
+    protected void initExtra() {
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveText);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveLong);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapClassName);
+        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
+    }
+
+    @Override
+    protected void initialiseExtra(JdsEnumTable jdsEnumTable) {
+        switch (jdsEnumTable) {
             case SaveText:
                 createTableFromFile("sql/postgresql/procedures/procStoreText.sql");
                 break;
@@ -182,6 +194,18 @@ public class JdsDatabasePostgres extends JdsDatabase {
                 break;
             case SaveEntity:
                 createTableFromFile("sql/postgresql/procedures/procStoreEntityOverview.sql");
+                break;
+            case MapEntityFields:
+                createTableFromFile("sql/postgresql/procedures/procBindEntityFields.sql");
+                break;
+            case MapEntityEnums:
+                createTableFromFile("sql/postgresql/procedures/procBindEntityEnums.sql");
+                break;
+            case MapClassName:
+                createTableFromFile("sql/postgresql/procedures/procRefEntities.sql");
+                break;
+            case MapEnumValues:
+                createTableFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
                 break;
         }
     }

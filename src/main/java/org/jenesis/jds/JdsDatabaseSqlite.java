@@ -1,5 +1,7 @@
 package org.jenesis.jds;
 
+import org.jenesis.jds.enums.JdsImplementation;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +12,7 @@ import java.sql.ResultSet;
 public class JdsDatabaseSqlite extends JdsDatabase {
 
     public JdsDatabaseSqlite() {
+        implementation= JdsImplementation.SQLITE;
         supportsStatements = false;
     }
 
@@ -110,6 +113,11 @@ public class JdsDatabaseSqlite extends JdsDatabase {
         createTableFromFile("sql/sqlite/createStoreOldFieldValues.sql");
     }
 
+    @Override
+    protected void createStoreEntityBinding() {
+        createTableFromFile("sql/sqlite/createStoreEntityBinding.sql");
+    }
+
 
     public String saveString() {
         return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(?,?,?);";
@@ -136,6 +144,22 @@ public class JdsDatabaseSqlite extends JdsDatabase {
     }
 
     public String saveOverview() {
-        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,ParentEntityGuid,DateCreated,DateModified,EntityId) VALUES(?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,DateCreated,DateModified,EntityId) VALUES(?,?,?,?)";
+    }
+
+    public String mapClassFields() {
+        return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId,FieldId) VALUES(?,?);";
+    }
+
+    public String mapEntityEnums() {
+        return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId,FieldId) VALUES(?,?);";
+    }
+
+    public String mapClassName() {
+        return "INSERT OR REPLACE INTO JdsRefEntities(EntityId,EntityName) VALUES(?,?);";
+    }
+
+    public String mapEnumValues() {
+        return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId,EnumSeq,EnumValue) VALUES(?,?,?);";
     }
 }

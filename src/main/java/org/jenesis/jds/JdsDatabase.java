@@ -1,9 +1,9 @@
 package org.jenesis.jds;
 
 
-import javafx.beans.property.SimpleIntegerProperty;
+import org.jenesis.jds.enums.JdsEnumTable;
 import org.jenesis.jds.enums.JdsImplementation;
-import org.jenesis.jds.enums.JdsTable;
+import org.jenesis.jds.enums.JdsSqlType;
 import org.jenesis.jds.listeners.BaseListener;
 
 import java.io.BufferedInputStream;
@@ -30,28 +30,30 @@ public abstract class JdsDatabase {
     private boolean propertiesSet;
     protected boolean supportsStatements, deleteAsFunction;
     private Properties properties;
+    protected JdsImplementation implementation;
 
     public final void init() {
-        init(true, JdsTable.RefEntities);
-        init(true, JdsTable.StoreEntityOverview);
-        init(true, JdsTable.RefEnumValues);
-        init(true, JdsTable.RefFields);
-        init(true, JdsTable.RefFieldTypes);
-        init(true, JdsTable.StoreTextArray);
-        init(true, JdsTable.StoreFloatArray);
-        init(true, JdsTable.StoreIntegerArray);
-        init(true, JdsTable.StoreLongArray);
-        init(true, JdsTable.StoreDoubleArray);
-        init(true, JdsTable.StoreDateTimeArray);
-        init(true, JdsTable.StoreText);
-        init(true, JdsTable.StoreFloat);
-        init(true, JdsTable.StoreInteger);
-        init(true, JdsTable.StoreLong);
-        init(true, JdsTable.StoreDouble);
-        init(true, JdsTable.StoreDateTime);
-        init(true, JdsTable.StoreOldFieldValues);
-        init(true, JdsTable.BindEntityFields);
-        init(true, JdsTable.BindEntityEnums);
+        init(JdsSqlType.TABLE, JdsEnumTable.RefEntities);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreEntityOverview);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreEntityBinding);
+        init(JdsSqlType.TABLE, JdsEnumTable.RefEnumValues);
+        init(JdsSqlType.TABLE, JdsEnumTable.RefFields);
+        init(JdsSqlType.TABLE, JdsEnumTable.RefFieldTypes);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreTextArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreFloatArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreIntegerArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreLongArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreDoubleArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreDateTimeArray);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreText);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreFloat);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreInteger);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreLong);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreDouble);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreDateTime);
+        init(JdsSqlType.TABLE, JdsEnumTable.StoreOldFieldValues);
+        init(JdsSqlType.TABLE, JdsEnumTable.BindEntityFields);
+        init(JdsSqlType.TABLE, JdsEnumTable.BindEntityEnums);
         initExtra();
     }
 
@@ -85,6 +87,11 @@ public abstract class JdsDatabase {
         }
     }
 
+    public JdsImplementation getImplementation()
+    {
+        return this.implementation;
+    }
+
     public final static JdsDatabase getImplementation(JdsImplementation implementation) {
         switch (implementation) {
             case SQLITE:
@@ -97,14 +104,26 @@ public abstract class JdsDatabase {
         return null;
     }
 
-    protected final void init(boolean isTable, JdsTable jdsTable) {
-        boolean tableExists = isTable ? doesTableExist(jdsTable.getName()) : doesProcedureExist(jdsTable.getName());
-        if (!tableExists)
-            createTable(jdsTable);
+    protected final void init(JdsSqlType type, JdsEnumTable jdsEnumTable) {
+        switch (type)
+        {
+            case TABLE:
+                if(!doesTableExist(jdsEnumTable.getName()))
+                    initialise(jdsEnumTable);
+                break;
+            case STORED_PROCEDURE:
+                if(!doesProcedureExist(jdsEnumTable.getName()))
+                    initialise(jdsEnumTable);
+                break;
+            case TRIGGER:
+                if(!doesTriggerExist(jdsEnumTable.getName()))
+                    initialise(jdsEnumTable);
+                break;
+        }
     }
 
-    private final void createTable(JdsTable jdsTable) {
-        switch (jdsTable) {
+    private final void initialise(JdsEnumTable jdsEnumTable) {
+        switch (jdsEnumTable) {
             case StoreTextArray:
                 createStoreTextArray();
                 break;
@@ -165,11 +184,14 @@ public abstract class JdsDatabase {
             case StoreOldFieldValues:
                 createRefOldFieldValues();
                 break;
+            case StoreEntityBinding:
+                createStoreEntityBinding();
+                break;
         }
-        createTableExtra(jdsTable);
+        initialiseExtra(jdsEnumTable);
     }
 
-    protected void createTableExtra(JdsTable jdsTable) {
+    protected void initialiseExtra(JdsEnumTable jdsEnumTable) {
     }
 
     private final boolean doesTableExist(String tableName) {
@@ -177,8 +199,13 @@ public abstract class JdsDatabase {
         return answer == 1;
     }
 
-    private final boolean doesProcedureExist(String tableName) {
-        int answer = procedureExists(tableName);
+    private final boolean doesProcedureExist(String procedureName) {
+        int answer = procedureExists(procedureName);
+        return answer == 1;
+    }
+
+    private final boolean doesTriggerExist(String triggerName) {
+        int answer = triggerExists(triggerName);
         return answer == 1;
     }
 
@@ -213,6 +240,10 @@ public abstract class JdsDatabase {
         return 0;
     }
 
+    public int triggerExists(String triggerName) {
+        return 0;
+    }
+
     abstract void createStoreText();
 
     abstract void createStoreDateTime();
@@ -239,7 +270,8 @@ public abstract class JdsDatabase {
 
     abstract void createStoreEntities();
 
-    protected final void createStoreEntitySubclass(){}
+    protected final void createStoreEntitySubclass() {
+    }
 
     abstract void createRefEnumValues();
 
@@ -255,127 +287,76 @@ public abstract class JdsDatabase {
 
     abstract void createRefOldFieldValues();
 
-    public final synchronized boolean mapClassFields(final long entityCode, final HashMap<Long, BaseListener> listenerHashMap) {
-        int rowsWritten = 0;
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityFields WHERE EntityId = ? AND FieldId =?";
-        String insertSql = "INSERT INTO JdsBindEntityFields (EntityId,FieldId) VALUES (?,?)";
+    abstract void createStoreEntityBinding();
+
+    public final synchronized void mapClassFields(final long entityId, final HashMap<Long, BaseListener> listenerHashMap) {
         try (Connection connection = getConnection();
-             PreparedStatement check = connection.prepareStatement(checkSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields())) {
+            connection.setAutoCommit(false);
             for (Map.Entry<Long, BaseListener> fieldId : listenerHashMap.entrySet()) {
-                check.clearParameters();
-                check.setLong(1, entityCode);
-                check.setLong(2, fieldId.getKey());
-                ResultSet resultSet = check.executeQuery();
-                while (resultSet.next()) {
-                    if (resultSet.getInt("Result") == 0) {
-                        insert.clearParameters();
-                        insert.setLong(1, entityCode);
-                        insert.setLong(2, fieldId.getKey());
-                        rowsWritten += insert.executeUpdate();
-                    }
-                }
-                resultSet.close();
+                statement.setLong(1, entityId);
+                statement.setLong(2, fieldId.getKey());
+                statement.addBatch();
             }
-            System.out.printf("Mapped Fields for Entity[%s]\n", entityCode);
+            statement.executeBatch();
+            connection.commit();
+            System.out.printf("Mapped Fields for Entity[%s]\n", entityId);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
-            return false;
         }
-        return rowsWritten > 0;
     }
 
-    public final synchronized boolean mapClassEnums(final long entityCode, final HashSet<JdsFieldEnum> fields) {
-        SimpleIntegerProperty firstResult = new SimpleIntegerProperty(0);
-        SimpleIntegerProperty secondResult = new SimpleIntegerProperty(0);
-        if (mapEnumValues(fields, firstResult)) return false;
-        if (mapEntityEnums(entityCode, fields, secondResult)) return false;
+    public final synchronized void mapClassEnums(final long entityCode, final HashSet<JdsFieldEnum> fields) {
+        mapEnumValues(fields);
+        mapEntityEnums(entityCode, fields);
         System.out.printf("Mapped Enums for Entity[%s]\n", entityCode);
-        return firstResult.get() > 0 && secondResult.get() > 0;
     }
 
-    private final synchronized boolean mapEntityEnums(long entityCode, HashSet<JdsFieldEnum> fields, SimpleIntegerProperty secondResult) {
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsBindEntityEnums WHERE EntityId=? AND FieldId=?";
-        String insertSql = "INSERT INTO JdsBindEntityEnums(EntityId,FieldId) VALUES (?,?)";
+    private final synchronized void mapEntityEnums(long entityId, HashSet<JdsFieldEnum> fields) {
         try (Connection connection = getConnection();
-             PreparedStatement check = connection.prepareStatement(checkSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEntityEnums()) : connection.prepareStatement(mapEntityEnums())) {
+            connection.setAutoCommit(false);
             for (JdsFieldEnum field : fields)
                 for (int index = 0; index < field.getSequenceValues().size(); index++) {
-                    check.clearParameters();
-                    check.setLong(1, entityCode);
-                    check.setLong(2, field.getField().getId());
-                    ResultSet resultSet = check.executeQuery();
-                    while (resultSet.next()) {
-                        if (resultSet.getInt("Result") == 0) {
-                            insert.clearParameters();
-                            insert.setLong(1, entityCode);
-                            insert.setLong(2, field.getField().getId());
-                            secondResult.set(secondResult.get() + insert.executeUpdate());
-                        }
-                    }
-                    resultSet.close();
+                    statement.setLong(1, entityId);
+                    statement.setLong(2, field.getField().getId());
+                    statement.addBatch();
                 }
+            statement.executeBatch();
+            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
-            return true;
         }
-        return false;
     }
 
-    private final synchronized boolean mapEnumValues(HashSet<JdsFieldEnum> fields, SimpleIntegerProperty firstResult) {
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsRefEnumValues WHERE FieldId=? AND EnumSeq=? AND EnumValue=?";
-        String insertSql = "INSERT INTO JdsRefEnumValues (FieldId,EnumSeq,EnumValue) VALUES (?,?,?)";
-        try (Connection connection = getConnection(); PreparedStatement check = connection.prepareStatement(checkSql); PreparedStatement insert = connection.prepareStatement(insertSql)) {
+    private final synchronized void mapEnumValues(HashSet<JdsFieldEnum> fields) {
+        try (Connection connection = getConnection(); PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEnumValues()) : connection.prepareStatement(mapEnumValues())) {
+            connection.setAutoCommit(false);
             for (JdsFieldEnum field : fields) {
                 for (int index = 0; index < field.getSequenceValues().size(); index++) {
-                    check.clearParameters();
-                    check.setLong(1, field.getField().getId());
-                    check.setInt(2, index);
-                    check.setString(3, field.getSequenceValues().get(index));
-                    ResultSet resultSet = check.executeQuery();
-                    while (resultSet.next()) {
-                        if (resultSet.getInt("Result") == 0) {
-                            insert.clearParameters();
-                            insert.setLong(1, field.getField().getId());
-                            insert.setInt(2, index);
-                            insert.setString(3, field.getSequenceValues().get(index));
-                            firstResult.set(firstResult.get() + insert.executeUpdate());
-                        }
-                    }
-                    resultSet.close();
+                    statement.setLong(1, field.getField().getId());
+                    statement.setInt(2, index);
+                    statement.setString(3, field.getSequenceValues().get(index));
+                    statement.addBatch();
                 }
             }
+            statement.executeBatch();
+            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
-            return true;
         }
-        return false;
     }
 
-    public final synchronized boolean mapClassName(final long entityCode, final String entityName) {
-        int result = 0;
-        String checkSql = "SELECT COUNT(*) AS Result FROM JdsRefEntities WHERE EntityId = ? AND EntityName = ?";
-        String insertSql = "INSERT INTO JdsRefEntities(EntityId,EntityName) VALUES (?,?)";
+    public final synchronized void mapClassName(final long entityId, final String entityName) {
         try (Connection connection = getConnection();
-             PreparedStatement check = connection.prepareStatement(checkSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            check.setLong(1, entityCode);
-            check.setString(2, entityName);
-            ResultSet resultSet = check.executeQuery();
-            while (resultSet.next()) {
-                if (resultSet.getInt("Result") == 0) {
-                    insert.clearParameters();
-                    insert.setLong(1, entityCode);
-                    insert.setString(2, entityName);
-                    result += insert.executeUpdate();
-                }
-            }
-            System.out.printf("Mapped Entity [%S - %s]", entityName, entityCode);
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassName()) : connection.prepareStatement(mapClassName())) {
+            statement.setLong(1, entityId);
+            statement.setString(2, entityName);
+            statement.executeUpdate();
+            System.out.printf("Mapped Entity [%S - %s]\n", entityName, entityId);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
-        return result > 0;
     }
 
     public final boolean logEdits() {
@@ -419,7 +400,23 @@ public abstract class JdsDatabase {
     }
 
     public String saveOverview() {
-        return "{call procStoreEntityOverview(?,?,?,?,?)}";
+        return "{call procStoreEntityOverview(?,?,?,?)}";
+    }
+
+    public String mapClassFields() {
+        return "{call procBindEntityFields(?,?)}";
+    }
+
+    public String mapEntityEnums() {
+        return "{call procBindEntityEnums(?,?)}";
+    }
+
+    public String mapClassName() {
+        return "{call procRefEntities(?,?)}";
+    }
+
+    public String mapEnumValues() {
+        return "{call procRefEnumValues(?,?,?)}";
     }
 
     public final boolean supportsStatements() {

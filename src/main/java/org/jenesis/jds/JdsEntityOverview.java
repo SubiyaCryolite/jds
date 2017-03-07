@@ -8,18 +8,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Created by ifung on 14/02/2017.
+ * Created by ifunga on 14/02/2017.
  */
 public class JdsEntityOverview {
     private final SimpleObjectProperty<LocalDateTime> dateCreated;
     private final SimpleObjectProperty<LocalDateTime> dateModified;
     private final SimpleLongProperty serviceCode;
     private final SimpleStringProperty entityGuid;
-    private final SimpleStringProperty parentEntityGuid;
 
     JdsEntityOverview() {
         this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
-        this.parentEntityGuid = new SimpleStringProperty(null);//default should be null
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
         this.dateModified = new SimpleObjectProperty<>(LocalDateTime.now());
         this.serviceCode = new SimpleLongProperty();
@@ -55,13 +53,5 @@ public class JdsEntityOverview {
 
     public void setEntityGuid(String entityGuid) {
         this.entityGuid.set(entityGuid);
-    }
-
-    public String getParentEntityGuid() {
-        return parentEntityGuid.get();
-    }
-
-    public void setParentEntityGuid(String parentEntityGuid) {
-        this.parentEntityGuid.set(parentEntityGuid);
     }
 }

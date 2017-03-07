@@ -34,14 +34,6 @@ public abstract class JdsEntity extends JdsEntityBase {
         getOverview().setEntityGuid(actionId);
     }
 
-    public String getParentEntityGuid() {
-        return getOverview().getParentEntityGuid();
-    }
-
-    public void setParentEntityGuid(String actionId) {
-        getOverview().setParentEntityGuid(actionId);
-    }
-
     public LocalDateTime getDateCreated() {
         return getOverview().getDateCreated();
     }
