@@ -7,8 +7,8 @@ import org.junit.Test;
 /**
  * Created by ifung on 05/03/2017.
  */
-public class TestJdsQuery {
-    public TestJdsQuery() {
+public class JdsQueryTests {
+    public JdsQueryTests() {
     }
 
     @Test

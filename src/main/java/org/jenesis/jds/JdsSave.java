@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
  */
 public class JdsSave {
 
+    /**
+     *
+     * @param database
+     * @param batchSize
+     * @param entities
+     */
     public static void save(final JdsDatabase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
         //strings, dates and numerics
         List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties = new ArrayList<>();
@@ -50,6 +56,28 @@ public class JdsSave {
         }
     }
 
+    /**
+     *
+     * @param batchSize
+     * @param entities
+     * @param dateTimeProperties
+     * @param stringProperties
+     * @param floatProperties
+     * @param doubleProperties
+     * @param longProperties
+     * @param integerProperties
+     * @param objectArrayProperties
+     * @param stringArrayProperties
+     * @param dateTimeArrayProperties
+     * @param floatArrayProperties
+     * @param doubleArrayProperties
+     * @param longArrayProperties
+     * @param integerArrayProperties
+     * @param enumProperties
+     * @param objectProperties
+     * @param overviews
+     * @param batchEntities
+     */
     private static void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
         //create batches
         int currentBatch = 0;
@@ -75,6 +103,26 @@ public class JdsSave {
         }
     }
 
+    /**
+     *
+     * @param dateTimeProperties
+     * @param stringProperties
+     * @param floatProperties
+     * @param doubleProperties
+     * @param longProperties
+     * @param integerProperties
+     * @param objectArrayProperties
+     * @param stringArrayProperties
+     * @param dateTimeArrayProperties
+     * @param floatArrayProperties
+     * @param doubleArrayProperties
+     * @param longArrayProperties
+     * @param integerArrayProperties
+     * @param enumProperties
+     * @param objectProperties
+     * @param overviews
+     * @param batchEntities
+     */
     private static void createBatchCollection(List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
         batchEntities.add(new ArrayList<>());
         overviews.add(new HashSet<>());
@@ -209,10 +257,21 @@ public class JdsSave {
         bindAndSaveInnerObjects(database, objectProperties);
     }
 
+    /**
+     *
+     * @param database
+     * @param batchSize
+     * @param entities
+     */
     public static void save(final JdsDatabase database, final int batchSize, final JdsEntity... entities) {
         save(database, batchSize, Arrays.asList(entities));
     }
 
+    /**
+     *
+     * @param jdsDatabase
+     * @param overviews
+     */
     private static void saveOverviews(final JdsDatabase jdsDatabase, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
@@ -1026,6 +1085,12 @@ public class JdsSave {
         }
     }
 
+    /**
+     *
+     * @param jdsParentChildBindings
+     * @param childGuid
+     * @return
+     */
     private static String getParent(final Collection<JdsParentChildBinding> jdsParentChildBindings, final String childGuid) {
         Optional<JdsParentChildBinding> any = jdsParentChildBindings.stream().filter(parentChildBinding -> parentChildBinding.childGuid.equals(childGuid)).findAny();
         return any.isPresent() ? any.get().parentGuid : "";

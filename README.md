@@ -324,20 +324,38 @@ The API has a single **save()** method within the class **JdsSave**. The method 
 ```
 
 ###1.2.5 Load
-The system currently has two variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user.
+The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional paramaeter "Comparator<? extends JdsEntity>" whicj allows you to load a sorted collection
 ```java
     List<SimpleAddressBook> allAddressBooks;
     List<SimpleAddressBook> specificAddressBook;
     
-    allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
-    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+    //load all entities of type SimpleAddressBook
+    allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class);
+    
+    //load all entities of type SimpleAddressBook with Entity Guids in range
+    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001");
+    
+    //load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
+    Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
+    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
 ```
 
 ###1.2.6 Load with Args
 I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
 
 ###1.2.7 Delete [W.I.P]
-I plan on adding this functionality soon.
+You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
+```java
+    public void deleteUsingStrings() {
+            JdsDelete.delete(jdsDatabase, "primaryAddress1");
+    }
+    
+    public void deleteUsingObjectOrCollection() {
+            SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
+            JdsDelete.delete(jdsDatabase, simpleAddressBook);
+    }
+```
+
 
 ##1.3 Backend Design
 Section coming soon

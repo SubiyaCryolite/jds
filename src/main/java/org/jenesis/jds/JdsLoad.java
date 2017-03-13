@@ -17,21 +17,66 @@ public class JdsLoad {
 
     final private static int batchSize = 1000; //Java supports up to 1000 prepared supportsStatements depending on the driver
 
+    /**
+     *
+     * @param jdsDatabase
+     * @param referenceType
+     * @param comparator
+     * @param suppliedEntityGuids
+     * @param <T>
+     * @return
+     */
+    public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, Comparator<T> comparator, final String... suppliedEntityGuids) {
+        List<T> collections = new ArrayList<>();
+        loadImplementation(jdsDatabase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
+        collections.sort(comparator);
+        return collections;
+    }
+
+    /**
+     *
+     * @param jdsDatabase
+     * @param referenceType
+     * @param suppliedEntityGuids
+     * @param <T>
+     * @return
+     */
     public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedEntityGuids) {
+        List<T> collections = new ArrayList<>();
+        loadImplementation(jdsDatabase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
+        return collections;
+    }
+
+    /**
+     *
+     * @param jdsDatabase
+     * @param referenceType
+     * @param collections
+     * @param suppliedEntityGuids
+     * @param <T>
+     */
+    private static <T extends JdsEntity> void loadImplementation(JdsDatabase jdsDatabase, Class<T> referenceType, List<JdsEntity> collections, String[] suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
         long code = annotation.entityId();
-        List<T> collections = new ArrayList<>();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
-        List<JdsEntity> castCollection = (List<JdsEntity>) collections;
+        List<JdsEntity> castCollection = collections;
         prepareActionBatches(jdsDatabase, batchSize, code, allBatches, suppliedEntityGuids);
 
         boolean initialiseInnerContent = true;
         for (List<String> currentBatch : allBatches) {
             populateInner(jdsDatabase, referenceType, castCollection, initialiseInnerContent, currentBatch);
         }
-        return collections;
     }
 
+    /**
+     *
+     * @param jdsDatabase
+     * @param referenceType
+     * @param jdsEntities
+     * @param initialiseInnerContent
+     * @param entityEntityGuids
+     * @param <T>
+     */
     private static <T extends JdsEntity> void populateInner(final JdsDatabase jdsDatabase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
         String questionsString = getQuestions(entityEntityGuids.size());
         //primitives
@@ -117,6 +162,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateFloatArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -132,6 +183,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateDoubleArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -147,6 +204,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateLongArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -162,6 +225,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateDateTimeArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -177,6 +246,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateStringArrays(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -192,6 +267,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateIntegerArraysAndEnums(Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -217,6 +298,13 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsDatabase
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateObjectEntriesAndObjectArrays(JdsDatabase jdsDatabase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         HashSet<String> innerEntityGuids = new HashSet<>();//ids should be unique
         Queue<JdsEntity> innerObjects = new ConcurrentLinkedQueue<>();//can be multiple copies of the same object however
@@ -260,10 +348,21 @@ public class JdsLoad {
         });
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param entityGuid
+     * @return
+     */
     private static Collection<JdsEntity> optimalEntityLookup(final Collection<JdsEntity> jdsEntities, final String entityGuid) {
         return jdsEntities.parallelStream().filter(entryPredicate -> entryPredicate.getEntityGuid().equals(entityGuid)).collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param innerEntityGuids
+     * @return
+     */
     private static List<List<String>> createProcessingBatches(Collection<String> innerEntityGuids) {
         List<List<String>> batches = new ArrayList<>();
         int index = 0;
@@ -281,6 +380,12 @@ public class JdsLoad {
         return batches;
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateOverviews(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -295,6 +400,13 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateDateTime(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -309,6 +421,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateDouble(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -323,6 +441,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateInteger(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -337,6 +461,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateFloat(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -351,6 +481,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateLong(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -365,6 +501,12 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
     private static void populateText(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -379,6 +521,14 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param jdsDatabase
+     * @param batchSize
+     * @param code
+     * @param allBatches
+     * @param suppliedEntityGuids
+     */
     private static void prepareActionBatches(final JdsDatabase jdsDatabase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
         int batchIndex = 0;
         int batchContents = 0;
@@ -416,6 +566,11 @@ public class JdsLoad {
         }
     }
 
+    /**
+     *
+     * @param size
+     * @return
+     */
     private static String getQuestions(final int size) {
         String[] questionArray = new String[size];
         for (int index = 0; index < size; index++) {
@@ -424,7 +579,14 @@ public class JdsLoad {
         return String.join(",", questionArray);
     }
 
-    private static void setParameterForStatement(final PreparedStatement textStatement, final int dex, final String EntityGuid) throws SQLException {
-        textStatement.setString(dex, EntityGuid);
+    /**
+     *
+     * @param textStatement
+     * @param dex
+     * @param entityGuid
+     * @throws SQLException
+     */
+    private static void setParameterForStatement(final PreparedStatement textStatement, final int dex, final String entityGuid) throws SQLException {
+        textStatement.setString(dex, entityGuid);
     }
 }

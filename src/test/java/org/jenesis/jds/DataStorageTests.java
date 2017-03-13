@@ -9,16 +9,17 @@ import org.sqlite.SQLiteConfig;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by ifunga on 18/02/2017.
  */
-public class TestClass {
+public class DataStorageTests {
 
     private JdsDatabase jdsDatabase;
 
-    public TestClass() {
+    public DataStorageTests() {
         initialiseJdsClasses();
     }
 
@@ -54,7 +55,7 @@ public class TestClass {
 
     @Test
     public void saveAndLoad() {
-        testSaves();
+        saveObject();
         testLoads();
     }
 
@@ -77,18 +78,48 @@ public class TestClass {
     }
 
     @Test
-    public void saveAndLoadAllImplementations()
-    {
+    public void saveAndLoadAllImplementations() {
         saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
     }
 
-    /**
-     *
-     */
     @Test
-    public void testSaves() {
+    public void saveObject() {
+        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
+        JdsSave.save(jdsDatabase, 1, simpleAddressBook);
+        System.out.printf("Saved %s\n", simpleAddressBook);
+    }
+
+    @Test
+    public void testLoads() {
+        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
+        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        System.out.printf("All entities [%s]\n", allAddressBooks);
+        System.out.printf("Specific entities [%s]\n", specificAddressBook);
+    }
+
+    @Test
+    public void testSortedLoads() {
+        Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
+        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator); //load all entities of type SimpleAddressBook
+        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        System.out.printf("All entities [%s]\n", allAddressBooks);
+        System.out.printf("Specific entities [%s]\n", specificAddressBook);
+    }
+
+    @Test
+    public void deleteUsingStrings() {
+        JdsDelete.delete(jdsDatabase, "primaryAddress1");
+    }
+
+    @Test
+    public void deleteUsingObjectOrCollection() {
+        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
+        JdsDelete.delete(jdsDatabase, simpleAddressBook);
+    }
+
+    private SimpleAddressBook getSimpleAddressBook() {
         SimpleAddress primaryAddress1 = new SimpleAddress();
         primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
         primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
@@ -124,17 +155,7 @@ public class TestClass {
         simpleAddressBook.getAddresses().add(primaryAddress1);
         simpleAddressBook.getAddresses().add(primaryAddress2);
         simpleAddressBook.getAddresses().add(primaryAddress3);
-
-        JdsSave.save(jdsDatabase, 1, simpleAddressBook);
-        System.out.printf("Saved %s\n", simpleAddressBook);
-    }
-
-    @Test
-    public void testLoads() {
-        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
-        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
-        System.out.printf("All entities [%s]\n", allAddressBooks);
-        System.out.printf("Specific entities [%s]\n", specificAddressBook);
+        return simpleAddressBook;
     }
 
     public String getDatabaseFile() {
