@@ -3,7 +3,7 @@
 # Jenesis Data Store
 Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development. The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software..
 
-#Dependancies
+#Dependencies
 The library depends on Java 8. Both 64 and 32 bit variants should suffice. Both the Development Kit and Runtime can be downloaded from [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 
 #Deployment ready?
@@ -12,13 +12,13 @@ The library depends on Java 8. Both 64 and 32 bit variants should suffice. Both 
 The library is not yet ready for use in projects. That said development is proceeding smoothly and usable alphas should be available in under 2 months.
 
 #Supported Databases
-The API currently supports the following Relational Databases, each of which has their own dependancies, versions and licensing requirements. Please consult the official sites for specifics.
+The API currently supports the following Relational Databases, each of which has their own dependencies, versions and licensing requirements. Please consult the official sites for specifics.
 
 |Database|Version Tested Against|Official Site|JDBC Driver Tested Against
 |-------|-----------|-----------|-----------|
-| PostgreSQL 				| 9.5    		| [Official Site](https://www.postgresql.org/) 		| [org.postgresql](https://mvnrepository.com/artifact/org.postgresql/postgresql)|
-| Microsoft SQL Server	| 2008 R2		| [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) 		| [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
-| SQLite 				| 3.16.1 	| [Official Site](https://www.sqlite.org/)		| [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
+| PostgreSQL            | 9.5         | [Official Site](https://www.postgresql.org/)        | [org.postgresql](https://mvnrepository.com/artifact/org.postgresql/postgresql)|
+| Microsoft SQL Server | 2008 R2     | [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)        | [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
+| SQLite            | 3.16.1   | [Official Site](https://www.sqlite.org/)    | [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
 
 Note: I plan on adding MySQL support soon.
 
@@ -72,7 +72,7 @@ public class TestFields
 ```
 
 ###1.1.3 Defining Enums
-JdsEnums are an extension of fields. However they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enummerated value with the following options (Male, Female, Other).
+JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard field of type ENUM_TEXT.
 ```java
 public class TestFields
@@ -89,7 +89,7 @@ public class TestEnums
     public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(TestFields.SEX_ENUM, "Male", "Female", "Other");
 }
 ```
-Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the deined values.
+Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the defined values.
 
 ###1.1.4 Binding Properties
 Depending on the type of field, JDS will require that you set you objects properties to one of the following container types.
@@ -236,7 +236,7 @@ public class SimpleAddressBook extends JdsEntity {
 
 ##1.2 CRUD Operations
 ###1.2.1 Initialising the database
-In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its classpath. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
+In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 ####Postgres example
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
@@ -260,7 +260,7 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
 
 ###1.2.2 Initialising JDS
-Once you have initialised your database you can go ahead and init all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
+Once you have initialised your database you can go ahead and initialise all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
 ```java
 public void initialiseJdsClasses()
 {
@@ -268,7 +268,7 @@ public void initialiseJdsClasses()
     JdsEntityClasses.map(SimpleAddressBook.class);
 }
 ```
-You only have to do this once at startup but it is vital that you do so. Without this you will face problems when loading or saving records
+You only have to do this once at start-up but it is vital that you do so. Without this you will face problems when loading or saving records
 
 ###1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
@@ -324,7 +324,7 @@ The API has a single **save()** method within the class **JdsSave**. The method 
 ```
 
 ###1.2.5 Load
-The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional paramaeter "Comparator<? extends JdsEntity>" whicj allows you to load a sorted collection
+The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
     List<SimpleAddressBook> allAddressBooks;
     List<SimpleAddressBook> specificAddressBook;
@@ -340,7 +340,7 @@ The system currently has three variants of the **load()** method. The first vari
     specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
 ```
 
-###1.2.6 Load with Args
+###1.2.6 Load with Arguments
 I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
 
 ###1.2.7 Delete [W.I.P]
