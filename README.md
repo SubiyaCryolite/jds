@@ -343,7 +343,7 @@ The system currently has three variants of the **load()** method. The first vari
 ###1.2.6 Load with Arguments
 I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
 
-###1.2.7 Delete [W.I.P]
+###1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
     public void deleteUsingStrings() {
