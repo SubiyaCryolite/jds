@@ -100,6 +100,8 @@ public abstract class JdsDatabase {
                 return new JdsDatabasePostgres();
             case TSQL:
                 return new JdsDatabaseTransactionalSql();
+            case MYSQL:
+                return new JdsDatabaseMySql();
         }
         return null;
     }
