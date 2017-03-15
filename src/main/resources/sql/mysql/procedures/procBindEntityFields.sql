@@ -1,8 +1,5 @@
-CREATE FUNCTION procBindEntityFields(pEntityId BIGINT, pFieldId BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procBindEntityFields(IN pEntityId BIGINT, IN pFieldId BIGINT)
 BEGIN
-	INSERT INTO JdsBindEntityFields(EntityId, FieldId)
-    VALUES (pEntityId, pFieldId)
-    ON CONFLICT (EntityId,FieldId) DO NOTHING;
-END;
-$$ LANGUAGE plpgsql;
+	INSERT IGNORE INTO JdsBindEntityFields(EntityId, FieldId)
+    VALUES (pEntityId, pFieldId);
+END

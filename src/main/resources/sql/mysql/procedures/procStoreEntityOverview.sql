@@ -1,8 +1,6 @@
-CREATE FUNCTION procStoreEntityOverview(pEntityGuid VARCHAR(48), pDateCreated TIMESTAMP, pDateModified TIMESTAMP, pEntityId BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procStoreEntityOverview(IN pEntityGuid VARCHAR(48), IN pDateCreated DATETIME, IN pDateModified DATETIME, IN pEntityId BIGINT)
 BEGIN
 	INSERT INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified, EntityId)
     VALUES (pEntityGuid, pDateCreated, pDateModified, pEntityId)
-    ON CONFLICT (EntityGuid) DO UPDATE SET DateCreated = pDateCreated, DateModified = pDateModified, EntityId = pEntityId;
-END;
-$$ LANGUAGE plpgsql;
+    ON DUPLICATE KEY UPDATE DateCreated = pDateCreated, DateModified = pDateModified, EntityId = pEntityId;
+END

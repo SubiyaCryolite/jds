@@ -17,10 +17,10 @@ The API currently supports the following Relational Databases, each of which has
 |Database|Version Tested Against|Official Site|JDBC Driver Tested Against
 |-------|-----------|-----------|-----------|
 | PostgreSQL            | 9.5         | [Official Site](https://www.postgresql.org/)        | [org.postgresql](https://mvnrepository.com/artifact/org.postgresql/postgresql)|
+| MySQL            |5.7.14         | [Official Site](https://www.mysql.com/downloads/)        | [com.mysql.cj.jdbc.Driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java)|
 | Microsoft SQL Server | 2008 R2     | [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)        | [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
 | SQLite            | 3.16.1   | [Official Site](https://www.sqlite.org/)    | [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
 
-Note: I plan on adding MySQL support soon.
 
 #1 How it works
 
@@ -241,6 +241,12 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
     jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
+    jdsDatabase.init();
+```
+####MySQL Example
+```java
+    JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
+    jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
     jdsDatabase.init();
 ```
 ####Microsoft SQL Server Example

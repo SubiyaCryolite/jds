@@ -1,8 +1,5 @@
-CREATE FUNCTION procBindEntityEnums(pEntityId BIGINT, pFieldId BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procBindEntityEnums(IN pEntityId BIGINT, IN pFieldId BIGINT)
 BEGIN
-	INSERT INTO JdsBindEntityEnums(EntityId, FieldId)
-    VALUES (pEntityId, pFieldId)
-    ON CONFLICT (EntityId,FieldId) DO NOTHING;
+	INSERT IGNORE INTO JdsBindEntityEnums(EntityId, FieldId)
+    VALUES (pEntityId, pFieldId);
 END;
-$$ LANGUAGE plpgsql;

@@ -56,7 +56,7 @@ public class DataStorageTests {
     @Test
     public void initialiseMysqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
-        jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds", "root", "");
+        jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
         jdsDatabase.init();
     }
 
@@ -81,6 +81,12 @@ public class DataStorageTests {
     @Test
     public void saveAndLoadSqliteImplementation() {
         initialiseSqlLiteBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadMySqlImplementation() {
+        initialiseMysqlBackend();
         saveAndLoad();
     }
 

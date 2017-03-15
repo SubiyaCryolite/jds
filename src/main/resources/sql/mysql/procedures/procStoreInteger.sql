@@ -1,8 +1,6 @@
-CREATE FUNCTION procStoreInteger(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue INT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procStoreInteger(IN pEntityGuid VARCHAR(48), IN pFieldId BIGINT, IN pValue INT)
 BEGIN
 	INSERT INTO JdsStoreInteger(EntityGuid, FieldId, Value)
     VALUES (pEntityGuid, pFieldId, pValue)
-    ON CONFLICT (EntityGuid,FieldId) DO UPDATE SET Value = pValue;
-END;
-$$ LANGUAGE plpgsql;
+    ON DUPLICATE KEY UPDATE Value = pValue;
+END

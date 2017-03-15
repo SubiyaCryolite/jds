@@ -1,8 +1,6 @@
-CREATE FUNCTION procRefEnumValues(pFieldId BIGINT, pEnumSeq INT, pEnumValue TEXT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procRefEnumValues(IN pFieldId BIGINT, IN pEnumSeq INT, IN pEnumValue TEXT)
 BEGIN
 	INSERT INTO JdsRefEnumValues(FieldId, EnumSeq, EnumValue)
     VALUES (pFieldId, pEnumSeq, pEnumValue)
-    ON CONFLICT (FieldId,EnumSeq) DO UPDATE SET EnumValue = pEnumValue;
-END;
-$$ LANGUAGE plpgsql;
+    ON DUPLICATE KEY UPDATE EnumValue = pEnumValue;
+END

@@ -1,8 +1,6 @@
-CREATE FUNCTION procStoreDateTime(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue TIMESTAMP)
-RETURNS VOID AS $$
+CREATE PROCEDURE procStoreDateTime(IN pEntityGuid VARCHAR(48), IN pFieldId BIGINT, IN pValue DATETIME)
 BEGIN
 	INSERT INTO JdsStoreDateTime(EntityGuid, FieldId, Value)
     VALUES (pEntityGuid, pFieldId, pValue)
-    ON CONFLICT (EntityGuid,FieldId) DO UPDATE SET Value = pValue;
-END;
-$$ LANGUAGE plpgsql;
+    ON DUPLICATE KEY UPDATE Value = pValue;
+END

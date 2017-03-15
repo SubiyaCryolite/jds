@@ -169,7 +169,6 @@ public class JdsDatabaseMySql extends JdsDatabase {
         init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
         init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapClassName);
         init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
-        init(JdsSqlType.TRIGGER, JdsEnumTable.CascadeEntityBinding);
     }
 
     @Override
@@ -207,9 +206,6 @@ public class JdsDatabaseMySql extends JdsDatabase {
                 break;
             case MapEnumValues:
                 createTableFromFile("sql/mysql/procedures/procRefEnumValues.sql");
-                break;
-            case CascadeEntityBinding:
-                createTableFromFile("sql/mysql/triggers/createEntityBindingCascade.sql");
                 break;
         }
     }
