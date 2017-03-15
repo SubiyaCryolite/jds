@@ -1,17 +1,17 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE.md) ![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/Jenesis-Data-Store)
 
 # Jenesis Data Store
-Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development. The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software..
+Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development. The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
 
-#Dependencies
+# Dependencies
 The library depends on Java 8. Both 64 and 32 bit variants should suffice. Both the Development Kit and Runtime can be downloaded from [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 
-#Deployment ready?
+# Deployment ready?
 ![No, hell no](https://media.giphy.com/media/RA8gXeMaTqXIc/giphy.gif)
 
 The library is not yet ready for use in projects. That said development is proceeding smoothly and usable alphas should be available in under 2 months.
 
-#Supported Databases
+# Supported Databases
 The API currently supports the following Relational Databases, each of which has their own dependencies, versions and licensing requirements. Please consult the official sites for specifics.
 
 |Database|Version Tested Against|Official Site|JDBC Driver Tested Against
@@ -22,16 +22,16 @@ The API currently supports the following Relational Databases, each of which has
 | SQLite            | 3.16.1   | [Official Site](https://www.sqlite.org/)    | [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
 
 
-#1 How it works
+# 1 How it works
 
-##1.1 Creating Classes
+## 1.1 Creating Classes
 Classes that use JDS need to extend JdsEntity.
 ```java
 public class Customer extends JdsEntity
 ```
 Following that the following steps need to be taken.
 
-###1.1.1 Annotating Classes
+### 1.1.1 Annotating Classes
 Every class that extends JdsEntity must have its own unique Entity Id as well as Entity Name. This is done by annotating the class in the following manner
 ```java
 @JdsEntityAnnotation(entityId = 5, entityName = "Customer")
@@ -39,7 +39,7 @@ public class Customer extends JdsEntity
 ```
 Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
 
-###1.1.2 Defining Fields
+### 1.1.2 Defining Fields
 JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every field that you define can be one of the following types.
 
 |JDS Field Type|Java Type|Description|
@@ -71,7 +71,7 @@ public class TestFields
 }
 ```
 
-###1.1.3 Defining Enums
+### 1.1.3 Defining Enums
 JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard field of type ENUM_TEXT.
 ```java
@@ -91,7 +91,7 @@ public class TestEnums
 ```
 Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the defined values.
 
-###1.1.4 Binding Properties
+### 1.1.4 Binding Properties
 Depending on the type of field, JDS will require that you set you objects properties to one of the following container types.
 
 |JDS Field Type|Java Property Type|
@@ -192,7 +192,7 @@ public class SimpleAddress extends JdsEntity {
     }
 }
 ```
-###1.1.5 Binding Objects and Object Arrays
+### 1.1.5 Binding Objects and Object Arrays
 Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays. All that's required is a valid JdsEntity subclass to be mapped based on the embedded objects annotations.
 
 The class below shows how you can achieve this.
@@ -234,28 +234,28 @@ public class SimpleAddressBook extends JdsEntity {
 ```
 
 
-##1.2 CRUD Operations
-###1.2.1 Initialising the database
+## 1.2 CRUD Operations
+### 1.2.1 Initialising the database
 In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
-####Postgres example
+#### Postgres example
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
     jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
     jdsDatabase.init();
 ```
-####MySQL Example
+#### MySQL Example
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
     jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
     jdsDatabase.init();
 ```
-####Microsoft SQL Server Example
+#### Microsoft SQL Server Example
 ```java
     JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
     jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
     jdsDatabase.init();
 ```
-####Sqlite Example
+#### Sqlite Example
 ```java
     String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
     SQLiteConfig sqLiteConfig = new SQLiteConfig();
@@ -265,7 +265,7 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
 
-###1.2.2 Initialising JDS
+### 1.2.2 Initialising JDS
 Once you have initialised your database you can go ahead and initialise all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
 ```java
 public void initialiseJdsClasses()
@@ -276,7 +276,7 @@ public void initialiseJdsClasses()
 ```
 You only have to do this once at start-up but it is vital that you do so. Without this you will face problems when loading or saving records
 
-###1.2.3 Creating objects
+### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
     SimpleAddress primaryAddress1 = new SimpleAddress();
@@ -316,7 +316,7 @@ Once you have defined your class you can initialise them. A dynamic **Entity Gui
     simpleAddressBook.getAddresses().add(primaryAddress3);
 ```
 
-###1.2.4 Save
+### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
     SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
@@ -329,7 +329,7 @@ The API has a single **save()** method within the class **JdsSave**. The method 
     System.out.printf("Saved %s\n", simpleAddressBook);
 ```
 
-###1.2.5 Load
+### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
     List<SimpleAddressBook> allAddressBooks;
@@ -346,10 +346,10 @@ The system currently has three variants of the **load()** method. The first vari
     specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
 ```
 
-###1.2.6 Load with Arguments
+### 1.2.6 Load with Arguments
 I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
 
-###1.2.7 Delete
+### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
     public void deleteUsingStrings() {
@@ -363,14 +363,14 @@ You can delete by providing one or more JdsEntities or via a collection of strin
 ```
 
 
-##1.3 Backend Design
+## 1.3 Backend Design
 Section coming soon
 
-#License
+# License
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
-#Development
+# Development
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.
 
-#Special Thanks
+# Special Thanks
 To all our users and contributors!
