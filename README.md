@@ -44,6 +44,7 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
+|BOOLEAN|boolean|Boolean values|
 |FLOAT|float|Numeric float values|
 |INT|int|Numeric integer values|
 |DOUBLE|double|Numeric double values|
@@ -96,6 +97,7 @@ Depending on the type of field, JDS will require that you set you objects proper
 
 |JDS Field Type|Java Property Type|
 |-----|-----|
+|BOOLEAN|[SimpleBooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleBooleanProperty.html)|
 |FLOAT|[SimpleFloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleFloatProperty.html)|
 |INT|[SimpleIntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleIntegerProperty.html)|
 |DOUBLE|[SimpleDoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleDoubleProperty.html)|

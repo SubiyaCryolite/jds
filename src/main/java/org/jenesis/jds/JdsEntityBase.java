@@ -16,7 +16,7 @@ abstract class JdsEntityBase {
     protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     //field and enum maps
     protected final static HashSet<Long> map = new HashSet<>();
-    protected final HashMap<Long, BaseListener> allFields = new HashMap<>();
+    protected final HashMap<Long, BaseListener> propertyListeners = new HashMap<>();
     protected final HashMap<Long, BaseListener> allObjects = new HashMap<>();
     protected final HashSet<JdsFieldEnum> allEnums = new HashSet<>();
     //stringProperties and dateProperties
@@ -25,6 +25,7 @@ abstract class JdsEntityBase {
     //numeric
     protected final HashMap<Long, SimpleFloatProperty> floatProperties = new HashMap<>();
     protected final HashMap<Long, SimpleDoubleProperty> doubleProperties = new HashMap<>();
+    protected final HashMap<Long, SimpleBooleanProperty> booleanProperties = new HashMap<>();
     protected final HashMap<Long, SimpleLongProperty> longProperties = new HashMap<>();
     protected final HashMap<Long, SimpleIntegerProperty> integerProperties = new HashMap<>();
     //arrays

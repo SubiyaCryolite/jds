@@ -69,7 +69,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleIntegerProperty integerProperty) {
         if (jdsField.getType() == JdsFieldType.INT) {
             NumberListener numberListener = new NumberListener();
-            allFields.put(jdsField.getId(), numberListener);
+            propertyListeners.put(jdsField.getId(), numberListener);
             integerProperties.put(jdsField.getId(), integerProperty);
             integerProperty.addListener(numberListener);
         } else
@@ -79,7 +79,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleObjectProperty<LocalDateTime> localDateTimeProperty) {
         if (jdsField.getType() == JdsFieldType.DATE_TIME) {
             LocalDateTimeListener localDateTimeListener = new LocalDateTimeListener();
-            allFields.put(jdsField.getId(), localDateTimeListener);
+            propertyListeners.put(jdsField.getId(), localDateTimeListener);
             dateProperties.put(jdsField.getId(), localDateTimeProperty);
             localDateTimeProperty.addListener(localDateTimeListener);
         } else
@@ -89,7 +89,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleStringProperty stringProperty) {
         if (jdsField.getType() == JdsFieldType.TEXT) {
             StringListener stringListener = new StringListener();
-            allFields.put(jdsField.getId(), stringListener);
+            propertyListeners.put(jdsField.getId(), stringListener);
             stringProperties.put(jdsField.getId(), stringProperty);
             stringProperty.addListener(stringListener);
         } else
@@ -99,7 +99,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleFloatProperty floatProperty) {
         if (jdsField.getType() == JdsFieldType.FLOAT) {
             NumberListener numberListener = new NumberListener();
-            allFields.put(jdsField.getId(), numberListener);
+            propertyListeners.put(jdsField.getId(), numberListener);
             floatProperties.put(jdsField.getId(), floatProperty);
             floatProperty.addListener(numberListener);
         } else
@@ -109,7 +109,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleLongProperty longProperty) {
         if (jdsField.getType() == JdsFieldType.LONG) {
             NumberListener numberListener = new NumberListener();
-            allFields.put(jdsField.getId(), numberListener);
+            propertyListeners.put(jdsField.getId(), numberListener);
             longProperties.put(jdsField.getId(), longProperty);
             longProperty.addListener(numberListener);
         } else
@@ -119,9 +119,19 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void map(final JdsField jdsField, final SimpleDoubleProperty doubleProperty) {
         if (jdsField.getType() == JdsFieldType.DOUBLE) {
             NumberListener numberListener = new NumberListener();
-            allFields.put(jdsField.getId(), numberListener);
+            propertyListeners.put(jdsField.getId(), numberListener);
             doubleProperties.put(jdsField.getId(), doubleProperty);
             doubleProperty.addListener(numberListener);
+        } else
+            throw new RuntimeException("Please init jdsField [" + jdsField + "] to the correct type");
+    }
+
+    protected final void map(final JdsField jdsField, final SimpleBooleanProperty booleanProperty) {
+        if (jdsField.getType() == JdsFieldType.BOOLEAN) {
+            BooleanListener booleanListener = new BooleanListener();
+            propertyListeners.put(jdsField.getId(), booleanListener);
+            booleanProperties.put(jdsField.getId(), booleanProperty);
+            booleanProperty.addListener(booleanListener);
         } else
             throw new RuntimeException("Please init jdsField [" + jdsField + "] to the correct type");
     }
@@ -129,7 +139,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void mapStrings(final JdsField jdsField, final SimpleListProperty<String> strings) {
         if (jdsField.getType() == JdsFieldType.ARRAY_TEXT) {
             ListStringListener listStringListener = new ListStringListener();
-            allFields.put(jdsField.getId(), listStringListener);
+            propertyListeners.put(jdsField.getId(), listStringListener);
             stringArrayProperties.put(jdsField.getId(), strings);
             strings.addListener(listStringListener);
         } else
@@ -139,7 +149,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void mapFloats(final JdsField jdsField, final SimpleListProperty<Float> floats) {
         if (jdsField.getType() == JdsFieldType.ARRAY_FLOAT) {
             ListNumberListener listStringListener = new ListNumberListener();
-            allFields.put(jdsField.getId(), listStringListener);
+            propertyListeners.put(jdsField.getId(), listStringListener);
             floatArrayProperties.put(jdsField.getId(), floats);
             floats.addListener(listStringListener);
         } else
@@ -149,7 +159,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void mapDoubles(final JdsField jdsField, final SimpleListProperty<Double> doubles) {
         if (jdsField.getType() == JdsFieldType.ARRAY_DOUBLE) {
             ListNumberListener listStringListener = new ListNumberListener();
-            allFields.put(jdsField.getId(), listStringListener);
+            propertyListeners.put(jdsField.getId(), listStringListener);
             doubleArrayProperties.put(jdsField.getId(), doubles);
             doubles.addListener(listStringListener);
         } else
@@ -159,7 +169,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     protected final void mapLongs(final JdsField jdsField, final SimpleListProperty<Long> longs) {
         if (jdsField.getType() == JdsFieldType.ARRAY_LONG) {
             ListNumberListener listStringListener = new ListNumberListener();
-            allFields.put(jdsField.getId(), listStringListener);
+            propertyListeners.put(jdsField.getId(), listStringListener);
             longArrayProperties.put(jdsField.getId(), longs);
             longs.addListener(listStringListener);
         } else
@@ -170,7 +180,7 @@ public abstract class JdsEntity extends JdsEntityBase {
         allEnums.add(jdsFieldEnum);
         if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_TEXT) {
             ListStringListener listStringListener = new ListStringListener();
-            allFields.put(jdsFieldEnum.getField().getId(), listStringListener);
+            propertyListeners.put(jdsFieldEnum.getField().getId(), listStringListener);
             enumProperties.put(jdsFieldEnum, strings);
             strings.addListener(listStringListener);
         } else
@@ -208,7 +218,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     public final List<Long> modifiedFields() {
-        return allFields.entrySet().parallelStream().filter(set -> set.getValue().getChanged() == true).map(p -> p.getKey()).collect(Collectors.toList());
+        return propertyListeners.entrySet().parallelStream().filter(set -> set.getValue().getChanged() == true).map(p -> p.getKey()).collect(Collectors.toList());
     }
 
     public final List<Long> modifiedObjects() {

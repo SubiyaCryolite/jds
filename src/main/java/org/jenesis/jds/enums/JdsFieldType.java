@@ -16,7 +16,8 @@ public enum JdsFieldType {
     ARRAY_LONG(9),
     ARRAY_TEXT(10),
     ARRAY_DATE_TIME(11),
-    ENUM_TEXT(12);
+    ENUM_TEXT(12),
+    BOOLEAN(13);
 
     private final int type;
 
