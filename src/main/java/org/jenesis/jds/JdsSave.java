@@ -8,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by ifunga on 12/02/2017.
@@ -298,7 +297,7 @@ public class JdsSave {
      */
     private static void saveBooleans(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreInteger WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveInteger()) : connection.prepareStatement(jdsDatabase.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -340,7 +339,7 @@ public class JdsSave {
      */
     private static void saveIntegers(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreInteger WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveInteger()) : connection.prepareStatement(jdsDatabase.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -382,7 +381,7 @@ public class JdsSave {
      */
     private static void saveFloats(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreFloat WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveFloat()) : connection.prepareStatement(jdsDatabase.saveFloat());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -424,7 +423,7 @@ public class JdsSave {
      */
     private static void saveDoubles(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreDouble WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDouble()) : connection.prepareStatement(jdsDatabase.saveDouble());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -466,7 +465,7 @@ public class JdsSave {
      */
     private static void saveLongs(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreLong WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveLong()) : connection.prepareStatement(jdsDatabase.saveLong());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -508,7 +507,7 @@ public class JdsSave {
      */
     private static void saveStrings(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreText WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveString()) : connection.prepareStatement(jdsDatabase.saveString());
              PreparedStatement log = connection.prepareStatement(logSql)) {
@@ -550,7 +549,7 @@ public class JdsSave {
      */
     private static void saveDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> dateProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) SELECT EntityGuid,FieldId,Value FROM JdsStoreDateTime WHERE FieldId =? AND EntityGuid = ?";
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDateTime()) : connection.prepareStatement(jdsDatabase.saveDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
