@@ -172,7 +172,6 @@ public class JdsLoad {
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.floatArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
                     property.add(value);
-                    currentEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -192,7 +191,6 @@ public class JdsLoad {
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.doubleArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
                     property.add(value);
-                    currentEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -212,7 +210,6 @@ public class JdsLoad {
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.longArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
                     property.add(value);
-                    currentEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -232,7 +229,6 @@ public class JdsLoad {
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.dateTimeArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
                     property.add(value.toLocalDateTime());
-                    currentEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -252,7 +248,6 @@ public class JdsLoad {
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.stringArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
                     property.add(value);
-                    currentEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -273,14 +268,12 @@ public class JdsLoad {
                     if (jdsEntity.integerArrayProperties.containsKey(fieldId)) {
                         SimpleListProperty<Integer> property = jdsEntity.integerArrayProperties.get(fieldId);
                         property.add(value);
-                        jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                     } else {
                         Optional<JdsFieldEnum> fieldEnum = jdsEntity.enumProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
                         if (fieldEnum.isPresent()) {
                             JdsFieldEnum jdsFieldEnum = fieldEnum.get();
                             SimpleListProperty<String> property = jdsEntity.enumProperties.get(jdsFieldEnum);
                             property.add(jdsFieldEnum.getValue(value));
-                            jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                         }
                     }
                 }
@@ -313,7 +306,6 @@ public class JdsLoad {
                             innerEntityGuids.add(entityGuid);
                             propertyList.get().add(jdsEntity);
                             innerObjects.add(jdsEntity);
-                            parentEntity.allObjects.get(entityId).setChanged(false);
                         } else if (parentEntity.objectProperties.containsKey(entityId)) {
                             SimpleObjectProperty<JdsEntity> property = ((SimpleObjectProperty<JdsEntity>) parentEntity.objectProperties.get(entityId));
                             Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
@@ -323,7 +315,6 @@ public class JdsLoad {
                             innerEntityGuids.add(entityGuid);
                             property.set(jdsEntity);
                             innerObjects.add(jdsEntity);
-                            parentEntity.allObjects.get(entityId).setChanged(false);
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace(System.err);
@@ -399,7 +390,6 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.dateProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.dateProperties.get(fieldId).set(value.toLocalDateTime());
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -418,7 +408,6 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.doubleProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.doubleProperties.get(fieldId).set(value);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -437,11 +426,9 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.integerProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.integerProperties.get(fieldId).set(value);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.booleanProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.booleanProperties.get(fieldId).set(value == 1);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -460,7 +447,6 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.floatProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.floatProperties.get(fieldId).set(value);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -479,7 +465,6 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.longProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.longProperties.get(fieldId).set(value);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }
@@ -498,7 +483,6 @@ public class JdsLoad {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.stringProperties.containsKey(fieldId)).forEach(jdsEntity -> {
                     jdsEntity.stringProperties.get(fieldId).set(value);
-                    jdsEntity.propertyListeners.get(fieldId).setChanged(false);
                 });
             }
         }

@@ -4,16 +4,13 @@ package org.jenesis.jds;
 import org.jenesis.jds.enums.JdsEnumTable;
 import org.jenesis.jds.enums.JdsImplementation;
 import org.jenesis.jds.enums.JdsSqlType;
-import org.jenesis.jds.listeners.BaseListener;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 
 /**
@@ -87,8 +84,7 @@ public abstract class JdsDatabase {
         }
     }
 
-    public JdsImplementation getImplementation()
-    {
+    public JdsImplementation getImplementation() {
         return this.implementation;
     }
 
@@ -107,18 +103,17 @@ public abstract class JdsDatabase {
     }
 
     protected final void init(JdsSqlType type, JdsEnumTable jdsEnumTable) {
-        switch (type)
-        {
+        switch (type) {
             case TABLE:
-                if(!doesTableExist(jdsEnumTable.getName()))
+                if (!doesTableExist(jdsEnumTable.getName()))
                     initialise(jdsEnumTable);
                 break;
             case STORED_PROCEDURE:
-                if(!doesProcedureExist(jdsEnumTable.getName()))
+                if (!doesProcedureExist(jdsEnumTable.getName()))
                     initialise(jdsEnumTable);
                 break;
             case TRIGGER:
-                if(!doesTriggerExist(jdsEnumTable.getName()))
+                if (!doesTriggerExist(jdsEnumTable.getName()))
                     initialise(jdsEnumTable);
                 break;
         }
@@ -291,13 +286,13 @@ public abstract class JdsDatabase {
 
     abstract void createStoreEntityBinding();
 
-    public final synchronized void mapClassFields(final long entityId, final HashMap<Long, BaseListener> listenerHashMap) {
+    public final synchronized void mapClassFields(final long entityId, final Set<Long> listenerHashMap) {
         try (Connection connection = getConnection();
              PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields())) {
             connection.setAutoCommit(false);
-            for (Map.Entry<Long, BaseListener> fieldId : listenerHashMap.entrySet()) {
+            for (Long fieldId : listenerHashMap) {
                 statement.setLong(1, entityId);
-                statement.setLong(2, fieldId.getKey());
+                statement.setLong(2, fieldId);
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -308,13 +303,13 @@ public abstract class JdsDatabase {
         }
     }
 
-    public final synchronized void mapClassEnums(final long entityCode, final HashSet<JdsFieldEnum> fields) {
+    public final synchronized void mapClassEnums(final long entityCode, final Set<JdsFieldEnum> fields) {
         mapEnumValues(fields);
         mapEntityEnums(entityCode, fields);
         System.out.printf("Mapped Enums for Entity[%s]\n", entityCode);
     }
 
-    private final synchronized void mapEntityEnums(long entityId, HashSet<JdsFieldEnum> fields) {
+    private final synchronized void mapEntityEnums(final long entityId, final Set<JdsFieldEnum> fields) {
         try (Connection connection = getConnection();
              PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEntityEnums()) : connection.prepareStatement(mapEntityEnums())) {
             connection.setAutoCommit(false);
@@ -331,7 +326,7 @@ public abstract class JdsDatabase {
         }
     }
 
-    private final synchronized void mapEnumValues(HashSet<JdsFieldEnum> fields) {
+    private final synchronized void mapEnumValues(final Set<JdsFieldEnum> fields) {
         try (Connection connection = getConnection(); PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEnumValues()) : connection.prepareStatement(mapEnumValues())) {
             connection.setAutoCommit(false);
             for (JdsFieldEnum field : fields) {

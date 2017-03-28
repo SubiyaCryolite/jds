@@ -1,7 +1,6 @@
 package org.jenesis.jds;
 
 import javafx.beans.property.*;
-import org.jenesis.jds.listeners.BaseListener;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -16,8 +15,8 @@ abstract class JdsEntityBase {
     protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     //field and enum maps
     protected final static HashSet<Long> map = new HashSet<>();
-    protected final HashMap<Long, BaseListener> propertyListeners = new HashMap<>();
-    protected final HashMap<Long, BaseListener> allObjects = new HashMap<>();
+    protected final HashSet<Long> properties = new HashSet<>();
+    protected final HashSet<Long> objects = new HashSet<>();
     protected final HashSet<JdsFieldEnum> allEnums = new HashSet<>();
     //stringProperties and dateProperties
     protected final HashMap<Long, SimpleObjectProperty<LocalDateTime>> dateProperties = new HashMap<>();
