@@ -5,7 +5,7 @@ apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
 group = 'io.github.subiyacryolite'
-version = '1.170402'
+version = '1.170402-SNAPSHOT'
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
