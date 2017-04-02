@@ -1,18 +1,19 @@
 apply plugin: 'java'
 apply plugin: 'idea' //run idea to resolve dependencies in intellij
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
+group = 'org.jenesis'
+version = '1.170402'
+archivesBaseName = project.name
+description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://maven.atlassian.com/3rdparty/"
-    }
-    maven {
-        url "http://clojars.org/repo/"
-    }
+    maven { url "https://maven.atlassian.com/3rdparty/" }
+    maven { url "http://clojars.org/repo/" }
 }
 
 dependencies {
@@ -21,15 +22,70 @@ dependencies {
     testCompile 'com.microsoft.sqlserver:sqljdbc4:4.0'
     testCompile 'org.postgresql:postgresql:42.0.0'
     testCompile 'mysql:mysql-connector-java:6.0.6'
-
 }
 
 jar {
     from configurations.runtime
     manifest {
         attributes(
-                "Implementation-Title": "Jenesis Data Store",
-                "Implementation-Version": "alpha 0.2017.03.04"
+            "Implementation-Title": "Jenesis Data Store",
+            "Implementation-Version": project.version
         )
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            pom.project {
+                name 'Jenesis Data Store'
+                packaging 'jar'
+                description = project.description
+                url 'https://github.com/SubiyaCryolite/Jenesis-Data-Store'
+                scm {
+                    connection 'scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git'
+                    developerConnection 'scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git'
+                    url 'https://github.com/SubiyaCryolite/Jenesis-Data-Store'
+                }
+                licenses {
+                    license {
+                        name 'The 3-Clause BSD License'
+                        url 'https://opensource.org/licenses/BSD-3-Clause'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'SubiyaCryolite'
+                        name 'Ifunga Ndana'
+                        email 'ifungandana@gmail.com'
+                    }
+                }
+            }
+        }
     }
 }

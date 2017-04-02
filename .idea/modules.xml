@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JenesisDataStore.iml" filepath="$PROJECT_DIR$/.idea/modules/JenesisDataStore.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JenesisDataStore_main.iml" filepath="$PROJECT_DIR$/.idea/modules/JenesisDataStore_main.iml" group="JenesisDataStore" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JenesisDataStore_test.iml" filepath="$PROJECT_DIR$/.idea/modules/JenesisDataStore_test.iml" group="JenesisDataStore" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds.iml" filepath="$PROJECT_DIR$/.idea/modules/jds.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds_main.iml" filepath="$PROJECT_DIR$/.idea/modules/jds_main.iml" group="jds" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds_test.iml" filepath="$PROJECT_DIR$/.idea/modules/jds_test.iml" group="jds" />
     </modules>
   </component>
 </project>

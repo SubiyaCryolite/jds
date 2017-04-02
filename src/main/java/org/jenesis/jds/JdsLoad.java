@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
  */
 public class JdsLoad {
 
-    final private static int batchSize = 1000; //Java supports up to 1000 prepared supportsStatements depending on the driver
+    /**
+     * Java supports up to 1000 prepared supportsStatements depending on the driver
+     */
+    final private static int batchSize = 1000;
 
     /**
      * @param jdsDatabase
