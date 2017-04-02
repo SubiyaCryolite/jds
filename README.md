@@ -114,7 +114,7 @@ Depending on the type of field, JDS will require that you set you objects proper
 ```java
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import org.jenesis.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 @JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
@@ -198,8 +198,8 @@ The class below shows how you can achieve this.
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.jenesis.jds.JdsEntity;
-import org.jenesis.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.JdsEntity;
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 

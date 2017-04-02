@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>org.jenesis.jds.JdsSave</li>
+<li>io.github.subiyacryolite.jds.JdsSave</li>
 </ul>
 </li>
 </ul>
@@ -148,7 +148,7 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#bindAndSaveInnerObjects-org.jenesis.jds.JdsDatabase-java.util.Map-">bindAndSaveInnerObjects</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#bindAndSaveInnerObjects-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">bindAndSaveInnerObjects</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                        java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleObjectProperty&lt;? extends <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>&gt;&gt;&gt;&nbsp;objectProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -179,86 +179,86 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#mapEntity-org.jenesis.jds.JdsDatabase-org.jenesis.jds.JdsEntity-">mapEntity</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#mapEntity-io.github.subiyacryolite.jds.JdsDatabase-io.github.subiyacryolite.jds.JdsEntity-">mapEntity</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
          <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>&nbsp;jdsEntity)</code>&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#save-org.jenesis.jds.JdsDatabase-int-java.util.Collection-">save</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#save-io.github.subiyacryolite.jds.JdsDatabase-int-java.util.Collection-">save</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
     int&nbsp;batchSize,
     java.util.Collection&lt;? extends <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>&gt;&nbsp;entities)</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#save-org.jenesis.jds.JdsDatabase-int-org.jenesis.jds.JdsEntity...-">save</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#save-io.github.subiyacryolite.jds.JdsDatabase-int-io.github.subiyacryolite.jds.JdsEntity...-">save</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
     int&nbsp;batchSize,
     <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>...&nbsp;entities)</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayDates-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayDates</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayDates-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayDates</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
               java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.time.LocalDateTime&gt;&gt;&gt;&nbsp;dateTimeArrayProperties)</code>
 <div class="block">Save all dates in one go</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayDoubles-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayDoubles</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayDoubles-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayDoubles</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                 java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.lang.Double&gt;&gt;&gt;&nbsp;doubleArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayFloats-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayFloats</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayFloats-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayFloats</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.lang.Float&gt;&gt;&gt;&nbsp;floatArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayIntegers-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayIntegers</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayIntegers-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayIntegers</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                  java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.lang.Integer&gt;&gt;&gt;&nbsp;integerArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i10" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayLongs-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayLongs</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayLongs-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayLongs</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
               java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.lang.Long&gt;&gt;&gt;&nbsp;longArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayObjects-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayObjects</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayObjects-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayObjects</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                 java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;? extends <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>&gt;&gt;&gt;&nbsp;objectArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i12" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayStrings-org.jenesis.jds.JdsDatabase-java.util.Map-">saveArrayStrings</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveArrayStrings-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveArrayStrings</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
                 java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleListProperty&lt;java.lang.String&gt;&gt;&gt;&nbsp;stringArrayProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveBooleans-org.jenesis.jds.JdsDatabase-java.util.Map-">saveBooleans</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveBooleans-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveBooleans</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
             java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleBooleanProperty&gt;&gt;&nbsp;booleanProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i14" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveDates-org.jenesis.jds.JdsDatabase-java.util.Map-">saveDates</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveDates-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveDates</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
          java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleObjectProperty&lt;java.time.LocalDateTime&gt;&gt;&gt;&nbsp;dateProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i15" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveDoubles-org.jenesis.jds.JdsDatabase-java.util.Map-">saveDoubles</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveDoubles-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveDoubles</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
            java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleDoubleProperty&gt;&gt;&nbsp;doubleProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveEnums-org.jenesis.jds.JdsDatabase-java.util.Map-">saveEnums</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveEnums-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveEnums</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
          java.util.Map&lt;java.lang.String,java.util.Map&lt;<a href="../../../org/jenesis/jds/JdsFieldEnum.html" title="class in org.jenesis.jds">JdsFieldEnum</a>,javafx.beans.property.SimpleListProperty&lt;java.lang.String&gt;&gt;&gt;&nbsp;enumStrings)</code>&nbsp;</td>
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveFloats-org.jenesis.jds.JdsDatabase-java.util.Map-">saveFloats</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveFloats-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveFloats</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
           java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleFloatProperty&gt;&gt;&nbsp;floatProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i18" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveInner-org.jenesis.jds.JdsDatabase-java.util.Collection-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.HashSet-">saveInner</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveInner-io.github.subiyacryolite.jds.JdsDatabase-java.util.Collection-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.HashSet-">saveInner</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;database,
          java.util.Collection&lt;? extends <a href="../../../org/jenesis/jds/JdsEntity.html" title="class in org.jenesis.jds">JdsEntity</a>&gt;&nbsp;entities,
          java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleObjectProperty&lt;java.time.LocalDateTime&gt;&gt;&gt;&nbsp;dateTimeProperties,
          java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleStringProperty&gt;&gt;&nbsp;stringProperties,
@@ -280,22 +280,22 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i19" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveIntegers-org.jenesis.jds.JdsDatabase-java.util.Map-">saveIntegers</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveIntegers-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveIntegers</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
             java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleIntegerProperty&gt;&gt;&nbsp;integerProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i20" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveLongs-org.jenesis.jds.JdsDatabase-java.util.Map-">saveLongs</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveLongs-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveLongs</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
          java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleLongProperty&gt;&gt;&nbsp;longProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i21" class="rowColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveOverviews-org.jenesis.jds.JdsDatabase-java.util.HashSet-">saveOverviews</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveOverviews-io.github.subiyacryolite.jds.JdsDatabase-java.util.HashSet-">saveOverviews</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
              java.util.HashSet&lt;<a href="../../../org/jenesis/jds/JdsEntityOverview.html" title="class in org.jenesis.jds">JdsEntityOverview</a>&gt;&nbsp;overviews)</code>&nbsp;</td>
 </tr>
 <tr id="i22" class="altColor">
 <td class="colFirst"><code>private static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveStrings-org.jenesis.jds.JdsDatabase-java.util.Map-">saveStrings</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/jenesis/jds/JdsSave.html#saveStrings-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">saveStrings</a></span>(<a href="../../../org/jenesis/jds/JdsDatabase.html" title="class in org.jenesis.jds">JdsDatabase</a>&nbsp;jdsDatabase,
            java.util.Map&lt;java.lang.String,java.util.Map&lt;java.lang.Long,javafx.beans.property.SimpleStringProperty&gt;&gt;&nbsp;stringProperties)</code>&nbsp;</td>
 </tr>
 <tr id="i23" class="rowColor">
@@ -360,7 +360,7 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="save-org.jenesis.jds.JdsDatabase-int-java.util.Collection-">
+<a name="save-io.github.subiyacryolite.jds.JdsDatabase-int-java.util.Collection-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -475,7 +475,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveInner-org.jenesis.jds.JdsDatabase-java.util.Collection-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.HashSet-">
+<a name="saveInner-io.github.subiyacryolite.jds.JdsDatabase-java.util.Collection-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.Map-java.util.HashSet-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -524,7 +524,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="save-org.jenesis.jds.JdsDatabase-int-org.jenesis.jds.JdsEntity...-">
+<a name="save-io.github.subiyacryolite.jds.JdsDatabase-int-io.github.subiyacryolite.jds.JdsEntity...-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -541,7 +541,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveOverviews-org.jenesis.jds.JdsDatabase-java.util.HashSet-">
+<a name="saveOverviews-io.github.subiyacryolite.jds.JdsDatabase-java.util.HashSet-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -556,7 +556,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="mapEntity-org.jenesis.jds.JdsDatabase-org.jenesis.jds.JdsEntity-">
+<a name="mapEntity-io.github.subiyacryolite.jds.JdsDatabase-io.github.subiyacryolite.jds.JdsEntity-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -570,7 +570,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveBooleans-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveBooleans-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -585,7 +585,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveIntegers-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveIntegers-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -600,7 +600,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveFloats-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveFloats-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -615,7 +615,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveDoubles-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveDoubles-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -630,7 +630,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveLongs-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveLongs-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -645,7 +645,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveStrings-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveStrings-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -660,7 +660,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveDates-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveDates-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -675,7 +675,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayDates-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayDates-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -690,7 +690,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayFloats-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayFloats-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -705,7 +705,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayIntegers-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayIntegers-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -720,7 +720,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayDoubles-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayDoubles-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -735,7 +735,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayLongs-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayLongs-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -750,7 +750,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayStrings-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayStrings-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -765,7 +765,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveEnums-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveEnums-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -780,7 +780,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="saveArrayObjects-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="saveArrayObjects-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -795,7 +795,7 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="bindAndSaveInnerObjects-org.jenesis.jds.JdsDatabase-java.util.Map-">
+<a name="bindAndSaveInnerObjects-io.github.subiyacryolite.jds.JdsDatabase-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockList">

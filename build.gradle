@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
-group = 'org.jenesis'
+group = 'io.github.subiyacryolite'
 version = '1.170402'
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
