@@ -14,4 +14,5 @@ public class TestFields {
     public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
     public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM_TEXT);
     public static final JdsField COUNTRY_NAME = new JdsField(7, "country_name", JdsFieldType.TEXT);
+    public static final JdsField PRIMARY_ADDRESS_ENUM = new JdsField(8,"primary_address_enum", JdsFieldType.ENUM_TEXT);
 }

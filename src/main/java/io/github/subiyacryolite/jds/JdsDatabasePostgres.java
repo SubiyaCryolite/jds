@@ -13,9 +13,9 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.enums.JdsDatabaseComponent;
 import io.github.subiyacryolite.jds.enums.JdsEnumTable;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
-import io.github.subiyacryolite.jds.enums.JdsSqlType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,159 +66,159 @@ public class JdsDatabasePostgres extends JdsDatabase {
 
     @Override
     protected void createStoreText() {
-        createTableFromFile("sql/postgresql/createStoreText.sql");
+        executeSqlFromFile("sql/postgresql/createStoreText.sql");
     }
 
     @Override
     protected void createStoreDateTime() {
-        createTableFromFile("sql/postgresql/createStoreDateTime.sql");
+        executeSqlFromFile("sql/postgresql/createStoreDateTime.sql");
     }
 
     @Override
     protected void createStoreInteger() {
-        createTableFromFile("sql/postgresql/createStoreInteger.sql");
+        executeSqlFromFile("sql/postgresql/createStoreInteger.sql");
     }
 
     @Override
     protected void createStoreFloat() {
-        createTableFromFile("sql/postgresql/createStoreFloat.sql");
+        executeSqlFromFile("sql/postgresql/createStoreFloat.sql");
     }
 
     @Override
     protected void createStoreDouble() {
-        createTableFromFile("sql/postgresql/createStoreDouble.sql");
+        executeSqlFromFile("sql/postgresql/createStoreDouble.sql");
     }
 
     @Override
     protected void createStoreLong() {
-        createTableFromFile("sql/postgresql/createStoreLong.sql");
+        executeSqlFromFile("sql/postgresql/createStoreLong.sql");
     }
 
     @Override
     protected void createStoreTextArray() {
-        createTableFromFile("sql/postgresql/createStoreTextArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreTextArray.sql");
     }
 
     @Override
     protected void createStoreDateTimeArray() {
-        createTableFromFile("sql/postgresql/createStoreDateTimeArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreDateTimeArray.sql");
     }
 
     @Override
     protected void createStoreIntegerArray() {
-        createTableFromFile("sql/postgresql/createStoreIntegerArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreIntegerArray.sql");
     }
 
     @Override
     protected void createStoreFloatArray() {
-        createTableFromFile("sql/postgresql/createStoreFloatArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreFloatArray.sql");
     }
 
     @Override
     protected void createStoreDoubleArray() {
-        createTableFromFile("sql/postgresql/createStoreDoubleArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreDoubleArray.sql");
     }
 
     @Override
     protected void createStoreLongArray() {
-        createTableFromFile("sql/postgresql/createStoreLongArray.sql");
+        executeSqlFromFile("sql/postgresql/createStoreLongArray.sql");
     }
 
     @Override
     protected void createStoreEntities() {
-        createTableFromFile("sql/postgresql/createRefEntities.sql");
+        executeSqlFromFile("sql/postgresql/createRefEntities.sql");
     }
 
     @Override
     protected void createRefEnumValues() {
-        createTableFromFile("sql/postgresql/createRefEnumValues.sql");
+        executeSqlFromFile("sql/postgresql/createRefEnumValues.sql");
     }
 
     @Override
     protected void createRefFields() {
-        createTableFromFile("sql/postgresql/createRefFields.sql");
+        executeSqlFromFile("sql/postgresql/createRefFields.sql");
     }
 
     @Override
     protected void createRefFieldTypes() {
-        createTableFromFile("sql/postgresql/createRefFieldTypes.sql");
+        executeSqlFromFile("sql/postgresql/createRefFieldTypes.sql");
     }
 
     @Override
     protected void createBindEntityFields() {
-        createTableFromFile("sql/postgresql/createBindEntityFields.sql");
+        executeSqlFromFile("sql/postgresql/createBindEntityFields.sql");
     }
 
     @Override
     protected void createBindEntityEnums() {
-        createTableFromFile("sql/postgresql/createBindEntityEnums.sql");
+        executeSqlFromFile("sql/postgresql/createBindEntityEnums.sql");
     }
 
     @Override
     protected void createRefEntityOverview() {
-        createTableFromFile("sql/postgresql/createStoreEntityOverview.sql");
+        executeSqlFromFile("sql/postgresql/createStoreEntityOverview.sql");
     }
 
     @Override
     protected void createRefOldFieldValues() {
-        createTableFromFile("sql/postgresql/createStoreOldFieldValues.sql");
+        executeSqlFromFile("sql/postgresql/createStoreOldFieldValues.sql");
     }
 
     @Override
     protected void createStoreEntityBinding() {
-        createTableFromFile("sql/postgresql/createStoreEntityBinding.sql");
+        executeSqlFromFile("sql/postgresql/createStoreEntityBinding.sql");
     }
 
     @Override
-    protected void initExtra() {
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveText);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveLong);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapClassName);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
+    protected void prepareCustomDatabaseComponents() {
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveText);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveLong);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapClassName);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
     }
 
     @Override
-    protected void initialiseExtra(JdsEnumTable jdsEnumTable) {
+    protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
             case SaveText:
-                createTableFromFile("sql/postgresql/procedures/procStoreText.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreText.sql");
                 break;
             case SaveLong:
-                createTableFromFile("sql/postgresql/procedures/procStoreLong.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreLong.sql");
                 break;
             case SaveInteger:
-                createTableFromFile("sql/postgresql/procedures/procStoreInteger.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreInteger.sql");
                 break;
             case SaveFloat:
-                createTableFromFile("sql/postgresql/procedures/procStoreFloat.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreFloat.sql");
                 break;
             case SaveDouble:
-                createTableFromFile("sql/postgresql/procedures/procStoreDouble.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreDouble.sql");
                 break;
             case SaveDateTime:
-                createTableFromFile("sql/postgresql/procedures/procStoreDateTime.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreDateTime.sql");
                 break;
             case SaveEntity:
-                createTableFromFile("sql/postgresql/procedures/procStoreEntityOverview.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procStoreEntityOverview.sql");
                 break;
             case MapEntityFields:
-                createTableFromFile("sql/postgresql/procedures/procBindEntityFields.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procBindEntityFields.sql");
                 break;
             case MapEntityEnums:
-                createTableFromFile("sql/postgresql/procedures/procBindEntityEnums.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procBindEntityEnums.sql");
                 break;
             case MapClassName:
-                createTableFromFile("sql/postgresql/procedures/procRefEntities.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procRefEntities.sql");
                 break;
             case MapEnumValues:
-                createTableFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
+                executeSqlFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
                 break;
         }
     }

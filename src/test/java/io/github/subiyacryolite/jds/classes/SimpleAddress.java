@@ -1,33 +1,41 @@
 package io.github.subiyacryolite.jds.classes;
 
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.util.List;
 
 @JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
-    private final SimpleStringProperty streetName;
-    private final SimpleIntegerProperty plotNumber;
-    private final SimpleStringProperty area;
-    private final SimpleStringProperty city;
-    private final SimpleStringProperty provinceOrState;
-    private final SimpleStringProperty country;
+    private final SimpleStringProperty streetName = new SimpleStringProperty("");
+    private final SimpleIntegerProperty plotNumber = new SimpleIntegerProperty(0);
+    private final SimpleStringProperty area = new SimpleStringProperty("");
+    private final SimpleStringProperty city = new SimpleStringProperty("");
+    private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
+    private final SimpleStringProperty country = new SimpleStringProperty("");
+    private final SimpleListProperty<String> primaryAddress = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public SimpleAddress() {
-        this.streetName = new SimpleStringProperty("");
-        this.plotNumber = new SimpleIntegerProperty(0);
-        this.area = new SimpleStringProperty("");
-        this.city = new SimpleStringProperty("");
-        this.provinceOrState = new SimpleStringProperty("");
-        this.country = new SimpleStringProperty("");
-        //map your properties
         map(TestFields.STREET_NAME, streetName);
         map(TestFields.PLOT_NUMBER, plotNumber);
         map(TestFields.AREA_NAME, area);
         map(TestFields.CITY_NAME, city);
         map(TestFields.COUNTRY_NAME, country);
         map(TestFields.PROVINCE_NAME, provinceOrState);
+        mapEnums(TestEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
+    }
+
+    public List<String> getPrimaryAddress() {
+        return this.primaryAddress.get();
+    }
+
+    public void setPrimaryAddress(ObservableList<String> value) {
+        this.primaryAddress.set(value);
     }
 
     public String getStreetName() {

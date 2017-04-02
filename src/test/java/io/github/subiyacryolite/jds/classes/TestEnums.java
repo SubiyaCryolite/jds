@@ -6,5 +6,5 @@ import io.github.subiyacryolite.jds.JdsFieldEnum;
  * Created by ifung on 18/02/2017.
  */
 public class TestEnums {
-    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(TestFields.SEX_ENUM, "Male", "Female", "Other");
+    public final static JdsFieldEnum PRIMARY_ADDRESS_ENUM = new JdsFieldEnum(TestFields.PRIMARY_ADDRESS_ENUM, "Yes", "No");
 }

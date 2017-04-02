@@ -13,9 +13,9 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.enums.JdsDatabaseComponent;
 import io.github.subiyacryolite.jds.enums.JdsEnumTable;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
-import io.github.subiyacryolite.jds.enums.JdsSqlType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +28,6 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     protected JdsDatabaseTransactionalSql() {
         supportsStatements = true;
-        deleteAsFunction = true;
         implementation= JdsImplementation.TSQL;
     }
 
@@ -85,163 +84,163 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     @Override
     protected void createStoreText() {
-        createTableFromFile("sql/tsql/createStoreText.sql");
+        executeSqlFromFile("sql/tsql/createStoreText.sql");
     }
 
     @Override
     protected void createStoreDateTime() {
-        createTableFromFile("sql/tsql/createStoreDateTime.sql");
+        executeSqlFromFile("sql/tsql/createStoreDateTime.sql");
     }
 
     @Override
     protected void createStoreInteger() {
-        createTableFromFile("sql/tsql/createStoreInteger.sql");
+        executeSqlFromFile("sql/tsql/createStoreInteger.sql");
     }
 
     @Override
     protected void createStoreFloat() {
-        createTableFromFile("sql/tsql/createStoreFloat.sql");
+        executeSqlFromFile("sql/tsql/createStoreFloat.sql");
     }
 
     @Override
     protected void createStoreDouble() {
-        createTableFromFile("sql/tsql/createStoreDouble.sql");
+        executeSqlFromFile("sql/tsql/createStoreDouble.sql");
     }
 
     @Override
     protected void createStoreLong() {
-        createTableFromFile("sql/tsql/createStoreLong.sql");
+        executeSqlFromFile("sql/tsql/createStoreLong.sql");
     }
 
     @Override
     protected void createStoreTextArray() {
-        createTableFromFile("sql/tsql/createStoreTextArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreTextArray.sql");
     }
 
     @Override
     protected void createStoreDateTimeArray() {
-        createTableFromFile("sql/tsql/createStoreDateTimeArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreDateTimeArray.sql");
     }
 
     @Override
     protected void createStoreIntegerArray() {
-        createTableFromFile("sql/tsql/createStoreIntegerArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreIntegerArray.sql");
     }
 
     @Override
     protected void createStoreFloatArray() {
-        createTableFromFile("sql/tsql/createStoreFloatArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreFloatArray.sql");
     }
 
     @Override
     protected void createStoreDoubleArray() {
-        createTableFromFile("sql/tsql/createStoreDoubleArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreDoubleArray.sql");
     }
 
     @Override
     protected void createStoreLongArray() {
-        createTableFromFile("sql/tsql/createStoreLongArray.sql");
+        executeSqlFromFile("sql/tsql/createStoreLongArray.sql");
     }
 
     @Override
     protected void createStoreEntities() {
-        createTableFromFile("sql/tsql/createRefEntities.sql");
+        executeSqlFromFile("sql/tsql/createRefEntities.sql");
     }
 
     @Override
     protected void createRefEnumValues() {
-        createTableFromFile("sql/tsql/createRefEnumValues.sql");
+        executeSqlFromFile("sql/tsql/createRefEnumValues.sql");
     }
 
     @Override
     protected void createRefFields() {
-        createTableFromFile("sql/tsql/createRefFields.sql");
+        executeSqlFromFile("sql/tsql/createRefFields.sql");
     }
 
     @Override
     protected void createRefFieldTypes() {
-        createTableFromFile("sql/tsql/createRefFieldTypes.sql");
+        executeSqlFromFile("sql/tsql/createRefFieldTypes.sql");
     }
 
     @Override
     protected void createBindEntityFields() {
-        createTableFromFile("sql/tsql/createBindEntityFields.sql");
+        executeSqlFromFile("sql/tsql/createBindEntityFields.sql");
     }
 
     @Override
     protected void createBindEntityEnums() {
-        createTableFromFile("sql/tsql/createBindEntityEnums.sql");
+        executeSqlFromFile("sql/tsql/createBindEntityEnums.sql");
     }
 
     @Override
     protected void createRefEntityOverview() {
-        createTableFromFile("sql/tsql/createStoreEntityOverview.sql");
+        executeSqlFromFile("sql/tsql/createStoreEntityOverview.sql");
     }
 
     @Override
     protected void createRefOldFieldValues() {
-        createTableFromFile("sql/tsql/createStoreOldFieldValues.sql");
+        executeSqlFromFile("sql/tsql/createStoreOldFieldValues.sql");
     }
 
     @Override
     protected void createStoreEntityBinding() {
-        createTableFromFile("sql/tsql/createStoreEntityBinding.sql");
+        executeSqlFromFile("sql/tsql/createStoreEntityBinding.sql");
     }
 
     @Override
-    protected void initExtra() {
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveText);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveLong);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapClassName);
-        init(JdsSqlType.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
-        init(JdsSqlType.TRIGGER, JdsEnumTable.CascadeEntityBinding);
+    protected void prepareCustomDatabaseComponents() {
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveText);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveLong);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapClassName);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
+        prepareDatabaseComponent(JdsDatabaseComponent.TRIGGER, JdsEnumTable.CascadeEntityBinding);
     }
 
     @Override
-    protected void initialiseExtra(JdsEnumTable jdsEnumTable) {
+    protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
             case SaveText:
-                createTableFromFile("sql/tsql/procedures/procStoreText.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreText.sql");
                 break;
             case SaveLong:
-                createTableFromFile("sql/tsql/procedures/procStoreLong.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreLong.sql");
                 break;
             case SaveInteger:
-                createTableFromFile("sql/tsql/procedures/procStoreInteger.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreInteger.sql");
                 break;
             case SaveFloat:
-                createTableFromFile("sql/tsql/procedures/procStoreFloat.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreFloat.sql");
                 break;
             case SaveDouble:
-                createTableFromFile("sql/tsql/procedures/procStoreDouble.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreDouble.sql");
                 break;
             case SaveDateTime:
-                createTableFromFile("sql/tsql/procedures/procStoreDateTime.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreDateTime.sql");
                 break;
             case SaveEntity:
-                createTableFromFile("sql/tsql/procedures/procStoreEntityOverview.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreEntityOverview.sql");
                 break;
             case MapEntityFields:
-                createTableFromFile("sql/tsql/procedures/procBindEntityFields.sql");
+                executeSqlFromFile("sql/tsql/procedures/procBindEntityFields.sql");
                 break;
             case MapEntityEnums:
-                createTableFromFile("sql/tsql/procedures/procBindEntityEnums.sql");
+                executeSqlFromFile("sql/tsql/procedures/procBindEntityEnums.sql");
                 break;
             case MapClassName:
-                createTableFromFile("sql/tsql/procedures/procRefEntities.sql");
+                executeSqlFromFile("sql/tsql/procedures/procRefEntities.sql");
                 break;
             case MapEnumValues:
-                createTableFromFile("sql/tsql/procedures/procRefEnumValues.sql");
+                executeSqlFromFile("sql/tsql/procedures/procRefEnumValues.sql");
                 break;
             case CascadeEntityBinding:
-                createTableFromFile("sql/tsql/triggers/createEntityBindingCascade.sql");
+                executeSqlFromFile("sql/tsql/triggers/createEntityBindingCascade.sql");
                 break;
         }
     }

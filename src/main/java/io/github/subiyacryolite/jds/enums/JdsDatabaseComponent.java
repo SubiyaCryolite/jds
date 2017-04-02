@@ -16,8 +16,9 @@ package io.github.subiyacryolite.jds.enums;
 /**
  * Created by ifunga on 05/03/2017.
  */
-public enum JdsSqlType {
+public enum JdsDatabaseComponent {
     STORED_PROCEDURE,
     TABLE,
-    TRIGGER
+    TRIGGER,
+    INDEX
 }

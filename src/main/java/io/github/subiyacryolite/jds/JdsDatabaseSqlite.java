@@ -46,89 +46,89 @@ public class JdsDatabaseSqlite extends JdsDatabase {
     }
 
     protected void createStoreText() {
-        createTableFromFile("sql/sqlite/createStoreText.sql");
+        executeSqlFromFile("sql/sqlite/createStoreText.sql");
     }
 
     protected void createStoreDateTime() {
-        createTableFromFile("sql/sqlite/createStoreDateTime.sql");
+        executeSqlFromFile("sql/sqlite/createStoreDateTime.sql");
     }
 
     protected void createStoreInteger() {
-        createTableFromFile("sql/sqlite/createStoreInteger.sql");
+        executeSqlFromFile("sql/sqlite/createStoreInteger.sql");
     }
 
     protected void createStoreFloat() {
-        createTableFromFile("sql/sqlite/createStoreFloat.sql");
+        executeSqlFromFile("sql/sqlite/createStoreFloat.sql");
     }
 
     protected void createStoreDouble() {
-        createTableFromFile("sql/sqlite/createStoreDouble.sql");
+        executeSqlFromFile("sql/sqlite/createStoreDouble.sql");
     }
 
     protected void createStoreLong() {
-        createTableFromFile("sql/sqlite/createStoreLong.sql");
+        executeSqlFromFile("sql/sqlite/createStoreLong.sql");
     }
 
     protected void createStoreTextArray() {
-        createTableFromFile("sql/sqlite/createStoreTextArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreTextArray.sql");
     }
 
     protected void createStoreDateTimeArray() {
-        createTableFromFile("sql/sqlite/createStoreDateTimeArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreDateTimeArray.sql");
     }
 
     protected void createStoreIntegerArray() {
-        createTableFromFile("sql/sqlite/createStoreIntegerArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreIntegerArray.sql");
     }
 
     protected void createStoreFloatArray() {
-        createTableFromFile("sql/sqlite/createStoreFloatArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreFloatArray.sql");
     }
 
     protected void createStoreDoubleArray() {
-        createTableFromFile("sql/sqlite/createStoreDoubleArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreDoubleArray.sql");
     }
 
     protected void createStoreLongArray() {
-        createTableFromFile("sql/sqlite/createStoreLongArray.sql");
+        executeSqlFromFile("sql/sqlite/createStoreLongArray.sql");
     }
 
     protected void createStoreEntities() {
-        createTableFromFile("sql/sqlite/createRefEntities.sql");
+        executeSqlFromFile("sql/sqlite/createRefEntities.sql");
     }
 
     protected void createRefEnumValues() {
-        createTableFromFile("sql/sqlite/createRefEnumValues.sql");
+        executeSqlFromFile("sql/sqlite/createRefEnumValues.sql");
     }
 
     protected void createRefFields() {
-        createTableFromFile("sql/sqlite/createRefFields.sql");
+        executeSqlFromFile("sql/sqlite/createRefFields.sql");
     }
 
     protected void createRefFieldTypes() {
-        createTableFromFile("sql/sqlite/createRefFieldTypes.sql");
+        executeSqlFromFile("sql/sqlite/createRefFieldTypes.sql");
     }
 
     protected void createBindEntityFields() {
-        createTableFromFile("sql/sqlite/createBindEntityFields.sql");
+        executeSqlFromFile("sql/sqlite/createBindEntityFields.sql");
     }
 
     protected void createBindEntityEnums() {
-        createTableFromFile("sql/sqlite/createBindEntityEnums.sql");
+        executeSqlFromFile("sql/sqlite/createBindEntityEnums.sql");
     }
 
     protected void createRefEntityOverview() {
-        createTableFromFile("sql/sqlite/createStoreEntityOverview.sql");
+        executeSqlFromFile("sql/sqlite/createStoreEntityOverview.sql");
     }
 
     @Override
     void createRefOldFieldValues() {
-        createTableFromFile("sql/sqlite/createStoreOldFieldValues.sql");
+        executeSqlFromFile("sql/sqlite/createStoreOldFieldValues.sql");
     }
 
     @Override
     protected void createStoreEntityBinding() {
-        createTableFromFile("sql/sqlite/createStoreEntityBinding.sql");
+        executeSqlFromFile("sql/sqlite/createStoreEntityBinding.sql");
     }
 
 
@@ -164,7 +164,7 @@ public class JdsDatabaseSqlite extends JdsDatabase {
         return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId,FieldId) VALUES(?,?);";
     }
 
-    public String mapEntityEnums() {
+    public String mapClassEnumsImplementation() {
         return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId,FieldId) VALUES(?,?);";
     }
 

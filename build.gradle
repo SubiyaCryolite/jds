@@ -5,9 +5,10 @@ apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
 group = 'io.github.subiyacryolite'
-version = '1.170402-SNAPSHOT'
+version = '1.170402'
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
@@ -28,8 +29,9 @@ jar {
     from configurations.runtime
     manifest {
         attributes(
-            "Implementation-Title": "Jenesis Data Store",
-            "Implementation-Version": project.version
+                "Implementation-Title": "Jenesis Data Store",
+                "Implementation-Version": project.version,
+                "Created-By" : "${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})",
         )
     }
 }
@@ -39,16 +41,17 @@ task javadocJar(type: Jar) {
     from javadoc
 }
 
-task sourcesJar(type: Jar) {
+task sourceJar(type: Jar) {
     classifier = 'sources'
-    from sourceSets.main.allSource
+    from sourceSets.main.allJava
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
+    archives javadocJar, sourceJar
 }
 
 signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
