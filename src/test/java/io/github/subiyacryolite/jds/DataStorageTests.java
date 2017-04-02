@@ -95,6 +95,7 @@ public class DataStorageTests {
         saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
+        saveAndLoadMySqlImplementation();
     }
 
     @Test
