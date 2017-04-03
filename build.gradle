@@ -2,8 +2,11 @@ apply plugin: 'java'
 apply plugin: 'idea' //run idea to resolve dependencies in intellij
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'jacoco'
 
-sourceCompatibility = '1.8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 group = 'io.github.subiyacryolite'
 version = '1.170402'
 archivesBaseName = project.name
@@ -59,10 +62,10 @@ uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
             pom.project {
@@ -90,5 +93,12 @@ uploadArchives {
                 }
             }
         }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
     }
 }

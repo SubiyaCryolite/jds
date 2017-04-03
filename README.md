@@ -1,4 +1,7 @@
-[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE.md) ![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/Jenesis-Data-Store)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE.md)
+![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/Jenesis-Data-Store)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
+[![Javadocs](javadoc.io/doc/io.github.subiyacryolite/jds.svg)](javadoc.io/doc/io.github.subiyacryolite/jds)
 
 # Jenesis Data Store
 Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development. The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
@@ -118,20 +121,14 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 @JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
-    private final SimpleStringProperty streetName;
-    private final SimpleIntegerProperty plotNumber;
-    private final SimpleStringProperty area;
-    private final SimpleStringProperty city;
-    private final SimpleStringProperty provinceOrState;
-    private final SimpleStringProperty country;
+    private final SimpleStringProperty streetName = new SimpleStringProperty("");
+    private final SimpleIntegerProperty plotNumber = new SimpleIntegerProperty(0);
+    private final SimpleStringProperty area = new SimpleStringProperty("");
+    private final SimpleStringProperty city = new SimpleStringProperty("");
+    private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
+    private final SimpleStringProperty country = new SimpleStringProperty("");
 
     public SimpleAddress() {
-        this.streetName = new SimpleStringProperty("");
-        this.plotNumber = new SimpleIntegerProperty(0);
-        this.area = new SimpleStringProperty("");
-        this.city = new SimpleStringProperty("");
-        this.provinceOrState = new SimpleStringProperty("");
-        this.country = new SimpleStringProperty("");
         //map your properties
         map(TestFields.STREET_NAME, streetName);
         map(TestFields.PLOT_NUMBER, plotNumber);
@@ -230,35 +227,34 @@ public class SimpleAddressBook extends JdsEntity {
 }
 ```
 
-
 ## 1.2 CRUD Operations
 ### 1.2.1 Initialising the database
 In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 #### Postgres example
 ```java
-    JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
-    jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-    jdsDatabase.init();
+JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
+jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
+jdsDatabase.init();
 ```
 #### MySQL Example
 ```java
-    JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
-    jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
-    jdsDatabase.init();
+JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
+jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
+jdsDatabase.init();
 ```
 #### Microsoft SQL Server Example
 ```java
-    JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
-    jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-    jdsDatabase.init();
+JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
+jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
+jdsDatabase.init();
 ```
 #### Sqlite Example
 ```java
-    String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
-    SQLiteConfig sqLiteConfig = new SQLiteConfig();
-    sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-    jdsDatabase.setConnectionProperties(databaseLocation, sqLiteConfig.toProperties());
-    jdsDatabase.init();
+String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
+SQLiteConfig sqLiteConfig = new SQLiteConfig();
+sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
+jdsDatabase.setConnectionProperties(databaseLocation, sqLiteConfig.toProperties());
+jdsDatabase.init();
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
 
@@ -276,71 +272,71 @@ You only have to do this once at start-up but it is vital that you do so. Withou
 ### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
-    SimpleAddress primaryAddress1 = new SimpleAddress();
-    primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
-    primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
-    primaryAddress1.setArea("Norte Broad");
-    primaryAddress1.setCity("Livingstone");
-    primaryAddress1.setCountry("Zambia");
-    primaryAddress1.setPlotNumber(23);
-    primaryAddress1.setProvinceOrState("Southern");
-    primaryAddress1.setStreetName("East Street");
-    
-    SimpleAddress primaryAddress2 = new SimpleAddress();
-    primaryAddress2.setEntityGuid("primaryAddress2"); //setting a custom Entity Guid
-    primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
-    primaryAddress2.setArea("Roma");
-    primaryAddress2.setCity("Lusaka");
-    primaryAddress2.setCountry("Zambia");
-    primaryAddress2.setPlotNumber(2);
-    primaryAddress2.setProvinceOrState("Lusaka");
-    primaryAddress2.setStreetName("West Street");
-    
-    SimpleAddress primaryAddress3 = new SimpleAddress();
-    primaryAddress3.setEntityGuid("primaryAddress3"); //setting a custom Entity Guid
-    primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
-    primaryAddress3.setArea("Riverdale");
-    primaryAddress3.setCity("Ndola");
-    primaryAddress3.setCountry("Zambia");
-    primaryAddress3.setPlotNumber(9);
-    primaryAddress3.setProvinceOrState("Copperbelt");
-    primaryAddress3.setStreetName("West Street");
-    
-    SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
-    simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
-    simpleAddressBook.getAddresses().add(primaryAddress1);
-    simpleAddressBook.getAddresses().add(primaryAddress2);
-    simpleAddressBook.getAddresses().add(primaryAddress3);
+SimpleAddress primaryAddress1 = new SimpleAddress();
+primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
+primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
+primaryAddress1.setArea("Norte Broad");
+primaryAddress1.setCity("Livingstone");
+primaryAddress1.setCountry("Zambia");
+primaryAddress1.setPlotNumber(23);
+primaryAddress1.setProvinceOrState("Southern");
+primaryAddress1.setStreetName("East Street");
+
+SimpleAddress primaryAddress2 = new SimpleAddress();
+primaryAddress2.setEntityGuid("primaryAddress2"); //setting a custom Entity Guid
+primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
+primaryAddress2.setArea("Roma");
+primaryAddress2.setCity("Lusaka");
+primaryAddress2.setCountry("Zambia");
+primaryAddress2.setPlotNumber(2);
+primaryAddress2.setProvinceOrState("Lusaka");
+primaryAddress2.setStreetName("West Street");
+
+SimpleAddress primaryAddress3 = new SimpleAddress();
+primaryAddress3.setEntityGuid("primaryAddress3"); //setting a custom Entity Guid
+primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
+primaryAddress3.setArea("Riverdale");
+primaryAddress3.setCity("Ndola");
+primaryAddress3.setCountry("Zambia");
+primaryAddress3.setPlotNumber(9);
+primaryAddress3.setProvinceOrState("Copperbelt");
+primaryAddress3.setStreetName("West Street");
+
+SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
+simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
+simpleAddressBook.getAddresses().add(primaryAddress1);
+simpleAddressBook.getAddresses().add(primaryAddress2);
+simpleAddressBook.getAddresses().add(primaryAddress3);
 ```
 
 ### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
-    SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
-    simpleAddressBook.setEntityGuid("testGuid0001");        //setting a custom Entity Guid        
-    simpleAddressBook.getAddresses().add(primaryAddress1);
-    simpleAddressBook.getAddresses().add(primaryAddress2);
-    simpleAddressBook.getAddresses().add(primaryAddress3);
-    
-    JdsSave.save(jdsDatabase, 1, simpleAddressBook);
-    System.out.printf("Saved %s\n", simpleAddressBook);
+SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
+simpleAddressBook.setEntityGuid("testGuid0001");        //setting a custom Entity Guid        
+simpleAddressBook.getAddresses().add(primaryAddress1);
+simpleAddressBook.getAddresses().add(primaryAddress2);
+simpleAddressBook.getAddresses().add(primaryAddress3);
+
+JdsSave.save(jdsDatabase, 1, simpleAddressBook);
+System.out.printf("Saved %s\n", simpleAddressBook);
 ```
 
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
-    List<SimpleAddressBook> allAddressBooks;
-    List<SimpleAddressBook> specificAddressBook;
-    
-    //load all entities of type SimpleAddressBook
-    allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class);
-    
-    //load all entities of type SimpleAddressBook with Entity Guids in range
-    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001");
-    
-    //load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
-    Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
-    specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
+List<SimpleAddressBook> allAddressBooks;
+List<SimpleAddressBook> specificAddressBook;
+
+//load all entities of type SimpleAddressBook
+allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class);
+
+//load all entities of type SimpleAddressBook with Entity Guids in range
+specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001");
+
+//load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
+Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
+specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
 ```
 
 ### 1.2.6 Load with Arguments
@@ -349,16 +345,15 @@ I plan to introduce a method that can load entities based on one or more propert
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
-    public void deleteUsingStrings() {
-            JdsDelete.delete(jdsDatabase, "primaryAddress1");
-    }
-    
-    public void deleteUsingObjectOrCollection() {
-            SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
-            JdsDelete.delete(jdsDatabase, simpleAddressBook);
-    }
-```
+public void deleteUsingStrings() {
+    JdsDelete.delete(jdsDatabase, "primaryAddress1");
+}
 
+public void deleteUsingObjectOrCollection() {
+    SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
+    JdsDelete.delete(jdsDatabase, simpleAddressBook);
+}
+```
 
 ## 1.3 Backend Design
 Section coming soon
@@ -368,6 +363,14 @@ JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses
 
 # Development
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.
+
+# Contributing to Jenesis Data Store
+If you would like to contribute code you can do so through GitHub by forking the repository and sending a pull request targeting the current development branch.
+
+When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.
+
+# Bugs and Feedback
+For bugs, questions and discussions please use the [Github Issues](https://github.com/SubiyaCryolite/Jenesis-Data-Store/issues).
 
 # Special Thanks
 To all our users and contributors!
