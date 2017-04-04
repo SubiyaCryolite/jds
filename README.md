@@ -234,19 +234,19 @@ In order to use JDS you will need an instance of JdsDatabase. The instance you c
 ```java
 JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
 jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-jdsDatabase.init();
+jdsDatabase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 #### MySQL Example
 ```java
 JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
 jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
-jdsDatabase.init();
+jdsDatabase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 #### Microsoft SQL Server Example
 ```java
 JdsDatabase jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
 jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-jdsDatabase.init();
+jdsDatabase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 #### Sqlite Example
 ```java
@@ -254,7 +254,7 @@ String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
 SQLiteConfig sqLiteConfig = new SQLiteConfig();
 sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
 jdsDatabase.setConnectionProperties(databaseLocation, sqLiteConfig.toProperties());
-jdsDatabase.init();
+jdsDatabase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
 

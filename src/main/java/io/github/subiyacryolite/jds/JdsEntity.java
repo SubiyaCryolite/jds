@@ -81,7 +81,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             integerProperties.put(jdsField.getId(), integerProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleObjectProperty<LocalDateTime> localDateTimeProperty) {
@@ -89,7 +89,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             dateProperties.put(jdsField.getId(), localDateTimeProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleStringProperty stringProperty) {
@@ -97,7 +97,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             stringProperties.put(jdsField.getId(), stringProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleFloatProperty floatProperty) {
@@ -105,7 +105,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             floatProperties.put(jdsField.getId(), floatProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleLongProperty longProperty) {
@@ -113,7 +113,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             longProperties.put(jdsField.getId(), longProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleDoubleProperty doubleProperty) {
@@ -121,7 +121,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             doubleProperties.put(jdsField.getId(), doubleProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void map(final JdsField jdsField, final SimpleBooleanProperty booleanProperty) {
@@ -129,7 +129,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             booleanProperties.put(jdsField.getId(), booleanProperty);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void mapStrings(final JdsField jdsField, final SimpleListProperty<String> strings) {
@@ -137,7 +137,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             stringArrayProperties.put(jdsField.getId(), strings);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void mapFloats(final JdsField jdsField, final SimpleListProperty<Float> floats) {
@@ -145,7 +145,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             floatArrayProperties.put(jdsField.getId(), floats);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void mapDoubles(final JdsField jdsField, final SimpleListProperty<Double> doubles) {
@@ -153,7 +153,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             doubleArrayProperties.put(jdsField.getId(), doubles);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void mapLongs(final JdsField jdsField, final SimpleListProperty<Long> longs) {
@@ -161,7 +161,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsField.getId());
             longArrayProperties.put(jdsField.getId(), longs);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent jdsField [" + jdsField + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
     protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<String> strings) {
@@ -170,7 +170,7 @@ public abstract class JdsEntity extends JdsEntityBase {
             properties.add(jdsFieldEnum.getField().getId());
             enumProperties.put(jdsFieldEnum, strings);
         } else
-            throw new RuntimeException("Please prepareDatabaseComponent field [" + jdsFieldEnum + "] to the correct type");
+            throw new RuntimeException("Please prepareDatabaseComponents field [" + jdsFieldEnum + "] to the correct type");
     }
 
     protected final void map(Class<? extends Object> entity, final SimpleObjectProperty<? extends JdsEntity> property) {

@@ -38,28 +38,28 @@ public class DataStorageTests {
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
         jdsDatabase.setConnectionProperties(url, sqLiteConfig.toProperties());
-        jdsDatabase.prepareDatabaseComponent();
+        jdsDatabase.init();
     }
 
     @Test
     public void initialisePostgeSqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
         jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
-        jdsDatabase.prepareDatabaseComponent();
+        jdsDatabase.init();
     }
 
     @Test
     public void initialiseTSqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
         jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
-        jdsDatabase.prepareDatabaseComponent();
+        jdsDatabase.init();
     }
 
     @Test
     public void initialiseMysqlBackend() {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
         jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
-        jdsDatabase.prepareDatabaseComponent();
+        jdsDatabase.init();
     }
 
     @Test

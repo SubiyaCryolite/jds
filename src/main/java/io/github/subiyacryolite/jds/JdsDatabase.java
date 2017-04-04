@@ -48,7 +48,7 @@ public abstract class JdsDatabase {
      */
     private String passWord;
     /**
-     *A value indicating whether JDS should log every write in the system
+     * A value indicating whether JDS should log every write in the system
      */
     private boolean logEdits;
     /**
@@ -75,7 +75,15 @@ public abstract class JdsDatabase {
     /**
      * Initialise JDS base tables
      */
-    public final void prepareDatabaseComponent() {
+    public void init() {
+        prepareDatabaseComponents();
+        prepareCustomDatabaseComponents();
+    }
+
+    /**
+     * Initialise core database components
+     */
+    private void prepareDatabaseComponents() {
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.RefEntities);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreEntityOverview);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreEntityBinding);
@@ -97,15 +105,15 @@ public abstract class JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreOldFieldValues);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityEnums);
-        prepareCustomDatabaseComponents();
     }
 
     /**
      * Set database connection properties
+     *
      * @param className the JDBC driver class name
-     * @param url the JDBC driver connection string
-     * @param userName the database username
-     * @param passWord the users password
+     * @param url       the JDBC driver connection string
+     * @param userName  the database username
+     * @param passWord  the users password
      */
     public final void setConnectionProperties(String className, String url, String userName, String passWord) {
         if (className == null || url == null || userName == null || passWord == null)
@@ -119,7 +127,8 @@ public abstract class JdsDatabase {
 
     /**
      * Set SQLite database connection properties
-     * @param url the JDBC driver connection string
+     *
+     * @param url        the JDBC driver connection string
      * @param properties SQLite properties including foreign key support
      */
     public void setConnectionProperties(String url, java.util.Properties properties) {
@@ -132,9 +141,10 @@ public abstract class JdsDatabase {
 
     /**
      * Acquire standard connection to the database
+     *
      * @return standard connection to the database
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
-     * @throws SQLException when a standard SQL Exception occurs
+     * @throws SQLException           when a standard SQL Exception occurs
      */
     public final synchronized Connection getConnection() throws ClassNotFoundException, SQLException {
         if (!propertiesSet)
@@ -150,6 +160,7 @@ public abstract class JdsDatabase {
 
     /**
      * Indicates the underlying implementation of this JDS Database instance
+     *
      * @return the underlying implementation of this JDS Database instance
      */
     public JdsImplementation getImplementation() {
@@ -158,6 +169,7 @@ public abstract class JdsDatabase {
 
     /**
      * Returns an instance of the requested JDS Database implementation
+     *
      * @param implementation the target database implementation
      * @return an instance of the requested JDS Database implementation
      */
@@ -177,8 +189,9 @@ public abstract class JdsDatabase {
 
     /**
      * Delegates the creation of custom database components depending on the underlying JDS Database implementation
+     *
      * @param databaseComponent the type of database component to create
-     * @param jdsEnumTable an enum that maps to the components concrete implementation details
+     * @param jdsEnumTable      an enum that maps to the components concrete implementation details
      */
     protected final void prepareDatabaseComponent(JdsDatabaseComponent databaseComponent, JdsEnumTable jdsEnumTable) {
         switch (databaseComponent) {
@@ -199,6 +212,7 @@ public abstract class JdsDatabase {
 
     /**
      * Initialises core JDS Database components
+     *
      * @param jdsEnumTable an enum that maps to the components concrete implementation details
      */
     private final void initiateDatabaseComponent(JdsEnumTable jdsEnumTable) {
@@ -272,6 +286,7 @@ public abstract class JdsDatabase {
 
     /**
      * Initialises custom JDS Database components
+     *
      * @param jdsEnumTable an enum that maps to the components concrete implementation details
      */
     protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
@@ -279,6 +294,7 @@ public abstract class JdsDatabase {
 
     /**
      * Checks if the specified table exists the the database
+     *
      * @param tableName the table to look up
      * @return true if the specified table exists the the database
      */
@@ -289,6 +305,7 @@ public abstract class JdsDatabase {
 
     /**
      * Checks if the specified procedure exists the the database
+     *
      * @param procedureName the procedure to look up
      * @return true if the specified procedure exists the the database
      */
@@ -299,6 +316,7 @@ public abstract class JdsDatabase {
 
     /**
      * Checks if the specified trigger exists the the database
+     *
      * @param triggerName the trigger to look up
      * @return true if the specified trigger exists the the database
      */
@@ -309,6 +327,7 @@ public abstract class JdsDatabase {
 
     /**
      * Checks if the specified index exists the the database
+     *
      * @param indexName the index to look up
      * @return true if the specified index exists the the database
      */
@@ -319,6 +338,7 @@ public abstract class JdsDatabase {
 
     /**
      * Executes SQL found in the specified file. We recommend having one statement per file.
+     *
      * @param fileName the file containing SQL to execute
      */
     protected final void executeSqlFromFile(String fileName) {
@@ -332,6 +352,7 @@ public abstract class JdsDatabase {
 
     /**
      * Method to read contents of a file to a String variable
+     *
      * @param inputStream the stream containing a files contents
      * @return the contents of a file contained in the input stream
      * @throws Exception
@@ -350,8 +371,8 @@ public abstract class JdsDatabase {
     }
 
     /**
-     * Override this method with custom implementations of {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponent}
-     * {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponent} delegates the creation of custom database components
+     * Override this method with custom implementations of {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponents}
+     * {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponents} delegates the creation of custom database components
      * depending on the underlying JDS Database implementation
      */
     protected void prepareCustomDatabaseComponents() {
@@ -359,6 +380,7 @@ public abstract class JdsDatabase {
 
     /**
      * Database specific check to see if the specified table exists in the database
+     *
      * @param tableName the table to look up
      * @return 1 if the specified table exists in the database
      */
@@ -366,6 +388,7 @@ public abstract class JdsDatabase {
 
     /**
      * Database specific check to see if the specified procedure exists in the database
+     *
      * @param procedureName the procedure to look up
      * @return 1 if the specified procedure exists in the database
      */
@@ -375,6 +398,7 @@ public abstract class JdsDatabase {
 
     /**
      * Database specific check to see if the specified trigger exists in the database
+     *
      * @param triggerName the trigger to look up
      * @return 1 if the specified trigger exists in the database
      */
@@ -384,6 +408,7 @@ public abstract class JdsDatabase {
 
     /**
      * Database specific check to see if the specified index exists in the database
+     *
      * @param indexName the trigger to look up
      * @return 1 if the specified index exists in the database
      */
@@ -498,6 +523,7 @@ public abstract class JdsDatabase {
 
     /**
      * Binds all the fields attached to an entity
+     *
      * @param entityId the value representing the entity
      * @param fieldIds the values representing the entity's fields
      */
@@ -520,8 +546,9 @@ public abstract class JdsDatabase {
 
     /**
      * Binds all the enums attached to an entity
+     *
      * @param entityId the value representing the entity
-     * @param fields the entity's enums
+     * @param fields   the entity's enums
      */
     public final synchronized void mapClassEnums(final long entityId, final Set<JdsFieldEnum> fields) {
         mapEnumValues(fields);
@@ -531,8 +558,9 @@ public abstract class JdsDatabase {
 
     /**
      * Binds all the enums attached to an entity
+     *
      * @param entityId the value representing the entity
-     * @param fields the entity's enums
+     * @param fields   the entity's enums
      */
     private final synchronized void mapClassEnumsImplementation(final long entityId, final Set<JdsFieldEnum> fields) {
         try (Connection connection = getConnection();
@@ -553,6 +581,7 @@ public abstract class JdsDatabase {
 
     /**
      * Binds all the values attached to an enum
+     *
      * @param fieldEnums the field enum
      */
     private final synchronized void mapEnumValues(final Set<JdsFieldEnum> fieldEnums) {
@@ -575,7 +604,8 @@ public abstract class JdsDatabase {
 
     /**
      * Maps an entity's name to its id
-     * @param entityId the entity's id
+     *
+     * @param entityId   the entity's id
      * @param entityName the entity's name
      */
     public final synchronized void mapClassName(final long entityId, final String entityName) {
@@ -592,6 +622,7 @@ public abstract class JdsDatabase {
 
     /**
      * A value indicating whether JDS is logging every write in the system
+     *
      * @return true if JDS is logging every write in the system
      */
     public final boolean logEdits() {
@@ -600,6 +631,7 @@ public abstract class JdsDatabase {
 
     /**
      * Determine whether JDS should log every write in the system
+     *
      * @param value whether JDS should log every write in the system
      */
     public final void logEdits(boolean value) {
@@ -608,6 +640,7 @@ public abstract class JdsDatabase {
 
     /**
      * A value indicating whether JDS is printing internal log information
+     *
      * @return true if JDS is printing internal log information
      */
     public final boolean printOutput() {
@@ -616,6 +649,7 @@ public abstract class JdsDatabase {
 
     /**
      * Determine whether JDS should print internal log information
+     *
      * @param value whether JDS should print internal log information
      */
     public final void printOutput(boolean value) {
@@ -624,6 +658,7 @@ public abstract class JdsDatabase {
 
     /**
      * A value indicating whether the underlying database implementation supports callable statements (Stored Procedures)
+     *
      * @return true if the underlying database implementation supports callable statements (stored procedures)
      */
     public final boolean supportsStatements() {
@@ -632,6 +667,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save text values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveString() {
@@ -640,6 +676,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save long values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveLong() {
@@ -648,6 +685,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save double values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveDouble() {
@@ -656,6 +694,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save float values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveFloat() {
@@ -664,6 +703,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save integer values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveInteger() {
@@ -672,6 +712,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save datetime values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveDateTime() {
@@ -680,6 +721,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save entity overview values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String saveOverview() {
@@ -688,6 +730,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to bind fields to entities
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String mapClassFields() {
@@ -696,6 +739,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to bind enums to entities
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String mapClassEnumsImplementation() {
@@ -704,6 +748,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to map class names
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String mapClassName() {
@@ -712,6 +757,7 @@ public abstract class JdsDatabase {
 
     /**
      * SQL call to save reference enum values
+     *
      * @return the default or overridden SQL statement for this operation
      */
     public String mapEnumValues() {
