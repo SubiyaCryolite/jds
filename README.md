@@ -1,7 +1,8 @@
-[![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
-![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/Jenesis-Data-Store)
+[![Build Status](https://travis-ci.org/SubiyaCryolite/Jenesis-Data-Store.svg?branch=master)](https://travis-ci.org/SubiyaCryolite/Jenesis-Data-Store)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
 [![Javadocs](https://javadoc.io/badge/io.github.subiyacryolite/jds.svg)](https://javadoc.io/doc/io.github.subiyacryolite/jds)
+[![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
+![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/Jenesis-Data-Store)
 
 # Jenesis Data Store
 Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development. The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
