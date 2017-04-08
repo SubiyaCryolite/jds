@@ -10,3 +10,5 @@ branches:
 cache:
   directories:
   - $HOME/.gradle
+before_install:
+ - chmod +x gradlew
