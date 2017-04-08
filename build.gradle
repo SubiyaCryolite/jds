@@ -39,6 +39,11 @@ jar {
     }
 }
 
+test {
+    //prevent problems with TravisCI
+    exclude 'io/github/subiyacryolite/jds/**'
+}
+
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
