@@ -339,7 +339,7 @@ public abstract class JdsDatabase {
     /**
      * Executes SQL found in the specified file. We recommend having one statement per file.
      *
-     * @param fileName the file containing SQL to execute
+     * @param fileName the file containing SQL to find
      */
     protected final void executeSqlFromFile(String fileName) {
         try (Connection connection = getConnection(); Statement innerStmt = connection.createStatement();) {

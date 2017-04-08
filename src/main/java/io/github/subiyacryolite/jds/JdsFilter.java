@@ -15,17 +15,17 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.*;
 
 import static io.github.subiyacryolite.jds.enums.JdsEnumTable.*;
 
 /**
  * Created by ifunga on 03/03/2017.
  */
-public class JdsQuery {
+public class JdsFilter {
 
 
     private final LinkedList<LinkedList<Object>> sessionValues;
@@ -36,7 +36,7 @@ public class JdsQuery {
     private LinkedList<Object> currentValues;
 
 
-    public JdsQuery() {
+    public JdsFilter() {
         currentStrings = new LinkedList<>();
         currentValues = new LinkedList<>();
         //==================================
@@ -51,7 +51,7 @@ public class JdsQuery {
         sessionSwitches.add("");
     }
 
-    public JdsQuery or() {
+    public JdsFilter or() {
         currentStrings = new LinkedList<>();
         sessionStrings.add(currentStrings);
         currentValues = new LinkedList<>();
@@ -60,7 +60,7 @@ public class JdsQuery {
         return this;
     }
 
-    public JdsQuery and() {
+    public JdsFilter and() {
         currentStrings = new LinkedList<>();
         sessionStrings.add(currentStrings);
         currentValues = new LinkedList<>();
@@ -69,58 +69,58 @@ public class JdsQuery {
         return this;
     }
 
-    public JdsQuery equals(JdsField jdsField, Object value) {
+    public JdsFilter equals(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value = ?)", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value = ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery like(JdsField jdsField, Object value) {
+    public JdsFilter like(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?)", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery startsLike(JdsField jdsField, Object value) {
+    public JdsFilter startsLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?%)", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?%)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery endsLike(JdsField jdsField, Object value) {
+    public JdsFilter endsLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE %?)", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE %?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery notLike(JdsField jdsField, Object value) {
+    public JdsFilter notLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT LIKE %)", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT LIKE %)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery in(JdsField jdsField, Object value) {
+    public JdsFilter in(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         currentValues.add(value);
         return this;
     }
 
-    public JdsQuery notIn(JdsField jdsField, Object value) {
+    public JdsFilter notIn(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(),getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         currentValues.add(value);
@@ -154,6 +154,28 @@ public class JdsQuery {
             tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTableName(ft), getTablePrefix(ft), getTablePrefix(ft)));
         }
         return String.join(" JOIN ", tables);
+    }
+
+    public <T extends JdsEntity> List<T> find(JdsDatabase database, final Class<T> referenceType) {
+        List<String> matchingGuids = new ArrayList<>();
+        String sql = this.toQuery();
+        try (Connection connection = database.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            for (LinkedList<Object> session : sessionValues) {
+                for (Object ob : session) {
+                    ps.setObject(parameterIndex, ob);
+                    parameterIndex++;
+                }
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                matchingGuids.add(rs.getString("EntityGuid"));
+            }
+            rs.close();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return JdsLoad.load(database, referenceType, matchingGuids.toArray(new String[0]));
     }
 
     private String getTableName(JdsFieldType jdsFieldType) {
@@ -216,6 +238,10 @@ public class JdsQuery {
                 return StoreDateTimeArray.getPrefix();
         }
         return "undefined";
+    }
+
+    public String toString() {
+        return toQuery();
     }
 }
 
