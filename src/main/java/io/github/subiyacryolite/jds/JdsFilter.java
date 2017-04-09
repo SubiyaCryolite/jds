@@ -25,7 +25,7 @@ import static io.github.subiyacryolite.jds.enums.JdsEnumTable.*;
 /**
  * Created by ifunga on 03/03/2017.
  */
-public class JdsFilter {
+public class JdsFilter implements AutoCloseable {
 
 
     private final LinkedList<LinkedList<Object>> sessionValues;
@@ -180,6 +180,8 @@ public class JdsFilter {
 
     private String getTableName(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
+            case ZONED_DATE_TIME:
+                return StoreZonedDateTime.getName();
             case TEXT:
                 return StoreText.getName();
             case INT:
@@ -191,6 +193,7 @@ public class JdsFilter {
             case LONG:
                 return StoreLong.getName();
             case DATE_TIME:
+            case DATE:
                 return StoreDateTime.getName();
             case ARRAY_TEXT:
                 return StoreTextArray.getName();
@@ -211,6 +214,8 @@ public class JdsFilter {
 
     private String getTablePrefix(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
+            case ZONED_DATE_TIME:
+                return StoreZonedDateTime.getPrefix();
             case TEXT:
                 return StoreText.getPrefix();
             case INT:
@@ -221,6 +226,7 @@ public class JdsFilter {
                 return StoreFloat.getPrefix();
             case LONG:
                 return StoreLong.getPrefix();
+            case DATE:
             case DATE_TIME:
                 return StoreDateTime.getPrefix();
             case ARRAY_TEXT:
@@ -242,6 +248,16 @@ public class JdsFilter {
 
     public String toString() {
         return toQuery();
+    }
+
+    @Override
+    public void close() throws Exception {
+        sessionValues.clear();
+        sessionStrings.clear();
+        sessionSwitches.clear();
+        tablesToJoin.clear();
+        currentStrings.clear();
+        currentValues.clear();
     }
 }
 

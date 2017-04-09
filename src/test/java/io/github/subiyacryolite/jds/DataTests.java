@@ -14,7 +14,7 @@ import static io.github.subiyacryolite.jds.classes.TestEnums.PRIMARY_ADDRESS_ENU
 /**
  * Created by ifunga on 18/02/2017.
  */
-public class DataStorageTests extends BaseTest{
+public class DataTests extends BaseTest{
     @Test
     public void saveAndLoad() {
         saveObject();

@@ -53,6 +53,11 @@ public class JdsDatabaseSqlite extends JdsDatabase {
         executeSqlFromFile("sql/sqlite/createStoreDateTime.sql");
     }
 
+    @Override
+    protected void createStoreZonedDateTime() {
+        executeSqlFromFile("sql/sqlite/createStoreZonedDateTime.sql");
+    }
+
     protected void createStoreInteger() {
         executeSqlFromFile("sql/sqlite/createStoreInteger.sql");
     }

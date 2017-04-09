@@ -102,6 +102,7 @@ public abstract class JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreLong);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreZonedDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreOldFieldValues);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityEnums);
@@ -217,6 +218,9 @@ public abstract class JdsDatabase {
      */
     private final void initiateDatabaseComponent(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
+            case StoreZonedDateTime:
+                createStoreZonedDateTime();
+                break;
             case StoreTextArray:
                 createStoreTextArray();
                 break;
@@ -425,6 +429,11 @@ public abstract class JdsDatabase {
      * Database specific SQL used to create the schema that stores datetime values
      */
     abstract void createStoreDateTime();
+
+    /**
+     * Database specific SQL used to create the schema that stores zoned datetime values
+     */
+    abstract void createStoreZonedDateTime();
 
     /**
      * Database specific SQL used to create the schema that stores integer values

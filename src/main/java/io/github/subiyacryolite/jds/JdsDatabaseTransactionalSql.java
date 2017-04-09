@@ -93,6 +93,11 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
     }
 
     @Override
+    protected void createStoreZonedDateTime() {
+        executeSqlFromFile("sql/tsql/createStoreZonedDateTime.sql");
+    }
+
+    @Override
     protected void createStoreInteger() {
         executeSqlFromFile("sql/tsql/createStoreInteger.sql");
     }

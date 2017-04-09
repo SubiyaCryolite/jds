@@ -29,6 +29,7 @@ public enum JdsEnumTable {
     StoreLong("JdsStoreLong", "sl"),
     StoreDouble("JdsStoreDouble", "sd"),
     StoreDateTime("JdsStoreDateTime", "sdt"),
+    StoreZonedDateTime("JdsStoreZonedDateTime", "szdt"),
     StoreOldFieldValues("JdsStoreOldFieldValues", "sof"),
     StoreEntityOverview("JdsStoreEntityOverview", "eo"),
     StoreEntityBinding("JdsStoreEntityBinding", "eb"),

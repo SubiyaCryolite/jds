@@ -75,6 +75,11 @@ public class JdsDatabasePostgres extends JdsDatabase {
     }
 
     @Override
+    protected void createStoreZonedDateTime() {
+        executeSqlFromFile("sql/postgresql/createStoreZonedDateTime.sql");
+    }
+
+    @Override
     protected void createStoreInteger() {
         executeSqlFromFile("sql/postgresql/createStoreInteger.sql");
     }

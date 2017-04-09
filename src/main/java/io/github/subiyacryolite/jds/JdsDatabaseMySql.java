@@ -75,6 +75,11 @@ public class JdsDatabaseMySql extends JdsDatabase {
     }
 
     @Override
+    protected void createStoreZonedDateTime() {
+        executeSqlFromFile("sql/mysql/createStoreZonedDateTime.sql");
+    }
+
+    @Override
     protected void createStoreInteger() {
         executeSqlFromFile("sql/mysql/createStoreInteger.sql");
     }
