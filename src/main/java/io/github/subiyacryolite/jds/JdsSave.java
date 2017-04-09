@@ -19,7 +19,11 @@ import javafx.collections.ObservableList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
@@ -33,35 +37,14 @@ public class JdsSave {
      * @param entities
      */
     public static void save(final JdsDatabase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
-        //strings, dates and numerics
-        List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleBooleanProperty>>> booleanProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleLongProperty>>> longProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties = new ArrayList<>();
-        //arrays
-        List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties = new ArrayList<>();
-        List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties = new ArrayList<>();
-        //enums
-        List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties = new ArrayList<>();
-        //objectProperties
-        List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties = new ArrayList<>();
-        List<HashSet<JdsEntityOverview>> overviews = new LinkedList<>();
+        JdsSaveContainer saveContainer = new JdsSaveContainer();
         List<Collection<JdsEntity>> batchEntities = new ArrayList<>();
-
-        setupBatches(batchSize, entities, dateTimeProperties, stringProperties, booleanProperties, floatProperties, doubleProperties, longProperties, integerProperties, objectArrayProperties, stringArrayProperties, dateTimeArrayProperties, floatArrayProperties, doubleArrayProperties, longArrayProperties, integerArrayProperties, enumProperties, objectProperties, overviews, batchEntities);
+        setupBatches(batchSize, entities, saveContainer, batchEntities);
         //process batches
         int step = 0;
         int stepsRequired = batchEntities.size() + 1;
         for (Collection<JdsEntity> current : batchEntities) {
-            saveInner(database, current, dateTimeProperties.get(step), stringProperties.get(step), booleanProperties.get(step), floatProperties.get(step), doubleProperties.get(step), longProperties.get(step), integerProperties.get(step), objectArrayProperties.get(step), stringArrayProperties.get(step), dateTimeArrayProperties.get(step), floatArrayProperties.get(step), doubleArrayProperties.get(step), longArrayProperties.get(step), integerArrayProperties.get(step), enumProperties.get(step), objectProperties.get(step), overviews.get(step));
+            saveInner(database, current, saveContainer, step);
             step++;
             if (database.printOutput())
                 System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
@@ -71,26 +54,10 @@ public class JdsSave {
     /**
      * @param batchSize
      * @param entities
-     * @param dateTimeProperties
-     * @param stringProperties
-     * @param booleanProperties
-     * @param floatProperties
-     * @param doubleProperties
-     * @param longProperties
-     * @param integerProperties
-     * @param objectArrayProperties
-     * @param stringArrayProperties
-     * @param dateTimeArrayProperties
-     * @param floatArrayProperties
-     * @param doubleArrayProperties
-     * @param longArrayProperties
-     * @param integerArrayProperties
-     * @param enumProperties
-     * @param objectProperties
-     * @param overviews
+     * @param container
      * @param batchEntities
      */
-    private static void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleBooleanProperty>>> booleanProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
+    private static void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, final JdsSaveContainer container, List<Collection<JdsEntity>> batchEntities) {
         //create batches
         int currentBatch = 0;
         int iteration = 0;
@@ -101,14 +68,14 @@ public class JdsSave {
                     iteration = 0;
                 }
                 if (iteration == 0) {
-                    createBatchCollection(dateTimeProperties, stringProperties, booleanProperties, floatProperties, doubleProperties, longProperties, integerProperties, objectArrayProperties, stringArrayProperties, dateTimeArrayProperties, floatArrayProperties, doubleArrayProperties, longArrayProperties, integerArrayProperties, enumProperties, objectProperties, overviews, batchEntities);
+                    createBatchCollection(container, batchEntities);
                 }
                 batchEntities.get(currentBatch).add(jdsEntity);
                 iteration++;
             }
         } else {
             //single large batch, good luck
-            createBatchCollection(dateTimeProperties, stringProperties, booleanProperties, floatProperties, doubleProperties, longProperties, integerProperties, objectArrayProperties, stringArrayProperties, dateTimeArrayProperties, floatArrayProperties, doubleArrayProperties, longArrayProperties, integerArrayProperties, enumProperties, objectProperties, overviews, batchEntities);
+            createBatchCollection(container, batchEntities);
             for (JdsEntity jdsEntity : entities) {
                 batchEntities.get(0).add(jdsEntity);
             }
@@ -116,140 +83,98 @@ public class JdsSave {
     }
 
     /**
-     * @param dateTimeProperties
-     * @param stringProperties
-     * @param booleanProperties
-     * @param floatProperties
-     * @param doubleProperties
-     * @param longProperties
-     * @param integerProperties
-     * @param objectArrayProperties
-     * @param stringArrayProperties
-     * @param dateTimeArrayProperties
-     * @param floatArrayProperties
-     * @param doubleArrayProperties
-     * @param longArrayProperties
-     * @param integerArrayProperties
-     * @param enumProperties
-     * @param objectProperties
-     * @param overviews
+     * @param saveContainer
      * @param batchEntities
      */
-    private static void createBatchCollection(List<Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>>> dateTimeProperties, List<Map<String, Map<Long, SimpleStringProperty>>> stringProperties, List<Map<String, Map<Long, SimpleBooleanProperty>>> booleanProperties, List<Map<String, Map<Long, SimpleFloatProperty>>> floatProperties, List<Map<String, Map<Long, SimpleDoubleProperty>>> doubleProperties, List<Map<String, Map<Long, SimpleLongProperty>>> longProperties, List<Map<String, Map<Long, SimpleIntegerProperty>>> integerProperties, List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrayProperties, List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrayProperties, List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Double>>>> doubleArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrayProperties, List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrayProperties, List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enumProperties, List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objectProperties, List<HashSet<JdsEntityOverview>> overviews, List<Collection<JdsEntity>> batchEntities) {
+    private static void createBatchCollection(final JdsSaveContainer saveContainer, final List<Collection<JdsEntity>> batchEntities) {
         batchEntities.add(new ArrayList<>());
-        overviews.add(new HashSet<>());
+        saveContainer.overviews.add(new HashSet<>());
         //primitives
-        dateTimeProperties.add(new HashMap<>());
-        stringProperties.add(new HashMap<>());
-        booleanProperties.add(new HashMap<>());
-        floatProperties.add(new HashMap<>());
-        doubleProperties.add(new HashMap<>());
-        longProperties.add(new HashMap<>());
-        integerProperties.add(new HashMap<>());
+        saveContainer.localDateTimes.add(new HashMap<>());
+        saveContainer.zonedDateTimes.add(new HashMap<>());
+        saveContainer.localTimes.add(new HashMap<>());
+        saveContainer.localDates.add(new HashMap<>());
+        saveContainer.strings.add(new HashMap<>());
+        saveContainer.booleans.add(new HashMap<>());
+        saveContainer.floats.add(new HashMap<>());
+        saveContainer.doubles.add(new HashMap<>());
+        saveContainer.longs.add(new HashMap<>());
+        saveContainer.integers.add(new HashMap<>());
         //arrays
-        stringArrayProperties.add(new HashMap<>());
-        dateTimeArrayProperties.add(new HashMap<>());
-        floatArrayProperties.add(new HashMap<>());
-        doubleArrayProperties.add(new HashMap<>());
-        longArrayProperties.add(new HashMap<>());
-        integerArrayProperties.add(new HashMap<>());
+        saveContainer.stringArrays.add(new HashMap<>());
+        saveContainer.dateTimeArrays.add(new HashMap<>());
+        saveContainer.floatArrays.add(new HashMap<>());
+        saveContainer.doubleArrays.add(new HashMap<>());
+        saveContainer.longArrays.add(new HashMap<>());
+        saveContainer.integerArrays.add(new HashMap<>());
         //enums
-        enumProperties.add(new HashMap<>());
+        saveContainer.enums.add(new HashMap<>());
         //objects
-        objectProperties.add(new HashMap<>());
+        saveContainer.objects.add(new HashMap<>());
         //object arrays
-        objectArrayProperties.add(new HashMap<>());
+        saveContainer.objectArrays.add(new HashMap<>());
     }
 
     /**
      * @param database
      * @param entities
-     * @param dateTimeProperties
-     * @param stringProperties
-     * @param booleanProperties
-     * @param floatProperties
-     * @param doubleProperties
-     * @param longProperties
-     * @param integerProperties
-     * @param objectArrayProperties
-     * @param stringArrayProperties
-     * @param dateTimeArrayProperties
-     * @param floatArrayProperties
-     * @param doubleArrayProperties
-     * @param longArrayProperties
-     * @param integerArrayProperties
-     * @param enumProperties
-     * @param objectProperties
-     * @param overviews
+     * @param saveContainer
+     * @param step
      */
-    private static void saveInner(final JdsDatabase database,
-                                  final Collection<? extends JdsEntity> entities,
-                                  final Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> dateTimeProperties,
-                                  final Map<String, Map<Long, SimpleStringProperty>> stringProperties,
-                                  final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties,
-                                  final Map<String, Map<Long, SimpleFloatProperty>> floatProperties,
-                                  final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties,
-                                  final Map<String, Map<Long, SimpleLongProperty>> longProperties,
-                                  final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties,
-                                  final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties,
-                                  final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumProperties,
-                                  final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties,
-                                  final HashSet<JdsEntityOverview> overviews) {
+    private static void saveInner(final JdsDatabase database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
         //fire
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
             mapEntity(database, entity);
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
-            overviews.add(entity.getOverview());
+            saveContainer.overviews.get(step).add(entity.getOverview());
             //assign properties
-            booleanProperties.put(entity.getEntityGuid(), entity.booleanProperties);
-            dateTimeProperties.put(entity.getEntityGuid(), entity.dateProperties);
-            stringProperties.put(entity.getEntityGuid(), entity.stringProperties);
-            floatProperties.put(entity.getEntityGuid(), entity.floatProperties);
-            doubleProperties.put(entity.getEntityGuid(), entity.doubleProperties);
-            longProperties.put(entity.getEntityGuid(), entity.longProperties);
-            integerProperties.put(entity.getEntityGuid(), entity.integerProperties);
+            saveContainer.booleans.get(step).put(entity.getEntityGuid(), entity.booleanProperties);
+            saveContainer.localDateTimes.get(step).put(entity.getEntityGuid(), entity.localDateTimeProperties);
+            saveContainer.zonedDateTimes.get(step).put(entity.getEntityGuid(), entity.zonedDateTimeProperties);
+            saveContainer.localTimes.get(step).put(entity.getEntityGuid(), entity.localTimeProperties);
+            saveContainer.localDates.get(step).put(entity.getEntityGuid(), entity.localDateProperties);
+            saveContainer.strings.get(step).put(entity.getEntityGuid(), entity.stringProperties);
+            saveContainer.floats.get(step).put(entity.getEntityGuid(), entity.floatProperties);
+            saveContainer.doubles.get(step).put(entity.getEntityGuid(), entity.doubleProperties);
+            saveContainer.longs.get(step).put(entity.getEntityGuid(), entity.longProperties);
+            saveContainer.integers.get(step).put(entity.getEntityGuid(), entity.integerProperties);
             //assign lists
-            stringArrayProperties.put(entity.getEntityGuid(), entity.stringArrayProperties);
-            dateTimeArrayProperties.put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
-            floatArrayProperties.put(entity.getEntityGuid(), entity.floatArrayProperties);
-            doubleArrayProperties.put(entity.getEntityGuid(), entity.doubleArrayProperties);
-            longArrayProperties.put(entity.getEntityGuid(), entity.longArrayProperties);
-            integerArrayProperties.put(entity.getEntityGuid(), entity.integerArrayProperties);
+            saveContainer.stringArrays.get(step).put(entity.getEntityGuid(), entity.stringArrayProperties);
+            saveContainer.dateTimeArrays.get(step).put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
+            saveContainer.floatArrays.get(step).put(entity.getEntityGuid(), entity.floatArrayProperties);
+            saveContainer.doubleArrays.get(step).put(entity.getEntityGuid(), entity.doubleArrayProperties);
+            saveContainer.longArrays.get(step).put(entity.getEntityGuid(), entity.longArrayProperties);
+            saveContainer.integerArrays.get(step).put(entity.getEntityGuid(), entity.integerArrayProperties);
             //assign enums
-            enumProperties.put(entity.getEntityGuid(), entity.enumProperties);
+            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumProperties);
             //assign objects
-            objectArrayProperties.put(entity.getEntityGuid(), entity.objectArrayProperties);
-            objectProperties.put(entity.getEntityGuid(), entity.objectProperties);
+            saveContainer.objectArrays.get(step).put(entity.getEntityGuid(), entity.objectArrayProperties);
+            saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);
         }
-        saveOverviews(database, overviews);
+        saveOverviews(database, saveContainer.overviews.get(step));
         //properties
-        saveBooleans(database, booleanProperties);
-        saveStrings(database, stringProperties);
-        saveDates(database, dateTimeProperties);
-        saveLongs(database, longProperties);
-        saveDoubles(database, doubleProperties);
-        saveIntegers(database, integerProperties);
-        saveFloats(database, floatProperties);
+        saveBooleans(database, saveContainer.booleans.get(step));
+        saveZonedDateTimes(database, saveContainer.zonedDateTimes.get(step));
+        saveStrings(database, saveContainer.strings.get(step));
+        saveDates(database, saveContainer.localDateTimes.get(step));
+        saveLongs(database, saveContainer.longs.get(step));
+        saveDoubles(database, saveContainer.doubles.get(step));
+        saveIntegers(database, saveContainer.integers.get(step));
+        saveFloats(database, saveContainer.floats.get(step));
         //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-        saveArrayDates(database, dateTimeArrayProperties);
-        saveArrayStrings(database, stringArrayProperties);
-        saveArrayLongs(database, longArrayProperties);
-        saveArrayDoubles(database, doubleArrayProperties);
-        saveArrayIntegers(database, integerArrayProperties);
-        saveArrayFloats(database, floatArrayProperties);
+        saveArrayDates(database, saveContainer.dateTimeArrays.get(step));
+        saveArrayStrings(database, saveContainer.stringArrays.get(step));
+        saveArrayLongs(database, saveContainer.longArrays.get(step));
+        saveArrayDoubles(database, saveContainer.doubleArrays.get(step));
+        saveArrayIntegers(database, saveContainer.integerArrays.get(step));
+        saveArrayFloats(database, saveContainer.floatArrays.get(step));
         //enums
-        saveEnums(database, enumProperties);
+        saveEnums(database, saveContainer.enums.get(step));
         //objects and object arrays
-        saveArrayObjects(database, objectArrayProperties);
-        bindAndSaveInnerObjects(database, objectProperties);
+        saveArrayObjects(database, saveContainer.objectArrays.get(step));
+        bindAndSaveInnerObjects(database, saveContainer.objects.get(step));
     }
 
     /**
@@ -560,33 +485,77 @@ public class JdsSave {
      * @param jdsDatabase
      * @param dateProperties
      */
-    private static void saveDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> dateProperties) {
+    private static void saveDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> dateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDateTime()) : connection.prepareStatement(jdsDatabase.saveDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
-            for (Map.Entry<String, Map<Long, SimpleObjectProperty<LocalDateTime>>> entry : dateProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : dateProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
                 if (innerRecordSize == 0) continue;
                 String entityGuid = entry.getKey();
-                for (Map.Entry<Long, SimpleObjectProperty<LocalDateTime>> recordEntry : entry.getValue().entrySet()) {
+                for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    LocalDateTime value = recordEntry.getValue().get();
+                    Temporal temporal = recordEntry.getValue().get();
+                    long longValue = temporal.getLong(ChronoField.INSTANT_SECONDS);
+                    LocalDateTime localDateTime = Instant.ofEpochMilli(longValue).atZone(ZoneId.systemDefault()).toLocalDateTime();
                     upsert.setString(1, entityGuid);
                     upsert.setLong(2, fieldId);
-                    upsert.setTimestamp(3, Timestamp.valueOf(value));
+                    upsert.setTimestamp(3, Timestamp.valueOf(localDateTime));
                     upsert.addBatch();
                     if (jdsDatabase.printOutput())
                         System.out.printf("Updating record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     if (!jdsDatabase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
-                    log.setTimestamp(3, Timestamp.valueOf(value));
+                    log.setTimestamp(3, Timestamp.valueOf(localDateTime));
+                    log.addBatch();
+                }
+            }
+            upsert.executeBatch();
+            log.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * @param jdsDatabase
+     * @param zonedDateProperties
+     */
+    private static void saveZonedDateTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+        int record = 0;
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
+        try (Connection connection = jdsDatabase.getConnection();
+             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveZonedDateTime()) : connection.prepareStatement(jdsDatabase.saveZonedDateTime());
+             PreparedStatement log = connection.prepareStatement(logSql)) {
+            connection.setAutoCommit(false);
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    long fieldId = recordEntry.getKey();
+                    Temporal value = recordEntry.getValue().get();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, fieldId);
+                    upsert.setLong(3, value.getLong(ChronoField.INSTANT_SECONDS));
+                    upsert.addBatch();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDatabase.logEdits()) continue;
+                    log.setString(1, entityGuid);
+                    log.setLong(2, fieldId);
+                    log.setLong(3, value.getLong(ChronoField.INSTANT_SECONDS));
                     log.addBatch();
                 }
             }

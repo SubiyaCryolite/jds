@@ -71,6 +71,9 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 |LONG|long|Numeric long values|
 |TEXT|String|String values with no max limit|
 |DATE_TIME|LocalDateTime|DateTime instances based on the host machines local timezone|
+|ZONED_DATE_TIME|ZonedDateTime|Zoned DateTime instances|
+|TIME|LocalTime|Local time instances|
+|DATE|LocalDate|Local date instances|
 |ARRAY_FLOAT|List\<Float\>|Lists of type Float|
 |ARRAY_INT|List\<Integer\>|Lists of type Integer|
 |ARRAY_DOUBLE|List\<Double\>|Lists of type Double|
@@ -123,7 +126,10 @@ Depending on the type of field, JDS will require that you set you objects proper
 |DOUBLE|[SimpleDoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleDoubleProperty.html)|
 |LONG|[SimpleLongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleLongProperty.html)|
 |TEXT|[SimpleStringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleStringProperty.html)|
-|DATE_TIME|[SimpleObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleObjectProperty.html)|
+|DATE_TIME|[SimpleObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)|
+|ZONED_DATE_TIME|[SimpleObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|
+|TIME|[SimpleObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)|
+|DATE|[SimpleObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)|
 |ARRAY_FLOAT|[SimpleListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 |ARRAY_INT|[SimpleListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 |ARRAY_DOUBLE|[SimpleListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|

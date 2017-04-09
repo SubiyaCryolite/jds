@@ -4,10 +4,12 @@ import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
@@ -19,6 +21,7 @@ public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
     private final SimpleStringProperty country = new SimpleStringProperty("");
     private final SimpleListProperty<String> primaryAddress = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final SimpleObjectProperty<ZonedDateTime> timeOfEntry = new SimpleObjectProperty(ZonedDateTime.now());
 
     public SimpleAddress() {
         map(TestFields.STREET_NAME, streetName);
@@ -27,6 +30,7 @@ public class SimpleAddress extends JdsEntity {
         map(TestFields.CITY_NAME, city);
         map(TestFields.COUNTRY_NAME, country);
         map(TestFields.PROVINCE_NAME, provinceOrState);
+        map(TestFields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
         mapEnums(TestEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
     }
 
@@ -86,15 +90,24 @@ public class SimpleAddress extends JdsEntity {
         this.country.set(value);
     }
 
+    public ZonedDateTime getTimeOfEntry() {
+        return timeOfEntry.get();
+    }
+
+    public void setTimeOfEntry(ZonedDateTime timeOfEntry) {
+        this.timeOfEntry.set(timeOfEntry);
+    }
+
     @Override
     public String toString() {
         return "SimpleAddress{" +
-                "streetName=" + streetName.get() +
-                ", plotNumber=" + plotNumber.get() +
-                ", area=" + area.get() +
-                ", city=" + city.get() +
-                ", provinceOrState=" + provinceOrState.get() +
-                ", country=" + country.get() +
+                "streetName=" + getStreetName() +
+                ", plotNumber=" + getPlotNumber() +
+                ", area=" + getArea() +
+                ", city=" + getCity() +
+                ", provinceOrState=" + getProvinceOrState() +
+                ", country=" + getCountry() +
+                ", timeOfEntry=" + getTimeOfEntry() +
                 '}';
     }
 }

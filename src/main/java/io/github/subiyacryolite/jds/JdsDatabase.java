@@ -729,6 +729,15 @@ public abstract class JdsDatabase {
     }
 
     /**
+     * SQL call to save datetime values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    public String saveZonedDateTime() {
+        return "{call procStoreZonedDateTime(?,?,?)}";
+    }
+
+    /**
      * SQL call to save entity overview values
      *
      * @return the default or overridden SQL statement for this operation

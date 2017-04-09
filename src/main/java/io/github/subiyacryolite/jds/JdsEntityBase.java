@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds;
 import javafx.beans.property.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.Temporal;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -31,8 +32,11 @@ abstract class JdsEntityBase {
     protected final HashSet<Long> properties = new HashSet<>();
     protected final HashSet<Long> objects = new HashSet<>();
     protected final HashSet<JdsFieldEnum> allEnums = new HashSet<>();
-    //stringProperties and dateProperties
-    protected final HashMap<Long, SimpleObjectProperty<LocalDateTime>> dateProperties = new HashMap<>();
+    //strings and localDateTimes
+    protected final HashMap<Long, SimpleObjectProperty<Temporal>> localDateTimeProperties = new HashMap<>();
+    protected final HashMap<Long, SimpleObjectProperty<Temporal>> zonedDateTimeProperties = new HashMap<>();
+    protected final HashMap<Long, SimpleObjectProperty<Temporal>> localDateProperties = new HashMap<>();
+    protected final HashMap<Long, SimpleObjectProperty<Temporal>> localTimeProperties = new HashMap<>();
     protected final HashMap<Long, SimpleStringProperty> stringProperties = new HashMap<>();
     //numeric
     protected final HashMap<Long, SimpleFloatProperty> floatProperties = new HashMap<>();
@@ -50,7 +54,7 @@ abstract class JdsEntityBase {
     protected final HashMap<Long, SimpleListProperty<Integer>> integerArrayProperties = new HashMap<>();
     //enums
     protected final HashMap<JdsFieldEnum, SimpleListProperty<String>> enumProperties = new HashMap<>();
-    //objectProperties
+    //objects
     protected final HashMap<Long, SimpleObjectProperty<? extends JdsEntity>> objectProperties = new HashMap<>();
 
     public final JdsEntityOverview getOverview() {

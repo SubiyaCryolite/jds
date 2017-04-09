@@ -13,12 +13,16 @@
 */
 package io.github.subiyacryolite.jds;
 
-import javafx.beans.property.*;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
+import javafx.beans.property.*;
 
 import java.lang.annotation.Annotation;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * Created by ifunga on 04/02/2017.
@@ -77,6 +81,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(final JdsField jdsField, final SimpleIntegerProperty integerProperty) {
+        if (integerProperty == null) return;
         if (jdsField.getType() == JdsFieldType.INT) {
             properties.add(jdsField.getId());
             integerProperties.put(jdsField.getId(), integerProperty);
@@ -84,15 +89,39 @@ public abstract class JdsEntity extends JdsEntityBase {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
     }
 
-    protected final void map(final JdsField jdsField, final SimpleObjectProperty<LocalDateTime> localDateTimeProperty) {
-        if (jdsField.getType() == JdsFieldType.DATE_TIME) {
-            properties.add(jdsField.getId());
-            dateProperties.put(jdsField.getId(), localDateTimeProperty);
-        } else
-            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+    protected final void map(final JdsField jdsField, final SimpleObjectProperty temporalProperty) {
+        if (temporalProperty == null) return;
+        Object temporal = temporalProperty.get();
+        if (temporal instanceof LocalDateTime) {
+            if (jdsField.getType() == JdsFieldType.DATE_TIME) {
+                properties.add(jdsField.getId());
+                localDateTimeProperties.put(jdsField.getId(), temporalProperty);
+            } else
+                throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+        } else if (temporal instanceof ZonedDateTime) {
+            if (jdsField.getType() == JdsFieldType.ZONED_DATE_TIME) {
+                properties.add(jdsField.getId());
+                zonedDateTimeProperties.put(jdsField.getId(), temporalProperty);
+            } else
+                throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+        } else if (temporal instanceof LocalDate) {
+            if (jdsField.getType() == JdsFieldType.DATE) {
+                properties.add(jdsField.getId());
+                localDateProperties.put(jdsField.getId(), temporalProperty);
+            } else
+                throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+        }
+        else if (temporal instanceof LocalTime) {
+            if (jdsField.getType() == JdsFieldType.TIME) {
+                properties.add(jdsField.getId());
+                localTimeProperties.put(jdsField.getId(), temporalProperty);
+            } else
+                throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+        }
     }
 
     protected final void map(final JdsField jdsField, final SimpleStringProperty stringProperty) {
+        if (stringProperty == null) return;
         if (jdsField.getType() == JdsFieldType.TEXT) {
             properties.add(jdsField.getId());
             stringProperties.put(jdsField.getId(), stringProperty);
@@ -101,6 +130,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(final JdsField jdsField, final SimpleFloatProperty floatProperty) {
+        if (floatProperty == null) return;
         if (jdsField.getType() == JdsFieldType.FLOAT) {
             properties.add(jdsField.getId());
             floatProperties.put(jdsField.getId(), floatProperty);
@@ -109,6 +139,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(final JdsField jdsField, final SimpleLongProperty longProperty) {
+        if (longProperty == null) return;
         if (jdsField.getType() == JdsFieldType.LONG) {
             properties.add(jdsField.getId());
             longProperties.put(jdsField.getId(), longProperty);
@@ -117,6 +148,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(final JdsField jdsField, final SimpleDoubleProperty doubleProperty) {
+        if (doubleProperty == null) return;
         if (jdsField.getType() == JdsFieldType.DOUBLE) {
             properties.add(jdsField.getId());
             doubleProperties.put(jdsField.getId(), doubleProperty);
@@ -125,6 +157,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(final JdsField jdsField, final SimpleBooleanProperty booleanProperty) {
+        if (booleanProperty == null) return;
         if (jdsField.getType() == JdsFieldType.BOOLEAN) {
             properties.add(jdsField.getId());
             booleanProperties.put(jdsField.getId(), booleanProperty);
@@ -133,6 +166,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void mapStrings(final JdsField jdsField, final SimpleListProperty<String> strings) {
+        if (strings == null) return;
         if (jdsField.getType() == JdsFieldType.ARRAY_TEXT) {
             properties.add(jdsField.getId());
             stringArrayProperties.put(jdsField.getId(), strings);
@@ -141,6 +175,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void mapFloats(final JdsField jdsField, final SimpleListProperty<Float> floats) {
+        if (floats == null) return;
         if (jdsField.getType() == JdsFieldType.ARRAY_FLOAT) {
             properties.add(jdsField.getId());
             floatArrayProperties.put(jdsField.getId(), floats);
@@ -149,6 +184,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void mapDoubles(final JdsField jdsField, final SimpleListProperty<Double> doubles) {
+        if (doubles == null) return;
         if (jdsField.getType() == JdsFieldType.ARRAY_DOUBLE) {
             properties.add(jdsField.getId());
             doubleArrayProperties.put(jdsField.getId(), doubles);
@@ -157,6 +193,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void mapLongs(final JdsField jdsField, final SimpleListProperty<Long> longs) {
+        if (longs == null) return;
         if (jdsField.getType() == JdsFieldType.ARRAY_LONG) {
             properties.add(jdsField.getId());
             longArrayProperties.put(jdsField.getId(), longs);
@@ -165,6 +202,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<String> strings) {
+        if (strings == null) return;
         allEnums.add(jdsFieldEnum);
         if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_TEXT) {
             properties.add(jdsFieldEnum.getField().getId());

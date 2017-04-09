@@ -28,7 +28,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     protected JdsDatabaseTransactionalSql() {
         supportsStatements = true;
-        implementation= JdsImplementation.TSQL;
+        implementation = JdsImplementation.TSQL;
     }
 
     @Override
@@ -200,6 +200,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
@@ -228,6 +229,9 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
                 break;
             case SaveDateTime:
                 executeSqlFromFile("sql/tsql/procedures/procStoreDateTime.sql");
+                break;
+            case SaveZonedDateTime:
+                executeSqlFromFile("sql/tsql/procedures/procStoreZonedDateTime.sql");
                 break;
             case SaveEntity:
                 executeSqlFromFile("sql/tsql/procedures/procStoreEntityOverview.sql");

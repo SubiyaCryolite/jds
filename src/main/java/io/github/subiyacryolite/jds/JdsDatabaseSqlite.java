@@ -161,6 +161,10 @@ public class JdsDatabaseSqlite extends JdsDatabase {
         return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
     }
 
+    public String saveZonedDateTime() {
+        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
     public String saveOverview() {
         return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,DateCreated,DateModified,EntityId) VALUES(?,?,?,?)";
     }

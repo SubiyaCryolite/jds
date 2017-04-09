@@ -28,7 +28,7 @@ public class JdsDatabasePostgres extends JdsDatabase {
 
     public JdsDatabasePostgres() {
         supportsStatements = true;
-        implementation= JdsImplementation.POSTGRES;
+        implementation = JdsImplementation.POSTGRES;
     }
 
     @Override
@@ -182,6 +182,7 @@ public class JdsDatabasePostgres extends JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
@@ -209,6 +210,9 @@ public class JdsDatabasePostgres extends JdsDatabase {
                 break;
             case SaveDateTime:
                 executeSqlFromFile("sql/postgresql/procedures/procStoreDateTime.sql");
+                break;
+            case SaveZonedDateTime:
+                executeSqlFromFile("sql/postgresql/procedures/procStoreZonedDateTime.sql");
                 break;
             case SaveEntity:
                 executeSqlFromFile("sql/postgresql/procedures/procStoreEntityOverview.sql");

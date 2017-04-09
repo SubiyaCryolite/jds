@@ -28,7 +28,7 @@ public class JdsDatabaseMySql extends JdsDatabase {
 
     protected JdsDatabaseMySql() {
         supportsStatements = true;
-        implementation= JdsImplementation.MYSQL;
+        implementation = JdsImplementation.MYSQL;
     }
 
     @Override
@@ -182,6 +182,7 @@ public class JdsDatabaseMySql extends JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
@@ -209,6 +210,9 @@ public class JdsDatabaseMySql extends JdsDatabase {
                 break;
             case SaveDateTime:
                 executeSqlFromFile("sql/mysql/procedures/procStoreDateTime.sql");
+                break;
+            case SaveZonedDateTime:
+                executeSqlFromFile("sql/mysql/procedures/procStoreZonedDateTime.sql");
                 break;
             case SaveEntity:
                 executeSqlFromFile("sql/mysql/procedures/procStoreEntityOverview.sql");
