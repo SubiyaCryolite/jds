@@ -136,6 +136,10 @@ public class JdsDatabaseSqlite extends JdsDatabase {
         executeSqlFromFile("sql/sqlite/createStoreEntityBinding.sql");
     }
 
+    protected void createStoreTime() {
+        executeSqlFromFile("sql/sqlite/createStoreTime.sql");
+    }
+
 
     public String saveString() {
         return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(?,?,?);";
@@ -159,6 +163,10 @@ public class JdsDatabaseSqlite extends JdsDatabase {
 
     public String saveDateTime() {
         return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    public String saveTime() {
+        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
     }
 
     public String saveZonedDateTime() {

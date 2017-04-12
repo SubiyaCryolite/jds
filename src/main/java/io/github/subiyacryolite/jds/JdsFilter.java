@@ -180,8 +180,6 @@ public class JdsFilter implements AutoCloseable {
 
     private String getTableName(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
-            case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getName();
             case TEXT:
                 return StoreText.getName();
             case INT:
@@ -192,9 +190,13 @@ public class JdsFilter implements AutoCloseable {
                 return StoreFloat.getName();
             case LONG:
                 return StoreLong.getName();
-            case DATE_TIME:
             case DATE:
+            case DATE_TIME:
                 return StoreDateTime.getName();
+            case ZONED_DATE_TIME:
+                return StoreZonedDateTime.getName();
+            case TIME:
+                return StoreTime.getName();
             case ARRAY_TEXT:
                 return StoreTextArray.getName();
             case ARRAY_INT:
@@ -214,8 +216,6 @@ public class JdsFilter implements AutoCloseable {
 
     private String getTablePrefix(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
-            case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getPrefix();
             case TEXT:
                 return StoreText.getPrefix();
             case INT:
@@ -229,6 +229,10 @@ public class JdsFilter implements AutoCloseable {
             case DATE:
             case DATE_TIME:
                 return StoreDateTime.getPrefix();
+            case ZONED_DATE_TIME:
+                return StoreZonedDateTime.getPrefix();
+            case TIME:
+                return StoreTime.getPrefix();
             case ARRAY_TEXT:
                 return StoreTextArray.getPrefix();
             case ARRAY_INT:

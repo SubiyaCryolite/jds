@@ -103,6 +103,7 @@ public abstract class JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreZonedDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreTime);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreOldFieldValues);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityFields);
         prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityEnums);
@@ -218,9 +219,6 @@ public abstract class JdsDatabase {
      */
     private final void initiateDatabaseComponent(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
-            case StoreZonedDateTime:
-                createStoreZonedDateTime();
-                break;
             case StoreTextArray:
                 createStoreTextArray();
                 break;
@@ -256,6 +254,12 @@ public abstract class JdsDatabase {
                 break;
             case StoreDateTime:
                 createStoreDateTime();
+                break;
+            case StoreZonedDateTime:
+                createStoreZonedDateTime();
+                break;
+            case StoreTime:
+                createStoreTime();
                 break;
             case RefEntities:
                 createStoreEntities();
@@ -434,6 +438,11 @@ public abstract class JdsDatabase {
      * Database specific SQL used to create the schema that stores zoned datetime values
      */
     abstract void createStoreZonedDateTime();
+
+    /**
+     * Database specific SQL used to create the schema that stores time values
+     */
+    abstract void createStoreTime();
 
     /**
      * Database specific SQL used to create the schema that stores integer values
@@ -735,6 +744,24 @@ public abstract class JdsDatabase {
      */
     public String saveZonedDateTime() {
         return "{call procStoreZonedDateTime(?,?,?)}";
+    }
+
+    /**
+     * SQL call to save date values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    public String saveDate() {
+        return "{call procStoreDate(?,?,?)}";
+    }
+
+    /**
+     * SQL call to save time values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    public String saveTime() {
+        return "{call procStoreTime(?,?,?)}";
     }
 
     /**

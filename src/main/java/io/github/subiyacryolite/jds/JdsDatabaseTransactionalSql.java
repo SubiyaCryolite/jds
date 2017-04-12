@@ -192,6 +192,11 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
         executeSqlFromFile("sql/tsql/createStoreEntityBinding.sql");
     }
 
+    protected void createStoreTime() {
+        executeSqlFromFile("sql/tsql/createStoreTime.sql");
+    }
+
+
     @Override
     protected void prepareCustomDatabaseComponents() {
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveText);
@@ -200,6 +205,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
+        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveTime);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
         prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
@@ -212,6 +218,9 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
     @Override
     protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
+            case SaveTime:
+                executeSqlFromFile("sql/mysql/procedures/procStoreTime.sql");
+                break;
             case SaveText:
                 executeSqlFromFile("sql/tsql/procedures/procStoreText.sql");
                 break;
