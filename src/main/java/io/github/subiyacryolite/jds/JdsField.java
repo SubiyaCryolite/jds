@@ -26,18 +26,9 @@ import static io.github.subiyacryolite.jds.enums.JdsFieldType.TEXT;
  */
 public class JdsField {
     private static HashMap<Long, String> fields = new HashMap<>();
-
-    private static void bind(final JdsField jdsField) {
-        if (!fields.containsKey(jdsField.getId()))
-            fields.put(jdsField.getId(), jdsField.getName());
-        else
-            throw new RuntimeException(String.format("This jdsField ID [%s] is already bound", jdsField.getId()));
-    }
-
     private final SimpleLongProperty id;
     private final SimpleStringProperty name;
     private JdsFieldType type;
-
     private JdsField() {
         id = new SimpleLongProperty();
         name = new SimpleStringProperty();
@@ -50,6 +41,13 @@ public class JdsField {
         setName(name);
         setType(type);
         bind(this);
+    }
+
+    private static void bind(final JdsField jdsField) {
+        if (!fields.containsKey(jdsField.getId()))
+            fields.put(jdsField.getId(), jdsField.getName());
+        else
+            throw new RuntimeException(String.format("This jdsField ID [%s] is already bound", jdsField.getId()));
     }
 
     public long getId() {
@@ -68,12 +66,12 @@ public class JdsField {
         this.name.set(name);
     }
 
-    private void setType(JdsFieldType type) {
-        this.type = type;
-    }
-
     public JdsFieldType getType() {
         return this.type;
+    }
+
+    private void setType(JdsFieldType type) {
+        this.type = type;
     }
 
     @Override

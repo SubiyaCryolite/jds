@@ -22,7 +22,7 @@ import java.util.Collection;
  * Created by ifunga on 13/03/2017.
  */
 public class JdsDelete {
-    private final static String DELETE_SQL ="DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
+    private final static String DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
 
     public static void delete(final JdsDatabase jdsDatabase, final Collection<? extends JdsEntity> entities) {
         try (Connection connection = jdsDatabase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {

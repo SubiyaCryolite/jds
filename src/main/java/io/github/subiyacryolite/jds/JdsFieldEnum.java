@@ -40,11 +40,6 @@ public class JdsFieldEnum {
         bind();
     }
 
-    private void bind() {
-        if (!fieldEnums.containsKey(field.get()))
-            fieldEnums.put(field.get().getId(), this);
-    }
-
     public static JdsFieldEnum get(final JdsField jdsField) {
         if (fieldEnums.containsKey(jdsField.getId()))
             return fieldEnums.get(jdsField.getId());
@@ -57,6 +52,11 @@ public class JdsFieldEnum {
             return fieldEnums.get(fieldId);
         else
             throw new RuntimeException(String.format("This field [%s] has not been bound to any enums", fieldId));
+    }
+
+    private void bind() {
+        if (!fieldEnums.containsKey(field.get()))
+            fieldEnums.put(field.get().getId(), this);
     }
 
     public JdsField getField() {

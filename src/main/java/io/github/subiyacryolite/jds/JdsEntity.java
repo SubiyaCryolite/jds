@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 
 /**
  * Created by ifunga on 04/02/2017.
@@ -72,12 +71,12 @@ public abstract class JdsEntity extends JdsEntityBase {
         this.getOverview().setEntityCode(serviceCode);
     }
 
-    private void setEntityName(String name) {
-        this.name.set(name);
-    }
-
     public String getEntityName() {
         return name.get();
+    }
+
+    private void setEntityName(String name) {
+        this.name.set(name);
     }
 
     protected final void map(final JdsField jdsField, final SimpleIntegerProperty integerProperty) {
@@ -110,8 +109,7 @@ public abstract class JdsEntity extends JdsEntityBase {
                 localDateProperties.put(jdsField.getId(), temporalProperty);
             } else
                 throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
-        }
-        else if (temporal instanceof LocalTime) {
+        } else if (temporal instanceof LocalTime) {
             if (jdsField.getType() == JdsFieldType.TIME) {
                 properties.add(jdsField.getId());
                 localTimeProperties.put(jdsField.getId(), temporalProperty);

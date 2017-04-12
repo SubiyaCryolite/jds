@@ -32,6 +32,14 @@ import java.util.Set;
  */
 public abstract class JdsDatabase {
     /**
+     * A value indicating whether the underlying database implementation supports callable statements (Stored Procedures)
+     */
+    protected boolean supportsStatements;
+    /**
+     * The underlying database implementation
+     */
+    protected JdsImplementation implementation;
+    /**
      * The JDBC driver class name
      */
     private String className;
@@ -60,17 +68,29 @@ public abstract class JdsDatabase {
      */
     private boolean propertiesSet;
     /**
-     * A value indicating whether the underlying database implementation supports callable statements (Stored Procedures)
-     */
-    protected boolean supportsStatements;
-    /**
      * SQLite connection properties
      */
     private Properties properties;
+
     /**
-     * The underlying database implementation
+     * Returns an instance of the requested JDS Database implementation
+     *
+     * @param implementation the target database implementation
+     * @return an instance of the requested JDS Database implementation
      */
-    protected JdsImplementation implementation;
+    public final static JdsDatabase getImplementation(JdsImplementation implementation) {
+        switch (implementation) {
+            case SQLITE:
+                return new JdsDatabaseSqlite();
+            case POSTGRES:
+                return new JdsDatabasePostgres();
+            case TSQL:
+                return new JdsDatabaseTransactionalSql();
+            case MYSQL:
+                return new JdsDatabaseMySql();
+        }
+        return null;
+    }
 
     /**
      * Initialise JDS base tables
@@ -167,26 +187,6 @@ public abstract class JdsDatabase {
      */
     public JdsImplementation getImplementation() {
         return this.implementation;
-    }
-
-    /**
-     * Returns an instance of the requested JDS Database implementation
-     *
-     * @param implementation the target database implementation
-     * @return an instance of the requested JDS Database implementation
-     */
-    public final static JdsDatabase getImplementation(JdsImplementation implementation) {
-        switch (implementation) {
-            case SQLITE:
-                return new JdsDatabaseSqlite();
-            case POSTGRES:
-                return new JdsDatabasePostgres();
-            case TSQL:
-                return new JdsDatabaseTransactionalSql();
-            case MYSQL:
-                return new JdsDatabaseMySql();
-        }
-        return null;
     }
 
     /**

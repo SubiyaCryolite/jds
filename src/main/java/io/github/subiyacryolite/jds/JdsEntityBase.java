@@ -26,9 +26,9 @@ import java.util.HashSet;
  * However, these fields are visible in package class JdsSave
  */
 abstract class JdsEntityBase {
-    protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     //field and enum maps
     protected final static HashSet<Long> map = new HashSet<>();
+    protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     protected final HashSet<Long> properties = new HashSet<>();
     protected final HashSet<Long> objects = new HashSet<>();
     protected final HashSet<JdsFieldEnum> allEnums = new HashSet<>();

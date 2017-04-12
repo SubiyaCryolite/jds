@@ -25,7 +25,7 @@ import java.sql.ResultSet;
 public class JdsDatabaseSqlite extends JdsDatabase {
 
     public JdsDatabaseSqlite() {
-        implementation= JdsImplementation.SQLITE;
+        implementation = JdsImplementation.SQLITE;
         supportsStatements = false;
     }
 

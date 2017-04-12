@@ -37,13 +37,11 @@ public enum JdsFieldType {
 
     private final int type;
 
-    JdsFieldType(final int type)
-    {
-        this.type=type;
+    JdsFieldType(final int type) {
+        this.type = type;
     }
 
-    public int getType()
-    {
+    public int getType() {
         return type;
     }
 }
