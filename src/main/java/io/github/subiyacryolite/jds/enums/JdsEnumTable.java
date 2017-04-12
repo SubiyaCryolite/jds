@@ -46,7 +46,7 @@ public enum JdsEnumTable {
     SaveLong("procStoreLong", ""),
     SaveDouble("procStoreDouble", ""),
     SaveDateTime("procStoreDateTime", ""),
-    SaveTime("procStoreTime", ""),
+    SaveTime("procStoreTime.sql", ""),
     SaveZonedDateTime("procStoreZonedDateTime", ""),
     SaveEntity("procStoreEntityOverview", ""),
     MapEntityFields("procBindEntityFields", ""),
