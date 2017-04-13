@@ -2,7 +2,9 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.classes.SimpleAddress;
 import io.github.subiyacryolite.jds.classes.SimpleAddressBook;
+import io.github.subiyacryolite.jds.classes.TypeClass;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
+import org.junit.Before;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig;
 
@@ -11,16 +13,28 @@ import java.io.File;
 /**
  * Created by ifung on 08/04/2017.
  */
-public class BaseTest {
+public abstract class BaseTest {
 
+    protected final double DELTA = 1e-15;
     protected JdsDatabase jdsDatabase;
 
-    public BaseTest() {
+    public void saveAndLoad() {
+    }
+
+    public void saveObject() {
+    }
+
+    public void testLoads() {
+    }
+
+    @Before
+    public void beforeAll() {
         initialiseJdsClasses();
     }
 
     @Test
     public void initialiseJdsClasses() {
+        JdsEntityClasses.map(TypeClass.class);
         JdsEntityClasses.map(SimpleAddress.class);
         JdsEntityClasses.map(SimpleAddressBook.class);
     }

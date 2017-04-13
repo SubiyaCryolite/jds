@@ -761,7 +761,7 @@ public abstract class JdsDatabase {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveTime() {
-        return "{call procStoreTime.sql(?,?,?)}";
+        return "{call procStoreTime(?,?,?)}";
     }
 
     /**

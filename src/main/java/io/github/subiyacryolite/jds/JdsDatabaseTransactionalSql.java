@@ -219,7 +219,7 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
     protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
         switch (jdsEnumTable) {
             case SaveTime:
-                executeSqlFromFile("sql/mysql/procedures/procStoreTime.sql");
+                executeSqlFromFile("sql/tsql/procedures/procStoreTime.sql");
                 break;
             case SaveText:
                 executeSqlFromFile("sql/tsql/procedures/procStoreText.sql");

@@ -14,11 +14,29 @@ import static io.github.subiyacryolite.jds.classes.TestEnums.PRIMARY_ADDRESS_ENU
 /**
  * Created by ifunga on 18/02/2017.
  */
-public class DataTests extends BaseTest{
+public class DataTests extends BaseTest {
     @Test
+    @Override
     public void saveAndLoad() {
         saveObject();
         testLoads();
+    }
+
+    @Test
+    @Override
+    public void saveObject() {
+        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
+        JdsSave.save(jdsDatabase, 1, simpleAddressBook);
+        System.out.printf("Saved %s\n", simpleAddressBook);
+    }
+
+    @Test
+    @Override
+    public void testLoads() {
+        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
+        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        System.out.printf("All entities [%s]\n", allAddressBooks);
+        System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
 
     @Test
@@ -51,21 +69,6 @@ public class DataTests extends BaseTest{
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
         saveAndLoadMySqlImplementation();
-    }
-
-    @Test
-    public void saveObject() {
-        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
-        JdsSave.save(jdsDatabase, 1, simpleAddressBook);
-        System.out.printf("Saved %s\n", simpleAddressBook);
-    }
-
-    @Test
-    public void testLoads() {
-        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
-        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
-        System.out.printf("All entities [%s]\n", allAddressBooks);
-        System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
 
     @Test

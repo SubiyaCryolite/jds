@@ -1,0 +1,134 @@
+package io.github.subiyacryolite.jds;
+
+import io.github.subiyacryolite.jds.classes.TypeClass;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.time.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Created by ifung on 12/04/2017.
+ */
+public class TypeTests extends BaseTest {
+
+
+    @Test
+    @Override
+    public void saveAndLoad() {
+        List<TypeClass> memObjects = getObjectsInMemory();
+        JdsSave.save(jdsDatabase, 1, memObjects);
+        System.out.printf("Saved %s\n", memObjects);
+
+        List<TypeClass> savObjects = JdsLoad.load(jdsDatabase, TypeClass.class); //load all entities of type SimpleAddressBook
+        List<TypeClass> specificObject = JdsLoad.load(jdsDatabase, TypeClass.class, "instance4"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        System.out.printf("All entities [%s]\n", savObjects);
+        System.out.printf("Specific entities [%s]\n", specificObject);
+
+        Optional<TypeClass> srcA = savObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance1")).findAny();
+        Optional<TypeClass> srcB = memObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance1")).findAny();
+        Optional<TypeClass> srcC = savObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance2")).findAny();
+        Optional<TypeClass> srcD = memObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance2")).findAny();
+        Optional<TypeClass> srcE = savObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance3")).findAny();
+        Optional<TypeClass> srcF = memObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance3")).findAny();
+        Optional<TypeClass> srcG = savObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance4")).findAny();
+        Optional<TypeClass> srcH = memObjects.parallelStream().filter(z -> z.getEntityGuid().equals("instance4")).findAny();
+        match(srcA, srcB);
+        match(srcC, srcD);
+        match(srcE, srcF);
+        match(srcG, srcH);
+    }
+
+    private void match(Optional<TypeClass> srcA, Optional<TypeClass> srcB) {
+        Assert.assertTrue(srcA.isPresent());
+        Assert.assertTrue(srcB.isPresent());
+        //date, localTime, zonedDateTime and localDateTime is accurate up to seconds [not nanoseconds]
+        Assert.assertEquals("DateField getYear " + srcA.get().getEntityGuid(), srcA.get().getDateField().getYear(), srcB.get().getDateField().getYear());
+        Assert.assertEquals("DateField getMonth " + srcA.get().getEntityGuid(), srcA.get().getDateField().getMonth(), srcB.get().getDateField().getMonth());
+        Assert.assertEquals("DateField getDayOfMonth " + srcA.get().getEntityGuid(), srcA.get().getDateField().getDayOfMonth(), srcB.get().getDateField().getDayOfMonth());
+
+        Assert.assertEquals("TimeField getHour " + srcA.get().getEntityGuid(), srcA.get().getTimeField().getHour(), srcB.get().getTimeField().getHour());
+        Assert.assertEquals("TimeField getMinute " + srcA.get().getEntityGuid(), srcA.get().getTimeField().getMinute(), srcB.get().getTimeField().getMinute());
+        Assert.assertEquals("TimeField getSecond " + srcA.get().getEntityGuid(), srcA.get().getTimeField().getSecond(), srcB.get().getTimeField().getSecond());
+
+        Assert.assertEquals("DateTimeField getYear " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getYear(), srcB.get().getDateTimeField().getYear());
+        Assert.assertEquals("DateTimeField getMonth " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getMonth(), srcB.get().getDateTimeField().getMonth());
+        Assert.assertEquals("DateTimeField getDayOfMonth " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getDayOfMonth(), srcB.get().getDateTimeField().getDayOfMonth());
+        Assert.assertEquals("DateTimeField getHour " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getHour(), srcB.get().getDateTimeField().getHour());
+        Assert.assertEquals("DateTimeField getMinute " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getMinute(), srcB.get().getDateTimeField().getMinute());
+        Assert.assertEquals("DateTimeField getSecond " + srcA.get().getEntityGuid(), srcA.get().getDateTimeField().getSecond(), srcB.get().getDateTimeField().getSecond());
+
+        Assert.assertEquals("ZonedDateTimeField getYear " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getYear(), srcB.get().getZonedDateTimeField().getYear());
+        Assert.assertEquals("ZonedDateTimeField getMonth " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getMonth(), srcB.get().getZonedDateTimeField().getMonth());
+        Assert.assertEquals("ZonedDateTimeField getDayOfMonth " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getDayOfMonth(), srcB.get().getZonedDateTimeField().getDayOfMonth());
+        Assert.assertEquals("ZonedDateTimeField getHour " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getHour(), srcB.get().getZonedDateTimeField().getHour());
+        Assert.assertEquals("ZonedDateTimeField getMinute " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getMinute(), srcB.get().getZonedDateTimeField().getMinute());
+        Assert.assertEquals("ZonedDateTimeField getSecond " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getSecond(), srcB.get().getZonedDateTimeField().getSecond());
+        Assert.assertEquals("ZonedDateTimeField getZone " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getZone(), srcB.get().getZonedDateTimeField().getZone());
+        Assert.assertEquals("ZonedDateTimeField getOffset " + srcA.get().getEntityGuid(), srcA.get().getZonedDateTimeField().getOffset(), srcB.get().getZonedDateTimeField().getOffset());
+
+        Assert.assertEquals("StringField " + srcA.get().getEntityGuid(), srcA.get().getStringField(), srcB.get().getStringField());
+        Assert.assertEquals("IntField " + srcA.get().getEntityGuid(), srcA.get().getIntField(), srcB.get().getIntField());
+        Assert.assertEquals("FloatField " + srcA.get().getEntityGuid(), srcA.get().getFloatField(), srcB.get().getFloatField(), DELTA);
+        Assert.assertEquals("DoubleField " + srcA.get().getEntityGuid(), srcA.get().getDoubleField(), srcB.get().getDoubleField(), DELTA);
+        Assert.assertEquals("LongField " + srcA.get().getEntityGuid(), srcA.get().getLongField(), srcB.get().getLongField());
+        Assert.assertEquals("BooleanField " + srcA.get().getEntityGuid(), srcA.get().getBooleanField(), srcB.get().getBooleanField());
+    }
+
+    private List<TypeClass> getObjectsInMemory() {
+        List<TypeClass> collection = new ArrayList<>();
+
+        TypeClass instance1 = new TypeClass();
+        instance1.setEntityGuid("instance1");
+        instance1.setStringField("One");
+
+        TypeClass instance2 = new TypeClass("tWO", LocalTime.MIDNIGHT, LocalDate.MIN, LocalDateTime.MAX, ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), 99, 888, 777.666, 5555.4444f, false);
+        instance2.setEntityGuid("instance2");
+
+        TypeClass instance3 = new TypeClass("Three", LocalTime.NOON, LocalDate.MAX, LocalDateTime.MAX, ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), 22, 333, 444.555, 5555.6666f, false);
+        instance3.setEntityGuid("instance3");
+
+        TypeClass instance4 = new TypeClass("Four", LocalTime.of(12, 44), LocalDate.MIN, LocalDateTime.MIN, ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), 10, 100, 100.22, 1000.0f, false);
+        instance4.setEntityGuid("instance4");
+
+        collection.add(instance1);
+        collection.add(instance2);
+        collection.add(instance3);
+        collection.add(instance4);
+        return collection;
+    }
+
+    @Test
+    public void saveAndLoadPostreSqlImplementation() {
+        initialisePostgeSqlBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadTsqlImplementation() {
+        initialiseTSqlBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadSqliteImplementation() {
+        initialiseSqlLiteBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadMySqlImplementation() {
+        initialiseMysqlBackend();
+        saveAndLoad();
+    }
+
+    @Test
+    public void saveAndLoadAllImplementations() {
+        saveAndLoadSqliteImplementation();
+        saveAndLoadTsqlImplementation();
+        saveAndLoadPostreSqlImplementation();
+        saveAndLoadMySqlImplementation();
+    }
+}

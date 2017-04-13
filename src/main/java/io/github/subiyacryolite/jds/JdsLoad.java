@@ -18,10 +18,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.sql.*;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -101,6 +98,7 @@ public class JdsLoad {
         String sqlFloatValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreFloat WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDoubleValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDouble WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlZonedDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         //array
         String sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
@@ -119,6 +117,7 @@ public class JdsLoad {
              PreparedStatement floats = connection.prepareStatement(sqlFloatValues);
              PreparedStatement doubles = connection.prepareStatement(sqlDoubleValues);
              PreparedStatement dateTimes = connection.prepareStatement(sqlDateTimeValues);
+             PreparedStatement times = connection.prepareStatement(sqlTimeValues);
              PreparedStatement zonedDateTimes = connection.prepareStatement(sqlZonedDateTimeValues);
              PreparedStatement textArrays = connection.prepareStatement(sqlTextArrayValues);
              PreparedStatement integerArraysAndEnums = connection.prepareStatement(sqlIntegerArrayAndEnumValues);
@@ -143,6 +142,7 @@ public class JdsLoad {
                 setParameterForStatement(floats, index, EntityGuid);
                 setParameterForStatement(doubles, index, EntityGuid);
                 setParameterForStatement(dateTimes, index, EntityGuid);
+                setParameterForStatement(times, index, EntityGuid);
                 setParameterForStatement(zonedDateTimes, index, EntityGuid);
                 //array
                 setParameterForStatement(textArrays, index, EntityGuid);
@@ -164,7 +164,8 @@ public class JdsLoad {
             populateIntegerAndBoolean(jdsEntities, integers);
             populateFloat(jdsEntities, floats);
             populateDouble(jdsEntities, doubles);
-            populateDateTime(jdsEntities, dateTimes);
+            populateDateTimeAndDate(jdsEntities, dateTimes);
+            populateTimes(jdsEntities, times);
 
             //integer arrays and enums
             populateIntegerArraysAndEnums(jdsEntities, integerArraysAndEnums);
@@ -392,9 +393,9 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
                 Timestamp dateModified = resultSet.getTimestamp("DateModified");
-                for (JdsEntity jdsEntity : optimalEntityLookup(jdsEntities, entityGuid)) {
-                    jdsEntity.setDateModified(dateModified.toLocalDateTime());
-                    jdsEntity.setDateCreated(dateCreated.toLocalDateTime());
+                for (JdsEntity entity : optimalEntityLookup(jdsEntities, entityGuid)) {
+                    entity.setDateModified(dateModified.toLocalDateTime());
+                    entity.setDateCreated(dateCreated.toLocalDateTime());
                 }
             }
         }
@@ -405,14 +406,17 @@ public class JdsLoad {
      * @param preparedStatement
      * @throws SQLException
      */
-    private static void populateDateTime(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
+    private static void populateDateTimeAndDate(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp value = resultSet.getTimestamp("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.localDateTimeProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.localDateTimeProperties.get(fieldId).set(value.toLocalDateTime());
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localDateTimeProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.localDateTimeProperties.get(fieldId).set(value.toLocalDateTime());
+                });
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localDateProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.localDateProperties.get(fieldId).set(value.toLocalDateTime().toLocalDate());
                 });
             }
         }
@@ -429,8 +433,8 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 double value = resultSet.getDouble("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.doubleProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.doubleProperties.get(fieldId).set(value);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.doubleProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.doubleProperties.get(fieldId).set(value);
                 });
             }
         }
@@ -447,11 +451,30 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 int value = resultSet.getInt("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.integerProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.integerProperties.get(fieldId).set(value);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.integerProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.integerProperties.get(fieldId).set(value);
                 });
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.booleanProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.booleanProperties.get(fieldId).set(value == 1);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.booleanProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.booleanProperties.get(fieldId).set(value == 1);
+                });
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    private static void populateTimes(final Collection<JdsEntity> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                int value = resultSet.getInt("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localTimeProperties.containsKey(fieldId)).forEach(entity -> {
+                    LocalTime localTime = LocalTime.ofSecondOfDay(value);
+                    entity.localTimeProperties.get(fieldId).set(localTime);
                 });
             }
         }
@@ -468,8 +491,8 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 float value = resultSet.getFloat("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.floatProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.floatProperties.get(fieldId).set(value);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.floatProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.floatProperties.get(fieldId).set(value);
                 });
             }
         }
@@ -486,8 +509,8 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 long value = resultSet.getLong("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.longProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.longProperties.get(fieldId).set(value);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.longProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.longProperties.get(fieldId).set(value);
                 });
             }
         }
@@ -504,10 +527,10 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 long value = resultSet.getLong("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.zonedDateTimeProperties.containsKey(fieldId)).forEach(jdsEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.zonedDateTimeProperties.containsKey(fieldId)).forEach(entity -> {
                     Instant instant = Instant.ofEpochSecond(value);
                     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-                    jdsEntity.zonedDateTimeProperties.get(fieldId).set(zonedDateTime);
+                    entity.zonedDateTimeProperties.get(fieldId).set(zonedDateTime);
                 });
             }
         }
@@ -524,8 +547,8 @@ public class JdsLoad {
                 String entityGuid = resultSet.getString("EntityGuid");
                 String value = resultSet.getString("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(currentEntity -> currentEntity.stringProperties.containsKey(fieldId)).forEach(jdsEntity -> {
-                    jdsEntity.stringProperties.get(fieldId).set(value);
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.stringProperties.containsKey(fieldId)).forEach(entity -> {
+                    entity.stringProperties.get(fieldId).set(value);
                 });
             }
         }

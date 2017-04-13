@@ -19,10 +19,10 @@ import javafx.collections.ObservableList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoField;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.*;
 
@@ -156,9 +156,10 @@ public class JdsSave {
         saveOverviews(database, saveContainer.overviews.get(step));
         //properties
         saveBooleans(database, saveContainer.booleans.get(step));
-        saveZonedDateTimes(database, saveContainer.zonedDateTimes.get(step));
         saveStrings(database, saveContainer.strings.get(step));
-        saveDates(database, saveContainer.localDateTimes.get(step));
+        saveDatesAndDateTimes(database, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
+        saveZonedDateTimes(database, saveContainer.zonedDateTimes.get(step));
+        saveTimes(database, saveContainer.localTimes.get(step));
         saveLongs(database, saveContainer.longs.get(step));
         saveDoubles(database, saveContainer.doubles.get(step));
         saveIntegers(database, saveContainer.integers.get(step));
@@ -483,16 +484,17 @@ public class JdsSave {
 
     /**
      * @param jdsDatabase
-     * @param dateProperties
+     * @param localDateTimeProperties
+     * @param localDateProperties
      */
-    private static void saveDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> dateProperties) {
+    private static void saveDatesAndDateTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
         try (Connection connection = jdsDatabase.getConnection();
              PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDateTime()) : connection.prepareStatement(jdsDatabase.saveDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
-            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : dateProperties.entrySet()) {
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
                 int innerRecordSize = entry.getValue().size();
@@ -501,19 +503,83 @@ public class JdsSave {
                 for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    Temporal temporal = recordEntry.getValue().get();
-                    long longValue = temporal.getLong(ChronoField.INSTANT_SECONDS);
-                    LocalDateTime localDateTime = Instant.ofEpochMilli(longValue).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime localDateTime = (LocalDateTime) recordEntry.getValue().get();
                     upsert.setString(1, entityGuid);
                     upsert.setLong(2, fieldId);
                     upsert.setTimestamp(3, Timestamp.valueOf(localDateTime));
                     upsert.addBatch();
                     if (jdsDatabase.printOutput())
-                        System.out.printf("Updating record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                        System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     if (!jdsDatabase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setTimestamp(3, Timestamp.valueOf(localDateTime));
+                    log.addBatch();
+                }
+            }
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateProperties.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    long fieldId = recordEntry.getKey();
+                    LocalDate localDate = (LocalDate) recordEntry.getValue().get();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, fieldId);
+                    upsert.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
+                    upsert.addBatch();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDatabase.logEdits()) continue;
+                    log.setString(1, entityGuid);
+                    log.setLong(2, fieldId);
+                    log.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
+                    log.addBatch();
+                }
+            }
+            upsert.executeBatch();
+            log.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * @param jdsDatabase
+     * @param localTimeProperties
+     */
+    private static void saveTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+        int record = 0;
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
+        try (Connection connection = jdsDatabase.getConnection();
+             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveTime()) : connection.prepareStatement(jdsDatabase.saveTime());
+             PreparedStatement log = connection.prepareStatement(logSql)) {
+            connection.setAutoCommit(false);
+            for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    long fieldId = recordEntry.getKey();
+                    LocalTime localTime = (LocalTime) recordEntry.getValue().get();
+                    int secondOfDay = localTime.toSecondOfDay();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, fieldId);
+                    upsert.setInt(3, secondOfDay);
+                    upsert.addBatch();
+                    if (jdsDatabase.printOutput())
+                        System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDatabase.logEdits()) continue;
+                    log.setString(1, entityGuid);
+                    log.setLong(2, fieldId);
+                    log.setInt(3, secondOfDay);
                     log.addBatch();
                 }
             }
@@ -545,17 +611,17 @@ public class JdsSave {
                 for (Map.Entry<Long, SimpleObjectProperty<Temporal>> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    Temporal value = recordEntry.getValue().get();
+                    ZonedDateTime zonedDateTime = (ZonedDateTime) recordEntry.getValue().get();
                     upsert.setString(1, entityGuid);
                     upsert.setLong(2, fieldId);
-                    upsert.setLong(3, value.getLong(ChronoField.INSTANT_SECONDS));
+                    upsert.setLong(3, zonedDateTime.toEpochSecond());
                     upsert.addBatch();
                     if (jdsDatabase.printOutput())
                         System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     if (!jdsDatabase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
-                    log.setLong(3, value.getLong(ChronoField.INSTANT_SECONDS));
+                    log.setLong(3, zonedDateTime.toEpochSecond());
                     log.addBatch();
                 }
             }
