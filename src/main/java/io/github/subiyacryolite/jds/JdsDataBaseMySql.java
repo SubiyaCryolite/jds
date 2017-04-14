@@ -13,8 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsDatabaseComponent;
-import io.github.subiyacryolite.jds.enums.JdsEnumTable;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
+import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -22,21 +22,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * The MySQL implementation of {@link JdsDataBase JdsDataBase}
  */
-public class JdsDatabasePostgres extends JdsDatabase {
+public class JdsDataBaseMySql extends JdsDataBase {
 
-    public JdsDatabasePostgres() {
+    protected JdsDataBaseMySql() {
         supportsStatements = true;
-        implementation = JdsImplementation.POSTGRES;
+        implementation = JdsImplementation.MYSQL;
     }
 
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM information_schema.tables where table_name = ?";
+        String sql = "SELECT COUNT(table_schema) AS Result FROM information_schema.tables WHERE table_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, tableName.toLowerCase());
+            preparedStatement.setString(1, tableName);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -50,9 +50,9 @@ public class JdsDatabasePostgres extends JdsDatabase {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM pg_proc WHERE proname = ?";
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, procedureName.toLowerCase());
+            preparedStatement.setString(1, procedureName);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -66,176 +66,176 @@ public class JdsDatabasePostgres extends JdsDatabase {
 
     @Override
     protected void createStoreText() {
-        executeSqlFromFile("sql/postgresql/createStoreText.sql");
+        executeSqlFromFile("sql/mysql/createStoreText.sql");
     }
 
     @Override
     protected void createStoreDateTime() {
-        executeSqlFromFile("sql/postgresql/createStoreDateTime.sql");
+        executeSqlFromFile("sql/mysql/createStoreDateTime.sql");
     }
 
     @Override
     protected void createStoreZonedDateTime() {
-        executeSqlFromFile("sql/postgresql/createStoreZonedDateTime.sql");
+        executeSqlFromFile("sql/mysql/createStoreZonedDateTime.sql");
     }
 
     @Override
     protected void createStoreInteger() {
-        executeSqlFromFile("sql/postgresql/createStoreInteger.sql");
+        executeSqlFromFile("sql/mysql/createStoreInteger.sql");
     }
 
     @Override
     protected void createStoreFloat() {
-        executeSqlFromFile("sql/postgresql/createStoreFloat.sql");
+        executeSqlFromFile("sql/mysql/createStoreFloat.sql");
     }
 
     @Override
     protected void createStoreDouble() {
-        executeSqlFromFile("sql/postgresql/createStoreDouble.sql");
+        executeSqlFromFile("sql/mysql/createStoreDouble.sql");
     }
 
     @Override
     protected void createStoreLong() {
-        executeSqlFromFile("sql/postgresql/createStoreLong.sql");
+        executeSqlFromFile("sql/mysql/createStoreLong.sql");
     }
 
     @Override
     protected void createStoreTextArray() {
-        executeSqlFromFile("sql/postgresql/createStoreTextArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreTextArray.sql");
     }
 
     @Override
     protected void createStoreDateTimeArray() {
-        executeSqlFromFile("sql/postgresql/createStoreDateTimeArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreDateTimeArray.sql");
     }
 
     @Override
     protected void createStoreIntegerArray() {
-        executeSqlFromFile("sql/postgresql/createStoreIntegerArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreIntegerArray.sql");
     }
 
     @Override
     protected void createStoreFloatArray() {
-        executeSqlFromFile("sql/postgresql/createStoreFloatArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreFloatArray.sql");
     }
 
     @Override
     protected void createStoreDoubleArray() {
-        executeSqlFromFile("sql/postgresql/createStoreDoubleArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreDoubleArray.sql");
     }
 
     @Override
     protected void createStoreLongArray() {
-        executeSqlFromFile("sql/postgresql/createStoreLongArray.sql");
+        executeSqlFromFile("sql/mysql/createStoreLongArray.sql");
     }
 
     @Override
     protected void createStoreEntities() {
-        executeSqlFromFile("sql/postgresql/createRefEntities.sql");
+        executeSqlFromFile("sql/mysql/createRefEntities.sql");
     }
 
     @Override
     protected void createRefEnumValues() {
-        executeSqlFromFile("sql/postgresql/createRefEnumValues.sql");
+        executeSqlFromFile("sql/mysql/createRefEnumValues.sql");
     }
 
     @Override
     protected void createRefFields() {
-        executeSqlFromFile("sql/postgresql/createRefFields.sql");
+        executeSqlFromFile("sql/mysql/createRefFields.sql");
     }
 
     @Override
     protected void createRefFieldTypes() {
-        executeSqlFromFile("sql/postgresql/createRefFieldTypes.sql");
+        executeSqlFromFile("sql/mysql/createRefFieldTypes.sql");
     }
 
     @Override
     protected void createBindEntityFields() {
-        executeSqlFromFile("sql/postgresql/createBindEntityFields.sql");
+        executeSqlFromFile("sql/mysql/createBindEntityFields.sql");
     }
 
     @Override
     protected void createBindEntityEnums() {
-        executeSqlFromFile("sql/postgresql/createBindEntityEnums.sql");
+        executeSqlFromFile("sql/mysql/createBindEntityEnums.sql");
     }
 
     @Override
     protected void createRefEntityOverview() {
-        executeSqlFromFile("sql/postgresql/createStoreEntityOverview.sql");
+        executeSqlFromFile("sql/mysql/createStoreEntityOverview.sql");
     }
 
     @Override
     protected void createRefOldFieldValues() {
-        executeSqlFromFile("sql/postgresql/createStoreOldFieldValues.sql");
+        executeSqlFromFile("sql/mysql/createStoreOldFieldValues.sql");
     }
 
     @Override
     protected void createStoreEntityBinding() {
-        executeSqlFromFile("sql/postgresql/createStoreEntityBinding.sql");
+        executeSqlFromFile("sql/mysql/createStoreEntityBinding.sql");
     }
 
     protected void createStoreTime() {
-        executeSqlFromFile("sql/postgresql/createStoreTime.sql");
+        executeSqlFromFile("sql/mysql/createStoreTime.sql");
     }
 
     @Override
     protected void prepareCustomDatabaseComponents() {
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveText);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveLong);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapClassName);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveLong);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveInteger);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveFloat);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDouble);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDateTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveZonedDateTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntity);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityFields);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
     }
 
     @Override
-    protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
-        switch (jdsEnumTable) {
+    protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
+        switch (jdsComponent) {
             case SaveTime:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreTime.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreTime.sql");
                 break;
             case SaveText:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreText.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreText.sql");
                 break;
             case SaveLong:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreLong.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreLong.sql");
                 break;
             case SaveInteger:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreInteger.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreInteger.sql");
                 break;
             case SaveFloat:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreFloat.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreFloat.sql");
                 break;
             case SaveDouble:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreDouble.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreDouble.sql");
                 break;
             case SaveDateTime:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreDateTime.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreDateTime.sql");
                 break;
             case SaveZonedDateTime:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreZonedDateTime.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreZonedDateTime.sql");
                 break;
             case SaveEntity:
-                executeSqlFromFile("sql/postgresql/procedures/procStoreEntityOverview.sql");
+                executeSqlFromFile("sql/mysql/procedures/procStoreEntityOverview.sql");
                 break;
             case MapEntityFields:
-                executeSqlFromFile("sql/postgresql/procedures/procBindEntityFields.sql");
+                executeSqlFromFile("sql/mysql/procedures/procBindEntityFields.sql");
                 break;
             case MapEntityEnums:
-                executeSqlFromFile("sql/postgresql/procedures/procBindEntityEnums.sql");
+                executeSqlFromFile("sql/mysql/procedures/procBindEntityEnums.sql");
                 break;
             case MapClassName:
-                executeSqlFromFile("sql/postgresql/procedures/procRefEntities.sql");
+                executeSqlFromFile("sql/mysql/procedures/procRefEntities.sql");
                 break;
             case MapEnumValues:
-                executeSqlFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
+                executeSqlFromFile("sql/mysql/procedures/procRefEnumValues.sql");
                 break;
         }
     }

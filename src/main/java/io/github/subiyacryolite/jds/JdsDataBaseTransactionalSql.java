@@ -13,8 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsDatabaseComponent;
-import io.github.subiyacryolite.jds.enums.JdsEnumTable;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
+import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -22,11 +22,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * The TSQL implementation of {@link JdsDataBase JdsDataBase}
  */
-public class JdsDatabaseTransactionalSql extends JdsDatabase {
+public class JdsDataBaseTransactionalSql extends JdsDataBase {
 
-    protected JdsDatabaseTransactionalSql() {
+    protected JdsDataBaseTransactionalSql() {
         supportsStatements = true;
         implementation = JdsImplementation.TSQL;
     }
@@ -199,25 +199,25 @@ public class JdsDatabaseTransactionalSql extends JdsDatabase {
 
     @Override
     protected void prepareCustomDatabaseComponents() {
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveText);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveLong);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveInteger);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveFloat);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDouble);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveZonedDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.SaveEntity);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityFields);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEntityEnums);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapClassName);
-        prepareDatabaseComponent(JdsDatabaseComponent.STORED_PROCEDURE, JdsEnumTable.MapEnumValues);
-        prepareDatabaseComponent(JdsDatabaseComponent.TRIGGER, JdsEnumTable.CascadeEntityBinding);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveLong);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveInteger);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveFloat);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDouble);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDateTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveZonedDateTime);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntity);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityFields);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
+        prepareDatabaseComponent(JdsComponentType.TRIGGER, JdsComponent.CascadeEntityBinding);
     }
 
     @Override
-    protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
-        switch (jdsEnumTable) {
+    protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
+        switch (jdsComponent) {
             case SaveTime:
                 executeSqlFromFile("sql/tsql/procedures/procStoreTime.sql");
                 break;

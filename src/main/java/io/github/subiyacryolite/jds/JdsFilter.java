@@ -23,10 +23,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.github.subiyacryolite.jds.enums.JdsEnumTable.*;
+import static io.github.subiyacryolite.jds.enums.JdsComponent.*;
 
 /**
- * Created by ifunga on 03/03/2017.
+ * This class is used to perform basic searches based on defined parameters
  */
 public class JdsFilter implements AutoCloseable {
 
@@ -159,7 +159,7 @@ public class JdsFilter implements AutoCloseable {
         return String.join(" JOIN ", tables);
     }
 
-    public <T extends JdsEntity> List<T> find(JdsDatabase database, final Class<T> referenceType) {
+    public <T extends JdsEntity> List<T> find(JdsDataBase database, final Class<T> referenceType) {
         List<String> matchingGuids = new ArrayList<>();
         String sql = this.toQuery();
         try (Connection connection = database.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {

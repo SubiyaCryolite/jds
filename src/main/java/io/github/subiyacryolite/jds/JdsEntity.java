@@ -24,7 +24,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
 /**
- * Created by ifunga on 04/02/2017.
+ * This class allows for all mapping operations in JDS, it also uses {@link JdsEntityBase JdsEntityBase} to store overview data
  */
 public abstract class JdsEntity extends JdsEntityBase {
     private final SimpleStringProperty name;

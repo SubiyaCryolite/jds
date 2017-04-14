@@ -19,13 +19,13 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * Created by ifunga on 13/03/2017.
+ * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDataBase JdsDataBase}
  */
 public class JdsDelete {
     private final static String DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
 
-    public static void delete(final JdsDatabase jdsDatabase, final Collection<? extends JdsEntity> entities) {
-        try (Connection connection = jdsDatabase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
+    public static void delete(final JdsDataBase jdsDataBase, final Collection<? extends JdsEntity> entities) {
+        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
             for (JdsEntity entity : entities) {
                 statement.setString(1, entity.getEntityGuid());
@@ -38,12 +38,12 @@ public class JdsDelete {
         }
     }
 
-    public static void delete(final JdsDatabase jdsDatabase, final JdsEntity... entities) {
-        delete(jdsDatabase, Arrays.asList(entities));
+    public static void delete(final JdsDataBase jdsDataBase, final JdsEntity... entities) {
+        delete(jdsDataBase, Arrays.asList(entities));
     }
 
-    public static void delete(final JdsDatabase jdsDatabase, final String... entityGuids) {
-        try (Connection connection = jdsDatabase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
+    public static void delete(final JdsDataBase jdsDataBase, final String... entityGuids) {
+        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
             for (String entityGuid : entityGuids) {
                 statement.setString(1, entityGuid);

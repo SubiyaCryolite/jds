@@ -14,9 +14,11 @@
 package io.github.subiyacryolite.jds.enums;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * This enum contains all the components that make up the JDS framework on a target database.
+ * Each enum contains the components name as well as an optional alias primarily used to create
+ * joins that implement search {@link io.github.subiyacryolite.jds.JdsFilter filter's}.
  */
-public enum JdsEnumTable {
+public enum JdsComponent {
     StoreTextArray("JdsStoreTextArray", "sta"),
     StoreFloatArray("JdsStoreFloatArray", "sfa"),
     StoreIntegerArray("JdsStoreIntegerArray", "sia"),
@@ -57,7 +59,7 @@ public enum JdsEnumTable {
 
     private String name, prefix;
 
-    JdsEnumTable(String name, String prefix) {
+    JdsComponent(String name, String prefix) {
         this.name = name;
         this.prefix = prefix;
     }

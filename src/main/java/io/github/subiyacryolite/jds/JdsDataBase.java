@@ -14,8 +14,8 @@
 package io.github.subiyacryolite.jds;
 
 
-import io.github.subiyacryolite.jds.enums.JdsDatabaseComponent;
-import io.github.subiyacryolite.jds.enums.JdsEnumTable;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
+import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.io.BufferedInputStream;
@@ -30,7 +30,7 @@ import java.util.Set;
  * This class is responsible for the setup of SQL connections, default database write statements, as well as the
  * initialization of core and custom components that will support JDS on the underlying Database implementation
  */
-public abstract class JdsDatabase {
+public abstract class JdsDataBase {
     /**
      * A value indicating whether the underlying database implementation supports callable statements (Stored Procedures)
      */
@@ -78,16 +78,16 @@ public abstract class JdsDatabase {
      * @param implementation the target database implementation
      * @return an instance of the requested JDS Database implementation
      */
-    public final static JdsDatabase getImplementation(JdsImplementation implementation) {
+    public final static JdsDataBase getImplementation(JdsImplementation implementation) {
         switch (implementation) {
             case SQLITE:
-                return new JdsDatabaseSqlite();
+                return new JdsDataBaseSqlite();
             case POSTGRES:
-                return new JdsDatabasePostgres();
+                return new JdsDataBasePostgres();
             case TSQL:
-                return new JdsDatabaseTransactionalSql();
+                return new JdsDataBaseTransactionalSql();
             case MYSQL:
-                return new JdsDatabaseMySql();
+                return new JdsDataBaseMySql();
         }
         return null;
     }
@@ -104,29 +104,29 @@ public abstract class JdsDatabase {
      * Initialise core database components
      */
     private void prepareDatabaseComponents() {
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.RefEntities);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreEntityOverview);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreEntityBinding);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.RefEnumValues);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.RefFields);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.RefFieldTypes);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreTextArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreFloatArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreIntegerArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreLongArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDoubleArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDateTimeArray);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreText);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreFloat);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreInteger);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreLong);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDouble);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreZonedDateTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreTime);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.StoreOldFieldValues);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityFields);
-        prepareDatabaseComponent(JdsDatabaseComponent.TABLE, JdsEnumTable.BindEntityEnums);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEntities);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityOverview);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityBinding);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEnumValues);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefFields);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefFieldTypes);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreTextArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreFloatArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreIntegerArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreLongArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDoubleArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDateTimeArray);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreText);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreFloat);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreInteger);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreLong);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDouble);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDateTime);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreZonedDateTime);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreTime);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreOldFieldValues);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityFields);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityEnums);
     }
 
     /**
@@ -193,21 +193,21 @@ public abstract class JdsDatabase {
      * Delegates the creation of custom database components depending on the underlying JDS Database implementation
      *
      * @param databaseComponent the type of database component to create
-     * @param jdsEnumTable      an enum that maps to the components concrete implementation details
+     * @param jdsComponent      an enum that maps to the components concrete implementation details
      */
-    protected final void prepareDatabaseComponent(JdsDatabaseComponent databaseComponent, JdsEnumTable jdsEnumTable) {
+    protected final void prepareDatabaseComponent(JdsComponentType databaseComponent, JdsComponent jdsComponent) {
         switch (databaseComponent) {
             case TABLE:
-                if (!doesTableExist(jdsEnumTable.getName()))
-                    initiateDatabaseComponent(jdsEnumTable);
+                if (!doesTableExist(jdsComponent.getName()))
+                    initiateDatabaseComponent(jdsComponent);
                 break;
             case STORED_PROCEDURE:
-                if (!doesProcedureExist(jdsEnumTable.getName()))
-                    initiateDatabaseComponent(jdsEnumTable);
+                if (!doesProcedureExist(jdsComponent.getName()))
+                    initiateDatabaseComponent(jdsComponent);
                 break;
             case TRIGGER:
-                if (!doesTriggerExist(jdsEnumTable.getName()))
-                    initiateDatabaseComponent(jdsEnumTable);
+                if (!doesTriggerExist(jdsComponent.getName()))
+                    initiateDatabaseComponent(jdsComponent);
                 break;
         }
     }
@@ -215,10 +215,10 @@ public abstract class JdsDatabase {
     /**
      * Initialises core JDS Database components
      *
-     * @param jdsEnumTable an enum that maps to the components concrete implementation details
+     * @param jdsComponent an enum that maps to the components concrete implementation details
      */
-    private final void initiateDatabaseComponent(JdsEnumTable jdsEnumTable) {
-        switch (jdsEnumTable) {
+    private final void initiateDatabaseComponent(JdsComponent jdsComponent) {
+        switch (jdsComponent) {
             case StoreTextArray:
                 createStoreTextArray();
                 break;
@@ -289,15 +289,15 @@ public abstract class JdsDatabase {
                 createStoreEntityBinding();
                 break;
         }
-        prepareCustomDatabaseComponents(jdsEnumTable);
+        prepareCustomDatabaseComponents(jdsComponent);
     }
 
     /**
      * Initialises custom JDS Database components
      *
-     * @param jdsEnumTable an enum that maps to the components concrete implementation details
+     * @param jdsComponent an enum that maps to the components concrete implementation details
      */
-    protected void prepareCustomDatabaseComponents(JdsEnumTable jdsEnumTable) {
+    protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
     }
 
     /**
@@ -379,8 +379,8 @@ public abstract class JdsDatabase {
     }
 
     /**
-     * Override this method with custom implementations of {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponents}
-     * {@link #prepareDatabaseComponent(JdsDatabaseComponent, JdsEnumTable) prepareDatabaseComponents} delegates the creation of custom database components
+     * Override this method with custom implementations of {@link #prepareDatabaseComponent(JdsComponentType, JdsComponent) prepareDatabaseComponents}
+     * {@link #prepareDatabaseComponent(JdsComponentType, JdsComponent) prepareDatabaseComponents} delegates the creation of custom database components
      * depending on the underlying JDS Database implementation
      */
     protected void prepareCustomDatabaseComponents() {

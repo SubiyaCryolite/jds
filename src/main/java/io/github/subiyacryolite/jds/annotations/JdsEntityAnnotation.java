@@ -19,7 +19,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by ifunga on 10/02/2017.
+ * The annotation used to decorate {@link io.github.subiyacryolite.jds.JdsEntity JdsEntities}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

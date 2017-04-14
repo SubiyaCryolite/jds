@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
- * Created by ifunga on 14/02/2017.
+ * This class is responsible for loading an {@link JdsEntity entities} {@link JdsField fields}
  */
 public class JdsLoad {
 
@@ -34,62 +34,62 @@ public class JdsLoad {
     final private static int batchSize = 1000;
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param referenceType
      * @param comparator
      * @param suppliedEntityGuids
      * @param <T>
      * @return
      */
-    public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, Comparator<T> comparator, final String... suppliedEntityGuids) {
+    public static <T extends JdsEntity> List<T> load(final JdsDataBase jdsDataBase, final Class<T> referenceType, Comparator<T> comparator, final String... suppliedEntityGuids) {
         List<T> collections = new ArrayList<>();
-        loadImplementation(jdsDatabase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
+        loadImplementation(jdsDataBase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
         collections.sort(comparator);
         return collections;
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param referenceType
      * @param suppliedEntityGuids
      * @param <T>
      * @return
      */
-    public static <T extends JdsEntity> List<T> load(final JdsDatabase jdsDatabase, final Class<T> referenceType, final String... suppliedEntityGuids) {
+    public static <T extends JdsEntity> List<T> load(final JdsDataBase jdsDataBase, final Class<T> referenceType, final String... suppliedEntityGuids) {
         List<T> collections = new ArrayList<>();
-        loadImplementation(jdsDatabase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
+        loadImplementation(jdsDataBase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
         return collections;
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param referenceType
      * @param collections
      * @param suppliedEntityGuids
      * @param <T>
      */
-    private static <T extends JdsEntity> void loadImplementation(JdsDatabase jdsDatabase, Class<T> referenceType, List<JdsEntity> collections, String[] suppliedEntityGuids) {
+    private static <T extends JdsEntity> void loadImplementation(JdsDataBase jdsDataBase, Class<T> referenceType, List<JdsEntity> collections, String[] suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
         long code = annotation.entityId();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
         List<JdsEntity> castCollection = collections;
-        prepareActionBatches(jdsDatabase, batchSize, code, allBatches, suppliedEntityGuids);
+        prepareActionBatches(jdsDataBase, batchSize, code, allBatches, suppliedEntityGuids);
 
         boolean initialiseInnerContent = true;
         for (List<String> currentBatch : allBatches) {
-            populateInner(jdsDatabase, referenceType, castCollection, initialiseInnerContent, currentBatch);
+            populateInner(jdsDataBase, referenceType, castCollection, initialiseInnerContent, currentBatch);
         }
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param referenceType
      * @param jdsEntities
      * @param initialiseInnerContent
      * @param entityEntityGuids
      * @param <T>
      */
-    private static <T extends JdsEntity> void populateInner(final JdsDatabase jdsDatabase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
+    private static <T extends JdsEntity> void populateInner(final JdsDataBase jdsDataBase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
         String questionsString = getQuestions(entityEntityGuids.size());
         //primitives
         String sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
@@ -110,7 +110,7 @@ public class JdsLoad {
         String sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s) ORDER BY ParentEntityGuid", questionsString);
         //overviews
         String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
              PreparedStatement integers = connection.prepareStatement(sqlIntegerValues);
@@ -175,7 +175,7 @@ public class JdsLoad {
             populateDoubleArrays(jdsEntities, doubleArrays);
             populateDateTimeArrays(jdsEntities, dateTimeArrays);
             //objects
-            populateObjectEntriesAndObjectArrays(jdsDatabase, jdsEntities, embeddedAndArrayObjects);
+            populateObjectEntriesAndObjectArrays(jdsDataBase, jdsEntities, embeddedAndArrayObjects);
             populateOverviews(jdsEntities, overviews);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -306,12 +306,12 @@ public class JdsLoad {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param jdsEntities
      * @param preparedStatement
      * @throws SQLException
      */
-    private static void populateObjectEntriesAndObjectArrays(JdsDatabase jdsDatabase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+    private static void populateObjectEntriesAndObjectArrays(JdsDataBase jdsDataBase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         HashSet<String> innerEntityGuids = new HashSet<>();//ids should be unique
         Queue<JdsEntity> innerObjects = new ConcurrentLinkedQueue<>();//can be multiple copies of the same object however
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -348,7 +348,7 @@ public class JdsLoad {
         }
         List<List<String>> batches = createProcessingBatches(innerEntityGuids);
         batches.stream().forEach(batch -> {
-            populateInner(jdsDatabase, null, innerObjects, false, batch);
+            populateInner(jdsDataBase, null, innerObjects, false, batch);
         });
     }
 
@@ -555,18 +555,18 @@ public class JdsLoad {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param batchSize
      * @param code
      * @param allBatches
      * @param suppliedEntityGuids
      */
-    private static void prepareActionBatches(final JdsDatabase jdsDatabase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
+    private static void prepareActionBatches(final JdsDataBase jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
         int batchIndex = 0;
         int batchContents = 0;
         //if no ids supplied we are looking for all instances of the entity
         String sql1 = "SELECT EntityGuid FROM JdsStoreEntityOverview WHERE EntityId = ?";
-        try (Connection connection = jdsDatabase.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
+        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
             if (suppliedEntityGuids.length == 0) {
                 preparedStatement.setLong(1, code);
                 try (ResultSet rs = preparedStatement.executeQuery()) {

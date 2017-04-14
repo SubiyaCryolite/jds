@@ -16,7 +16,7 @@ import java.io.File;
 public abstract class BaseTest {
 
     protected final double DELTA = 1e-15;
-    protected JdsDatabase jdsDatabase;
+    protected JdsDataBase jdsDataBase;
 
     public void saveAndLoad() {
     }
@@ -43,36 +43,36 @@ public abstract class BaseTest {
     @Test
     public void initialiseSqlLiteBackend() {
         String url = "jdbc:sqlite:" + getDatabaseFile();
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.SQLITE);
+        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.SQLITE);
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-        jdsDatabase.setConnectionProperties(url, sqLiteConfig.toProperties());
-        jdsDatabase.init();
-        jdsDatabase.logEdits(true);
+        jdsDataBase.setConnectionProperties(url, sqLiteConfig.toProperties());
+        jdsDataBase.init();
+        jdsDataBase.logEdits(true);
     }
 
     @Test
     public void initialisePostgeSqlBackend() {
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
-        jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
-        jdsDatabase.init();
-        jdsDatabase.logEdits(true);
+        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.POSTGRES);
+        jdsDataBase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
+        jdsDataBase.init();
+        jdsDataBase.logEdits(true);
     }
 
     @Test
     public void initialiseTSqlBackend() {
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
-        jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
-        jdsDatabase.init();
-        jdsDatabase.logEdits(true);
+        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.TSQL);
+        jdsDataBase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
+        jdsDataBase.init();
+        jdsDataBase.logEdits(true);
     }
 
     @Test
     public void initialiseMysqlBackend() {
-        jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
-        jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
-        jdsDatabase.init();
-        jdsDatabase.logEdits(true);
+        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.MYSQL);
+        jdsDataBase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
+        jdsDataBase.init();
+        jdsDataBase.logEdits(true);
     }
 
     public String getDatabaseFile() {

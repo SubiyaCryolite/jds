@@ -7,7 +7,7 @@ import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
- * Created by ifung on 09/04/2017.
+ * Helper class used when performing {@link JdsEntity JdsEntity} saves
  */
 class JdsSaveContainer {
     //strings, dates and numeric

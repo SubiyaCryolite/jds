@@ -22,7 +22,7 @@ import java.util.HashMap;
 import static io.github.subiyacryolite.jds.enums.JdsFieldType.TEXT;
 
 /**
- * Created by ifunga on 09/02/2017.
+ * Represents a field in JDS
  */
 public class JdsField {
     private static HashMap<Long, String> fields = new HashMap<>();

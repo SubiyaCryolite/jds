@@ -19,7 +19,7 @@ public class QueryTests extends BaseTest {
     @Test
     public void TestQuery() {
         JdsFilter query = new JdsFilter().equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
-        List<SimpleAddress> output = query.find(jdsDatabase, SimpleAddress.class);
+        List<SimpleAddress> output = query.find(jdsDataBase, SimpleAddress.class);
         Assert.assertNotNull(output);
     }
 }

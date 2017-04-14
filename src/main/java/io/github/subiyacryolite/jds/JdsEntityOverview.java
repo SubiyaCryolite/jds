@@ -21,7 +21,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Created by ifunga on 14/02/2017.
+ * A self contains a set of properties that form the overview of a {@link JdsEntity}.
+ * Instances of this class are initialised in {@link JdsEntityBase JdsEntityBase} and exposed via
+ * inheritance
  */
 public class JdsEntityOverview {
     private final SimpleObjectProperty<LocalDateTime> dateCreated;

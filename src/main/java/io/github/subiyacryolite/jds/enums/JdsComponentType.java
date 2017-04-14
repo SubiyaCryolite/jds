@@ -14,9 +14,11 @@
 package io.github.subiyacryolite.jds.enums;
 
 /**
- * Created by ifunga on 05/03/2017.
+ * This enum contains the types of database components that JDS supports.
+ * It is primarily used to lookup if a named instance of a {@link io.github.subiyacryolite.jds.enums.JdsComponent JdsComponent}
+ * exists on the target database
  */
-public enum JdsDatabaseComponent {
+public enum JdsComponentType {
     STORED_PROCEDURE,
     TABLE,
     TRIGGER,

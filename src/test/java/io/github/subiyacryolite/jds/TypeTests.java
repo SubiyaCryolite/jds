@@ -19,11 +19,11 @@ public class TypeTests extends BaseTest {
     @Override
     public void saveAndLoad() {
         List<TypeClass> memObjects = getCollection();
-        JdsSave.save(jdsDatabase, 1, memObjects);
+        JdsSave.save(jdsDataBase, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
-        List<TypeClass> savObjects = JdsLoad.load(jdsDatabase, TypeClass.class); //load all entities of type SimpleAddressBook
-        List<TypeClass> specificObject = JdsLoad.load(jdsDatabase, TypeClass.class, "instance4"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        List<TypeClass> savObjects = JdsLoad.load(jdsDataBase, TypeClass.class); //load all entities of type SimpleAddressBook
+        List<TypeClass> specificObject = JdsLoad.load(jdsDataBase, TypeClass.class, "instance4"); //load all entities of type SimpleAddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", savObjects);
         System.out.printf("Specific entities [%s]\n", specificObject);
 

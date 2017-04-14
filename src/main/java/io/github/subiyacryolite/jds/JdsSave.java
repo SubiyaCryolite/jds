@@ -27,7 +27,7 @@ import java.time.temporal.Temporal;
 import java.util.*;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * This class is responsible for persisting on or more {@link JdsEntity JdsEntities}
  */
 public class JdsSave {
 
@@ -36,7 +36,7 @@ public class JdsSave {
      * @param batchSize
      * @param entities
      */
-    public static void save(final JdsDatabase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
+    public static void save(final JdsDataBase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
         JdsSaveContainer saveContainer = new JdsSaveContainer();
         List<Collection<JdsEntity>> batchEntities = new ArrayList<>();
         setupBatches(batchSize, entities, saveContainer, batchEntities);
@@ -121,7 +121,7 @@ public class JdsSave {
      * @param saveContainer
      * @param step
      */
-    private static void saveInner(final JdsDatabase database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
+    private static void saveInner(final JdsDataBase database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
         //fire
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
@@ -183,19 +183,19 @@ public class JdsSave {
      * @param batchSize
      * @param entities
      */
-    public static void save(final JdsDatabase database, final int batchSize, final JdsEntity... entities) {
+    public static void save(final JdsDataBase database, final int batchSize, final JdsEntity... entities) {
         save(database, batchSize, Arrays.asList(entities));
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param overviews
      */
-    private static void saveOverviews(final JdsDatabase jdsDatabase, final HashSet<JdsEntityOverview> overviews) {
+    private static void saveOverviews(final JdsDataBase jdsDataBase, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveOverview()) : connection.prepareStatement(jdsDatabase.saveOverview())) {
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveOverview()) : connection.prepareStatement(jdsDataBase.saveOverview())) {
             connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
@@ -205,7 +205,7 @@ public class JdsSave {
                 upsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 upsert.setLong(4, overview.getEntityCode());
                 upsert.addBatch();
-                if (jdsDatabase.printOutput())
+                if (jdsDataBase.printOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
             upsert.executeBatch();
@@ -218,27 +218,27 @@ public class JdsSave {
     /**
      * @param jdsEntity
      */
-    private static void mapEntity(final JdsDatabase jdsDatabase, final JdsEntity jdsEntity) {
+    private static void mapEntity(final JdsDataBase jdsDataBase, final JdsEntity jdsEntity) {
         if (!JdsEntity.map.contains(jdsEntity.getEntityCode())) {
             JdsEntity.map.add(jdsEntity.getEntityCode());
-            jdsDatabase.mapClassName(jdsEntity.getEntityCode(), jdsEntity.getEntityName());
-            jdsDatabase.mapClassFields(jdsEntity.getEntityCode(), jdsEntity.properties);
-            jdsDatabase.mapClassEnums(jdsEntity.getEntityCode(), jdsEntity.allEnums);
-            if (jdsDatabase.printOutput())
+            jdsDataBase.mapClassName(jdsEntity.getEntityCode(), jdsEntity.getEntityName());
+            jdsDataBase.mapClassFields(jdsEntity.getEntityCode(), jdsEntity.properties);
+            jdsDataBase.mapClassEnums(jdsEntity.getEntityCode(), jdsEntity.allEnums);
+            if (jdsDataBase.printOutput())
                 System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
         }
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private static void saveBooleans(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
+    private static void saveBooleans(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveInteger()) : connection.prepareStatement(jdsDatabase.saveInteger());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveInteger()) : connection.prepareStatement(jdsDataBase.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
@@ -255,9 +255,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Boolean field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, value);
@@ -273,14 +273,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param integerProperties
      */
-    private static void saveIntegers(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
+    private static void saveIntegers(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveInteger()) : connection.prepareStatement(jdsDatabase.saveInteger());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveInteger()) : connection.prepareStatement(jdsDataBase.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
@@ -297,9 +297,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, value);
@@ -315,14 +315,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param floatProperties
      */
-    private static void saveFloats(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
+    private static void saveFloats(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveFloat()) : connection.prepareStatement(jdsDatabase.saveFloat());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveFloat()) : connection.prepareStatement(jdsDataBase.saveFloat());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
@@ -339,9 +339,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setFloat(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Float field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setFloat(3, value);
@@ -357,14 +357,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param doubleProperties
      */
-    private static void saveDoubles(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
+    private static void saveDoubles(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDouble()) : connection.prepareStatement(jdsDatabase.saveDouble());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveDouble()) : connection.prepareStatement(jdsDataBase.saveDouble());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
@@ -381,9 +381,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setDouble(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Double field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setDouble(3, value);
@@ -399,14 +399,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param longProperties
      */
-    private static void saveLongs(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
+    private static void saveLongs(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveLong()) : connection.prepareStatement(jdsDatabase.saveLong());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveLong()) : connection.prepareStatement(jdsDataBase.saveLong());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
@@ -423,9 +423,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setLong(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setLong(3, value);
@@ -441,14 +441,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param stringProperties
      */
-    private static void saveStrings(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
+    private static void saveStrings(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveString()) : connection.prepareStatement(jdsDatabase.saveString());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveString()) : connection.prepareStatement(jdsDataBase.saveString());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
@@ -465,9 +465,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setString(3, value);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setString(3, value);
@@ -483,15 +483,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private static void saveDatesAndDateTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
+    private static void saveDatesAndDateTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveDateTime()) : connection.prepareStatement(jdsDatabase.saveDateTime());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveDateTime()) : connection.prepareStatement(jdsDataBase.saveDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
@@ -508,9 +508,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setTimestamp(3, Timestamp.valueOf(localDateTime));
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setTimestamp(3, Timestamp.valueOf(localDateTime));
@@ -531,9 +531,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
@@ -549,14 +549,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param localTimeProperties
      */
-    private static void saveTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+    private static void saveTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveTime()) : connection.prepareStatement(jdsDatabase.saveTime());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveTime()) : connection.prepareStatement(jdsDataBase.saveTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
@@ -574,9 +574,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, secondOfDay);
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, secondOfDay);
@@ -592,14 +592,14 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param zonedDateProperties
      */
-    private static void saveZonedDateTimes(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+    private static void saveZonedDateTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
-             PreparedStatement upsert = jdsDatabase.supportsStatements() ? connection.prepareCall(jdsDatabase.saveZonedDateTime()) : connection.prepareStatement(jdsDatabase.saveZonedDateTime());
+        try (Connection connection = jdsDataBase.getConnection();
+             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveZonedDateTime()) : connection.prepareStatement(jdsDataBase.saveZonedDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
@@ -616,9 +616,9 @@ public class JdsSave {
                     upsert.setLong(2, fieldId);
                     upsert.setLong(3, zonedDateTime.toEpochSecond());
                     upsert.addBatch();
-                    if (jdsDatabase.printOutput())
+                    if (jdsDataBase.printOutput())
                         System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDatabase.logEdits()) continue;
+                    if (!jdsDataBase.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setLong(3, zonedDateTime.toEpochSecond());
@@ -639,11 +639,11 @@ public class JdsSave {
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayDates(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private static void saveArrayDates(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -658,7 +658,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (LocalDateTime value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setTimestamp(3, Timestamp.valueOf(value));
@@ -675,7 +675,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -690,15 +690,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayFloats(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private static void saveArrayFloats(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -713,7 +713,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Float value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setFloat(3, value);
@@ -731,7 +731,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal);
 
                     }
@@ -747,15 +747,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private static void saveArrayIntegers(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private static void saveArrayIntegers(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -770,7 +770,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Integer value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setInt(3, value);
@@ -788,7 +788,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -803,15 +803,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayDoubles(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private static void saveArrayDoubles(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -826,7 +826,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Double value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setDouble(3, value);
@@ -844,7 +844,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -859,15 +859,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayLongs(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private static void saveArrayLongs(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -882,7 +882,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Long value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setLong(3, value);
@@ -900,7 +900,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -915,15 +915,15 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayStrings(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private static void saveArrayStrings(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -938,7 +938,7 @@ public class JdsSave {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (String value : it.getValue().get()) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setString(3, value);
@@ -956,7 +956,7 @@ public class JdsSave {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -971,18 +971,18 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param enumStrings
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveEnums(final JdsDatabase jdsDatabase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
+    private static void saveEnums(final JdsDataBase jdsDataBase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
@@ -996,7 +996,7 @@ public class JdsSave {
                     ObservableList<String> textValues = fieldEnums.getValue().get();
                     if (textValues.size() == 0) continue;
                     for (String enumText : textValues) {
-                        if (jdsDatabase.logEdits()) {
+                        if (jdsDataBase.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId.getField().getId());
                             log.setInt(3, fieldId.getIndex(enumText));
@@ -1013,7 +1013,7 @@ public class JdsSave {
                         insert.setInt(3, sequence);
                         insert.setInt(4, fieldId.getIndex(enumText));
                         insert.addBatch();
-                        if (jdsDatabase.printOutput())
+                        if (jdsDataBase.printOutput())
                             System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", sequence, record, recordTotal);
                         sequence++;
                     }
@@ -1029,12 +1029,12 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param objectArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void saveArrayObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
+    private static void saveArrayObjects(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
         if (objectArrayProperties.size() == 0) return;
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
@@ -1067,10 +1067,10 @@ public class JdsSave {
             }
         }
         //save children first
-        save(jdsDatabase, -1, jdsEntities);
+        save(jdsDataBase, -1, jdsEntities);
 
         //bind children below
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
              PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
             connection.setAutoCommit(false);
@@ -1094,11 +1094,11 @@ public class JdsSave {
     }
 
     /**
-     * @param jdsDatabase
+     * @param jdsDataBase
      * @param objectProperties
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void bindAndSaveInnerObjects(final JdsDatabase jdsDatabase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
+    private static void bindAndSaveInnerObjects(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);
@@ -1130,10 +1130,10 @@ public class JdsSave {
             }
         }
         //save children first
-        save(jdsDatabase, -1, jdsEntities);
+        save(jdsDataBase, -1, jdsEntities);
 
         //bind children below
-        try (Connection connection = jdsDatabase.getConnection();
+        try (Connection connection = jdsDataBase.getConnection();
              PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
              PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
             connection.setAutoCommit(false);

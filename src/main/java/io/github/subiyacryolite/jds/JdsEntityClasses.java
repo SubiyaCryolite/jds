@@ -19,7 +19,8 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
 /**
- * Created by ifunga on 11/02/2017.
+ * This class maps {@link JdsEntity JdsEntities} for usage with JDS. It also
+ * validates annotations and checks for duplicate entity codes
  */
 public class JdsEntityClasses {
     private final static HashMap<Long, Class> classes = new HashMap<>();

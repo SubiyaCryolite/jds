@@ -20,11 +20,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * The SQLite implementation of {@link JdsDataBase JdsDataBase}
  */
-public class JdsDatabaseSqlite extends JdsDatabase {
+public class JdsDataBaseSqlite extends JdsDataBase {
 
-    public JdsDatabaseSqlite() {
+    public JdsDataBaseSqlite() {
         implementation = JdsImplementation.SQLITE;
         supportsStatements = false;
     }

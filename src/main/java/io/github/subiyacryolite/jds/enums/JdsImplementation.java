@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds.enums;
 
 /**
- * Created by ifunga on 12/02/2017.
+ * An enum representing the current JDS database implementations
  */
 public enum JdsImplementation {
     MYSQL,

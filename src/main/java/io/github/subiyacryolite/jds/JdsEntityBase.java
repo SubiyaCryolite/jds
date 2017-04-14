@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * Created by ifunga on 13/02/2017.
  * This class simply hides all underlying data structures from the user
  * However, these fields are visible in package class JdsSave
  */

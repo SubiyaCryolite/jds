@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds.enums;
 
 /**
- * Created by ifunga on 09/02/2017.
+ * An enum containing the data-types supported by JDS
  */
 public enum JdsFieldType {
     FLOAT(0),

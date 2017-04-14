@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
- * Created by ifunga on 11/02/2017.
+ * Represents a field enum in JDS
  */
 public class JdsFieldEnum {
 
