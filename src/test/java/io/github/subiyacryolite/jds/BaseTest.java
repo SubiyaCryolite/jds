@@ -48,6 +48,7 @@ public abstract class BaseTest {
         sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
         jdsDatabase.setConnectionProperties(url, sqLiteConfig.toProperties());
         jdsDatabase.init();
+        jdsDatabase.logEdits(true);
     }
 
     @Test
@@ -55,6 +56,7 @@ public abstract class BaseTest {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
         jdsDatabase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
         jdsDatabase.init();
+        jdsDatabase.logEdits(true);
     }
 
     @Test
@@ -62,6 +64,7 @@ public abstract class BaseTest {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
         jdsDatabase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
         jdsDatabase.init();
+        jdsDatabase.logEdits(true);
     }
 
     @Test
@@ -69,6 +72,7 @@ public abstract class BaseTest {
         jdsDatabase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
         jdsDatabase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
         jdsDatabase.init();
+        jdsDatabase.logEdits(true);
     }
 
     public String getDatabaseFile() {

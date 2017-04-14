@@ -85,32 +85,40 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 I recommend defining your fields as static constants
 
 ```java
-public class TestFields
-{
-    public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
-    public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
-    public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);
-    public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.TEXT);
-    public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
+import io.github.subiyacryolite.jds.JdsField;
+import io.github.subiyacryolite.jds.enums.JdsFieldType;
+
+public class NewTestFields {
+    public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
+    public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
+    public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);
+    public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "DATE_TIME_FIELD", JdsFieldType.DATE_TIME);
+    public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "ZONED_DATE_TIME_FIELD", JdsFieldType.ZONED_DATE_TIME);
+    public static final JdsField LONG_FIELD = new JdsField(1004, "LONG_FIELD", JdsFieldType.LONG);
+    public static final JdsField INT_FIELD = new JdsField(1005, "INT_FIELD", JdsFieldType.INT);
+    public static final JdsField DOUBLE_FIELD = new JdsField(1006, "DOUBLE_FIELD", JdsFieldType.DOUBLE);
+    public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
+    public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
 }
+
 ```
 
 ### 1.1.3 Defining Enums
 JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard field of type ENUM_TEXT.
 ```java
-public class TestFields
+public class NewTestFields
 {
-    ... 
-    ...
+    //---
+    //---
     public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM_TEXT);
 }
 ```
 Then, we can define our actual enum in the following manner.
 ```java
-public class TestEnums
+public class NewTestEnums
 {
-    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(TestFields.SEX_ENUM, "Male", "Female", "Other");
+    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(NewTestFields.SEX_ENUM, "Male", "Female", "Other");
 }
 ```
 Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the defined values.
@@ -143,74 +151,149 @@ Depending on the type of field, JDS will require that you set you objects proper
  The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
 ```java
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import javafx.beans.property.*;
 
-@JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
-public class SimpleAddress extends JdsEntity {
-    private final SimpleStringProperty streetName = new SimpleStringProperty("");
-    private final SimpleIntegerProperty plotNumber = new SimpleIntegerProperty(0);
-    private final SimpleStringProperty area = new SimpleStringProperty("");
-    private final SimpleStringProperty city = new SimpleStringProperty("");
-    private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
-    private final SimpleStringProperty country = new SimpleStringProperty("");
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
-    public SimpleAddress() {
-        //map your properties
-        map(TestFields.STREET_NAME, streetName);
-        map(TestFields.PLOT_NUMBER, plotNumber);
-        map(TestFields.AREA_NAME, area);
-        map(TestFields.CITY_NAME, city);
-        map(TestFields.PROVINCE_NAME, provinceOrState);
+@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+public class TypeClass extends JdsEntity {
+    private final SimpleStringProperty stringField = new SimpleStringProperty("");
+    private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
+    private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
+    private final SimpleObjectProperty<LocalDateTime> dateTimeField = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
+    private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField = new SimpleObjectProperty<ZonedDateTime>(ZonedDateTime.now());
+    private final SimpleLongProperty longField = new SimpleLongProperty(0);
+    private final SimpleIntegerProperty intField = new SimpleIntegerProperty(0);
+    private final SimpleDoubleProperty doubleField = new SimpleDoubleProperty(0);
+    private final SimpleFloatProperty floatField = new SimpleFloatProperty(0);
+    private final SimpleBooleanProperty booleanField = new SimpleBooleanProperty(false);
+
+    public TypeClass() {
+        map(NewTestFields.STRING_FIELD, stringField);
+        map(NewTestFields.DATE_FIELD, dateField);
+        map(NewTestFields.TIME_FIELD, timeField);
+        map(NewTestFields.DATE_TIME_FIELD, dateTimeField);
+        map(NewTestFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
+        map(NewTestFields.LONG_FIELD, longField);
+        map(NewTestFields.INT_FIELD, intField);
+        map(NewTestFields.DOUBLE_FIELD, doubleField);
+        map(NewTestFields.FLOAT_FIELD, floatField);
+        map(NewTestFields.BOOLEAN_FIELD, booleanField);
     }
 
-    public String getStreetName() {
-        return this.streetName.get();
+    public TypeClass(String str, LocalTime timeField, LocalDate localDate, LocalDateTime localDateTime, ZonedDateTime zonedDateTime, long l, int i, double d, float f, boolean b) {
+        this();
+        setStringField(str);
+        setTimeField(timeField);
+        setDateField(localDate);
+        setDateTimeField(localDateTime);
+        setZonedDateTimeField(zonedDateTime);
+        setLongField(l);
+        setIntField(i);
+        setDoubleField(d);
+        setFloatField(f);
+        setBooleanField(b);
     }
 
-    public void setStreetName(String value) {
-        this.streetName.set(value);
+    public String getStringField() {
+        return stringField.get();
     }
 
-    public int getPlotNumber() {
-        return this.plotNumber.get();
+    public void setStringField(String stringField) {
+        this.stringField.set(stringField);
     }
 
-    public void setPlotNumber(int value) {
-        this.plotNumber.set(value);
+    public LocalTime getTimeField() {
+        return timeField.get();
     }
 
-    public String getArea() {
-        return this.area.get();
+    public void setTimeField(LocalTime dateField) {
+        this.timeField.set(dateField);
     }
 
-    public void setArea(String value) {
-        this.area.set(value);
+    public LocalDate getDateField() {
+        return dateField.get();
     }
 
-    public String getCity() {
-        return this.city.get();
+    public void setDateField(LocalDate dateField) {
+        this.dateField.set(dateField);
     }
 
-    public void setCity(String value) {
-        this.city.set(value);
+    public LocalDateTime getDateTimeField() {
+        return dateTimeField.get();
     }
 
-    public String getProvinceOrState() {
-        return this.provinceOrState.get();
+    public void setDateTimeField(LocalDateTime dateTimeField) {
+        this.dateTimeField.set(dateTimeField);
     }
 
-    public void setProvinceOrState(String value) {
-        this.provinceOrState.set(value);
+    public ZonedDateTime getZonedDateTimeField() {
+        return zonedDateTimeField.get();
     }
 
-    public String getCountry() {
-        return this.country.get();
+    public void setZonedDateTimeField(ZonedDateTime zonedDateTimeField) {
+        this.zonedDateTimeField.set(zonedDateTimeField);
     }
 
-    public void setCountry(String value) {
-        this.country.set(value);
+    public long getLongField() {
+        return longField.get();
+    }
+
+    public void setLongField(long longField) {
+        this.longField.set(longField);
+    }
+
+    public int getIntField() {
+        return intField.get();
+    }
+
+    public void setIntField(int intField) {
+        this.intField.set(intField);
+    }
+
+    public double getDoubleField() {
+        return doubleField.get();
+    }
+
+    public void setDoubleField(double doubleField) {
+        this.doubleField.set(doubleField);
+    }
+
+    public float getFloatField() {
+        return floatField.get();
+    }
+
+    public void setFloatField(float floatField) {
+        this.floatField.set(floatField);
+    }
+
+    public boolean getBooleanField() {
+        return booleanField.get();
+    }
+
+    public void setBooleanField(boolean booleanField) {
+        this.booleanField.set(booleanField);
+    }
+
+    @Override
+    public String toString() {
+        return "TypeClass{" +
+                "stringField = " + getStringField() +
+                ", timeField = " + getTimeField() +
+                ", dateField = " + getDateField() +
+                ", dateTimeField = " + getDateTimeField() +
+                ", zonedDateTimeField = " + getZonedDateTimeField() +
+                ", longField = " + getLongField() +
+                ", intField = " + getIntField() +
+                ", doubleField = " + getDoubleField() +
+                ", floatField = " + getFloatField() +
+                ", booleanField = " + getBooleanField() +
+                '}';
     }
 }
 ```
@@ -230,11 +313,9 @@ import java.util.List;
 
 @JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
 public class SimpleAddressBook extends JdsEntity {
-    private final SimpleListProperty<SimpleAddress> addresses;
+    private final SimpleListProperty<SimpleAddress> addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public SimpleAddressBook() {
-        this.addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
-        //map your objects
         map(SimpleAddress.class, addresses);
     }
 
@@ -291,6 +372,7 @@ Once you have initialised your database you can go ahead and initialise all your
 ```java
 public void initialiseJdsClasses()
 {
+    JdsEntityClasses.map(TypeClass.class);
     JdsEntityClasses.map(SimpleAddress.class);
     JdsEntityClasses.map(SimpleAddressBook.class);
 }
@@ -300,86 +382,102 @@ You only have to do this once at start-up but it is vital that you do so. Withou
 ### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
-SimpleAddress primaryAddress1 = new SimpleAddress();
-primaryAddress1.setEntityGuid("primaryAddress1"); //setting a custom Entity Guid
-primaryAddress1.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
-primaryAddress1.setArea("Norte Broad");
-primaryAddress1.setCity("Livingstone");
-primaryAddress1.setCountry("Zambia");
-primaryAddress1.setPlotNumber(23);
-primaryAddress1.setProvinceOrState("Southern");
-primaryAddress1.setStreetName("East Street");
-
-SimpleAddress primaryAddress2 = new SimpleAddress();
-primaryAddress2.setEntityGuid("primaryAddress2"); //setting a custom Entity Guid
-primaryAddress2.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
-primaryAddress2.setArea("Roma");
-primaryAddress2.setCity("Lusaka");
-primaryAddress2.setCountry("Zambia");
-primaryAddress2.setPlotNumber(2);
-primaryAddress2.setProvinceOrState("Lusaka");
-primaryAddress2.setStreetName("West Street");
-
-SimpleAddress primaryAddress3 = new SimpleAddress();
-primaryAddress3.setEntityGuid("primaryAddress3"); //setting a custom Entity Guid
-primaryAddress3.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
-primaryAddress3.setArea("Riverdale");
-primaryAddress3.setCity("Ndola");
-primaryAddress3.setCountry("Zambia");
-primaryAddress3.setPlotNumber(9);
-primaryAddress3.setProvinceOrState("Copperbelt");
-primaryAddress3.setStreetName("West Street");
-
-SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
-simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
-simpleAddressBook.getAddresses().add(primaryAddress1);
-simpleAddressBook.getAddresses().add(primaryAddress2);
-simpleAddressBook.getAddresses().add(primaryAddress3);
+private List<TypeClass> getCollection() {
+    List<TypeClass> collection = new ArrayList<>();
+    
+    TypeClass instance1 = new TypeClass();
+    instance1.setEntityGuid("instance1");
+    instance1.setStringField("One");
+    
+    TypeClass instance2 = new TypeClass();
+    instance2.setStringField("tWO");
+    instance2.setTimeField(LocalTime.of(15, 24));
+    instance2.setDateField(LocalDate.of(2012, 8, 26));
+    instance2.setDateTimeField(LocalDateTime.of(1991, 07, 01, 8, 33, 12));
+    instance2.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusMonths(3), ZoneId.systemDefault()));
+    instance2.setIntField(99);
+    instance2.setLongField(888);
+    instance2.setDoubleField(777.666);
+    instance2.setFloatField(5555.4444f);
+    instance2.setBooleanField(false);
+    instance2.setEntityGuid("instance2");
+    
+    TypeClass instance3 = new TypeClass();
+    instance3.setStringField("Three");
+    instance3.setTimeField(LocalTime.of(03, 14));
+    instance3.setDateField(LocalDate.of(2034, 6, 14));
+    instance3.setDateTimeField(LocalDateTime.of(1987, 07, 24, 13, 22, 45));
+    instance3.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().plusDays(3), ZoneId.systemDefault()));
+    instance3.setIntField(22);
+    instance3.setLongField(333);
+    instance3.setDoubleField(444.555);
+    instance3.setFloatField(5555.6666f);
+    instance3.setBooleanField(false);
+    instance3.setEntityGuid("instance3");
+    
+    TypeClass instance4 = new TypeClass();
+    instance4.setStringField("Four");
+    instance4.setTimeField(LocalTime.of(12, 44));
+    instance4.setDateField(LocalDate.of(3034, 12, 1));
+    instance4.setDateTimeField(LocalDateTime.of(1964, 10, 24, 2, 12, 14));
+    instance4.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusDays(3), ZoneId.systemDefault()));
+    instance4.setIntField(10);
+    instance4.setLongField(100);
+    instance4.setDoubleField(100.22);
+    instance4.setFloatField(1000.0f);
+    instance4.setBooleanField(false);
+    instance4.setEntityGuid("instance4");
+    
+    collection.add(instance1);
+    collection.add(instance2);
+    collection.add(instance3);
+    collection.add(instance4);
+    return collection;
+}
 ```
 
 ### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
-SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
-simpleAddressBook.setEntityGuid("testGuid0001");        //setting a custom Entity Guid        
-simpleAddressBook.getAddresses().add(primaryAddress1);
-simpleAddressBook.getAddresses().add(primaryAddress2);
-simpleAddressBook.getAddresses().add(primaryAddress3);
-
-JdsSave.save(jdsDatabase, 1, simpleAddressBook);
-System.out.printf("Saved %s\n", simpleAddressBook);
+List<TypeClass> collection = getCollection();
+JdsSave.save(jdsDatabase, 1, collection);
+System.out.printf("Saved %s\n", collection);
 ```
 
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
-List<SimpleAddressBook> allAddressBooks;
-List<SimpleAddressBook> specificAddressBook;
+List<TypeClass> allInstances;
+List<TypeClass> specificInstance;
 
 //load all entities of type SimpleAddressBook
-allAddressBooks = JdsLoad.load(jdsDatabase, SimpleAddressBook.class);
+allInstances = JdsLoad.load(jdsDatabase, TypeClass.class);
 
 //load all entities of type SimpleAddressBook with Entity Guids in range
-specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, "testGuid0001");
+specificInstance = JdsLoad.load(jdsDatabase, TypeClass.class, "instance3");
 
 //load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
-Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
-specificAddressBook = JdsLoad.load(jdsDatabase, SimpleAddressBook.class, comparator, "testGuid0001");
+Comparator<TypeClass> comparator = Comparator.comparing(TypeClass::getDateField);
+specificAddressBook = JdsLoad.load(jdsDatabase, TypeClass.class, comparator, "testGuid0001");
 ```
 
-### 1.2.6 Load with Arguments
-I plan to introduce a method that can load entities based on one or more property values e.g. load all Female Clients (Sex == "Female").
+### 1.2.6 Load with Filter
+A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
+```java
+JdsFilter query = new JdsFilter().equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
+List<SimpleAddress> output = query.find(jdsDatabase, SimpleAddress.class);
+```
 
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
 public void deleteUsingStrings() {
-    JdsDelete.delete(jdsDatabase, "primaryAddress1");
+    JdsDelete.delete(jdsDatabase, "instance2");
 }
 
 public void deleteUsingObjectOrCollection() {
-    SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
-    JdsDelete.delete(jdsDatabase, simpleAddressBook);
+    List<TypeClass> collection = getCollection();
+    JdsDelete.delete(jdsDatabase, collection);
 }
 ```
 

@@ -18,7 +18,7 @@ public class TypeTests extends BaseTest {
     @Test
     @Override
     public void saveAndLoad() {
-        List<TypeClass> memObjects = getObjectsInMemory();
+        List<TypeClass> memObjects = getCollection();
         JdsSave.save(jdsDatabase, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
@@ -71,26 +71,65 @@ public class TypeTests extends BaseTest {
 
         Assert.assertEquals("StringField " + srcA.get().getEntityGuid(), srcA.get().getStringField(), srcB.get().getStringField());
         Assert.assertEquals("IntField " + srcA.get().getEntityGuid(), srcA.get().getIntField(), srcB.get().getIntField());
-        Assert.assertEquals("FloatField " + srcA.get().getEntityGuid(), srcA.get().getFloatField(), srcB.get().getFloatField(), DELTA);
-        Assert.assertEquals("DoubleField " + srcA.get().getEntityGuid(), srcA.get().getDoubleField(), srcB.get().getDoubleField(), DELTA);
+        Assert.assertEquals("FloatField " + srcA.get().getEntityGuid(), srcA.get().getFloatField(), srcB.get().getFloatField(),DELTA);
+        Assert.assertEquals("DoubleField " + srcA.get().getEntityGuid(), srcA.get().getDoubleField(), srcB.get().getDoubleField(),DELTA);
         Assert.assertEquals("LongField " + srcA.get().getEntityGuid(), srcA.get().getLongField(), srcB.get().getLongField());
         Assert.assertEquals("BooleanField " + srcA.get().getEntityGuid(), srcA.get().getBooleanField(), srcB.get().getBooleanField());
     }
 
-    private List<TypeClass> getObjectsInMemory() {
+    private List<TypeClass> getCollection() {
         List<TypeClass> collection = new ArrayList<>();
 
         TypeClass instance1 = new TypeClass();
-        instance1.setEntityGuid("instance1");
         instance1.setStringField("One");
+        instance1.setTimeField(LocalTime.of(15, 24));
+        instance1.setDateField(LocalDate.of(2012, 8, 26));
+        instance1.setDateTimeField(LocalDateTime.of(1991, 07, 01, 8, 33, 12));
+        instance1.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusMonths(3), ZoneId.systemDefault()));
+        instance1.setIntField(99);
+        instance1.setLongField(888);
+        instance1.setDoubleField(777.666);
+        instance1.setFloatField(5555.4444f);
+        instance1.setBooleanField(true);
+        instance1.setEntityGuid("instance1");
 
-        TypeClass instance2 = new TypeClass("tWO", LocalTime.MIDNIGHT, LocalDate.MIN, LocalDateTime.MAX, ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), 99, 888, 777.666, 5555.4444f, false);
+        TypeClass instance2 = new TypeClass();
+        instance2.setStringField("tWO");
+        instance2.setTimeField(LocalTime.of(19, 24));
+        instance2.setDateField(LocalDate.of(2011, 4, 2));
+        instance2.setDateTimeField(LocalDateTime.of(1999, 02, 21, 11, 13, 43));
+        instance2.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusMonths(7), ZoneId.systemDefault()));
+        instance2.setIntField(66);
+        instance2.setLongField(555);
+        instance2.setDoubleField(444.333);
+        instance2.setFloatField(2222.1111f);
+        instance2.setBooleanField(false);
         instance2.setEntityGuid("instance2");
 
-        TypeClass instance3 = new TypeClass("Three", LocalTime.NOON, LocalDate.MAX, LocalDateTime.MAX, ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), 22, 333, 444.555, 5555.6666f, false);
+        TypeClass instance3 = new TypeClass();
+        instance3.setStringField("Three");
+        instance3.setTimeField(LocalTime.of(03, 14));
+        instance3.setDateField(LocalDate.of(2034, 6, 14));
+        instance3.setDateTimeField(LocalDateTime.of(1987, 07, 24, 13, 22, 45));
+        instance3.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().plusDays(3), ZoneId.systemDefault()));
+        instance3.setIntField(22);
+        instance3.setLongField(333);
+        instance3.setDoubleField(444.555);
+        instance3.setFloatField(5555.6666f);
+        instance3.setBooleanField(true);
         instance3.setEntityGuid("instance3");
 
-        TypeClass instance4 = new TypeClass("Four", LocalTime.of(12, 44), LocalDate.MIN, LocalDateTime.MIN, ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), 10, 100, 100.22, 1000.0f, false);
+        TypeClass instance4 = new TypeClass();
+        instance4.setStringField("Four");
+        instance4.setTimeField(LocalTime.of(12, 44));
+        instance4.setDateField(LocalDate.of(3034, 12, 1));
+        instance4.setDateTimeField(LocalDateTime.of(1964, 10, 24, 2, 12, 14));
+        instance4.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusDays(3), ZoneId.systemDefault()));
+        instance4.setIntField(10);
+        instance4.setLongField(100);
+        instance4.setDoubleField(100.22);
+        instance4.setFloatField(1000.0f);
+        instance4.setBooleanField(false);
         instance4.setEntityGuid("instance4");
 
         collection.add(instance1);

@@ -20,6 +20,6 @@ CREATE TABLE JdsStoreOldFieldValues(
     IntegerValue		INTEGER,
     FloatValue			REAL,
     DoubleValue			FLOAT,
-    LongValue			INTEGER,
+    LongValue			BIGINT,
     DateTimeValue		TIMESTAMP
 );
