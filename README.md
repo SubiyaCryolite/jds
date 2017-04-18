@@ -172,43 +172,63 @@ import java.time.ZonedDateTime;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
 public class TypeClass extends JdsEntity {
-    private final SimpleStringProperty stringField = new SimpleStringProperty("");
-    private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
-    private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
-    private final SimpleObjectProperty<LocalDateTime> dateTimeField = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
-    private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField = new SimpleObjectProperty<ZonedDateTime>(ZonedDateTime.now());
-    private final SimpleLongProperty longField = new SimpleLongProperty(0);
-    private final SimpleIntegerProperty intField = new SimpleIntegerProperty(0);
-    private final SimpleDoubleProperty doubleField = new SimpleDoubleProperty(0);
-    private final SimpleFloatProperty floatField = new SimpleFloatProperty(0);
-    private final SimpleBooleanProperty booleanField = new SimpleBooleanProperty(false);
-
-    public TypeClass() {
-        map(NewTestFields.STRING_FIELD, stringField);
-        map(NewTestFields.DATE_FIELD, dateField);
-        map(NewTestFields.TIME_FIELD, timeField);
-        map(NewTestFields.DATE_TIME_FIELD, dateTimeField);
-        map(NewTestFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
-        map(NewTestFields.LONG_FIELD, longField);
-        map(NewTestFields.INT_FIELD, intField);
-        map(NewTestFields.DOUBLE_FIELD, doubleField);
-        map(NewTestFields.FLOAT_FIELD, floatField);
-        map(NewTestFields.BOOLEAN_FIELD, booleanField);
-    }
-
-    public TypeClass(String str, LocalTime timeField, LocalDate localDate, LocalDateTime localDateTime, ZonedDateTime zonedDateTime, long l, int i, double d, float f, boolean b) {
-        this();
-        setStringField(str);
-        setTimeField(timeField);
-        setDateField(localDate);
-        setDateTimeField(localDateTime);
-        setZonedDateTimeField(zonedDateTime);
-        setLongField(l);
-        setIntField(i);
-        setDoubleField(d);
-        setFloatField(f);
-        setBooleanField(b);
-    }
+        private final SimpleStringProperty stringField;
+        private final SimpleObjectProperty<LocalTime> timeField;
+        private final SimpleObjectProperty<LocalDate> dateField;
+        private final SimpleObjectProperty<LocalDateTime> dateTimeField;
+        private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField;
+        private final SimpleLongProperty longField;
+        private final SimpleIntegerProperty intField;
+        private final SimpleDoubleProperty doubleField;
+        private final SimpleFloatProperty floatField;
+        private final SimpleBooleanProperty booleanField;
+    
+        public TypeClass() {
+            stringField = new SimpleStringProperty("");
+            timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
+            dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
+            dateTimeField = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
+            zonedDateTimeField = new SimpleObjectProperty<ZonedDateTime>(ZonedDateTime.now());
+            longField = new SimpleLongProperty(0);
+            intField = new SimpleIntegerProperty(0);
+            doubleField = new SimpleDoubleProperty(0);
+            floatField = new SimpleFloatProperty(0);
+            booleanField = new SimpleBooleanProperty(false);
+            //map
+            map(NewTestFields.STRING_FIELD, stringField);
+            map(NewTestFields.DATE_FIELD, dateField);
+            map(NewTestFields.TIME_FIELD, timeField);
+            map(NewTestFields.DATE_TIME_FIELD, dateTimeField);
+            map(NewTestFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
+            map(NewTestFields.LONG_FIELD, longField);
+            map(NewTestFields.INT_FIELD, intField);
+            map(NewTestFields.DOUBLE_FIELD, doubleField);
+            map(NewTestFields.FLOAT_FIELD, floatField);
+            map(NewTestFields.BOOLEAN_FIELD, booleanField);
+        }
+    
+        public TypeClass(String str, 
+                         LocalTime timeField, 
+                         LocalDate localDate, 
+                         LocalDateTime localDateTime, 
+                         ZonedDateTime zonedDateTime, 
+                         long l, 
+                         int i, 
+                         double d, 
+                         float f, 
+                         boolean b) {
+            this();
+            setStringField(str);
+            setTimeField(timeField);
+            setDateField(localDate);
+            setDateTimeField(localDateTime);
+            setZonedDateTimeField(zonedDateTime);
+            setLongField(l);
+            setIntField(i);
+            setDoubleField(d);
+            setFloatField(f);
+            setBooleanField(b);
+        }
 
     public String getStringField() {
         return stringField.get();
