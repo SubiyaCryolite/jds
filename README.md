@@ -15,6 +15,8 @@ Put simply, JDS is useful for any developer that requires a flexible schema runn
 - Single or Multi-user applications
 - Self hosted REST/SOAP services
 
+JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
+
 ## Features
 - Transparent persistence for Plain Old Java Objects (POJOs)
 - Generics are supported
@@ -346,22 +348,22 @@ public class SimpleAddressBook extends JdsEntity {
 
 ## 1.2 CRUD Operations
 ### 1.2.1 Initialising the database
-In order to use JDS you will need an instance of JdsDatabase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
+In order to use JDS you will need an instance of JdsDataBase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 #### Postgres example
 ```java
-JdsDatabase jdsDataBase = JdsDatabase.getImplementation(JdsImplementation.POSTGRES);
+JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.POSTGRES);
 jdsDataBase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
 jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 #### MySQL Example
 ```java
-JdsDatabase jdsDataBase = JdsDatabase.getImplementation(JdsImplementation.MYSQL);
+JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.MYSQL);
 jdsDataBase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
 jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 #### Microsoft SQL Server Example
 ```java
-JdsDatabase jdsDataBase = JdsDatabase.getImplementation(JdsImplementation.TSQL);
+JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.TSQL);
 jdsDataBase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
 jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
 ```
@@ -373,7 +375,7 @@ sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
 jdsDataBase.setConnectionProperties(databaseLocation, sqLiteConfig.toProperties());
 jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
 ```
-With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDatabase instance in order to return a standard **java.sql.Connection** in your application. 
+With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDataBase instance in order to return a standard **java.sql.Connection** in your application. 
 
 ### 1.2.2 Initialising JDS
 Once you have initialised your database you can go ahead and initialise all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
@@ -490,16 +492,15 @@ public void deleteUsingObjectOrCollection() {
 ```
 
 ## 1.3 Backend Design
-Section coming soon
+Section coming soon, it looks something like this
 
-# License
-JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
+![Database design](database_design.png?raw=true)
 
 # Development
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.
 
 # Contributing to Jenesis Data Store
-If you would like to contribute code you can do so through GitHub by forking the repository and sending a pull request targeting the current development branch.
+If you would like to contribute code you can do so through [Github](https://github.com/SubiyaCryolite/Jenesis-Data-Store/) by forking the repository and sending a pull request targeting the current development branch.
 
 When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible.
 
