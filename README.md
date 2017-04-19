@@ -405,7 +405,7 @@ String dbFileLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
 SQLiteConfig sqLiteConfig = new SQLiteConfig();
 sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
 jdsDataBase.setConnectionProperties(dbFileLocation, sqLiteConfig.toProperties());
-jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
+jdsDataBase.init();
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDataBase instance in order to return a standard **java.sql.Connection** in your application. 
 
