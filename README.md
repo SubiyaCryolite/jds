@@ -371,28 +371,40 @@ public class SimpleAddressBook extends JdsEntity {
 In order to use JDS you will need an instance of JdsDataBase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 #### Postgres example
 ```java
+String dbDriverName = "org.postgresql.Driver";
+String dbConnectionString = "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE";
+String dbUser = "DATABASE_USER";
+String dbPassword = "DATABASE_PASSWORD";
 JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.POSTGRES);
-jdsDataBase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
+jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
+jdsDataBase.init();
 ```
 #### MySQL Example
 ```java
+String dbDriverName = "com.mysql.cj.jdbc.Driver";
+String dbConnectionString = "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false";
+String dbUser = "root";
+String dbPassword = "";
 JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.MYSQL);
-jdsDataBase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
-jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
+jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
+jdsDataBase.init();
 ```
 #### Microsoft SQL Server Example
 ```java
+String dbDriverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+String dbConnectionString = "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE";
+String dbUser = "DATABASE_USER";
+String dbPassword = "DATABASE_PASSWORD";
 JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.TSQL);
-jdsDataBase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE", "DATABASE_USER", "DATABASE_PASSWORD");
-jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
+jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
+jdsDataBase.init();
 ```
 #### Sqlite Example
 ```java
-String databaseLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
+String dbFileLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
 SQLiteConfig sqLiteConfig = new SQLiteConfig();
 sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-jdsDataBase.setConnectionProperties(databaseLocation, sqLiteConfig.toProperties());
+jdsDataBase.setConnectionProperties(dbFileLocation, sqLiteConfig.toProperties());
 jdsDataBase.init(); //prepareDatabaseComponent() in 1.170402
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDataBase instance in order to return a standard **java.sql.Connection** in your application. 
