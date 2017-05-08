@@ -13,15 +13,16 @@
  */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.sql.*;
-import java.util.Properties;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Set;
 
 /**
@@ -41,22 +42,6 @@ public abstract class JdsDb  implements JdsDbContract{
      */
     protected JdsImplementation implementation;
     /**
-     * The JDBC driver class name
-     */
-    private String className;
-    /**
-     * The database connection string
-     */
-    private String url;
-    /**
-     * The database user name
-     */
-    private String userName;
-    /**
-     * The database user password
-     */
-    private String passWord;
-    /**
      * A value indicating whether JDS should log every write in the system
      */
     private boolean logEdits;
@@ -64,34 +49,6 @@ public abstract class JdsDb  implements JdsDbContract{
      * A value indicating whether JDS should print internal log information
      */
     private boolean printOutput;
-    /**
-     * Checks if SQLIte connection properties have been set
-     */
-    private boolean propertiesSet;
-    /**
-     * SQLite connection properties
-     */
-    private Properties properties;
-
-    /**
-     * Returns an instance of the requested JDS Database implementation
-     *
-     * @param implementation the target database implementation
-     * @return an instance of the requested JDS Database implementation
-     */
-    public final static JdsDb getImplementation(JdsImplementation implementation) {
-//        switch (implementation) {
-//            case SQLITE:
-//                return new JdsDbSqlite();
-//            case POSTGRES:
-//                return new JdsDataBasePostgres();
-//            case TSQL:
-//                return new JdsDataBaseTransactionalSql();
-//            case MYSQL:
-//                return new JdsDataBaseMySql();
-//        }
-        return null;
-    }
 
     /**
      * Initialise JDS base tables
@@ -128,41 +85,6 @@ public abstract class JdsDb  implements JdsDbContract{
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreOldFieldValues);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityFields);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityEnums);
-    }
-
-    /**
-     * Set database connection properties
-     *
-     * @param className the JDBC driver class name
-     * @param url the JDBC driver connection string
-     * @param userName the database username
-     * @param passWord the users password
-     */
-    public final void setConnectionProperties(String className, String url, String userName, String passWord) {
-        if (className == null || url == null || userName == null || passWord == null) {
-            throw new RuntimeException("Please supply valid values. Nulls not permitted");
-        }
-        this.className = className;
-        this.url = url;
-        this.userName = userName;
-        this.passWord = passWord;
-        this.propertiesSet = true;
-    }
-
-    /**
-     * Set SQLite database connection properties
-     *
-     * @param url the JDBC driver connection string
-     * @param properties SQLite properties including foreign key support
-     */
-    @Deprecated
-    public void setConnectionProperties(String url, java.util.Properties properties) {
-        if (url == null) {
-            throw new RuntimeException("Please supply valid values. Nulls not permitted");
-        }
-        this.url = url;
-        this.propertiesSet = true;
-        this.properties = properties;
     }
 
     /**

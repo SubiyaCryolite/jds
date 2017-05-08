@@ -34,7 +34,7 @@ jar {
         attributes(
                 "Implementation-Title": "Jenesis Data Store",
                 "Implementation-Version": project.version,
-                "Created-By" : "${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})",
+                "Created-By": "${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})",
         )
     }
 }
@@ -68,10 +68,10 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: hasProperty('ossrhUsername')?ossrhUsername:'', password: hasProperty('ossrhPassword')?ossrhPassword:'')
+                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: hasProperty('ossrhUsername')?ossrhUsername:'', password: hasProperty('ossrhPassword')?ossrhPassword:'')
+                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
             }
             pom.project {
                 name 'Jenesis Data Store'
