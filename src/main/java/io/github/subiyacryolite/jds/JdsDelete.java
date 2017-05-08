@@ -19,12 +19,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDataBase JdsDataBase}
+ * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDb JdsDataBase}
  */
 public class JdsDelete {
     private final static String DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
 
-    public static void delete(final JdsDataBase jdsDataBase, final Collection<? extends JdsEntity> entities) {
+    public static void delete(final JdsDb jdsDataBase, final Collection<? extends JdsEntity> entities) {
         try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
             for (JdsEntity entity : entities) {
@@ -38,11 +38,11 @@ public class JdsDelete {
         }
     }
 
-    public static void delete(final JdsDataBase jdsDataBase, final JdsEntity... entities) {
+    public static void delete(final JdsDb jdsDataBase, final JdsEntity... entities) {
         delete(jdsDataBase, Arrays.asList(entities));
     }
 
-    public static void delete(final JdsDataBase jdsDataBase, final String... entityGuids) {
+    public static void delete(final JdsDb jdsDataBase, final String... entityGuids) {
         try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
             for (String entityGuid : entityGuids) {

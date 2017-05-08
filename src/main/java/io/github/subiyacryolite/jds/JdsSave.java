@@ -36,7 +36,7 @@ public class JdsSave {
      * @param batchSize
      * @param entities
      */
-    public static void save(final JdsDataBase database, final int batchSize, final Collection<? extends JdsEntity> entities) {
+    public static void save(final JdsDb database, final int batchSize, final Collection<? extends JdsEntity> entities) {
         JdsSaveContainer saveContainer = new JdsSaveContainer();
         List<Collection<JdsEntity>> batchEntities = new ArrayList<>();
         setupBatches(batchSize, entities, saveContainer, batchEntities);
@@ -121,7 +121,7 @@ public class JdsSave {
      * @param saveContainer
      * @param step
      */
-    private static void saveInner(final JdsDataBase database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
+    private static void saveInner(final JdsDb database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
         //fire
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
@@ -183,7 +183,7 @@ public class JdsSave {
      * @param batchSize
      * @param entities
      */
-    public static void save(final JdsDataBase database, final int batchSize, final JdsEntity... entities) {
+    public static void save(final JdsDb database, final int batchSize, final JdsEntity... entities) {
         save(database, batchSize, Arrays.asList(entities));
     }
 
@@ -191,7 +191,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param overviews
      */
-    private static void saveOverviews(final JdsDataBase jdsDataBase, final HashSet<JdsEntityOverview> overviews) {
+    private static void saveOverviews(final JdsDb jdsDataBase, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
         try (Connection connection = jdsDataBase.getConnection();
@@ -218,7 +218,7 @@ public class JdsSave {
     /**
      * @param jdsEntity
      */
-    private static void mapEntity(final JdsDataBase jdsDataBase, final JdsEntity jdsEntity) {
+    private static void mapEntity(final JdsDb jdsDataBase, final JdsEntity jdsEntity) {
         if (!JdsEntity.map.contains(jdsEntity.getEntityCode())) {
             JdsEntity.map.add(jdsEntity.getEntityCode());
             jdsDataBase.mapClassName(jdsEntity.getEntityCode(), jdsEntity.getEntityName());
@@ -234,7 +234,7 @@ public class JdsSave {
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private static void saveBooleans(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
+    private static void saveBooleans(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -276,7 +276,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param integerProperties
      */
-    private static void saveIntegers(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
+    private static void saveIntegers(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -318,7 +318,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param floatProperties
      */
-    private static void saveFloats(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
+    private static void saveFloats(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -360,7 +360,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param doubleProperties
      */
-    private static void saveDoubles(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
+    private static void saveDoubles(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -402,7 +402,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param longProperties
      */
-    private static void saveLongs(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
+    private static void saveLongs(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -444,7 +444,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param stringProperties
      */
-    private static void saveStrings(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
+    private static void saveStrings(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -487,7 +487,7 @@ public class JdsSave {
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private static void saveDatesAndDateTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
+    private static void saveDatesAndDateTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -552,7 +552,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param localTimeProperties
      */
-    private static void saveTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+    private static void saveTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -595,7 +595,7 @@ public class JdsSave {
      * @param jdsDataBase
      * @param zonedDateProperties
      */
-    private static void saveZonedDateTimes(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+    private static void saveZonedDateTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
         try (Connection connection = jdsDataBase.getConnection();
@@ -639,7 +639,7 @@ public class JdsSave {
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayDates(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private static void saveArrayDates(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
@@ -694,7 +694,7 @@ public class JdsSave {
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayFloats(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private static void saveArrayFloats(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
@@ -751,7 +751,7 @@ public class JdsSave {
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private static void saveArrayIntegers(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private static void saveArrayIntegers(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
@@ -807,7 +807,7 @@ public class JdsSave {
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayDoubles(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private static void saveArrayDoubles(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
@@ -863,7 +863,7 @@ public class JdsSave {
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayLongs(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private static void saveArrayLongs(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
@@ -919,7 +919,7 @@ public class JdsSave {
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveArrayStrings(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private static void saveArrayStrings(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
@@ -976,7 +976,7 @@ public class JdsSave {
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private static void saveEnums(final JdsDataBase jdsDataBase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
+    private static void saveEnums(final JdsDb jdsDataBase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
@@ -1034,7 +1034,7 @@ public class JdsSave {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void saveArrayObjects(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
+    private static void saveArrayObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
         if (objectArrayProperties.size() == 0) return;
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
@@ -1098,7 +1098,7 @@ public class JdsSave {
      * @param objectProperties
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void bindAndSaveInnerObjects(final JdsDataBase jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
+    private static void bindAndSaveInnerObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
         if (objectProperties.size() == 0) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);

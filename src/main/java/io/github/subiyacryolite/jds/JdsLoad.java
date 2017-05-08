@@ -41,7 +41,7 @@ public class JdsLoad {
      * @param <T>
      * @return
      */
-    public static <T extends JdsEntity> List<T> load(final JdsDataBase jdsDataBase, final Class<T> referenceType, Comparator<T> comparator, final String... suppliedEntityGuids) {
+    public static <T extends JdsEntity> List<T> load(final JdsDb jdsDataBase, final Class<T> referenceType, Comparator<T> comparator, final String... suppliedEntityGuids) {
         List<T> collections = new ArrayList<>();
         loadImplementation(jdsDataBase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
         collections.sort(comparator);
@@ -55,7 +55,7 @@ public class JdsLoad {
      * @param <T>
      * @return
      */
-    public static <T extends JdsEntity> List<T> load(final JdsDataBase jdsDataBase, final Class<T> referenceType, final String... suppliedEntityGuids) {
+    public static <T extends JdsEntity> List<T> load(final JdsDb jdsDataBase, final Class<T> referenceType, final String... suppliedEntityGuids) {
         List<T> collections = new ArrayList<>();
         loadImplementation(jdsDataBase, referenceType, (List<JdsEntity>) collections, suppliedEntityGuids);
         return collections;
@@ -68,7 +68,7 @@ public class JdsLoad {
      * @param suppliedEntityGuids
      * @param <T>
      */
-    private static <T extends JdsEntity> void loadImplementation(JdsDataBase jdsDataBase, Class<T> referenceType, List<JdsEntity> collections, String[] suppliedEntityGuids) {
+    private static <T extends JdsEntity> void loadImplementation(JdsDb jdsDataBase, Class<T> referenceType, List<JdsEntity> collections, String[] suppliedEntityGuids) {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
         long code = annotation.entityId();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
@@ -89,7 +89,7 @@ public class JdsLoad {
      * @param entityEntityGuids
      * @param <T>
      */
-    private static <T extends JdsEntity> void populateInner(final JdsDataBase jdsDataBase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
+    private static <T extends JdsEntity> void populateInner(final JdsDb jdsDataBase, Class<T> referenceType, final Collection<JdsEntity> jdsEntities, final boolean initialiseInnerContent, final Collection<String> entityEntityGuids) {
         String questionsString = getQuestions(entityEntityGuids.size());
         //primitives
         String sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
@@ -311,7 +311,7 @@ public class JdsLoad {
      * @param preparedStatement
      * @throws SQLException
      */
-    private static void populateObjectEntriesAndObjectArrays(JdsDataBase jdsDataBase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
+    private static void populateObjectEntriesAndObjectArrays(JdsDb jdsDataBase, Collection<JdsEntity> jdsEntities, PreparedStatement preparedStatement) throws SQLException {
         HashSet<String> innerEntityGuids = new HashSet<>();//ids should be unique
         Queue<JdsEntity> innerObjects = new ConcurrentLinkedQueue<>();//can be multiple copies of the same object however
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -561,7 +561,7 @@ public class JdsLoad {
      * @param allBatches
      * @param suppliedEntityGuids
      */
-    private static void prepareActionBatches(final JdsDataBase jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
+    private static void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
         int batchIndex = 0;
         int batchContents = 0;
         //if no ids supplied we are looking for all instances of the entity

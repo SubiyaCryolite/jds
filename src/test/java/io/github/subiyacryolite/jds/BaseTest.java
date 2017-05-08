@@ -1,5 +1,6 @@
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.classes.JdsDbSqliteImplementation;
 import io.github.subiyacryolite.jds.classes.SimpleAddress;
 import io.github.subiyacryolite.jds.classes.SimpleAddressBook;
 import io.github.subiyacryolite.jds.classes.TypeClass;
@@ -16,7 +17,7 @@ import java.io.File;
 public abstract class BaseTest {
 
     protected final double DELTA = 1e-15;
-    protected JdsDataBase jdsDataBase;
+    protected JdsDb jdsDataBase;
 
     public void saveAndLoad() {
     }
@@ -42,18 +43,15 @@ public abstract class BaseTest {
 
     @Test
     public void initialiseSqlLiteBackend() {
-        String url = "jdbc:sqlite:" + getDatabaseFile();
-        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.SQLITE);
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-        jdsDataBase.setConnectionProperties(url, sqLiteConfig.toProperties());
+        
+        jdsDataBase = new JdsDbSqliteImplementation();
         jdsDataBase.init();
         jdsDataBase.logEdits(true);
     }
 
     @Test
     public void initialisePostgeSqlBackend() {
-        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.POSTGRES);
+        jdsDataBase = JdsDb.getImplementation(JdsImplementation.POSTGRES);
         jdsDataBase.setConnectionProperties("org.postgresql.Driver", "jdbc:postgresql://127.0.0.1:5432/jds", "postgres", "");
         jdsDataBase.init();
         jdsDataBase.logEdits(true);
@@ -61,7 +59,7 @@ public abstract class BaseTest {
 
     @Test
     public void initialiseTSqlBackend() {
-        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.TSQL);
+        jdsDataBase = JdsDb.getImplementation(JdsImplementation.TSQL);
         jdsDataBase.setConnectionProperties("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
         jdsDataBase.init();
         jdsDataBase.logEdits(true);
@@ -69,22 +67,9 @@ public abstract class BaseTest {
 
     @Test
     public void initialiseMysqlBackend() {
-        jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.MYSQL);
+        jdsDataBase = JdsDb.getImplementation(JdsImplementation.MYSQL);
         jdsDataBase.setConnectionProperties("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
         jdsDataBase.init();
         jdsDataBase.logEdits(true);
-    }
-
-    public String getDatabaseFile() {
-        File path = new File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db");
-        if (!path.exists()) {
-            File directory = path.getParentFile();
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-        }
-        String absolutePath = path.getAbsolutePath();
-        System.err.printf("You're test database is available here [%s]\n", absolutePath);
-        return absolutePath;
     }
 }

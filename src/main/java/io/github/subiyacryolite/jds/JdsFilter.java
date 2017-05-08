@@ -159,7 +159,7 @@ public class JdsFilter implements AutoCloseable {
         return String.join(" JOIN ", tables);
     }
 
-    public <T extends JdsEntity> List<T> find(JdsDataBase database, final Class<T> referenceType) {
+    public <T extends JdsEntity> List<T> find(JdsDb database, final Class<T> referenceType) {
         List<String> matchingGuids = new ArrayList<>();
         String sql = this.toQuery();
         try (Connection connection = database.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
