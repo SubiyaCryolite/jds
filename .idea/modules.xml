@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Jenesis-Data-Store.iml" filepath="$PROJECT_DIR$/.idea/modules/Jenesis-Data-Store.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NetBeansProjects-jds_test.iml" filepath="$PROJECT_DIR$/.idea/modules/NetBeansProjects-jds_test.iml" group="jds" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds.iml" filepath="$PROJECT_DIR$/.idea/modules/jds.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds_main.iml" filepath="$PROJECT_DIR$/.idea/modules/jds_main.iml" group="jds" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jds_test.iml" filepath="$PROJECT_DIR$/.idea/modules/jds_test.iml" group="jds" />

@@ -1034,16 +1034,16 @@ public class JdsSave {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void saveArrayObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> objectArrayProperties) {
-        if (objectArrayProperties.size() == 0) return;
+    private static void saveArrayObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<JdsEntity>>> objectArrayProperties) {
+        if (objectArrayProperties.isEmpty()) return;
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
         final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);
-        for (Map.Entry<String, Map<Long, SimpleListProperty<? extends JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
+        for (Map.Entry<String, Map<Long, SimpleListProperty<JdsEntity>>> serviceCodeEntities : objectArrayProperties.entrySet()) {
             String parentGuid = serviceCodeEntities.getKey();
-            for (Map.Entry<Long, SimpleListProperty<? extends JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
+            for (Map.Entry<Long, SimpleListProperty<JdsEntity>> serviceCodeEntity : serviceCodeEntities.getValue().entrySet()) {
                 record.set(0);
                 changesMade.set(false);
                 serviceCodeEntity.getValue().stream().filter(jdsEntity -> jdsEntity != null).forEach(jdsEntity -> {
@@ -1098,16 +1098,16 @@ public class JdsSave {
      * @param objectProperties
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private static void bindAndSaveInnerObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> objectProperties) {
-        if (objectProperties.size() == 0) return;//prevent stack overflow :)
+    private static void bindAndSaveInnerObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>> objectProperties) {
+        if (objectProperties.isEmpty()) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
         final Collection<JdsParentChildBinding> parentChildBindings = new ArrayList<>();
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
-        for (Map.Entry<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>> entry : objectProperties.entrySet()) {
+        for (Map.Entry<String, Map<Long, SimpleObjectProperty<JdsEntity>>> entry : objectProperties.entrySet()) {
             String parentGuid = entry.getKey();
-            for (Map.Entry<Long, SimpleObjectProperty<? extends JdsEntity>> recordEntry : entry.getValue().entrySet()) {
+            for (Map.Entry<Long, SimpleObjectProperty<JdsEntity>> recordEntry : entry.getValue().entrySet()) {
                 record.set(0);
                 JdsEntity jdsEntity = recordEntry.getValue().get();
                 changesMade.set(false);

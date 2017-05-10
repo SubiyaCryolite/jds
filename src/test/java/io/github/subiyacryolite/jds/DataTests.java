@@ -91,7 +91,7 @@ public class DataTests extends BaseTest {
         JdsDelete.delete(jdsDataBase, simpleAddressBook);
     }
 
-    private SimpleAddressBook getSimpleAddressBook() {
+    protected SimpleAddressBook getSimpleAddressBook() {
         SimpleAddress primaryAddress = new SimpleAddress();
         primaryAddress.setEntityGuid("primaryAddress"); //setting a custom Entity Guid
         primaryAddress.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));

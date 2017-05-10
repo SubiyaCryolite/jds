@@ -15,19 +15,24 @@ package io.github.subiyacryolite.jds;
 
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a field enum in JDS
  */
-public class JdsFieldEnum {
+public class JdsFieldEnum implements Externalizable {
 
     private static final HashMap<Long, JdsFieldEnum> fieldEnums = new HashMap<>();
     private final SimpleObjectProperty<JdsField> field;
     private final LinkedList<String> sequenceValues;//keep order at all times
 
-    private JdsFieldEnum() {
+    public JdsFieldEnum() {
         this.field = new SimpleObjectProperty();
         this.sequenceValues = new LinkedList<>();
     }
@@ -81,5 +86,17 @@ public class JdsFieldEnum {
 
     public String getValue(int index) {
         return (index >= sequenceValues.size()) ? "" : sequenceValues.get(index);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(field.get());
+        out.writeObject(sequenceValues);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        field.set((JdsField) in.readObject());
+        sequenceValues.addAll((List<String>) in.readObject());
     }
 }

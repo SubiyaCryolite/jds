@@ -22,7 +22,7 @@ class JdsSaveContainer {
     public final List<Map<String, Map<Long, SimpleLongProperty>>> longs = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleIntegerProperty>>> integers = new ArrayList<>();
     //arrays
-    public final List<Map<String, Map<Long, SimpleListProperty<? extends JdsEntity>>>> objectArrays = new ArrayList<>();
+    public final List<Map<String, Map<Long, SimpleListProperty<JdsEntity>>>> objectArrays = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrays = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleListProperty<LocalDateTime>>>> dateTimeArrays = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleListProperty<Float>>>> floatArrays = new ArrayList<>();
@@ -32,7 +32,7 @@ class JdsSaveContainer {
     //enums
     public final List<Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>>> enums = new ArrayList<>();
     //objects
-    public final List<Map<String, Map<Long, SimpleObjectProperty<? extends JdsEntity>>>> objects = new ArrayList<>();
+    public final List<Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>>> objects = new ArrayList<>();
     //overviews
     public final List<HashSet<JdsEntityOverview>> overviews = new LinkedList<>();
 }

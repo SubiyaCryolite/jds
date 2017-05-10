@@ -17,6 +17,10 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashMap;
 
 import static io.github.subiyacryolite.jds.enums.JdsFieldType.TEXT;
@@ -24,12 +28,13 @@ import static io.github.subiyacryolite.jds.enums.JdsFieldType.TEXT;
 /**
  * Represents a field in JDS
  */
-public class JdsField {
+public class JdsField implements Externalizable {
     private static HashMap<Long, String> fields = new HashMap<>();
     private final SimpleLongProperty id;
     private final SimpleStringProperty name;
     private JdsFieldType type;
-    private JdsField() {
+
+    public JdsField() {
         id = new SimpleLongProperty();
         name = new SimpleStringProperty();
         type = TEXT;
@@ -81,5 +86,19 @@ public class JdsField {
                 ", name=" + name.get() +
                 ", type=" + type +
                 '}';
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeLong(id.get());
+        out.writeUTF(name.get());
+        out.writeObject(type);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        id.set(in.readLong());
+        name.set(in.readUTF());
+        type = (JdsFieldType) in.readObject();
     }
 }

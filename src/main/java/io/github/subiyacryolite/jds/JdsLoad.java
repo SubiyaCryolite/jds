@@ -322,7 +322,7 @@ public class JdsLoad {
                 for (JdsEntity parentEntity : optimalEntityLookup(jdsEntities, parentEntityGuid)) {
                     try {
                         if (parentEntity.objectArrayProperties.containsKey(entityId)) {
-                            SimpleListProperty<JdsEntity> propertyList = (SimpleListProperty<JdsEntity>) parentEntity.objectArrayProperties.get(entityId);
+                            SimpleListProperty<JdsEntity> propertyList = parentEntity.objectArrayProperties.get(entityId);
                             Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
@@ -331,7 +331,7 @@ public class JdsLoad {
                             propertyList.get().add(jdsEntity);
                             innerObjects.add(jdsEntity);
                         } else if (parentEntity.objectProperties.containsKey(entityId)) {
-                            SimpleObjectProperty<JdsEntity> property = ((SimpleObjectProperty<JdsEntity>) parentEntity.objectProperties.get(entityId));
+                            SimpleObjectProperty<JdsEntity> property = parentEntity.objectProperties.get(entityId);
                             Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
