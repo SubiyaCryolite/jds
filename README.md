@@ -134,7 +134,9 @@ public class NewTestEnums
 Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the defined values.
 
 ### 1.1.4 Binding Properties
-Depending on the type of field, JDS will require that you set you objects properties to one of the following container types.
+Depending on the type of field, JDS will require that you set you objects properties to one of the following JavaFX bean container types.
+
+Kindly note that none of the JavaFX beans are serializable, however JDS supports serialization via the explicit implementation of Javas Externalizable interface. That said only Property values are serialized, not listeners or their states.
 
 |JDS Field Type|Java Property Type|
 |-----|-----|
@@ -368,44 +370,106 @@ public class SimpleAddressBook extends JdsEntity {
 
 ## 1.2 CRUD Operations
 ### 1.2.1 Initialising the database
-In order to use JDS you will need an instance of JdsDataBase. The instance you create will depend on your underlying backend. Beyond that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
+In order to use JDS you will need an instance of JdsDb. Your instance of JdsDb will have to extend one of the following classes and override the getConnection() method: JdsDbMySql, JdsDbPostgreSql, JdsDbSqlite or JdsDbTransactionalSql.
+Please note that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 #### Postgres example
 ```java
-String dbDriverName = "org.postgresql.Driver";
-String dbConnectionString = "jdbc:postgresql://127.0.0.1:5432/PROJECT_DATABASE";
-String dbUser = "DATABASE_USER";
-String dbPassword = "DATABASE_PASSWORD";
-JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.POSTGRES);
-jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
-jdsDataBase.init();
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class JdsDbPostgreSqlmplementation extends JdsDbPostgreSql {
+
+    @Override
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("org.postgresql.Driver");
+        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DB_NAME", "DB_USER", "DB_PASSWORD");
+    }
+}
+
+........
+
+JdsDb jdsDb = new JdsDbPostgreSqlmplementation();
+jdsDb.init();
 ```
 #### MySQL Example
 ```java
-String dbDriverName = "com.mysql.cj.jdbc.Driver";
-String dbConnectionString = "jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false";
-String dbUser = "root";
-String dbPassword = "";
-JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.MYSQL);
-jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
-jdsDataBase.init();
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class JdsDbMySqlImplementation extends JdsDbMySql {
+
+    @Override
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/DB_NAME?autoReconnect=true&useSSL=false", "DB_USER", "DB_PASSWORD");
+    }
+}
+
+...
+
+JdsDb jdsDb = new JdsDbMySqlImplementation();
+jdsDb.init();
 ```
 #### Microsoft SQL Server Example
 ```java
-String dbDriverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-String dbConnectionString = "jdbc:sqlserver://127.0.0.1\\DATABASE_INSTANCE;databaseName=PROJECT_DATABASE";
-String dbUser = "DATABASE_USER";
-String dbPassword = "DATABASE_PASSWORD";
-JdsDataBase jdsDataBase = JdsDataBase.getImplementation(JdsImplementation.TSQL);
-jdsDataBase.setConnectionProperties(dbDriverName, dbConnectionString, dbUser, dbPassword);
-jdsDataBase.init();
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+
+public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
+
+    @Override
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DB_NAME", "DB_USER", "DB_PASSWORD");
+    }
+}
+
+....
+
+JdsDb jdsDb = new JdsDbTransactionalSqllmplementation();
+jdsDb.init();
 ```
 #### Sqlite Example
 ```java
-String dbFileLocation = "jdbc:sqlite:" + getDatabaseFileLocation();
-SQLiteConfig sqLiteConfig = new SQLiteConfig();
-sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-jdsDataBase.setConnectionProperties(dbFileLocation, sqLiteConfig.toProperties());
-jdsDataBase.init();
+import org.sqlite.SQLiteConfig;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class JdsDbSqliteImplementation extends JdsDbSqlite {
+
+    @Override
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        String url = "jdbc:sqlite:" + getDatabaseFile();
+        SQLiteConfig sqLiteConfig = new SQLiteConfig();
+        sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
+        Class.forName("org.sqlite.JDBC");
+        return DriverManager.getConnection(url, sqLiteConfig.toProperties());
+    }
+
+    public String getDatabaseFile() {
+        File path = new File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db");
+        if (!path.exists()) {
+            File directory = path.getParentFile();
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+        }
+        String absolutePath = path.getAbsolutePath();
+        return absolutePath;
+    }
+}
+
+...
+
+JdsDb jdsDb = new JdsDbSqliteImplementation();
+jdsDb.init();
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDataBase instance in order to return a standard **java.sql.Connection** in your application. 
 
@@ -482,7 +546,7 @@ private List<TypeClass> getCollection() {
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
 List<TypeClass> collection = getCollection();
-JdsSave.save(jdsDataBase, 1, collection);
+JdsSave.save(jdsDb, 1, collection);
 System.out.printf("Saved %s\n", collection);
 ```
 
@@ -493,38 +557,44 @@ List<TypeClass> allInstances;
 List<TypeClass> specificInstance;
 
 //load all entities of type SimpleAddressBook
-allInstances = JdsLoad.load(jdsDataBase, TypeClass.class);
+allInstances = JdsLoad.load(jdsDb, TypeClass.class);
 
 //load all entities of type SimpleAddressBook with Entity Guids in range
-specificInstance = JdsLoad.load(jdsDataBase, TypeClass.class, "instance3");
+specificInstance = JdsLoad.load(jdsDb, TypeClass.class, "instance3");
 
 //load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
 Comparator<TypeClass> comparator = Comparator.comparing(TypeClass::getDateField);
-specificAddressBook = JdsLoad.load(jdsDataBase, TypeClass.class, comparator, "testGuid0001");
+specificAddressBook = JdsLoad.load(jdsDb, TypeClass.class, comparator, "testGuid0001");
 ```
 
 ### 1.2.6 Load with Filter
 A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
 ```java
 JdsFilter query = new JdsFilter().equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
-List<SimpleAddress> output = query.find(jdsDataBase, SimpleAddress.class);
+List<SimpleAddress> output = query.find(jdsDb, SimpleAddress.class);
 ```
 
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
 public void deleteUsingStrings() {
-    JdsDelete.delete(jdsDataBase, "instance2");
+    JdsDelete.delete(jdsDb, "instance2");
 }
 
 public void deleteUsingObjectOrCollection() {
     List<TypeClass> collection = getCollection();
-    JdsDelete.delete(jdsDataBase, collection);
+    JdsDelete.delete(jdsDb, collection);
 }
 ```
 
 ## 1.3 Backend Design
-Section coming soon, it looks something like this
+The underlying database is based off of the star schema.
+
+Each **JdsStore[X]** table stores live data and are always up-to-date.
+
+The **JdsRef[X]** and **JdsBind[X]** tables are used by the systems to link different relations and metadata.
+
+**JdsSoreOldFieldValues** stores every single update/insert in the system and is the single point of reference for historical data. It is written to by calling **logEdits(true)** on an instance of JdsDb. This behaviour is disabled by default.
 
 ![Database design](database_design.png?raw=true)
 
