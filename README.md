@@ -17,8 +17,12 @@ Put simply, JDS is useful for any developer that requires a flexible schema runn
 
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
+#Design
+The concept behind JDS is quite simple. Extend a base “Entity” class, define “Fields” of a particular datatype and lastly “Map” the said fields to a JavaFX Bean.
+
 ## Features
-- Transparent persistence for Plain Old Java Objects (POJOs)
+- Transparent persistence
+- Serialization of JavaFX bean values
 - Generics are supported
 - Easily integrates with new or existing databases
 - Supports MySQL, T-SQL, PostgreSQL and SQLite
