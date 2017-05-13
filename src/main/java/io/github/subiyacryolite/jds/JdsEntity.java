@@ -15,6 +15,10 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
+import io.github.subiyacryolite.jds.events.OnPostLoadEvent;
+import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
+import io.github.subiyacryolite.jds.events.OnPreLoadEvenArguments;
+import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
 
 import java.lang.annotation.Annotation;
@@ -276,5 +280,17 @@ public abstract class JdsEntity extends JdsEntityBase {
         } else {
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
+    }
+
+    public void onPreSave(final OnPreSaveEventArguments eventArguments) {
+    }
+
+    public void onPostSave(final OnPostSaveEventArguments eventArguments) {
+    }
+
+    public void onPreLoad(final OnPreLoadEvenArguments eventArguments) {
+    }
+
+    public void onPostLoad(final OnPostLoadEvent eventArguments) {
     }
 }

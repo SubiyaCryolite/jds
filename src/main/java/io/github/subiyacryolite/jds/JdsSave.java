@@ -13,6 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
+import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
@@ -123,8 +125,10 @@ public class JdsSave {
      */
     private static void saveInner(final JdsDb database, final Collection<? extends JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) {
         //fire
+        int sequence = 0;
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
+            entity.onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
             mapEntity(database, entity);
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
@@ -152,6 +156,7 @@ public class JdsSave {
             //assign objects
             saveContainer.objectArrays.get(step).put(entity.getEntityGuid(), entity.objectArrayProperties);
             saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);
+            sequence++;
         }
         saveOverviews(database, saveContainer.overviews.get(step));
         //properties
@@ -176,6 +181,12 @@ public class JdsSave {
         //objects and object arrays
         saveArrayObjects(database, saveContainer.objectArrays.get(step));
         bindAndSaveInnerObjects(database, saveContainer.objects.get(step));
+
+        sequence = 0;
+        for (final JdsEntity entity : entities) {
+            entity.onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
+            sequence++;
+        }
     }
 
     /**

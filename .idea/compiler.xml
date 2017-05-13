@@ -9,6 +9,7 @@
       <module name="JenesisDataStore_main" target="1.8" />
       <module name="JenesisDataStore_test" target="1.8" />
       <module name="NetBeansProjects-jds_test" target="1.8" />
+      <module name="Software Development-jds_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

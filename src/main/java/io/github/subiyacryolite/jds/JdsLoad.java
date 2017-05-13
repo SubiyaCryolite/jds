@@ -14,6 +14,8 @@
 package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.events.OnPostLoadEvent;
+import io.github.subiyacryolite.jds.events.OnPreLoadEvenArguments;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -128,34 +130,35 @@ public class JdsLoad {
              PreparedStatement embeddedAndArrayObjects = connection.prepareStatement(sqlEmbeddedAndArrayObjects);
              PreparedStatement overviews = connection.prepareStatement(sqlOverviews)) {
             //work in batches to not break prepared statement
-            int index = 1;
-            for (String EntityGuid : entityEntityGuids) {
+            int batchSequence = 1;
+            for (String entityGuid : entityEntityGuids) {
                 if (initialiseInnerContent) {
                     JdsEntity instance = referenceType.newInstance();
-                    instance.setEntityGuid(EntityGuid);
+                    instance.setEntityGuid(entityGuid);
                     jdsEntities.add(instance);
+                    instance.onPreLoad(new OnPreLoadEvenArguments(entityGuid, batchSequence, entityEntityGuids.size()));
                 }
                 //primitives
-                setParameterForStatement(strings, index, EntityGuid);
-                setParameterForStatement(integers, index, EntityGuid);
-                setParameterForStatement(longs, index, EntityGuid);
-                setParameterForStatement(floats, index, EntityGuid);
-                setParameterForStatement(doubles, index, EntityGuid);
-                setParameterForStatement(dateTimes, index, EntityGuid);
-                setParameterForStatement(times, index, EntityGuid);
-                setParameterForStatement(zonedDateTimes, index, EntityGuid);
+                setParameterForStatement(strings, batchSequence, entityGuid);
+                setParameterForStatement(integers, batchSequence, entityGuid);
+                setParameterForStatement(longs, batchSequence, entityGuid);
+                setParameterForStatement(floats, batchSequence, entityGuid);
+                setParameterForStatement(doubles, batchSequence, entityGuid);
+                setParameterForStatement(dateTimes, batchSequence, entityGuid);
+                setParameterForStatement(times, batchSequence, entityGuid);
+                setParameterForStatement(zonedDateTimes, batchSequence, entityGuid);
                 //array
-                setParameterForStatement(textArrays, index, EntityGuid);
-                setParameterForStatement(longArrays, index, EntityGuid);
-                setParameterForStatement(floatArrays, index, EntityGuid);
-                setParameterForStatement(doubleArrays, index, EntityGuid);
-                setParameterForStatement(dateTimeArrays, index, EntityGuid);
-                setParameterForStatement(integerArraysAndEnums, index, EntityGuid);
+                setParameterForStatement(textArrays, batchSequence, entityGuid);
+                setParameterForStatement(longArrays, batchSequence, entityGuid);
+                setParameterForStatement(floatArrays, batchSequence, entityGuid);
+                setParameterForStatement(doubleArrays, batchSequence, entityGuid);
+                setParameterForStatement(dateTimeArrays, batchSequence, entityGuid);
+                setParameterForStatement(integerArraysAndEnums, batchSequence, entityGuid);
                 //object and object arrays
-                setParameterForStatement(embeddedAndArrayObjects, index, EntityGuid);
+                setParameterForStatement(embeddedAndArrayObjects, batchSequence, entityGuid);
                 //overview
-                setParameterForStatement(overviews, index, EntityGuid);
-                index++;
+                setParameterForStatement(overviews, batchSequence, entityGuid);
+                batchSequence++;
             }
             //primitives
             populateText(jdsEntities, strings);
@@ -396,6 +399,7 @@ public class JdsLoad {
                 for (JdsEntity entity : optimalEntityLookup(jdsEntities, entityGuid)) {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
+                    entity.onPostLoad(new OnPostLoadEvent(entity.getEntityGuid()));
                 }
             }
         }
