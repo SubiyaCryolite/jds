@@ -60,7 +60,7 @@ public class JdsDelete implements Callable<Boolean> {
      *
      * @param jdsDb
      * @param entities
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
      */
     public static void delete(final JdsDb jdsDb, final Collection<JdsEntity> entities) throws Exception {
@@ -71,7 +71,7 @@ public class JdsDelete implements Callable<Boolean> {
      *
      * @param jdsDb
      * @param entities
-     * @deprecated   please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
      */
     public static void delete(final JdsDb jdsDb, final JdsEntity... entities) throws Exception {
@@ -82,7 +82,7 @@ public class JdsDelete implements Callable<Boolean> {
      *
      * @param jdsDb
      * @param entityGuids
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
      */
     public static void delete(final JdsDb jdsDb, final String... entityGuids) throws Exception {

@@ -1190,7 +1190,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param jdsDb
      * @param batchSize
      * @param entities
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static void save(final JdsDb jdsDb, final int batchSize, final Collection<? extends JdsEntity> entities) throws Exception {
         new JdsSave(jdsDb, batchSize, entities).call();
@@ -1200,7 +1200,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param jdsDb
      * @param batchSize
      * @param entities
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static void save(final JdsDb jdsDb, final int batchSize, final JdsEntity... entities) throws Exception {
         save(jdsDb, batchSize, Arrays.asList(entities));

@@ -46,7 +46,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param referenceType
      * @param comparator
      * @param entityGuids
-     * @return
      */
     public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, Comparator<T> comparator, final String... entityGuids) {
         this.jdsDb = jdsDb;
@@ -59,7 +58,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param jdsDb
      * @param referenceType
      * @param entityGuids
-     * @return
      */
     public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, final String... entityGuids) {
         this.jdsDb = jdsDb;
@@ -654,7 +652,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param entityGuids
      * @param <T>
      * @return
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static <T extends JdsEntity> List<T> load(final JdsDb jdsDb, final Class<T> referenceType, Comparator<T> comparator, final String... entityGuids) throws Exception {
         List<T> collections = new JdsLoad(jdsDb, referenceType, comparator, entityGuids).call();
@@ -667,7 +665,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param entityGuids
      * @param <T>
      * @return
-     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static <T extends JdsEntity> List<T> load(final JdsDb jdsDb, final Class<T> referenceType, final String... entityGuids) throws Exception {
         List<T> collections = new JdsLoad(jdsDb, referenceType, entityGuids).call();
