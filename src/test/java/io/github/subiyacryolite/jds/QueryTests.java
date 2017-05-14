@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by ifung on 05/03/2017.
@@ -17,9 +19,9 @@ public class QueryTests extends BaseTest {
     }
 
     @Test
-    public void TestQuery() {
-        JdsFilter query = new JdsFilter().equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
-        List<SimpleAddress> output = query.find(jdsDataBase, SimpleAddress.class);
+    public void TestQuery() throws ExecutionException, InterruptedException {
+        JdsFilter filter = new JdsFilter(jdsDataBase, SimpleAddress.class).equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
+        List<SimpleAddress> output = new FutureTask<List<SimpleAddress>>(filter).get();
         Assert.assertNotNull(output);
     }
 }

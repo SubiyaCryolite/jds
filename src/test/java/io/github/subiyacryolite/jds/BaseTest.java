@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by ifung on 08/04/2017.
@@ -16,13 +17,13 @@ public abstract class BaseTest {
     protected final double DELTA = 1e-15;
     protected JdsDb jdsDataBase;
 
-    public void saveAndLoad() {
+    public void saveAndLoad() throws Exception {
     }
 
-    public void saveObject() {
+    public void saveObject() throws Exception {
     }
 
-    public void testLoads() {
+    public void testLoads() throws Exception {
     }
 
     @Before

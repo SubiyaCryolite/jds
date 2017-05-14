@@ -22,24 +22,30 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static io.github.subiyacryolite.jds.enums.JdsComponent.*;
 
 /**
  * This class is used to perform basic searches based on defined parameters
  */
-public class JdsFilter implements AutoCloseable {
+public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<List<T>> {
 
 
     private final LinkedList<LinkedList<Object>> sessionValues;
     private final LinkedList<LinkedList<String>> sessionStrings;
     private final LinkedList<String> sessionSwitches;
     private final HashSet<JdsFieldType> tablesToJoin;
+    private final JdsDb jdsDb;
+    private final Class<T> referenceType;
     private LinkedList<String> currentStrings;
     private LinkedList<Object> currentValues;
 
 
-    public JdsFilter() {
+    public JdsFilter(JdsDb jdsDb, final Class<T> referenceType) {
+        this.jdsDb = jdsDb;
+        this.referenceType = referenceType;
+        //////////
         currentStrings = new LinkedList<>();
         currentValues = new LinkedList<>();
         //==================================
@@ -159,28 +165,6 @@ public class JdsFilter implements AutoCloseable {
         return String.join(" JOIN ", tables);
     }
 
-    public <T extends JdsEntity> List<T> find(JdsDb database, final Class<T> referenceType) {
-        List<String> matchingGuids = new ArrayList<>();
-        String sql = this.toQuery();
-        try (Connection connection = database.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            for (LinkedList<Object> session : sessionValues) {
-                for (Object ob : session) {
-                    ps.setObject(parameterIndex, ob);
-                    parameterIndex++;
-                }
-            }
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                matchingGuids.add(rs.getString("EntityGuid"));
-            }
-            rs.close();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
-        return JdsLoad.load(database, referenceType, matchingGuids.toArray(new String[0]));
-    }
-
     private String getTableName(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
             case TEXT:
@@ -265,6 +249,29 @@ public class JdsFilter implements AutoCloseable {
         tablesToJoin.clear();
         currentStrings.clear();
         currentValues.clear();
+    }
+
+    @Override
+    public List<T> call() throws Exception {
+        List<String> matchingGuids = new ArrayList<>();
+        String sql = this.toQuery();
+        try (Connection connection = jdsDb.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            for (LinkedList<Object> session : sessionValues) {
+                for (Object ob : session) {
+                    ps.setObject(parameterIndex, ob);
+                    parameterIndex++;
+                }
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                matchingGuids.add(rs.getString("EntityGuid"));
+            }
+            rs.close();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return new JdsLoad(jdsDb, referenceType, matchingGuids.toArray(new String[0])).call();
     }
 }
 

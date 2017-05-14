@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static io.github.subiyacryolite.jds.classes.TestEnums.PRIMARY_ADDRESS_ENUM;
 
@@ -17,14 +19,14 @@ import static io.github.subiyacryolite.jds.classes.TestEnums.PRIMARY_ADDRESS_ENU
 public class DataTests extends BaseTest {
     @Test
     @Override
-    public void saveAndLoad() {
+    public void saveAndLoad() throws Exception {
         saveObject();
         testLoads();
     }
 
     @Test
     @Override
-    public void saveObject() {
+    public void saveObject() throws Exception {
         SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
         JdsSave.save(jdsDataBase, 1, simpleAddressBook);
         System.out.printf("Saved %s\n", simpleAddressBook);
@@ -32,39 +34,41 @@ public class DataTests extends BaseTest {
 
     @Test
     @Override
-    public void testLoads() {
-        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDataBase, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
-        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDataBase, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+    public void testLoads() throws Exception {
+        FutureTask<List<SimpleAddressBook>> futureTask = new FutureTask<List<SimpleAddressBook>>(new JdsLoad(jdsDataBase, SimpleAddressBook.class));
+        futureTask.run();
+        List<SimpleAddressBook> allAddressBooks = futureTask.get(); //load all entities of type SimpleAddressBook
+        List<SimpleAddressBook> specificAddressBook = new JdsLoad(jdsDataBase, SimpleAddressBook.class, "testGuid0001").call(); //load all entities of type SimpleAddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
 
     @Test
-    public void saveAndLoadPostreSqlImplementation() {
+    public void saveAndLoadPostreSqlImplementation() throws Exception {
         initialisePostgeSqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadTsqlImplementation() {
+    public void saveAndLoadTsqlImplementation() throws Exception {
         initialiseTSqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadSqliteImplementation() {
+    public void saveAndLoadSqliteImplementation() throws Exception {
         initialiseSqlLiteBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadMySqlImplementation() {
+    public void saveAndLoadMySqlImplementation() throws Exception {
         initialiseMysqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadAllImplementations() {
+    public void saveAndLoadAllImplementations() throws Exception {
         saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
@@ -72,21 +76,23 @@ public class DataTests extends BaseTest {
     }
 
     @Test
-    public void testSortedLoads() {
+    public void testSortedLoads() throws Exception {
         Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
-        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDataBase, SimpleAddressBook.class, comparator); //load all entities of type SimpleAddressBook
+        List<SimpleAddressBook> allAddressBooks = new JdsLoad(jdsDataBase, SimpleAddressBook.class, comparator).call(); //load all entities of type SimpleAddressBook
         List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDataBase, SimpleAddressBook.class, comparator, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
 
     @Test
-    public void deleteUsingStrings() {
-        JdsDelete.delete(jdsDataBase, "primaryAddress1");
+    public void deleteUsingStrings() throws ExecutionException, InterruptedException {
+        initialiseSqlLiteBackend();
+        Boolean result = new FutureTask<>(new JdsDelete(jdsDataBase, "primaryAddress1")).get();
+        System.out.print("Completed " + result);
     }
 
     @Test
-    public void deleteUsingObjectOrCollection() {
+    public void deleteUsingObjectOrCollection() throws Exception {
         SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
         JdsDelete.delete(jdsDataBase, simpleAddressBook);
     }

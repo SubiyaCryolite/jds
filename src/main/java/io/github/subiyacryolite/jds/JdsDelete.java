@@ -17,42 +17,75 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDb JdsDataBase}
  */
-public class JdsDelete {
+public class JdsDelete implements Callable<Boolean> {
     private final static String DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
+    private final JdsDb jdsDb;
+    private final Collection<String> entities;
 
-    public static void delete(final JdsDb jdsDataBase, final Collection<? extends JdsEntity> entities) {
-        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
+    public Boolean call() throws Exception {
+        try (Connection connection = jdsDb.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
-            for (JdsEntity entity : entities) {
-                statement.setString(1, entity.getEntityGuid());
+            for (String entity : entities) {
+                statement.setString(1, entity);
                 statement.addBatch();
             }
             statement.executeBatch();
             connection.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
         }
+        return true;
     }
 
-    public static void delete(final JdsDb jdsDataBase, final JdsEntity... entities) {
-        delete(jdsDataBase, Arrays.asList(entities));
+    public JdsDelete(final JdsDb jdsDb, final Collection<JdsEntity> entities) {
+        this.jdsDb = jdsDb;
+        this.entities = entities.stream().map(x -> x.getEntityGuid()).collect(Collectors.toList());
     }
 
-    public static void delete(final JdsDb jdsDataBase, final String... entityGuids) {
-        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
-            connection.setAutoCommit(false);
-            for (String entityGuid : entityGuids) {
-                statement.setString(1, entityGuid);
-                statement.addBatch();
-            }
-            statement.executeBatch();
-            connection.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
+    public JdsDelete(final JdsDb jdsDb, final JdsEntity... entities) {
+        this.jdsDb = jdsDb;
+        this.entities = Arrays.stream(entities).map(x -> x.getEntityGuid()).collect(Collectors.toList());
+    }
+
+    public JdsDelete(final JdsDb jdsDb, final String... entityGuids) {
+        this.jdsDb = jdsDb;
+        this.entities = Arrays.stream(entityGuids).collect(Collectors.toList());
+    }
+
+    /**
+     *
+     * @param jdsDb
+     * @param entities
+     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @throws Exception
+     */
+    public static void delete(final JdsDb jdsDb, final Collection<JdsEntity> entities) throws Exception {
+        new JdsDelete(jdsDb, entities).call();
+    }
+
+    /**
+     *
+     * @param jdsDb
+     * @param entities
+     * @deprecated   please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @throws Exception
+     */
+    public static void delete(final JdsDb jdsDb, final JdsEntity... entities) throws Exception {
+        delete(jdsDb, Arrays.asList(entities));
+    }
+
+    /**
+     *
+     * @param jdsDb
+     * @param entityGuids
+     * @deprecated please refer to https://github.com/SubiyaCryolite/Jenesis-Data-Store for the most up to date CRUD approach
+     * @throws Exception
+     */
+    public static void delete(final JdsDb jdsDb, final String... entityGuids) throws Exception {
+        new JdsDelete(jdsDb, entityGuids).call();
     }
 }

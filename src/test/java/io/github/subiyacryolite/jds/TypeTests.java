@@ -8,6 +8,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by ifung on 12/04/2017.
@@ -17,13 +18,13 @@ public class TypeTests extends BaseTest {
 
     @Test
     @Override
-    public void saveAndLoad() {
+    public void saveAndLoad() throws Exception {
         List<TypeClass> memObjects = getCollection();
         JdsSave.save(jdsDataBase, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
-        List<TypeClass> savObjects = JdsLoad.load(jdsDataBase, TypeClass.class); //load all entities of type SimpleAddressBook
-        List<TypeClass> specificObject = JdsLoad.load(jdsDataBase, TypeClass.class, "instance4"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        List<TypeClass> savObjects = new FutureTask<List<TypeClass>>(new JdsLoad(jdsDataBase, TypeClass.class)).get(); //load all entities of type SimpleAddressBook
+        List<TypeClass> specificObject = new FutureTask<List<TypeClass>>(new JdsLoad(jdsDataBase, TypeClass.class, "instance4")).get(); //load all entities of type SimpleAddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", savObjects);
         System.out.printf("Specific entities [%s]\n", specificObject);
 
@@ -71,8 +72,8 @@ public class TypeTests extends BaseTest {
 
         Assert.assertEquals("StringField " + srcA.get().getEntityGuid(), srcA.get().getStringField(), srcB.get().getStringField());
         Assert.assertEquals("IntField " + srcA.get().getEntityGuid(), srcA.get().getIntField(), srcB.get().getIntField());
-        Assert.assertEquals("FloatField " + srcA.get().getEntityGuid(), srcA.get().getFloatField(), srcB.get().getFloatField(),DELTA);
-        Assert.assertEquals("DoubleField " + srcA.get().getEntityGuid(), srcA.get().getDoubleField(), srcB.get().getDoubleField(),DELTA);
+        Assert.assertEquals("FloatField " + srcA.get().getEntityGuid(), srcA.get().getFloatField(), srcB.get().getFloatField(), DELTA);
+        Assert.assertEquals("DoubleField " + srcA.get().getEntityGuid(), srcA.get().getDoubleField(), srcB.get().getDoubleField(), DELTA);
         Assert.assertEquals("LongField " + srcA.get().getEntityGuid(), srcA.get().getLongField(), srcB.get().getLongField());
         Assert.assertEquals("BooleanField " + srcA.get().getEntityGuid(), srcA.get().getBooleanField(), srcB.get().getBooleanField());
     }
@@ -140,31 +141,31 @@ public class TypeTests extends BaseTest {
     }
 
     @Test
-    public void saveAndLoadPostreSqlImplementation() {
+    public void saveAndLoadPostreSqlImplementation() throws Exception {
         initialisePostgeSqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadTsqlImplementation() {
+    public void saveAndLoadTsqlImplementation() throws Exception {
         initialiseTSqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadSqliteImplementation() {
+    public void saveAndLoadSqliteImplementation() throws Exception {
         initialiseSqlLiteBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadMySqlImplementation() {
+    public void saveAndLoadMySqlImplementation() throws Exception {
         initialiseMysqlBackend();
         saveAndLoad();
     }
 
     @Test
-    public void saveAndLoadAllImplementations() {
+    public void saveAndLoadAllImplementations() throws Exception {
         saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
