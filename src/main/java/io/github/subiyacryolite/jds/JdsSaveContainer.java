@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Helper class used when performing {@link JdsEntity JdsEntity} saves
  */
-class JdsSaveContainer {
+final class JdsSaveContainer {
     //strings, dates and numeric
     public final List<Map<String, Map<Long, SimpleObjectProperty<Temporal>>>> localDateTimes = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleObjectProperty<Temporal>>>> localDates = new ArrayList<>();
