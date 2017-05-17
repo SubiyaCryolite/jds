@@ -581,7 +581,7 @@ Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateFiel
 
     Callable<List<JdsExample>> loadAllInstances = new JdsLoad(jdsDb, JdsExample.class);
     Callable<List<JdsExample>> loadSpecificInstance = new JdsLoad(jdsDb, JdsExample.class, "instance3");
-    Callable<List<JdsExample>> loadSortedInstances = new JdsLoad(jdsDb, JdsExample.class);
+    Callable<List<JdsExample>> loadSortedInstances = new JdsLoad(jdsDb, JdsExample.class, comparator);
     
     FutureTask<List<JdsExample>> loadingAllInstances = new FutureTask(loadAllInstances);
     FutureTask<List<JdsExample>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
