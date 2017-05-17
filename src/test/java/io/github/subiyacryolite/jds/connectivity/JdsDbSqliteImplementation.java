@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package io.github.subiyacryolite.jds;
+package io.github.subiyacryolite.jds.connectivity;
 
+import io.github.subiyacryolite.jds.JdsDbSqlite;
 import org.sqlite.SQLiteConfig;
 
 import java.io.File;

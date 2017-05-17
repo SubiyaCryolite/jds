@@ -1,4 +1,6 @@
-package io.github.subiyacryolite.jds;
+package io.github.subiyacryolite.jds.connectivity;
+
+import io.github.subiyacryolite.jds.JdsDbPostgreSql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

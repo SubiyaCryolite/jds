@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
@@ -6,7 +6,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType;
 /**
  * Created by ifunga on 12/04/2017.
  */
-public class NewTestFields {
+public class JdsExampleFields {
     public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
     public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
     public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);

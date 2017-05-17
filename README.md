@@ -482,7 +482,7 @@ Once you have initialised your database you can go ahead and initialise all your
 ```java
 public void initialiseJdsClasses()
 {
-    JdsEntityClasses.map(TypeClass.class);
+    JdsEntityClasses.map(JdsExample.class);
     JdsEntityClasses.map(SimpleAddress.class);
     JdsEntityClasses.map(SimpleAddressBook.class);
 }
@@ -492,10 +492,10 @@ You only have to do this once at start-up but it is vital that you do so. Withou
 ### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
-private List<TypeClass> getCollection() {
-    List<TypeClass> collection = new ArrayList<>();
+private List<JdsExample> getCollection() {
+    List<JdsExample> collection = new ArrayList<>();
     
-    TypeClass instance1 = new TypeClass();
+    JdsExample instance1 = new JdsExample();
     instance1.setEntityGuid("instance1");
     instance1.setStringField("One");
     
@@ -512,7 +512,7 @@ private List<TypeClass> getCollection() {
     instance2.setBooleanField(false);
     instance2.setEntityGuid("instance2");
     
-    TypeClass instance3 = new TypeClass();
+    JdsExample instance3 = new JdsExample();
     instance3.setStringField("Three");
     instance3.setTimeField(LocalTime.of(03, 14));
     instance3.setDateField(LocalDate.of(2034, 6, 14));
@@ -525,7 +525,7 @@ private List<TypeClass> getCollection() {
     instance3.setBooleanField(false);
     instance3.setEntityGuid("instance3");
     
-    TypeClass instance4 = new TypeClass();
+    JdsExample instance4 = new JdsExample();
     instance4.setStringField("Four");
     instance4.setTimeField(LocalTime.of(12, 44));
     instance4.setDateField(LocalDate.of(3034, 12, 1));
@@ -549,7 +549,18 @@ private List<TypeClass> getCollection() {
 ### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
-List<TypeClass> collection = getCollection();
+List<JdsExample> collection = getCollection();
+
+//NEW APPROACH (INTRODUCED IN 1.170514)
+List<JdsExample> collection = getCollection();
+Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
+FutureTask<Boolean> saving = new FutureTask(save);
+saving.run();
+while (!saving.isDone())
+    System.out.println("Waiting for operation 1 to complete");
+System.out.printf("Saved? %s\n", saving.get());
+
+//OLD APPROACH (DEPRECATED IN 1.170514)
 JdsSave.save(jdsDb, 1, collection);
 System.out.printf("Saved %s\n", collection);
 ```
@@ -557,38 +568,82 @@ System.out.printf("Saved %s\n", collection);
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
-List<TypeClass> allInstances;
-List<TypeClass> specificInstance;
+//all entities of type SimpleAddressBook
+List<JdsExample> allInstances;
+//all entities of type SimpleAddressBook with Entity Guids in range
+List<JdsExample> specificInstance;
+//all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
+List<JdsExample> sortedInstances;
+//ordering comparator
+Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateField);
 
-//load all entities of type SimpleAddressBook
-allInstances = JdsLoad.load(jdsDb, TypeClass.class);
+//NEW APPROACH (INTRODUCED IN 1.170514)
 
-//load all entities of type SimpleAddressBook with Entity Guids in range
-specificInstance = JdsLoad.load(jdsDb, TypeClass.class, "instance3");
+    Callable<List<JdsExample>> loadAllInstances = new JdsLoad(jdsDb, JdsExample.class);
+    Callable<List<JdsExample>> loadSpecificInstance = new JdsLoad(jdsDb, JdsExample.class, "instance3");
+    Callable<List<JdsExample>> loadSortedInstances = new JdsLoad(jdsDb, JdsExample.class);
+    
+    FutureTask<List<JdsExample>> loadingAllInstances = new FutureTask(loadAllInstances);
+    FutureTask<List<JdsExample>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
+    FutureTask<List<JdsExample>> loadingSortedInstances = new FutureTask(loadSortedInstances);
+    
+    loadingAllInstances.run();
+    loadingSpecificInstance.run();
+    loadingSortedInstances.run();
+    
+    while (!loadingAllInstances.isDone())
+        System.out.println("Waiting for operation 1 to complete");
+    while (!loadingSpecificInstance.isDone())
+        System.out.println("Waiting for operation 2 to complete");
+    while (!loadingSortedInstances.isDone())
+        System.out.println("Waiting for operation 3 to complete");
+    
+    List<JdsExample> allInstances = loadingAllInstances.get();
+    List<JdsExample> specificInstance = loadingSpecificInstance.get();
+    List<JdsExample> sortedInstances = loadingSortedInstances.get();
+    
+    System.out.println(allInstances);
+    System.out.println(specificInstance);
+    System.out.println(sortedInstances);
+    System.out.println("DONE");
 
-//load all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
-Comparator<TypeClass> comparator = Comparator.comparing(TypeClass::getDateField);
-specificAddressBook = JdsLoad.load(jdsDb, TypeClass.class, comparator, "testGuid0001");
+//OLD APPROACH (DEPRECATED IN 1.170514)
+
+    allInstances = JdsLoad.load(jdsDb, JdsExample.class);
+    specificInstance = JdsLoad.load(jdsDb, JdsExample.class, "instance3");
+    specificAddressBook = JdsLoad.load(jdsDb, JdsExample.class, comparator);
+    
+    System.out.println(allInstances);
+    System.out.println(specificInstance);
+    System.out.println(sortedInstances);
+    System.out.println("DONE");
 ```
 
 ### 1.2.6 Load with Filter
 A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
 ```java
-JdsFilter query = new JdsFilter().equals(TestFields.AREA_NAME, "Riverdale").like(TestFields.COUNTRY_NAME, "Zam").or().equals(TestFields.PROVINCE_NAME, "Copperbelt");
-List<SimpleAddress> output = query.find(jdsDb, SimpleAddress.class);
+    JdsFilter filter = new JdsFilter(jdsDb, SimpleAddress.class).equals(SimpleAddressFields.AREA_NAME, "Riverdale").like(SimpleAddressFields.COUNTRY_NAME, "Zam").or().equals(SimpleAddressFields.PROVINCE_NAME, "Copperbelt");
+    List<SimpleAddress> output = new FutureTask<List<SimpleAddress>>(filter).get();
 ```
 
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
-public void deleteUsingStrings() {
-    JdsDelete.delete(jdsDb, "instance2");
-}
+List<TypeClass> collection = getCollection();
+    
+//NEW APPROACH (INTRODUCED IN 1.170514)
+    Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
+    FutureTask<Boolean> deleting = new FutureTask(delete);
+    deleting.run();
+    while(!deleting.isDone())
+        System.out.println("Waiting for operation to complete");
+    System.out.println("Deleted? "+ deleting.get());
 
-public void deleteUsingObjectOrCollection() {
-    List<TypeClass> collection = getCollection();
+//OLD APPROACH (DEPRECATED IN 1.170514)
+    //using strings representing entity guids
+    JdsDelete.delete(jdsDb, "instance2");
+    //using an object or an object ollection
     JdsDelete.delete(jdsDb, collection);
-}
 ```
 
 ## 1.3 Backend Design

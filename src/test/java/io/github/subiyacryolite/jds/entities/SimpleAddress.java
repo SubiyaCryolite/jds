@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
@@ -24,14 +24,14 @@ public class SimpleAddress extends JdsEntity {
     private final SimpleObjectProperty<ZonedDateTime> timeOfEntry = new SimpleObjectProperty(ZonedDateTime.now());
 
     public SimpleAddress() {
-        map(TestFields.STREET_NAME, streetName);
-        map(TestFields.PLOT_NUMBER, plotNumber);
-        map(TestFields.AREA_NAME, area);
-        map(TestFields.CITY_NAME, city);
-        map(TestFields.COUNTRY_NAME, country);
-        map(TestFields.PROVINCE_NAME, provinceOrState);
-        map(TestFields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
-        mapEnums(TestEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
+        map(SimpleAddressFields.STREET_NAME, streetName);
+        map(SimpleAddressFields.PLOT_NUMBER, plotNumber);
+        map(SimpleAddressFields.AREA_NAME, area);
+        map(SimpleAddressFields.CITY_NAME, city);
+        map(SimpleAddressFields.COUNTRY_NAME, country);
+        map(SimpleAddressFields.PROVINCE_NAME, provinceOrState);
+        map(SimpleAddressFields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
+        mapEnums(SimpleAddressEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
     }
 
     public List<String> getPrimaryAddress() {

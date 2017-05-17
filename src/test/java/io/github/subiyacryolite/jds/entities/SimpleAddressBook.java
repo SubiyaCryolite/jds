@@ -1,8 +1,7 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds.entities;
 
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 

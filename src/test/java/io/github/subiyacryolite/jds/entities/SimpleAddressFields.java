@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
@@ -6,7 +6,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType;
 /**
  * Created by ifung on 18/02/2017.
  */
-public class TestFields {
+public class SimpleAddressFields {
     public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
     public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
     public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);

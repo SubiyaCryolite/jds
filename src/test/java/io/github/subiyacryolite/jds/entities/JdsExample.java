@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
  * Created by ifunga on 12/04/2017.
  */
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class TypeClass extends JdsEntity {
+public class JdsExample extends JdsEntity {
     private final SimpleStringProperty stringField = new SimpleStringProperty("");
     private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
     private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
@@ -25,20 +25,20 @@ public class TypeClass extends JdsEntity {
     private final SimpleFloatProperty floatField = new SimpleFloatProperty(0);
     private final SimpleBooleanProperty booleanField = new SimpleBooleanProperty(false);
 
-    public TypeClass() {
-        map(NewTestFields.STRING_FIELD, stringField);
-        map(NewTestFields.DATE_FIELD, dateField);
-        map(NewTestFields.TIME_FIELD, timeField);
-        map(NewTestFields.DATE_TIME_FIELD, dateTimeField);
-        map(NewTestFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
-        map(NewTestFields.LONG_FIELD, longField);
-        map(NewTestFields.INT_FIELD, intField);
-        map(NewTestFields.DOUBLE_FIELD, doubleField);
-        map(NewTestFields.FLOAT_FIELD, floatField);
-        map(NewTestFields.BOOLEAN_FIELD, booleanField);
+    public JdsExample() {
+        map(JdsExampleFields.STRING_FIELD, stringField);
+        map(JdsExampleFields.DATE_FIELD, dateField);
+        map(JdsExampleFields.TIME_FIELD, timeField);
+        map(JdsExampleFields.DATE_TIME_FIELD, dateTimeField);
+        map(JdsExampleFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
+        map(JdsExampleFields.LONG_FIELD, longField);
+        map(JdsExampleFields.INT_FIELD, intField);
+        map(JdsExampleFields.DOUBLE_FIELD, doubleField);
+        map(JdsExampleFields.FLOAT_FIELD, floatField);
+        map(JdsExampleFields.BOOLEAN_FIELD, booleanField);
     }
 
-    public TypeClass(String str, LocalTime timeField, LocalDate localDate, LocalDateTime localDateTime, ZonedDateTime zonedDateTime, long l, int i, double d, float f, boolean b) {
+    public JdsExample(String str, LocalTime timeField, LocalDate localDate, LocalDateTime localDateTime, ZonedDateTime zonedDateTime, long l, int i, double d, float f, boolean b) {
         this();
         setStringField(str);
         setTimeField(timeField);
@@ -134,7 +134,7 @@ public class TypeClass extends JdsEntity {
 
     @Override
     public String toString() {
-        return "TypeClass{" +
+        return "JdsExample{" +
                 "stringField = " + getStringField() +
                 ", timeField = " + getTimeField() +
                 ", dateField = " + getDateField() +

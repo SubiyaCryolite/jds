@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package io.github.subiyacryolite.jds;
+package io.github.subiyacryolite.jds.connectivity;
+
+import io.github.subiyacryolite.jds.JdsDbTransactionalSql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,11 +15,11 @@ import java.sql.SQLException;
  *
  * @author indana
  */
-public class JdsDbMySqlImplementation extends JdsDbMySql {
+public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
 
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", "sa", "p@nkP#55W0rd");
     }
 }

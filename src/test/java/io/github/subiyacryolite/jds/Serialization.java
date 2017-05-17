@@ -1,17 +1,16 @@
-package io.github.subiyacryolite.jds.classes;
+package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.DataTests;
-import io.github.subiyacryolite.jds.JdsEntity;
+import io.github.subiyacryolite.jds.common.BaseTestConfig;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by indana on 5/10/2017.
  */
-public class TestSerialization extends DataTests {
+public class Serialization extends BaseTestConfig {
 
     @Test
     public void testSerialization() {
