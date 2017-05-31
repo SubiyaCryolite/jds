@@ -1164,7 +1164,7 @@ public class JdsSave implements Callable<Boolean> {
             }
         }
         //save children first
-        new JdsSave(jdsDb, -1, jdsEntities).call();
+        new JdsSave(jdsDb, connection, -1, jdsEntities, true).call();
 
         //bind children below
         try (PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
