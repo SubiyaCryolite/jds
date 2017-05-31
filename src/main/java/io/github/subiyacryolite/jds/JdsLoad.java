@@ -14,8 +14,10 @@
 package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.events.JdsPostLoadListener;
+import io.github.subiyacryolite.jds.events.JdsPreLoadListener;
 import io.github.subiyacryolite.jds.events.OnPostLoadEvent;
-import io.github.subiyacryolite.jds.events.OnPreLoadEvenArguments;
+import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -129,7 +131,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     T entity = referenceType.newInstance();
                     entity.setEntityGuid(entityGuid);
                     entities.add(entity);
-                    entity.onPreLoad(new OnPreLoadEvenArguments(entityGuid, batchSequence, entityGuids.size()));
+                    if (entity instanceof JdsPreLoadListener)
+                        ((JdsPreLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(entityGuid, batchSequence, entityGuids.size()));
                 }
                 //primitives
                 setParameterForStatement(batchSequence, entityGuid, strings);
@@ -402,7 +405,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 for (JdsEntity entity : optimalEntityLookup(jdsEntities, entityGuid)) {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
-                    entity.onPostLoad(new OnPostLoadEvent(entity.getEntityGuid()));
+                    if (entity instanceof JdsPostLoadListener)
+                        ((JdsPostLoadListener) entity).onPostLoad(new OnPostLoadEvent(entity.getEntityGuid()));
                 }
             }
         }

@@ -13,6 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.events.JdsPostSaveListener;
+import io.github.subiyacryolite.jds.events.JdsPreSaveListener;
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
@@ -20,6 +22,7 @@ import javafx.collections.ObservableList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,17 +39,33 @@ public class JdsSave implements Callable<Boolean> {
 
     private final JdsDb jdsDb;
     private final int batchSize;
+    private final Connection connection;
     private final Collection<? extends JdsEntity> entities;
+    private final boolean recursiveInnerCall;
+
+    /**
+     * @param jdsDb
+     * @param entities
+     */
+    public JdsSave(final JdsDb jdsDb, final Collection<? extends JdsEntity> entities) throws SQLException, ClassNotFoundException {
+        this(jdsDb, jdsDb.getConnection(), 0, entities, false);
+    }
 
     /**
      * @param jdsDb
      * @param batchSize
      * @param entities
      */
-    public JdsSave(final JdsDb jdsDb, final int batchSize, final Collection<? extends JdsEntity> entities) {
+    public JdsSave(final JdsDb jdsDb, final int batchSize, final Collection<? extends JdsEntity> entities) throws SQLException, ClassNotFoundException {
+        this(jdsDb, jdsDb.getConnection(), batchSize, entities, false);
+    }
+
+    private JdsSave(final JdsDb jdsDb, Connection connection, final int batchSize, final Collection<? extends JdsEntity> entities, boolean recursiveInnerCall) {
         this.jdsDb = jdsDb;
         this.batchSize = batchSize;
         this.entities = entities;
+        this.connection = connection;
+        this.recursiveInnerCall = recursiveInnerCall;
     }
 
     /**
@@ -80,6 +99,7 @@ public class JdsSave implements Callable<Boolean> {
     private void setupBatches(int batchSize, Collection<? extends JdsEntity> entities, final JdsSaveContainer container, List<Collection<JdsEntity>> batchEntities) {
         //create batches
         int currentBatch = 0;
+        //default bach is 0 or -1 which means one large chunk. Anything above is a single batch
         int iteration = 0;
         if (batchSize > 0) {
             for (JdsEntity jdsEntity : entities) {
@@ -146,7 +166,9 @@ public class JdsSave implements Callable<Boolean> {
         int sequence = 0;
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
-            entity.onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
+            if (entity instanceof JdsPreSaveListener) {
+                ((JdsPreSaveListener) entity).onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
+            }
             mapEntity(database, entity);
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
@@ -176,46 +198,54 @@ public class JdsSave implements Callable<Boolean> {
             saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);
             sequence++;
         }
-        saveOverviews(database, saveContainer.overviews.get(step));
-        //properties
-        saveBooleans(database, saveContainer.booleans.get(step));
-        saveStrings(database, saveContainer.strings.get(step));
-        saveDatesAndDateTimes(database, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
-        saveZonedDateTimes(database, saveContainer.zonedDateTimes.get(step));
-        saveTimes(database, saveContainer.localTimes.get(step));
-        saveLongs(database, saveContainer.longs.get(step));
-        saveDoubles(database, saveContainer.doubles.get(step));
-        saveIntegers(database, saveContainer.integers.get(step));
-        saveFloats(database, saveContainer.floats.get(step));
-        //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-        saveArrayDates(database, saveContainer.dateTimeArrays.get(step));
-        saveArrayStrings(database, saveContainer.stringArrays.get(step));
-        saveArrayLongs(database, saveContainer.longArrays.get(step));
-        saveArrayDoubles(database, saveContainer.doubleArrays.get(step));
-        saveArrayIntegers(database, saveContainer.integerArrays.get(step));
-        saveArrayFloats(database, saveContainer.floatArrays.get(step));
-        //enums
-        saveEnums(database, saveContainer.enums.get(step));
-        //objects and object arrays
-        saveArrayObjects(database, saveContainer.objectArrays.get(step));
-        bindAndSaveInnerObjects(database, saveContainer.objects.get(step));
-
+        //share one connection for raw saves, helps with performance
+        try {
+            saveOverviews(connection, saveContainer.overviews.get(step));
+            //properties
+            saveBooleans(connection, saveContainer.booleans.get(step));
+            saveStrings(connection, saveContainer.strings.get(step));
+            saveDatesAndDateTimes(connection, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
+            saveZonedDateTimes(connection, saveContainer.zonedDateTimes.get(step));
+            saveTimes(connection, saveContainer.localTimes.get(step));
+            saveLongs(connection, saveContainer.longs.get(step));
+            saveDoubles(connection, saveContainer.doubles.get(step));
+            saveIntegers(connection, saveContainer.integers.get(step));
+            saveFloats(connection, saveContainer.floats.get(step));
+            //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
+            saveArrayDates(connection, saveContainer.dateTimeArrays.get(step));
+            saveArrayStrings(connection, saveContainer.stringArrays.get(step));
+            saveArrayLongs(connection, saveContainer.longArrays.get(step));
+            saveArrayDoubles(connection, saveContainer.doubleArrays.get(step));
+            saveArrayIntegers(connection, saveContainer.integerArrays.get(step));
+            saveArrayFloats(connection, saveContainer.floatArrays.get(step));
+            //enums
+            saveEnums(connection, saveContainer.enums.get(step));
+            //objects and object arrays
+            saveArrayObjects(connection, saveContainer.objectArrays.get(step));
+            bindAndSaveInnerObjects(connection, saveContainer.objects.get(step));
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (!recursiveInnerCall)
+                connection.close();
+        }
         sequence = 0;
         for (final JdsEntity entity : entities) {
-            entity.onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
+            if (entity instanceof JdsPostSaveListener) {
+                ((JdsPostSaveListener) entity).onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
+            }
             sequence++;
         }
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param overviews
      */
-    private void saveOverviews(final JdsDb jdsDataBase, final HashSet<JdsEntityOverview> overviews) {
+    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveOverview()) : connection.prepareStatement(jdsDataBase.saveOverview())) {
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveOverview()) : connection.prepareStatement(jdsDb.saveOverview())) {
             connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
@@ -225,7 +255,7 @@ public class JdsSave implements Callable<Boolean> {
                 upsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 upsert.setLong(4, overview.getEntityCode());
                 upsert.addBatch();
-                if (jdsDataBase.printOutput())
+                if (jdsDb.printOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
             upsert.executeBatch();
@@ -250,15 +280,14 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private void saveBooleans(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
+    private void saveBooleans(final Connection connection, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveInteger()) : connection.prepareStatement(jdsDataBase.saveInteger());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
@@ -275,9 +304,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Boolean field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, value);
@@ -293,14 +322,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param integerProperties
      */
-    private void saveIntegers(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
+    private void saveIntegers(final Connection connection, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveInteger()) : connection.prepareStatement(jdsDataBase.saveInteger());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
@@ -317,9 +345,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, value);
@@ -335,14 +363,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param floatProperties
      */
-    private void saveFloats(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
+    private void saveFloats(final Connection connection, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveFloat()) : connection.prepareStatement(jdsDataBase.saveFloat());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveFloat()) : connection.prepareStatement(jdsDb.saveFloat());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
@@ -359,9 +386,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setFloat(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Float field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setFloat(3, value);
@@ -377,14 +404,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param doubleProperties
      */
-    private void saveDoubles(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
+    private void saveDoubles(final Connection connection, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveDouble()) : connection.prepareStatement(jdsDataBase.saveDouble());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveDouble()) : connection.prepareStatement(jdsDb.saveDouble());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
@@ -401,9 +427,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setDouble(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Double field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setDouble(3, value);
@@ -419,14 +445,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param longProperties
      */
-    private void saveLongs(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
+    private void saveLongs(final Connection connection, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveLong()) : connection.prepareStatement(jdsDataBase.saveLong());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveLong()) : connection.prepareStatement(jdsDb.saveLong());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
@@ -443,9 +468,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setLong(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setLong(3, value);
@@ -461,14 +486,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param stringProperties
      */
-    private void saveStrings(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
+    private void saveStrings(final Connection connection, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveString()) : connection.prepareStatement(jdsDataBase.saveString());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveString()) : connection.prepareStatement(jdsDb.saveString());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
@@ -485,9 +509,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setString(3, value);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setString(3, value);
@@ -503,15 +527,14 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private void saveDatesAndDateTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
+    private void saveDatesAndDateTimes(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveDateTime()) : connection.prepareStatement(jdsDataBase.saveDateTime());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveDateTime()) : connection.prepareStatement(jdsDb.saveDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
@@ -528,9 +551,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setTimestamp(3, Timestamp.valueOf(localDateTime));
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setTimestamp(3, Timestamp.valueOf(localDateTime));
@@ -551,9 +574,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
@@ -569,14 +592,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param localTimeProperties
      */
-    private void saveTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+    private void saveTimes(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveTime()) : connection.prepareStatement(jdsDataBase.saveTime());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveTime()) : connection.prepareStatement(jdsDb.saveTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
@@ -594,9 +616,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setInt(3, secondOfDay);
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setInt(3, secondOfDay);
@@ -612,14 +634,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param zonedDateProperties
      */
-    private void saveZonedDateTimes(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+    private void saveZonedDateTimes(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) VALUES(?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement upsert = jdsDataBase.supportsStatements() ? connection.prepareCall(jdsDataBase.saveZonedDateTime()) : connection.prepareStatement(jdsDataBase.saveZonedDateTime());
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveZonedDateTime()) : connection.prepareStatement(jdsDb.saveZonedDateTime());
              PreparedStatement log = connection.prepareStatement(logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
@@ -636,9 +657,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong(2, fieldId);
                     upsert.setLong(3, zonedDateTime.toEpochSecond());
                     upsert.addBatch();
-                    if (jdsDataBase.printOutput())
+                    if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDataBase.logEdits()) continue;
+                    if (!jdsDb.logEdits()) continue;
                     log.setString(1, entityGuid);
                     log.setLong(2, fieldId);
                     log.setLong(3, zonedDateTime.toEpochSecond());
@@ -656,15 +677,15 @@ public class JdsSave implements Callable<Boolean> {
     /**
      * Save all dates in one go
      *
+     * @param connection
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDates(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private void saveArrayDates(final Connection connection, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -678,7 +699,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (LocalDateTime value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setTimestamp(3, Timestamp.valueOf(value));
@@ -695,7 +716,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -710,16 +731,15 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayFloats(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private void saveArrayFloats(final Connection connection, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,FloatValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -733,7 +753,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Float value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setFloat(3, value);
@@ -751,7 +771,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal);
 
                     }
@@ -767,16 +787,15 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private void saveArrayIntegers(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private void saveArrayIntegers(final Connection connection, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -790,7 +809,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Integer value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setInt(3, value);
@@ -808,7 +827,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -823,16 +842,15 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDoubles(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private void saveArrayDoubles(final Connection connection, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DoubleValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -846,7 +864,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Double value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setDouble(3, value);
@@ -864,7 +882,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -879,16 +897,15 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayLongs(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private void saveArrayLongs(final Connection connection, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -902,7 +919,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Long value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setLong(3, value);
@@ -920,7 +937,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -935,16 +952,15 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayStrings(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private void saveArrayStrings(final Connection connection, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -958,7 +974,7 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (String value : it.getValue().get()) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId);
                             log.setString(3, value);
@@ -976,7 +992,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setString(4, entityGuid);
                         insert.addBatch();
                         index.set(index.get() + 1);
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -991,19 +1007,18 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param enumStrings
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveEnums(final JdsDb jdsDataBase, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
+    private void saveEnums(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleListProperty<String>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,IntegerValue,Sequence) VALUES(?,?,?,?)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement log = connection.prepareStatement(logSql);
+        try (PreparedStatement log = connection.prepareStatement(logSql);
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -1016,7 +1031,7 @@ public class JdsSave implements Callable<Boolean> {
                     ObservableList<String> textValues = fieldEnums.getValue().get();
                     if (textValues.size() == 0) continue;
                     for (String enumText : textValues) {
-                        if (jdsDataBase.logEdits()) {
+                        if (jdsDb.logEdits()) {
                             log.setString(1, entityGuid);
                             log.setLong(2, fieldId.getField().getId());
                             log.setInt(3, fieldId.getIndex(enumText));
@@ -1033,7 +1048,7 @@ public class JdsSave implements Callable<Boolean> {
                         insert.setInt(3, sequence);
                         insert.setInt(4, fieldId.getIndex(enumText));
                         insert.addBatch();
-                        if (jdsDataBase.printOutput())
+                        if (jdsDb.printOutput())
                             System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", sequence, record, recordTotal);
                         sequence++;
                     }
@@ -1049,12 +1064,12 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param objectArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private void saveArrayObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleListProperty<JdsEntity>>> objectArrayProperties) throws Exception {
+    private void saveArrayObjects(final Connection connection, final Map<String, Map<Long, SimpleListProperty<JdsEntity>>> objectArrayProperties) throws Exception {
         if (objectArrayProperties.isEmpty()) return;
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
@@ -1087,11 +1102,10 @@ public class JdsSave implements Callable<Boolean> {
             }
         }
         //save children first
-        new JdsSave(jdsDataBase, -1, jdsEntities).call();
+        new JdsSave(jdsDb, connection, -1, jdsEntities, true).call();
 
         //bind children below
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
+        try (PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
              PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
             connection.setAutoCommit(false);
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
@@ -1114,11 +1128,11 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param jdsDataBase
+     * @param connection
      * @param objectProperties
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private void bindAndSaveInnerObjects(final JdsDb jdsDataBase, final Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>> objectProperties) throws Exception {
+    private void bindAndSaveInnerObjects(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>> objectProperties) throws Exception {
         if (objectProperties.isEmpty()) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);
@@ -1150,11 +1164,10 @@ public class JdsSave implements Callable<Boolean> {
             }
         }
         //save children first
-        new JdsSave(jdsDataBase, -1, jdsEntities).call();
+        new JdsSave(jdsDb, -1, jdsEntities).call();
 
         //bind children below
-        try (Connection connection = jdsDataBase.getConnection();
-             PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
+        try (PreparedStatement clearOldBindings = connection.prepareStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = ? AND ChildEntityId = ?");
              PreparedStatement writeNewBindings = connection.prepareStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(?,?,?)")) {
             connection.setAutoCommit(false);
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {

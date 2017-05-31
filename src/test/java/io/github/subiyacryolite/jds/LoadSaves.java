@@ -4,6 +4,7 @@ import io.github.subiyacryolite.jds.common.BaseTestConfig;
 import io.github.subiyacryolite.jds.entities.JdsExample;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -15,37 +16,76 @@ import java.util.concurrent.FutureTask;
 public class LoadSaves extends BaseTestConfig {
 
     @Test
-    public void callableSqlLiteLoadSave() throws ExecutionException, InterruptedException {
+    public void callableSqlLiteBulkSave() throws Exception {
+        initialiseSqlLiteBackend();
+        bulkSave();
+    }
+
+    @Test
+    public void callableSqlLiteBulkLoad() throws ExecutionException, InterruptedException {
+        initialiseSqlLiteBackend();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteBulkLoadSave() throws Exception {
+        initialiseSqlLiteBackend();
+        bulkSave();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteLoadSave() throws Exception {
         initialiseSqlLiteBackend();
         save();
         load();
     }
 
     @Test
-    public void callableMysqlLoadSave() throws ExecutionException, InterruptedException {
+    public void callableMysqlLoadSave() throws Exception {
         initialiseMysqlBackend();
         save();
         load();
     }
 
     @Test
-    public void callablePostgeSqlLoadSave() throws ExecutionException, InterruptedException {
+    public void callablePostgeSqlLoadSave() throws Exception {
         initialisePostgeSqlBackend();
         save();
         load();
     }
 
     @Test
-    public void callableTSqlLoadSave() throws ExecutionException, InterruptedException {
+    public void callableTSqlLoadSave() throws Exception {
         initialiseTSqlBackend();
         save();
         load();
     }
 
     @Test
-    public void save() throws ExecutionException, InterruptedException {
+    public void save() throws Exception {
         List<JdsExample> collection = getCollection();
-        Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
+        Callable<Boolean> save = new JdsSave(jdsDb, collection);
+        FutureTask<Boolean> saving = new FutureTask(save);
+        saving.run();
+        while (!saving.isDone())
+            System.out.println("Waiting for operation 1 to complete");
+        System.out.printf("Saved? %s\n", saving.get());
+    }
+
+    @Test
+    public void bulkSave() throws Exception {
+        List<JdsExample> collection = new ArrayList<>();
+        for (int i = 0; i < 5000; i++) {
+            JdsExample jdsExample = new JdsExample();
+            jdsExample.setEntityGuid("guid_" + i);
+            jdsExample.setIntField(i);
+            jdsExample.setFloatField(i + 1);
+            jdsExample.setDoubleField(i + 2);
+            jdsExample.setLongField(i + 3);
+            collection.add(jdsExample);
+        }
+        Callable<Boolean> save = new JdsSave(jdsDb, collection);
         FutureTask<Boolean> saving = new FutureTask(save);
         saving.run();
         while (!saving.isDone())
@@ -89,8 +129,8 @@ public class LoadSaves extends BaseTestConfig {
         Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
         FutureTask<Boolean> deleting = new FutureTask(delete);
         deleting.run();
-        while(!deleting.isDone())
+        while (!deleting.isDone())
             System.out.println("Waiting for operation to complete");
-        System.out.println("Deleted? "+ deleting.get());
+        System.out.println("Deleted? " + deleting.get());
     }
 }

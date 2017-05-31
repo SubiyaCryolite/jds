@@ -3,12 +3,12 @@ package io.github.subiyacryolite.jds.events;
 /**
  * Created by ifunga on 13/05/2017.
  */
-public class OnPreLoadEvenArguments {
+public class OnPreLoadEventArguments {
     private final String entityGuid;
     private final int batchSequence;
     private final int batchSize;
 
-    public OnPreLoadEvenArguments(String entityGuid, int batchSequence, int batchSize) {
+    public OnPreLoadEventArguments(String entityGuid, int batchSequence, int batchSize) {
         this.entityGuid = entityGuid;
         this.batchSequence = batchSequence;
         this.batchSize = batchSize;

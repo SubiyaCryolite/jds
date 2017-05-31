@@ -2,6 +2,7 @@ package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.events.*;
 import javafx.beans.property.*;
 
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ import java.time.ZonedDateTime;
  * Created by ifunga on 12/04/2017.
  */
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class JdsExample extends JdsEntity {
+public class JdsExample extends JdsEntity implements JdsPostLoadListener, JdsPostSaveListener, JdsPreLoadListener, JdsPreSaveListener {
     private final SimpleStringProperty stringField = new SimpleStringProperty("");
     private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
     private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
@@ -146,5 +147,25 @@ public class JdsExample extends JdsEntity {
                 ", floatField = " + getFloatField() +
                 ", booleanField = " + getBooleanField() +
                 '}';
+    }
+
+    @Override
+    public void onPreSave(OnPreSaveEventArguments eventArguments) {
+        System.out.printf("Pre-Save :: Batch Sequence[%s]. Batch Size [%s]. Outer Batch Step [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize(), eventArguments.getOuterBatchStep());
+    }
+
+    @Override
+    public void onPostSave(OnPostSaveEventArguments eventArguments) {
+        System.out.printf("Post-Save :: Batch Sequence[%s]. Batch Size [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize());
+    }
+
+    @Override
+    public void onPreLoad(OnPreLoadEventArguments eventArguments) {
+        System.out.printf("Pre-Load :: Batch Sequence[%s]. Batch Size [%s]. Entity Guid [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize(), eventArguments.getEntityGuid());
+    }
+
+    @Override
+    public void onPostLoad(OnPostLoadEvent eventArguments) {
+        System.out.printf("Post-Load :: Entity Guid [%s]\n", eventArguments.getEntityGuid());
     }
 }
