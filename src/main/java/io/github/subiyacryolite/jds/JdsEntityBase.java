@@ -13,14 +13,15 @@
  */
 package io.github.subiyacryolite.jds;
 
-import java.io.*;
-
 import javafx.beans.property.*;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +61,8 @@ abstract class JdsEntityBase implements Externalizable {
     protected final HashMap<JdsFieldEnum, SimpleListProperty<String>> enumProperties = new HashMap<>();
     //objects
     protected final HashMap<Long, SimpleObjectProperty<JdsEntity>> objectProperties = new HashMap<>();
+    //blobs
+    protected final HashMap<Long, SimpleBlobProperty> blobProperties = new HashMap<>();
 
     public final JdsEntityOverview getOverview() {
         return this.overview.get();
@@ -86,6 +89,8 @@ abstract class JdsEntityBase implements Externalizable {
         objectOutputStream.writeObject(serializeBoolean(booleanProperties));
         objectOutputStream.writeObject(serializeLong(longProperties));
         objectOutputStream.writeObject(serializeInteger(integerProperties));
+        //blobs
+        objectOutputStream.writeObject(serializeBlobs(blobProperties));
         //arrays
         objectOutputStream.writeObject(serializeObjects(objectArrayProperties));
         objectOutputStream.writeObject(serializeStrings(stringArrayProperties));
@@ -94,6 +99,10 @@ abstract class JdsEntityBase implements Externalizable {
         objectOutputStream.writeObject(serializeDoubles(doubleArrayProperties));
         objectOutputStream.writeObject(serializeLongs(longArrayProperties));
         objectOutputStream.writeObject(serializeIntegers(integerArrayProperties));
+    }
+
+    private Map<Long, SimpleBlobProperty> serializeBlobs(HashMap<Long, SimpleBlobProperty> input) {
+        return  input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue()));
     }
 
     private Map<Long, List<Integer>> serializeIntegers(HashMap<Long, SimpleListProperty<Integer>> input) {
@@ -173,6 +182,8 @@ abstract class JdsEntityBase implements Externalizable {
         putBoolean(booleanProperties, (Map<Long, Boolean>) objectInputStream.readObject());
         putLong(longProperties, (Map<Long, Long>) objectInputStream.readObject());
         putInteger(integerProperties, (Map<Long, Integer>) objectInputStream.readObject());
+        //blobs
+        putBlobs(blobProperties, (Map<Long, SimpleBlobProperty>) objectInputStream.readObject());
         //arrays
         putObjects(objectArrayProperties, (Map<Long, List<JdsEntity>>) objectInputStream.readObject());
         putStrings(stringArrayProperties, (Map<Long, List<String>>) objectInputStream.readObject());
@@ -229,6 +240,12 @@ abstract class JdsEntityBase implements Externalizable {
     private void putInteger(HashMap<Long, SimpleIntegerProperty> destination, Map<Long, Integer> source) {
         source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
             destination.get(entry.getKey()).set(entry.getValue());
+        });
+    }
+
+    private void putBlobs(HashMap<Long, SimpleBlobProperty> destination, Map<Long, SimpleBlobProperty> source) {
+        source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
+            destination.get(entry.getKey()).set(entry.getValue().get());
         });
     }
 

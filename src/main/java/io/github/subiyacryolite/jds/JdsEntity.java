@@ -15,10 +15,6 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
-import io.github.subiyacryolite.jds.events.OnPostLoadEvent;
-import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
-import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments;
-import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
 
 import java.lang.annotation.Annotation;
@@ -82,6 +78,19 @@ public abstract class JdsEntity extends JdsEntityBase {
     private void setEntityName(String name) {
         this.name.set(name);
     }
+
+    protected final void map(final JdsField jdsField, final SimpleBlobProperty integerProperty) {
+        if (integerProperty == null) {
+            return;
+        }
+        if (jdsField.getType() == JdsFieldType.BLOB) {
+            properties.add(jdsField.getId());
+            blobProperties.put(jdsField.getId(), integerProperty);
+        } else {
+            throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
+        }
+    }
+
 
     protected final void map(final JdsField jdsField, final SimpleIntegerProperty integerProperty) {
         if (integerProperty == null) {

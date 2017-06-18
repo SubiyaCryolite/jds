@@ -33,7 +33,8 @@ public enum JdsFieldType {
     BOOLEAN(13),
     ZONED_DATE_TIME(14),
     DATE(15),
-    TIME(16);
+    TIME(16),
+    BLOB(17);
 
     private final int type;
 
