@@ -102,7 +102,7 @@ abstract class JdsEntityBase implements Externalizable {
     }
 
     private Map<Long, SimpleBlobProperty> serializeBlobs(HashMap<Long, SimpleBlobProperty> input) {
-        return  input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue()));
+        return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue()));
     }
 
     private Map<Long, List<Integer>> serializeIntegers(HashMap<Long, SimpleListProperty<Integer>> input) {

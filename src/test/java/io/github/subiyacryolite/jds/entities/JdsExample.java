@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
+import static io.github.subiyacryolite.jds.entities.JdsExampleFields.*;
+
 /**
  * Created by ifunga on 12/04/2017.
  */
@@ -25,18 +27,20 @@ public class JdsExample extends JdsEntity implements JdsPostLoadListener, JdsPos
     private final SimpleDoubleProperty doubleField = new SimpleDoubleProperty(0);
     private final SimpleFloatProperty floatField = new SimpleFloatProperty(0);
     private final SimpleBooleanProperty booleanField = new SimpleBooleanProperty(false);
+    private final SimpleBlobProperty blobField = new SimpleBlobProperty(new byte[0]);
 
     public JdsExample() {
-        map(JdsExampleFields.STRING_FIELD, stringField);
-        map(JdsExampleFields.DATE_FIELD, dateField);
-        map(JdsExampleFields.TIME_FIELD, timeField);
-        map(JdsExampleFields.DATE_TIME_FIELD, dateTimeField);
-        map(JdsExampleFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
-        map(JdsExampleFields.LONG_FIELD, longField);
-        map(JdsExampleFields.INT_FIELD, intField);
-        map(JdsExampleFields.DOUBLE_FIELD, doubleField);
-        map(JdsExampleFields.FLOAT_FIELD, floatField);
-        map(JdsExampleFields.BOOLEAN_FIELD, booleanField);
+        map(STRING_FIELD, stringField);
+        map(DATE_FIELD, dateField);
+        map(TIME_FIELD, timeField);
+        map(DATE_TIME_FIELD, dateTimeField);
+        map(ZONED_DATE_TIME_FIELD, zonedDateTimeField);
+        map(LONG_FIELD, longField);
+        map(INT_FIELD, intField);
+        map(DOUBLE_FIELD, doubleField);
+        map(FLOAT_FIELD, floatField);
+        map(BOOLEAN_FIELD, booleanField);
+        map(BLOB_FIELD, blobField);
     }
 
     public JdsExample(String str, LocalTime timeField, LocalDate localDate, LocalDateTime localDateTime, ZonedDateTime zonedDateTime, long l, int i, double d, float f, boolean b) {

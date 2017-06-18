@@ -17,4 +17,5 @@ public class JdsExampleFields {
     public static final JdsField DOUBLE_FIELD = new JdsField(1006, "DOUBLE_FIELD", JdsFieldType.DOUBLE);
     public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
     public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
+    public static final JdsField BLOB_FIELD = new JdsField(1008, "BLOB_FIELD", JdsFieldType.BLOB);
 }

@@ -8,6 +8,18 @@ import java.io.*;
 public class SimpleBlobProperty implements Serializable {
     private byte[] bytes;
 
+    public SimpleBlobProperty()
+    {}
+
+    public SimpleBlobProperty(byte[] value)
+    {
+        set(value);
+    }
+
+    public SimpleBlobProperty(InputStream value) throws IOException {
+        set(value);
+    }
+
     public final byte[] get() {
         return bytes;
     }

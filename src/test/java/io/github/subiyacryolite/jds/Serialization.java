@@ -1,10 +1,11 @@
 package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import org.junit.Assert;
+import javafx.beans.property.SimpleBlobProperty;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,10 +17,20 @@ public class Serialization extends BaseTestConfig {
     public void testSerialization() {
         List<JdsEntity> entities = new ArrayList<>();
         entities.add(getSimpleAddressBook());
-        for (JdsEntity ent : entities) {
-            String fName = ent.getClass().getCanonicalName();
-            serialize(ent, fName);
-            deserialize(fName, ent.getClass());
+        for (JdsEntity jdsEntity : entities) {
+            String canonicalName = jdsEntity.getClass().getCanonicalName();
+            serialize(jdsEntity, canonicalName);
+            deserialize(canonicalName, jdsEntity.getClass());
         }
+    }
+
+    @Test
+    public void testBlobSerialization() {
+        SimpleBlobProperty in = new SimpleBlobProperty(new byte[]{1, 0, 1, 1, 1, 1, 0});
+        String canonicalName = in.getClass().getCanonicalName();
+        serialize(in, canonicalName);
+        SimpleBlobProperty out = deserialize(canonicalName, in.getClass());
+        System.out.printf("pre %s\n",Arrays.toString(in.get()));
+        System.out.printf("post %s\n",Arrays.toString(out.get()));
     }
 }
