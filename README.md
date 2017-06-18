@@ -29,8 +29,6 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 - Underlying database implemented using the Star Schema
 - Save, Updates and Deletes cascade to child objects and collections
 - Eager Loading is applied to embedded objects as well as on collections
-## Planned Features (as of 7th Apr 2017)
-- [Lazy Loading will be made default in future releases](https://github.com/SubiyaCryolite/Jenesis-Data-Store/issues/4)
 
 # Maven Central
 You can search on The Central Repository with GroupId and ArtifactId Maven Search for [![Maven Search](https://img.shields.io/badge/io.github.subiyacryolite-jds-blue.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
