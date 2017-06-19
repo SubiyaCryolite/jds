@@ -21,6 +21,7 @@ final class JdsSaveContainer {
     public final List<Map<String, Map<Long, SimpleDoubleProperty>>> doubles = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleLongProperty>>> longs = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleIntegerProperty>>> integers = new ArrayList<>();
+    public final List<Map<String, Map<Long, SimpleBlobProperty>>> blobs = new ArrayList<>();
     //arrays
     public final List<Map<String, Map<Long, SimpleListProperty<JdsEntity>>>> objectArrays = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleListProperty<String>>>> stringArrays = new ArrayList<>();

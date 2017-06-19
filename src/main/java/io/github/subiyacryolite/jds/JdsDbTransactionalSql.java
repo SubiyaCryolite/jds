@@ -202,6 +202,7 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
 
     @Override
     protected void prepareCustomDatabaseComponents() {
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveBlob);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveLong);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveInteger);
@@ -221,6 +222,9 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
+            case SaveBlob:
+                executeSqlFromFile("sql/tsql/procedures/procStoreBlob.sql");
+                break;
             case SaveTime:
                 executeSqlFromFile("sql/tsql/procedures/procStoreTime.sql");
                 break;

@@ -26,7 +26,11 @@ public class Serialization extends BaseTestConfig {
 
     @Test
     public void testBlobSerialization() {
-        SimpleBlobProperty in = new SimpleBlobProperty(new byte[]{1, 0, 1, 1, 1, 1, 0});
+        SimpleBlobProperty in = new SimpleBlobProperty(new byte[]{(byte)0xC9, (byte)0xCB, (byte)0xBB,
+                (byte)0xCC, (byte)0xCE, (byte)0xB9,
+                (byte)0xC8, (byte)0xCA, (byte)0xBC,
+                (byte)0xCC, (byte)0xCE, (byte)0xB9,
+                (byte)0xC9, (byte)0xCB, (byte)0xBB});
         String canonicalName = in.getClass().getCanonicalName();
         serialize(in, canonicalName);
         SimpleBlobProperty out = deserialize(canonicalName, in.getClass());

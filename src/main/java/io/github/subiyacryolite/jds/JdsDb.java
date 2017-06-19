@@ -661,6 +661,15 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     /**
+     * SQL call to save blob values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    public String saveBlob() {
+        return "{call procStoreBlob(?,?,?)}";
+    }
+
+    /**
      * SQL call to save float values
      *
      * @return the default or overridden SQL statement for this operation

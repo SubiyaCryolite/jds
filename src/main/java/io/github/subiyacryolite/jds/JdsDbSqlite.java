@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 /**
  * The SQLite implementation of {@link JdsDb JdsDataBase}
  */
-public abstract class JdsDbSqlite extends JdsDb{
+public abstract class JdsDbSqlite extends JdsDb {
 
     protected JdsDbSqlite() {
         implementation = JdsImplementation.SQLITE;
@@ -159,7 +159,7 @@ public abstract class JdsDbSqlite extends JdsDb{
         executeSqlFromFile("sql/sqlite/createStoreTime.sql");
     }
 
-    protected void  createStoreBlob() {
+    protected void createStoreBlob() {
         executeSqlFromFile("sql/sqlite/createStoreBlob.sql");
     }
 
@@ -197,6 +197,11 @@ public abstract class JdsDbSqlite extends JdsDb{
     @Override
     public String saveTime() {
         return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+    }
+
+    @Override
+    public String saveBlob() {
+        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(?,?,?);";
     }
 
     @Override

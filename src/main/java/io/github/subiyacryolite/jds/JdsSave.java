@@ -184,6 +184,8 @@ public class JdsSave implements Callable<Boolean> {
             saveContainer.doubles.get(step).put(entity.getEntityGuid(), entity.doubleProperties);
             saveContainer.longs.get(step).put(entity.getEntityGuid(), entity.longProperties);
             saveContainer.integers.get(step).put(entity.getEntityGuid(), entity.integerProperties);
+            //assign blobs
+            saveContainer.blobs.get(step).put(entity.getEntityGuid(), entity.blobProperties);
             //assign lists
             saveContainer.stringArrays.get(step).put(entity.getEntityGuid(), entity.stringArrayProperties);
             saveContainer.dateTimeArrays.get(step).put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
@@ -211,6 +213,8 @@ public class JdsSave implements Callable<Boolean> {
             saveDoubles(connection, saveContainer.doubles.get(step));
             saveIntegers(connection, saveContainer.integers.get(step));
             saveFloats(connection, saveContainer.floats.get(step));
+            //blobs
+            saveBlobs(connection, saveContainer.blobs.get(step));
             //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
             saveArrayDates(connection, saveContainer.dateTimeArrays.get(step));
             saveArrayStrings(connection, saveContainer.stringArrays.get(step));
@@ -352,6 +356,41 @@ public class JdsSave implements Callable<Boolean> {
                     log.setLong(2, fieldId);
                     log.setInt(3, value);
                     log.addBatch();
+                }
+            }
+            upsert.executeBatch();
+            log.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * @param connection
+     * @param blobProperties
+     */
+    private void saveBlobs(final Connection connection, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
+        int record = 0;
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveFloat()) : connection.prepareStatement(jdsDb.saveFloat());
+             PreparedStatement log = connection.prepareStatement("INSERT INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(?,?,?)")) {
+            connection.setAutoCommit(false);
+            for (Map.Entry<String, Map<Long, SimpleBlobProperty>> entry : blobProperties.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<Long, SimpleBlobProperty> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    long fieldId = recordEntry.getKey();
+                    byte[] value = recordEntry.getValue().get();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, fieldId);
+                    upsert.setBytes(3, value);
+                    upsert.addBatch();
+                    if (jdsDb.printOutput())
+                        System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize);
                 }
             }
             upsert.executeBatch();

@@ -21,6 +21,7 @@ import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
@@ -96,6 +97,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
         String sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlZonedDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        //blobs
+        String sqlBlobs = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreBlob WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         //array
         String sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlIntegerArrayAndEnumValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
@@ -107,6 +110,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
         //overviews
         String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         try (Connection connection = jdsDb.getConnection();
+             PreparedStatement blobs = connection.prepareStatement(sqlBlobs);
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);
              PreparedStatement longs = connection.prepareStatement(sqlLongValues);
              PreparedStatement integers = connection.prepareStatement(sqlIntegerValues);
@@ -143,6 +147,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 setParameterForStatement(batchSequence, entityGuid, dateTimes);
                 setParameterForStatement(batchSequence, entityGuid, times);
                 setParameterForStatement(batchSequence, entityGuid, zonedDateTimes);
+                //blobs
+                setParameterForStatement(batchSequence, entityGuid, blobs);
                 //array
                 setParameterForStatement(batchSequence, entityGuid, textArrays);
                 setParameterForStatement(batchSequence, entityGuid, longArrays);
@@ -163,6 +169,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateIntegerAndBoolean(entities, integers);
                 populateFloat(entities, floats);
                 populateDouble(entities, doubles);
+                //blobs
+                populateBlobs(entities, blobs);
                 //integer arrays and enums
                 populateIntegerArraysAndEnums(entities, integerArraysAndEnums);
                 populateFloatArrays(entities, floatArrays);
@@ -446,6 +454,28 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.doubleProperties.containsKey(fieldId)).forEach(entity -> {
                     entity.doubleProperties.get(fieldId).set(value);
+                });
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    private <T extends JdsEntity> void populateBlobs(final Collection<T> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            while (resultSet.next()) {
+                String entityGuid = resultSet.getString("EntityGuid");
+                Blob value = resultSet.getBlob("Value");
+                long fieldId = resultSet.getLong("FieldId");
+                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.blobProperties.containsKey(fieldId)).forEach(entity -> {
+                    try {
+                        entity.blobProperties.get(fieldId).set(value.getBinaryStream());
+                    } catch (IOException | SQLException e) {
+                        e.printStackTrace(System.err);
+                    }
                 });
             }
         }

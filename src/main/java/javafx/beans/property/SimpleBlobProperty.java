@@ -31,7 +31,7 @@ public class SimpleBlobProperty implements Serializable {
     public final void set(final InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1024];
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            int line = 0;
+            int line;
             while ((line = inputStream.read(buffer)) != -1) {
                 os.write(buffer, 0, line);
             }
