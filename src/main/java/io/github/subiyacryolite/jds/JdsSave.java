@@ -140,6 +140,8 @@ public class JdsSave implements Callable<Boolean> {
         saveContainer.doubles.add(new HashMap<>());
         saveContainer.longs.add(new HashMap<>());
         saveContainer.integers.add(new HashMap<>());
+        //blob
+        saveContainer.blobs.add(new HashMap<>());
         //arrays
         saveContainer.stringArrays.add(new HashMap<>());
         saveContainer.dateTimeArrays.add(new HashMap<>());
