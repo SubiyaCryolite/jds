@@ -16,5 +16,5 @@ CREATE TABLE JdsStoreBlob(
 	EntityGuid      NVARCHAR(48) NOT NULL,
 	Value           VARBINARY(MAX),
 	PRIMARY KEY (FieldId,EntityGuid),
-	CONSTRAINT fk_JdsStoreFloat_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+	CONSTRAINT fk_JdsStoreBlob_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
 );
