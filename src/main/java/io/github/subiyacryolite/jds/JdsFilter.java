@@ -169,6 +169,8 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         switch (jdsFieldType) {
             case TEXT:
                 return StoreText.getName();
+            case BLOB:
+                return StoreBlob.getName();
             case INT:
                 return StoreInteger.getName();
             case DOUBLE:
@@ -205,6 +207,8 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         switch (jdsFieldType) {
             case TEXT:
                 return StoreText.getPrefix();
+            case BLOB:
+                return StoreBlob.getPrefix();
             case INT:
                 return StoreInteger.getPrefix();
             case DOUBLE:

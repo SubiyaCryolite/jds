@@ -34,9 +34,11 @@ public abstract class JdsDbMySql extends JdsDb {
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(table_schema) AS Result FROM information_schema.tables WHERE table_name = ?";
+        String sql = "SELECT COUNT(table_schema) AS Result FROM information_schema.tables WHERE table_name = ? AND table_schema = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            String db = connection.getCatalog();
             preparedStatement.setString(1, tableName);
+            preparedStatement.setString(2, db);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -176,6 +178,10 @@ public abstract class JdsDbMySql extends JdsDb {
 
     protected void createStoreTime() {
         executeSqlFromFile("sql/mysql/createStoreTime.sql");
+    }
+
+    protected void createStoreBlob() {
+        executeSqlFromFile("sql/mysql/createStoreBlob.sql");
     }
 
     @Override

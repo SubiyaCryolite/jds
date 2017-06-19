@@ -30,7 +30,7 @@ import java.util.Set;
  * write statements, as well as the initialization of core and custom components
  * that will support JDS on the underlying Database implementation
  */
-public abstract class JdsDb  implements JdsDbContract{
+public abstract class JdsDb implements JdsDbContract {
 
     /**
      * A value indicating whether the underlying database implementation
@@ -75,6 +75,7 @@ public abstract class JdsDb  implements JdsDbContract{
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDoubleArray);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDateTimeArray);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreText);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreBlob);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreFloat);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreInteger);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreLong);
@@ -101,8 +102,8 @@ public abstract class JdsDb  implements JdsDbContract{
      * underlying JDS Database implementation
      *
      * @param databaseComponent the type of database component to create
-     * @param jdsComponent an enum that maps to the components concrete
-     * implementation details
+     * @param jdsComponent      an enum that maps to the components concrete
+     *                          implementation details
      */
     protected final void prepareDatabaseComponent(JdsComponentType databaseComponent, JdsComponent jdsComponent) {
         switch (databaseComponent) {
@@ -128,7 +129,7 @@ public abstract class JdsDb  implements JdsDbContract{
      * Initialises core JDS Database components
      *
      * @param jdsComponent an enum that maps to the components concrete
-     * implementation details
+     *                     implementation details
      */
     private final void initiateDatabaseComponent(JdsComponent jdsComponent) {
         switch (jdsComponent) {
@@ -149,6 +150,8 @@ public abstract class JdsDb  implements JdsDbContract{
                 break;
             case StoreDateTimeArray:
                 createStoreDateTimeArray();
+            case StoreBlob:
+                createStoreBlob();
                 break;
             case StoreText:
                 createStoreText();
@@ -209,7 +212,7 @@ public abstract class JdsDb  implements JdsDbContract{
      * Initialises custom JDS Database components
      *
      * @param jdsComponent an enum that maps to the components concrete
-     * implementation details
+     *                     implementation details
      */
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
     }
@@ -350,6 +353,12 @@ public abstract class JdsDb  implements JdsDbContract{
     abstract void createStoreText();
 
     /**
+     * Database specific SQL used to create the schema that stores blob
+     * values
+     */
+    abstract void createStoreBlob();
+
+    /**
      * Database specific SQL used to create the schema that stores datetime
      * values
      */
@@ -485,7 +494,7 @@ public abstract class JdsDb  implements JdsDbContract{
      */
     public final synchronized void mapClassFields(final long entityId, final Set<Long> fieldIds) {
         try (Connection connection = getConnection();
-                PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields())) {
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields())) {
             connection.setAutoCommit(false);
             for (Long fieldId : fieldIds) {
                 statement.setLong(1, entityId);
@@ -504,7 +513,7 @@ public abstract class JdsDb  implements JdsDbContract{
      * Binds all the enums attached to an entity
      *
      * @param entityId the value representing the entity
-     * @param fields the entity's enums
+     * @param fields   the entity's enums
      */
     public final synchronized void mapClassEnums(final long entityId, final Set<JdsFieldEnum> fields) {
         mapEnumValues(fields);
@@ -516,11 +525,11 @@ public abstract class JdsDb  implements JdsDbContract{
      * Binds all the enums attached to an entity
      *
      * @param entityId the value representing the entity
-     * @param fields the entity's enums
+     * @param fields   the entity's enums
      */
     private final synchronized void mapClassEnumsImplementation(final long entityId, final Set<JdsFieldEnum> fields) {
         try (Connection connection = getConnection();
-                PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassEnumsImplementation()) : connection.prepareStatement(mapClassEnumsImplementation())) {
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassEnumsImplementation()) : connection.prepareStatement(mapClassEnumsImplementation())) {
             connection.setAutoCommit(false);
             for (JdsFieldEnum field : fields) {
                 for (int index = 0; index < field.getSequenceValues().size(); index++) {
@@ -562,12 +571,12 @@ public abstract class JdsDb  implements JdsDbContract{
     /**
      * Maps an entity's name to its id
      *
-     * @param entityId the entity's id
+     * @param entityId   the entity's id
      * @param entityName the entity's name
      */
     public final synchronized void mapClassName(final long entityId, final String entityName) {
         try (Connection connection = getConnection();
-                PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassName()) : connection.prepareStatement(mapClassName())) {
+             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassName()) : connection.prepareStatement(mapClassName())) {
             statement.setLong(1, entityId);
             statement.setString(2, entityName);
             statement.executeUpdate();

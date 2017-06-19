@@ -196,6 +196,9 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         executeSqlFromFile("sql/tsql/createStoreTime.sql");
     }
 
+    protected void createStoreBlob() {
+        executeSqlFromFile("sql/tsql/createStoreBlob.sql");
+    }
 
     @Override
     protected void prepareCustomDatabaseComponents() {

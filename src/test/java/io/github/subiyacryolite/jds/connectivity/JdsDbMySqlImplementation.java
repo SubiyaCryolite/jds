@@ -20,6 +20,6 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?autoReconnect=true&useSSL=false", "root", "p@nkP#55W0rd");
     }
 }

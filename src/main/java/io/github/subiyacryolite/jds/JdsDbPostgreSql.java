@@ -178,6 +178,10 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         executeSqlFromFile("sql/postgresql/createStoreTime.sql");
     }
 
+    protected void  createStoreBlob() {
+        executeSqlFromFile("sql/postgresql/createStoreBlob.sql");
+    }
+
     @Override
     protected void prepareCustomDatabaseComponents() {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);

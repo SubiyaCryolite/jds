@@ -159,6 +159,10 @@ public abstract class JdsDbSqlite extends JdsDb{
         executeSqlFromFile("sql/sqlite/createStoreTime.sql");
     }
 
+    protected void  createStoreBlob() {
+        executeSqlFromFile("sql/sqlite/createStoreBlob.sql");
+    }
+
 
     @Override
     public String saveString() {

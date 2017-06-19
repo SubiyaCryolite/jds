@@ -23,7 +23,7 @@ public class LoadSaves extends BaseTestConfig {
 
     @Test
     public void callableSqlLiteBulkLoad() throws ExecutionException, InterruptedException {
-        initialiseSqlLiteBackend();
+        initialiseMysqlBackend();
         load();
     }
 

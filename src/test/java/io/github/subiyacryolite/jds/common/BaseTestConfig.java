@@ -55,28 +55,28 @@ public abstract class BaseTestConfig {
     public void initialiseSqlLiteBackend() {
         jdsDb = new JdsDbSqliteImplementation();
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.logEdits(false);
     }
 
     @Test
     public void initialisePostgeSqlBackend() {
         jdsDb = new JdsDbPostgreSqlmplementation();
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.logEdits(false);
     }
 
     @Test
     public void initialiseTSqlBackend() {
         jdsDb = new JdsDbTransactionalSqllmplementation();
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.logEdits(false);
     }
 
     @Test
     public void initialiseMysqlBackend() {
         jdsDb = new JdsDbMySqlImplementation();
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.logEdits(false);
     }
 
     protected <T> void serialize(final T objectToSerialize, final String fileName) {
