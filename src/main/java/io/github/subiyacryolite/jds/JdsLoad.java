@@ -169,8 +169,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateIntegerAndBoolean(entities, integers);
                 populateFloat(entities, floats);
                 populateDouble(entities, doubles);
-                //blobs
-                populateBlobs(entities, blobs);
                 //integer arrays and enums
                 populateIntegerArraysAndEnums(entities, integerArraysAndEnums);
                 populateFloatArrays(entities, floatArrays);
@@ -186,6 +184,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateDateTimeArrays(entities, dateTimeArrays);
             }
             if (initialiseObjects) {
+                //blobs
+                populateBlobs(entities, blobs);
                 populateObjectEntriesAndObjectArrays(jdsDb, entities, embeddedAndArrayObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects);
             }
             populateOverviews(entities, overviews);
