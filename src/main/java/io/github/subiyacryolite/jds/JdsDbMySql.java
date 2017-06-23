@@ -36,9 +36,8 @@ public abstract class JdsDbMySql extends JdsDb {
         int toReturn = 0;
         String sql = "SELECT COUNT(table_schema) AS Result FROM information_schema.tables WHERE table_name = ? AND table_schema = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            String db = connection.getCatalog();
             preparedStatement.setString(1, tableName);
-            preparedStatement.setString(2, db);
+            preparedStatement.setString(2, connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -52,9 +51,10 @@ public abstract class JdsDbMySql extends JdsDb {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ?";
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ? AND table_schema = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName);
+            preparedStatement.setString(2, connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
