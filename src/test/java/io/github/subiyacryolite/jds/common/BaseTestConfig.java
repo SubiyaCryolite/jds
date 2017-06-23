@@ -20,7 +20,7 @@ import java.util.List;
 import static io.github.subiyacryolite.jds.entities.SimpleAddressEnums.PRIMARY_ADDRESS_ENUM;
 
 /**
- * Created by ifung on 08/04/2017.
+ * Created by ifunga on 08/04/2017.
  */
 public abstract class BaseTestConfig {
 

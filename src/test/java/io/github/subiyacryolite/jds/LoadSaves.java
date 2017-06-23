@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 /**
- * Created by ifung on 12/04/2017.
+ * Created by ifunga on 12/04/2017.
  */
 public class LoadSaves extends BaseTestConfig {
 

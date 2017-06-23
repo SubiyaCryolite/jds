@@ -4,7 +4,7 @@ import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
 /**
- * Created by ifung on 18/02/2017.
+ * Created by ifunga on 18/02/2017.
  */
 public class SimpleAddressFields {
     public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);

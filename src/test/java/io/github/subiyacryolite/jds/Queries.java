@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 /**
- * Created by ifung on 05/03/2017.
+ * Created by ifunga on 05/03/2017.
  */
 public class Queries extends BaseTestConfig {
 
