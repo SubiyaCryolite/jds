@@ -13,8 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -71,6 +71,23 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, triggerName);
             preparedStatement.setString(2, "TR");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
+        return toReturn;
+    }
+
+    public int viewExists(String viewName) {
+        int toReturn = 0;
+        String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, viewName);
+            preparedStatement.setString(2, "V");
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -217,11 +234,19 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
         prepareDatabaseComponent(JdsComponentType.TRIGGER, JdsComponent.CascadeEntityBinding);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
     }
 
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
+            case MapFieldNames:
+                executeSqlFromFile("sql/tsql/procedures/procBindFieldNames.sql");
+                break;
+            case MapFieldTypes:
+                executeSqlFromFile("sql/tsql/procedures/procBindFieldTypes.sql");
+                break;
             case SaveBlob:
                 executeSqlFromFile("sql/tsql/procedures/procStoreBlob.sql");
                 break;
@@ -268,5 +293,14 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
                 executeSqlFromFile("sql/tsql/triggers/createEntityBindingCascade.sql");
                 break;
         }
+    }
+
+    public String createOrAlterView(String viewName, String viewSql) {
+        StringBuilder sb = new StringBuilder("CREATE VIEW\t");
+        sb.append(viewName);
+        sb.append("\tAS\t");
+        sb.append(viewSql);
+        String toExecute = sb.toString();
+        return toExecute;
     }
 }

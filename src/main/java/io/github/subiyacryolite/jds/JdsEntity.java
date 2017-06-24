@@ -84,7 +84,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.BLOB) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             blobProperties.put(jdsField.getId(), integerProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -97,7 +98,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.INT) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             integerProperties.put(jdsField.getId(), integerProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -111,28 +113,32 @@ public abstract class JdsEntity extends JdsEntityBase {
         Object temporal = temporalProperty.get();
         if (temporal instanceof LocalDateTime) {
             if (jdsField.getType() == JdsFieldType.DATE_TIME) {
-                properties.add(jdsField.getId());
+                properties.put(jdsField.getId(), jdsField.getName());
+                types.put(jdsField.getId(), jdsField.getType().toString());
                 localDateTimeProperties.put(jdsField.getId(), temporalProperty);
             } else {
                 throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
             }
         } else if (temporal instanceof ZonedDateTime) {
             if (jdsField.getType() == JdsFieldType.ZONED_DATE_TIME) {
-                properties.add(jdsField.getId());
+                properties.put(jdsField.getId(), jdsField.getName());
+                types.put(jdsField.getId(), jdsField.getType().toString());
                 zonedDateTimeProperties.put(jdsField.getId(), temporalProperty);
             } else {
                 throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
             }
         } else if (temporal instanceof LocalDate) {
             if (jdsField.getType() == JdsFieldType.DATE) {
-                properties.add(jdsField.getId());
+                properties.put(jdsField.getId(), jdsField.getName());
+                types.put(jdsField.getId(), jdsField.getType().toString());
                 localDateProperties.put(jdsField.getId(), temporalProperty);
             } else {
                 throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
             }
         } else if (temporal instanceof LocalTime) {
             if (jdsField.getType() == JdsFieldType.TIME) {
-                properties.add(jdsField.getId());
+                properties.put(jdsField.getId(), jdsField.getName());
+                types.put(jdsField.getId(), jdsField.getType().toString());
                 localTimeProperties.put(jdsField.getId(), temporalProperty);
             } else {
                 throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -145,7 +151,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.TEXT) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             stringProperties.put(jdsField.getId(), stringProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -157,7 +164,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.FLOAT) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             floatProperties.put(jdsField.getId(), floatProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -169,7 +177,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.LONG) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             longProperties.put(jdsField.getId(), longProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -181,7 +190,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.DOUBLE) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             doubleProperties.put(jdsField.getId(), doubleProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -193,7 +203,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.BOOLEAN) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             booleanProperties.put(jdsField.getId(), booleanProperty);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -205,7 +216,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.ARRAY_TEXT) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             stringArrayProperties.put(jdsField.getId(), strings);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -217,7 +229,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.ARRAY_FLOAT) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             floatArrayProperties.put(jdsField.getId(), floats);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -229,7 +242,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.ARRAY_DOUBLE) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             doubleArrayProperties.put(jdsField.getId(), doubles);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -241,7 +255,8 @@ public abstract class JdsEntity extends JdsEntityBase {
             return;
         }
         if (jdsField.getType() == JdsFieldType.ARRAY_LONG) {
-            properties.add(jdsField.getId());
+            properties.put(jdsField.getId(), jdsField.getName());
+            types.put(jdsField.getId(), jdsField.getType().toString());
             longArrayProperties.put(jdsField.getId(), longs);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents jdsField [" + jdsField + "] to the correct type");
@@ -254,7 +269,8 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
         allEnums.add(jdsFieldEnum);
         if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_TEXT) {
-            properties.add(jdsFieldEnum.getField().getId());
+            properties.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getName());
+            types.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getType().toString());
             enumProperties.put(jdsFieldEnum, strings);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents field [" + jdsFieldEnum + "] to the correct type");

@@ -219,6 +219,14 @@ public abstract class JdsDbSqlite extends JdsDb {
         return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId,FieldId) VALUES(?,?);";
     }
 
+    public String mapFieldNames() {
+        return "INSERT OR REPLACE INTO JdsRefFields(FieldId,FieldName) VALUES(?,?);";
+    }
+
+    public String mapFieldTypes() {
+        return "INSERT OR REPLACE INTO JdsRefFieldTypes(TypeId,TypeName) VALUES(?,?);";
+    }
+
     @Override
     public String mapClassEnumsImplementation() {
         return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId,FieldId) VALUES(?,?);";
@@ -232,5 +240,9 @@ public abstract class JdsDbSqlite extends JdsDb {
     @Override
     public String mapEnumValues() {
         return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId,EnumSeq,EnumValue) VALUES(?,?,?);";
+    }
+
+    public String createOrAlterView(String viewName, String viewSql) {
+        return "";
     }
 }

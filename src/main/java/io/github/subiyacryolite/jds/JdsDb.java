@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
@@ -20,9 +21,12 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,6 +35,8 @@ import java.util.Set;
  * that will support JDS on the underlying Database implementation
  */
 public abstract class JdsDb implements JdsDbContract {
+
+    private final HashMap<Long, Class> classes = new HashMap<>();
 
     /**
      * A value indicating whether the underlying database implementation
@@ -487,23 +493,48 @@ public abstract class JdsDb implements JdsDbContract {
     abstract void createStoreEntityBinding();
 
     /**
-     * Binds all the fields attached to an entity
+     * Binds all the fields attached to an entity, updates the fields dictionary
      *
-     * @param entityId the value representing the entity
-     * @param fieldIds the values representing the entity's fields
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     * @param fields     the values representing the entity's fields
      */
-    public final synchronized void mapClassFields(final long entityId, final Set<Long> fieldIds) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields())) {
-            connection.setAutoCommit(false);
-            for (Long fieldId : fieldIds) {
-                statement.setLong(1, entityId);
-                statement.setLong(2, fieldId);
-                statement.addBatch();
+    public final synchronized void mapClassFields(final Connection connection, final long entityId, final Map<Long, String> fields) {
+        try (PreparedStatement mapClassFields = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields());
+             PreparedStatement mapFieldNames = supportsStatements() ? connection.prepareCall(mapFieldNames()) : connection.prepareStatement(mapFieldNames())) {
+            for (Map.Entry<Long, String> field : fields.entrySet()) {
+                //1. map this field ID to the entity type
+                mapClassFields.setLong(1, entityId);
+                mapClassFields.setLong(2, field.getKey());
+                mapClassFields.addBatch();
+
+                //2. map this field to the field dictionary
+                mapFieldNames.setLong(1, field.getKey());
+                mapFieldNames.setString(2, field.getValue());
+                mapFieldNames.addBatch();
             }
-            statement.executeBatch();
-            connection.commit();
-            System.out.printf("Mapped Fields for Entity[%s]\n", entityId);
+            mapClassFields.executeBatch();
+            mapFieldNames.executeBatch();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * Binds all the field types and updates reference tables
+     *
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     * @param fieldTypes the values representing the entity's field types
+     */
+    public final synchronized void mapClassFieldTypes(final Connection connection, final long entityId, final Map<Long, String> fieldTypes) {
+        try (PreparedStatement mapFieldTypes = supportsStatements() ? connection.prepareCall(mapFieldTypes()) : connection.prepareStatement(mapFieldTypes())) {
+            for (Map.Entry<Long, String> fieldType : fieldTypes.entrySet()) {
+                mapFieldTypes.setLong(1, fieldType.getKey());
+                mapFieldTypes.setString(2, fieldType.getValue());
+                mapFieldTypes.addBatch();
+            }
+            mapFieldTypes.executeBatch();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -515,22 +546,21 @@ public abstract class JdsDb implements JdsDbContract {
      * @param entityId the value representing the entity
      * @param fields   the entity's enums
      */
-    public final synchronized void mapClassEnums(final long entityId, final Set<JdsFieldEnum> fields) {
-        mapEnumValues(fields);
-        mapClassEnumsImplementation(entityId, fields);
+    public final synchronized void mapClassEnums(final Connection connection, final long entityId, final Set<JdsFieldEnum> fields) {
+        mapEnumValues(connection, fields);
+        mapClassEnumsImplementation(connection, entityId, fields);
         System.out.printf("Mapped Enums for Entity[%s]\n", entityId);
     }
 
     /**
      * Binds all the enums attached to an entity
      *
-     * @param entityId the value representing the entity
-     * @param fields   the entity's enums
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     * @param fields     the entity's enums
      */
-    private final synchronized void mapClassEnumsImplementation(final long entityId, final Set<JdsFieldEnum> fields) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassEnumsImplementation()) : connection.prepareStatement(mapClassEnumsImplementation())) {
-            connection.setAutoCommit(false);
+    private final synchronized void mapClassEnumsImplementation(final Connection connection, final long entityId, final Set<JdsFieldEnum> fields) {
+        try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassEnumsImplementation()) : connection.prepareStatement(mapClassEnumsImplementation())) {
             for (JdsFieldEnum field : fields) {
                 for (int index = 0; index < field.getSequenceValues().size(); index++) {
                     statement.setLong(1, entityId);
@@ -539,7 +569,6 @@ public abstract class JdsDb implements JdsDbContract {
                 }
             }
             statement.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -548,11 +577,11 @@ public abstract class JdsDb implements JdsDbContract {
     /**
      * Binds all the values attached to an enum
      *
+     * @param connection the SQL connection to use for DB operations
      * @param fieldEnums the field enum
      */
-    private final synchronized void mapEnumValues(final Set<JdsFieldEnum> fieldEnums) {
-        try (Connection connection = getConnection(); PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEnumValues()) : connection.prepareStatement(mapEnumValues())) {
-            connection.setAutoCommit(false);
+    private final synchronized void mapEnumValues(final Connection connection, final Set<JdsFieldEnum> fieldEnums) {
+        try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEnumValues()) : connection.prepareStatement(mapEnumValues())) {
             for (JdsFieldEnum field : fieldEnums) {
                 for (int index = 0; index < field.getSequenceValues().size(); index++) {
                     statement.setLong(1, field.getField().getId());
@@ -562,7 +591,6 @@ public abstract class JdsDb implements JdsDbContract {
                 }
             }
             statement.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -571,19 +599,52 @@ public abstract class JdsDb implements JdsDbContract {
     /**
      * Maps an entity's name to its id
      *
+     * @param connection the SQL connection to use for DB operations
      * @param entityId   the entity's id
      * @param entityName the entity's name
      */
-    public final synchronized void mapClassName(final long entityId, final String entityName) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassName()) : connection.prepareStatement(mapClassName())) {
+    public final synchronized void mapClassName(final Connection connection, final long entityId, final String entityName) {
+        try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassName()) : connection.prepareStatement(mapClassName())) {
             statement.setLong(1, entityId);
             statement.setString(2, entityName);
             statement.executeUpdate();
-            System.out.printf("Mapped Entity [%S - %s]\n", entityName, entityId);
+            if (printOutput)
+                System.out.printf("Mapped Entity [%S - %s]\n", entityName, entityId);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
+    }
+
+    public synchronized void map(Class<? extends JdsEntity> entity) {
+        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
+            Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
+            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
+            if (!classes.containsKey(entityAnnotation.entityId())) {
+                classes.put(entityAnnotation.entityId(), entity);
+                //do the thing
+                try (Connection connection = getConnection()) {
+                    connection.setAutoCommit(false);
+                    JdsEntity jdsEntity = entity.newInstance();
+                    mapClassName(connection, jdsEntity.getEntityCode(), jdsEntity.getEntityName());
+                    mapClassFields(connection, jdsEntity.getEntityCode(), jdsEntity.properties);
+                    mapClassFieldTypes(connection, jdsEntity.getEntityCode(), jdsEntity.types);
+                    mapClassEnums(connection, jdsEntity.getEntityCode(), jdsEntity.allEnums);
+                    connection.commit();
+                    jdsEntity = null;
+                    if (printOutput())
+                        System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
+                } catch (Exception ex) {
+                    ex.printStackTrace(System.err);
+                }
+            } else
+                throw new RuntimeException("Duplicate service code for class [" + entity.getCanonicalName() + "] - [" + entityAnnotation.entityId() + "]");
+        } else
+            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
+    }
+
+
+    public Class<JdsEntity> getBoundClass(long serviceCode) {
+        return classes.get(serviceCode);
     }
 
     /**
@@ -741,6 +802,14 @@ public abstract class JdsDb implements JdsDbContract {
         return "{call procBindEntityFields(?,?)}";
     }
 
+    public String mapFieldNames() {
+        return "{call procBindFieldNames(?,?)}";
+    }
+
+    public String mapFieldTypes() {
+        return "{call procBindFieldTypes(?,?)}";
+    }
+
     /**
      * SQL call to bind enums to entities
      *
@@ -767,4 +836,6 @@ public abstract class JdsDb implements JdsDbContract {
     public String mapEnumValues() {
         return "{call procRefEnumValues(?,?,?)}";
     }
+
+    public abstract String createOrAlterView(String viewName, String viewSql);
 }

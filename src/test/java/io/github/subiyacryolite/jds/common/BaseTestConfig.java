@@ -1,7 +1,6 @@
 package io.github.subiyacryolite.jds.common;
 
 import io.github.subiyacryolite.jds.JdsDb;
-import io.github.subiyacryolite.jds.JdsEntityClasses;
 import io.github.subiyacryolite.jds.connectivity.JdsDbMySqlImplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbPostgreSqlmplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbSqliteImplementation;
@@ -9,7 +8,6 @@ import io.github.subiyacryolite.jds.connectivity.JdsDbTransactionalSqllmplementa
 import io.github.subiyacryolite.jds.entities.JdsExample;
 import io.github.subiyacryolite.jds.entities.SimpleAddress;
 import io.github.subiyacryolite.jds.entities.SimpleAddressBook;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
@@ -38,16 +36,11 @@ public abstract class BaseTestConfig {
     public void load() throws Exception {
     }
 
-    @Before
-    public void beforeAll() {
-        initialiseJdsClasses();
-    }
-
     @Test
     public void initialiseJdsClasses() {
-        JdsEntityClasses.map(JdsExample.class);
-        JdsEntityClasses.map(SimpleAddress.class);
-        JdsEntityClasses.map(SimpleAddressBook.class);
+        jdsDb.map(JdsExample.class);
+        jdsDb.map(SimpleAddress.class);
+        jdsDb.map(SimpleAddressBook.class);
     }
 
 
@@ -56,6 +49,7 @@ public abstract class BaseTestConfig {
         jdsDb = new JdsDbSqliteImplementation();
         jdsDb.init();
         jdsDb.logEdits(false);
+        initialiseJdsClasses();
     }
 
     @Test
@@ -63,6 +57,7 @@ public abstract class BaseTestConfig {
         jdsDb = new JdsDbPostgreSqlmplementation();
         jdsDb.init();
         jdsDb.logEdits(false);
+        initialiseJdsClasses();
     }
 
     @Test
@@ -70,6 +65,7 @@ public abstract class BaseTestConfig {
         jdsDb = new JdsDbTransactionalSqllmplementation();
         jdsDb.init();
         jdsDb.logEdits(false);
+        initialiseJdsClasses();
     }
 
     @Test
@@ -77,6 +73,7 @@ public abstract class BaseTestConfig {
         jdsDb = new JdsDbMySqlImplementation();
         jdsDb.init();
         jdsDb.logEdits(false);
+        initialiseJdsClasses();
     }
 
     protected <T> void serialize(final T objectToSerialize, final String fileName) {

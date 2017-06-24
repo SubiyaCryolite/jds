@@ -57,10 +57,10 @@ public class LagacyLoadSaves extends BaseTestConfig {
 
     @Test
     public void saveAndLoadAllImplementations() throws Exception {
-        saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
         saveAndLoadMySqlImplementation();
+        saveAndLoadSqliteImplementation();
     }
 
     @Test

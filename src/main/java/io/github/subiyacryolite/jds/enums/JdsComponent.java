@@ -57,7 +57,9 @@ public enum JdsComponent {
     MapEntityEnums("procBindEntityEnums", ""),
     MapClassName("procRefEntities", ""),
     MapEnumValues("procRefEnumValues", ""),
-    CascadeEntityBinding("triggerEntityBindingCascade", "");
+    CascadeEntityBinding("triggerEntityBindingCascade", ""),
+    MapFieldNames("procBindFieldNames",""),
+    MapFieldTypes("procBindFieldTypes","");
 
     private String name, prefix;
 

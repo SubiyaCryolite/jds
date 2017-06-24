@@ -22,5 +22,6 @@ public enum JdsComponentType {
     STORED_PROCEDURE,
     TABLE,
     TRIGGER,
-    INDEX
+    INDEX,
+    VIEW
 }

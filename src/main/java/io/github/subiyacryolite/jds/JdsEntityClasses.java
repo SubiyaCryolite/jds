@@ -13,40 +13,19 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
-
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-
 /**
  * This class maps {@link JdsEntity JdsEntities} for usage with JDS. It also
  * validates annotations and checks for duplicate entity codes
+ * @Deprecated use JdsDb.map instead
  */
 public class JdsEntityClasses {
-    private final static HashMap<Long, Class> classes = new HashMap<>();
 
+    /**
+     * Deprecated!! Use JdsDb.map instead
+     * @Deprecated use JdsDb.map instead
+     * @param entity
+     */
     public static synchronized void map(Class<? extends JdsEntity> entity) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation je = (JdsEntityAnnotation) annotation;
-            if (!classes.containsKey(je.entityId())) {
-                classes.put(je.entityId(), entity);
-            } else
-                throw new RuntimeException("Duplicate service code for class [" + entity.getCanonicalName() + "] - [" + je.entityId() + "]");
-        } else
-            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
-    }
-
-    public static boolean hasClass(long serviceCode) {
-        return classes.containsKey(serviceCode);
-    }
-
-    public static Class<JdsEntity> getBoundClass(long serviceCode) {
-        return classes.get(serviceCode);
-    }
-
-    @Override
-    public String toString() {
-        return "JdsEntityClasses{" + classes + "}";
+            throw new RuntimeException("Deprecated!! Use JdsDb.map instead");
     }
 }

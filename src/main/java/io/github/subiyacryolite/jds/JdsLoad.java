@@ -340,7 +340,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     try {
                         if (parentEntity.objectArrayProperties.containsKey(entityId)) {
                             SimpleListProperty<JdsEntity> propertyList = parentEntity.objectArrayProperties.get(entityId);
-                            Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
+                            Class<JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
                             jdsEntity.setEntityGuid(entityGuid);
@@ -349,7 +349,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                             innerObjects.add(jdsEntity);
                         } else if (parentEntity.objectProperties.containsKey(entityId)) {
                             SimpleObjectProperty<JdsEntity> property = parentEntity.objectProperties.get(entityId);
-                            Class<JdsEntity> jdsEntityClass = JdsEntityClasses.getBoundClass(entityId);
+                            Class<JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
                             jdsEntity.setEntityGuid(entityGuid);

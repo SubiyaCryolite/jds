@@ -13,8 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -34,9 +34,10 @@ public abstract class JdsDbPostgreSql extends JdsDb {
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM information_schema.tables where table_name = ?";
+        String sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, tableName.toLowerCase());
+            preparedStatement.setString(1, connection.getCatalog());
+            preparedStatement.setString(2, tableName.toLowerCase());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -50,9 +51,27 @@ public abstract class JdsDbPostgreSql extends JdsDb {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM pg_proc WHERE proname = ?";
+        String sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? and routine_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, procedureName.toLowerCase());
+            preparedStatement.setString(1, connection.getCatalog());
+            preparedStatement.setString(2, procedureName.toLowerCase());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
+        return toReturn;
+    }
+
+    public int viewExists(String viewName) {
+        int toReturn = 0;
+        String sql = "select COUNT(*) AS Result from information_schema.views where table_catalog = ? and table_name = ?";
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, connection.getCatalog());
+            preparedStatement.setString(2, viewName.toLowerCase());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -178,7 +197,7 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         executeSqlFromFile("sql/postgresql/createStoreTime.sql");
     }
 
-    protected void  createStoreBlob() {
+    protected void createStoreBlob() {
         executeSqlFromFile("sql/postgresql/createStoreBlob.sql");
     }
 
@@ -198,11 +217,19 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
     }
 
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
+            case MapFieldNames:
+                executeSqlFromFile("sql/postgresql/procedures/procBindFieldNames.sql");
+                break;
+            case MapFieldTypes:
+                executeSqlFromFile("sql/postgresql/procedures/procBindFieldTypes.sql");
+                break;
             case SaveBlob:
                 executeSqlFromFile("sql/postgresql/procedures/procStoreBlob.sql");
                 break;
@@ -246,5 +273,14 @@ public abstract class JdsDbPostgreSql extends JdsDb {
                 executeSqlFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
                 break;
         }
+    }
+
+    public String createOrAlterView(String viewName, String viewSql) {
+        StringBuilder sb = new StringBuilder("CREATE VIEW\t");
+        sb.append(viewName);
+        sb.append("\tAS\t");
+        sb.append(viewSql);
+        String toExecute = sb.toString();
+        return toExecute;
     }
 }

@@ -17,7 +17,7 @@ public class LoadSaves extends BaseTestConfig {
 
     @Test
     public void callableSqlLiteBulkSave() throws Exception {
-        initialiseSqlLiteBackend();
+        initialiseTSqlBackend();
         bulkSave();
     }
 

@@ -171,7 +171,6 @@ public class JdsSave implements Callable<Boolean> {
             if (entity instanceof JdsPreSaveListener) {
                 ((JdsPreSaveListener) entity).onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
             }
-            mapEntity(database, entity);
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
             saveContainer.overviews.get(step).add(entity.getOverview());
@@ -270,21 +269,6 @@ public class JdsSave implements Callable<Boolean> {
             ex.printStackTrace(System.err);
         }
     }
-
-    /**
-     * @param jdsEntity
-     */
-    private void mapEntity(final JdsDb jdsDataBase, final JdsEntity jdsEntity) {
-        if (!JdsEntity.map.contains(jdsEntity.getEntityCode())) {
-            JdsEntity.map.add(jdsEntity.getEntityCode());
-            jdsDataBase.mapClassName(jdsEntity.getEntityCode(), jdsEntity.getEntityName());
-            jdsDataBase.mapClassFields(jdsEntity.getEntityCode(), jdsEntity.properties);
-            jdsDataBase.mapClassEnums(jdsEntity.getEntityCode(), jdsEntity.allEnums);
-            if (jdsDataBase.printOutput())
-                System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
-        }
-    }
-
     /**
      * @param connection
      * @param booleanProperties

@@ -13,8 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
+import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -34,7 +34,7 @@ public abstract class JdsDbMySql extends JdsDb {
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(table_schema) AS Result FROM information_schema.tables WHERE table_name = ? AND table_schema = ?";
+        String sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName);
             preparedStatement.setString(2, connection.getCatalog());
@@ -51,9 +51,26 @@ public abstract class JdsDbMySql extends JdsDb {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ? AND table_schema = ?";
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ? AND ROUTINE_SCHEMA = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName);
+            preparedStatement.setString(2, connection.getCatalog());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
+        return toReturn;
+    }
+
+    public int viewExists(String viewName) {
+        int toReturn = 0;
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE AND TABLE_NAME = ? AND TABLE_SCHEMA = ?";
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, viewName);
             preparedStatement.setString(2, connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -200,11 +217,19 @@ public abstract class JdsDbMySql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
     }
 
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
+            case MapFieldNames:
+                executeSqlFromFile("sql/mysql/procedures/procBindFieldNames.sql");
+                break;
+            case MapFieldTypes:
+                executeSqlFromFile("sql/mysql/procedures/procBindFieldTypes.sql");
+                break;
             case SaveBlob:
                 executeSqlFromFile("sql/mysql/procedures/procStoreBlob.sql");
                 break;
@@ -248,5 +273,14 @@ public abstract class JdsDbMySql extends JdsDb {
                 executeSqlFromFile("sql/mysql/procedures/procRefEnumValues.sql");
                 break;
         }
+    }
+
+    public String createOrAlterView(String viewName, String viewSql) {
+        StringBuilder sb = new StringBuilder("CREATE VIEW\t");
+        sb.append(viewName);
+        sb.append("\tAS\t");
+        sb.append(viewSql);
+        String toExecute = sb.toString();
+        return toExecute;
     }
 }
