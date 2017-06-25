@@ -160,27 +160,7 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         return toQuery();
     }
 
-    /*
-    * CONDITIONS START HERE
-    * equals
-    * notEquals
-    * like
-    * startsLike
-    * endsLike
-    * notLike
-    * in
-    * notIn
-    * greaterThan
-    * greaterThanOrEqualTo
-    * lessThan
-    * lessThanOrEqualTo
-    * notLessThan
-    * notGreaterThan
-    * isNull
-    * isNotNull
-    * between
-    */
-
+    //========================================================CONDITIONS START HERE
     public JdsFilter isNotNull(JdsField jdsField) {
         tablesToJoin.add(jdsField.getType());
         String builder = String.format("(%s.FieldId = %s AND %s.Value IS NOT NULL)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));

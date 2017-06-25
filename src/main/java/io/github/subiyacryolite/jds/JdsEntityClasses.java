@@ -16,13 +16,13 @@ package io.github.subiyacryolite.jds;
 /**
  * This class maps {@link JdsEntity JdsEntities} for usage with JDS. It also
  * validates annotations and checks for duplicate entity codes
- * @Deprecated use JdsDb.map instead
+ * @deprecated use JdsDb.map instead
  */
 public class JdsEntityClasses {
 
     /**
      * Deprecated!! Use JdsDb.map instead
-     * @Deprecated use JdsDb.map instead
+     * @deprecated use JdsDb.map instead
      * @param entity
      */
     public static synchronized void map(Class<? extends JdsEntity> entity) {
