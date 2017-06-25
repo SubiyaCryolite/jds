@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
+ * This class is responsible for creating and deleting flat views of {@link JdsEntity JdsEntities}
  * Created by ifunga on 24/06/2017.
  */
 public class JdsView {
@@ -19,8 +20,8 @@ public class JdsView {
     /**
      * Create flat tables that will be representative of a JdsEntity
      *
-     * @param target the JdsEntity
-     * @param jdsDb  an instance of JdsDb
+     * @param target the {@link JdsEntity JdsEntity}
+     * @param jdsDb  an instance of {@link JdsDb JdsDb}
      * @return whether the operation completed successfully
      * @throws IllegalArgumentException
      */
@@ -51,6 +52,14 @@ public class JdsView {
                 String timeView = innerView(connection, jdsDb, JdsFieldType.TIME, id, name);
                 String textView = innerView(connection, jdsDb, JdsFieldType.TEXT, id, name);
                 String zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, id, name);
+                String[] unused = new String[]{
+                        arrayFloatView,
+                        arrayIntView,
+                        arrayDoubleView,
+                        arrayLongView,
+                        arrayTextView,
+                        arrayDateTimeView,
+                        enumView};
                 createMainView(connection,
                         jdsDb,
                         id,
@@ -66,17 +75,9 @@ public class JdsView {
                                 longView,
                                 timeView,
                                 textView,
-                                zonedDateTimeView},
-                        new String[]{
-                                arrayFloatView,
-                                arrayIntView,
-                                arrayDoubleView,
-                                arrayLongView,
-                                arrayTextView,
-                                arrayDateTimeView,
-                                enumView});
+                                zonedDateTimeView});
             } catch (Exception ex) {
-                ex.printStackTrace();
+                ex.printStackTrace(System.err);
             }
             return true;
         } else {
@@ -85,11 +86,11 @@ public class JdsView {
     }
 
     /**
-     * @param connection
-     * @param viewName
-     * @param tables
+     * @param connection the SQL connection that will be used for this operation
+     * @param viewName   the final name of this view
+     * @param tables     the tables that will make up this view
      */
-    private static void createMainView(Connection connection, JdsDb jdsDb, long entityId, String viewName, String[] tables, String[] arrayTables) {
+    private static void createMainView(Connection connection, JdsDb jdsDb, long entityId, String viewName, String[] tables) {
         String sql = "SELECT field.FieldName FROM \n" +
                 "JdsRefEntities entity\n" +
                 "LEFT JOIN JdsBindEntityFields bound\n" +
@@ -141,8 +142,8 @@ public class JdsView {
     /**
      * Delete all flat tables bound to a JdsEntity
      *
-     * @param target the JdsEntity
-     * @param jdsDb  an instance of JdsDb
+     * @param target the {@link JdsEntity JdsEntity}
+     * @param jdsDb  an instance of {@link JdsDb JdsDb}
      * @return whether the operation completed successfully
      * @throws IllegalArgumentException
      */
@@ -195,7 +196,7 @@ public class JdsView {
     /**
      * Create a view of a specific data-type for a JdsEntity
      *
-     * @param connection the SQL connection that will be used
+     * @param connection the SQL connection that will be used for this operation
      * @param jdsDb      an instance of JdsDb
      * @param fieldType  the data-type of this view
      * @param entityId   the id code of the JdsEntity
@@ -282,7 +283,7 @@ public class JdsView {
     /**
      * Executes a view drop
      *
-     * @param connection the SQL connection to use
+     * @param connection the SQL connection that will be used for this operation
      * @param name       the view to drop
      * @return whether the action completed successfully
      */

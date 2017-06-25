@@ -13,6 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
 import java.sql.Connection;
@@ -33,57 +34,62 @@ import static io.github.subiyacryolite.jds.JdsTableLookup.getTablePrefix;
 public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<List<T>> {
 
 
-    private final LinkedList<LinkedList<Object>> sessionValues;
-    private final LinkedList<LinkedList<String>> sessionStrings;
-    private final LinkedList<String> sessionSwitches;
+    private final LinkedList<LinkedList<Object>> blockParamaters;
+    private final LinkedList<LinkedList<String>> blockStrings;
+    private final LinkedList<String> blockSwitches;
     private final HashSet<JdsFieldType> tablesToJoin;
     private final JdsDb jdsDb;
     private final Class<T> referenceType;
     private LinkedList<String> currentStrings;
     private LinkedList<Object> currentValues;
-
+    private long entityId;
 
     public JdsFilter(JdsDb jdsDb, final Class<T> referenceType) {
         this.jdsDb = jdsDb;
         this.referenceType = referenceType;
+        if (referenceType.isAnnotationPresent(JdsEntityAnnotation.class)) {
+            JdsEntityAnnotation je = referenceType.getAnnotation(JdsEntityAnnotation.class);
+            entityId = je.entityId();
+        } else
+            throw new IllegalArgumentException("You must annotate the class [" + referenceType.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         //////////
         currentStrings = new LinkedList<>();
         currentValues = new LinkedList<>();
         //==================================
-        sessionStrings = new LinkedList<>();
-        sessionValues = new LinkedList<>();
+        blockStrings = new LinkedList<>();
+        blockParamaters = new LinkedList<>();
         //==================================
         tablesToJoin = new HashSet<>();
-        sessionSwitches = new LinkedList<>();
+        blockSwitches = new LinkedList<>();
         //==================================
-        sessionStrings.add(currentStrings);
-        sessionValues.add(currentValues);
-        sessionSwitches.add("");
+        blockStrings.add(currentStrings);
+        blockParamaters.add(currentValues);
+        blockSwitches.add("");
     }
 
     public JdsFilter or() {
         currentStrings = new LinkedList<>();
-        sessionStrings.add(currentStrings);
+        blockStrings.add(currentStrings);
         currentValues = new LinkedList<>();
-        sessionValues.add(currentValues);
-        sessionSwitches.add(" OR ");
+        blockParamaters.add(currentValues);
+        blockSwitches.add(" OR ");
         return this;
     }
 
     public JdsFilter and() {
         currentStrings = new LinkedList<>();
-        sessionStrings.add(currentStrings);
+        blockStrings.add(currentStrings);
         currentValues = new LinkedList<>();
-        sessionValues.add(currentValues);
-        sessionSwitches.add(" AND ");
+        blockParamaters.add(currentValues);
+        blockSwitches.add(" AND ");
         return this;
     }
 
     @Override
     public void close() throws Exception {
-        sessionValues.clear();
-        sessionStrings.clear();
-        sessionSwitches.clear();
+        blockParamaters.clear();
+        blockStrings.clear();
+        blockSwitches.clear();
         tablesToJoin.clear();
         currentStrings.clear();
         currentValues.clear();
@@ -95,9 +101,9 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         String sql = this.toQuery();
         try (Connection connection = jdsDb.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            for (LinkedList<Object> session : sessionValues) {
-                for (Object ob : session) {
-                    ps.setObject(parameterIndex, ob);
+            for (LinkedList<Object> parameters : blockParamaters) {
+                for (Object paramter : parameters) {
+                    ps.setObject(parameterIndex, paramter);
                     parameterIndex++;
                 }
             }
@@ -109,7 +115,45 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
+        if (matchingGuids.isEmpty()) {
+            //no results. return empty collection
+            //if you pass empty collection to jds load it will assume load EVERYTHING
+            return new ArrayList<>();
+        }
         return new JdsLoad(jdsDb, referenceType, matchingGuids.toArray(new String[0])).call();
+    }
+
+
+    public String toQuery() {
+        StringBuilder main = new StringBuilder();
+        main.append("SELECT * FROM JdsStoreEntityOverview eo\n");
+        main.append("JOIN JdsRefEntities entity ON eo.EntityId = entity.EntityId");
+        if (tablesToJoin.size() > 0) {
+            main.append(" JOIN ");
+            main.append(createLeftJoins(tablesToJoin));
+        }
+        main.append("\nWHERE entity.EntityId = ");
+        main.append(entityId);
+        if (blockStrings.size() > 0) {
+            main.append(" AND ");
+        }
+        for (int chunk = 0; chunk < blockStrings.size(); chunk++) {
+            StringBuilder inner = new StringBuilder();
+            main.append(blockSwitches.get(chunk));
+            inner.append(String.join(" AND\n", blockStrings.get(chunk)));
+            main.append("(");
+            main.append(inner);
+            main.append(")");
+        }
+        return main.toString();
+    }
+
+    private String createLeftJoins(HashSet<JdsFieldType> tablesToJoin) {
+        List<String> tables = new ArrayList<>();
+        for (JdsFieldType ft : tablesToJoin) {
+            tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTableName(ft), getTablePrefix(ft), getTablePrefix(ft)));
+        }
+        return String.join(" JOIN\n", tables);
     }
 
     public String toString() {
@@ -274,35 +318,6 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         currentValues.add(value);
         currentValues.add(value);
         return this;
-    }
-
-    public String toQuery() {
-        StringBuilder main = new StringBuilder();
-        main.append("SELECT * FROM JdsStoreEntityOverview eo");
-        if (tablesToJoin.size() > 0) {
-            main.append(" JOIN ");
-            main.append(createLeftJoins(tablesToJoin));
-        }
-        if (sessionStrings.size() > 0) {
-            main.append(" WHERE ");
-        }
-        for (int chunk = 0; chunk < sessionStrings.size(); chunk++) {
-            StringBuilder inner = new StringBuilder();
-            main.append(sessionSwitches.get(chunk));
-            inner.append(String.join(" AND ", sessionStrings.get(chunk)));
-            main.append("(");
-            main.append(inner);
-            main.append(")");
-        }
-        return main.toString();
-    }
-
-    private String createLeftJoins(HashSet<JdsFieldType> tablesToJoin) {
-        List<String> tables = new ArrayList<>();
-        for (JdsFieldType ft : tablesToJoin) {
-            tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTableName(ft), getTablePrefix(ft), getTablePrefix(ft)));
-        }
-        return String.join(" JOIN ", tables);
     }
 }
 

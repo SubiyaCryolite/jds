@@ -7,8 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 /**
  * Created by ifunga on 05/03/2017.
@@ -20,9 +18,10 @@ public class FilterTests extends BaseTestConfig {
     }
 
     @Test
-    public void basicQuery() throws ExecutionException, InterruptedException {
-        JdsFilter filter = new JdsFilter(jdsDb, SimpleAddress.class).equals(SimpleAddressFields.AREA_NAME, "Riverdale").like(SimpleAddressFields.COUNTRY_NAME, "Zam").or().equals(SimpleAddressFields.PROVINCE_NAME, "Copperbelt");
-        List<SimpleAddress> output = new FutureTask<List<SimpleAddress>>(filter).get();
+    public void basicQuery() throws Exception {
+        JdsFilter filter = new JdsFilter(jdsDb, SimpleAddress.class).between(SimpleAddressFields.PLOT_NUMBER, 1, 2).like(SimpleAddressFields.COUNTRY_NAME, "Zam").or().equals(SimpleAddressFields.PROVINCE_NAME, "Copperbelt");
+        List<SimpleAddress> output = filter.call();
         Assert.assertNotNull(output);
+        System.out.println(output);
     }
 }
