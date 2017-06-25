@@ -24,7 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static io.github.subiyacryolite.jds.enums.JdsComponent.*;
+import static io.github.subiyacryolite.jds.JdsTableLookup.getTableName;
+import static io.github.subiyacryolite.jds.JdsTableLookup.getTablePrefix;
 
 /**
  * This class is used to perform basic searches based on defined parameters
@@ -78,9 +79,148 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
         return this;
     }
 
+    @Override
+    public void close() throws Exception {
+        sessionValues.clear();
+        sessionStrings.clear();
+        sessionSwitches.clear();
+        tablesToJoin.clear();
+        currentStrings.clear();
+        currentValues.clear();
+    }
+
+    @Override
+    public List<T> call() throws Exception {
+        List<String> matchingGuids = new ArrayList<>();
+        String sql = this.toQuery();
+        try (Connection connection = jdsDb.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            for (LinkedList<Object> session : sessionValues) {
+                for (Object ob : session) {
+                    ps.setObject(parameterIndex, ob);
+                    parameterIndex++;
+                }
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                matchingGuids.add(rs.getString("EntityGuid"));
+            }
+            rs.close();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return new JdsLoad(jdsDb, referenceType, matchingGuids.toArray(new String[0])).call();
+    }
+
+    public String toString() {
+        return toQuery();
+    }
+
+    /*
+    * CONDITIONS START HERE
+    * equals
+    * notEquals
+    * like
+    * startsLike
+    * endsLike
+    * notLike
+    * in
+    * notIn
+    * greaterThan
+    * greaterThanOrEqualTo
+    * lessThan
+    * lessThanOrEqualTo
+    * notLessThan
+    * notGreaterThan
+    * isNull
+    * isNotNull
+    * between
+    */
+
+    public JdsFilter isNotNull(JdsField jdsField) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value IS NOT NULL)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add("");
+        return this;
+    }
+
+    public JdsFilter isNull(JdsField jdsField) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value IS NULL)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add("");
+        return this;
+    }
+
+    public JdsFilter between(JdsField jdsField, Object value1, Object value2) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND (%s.Value BETWEEN ? AND ?) )", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value1);
+        currentValues.add(value2);
+        return this;
+    }
+
+    public JdsFilter notLessThan(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value !< ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter lessThan(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value < ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter lessThanOrEqualTo(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value < ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter notGreaterThan(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value !> ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter greaterThan(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value > ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter greaterThanOrEqualTo(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value >= ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
     public JdsFilter equals(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
         String builder = String.format("(%s.FieldId = %s AND %s.Value = ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        currentStrings.add(builder);
+        currentValues.add(value);
+        return this;
+    }
+
+    public JdsFilter notEquals(JdsField jdsField, Object value) {
+        tablesToJoin.add(jdsField.getType());
+        String builder = String.format("(%s.FieldId = %s AND %s.Value <> ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -163,119 +303,6 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
             tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTableName(ft), getTablePrefix(ft), getTablePrefix(ft)));
         }
         return String.join(" JOIN ", tables);
-    }
-
-    private String getTableName(JdsFieldType jdsFieldType) {
-        switch (jdsFieldType) {
-            case TEXT:
-                return StoreText.getName();
-            case BLOB:
-                return StoreBlob.getName();
-            case INT:
-                return StoreInteger.getName();
-            case DOUBLE:
-                return StoreDouble.getName();
-            case FLOAT:
-                return StoreFloat.getName();
-            case LONG:
-                return StoreLong.getName();
-            case DATE:
-            case DATE_TIME:
-                return StoreDateTime.getName();
-            case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getName();
-            case TIME:
-                return StoreTime.getName();
-            case ARRAY_TEXT:
-                return StoreTextArray.getName();
-            case ARRAY_INT:
-            case ENUM_TEXT:
-                return StoreIntegerArray.getName();
-            case ARRAY_DOUBLE:
-                return StoreDoubleArray.getName();
-            case ARRAY_FLOAT:
-                return StoreFloatArray.getName();
-            case ARRAY_LONG:
-                return StoreLongArray.getName();
-            case ARRAY_DATE_TIME:
-                return StoreDateTimeArray.getName();
-        }
-        return "undefined";
-    }
-
-    private String getTablePrefix(JdsFieldType jdsFieldType) {
-        switch (jdsFieldType) {
-            case TEXT:
-                return StoreText.getPrefix();
-            case BLOB:
-                return StoreBlob.getPrefix();
-            case INT:
-                return StoreInteger.getPrefix();
-            case DOUBLE:
-                return StoreDouble.getPrefix();
-            case FLOAT:
-                return StoreFloat.getPrefix();
-            case LONG:
-                return StoreLong.getPrefix();
-            case DATE:
-            case DATE_TIME:
-                return StoreDateTime.getPrefix();
-            case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getPrefix();
-            case TIME:
-                return StoreTime.getPrefix();
-            case ARRAY_TEXT:
-                return StoreTextArray.getPrefix();
-            case ARRAY_INT:
-            case ENUM_TEXT:
-                return StoreIntegerArray.getPrefix();
-            case ARRAY_DOUBLE:
-                return StoreDoubleArray.getPrefix();
-            case ARRAY_FLOAT:
-                return StoreFloatArray.getPrefix();
-            case ARRAY_LONG:
-                return StoreLongArray.getPrefix();
-            case ARRAY_DATE_TIME:
-                return StoreDateTimeArray.getPrefix();
-        }
-        return "undefined";
-    }
-
-    public String toString() {
-        return toQuery();
-    }
-
-    @Override
-    public void close() throws Exception {
-        sessionValues.clear();
-        sessionStrings.clear();
-        sessionSwitches.clear();
-        tablesToJoin.clear();
-        currentStrings.clear();
-        currentValues.clear();
-    }
-
-    @Override
-    public List<T> call() throws Exception {
-        List<String> matchingGuids = new ArrayList<>();
-        String sql = this.toQuery();
-        try (Connection connection = jdsDb.getConnection(); PreparedStatement ps = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            for (LinkedList<Object> session : sessionValues) {
-                for (Object ob : session) {
-                    ps.setObject(parameterIndex, ob);
-                    parameterIndex++;
-                }
-            }
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                matchingGuids.add(rs.getString("EntityGuid"));
-            }
-            rs.close();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
-        return new JdsLoad(jdsDb, referenceType, matchingGuids.toArray(new String[0])).call();
     }
 }
 

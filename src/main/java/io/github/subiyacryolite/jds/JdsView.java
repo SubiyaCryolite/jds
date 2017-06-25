@@ -40,7 +40,7 @@ public class JdsView {
                 String arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, id, name);
                 String arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, id, name);
                 String booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, id, name);
-                String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, id, name);
+                //String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, id, name);, problem with PG implementation
                 String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, id, name);
                 String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, id, name);
                 String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, id, name);
@@ -57,7 +57,7 @@ public class JdsView {
                         viewName,
                         new String[]{
                                 booleanView,
-                                blobView,
+                                //blobView, problem with PG implementation
                                 dateTimeView,
                                 dateView,
                                 doubleView,
@@ -98,7 +98,7 @@ public class JdsView {
                 "ON bound.FieldId = field.FieldId\n" +
                 "LEFT join JdsRefFieldTypes type\n" +
                 "ON field.FieldId = type.TypeId\n" +
-                "WHERE type.TypeName NOT IN ('ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_TEXT') AND entity.EntityId = ?\n" +
+                "WHERE type.TypeName NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_TEXT') AND entity.EntityId = ?\n" +
                 "ORDER BY field.FieldName";
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -154,6 +154,7 @@ public class JdsView {
             String name = cleanViewName(je.entityName());
             String viewName = getMainViewName(name);
             try (Connection connection = jdsDb.getConnection()) {
+                dropView(connection, viewName);
                 dropView(connection, getViewName(JdsFieldType.ARRAY_FLOAT, name));
                 dropView(connection, getViewName(JdsFieldType.ARRAY_INT, name));
                 dropView(connection, getViewName(JdsFieldType.ARRAY_DOUBLE, name));
@@ -172,7 +173,6 @@ public class JdsView {
                 dropView(connection, getViewName(JdsFieldType.TIME, name));
                 dropView(connection, getViewName(JdsFieldType.TEXT, name));
                 dropView(connection, getViewName(JdsFieldType.ZONED_DATE_TIME, name));
-                dropView(connection, viewName);
             } catch (Exception ex) {
                 ex.printStackTrace(System.err);
             }
@@ -252,6 +252,7 @@ public class JdsView {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlToExecute)) {
             preparedStatement.execute();
         } catch (Exception ex) {
+            System.err.println(sqlToExecute);
             ex.printStackTrace(System.err);
         }
         return viewName;
