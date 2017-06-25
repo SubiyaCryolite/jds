@@ -482,9 +482,10 @@ Once you have initialised your database you can go ahead and initialise all your
 ```java
 public void initialiseJdsClasses()
 {
-    JdsEntityClasses.map(JdsExample.class);
-    JdsEntityClasses.map(SimpleAddress.class);
-    JdsEntityClasses.map(SimpleAddressBook.class);
+    //jdsDb is a reference to your instance of JdsDb.java
+    jdsDb.map(JdsExample.class);
+    jdsDb.map(SimpleAddress.class);
+    jdsDb.map(SimpleAddressBook.class);
 }
 ```
 You only have to do this once at start-up but it is vital that you do so. Without this you will face problems when loading or saving records
