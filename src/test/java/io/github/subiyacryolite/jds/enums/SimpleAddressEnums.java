@@ -1,6 +1,7 @@
-package io.github.subiyacryolite.jds.entities;
+package io.github.subiyacryolite.jds.enums;
 
 import io.github.subiyacryolite.jds.JdsFieldEnum;
+import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
 
 /**
  * Created by ifunga on 18/02/2017.

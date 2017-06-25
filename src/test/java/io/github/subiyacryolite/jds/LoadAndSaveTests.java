@@ -13,7 +13,7 @@ import java.util.concurrent.FutureTask;
 /**
  * Created by ifunga on 12/04/2017.
  */
-public class LoadSaves extends BaseTestConfig {
+public class LoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void callableSqlLiteBulkSave() throws Exception {

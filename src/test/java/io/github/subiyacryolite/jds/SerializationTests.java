@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by indana on 5/10/2017.
  */
-public class Serialization extends BaseTestConfig {
+public class SerializationTests extends BaseTestConfig {
 
     @Test
     public void testSerialization() {

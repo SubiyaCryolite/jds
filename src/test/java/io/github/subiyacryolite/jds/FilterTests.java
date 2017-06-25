@@ -2,7 +2,7 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.common.BaseTestConfig;
 import io.github.subiyacryolite.jds.entities.SimpleAddress;
-import io.github.subiyacryolite.jds.entities.SimpleAddressFields;
+import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.FutureTask;
 /**
  * Created by ifunga on 05/03/2017.
  */
-public class Queries extends BaseTestConfig {
+public class FilterTests extends BaseTestConfig {
 
-    public Queries() {
+    public FilterTests() {
         initialiseSqlLiteBackend();
     }
 

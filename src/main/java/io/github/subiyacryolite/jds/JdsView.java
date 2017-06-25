@@ -1,6 +1,6 @@
 package io.github.subiyacryolite.jds;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * Created by ifung on 24/06/2017.
+ * Created by ifunga on 24/06/2017.
  */
 public class JdsView {
 
@@ -22,11 +22,11 @@ public class JdsView {
      * @param target the JdsEntity
      * @param jdsDb  an instance of JdsDb
      * @return whether the operation completed successfully
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
-    public static boolean create(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws InvalidArgumentException {
+    public static boolean create(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws IllegalArgumentException {
         if (!jdsDb.supportsStatements())
-            throw new InvalidArgumentException(new String[]{"The underlying database does not support the creation of views"});
+            throw new IllegalArgumentException("The underlying database does not support the creation of views");
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation je = target.getAnnotation(JdsEntityAnnotation.class);
             long id = je.entityId();
@@ -80,7 +80,7 @@ public class JdsView {
             }
             return true;
         } else {
-            throw new InvalidArgumentException(new String[]{"You must annotate the class [" + target.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]"});
+            throw new IllegalArgumentException("You must annotate the class [" + target.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
 
@@ -144,11 +144,11 @@ public class JdsView {
      * @param target the JdsEntity
      * @param jdsDb  an instance of JdsDb
      * @return whether the operation completed successfully
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
-    public static boolean delete(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws InvalidArgumentException {
+    public static boolean delete(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws IllegalArgumentException {
         if (!jdsDb.supportsStatements())
-            throw new InvalidArgumentException(new String[]{"The underlying database does not support the creation of views"});
+            throw new IllegalArgumentException("The underlying database does not support the creation of views");
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation je = target.getAnnotation(JdsEntityAnnotation.class);
             String name = cleanViewName(je.entityName());
@@ -178,7 +178,7 @@ public class JdsView {
             }
             return true;
         } else {
-            throw new InvalidArgumentException(new String[]{"You must annotate the class [" + target.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]"});
+            throw new IllegalArgumentException("You must annotate the class [" + target.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
 

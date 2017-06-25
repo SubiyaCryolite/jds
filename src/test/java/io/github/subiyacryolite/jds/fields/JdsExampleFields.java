@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.entities;
+package io.github.subiyacryolite.jds.fields;
 
 import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;

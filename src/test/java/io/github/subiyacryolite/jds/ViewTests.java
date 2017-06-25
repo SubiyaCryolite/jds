@@ -1,6 +1,5 @@
 package io.github.subiyacryolite.jds;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import io.github.subiyacryolite.jds.common.BaseTestConfig;
 import io.github.subiyacryolite.jds.entities.JdsExample;
 import io.github.subiyacryolite.jds.entities.SimpleAddress;
@@ -11,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ifung on 24/06/2017.
+ * Created by ifunga on 24/06/2017.
  */
-public class FlatViewBuilder extends BaseTestConfig {
+public class ViewTests extends BaseTestConfig {
 
     public List<Class<? extends JdsEntity>> getEntities() {
         List<Class<? extends JdsEntity>> list = new ArrayList<>();
@@ -39,7 +38,7 @@ public class FlatViewBuilder extends BaseTestConfig {
                 boolean delete = JdsView.delete(entry, jdsDb);
                 boolean create = JdsView.create(entry, jdsDb);
             }
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace(System.err);
         }
     }
@@ -52,7 +51,7 @@ public class FlatViewBuilder extends BaseTestConfig {
                 boolean delete = JdsView.delete(entry, jdsDb);
                 boolean create = JdsView.create(entry, jdsDb);
             }
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace(System.err);
         }
     }
@@ -65,7 +64,7 @@ public class FlatViewBuilder extends BaseTestConfig {
                 boolean delete = JdsView.delete(entry, jdsDb);
                 boolean create = JdsView.create(entry, jdsDb);
             }
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace(System.err);
         }
     }

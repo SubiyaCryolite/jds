@@ -15,7 +15,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.subiyacryolite.jds.entities.SimpleAddressEnums.PRIMARY_ADDRESS_ENUM;
+import static io.github.subiyacryolite.jds.enums.SimpleAddressEnums.PRIMARY_ADDRESS_ENUM;
 
 /**
  * Created by ifunga on 08/04/2017.

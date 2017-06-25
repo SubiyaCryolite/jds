@@ -12,7 +12,7 @@ import java.util.concurrent.FutureTask;
 /**
  * Created by ifunga on 18/02/2017.
  */
-public class LagacyLoadSaves extends BaseTestConfig {
+public class LagacyLoadAndSaveTests extends BaseTestConfig {
 
     @Test
     @Override

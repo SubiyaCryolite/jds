@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * Created by indana on 5/17/2017.
  */
-public class LegacyValidations extends BaseTestConfig {
+public class LegacyValidationTests extends BaseTestConfig {
     @Test
     @Override
     public void saveAndLoad() throws Exception {

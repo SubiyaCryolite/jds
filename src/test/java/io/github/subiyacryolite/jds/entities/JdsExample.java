@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import static io.github.subiyacryolite.jds.entities.JdsExampleFields.*;
+import static io.github.subiyacryolite.jds.fields.JdsExampleFields.*;
 
 /**
  * Created by ifunga on 12/04/2017.
