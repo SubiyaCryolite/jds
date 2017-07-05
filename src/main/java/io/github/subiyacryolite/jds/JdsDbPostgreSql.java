@@ -202,6 +202,11 @@ public abstract class JdsDbPostgreSql extends JdsDb {
     }
 
     @Override
+    protected void createRefInheritance() {
+        executeSqlFromFile("sql/postgresql/createRefInheritance.sql");
+    }
+
+    @Override
     protected void prepareCustomDatabaseComponents() {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveBlob);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
@@ -219,6 +224,7 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityInheritance);
     }
 
     @Override
@@ -271,6 +277,9 @@ public abstract class JdsDbPostgreSql extends JdsDb {
                 break;
             case MapEnumValues:
                 executeSqlFromFile("sql/postgresql/procedures/procRefEnumValues.sql");
+                break;
+            case MapEntityInheritance:
+                executeSqlFromFile("sql/postgresql/procedures/procBindParentToChild.sql");
                 break;
         }
     }

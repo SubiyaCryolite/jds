@@ -218,6 +218,11 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
     }
 
     @Override
+    protected void createRefInheritance() {
+        executeSqlFromFile("sql/tsql/createRefInheritance.sql");
+    }
+
+    @Override
     protected void prepareCustomDatabaseComponents() {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveBlob);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
@@ -236,6 +241,7 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.TRIGGER, JdsComponent.CascadeEntityBinding);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityInheritance);
     }
 
     @Override
@@ -291,6 +297,9 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
                 break;
             case CascadeEntityBinding:
                 executeSqlFromFile("sql/tsql/triggers/createEntityBindingCascade.sql");
+                break;
+            case MapEntityInheritance:
+                executeSqlFromFile("sql/tsql/procedures/procBindParentToChild.sql");
                 break;
         }
     }

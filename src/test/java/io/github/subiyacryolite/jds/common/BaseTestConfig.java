@@ -5,9 +5,7 @@ import io.github.subiyacryolite.jds.connectivity.JdsDbMySqlImplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbPostgreSqlmplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbSqliteImplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbTransactionalSqllmplementation;
-import io.github.subiyacryolite.jds.entities.JdsExample;
-import io.github.subiyacryolite.jds.entities.SimpleAddress;
-import io.github.subiyacryolite.jds.entities.SimpleAddressBook;
+import io.github.subiyacryolite.jds.entities.*;
 import org.junit.Test;
 
 import java.io.*;
@@ -38,6 +36,9 @@ public abstract class BaseTestConfig {
 
     @Test
     public void initialiseJdsClasses() {
+        jdsDb.map(EntityA.class);
+        jdsDb.map(EntityB.class);
+        jdsDb.map(EntityC.class);
         jdsDb.map(JdsExample.class);
         jdsDb.map(SimpleAddress.class);
         jdsDb.map(SimpleAddressBook.class);

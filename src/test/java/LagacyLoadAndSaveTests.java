@@ -1,5 +1,6 @@
-package io.github.subiyacryolite.jds;
-
+import io.github.subiyacryolite.jds.JdsDelete;
+import io.github.subiyacryolite.jds.JdsLoad;
+import io.github.subiyacryolite.jds.JdsSave;
 import io.github.subiyacryolite.jds.common.BaseTestConfig;
 import io.github.subiyacryolite.jds.entities.SimpleAddressBook;
 import org.junit.Test;
@@ -21,6 +22,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
         JdsSave.save(jdsDb, 1, simpleAddressBook);
         System.out.printf("Saved %s\n", simpleAddressBook);
     }
+
 
     @Test
     @Override

@@ -45,6 +45,14 @@ public class JdsFieldEnum implements Externalizable {
         bind();
     }
 
+    public JdsFieldEnum(final JdsField jdsField, final Enum... values) {
+        this();
+        this.field.set(jdsField);
+        for (Enum value : values)
+            this.sequenceValues.addLast(value.toString());
+        bind();
+    }
+
     public static JdsFieldEnum get(final JdsField jdsField) {
         if (fieldEnums.containsKey(jdsField.getId()))
             return fieldEnums.get(jdsField.getId());

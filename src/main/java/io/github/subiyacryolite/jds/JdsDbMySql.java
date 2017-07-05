@@ -193,12 +193,19 @@ public abstract class JdsDbMySql extends JdsDb {
         executeSqlFromFile("sql/mysql/createStoreEntityBinding.sql");
     }
 
+    @Override
     protected void createStoreTime() {
         executeSqlFromFile("sql/mysql/createStoreTime.sql");
     }
 
+    @Override
     protected void createStoreBlob() {
         executeSqlFromFile("sql/mysql/createStoreBlob.sql");
+    }
+
+    @Override
+    protected void createRefInheritance() {
+        executeSqlFromFile("sql/mysql/createRefInheritance.sql");
     }
 
     @Override
@@ -219,6 +226,7 @@ public abstract class JdsDbMySql extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityInheritance);
     }
 
     @Override
@@ -271,6 +279,9 @@ public abstract class JdsDbMySql extends JdsDb {
                 break;
             case MapEnumValues:
                 executeSqlFromFile("sql/mysql/procedures/procRefEnumValues.sql");
+                break;
+            case MapEntityInheritance:
+                executeSqlFromFile("sql/mysql/procedures/procBindParentToChild.sql");
                 break;
         }
     }

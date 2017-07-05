@@ -163,6 +163,11 @@ public abstract class JdsDbSqlite extends JdsDb {
         executeSqlFromFile("sql/sqlite/createStoreBlob.sql");
     }
 
+    @Override
+    protected void createRefInheritance() {
+        executeSqlFromFile("sql/sqlite/createRefInheritance.sql");
+    }
+
 
     @Override
     public String saveString() {
@@ -240,6 +245,14 @@ public abstract class JdsDbSqlite extends JdsDb {
     @Override
     public String mapEnumValues() {
         return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId,EnumSeq,EnumValue) VALUES(?,?,?);";
+    }
+
+    /**
+     * Map parents to child entities
+     * @return
+     */
+    public String mapParentToChild() {
+        return "INSERT OR REPLACE INTO JdsRefEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?);";
     }
 
     public String createOrAlterView(String viewName, String viewSql) {

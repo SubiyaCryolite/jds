@@ -21,13 +21,10 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class is responsible for the setup of SQL connections, default database
@@ -36,7 +33,7 @@ import java.util.Set;
  */
 public abstract class JdsDb implements JdsDbContract {
 
-    private final HashMap<Long, Class> classes = new HashMap<>();
+    private final HashMap<Long, Class<? extends JdsEntity>> classes = new HashMap<>();
 
     /**
      * A value indicating whether the underlying database implementation
@@ -92,6 +89,7 @@ public abstract class JdsDb implements JdsDbContract {
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreOldFieldValues);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityFields);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityEnums);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefInheritance);
     }
 
     /**
@@ -188,6 +186,9 @@ public abstract class JdsDb implements JdsDbContract {
                 break;
             case RefEnumValues:
                 createRefEnumValues();
+                break;
+            case RefInheritance:
+                createRefInheritance();
                 break;
             case RefFields:
                 createRefFields();
@@ -451,6 +452,11 @@ public abstract class JdsDb implements JdsDbContract {
     abstract void createRefEnumValues();
 
     /**
+     * Database specific SQL used to create the schema that stores inheritance information
+     */
+    abstract void createRefInheritance();
+
+    /**
      * Database specific SQL used to create the schema that stores field
      * definitions
      */
@@ -553,6 +559,25 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     /**
+     * @param connection     the SQL connection to use for DB operations
+     * @param parentEntities a collection of parent classes
+     * @param entityCode     the value representing the entity
+     */
+    private void mapParentEntities(Connection connection, List<Long> parentEntities, long entityCode) {
+        if (parentEntities.isEmpty()) return;
+        try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapParentToChild()) : connection.prepareStatement(mapParentToChild())) {
+            for (long parentEntitiy : parentEntities) {
+                    statement.setLong(1, parentEntitiy);
+                    statement.setLong(2, entityCode);
+                    statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
      * Binds all the enums attached to an entity
      *
      * @param connection the SQL connection to use for DB operations
@@ -617,18 +642,20 @@ public abstract class JdsDb implements JdsDbContract {
 
     public synchronized void map(Class<? extends JdsEntity> entity) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
+            JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
             if (!classes.containsKey(entityAnnotation.entityId())) {
                 classes.put(entityAnnotation.entityId(), entity);
                 //do the thing
                 try (Connection connection = getConnection()) {
                     connection.setAutoCommit(false);
+                    List<Long> parentEntities = new ArrayList<>();
                     JdsEntity jdsEntity = entity.newInstance();
+                    determineParents(entity, parentEntities);
                     mapClassName(connection, jdsEntity.getEntityCode(), jdsEntity.getEntityName());
                     mapClassFields(connection, jdsEntity.getEntityCode(), jdsEntity.properties);
                     mapClassFieldTypes(connection, jdsEntity.getEntityCode(), jdsEntity.types);
                     mapClassEnums(connection, jdsEntity.getEntityCode(), jdsEntity.allEnums);
+                    mapParentEntities(connection, parentEntities, jdsEntity.getEntityCode());
                     connection.commit();
                     jdsEntity = null;
                     if (printOutput())
@@ -642,8 +669,26 @@ public abstract class JdsDb implements JdsDbContract {
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }
 
+    public Collection<Class<? extends JdsEntity>> getMappedClasses()
+    {
+        return classes.values();
+    }
 
-    public Class<JdsEntity> getBoundClass(long serviceCode) {
+    private void determineParents(Class<? extends JdsEntity> entity, List<Long> parentEntities) {
+        addAllToList(entity.getSuperclass(), parentEntities);
+    }
+
+    private void addAllToList(Class<?> superclass, List<Long> parentEntities) {
+        if (superclass == null) return;
+        if (superclass.isAnnotationPresent(JdsEntityAnnotation.class)) {
+            JdsEntityAnnotation annotation = superclass.getAnnotation(JdsEntityAnnotation.class);
+            parentEntities.add(annotation.entityId());
+            addAllToList(superclass.getSuperclass(), parentEntities);
+        }
+    }
+
+
+    public Class<? extends JdsEntity> getBoundClass(long serviceCode) {
         return classes.get(serviceCode);
     }
 
@@ -817,6 +862,14 @@ public abstract class JdsDb implements JdsDbContract {
      */
     public String mapClassEnumsImplementation() {
         return "{call procBindEntityEnums(?,?)}";
+    }
+
+    /**
+     * Map parents to child entities
+     * @return
+     */
+    public String mapParentToChild() {
+        return "{call procBindParentToChild(?,?)}";
     }
 
     /**

@@ -340,7 +340,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     try {
                         if (parentEntity.objectArrayProperties.containsKey(entityId)) {
                             SimpleListProperty<JdsEntity> propertyList = parentEntity.objectArrayProperties.get(entityId);
-                            Class<JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
+                            Class<? extends JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
                             jdsEntity.setEntityGuid(entityGuid);
@@ -349,7 +349,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                             innerObjects.add(jdsEntity);
                         } else if (parentEntity.objectProperties.containsKey(entityId)) {
                             SimpleObjectProperty<JdsEntity> property = parentEntity.objectProperties.get(entityId);
-                            Class<JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
+                            Class<? extends JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
                             jdsEntity.setEntityGuid(entityGuid);
@@ -602,40 +602,56 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param allBatches
      * @param suppliedEntityGuids
      */
-    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) {
+    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) throws SQLException, ClassNotFoundException {
         int batchIndex = 0;
         int batchContents = 0;
-        //if no ids supplied we are looking for all instances of the entity
-        String sql1 = "SELECT EntityGuid FROM JdsStoreEntityOverview WHERE EntityId = ?";
-        try (Connection connection = jdsDataBase.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql1)) {
-            if (suppliedEntityGuids.length == 0) {
-                preparedStatement.setLong(1, code);
+
+        List<Long> entityAndChildren = new ArrayList<>();
+        entityAndChildren.add(code);
+
+        try (Connection connection = jdsDataBase.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?")) {
+                preparedStatement.setLong(1, entityAndChildren.get(0));
                 try (ResultSet rs = preparedStatement.executeQuery()) {
                     while (rs.next()) {
+                        entityAndChildren.add(rs.getLong("ChildEntityCode"));
+                    }
+                }
+            }
+
+            StringJoiner entityHeirarchy = new StringJoiner(",");
+            for (Long id : entityAndChildren)
+                entityHeirarchy.add(id + "");
+
+            //if no ids supplied we are looking for all instances of the entity
+            String rawSql = "SELECT EntityGuid FROM JdsStoreEntityOverview WHERE EntityId IN (%s)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(String.format(rawSql, entityHeirarchy))) {
+                if (suppliedEntityGuids.length == 0) {
+                    try (ResultSet rs = preparedStatement.executeQuery()) {
+                        while (rs.next()) {
+                            if (batchContents == batchSize) {
+                                batchIndex++;
+                                batchContents = 0;
+                            }
+                            if (batchContents == 0)
+                                allBatches.add(new ArrayList<>());
+                            allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
+                            batchContents++;
+                        }
+                    }
+                } else {
+                    for (String EntityGuid : suppliedEntityGuids) {
                         if (batchContents == batchSize) {
                             batchIndex++;
                             batchContents = 0;
                         }
                         if (batchContents == 0)
                             allBatches.add(new ArrayList<>());
-                        allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
+                        allBatches.get(batchIndex).add(EntityGuid);
                         batchContents++;
                     }
                 }
-            } else {
-                for (String EntityGuid : suppliedEntityGuids) {
-                    if (batchContents == batchSize) {
-                        batchIndex++;
-                        batchContents = 0;
-                    }
-                    if (batchContents == 0)
-                        allBatches.add(new ArrayList<>());
-                    allBatches.get(batchIndex).add(EntityGuid);
-                    batchContents++;
-                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
         }
     }
 

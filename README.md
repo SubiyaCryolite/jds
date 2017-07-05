@@ -22,13 +22,14 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 
 ## Features
 - Transparent persistence
-- Serialization of JavaFX bean values
-- Generics are supported
+- Serialization of JavaFX bean *values*
+- Full support for generics and inheritance
 - Easily integrates with new or existing databases
-- Supports MySQL, T-SQL, PostgreSQL and SQLite
-- Underlying database implemented using the Star Schema
 - Save, Updates and Deletes cascade to child objects and collections
 - Eager Loading is applied to embedded objects as well as on collections
+- Generation of views representing entities as conventional tables
+- Supports MySQL, T-SQL, PostgreSQL and SQLite
+- Underlying database implemented using the Star Schema
 
 # Maven Central
 You can search on The Central Repository with GroupId and ArtifactId Maven Search for [![Maven Search](https://img.shields.io/badge/io.github.subiyacryolite-jds-blue.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)

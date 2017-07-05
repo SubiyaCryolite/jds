@@ -3,10 +3,12 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
+import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -31,27 +33,30 @@ public class JdsView {
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation je = target.getAnnotation(JdsEntityAnnotation.class);
             long id = je.entityId();
-            String name = cleanViewName(je.entityName());
-            String viewName = getMainViewName(name);
+            String cleanName = cleanViewName(je.entityName());
+            String viewName = getMainViewName(cleanName);
+            List<Long> entityAndChildren = new ArrayList<>();
+            entityAndChildren.add(id);
             try (Connection connection = jdsDb.getConnection()) {
-                String arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, id, name);
-                String arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, id, name);
-                String arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, id, name);
-                String arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, id, name);
-                String arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, id, name);
-                String arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, id, name);
-                String booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, id, name);
-                //String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, id, name);, problem with PG implementation
-                String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, id, name);
-                String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, id, name);
-                String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, id, name);
-                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM_TEXT, id, name);
-                String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, id, name);
-                String intView = innerView(connection, jdsDb, JdsFieldType.INT, id, name);
-                String longView = innerView(connection, jdsDb, JdsFieldType.LONG, id, name);
-                String timeView = innerView(connection, jdsDb, JdsFieldType.TIME, id, name);
-                String textView = innerView(connection, jdsDb, JdsFieldType.TEXT, id, name);
-                String zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, id, name);
+                populateChildEntities(connection, entityAndChildren, id);
+                String arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, entityAndChildren, cleanName);
+                String arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, entityAndChildren, cleanName);
+                String arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, entityAndChildren, cleanName);
+                String arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, entityAndChildren, cleanName);
+                String arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, entityAndChildren, cleanName);
+                String arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, entityAndChildren, cleanName);
+                String booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, entityAndChildren, cleanName);
+                //String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, entityAndChildren, name);, problem with PG implementation
+                String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, entityAndChildren, cleanName);
+                String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, entityAndChildren, cleanName);
+                String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, entityAndChildren, cleanName);
+                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM_TEXT, entityAndChildren, cleanName);
+                String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, entityAndChildren, cleanName);
+                String intView = innerView(connection, jdsDb, JdsFieldType.INT, entityAndChildren, cleanName);
+                String longView = innerView(connection, jdsDb, JdsFieldType.LONG, entityAndChildren, cleanName);
+                String timeView = innerView(connection, jdsDb, JdsFieldType.TIME, entityAndChildren, cleanName);
+                String textView = innerView(connection, jdsDb, JdsFieldType.TEXT, entityAndChildren, cleanName);
+                String zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, entityAndChildren, cleanName);
                 String[] unused = new String[]{
                         arrayFloatView,
                         arrayIntView,
@@ -62,7 +67,7 @@ public class JdsView {
                         enumView};
                 createMainView(connection,
                         jdsDb,
-                        id,
+                        entityAndChildren,
                         viewName,
                         new String[]{
                                 booleanView,
@@ -85,12 +90,24 @@ public class JdsView {
         }
     }
 
+    private static void populateChildEntities(Connection connection, List<Long> entityAndChildren, long id) throws SQLException {
+        String sql = "SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    entityAndChildren.add(rs.getLong("ChildEntityCode"));
+                }
+            }
+        }
+    }
+
     /**
      * @param connection the SQL connection that will be used for this operation
      * @param viewName   the final name of this view
      * @param tables     the tables that will make up this view
      */
-    private static void createMainView(Connection connection, JdsDb jdsDb, long entityId, String viewName, String[] tables) {
+    private static void createMainView(Connection connection, JdsDb jdsDb, List<Long> entityId, String viewName, String[] tables) {
         String sql = "SELECT field.FieldName FROM \n" +
                 "JdsRefEntities entity\n" +
                 "LEFT JOIN JdsBindEntityFields bound\n" +
@@ -103,7 +120,7 @@ public class JdsView {
                 "ORDER BY field.FieldName";
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setLong(1, entityId);
+            preparedStatement.setLong(1, entityId.get(0));
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 fieldNames.add(resultSet.getString("FieldName"));
@@ -127,8 +144,13 @@ public class JdsView {
         for (int index = 0; index < tables.length; index++)
             stringJoiner.add(String.format("LEFT JOIN %s vwn%s ON overview.EntityGuid = vwn%s.EntityGuid", tables[index], index, index));
         stringBuilder.append(stringJoiner.toString());
-        stringBuilder.append("\nWHERE overview.EntityId = ");
-        stringBuilder.append(entityId);
+        stringBuilder.append("\nWHERE overview.EntityId IN (");
+
+        StringJoiner entityHeiarchy = new StringJoiner(",");
+        for (Long l : entityId)
+            entityHeiarchy.add(l + "");
+        stringBuilder.append(entityHeiarchy);
+        stringBuilder.append(")");
 
         String viewSql = jdsDb.createOrAlterView(viewName, stringBuilder.toString());
         try (PreparedStatement preparedStatement = connection.prepareStatement(viewSql)) {
@@ -147,7 +169,7 @@ public class JdsView {
      * @return whether the operation completed successfully
      * @throws IllegalArgumentException
      */
-    public static boolean delete(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws IllegalArgumentException {
+    public static boolean delete(final Class<? extends JdsEntity> target, final JdsDb jdsDb) throws IllegalArgumentException, SQLException, ClassNotFoundException {
         if (!jdsDb.supportsStatements())
             throw new IllegalArgumentException("The underlying database does not support the creation of views");
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
@@ -155,27 +177,25 @@ public class JdsView {
             String name = cleanViewName(je.entityName());
             String viewName = getMainViewName(name);
             try (Connection connection = jdsDb.getConnection()) {
-                dropView(connection, viewName);
-                dropView(connection, getViewName(JdsFieldType.ARRAY_FLOAT, name));
-                dropView(connection, getViewName(JdsFieldType.ARRAY_INT, name));
-                dropView(connection, getViewName(JdsFieldType.ARRAY_DOUBLE, name));
-                dropView(connection, getViewName(JdsFieldType.ARRAY_LONG, name));
-                dropView(connection, getViewName(JdsFieldType.ARRAY_TEXT, name));
-                dropView(connection, getViewName(JdsFieldType.ARRAY_DATE_TIME, name));
-                dropView(connection, getViewName(JdsFieldType.BOOLEAN, name));
-                dropView(connection, getViewName(JdsFieldType.BLOB, name));
-                dropView(connection, getViewName(JdsFieldType.DATE_TIME, name));
-                dropView(connection, getViewName(JdsFieldType.DATE, name));
-                dropView(connection, getViewName(JdsFieldType.DOUBLE, name));
-                dropView(connection, getViewName(JdsFieldType.ENUM_TEXT, name));
-                dropView(connection, getViewName(JdsFieldType.FLOAT, name));
-                dropView(connection, getViewName(JdsFieldType.INT, name));
-                dropView(connection, getViewName(JdsFieldType.LONG, name));
-                dropView(connection, getViewName(JdsFieldType.TIME, name));
-                dropView(connection, getViewName(JdsFieldType.TEXT, name));
-                dropView(connection, getViewName(JdsFieldType.ZONED_DATE_TIME, name));
-            } catch (Exception ex) {
-                ex.printStackTrace(System.err);
+                dropView(jdsDb, viewName);
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_FLOAT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_INT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_DOUBLE, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_LONG, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_TEXT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ARRAY_DATE_TIME, name));
+                dropView(jdsDb, getViewName(JdsFieldType.BOOLEAN, name));
+                //dropView(connection, getViewName(JdsFieldType.BLOB, name));
+                dropView(jdsDb, getViewName(JdsFieldType.DATE_TIME, name));
+                dropView(jdsDb, getViewName(JdsFieldType.DATE, name));
+                dropView(jdsDb, getViewName(JdsFieldType.DOUBLE, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ENUM_TEXT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.FLOAT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.INT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.LONG, name));
+                dropView(jdsDb, getViewName(JdsFieldType.TIME, name));
+                dropView(jdsDb, getViewName(JdsFieldType.TEXT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ZONED_DATE_TIME, name));
             }
             return true;
         } else {
@@ -199,12 +219,12 @@ public class JdsView {
      * @param connection the SQL connection that will be used for this operation
      * @param jdsDb      an instance of JdsDb
      * @param fieldType  the data-type of this view
-     * @param entityId   the id code of the JdsEntity
+     * @param entityIds  the id codes of the JdsEntity and its children
      * @param entityName the raw entity name
      * @return the created inner view name
      */
-    private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final long entityId, final String entityName) {
-        String sql = "select field.FieldName from \n" +
+    private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final List<Long> entityIds, final String entityName) {
+        String sql = "select distinct field.FieldName from \n" +
                 "JdsRefEntities entity\n" +
                 "left join JdsBindEntityFields bound\n" +
                 "on entity.EntityId = bound.EntityId\n" +
@@ -214,10 +234,11 @@ public class JdsView {
                 "on field.FieldId = type.TypeId\n" +
                 "where type.TypeName = ? and entity.EntityId = ?\n" +
                 "order by field.FieldName";
+
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, fieldType.toString());
-            ps.setLong(2, entityId);
+            ps.setLong(2, entityIds.get(0));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 fieldNames.add(rs.getString("FieldName"));
@@ -226,26 +247,30 @@ public class JdsView {
             ex.printStackTrace(System.err);
         }
         String viewName = getViewName(fieldType, entityName);
+
         StringBuilder stringBuilder = new StringBuilder("SELECT t.EntityGuid AS EntityGuid");
         if (!fieldNames.isEmpty()) {
             stringBuilder.append(",\n");
         }
-        StringJoiner sj = new StringJoiner(",\n");
+        StringJoiner fieldsOfInterest = new StringJoiner(",\n");
         for (String entry : fieldNames) {
-            sj.add(String.format("MAX(CASE WHEN t.FieldName = '%s' THEN t.Value ELSE NULL END) AS %s", entry, entry));
+            fieldsOfInterest.add(String.format("MAX(CASE WHEN t.FieldName = '%s' THEN t.Value ELSE NULL END) AS %s", entry, entry));
         }
-        stringBuilder.append(sj.toString());
+        stringBuilder.append(fieldsOfInterest);
         stringBuilder.append("\nFROM\t\n");
         stringBuilder.append("\t(\n");
         stringBuilder.append("\t\tselect src.EntityGuid, sField.FieldName, src.Value\n");
         stringBuilder.append("\t\tfrom ");
         stringBuilder.append(JdsTableLookup.tableFor(fieldType));
         stringBuilder.append("\tsrc\n");
-        stringBuilder.append("\t\tleft join JdsRefFields sField\n");
-        stringBuilder.append("\t\ton src.FieldId = sField.FieldId\n");
-        stringBuilder.append("\t\tleft join JdsRefFieldTypes sFieldType\n");
-        stringBuilder.append("\t\ton sField.FieldId = sFieldType.TypeId \n");
-        stringBuilder.append(String.format("\t\twhere src.FieldId IN (SELECT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId = %s and sFieldType.TypeName = '%s')\n", entityId, fieldType));
+        stringBuilder.append("\t\tleft Join JdsStoreEntityOverview ov on ov.EntityGuid = src.EntityGuid\n");
+        stringBuilder.append("\t\tleft join JdsRefFields sField on src.FieldId = sField.FieldId\n");
+        stringBuilder.append("\t\tleft join JdsRefFieldTypes sFieldType on sField.FieldId = sFieldType.TypeId \n");
+        StringJoiner entityHierarchy = new StringJoiner(",");
+        for (Long id : entityIds)
+            entityHierarchy.add("" + id);
+        stringBuilder.append(String.format("\t\tWHERE ov.EntityId IN (%s)\n", entityHierarchy));
+        stringBuilder.append(String.format("\t\tAND src.FieldId IN (SELECT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId in (%s) and sFieldType.TypeName = '%s')\n", entityHierarchy, fieldType));
         stringBuilder.append("\t) AS t\n");
         stringBuilder.append("\tGROUP BY t.EntityGuid");
 
@@ -277,20 +302,20 @@ public class JdsView {
      * @return
      */
     private static String getMainViewName(final String entityName) {
-        return String.format("vw_%s", entityName);
+        return String.format("_%s", entityName);
     }
 
     /**
      * Executes a view drop
      *
-     * @param connection the SQL connection that will be used for this operation
-     * @param name       the view to drop
+     * @param jdsDb the SQL connection that will be used for this operation
+     * @param name  the view to drop
      * @return whether the action completed successfully
      */
-    private static boolean dropView(final Connection connection, final String name) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(String.format("DROP VIEW %s", name))) {
+    private static boolean dropView(final JdsDb jdsDb, final String name) {
+        try (Connection connection = jdsDb.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(String.format("DROP VIEW %s%s", name, jdsDb.implementation == JdsImplementation.POSTGRES ? " CASCADE" : ""))) {
             return preparedStatement.execute();
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return false;
         }
     }

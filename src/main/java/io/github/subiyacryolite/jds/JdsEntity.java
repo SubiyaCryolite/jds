@@ -27,7 +27,7 @@ import java.time.ZonedDateTime;
  * This class allows for all mapping operations in JDS, it also uses
  * {@link JdsEntityBase JdsEntityBase} to store overview data
  */
-public abstract class JdsEntity extends JdsEntityBase {
+public abstract class JdsEntity extends JdsEntityBase{
 
     public JdsEntity() {
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
