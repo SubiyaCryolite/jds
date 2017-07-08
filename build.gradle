@@ -41,8 +41,7 @@ jar {
 
 test {
     //prevent problems with TravisCI
-    exclude 'io/github/subiyacryolite/jds/**'
-    exclude './**'
+    exclude '**'
 }
 
 task javadocJar(type: Jar) {
