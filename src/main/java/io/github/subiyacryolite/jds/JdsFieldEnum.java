@@ -20,37 +20,32 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Represents a field enum in JDS
  */
-public class JdsFieldEnum implements Externalizable {
+public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
 
     private static final HashMap<Long, JdsFieldEnum> fieldEnums = new HashMap<>();
     private final SimpleObjectProperty<JdsField> field;
-    private final LinkedList<String> sequenceValues;//keep order at all times
+    private final Class<T> enumType;
+    private Enum[] sequenceValues = new Enum[0];//keep order at all times
 
-    public JdsFieldEnum() {
+    public JdsFieldEnum(final Class<T> type) {
+        this.enumType = type;
         this.field = new SimpleObjectProperty();
-        this.sequenceValues = new LinkedList<>();
     }
 
-    public JdsFieldEnum(final JdsField jdsField, final String... values) {
-        this();
+    public JdsFieldEnum(final Class<T> type, final JdsField jdsField, final T... values) {
+        this(type);
         this.field.set(jdsField);
-        for (String value : values)
-            this.sequenceValues.addLast(value);
+        sequenceValues = new Enum[values.length];
+        System.arraycopy(values, 0, sequenceValues, 0, values.length);
         bind();
     }
 
-    public JdsFieldEnum(final JdsField jdsField, final Enum... values) {
-        this();
-        this.field.set(jdsField);
-        for (Enum value : values)
-            this.sequenceValues.addLast(value.toString());
-        bind();
+    public final Class<? extends Enum> getEnumType() {
+        return enumType;
     }
 
     public static JdsFieldEnum get(final JdsField jdsField) {
@@ -76,7 +71,7 @@ public class JdsFieldEnum implements Externalizable {
         return field.get();
     }
 
-    public LinkedList<String> getSequenceValues() {
+    public Enum[] getSequenceValues() {
         return this.sequenceValues;
     }
 
@@ -88,12 +83,16 @@ public class JdsFieldEnum implements Externalizable {
                 '}';
     }
 
-    public int getIndex(String enumText) {
-        return sequenceValues.indexOf(enumText);
+    public int indexOf(Enum enumText) {
+        for (int i = 0; i < sequenceValues.length; i++) {
+            if (sequenceValues[i] == enumText)
+                return i;
+        }
+        return -1;
     }
 
-    public String getValue(int index) {
-        return (index >= sequenceValues.size()) ? "" : sequenceValues.get(index);
+    public Enum valueOf(int index) {
+        return (index >= sequenceValues.length) ? null : sequenceValues[index];
     }
 
     @Override
@@ -105,6 +104,6 @@ public class JdsFieldEnum implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         field.set((JdsField) in.readObject());
-        sequenceValues.addAll((List<String>) in.readObject());
+        sequenceValues = (Enum[]) in.readObject();
     }
 }

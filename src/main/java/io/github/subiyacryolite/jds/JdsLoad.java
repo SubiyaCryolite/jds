@@ -305,12 +305,15 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     if (jdsEntity.integerArrayProperties.containsKey(fieldId)) {
                         SimpleListProperty<Integer> property = jdsEntity.integerArrayProperties.get(fieldId);
                         property.add(value);
-                    } else {
+                    }else {
                         Optional<JdsFieldEnum> fieldEnum = jdsEntity.enumProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
                         if (fieldEnum.isPresent()) {
                             JdsFieldEnum jdsFieldEnum = fieldEnum.get();
-                            SimpleListProperty<String> property = jdsEntity.enumProperties.get(jdsFieldEnum);
-                            property.add(jdsFieldEnum.getValue(value));
+                            SimpleListProperty<Enum> property = jdsEntity.enumProperties.get(jdsFieldEnum);
+                            Object[] enumValues = jdsFieldEnum.getEnumType().getEnumConstants();
+                            if (value < enumValues.length) {
+                                property.add((Enum) enumValues[value]);
+                            }
                         }
                     }
                 }

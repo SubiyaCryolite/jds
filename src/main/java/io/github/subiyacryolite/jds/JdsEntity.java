@@ -22,12 +22,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Iterator;
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
  * {@link JdsEntityBase JdsEntityBase} to store overview data
  */
-public abstract class JdsEntity extends JdsEntityBase{
+public abstract class JdsEntity extends JdsEntityBase {
 
     public JdsEntity() {
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
@@ -263,15 +264,15 @@ public abstract class JdsEntity extends JdsEntityBase{
         }
     }
 
-    protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<String> strings) {
-        if (strings == null) {
+    protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<? extends Enum> enums) {
+        if (enums == null) {
             return;
         }
         allEnums.add(jdsFieldEnum);
         if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_TEXT) {
             properties.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getName());
             types.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getType().toString());
-            enumProperties.put(jdsFieldEnum, strings);
+            enumProperties.put(jdsFieldEnum, (SimpleListProperty<Enum>) enums);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents field [" + jdsFieldEnum + "] to the correct type");
         }
@@ -305,5 +306,194 @@ public abstract class JdsEntity extends JdsEntityBase{
         } else {
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
+    }
+
+    /**
+     * Copy values from matching fields found in both objects
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity
+     */
+    public <T extends JdsEntity> void copy(T source) {
+        copyHeaderValues(source);
+        copyPropertyValues(source);
+        copyArrayValues(source);
+        copyEnumValues(source);
+        copyObjectAndObjectArrayValues(source);
+    }
+
+    /**
+     * Copy all header overview information
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity
+     */
+    private <T extends JdsEntity> void copyArrayValues(final T source) {
+        JdsEntityOverview dest = this.getOverview();
+        dest.setDateCreated(source.getOverview().getDateCreated());
+        dest.setDateModified(source.getOverview().getDateModified());
+        dest.setEntityGuid(source.getOverview().getEntityGuid());
+    }
+
+    /**
+     * Copy all property values
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity A valid JDSEntity
+     */
+    private <T extends JdsEntity> void copyPropertyValues(final T source) {
+        JdsEntity dest = this;
+        source.booleanProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.booleanProperties.containsKey(srcEntry.getKey())) {
+                dest.booleanProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.localDateTimeProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.localDateTimeProperties.containsKey(srcEntry.getKey())) {
+                dest.localDateTimeProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.zonedDateTimeProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.zonedDateTimeProperties.containsKey(srcEntry.getKey())) {
+                dest.zonedDateTimeProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.localTimeProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.localTimeProperties.containsKey(srcEntry.getKey())) {
+                dest.localTimeProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.localDateProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.localDateProperties.containsKey(srcEntry.getKey())) {
+                dest.localDateProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.stringProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.stringProperties.containsKey(srcEntry.getKey())) {
+                dest.stringProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.floatProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.floatProperties.containsKey(srcEntry.getKey())) {
+                dest.floatProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.doubleProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.doubleProperties.containsKey(srcEntry.getKey())) {
+                dest.doubleProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.longProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.longProperties.containsKey(srcEntry.getKey())) {
+                dest.longProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.integerProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.integerProperties.containsKey(srcEntry.getKey())) {
+                dest.integerProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+        source.blobProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.blobProperties.containsKey(srcEntry.getKey())) {
+                dest.blobProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+    }
+
+    /**
+     * Copy all property array values
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity A valid JDSEntity
+     */
+    private <T extends JdsEntity> void copyHeaderValues(final T source) {
+        JdsEntity dest = this;
+        source.stringArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.stringArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<String> entry = dest.stringArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+        source.dateTimeArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.dateTimeArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<LocalDateTime> entry = dest.dateTimeArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+        source.floatArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.floatArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<Float> entry = dest.floatArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+        source.doubleArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.doubleArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<Double> entry = dest.doubleArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+        source.longArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.longArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<Long> entry = dest.longArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+        source.integerArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.integerArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<Integer> entry = dest.integerArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+    }
+
+    /**
+     * Copy over object and object array values
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity
+     */
+    private <T extends JdsEntity> void copyObjectAndObjectArrayValues(T source) {
+        JdsEntity dest = this;
+        source.objectProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.objectProperties.containsKey(srcEntry.getKey())) {
+                dest.objectProperties.get(srcEntry.getKey()).set(srcEntry.getValue().get());
+            }
+        });
+
+        source.objectArrayProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            if (dest.objectArrayProperties.containsKey(srcEntry.getKey())) {
+                SimpleListProperty<JdsEntity> entry = dest.objectArrayProperties.get(srcEntry.getKey());
+                entry.clear();
+                entry.set(srcEntry.getValue().get());
+            }
+        });
+    }
+
+    /**
+     * Copy over object enum values
+     *
+     * @param source The entity to copy values from
+     * @param <T>    A valid JDSEntity
+     */
+    private <T extends JdsEntity> void copyEnumValues(T source) {
+        JdsEntity dest = this;
+        source.enumProperties.entrySet().parallelStream().forEach(srcEntry -> {
+            JdsFieldEnum key = srcEntry.getKey();
+            if (dest.enumProperties.containsKey(key)) {
+                SimpleListProperty<Enum> dstEntry = dest.enumProperties.get(srcEntry.getKey());
+                dstEntry.clear();
+                Iterator<? extends Enum> it = srcEntry.getValue().iterator();
+                while (it.hasNext()) {
+                    Enum nxt = it.next();
+                    dstEntry.add(nxt);
+                }
+            }
+        });
     }
 }

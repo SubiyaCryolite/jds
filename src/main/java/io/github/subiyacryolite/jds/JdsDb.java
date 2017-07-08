@@ -587,7 +587,7 @@ public abstract class JdsDb implements JdsDbContract {
     private final synchronized void mapClassEnumsImplementation(final Connection connection, final long entityId, final Set<JdsFieldEnum> fields) {
         try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapClassEnumsImplementation()) : connection.prepareStatement(mapClassEnumsImplementation())) {
             for (JdsFieldEnum field : fields) {
-                for (int index = 0; index < field.getSequenceValues().size(); index++) {
+                for (int index = 0; index < field.getSequenceValues().length; index++) {
                     statement.setLong(1, entityId);
                     statement.setLong(2, field.getField().getId());
                     statement.addBatch();
@@ -608,10 +608,10 @@ public abstract class JdsDb implements JdsDbContract {
     private final synchronized void mapEnumValues(final Connection connection, final Set<JdsFieldEnum> fieldEnums) {
         try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapEnumValues()) : connection.prepareStatement(mapEnumValues())) {
             for (JdsFieldEnum field : fieldEnums) {
-                for (int index = 0; index < field.getSequenceValues().size(); index++) {
+                for (int index = 0; index < field.getSequenceValues().length; index++) {
                     statement.setLong(1, field.getField().getId());
                     statement.setInt(2, index);
-                    statement.setString(3, field.getSequenceValues().get(index));
+                    statement.setString(3, field.getSequenceValues()[index].toString());
                     statement.addBatch();
                 }
             }

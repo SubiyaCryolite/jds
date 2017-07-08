@@ -58,7 +58,7 @@ abstract class JdsEntityBase implements Externalizable {
     protected final Map<Long, SimpleListProperty<Long>> longArrayProperties = new HashMap<>();
     protected final Map<Long, SimpleListProperty<Integer>> integerArrayProperties = new HashMap<>();
     //enums
-    protected final Map<JdsFieldEnum, SimpleListProperty<String>> enumProperties = new HashMap<>();
+    protected final Map<JdsFieldEnum, SimpleListProperty<Enum>> enumProperties = new HashMap<>();
     //objects
     protected final Map<Long, SimpleObjectProperty<JdsEntity>> objectProperties = new HashMap<>();
     //blobs

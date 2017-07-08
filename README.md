@@ -94,7 +94,7 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 |ARRAY_LONG|List\<Long\>|Lists of type Long|
 |ARRAY_TEXT|List\<String\>|Lists of type String|
 |ARRAY_DATE_TIME|List\<LocalDateTime\>|Lists of type LocalDateTime|
-|ENUM_TEXT|List\<String\>|Lists of type String|
+|ENUM_TEXT|List\<Enum\>|Lists of type Enum|
 
 I recommend defining your fields as static constants
 
@@ -130,12 +130,20 @@ public class NewTestFields
 ```
 Then, we can define our actual enum in the following manner.
 ```java
+public enum SexEnum
+{
+    MALE,
+    FEMALE,
+    OTHER
+}
+
+
 public class NewTestEnums
 {
-    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(NewTestFields.SEX_ENUM, "Male", "Female", "Other");
+    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(SexEnum.class, NewTestFields.SEX_ENUM, SexEnum.values());
 }
 ```
-Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<String\> in-memory containing one or more of the defined values.
+Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<Enum\> in-memory containing one or more of the defined values.
 
 ### 1.1.4 Binding Properties
 Depending on the type of field, JDS will require that you set you objects properties to one of the following JavaFX bean container types.

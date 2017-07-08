@@ -2,6 +2,7 @@ package io.github.subiyacryolite.jds.entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.enums.PrimaryAddress;
 import io.github.subiyacryolite.jds.enums.SimpleAddressEnums;
 import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -22,7 +23,7 @@ public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty city = new SimpleStringProperty("");
     private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
     private final SimpleStringProperty country = new SimpleStringProperty("");
-    private final SimpleListProperty<String> primaryAddress = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final SimpleListProperty<PrimaryAddress> primaryAddress = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final SimpleObjectProperty<ZonedDateTime> timeOfEntry = new SimpleObjectProperty(ZonedDateTime.now());
 
     public SimpleAddress() {
@@ -36,11 +37,11 @@ public class SimpleAddress extends JdsEntity {
         mapEnums(SimpleAddressEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
     }
 
-    public List<String> getPrimaryAddress() {
+    public List<PrimaryAddress> getPrimaryAddress() {
         return this.primaryAddress.get();
     }
 
-    public void setPrimaryAddress(ObservableList<String> value) {
+    public void setPrimaryAddress(ObservableList<PrimaryAddress> value) {
         this.primaryAddress.set(value);
     }
 
@@ -103,7 +104,8 @@ public class SimpleAddress extends JdsEntity {
     @Override
     public String toString() {
         return "SimpleAddress{" +
-                "streetName=" + getStreetName() +
+                "primaryAddress=" + getPrimaryAddress() +
+                ", streetName=" + getStreetName() +
                 ", plotNumber=" + getPlotNumber() +
                 ", area=" + getArea() +
                 ", city=" + getCity() +
