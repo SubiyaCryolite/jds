@@ -627,7 +627,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 entityHeirarchy.add(id + "");
 
             //if no ids supplied we are looking for all instances of the entity
-            String rawSql = "SELECT EntityGuid FROM JdsStoreEntityOverview WHERE EntityId IN (%s)";
+            String rawSql = "SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance WHERE EntityId IN (%s)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(String.format(rawSql, entityHeirarchy))) {
                 if (suppliedEntityGuids.length == 0) {
                     try (ResultSet rs = preparedStatement.executeQuery()) {

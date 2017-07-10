@@ -100,6 +100,11 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
     }
 
     @Override
+    protected void createStoreEntityInheritance() {
+        executeSqlFromFile("sql/tsql/createStoreEntityInheritance.sql");
+    }
+
+    @Override
     protected void createStoreText() {
         executeSqlFromFile("sql/tsql/createStoreText.sql");
     }

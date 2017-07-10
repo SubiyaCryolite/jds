@@ -21,5 +21,6 @@ CREATE TABLE JdsStoreOldFieldValues(
     FloatValue			FLOAT,
     DoubleValue			DOUBLE,
     LongValue			INT,
-    DateTimeValue		DATETIME
+    DateTimeValue		DATETIME,
+    BlobValue           BLOB
 );

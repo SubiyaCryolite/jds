@@ -11,10 +11,14 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreEntityOverview
-(
-    EntityGuid          TEXT,
-    DateCreated         TIMESTAMP,
-    DateModified        TIMESTAMP,
-    PRIMARY KEY         (EntityGuid)
-);
+CREATE PROCEDURE procStoreEntityOverviewV2(@EntityGuid NVARCHAR(48), @DateCreated DATETIME, @DateModified DATETIME)
+AS
+BEGIN
+	MERGE JdsStoreEntityOverview AS dest
+	USING (VALUES (@EntityGuid,@DateCreated,@DateModified)) AS src([EntityGuid],[DateCreated],[DateModified])
+	ON (src.EntityGuid = dest.EntityGuid)
+	WHEN MATCHED THEN
+		UPDATE SET dest.[DateModified] = src.[DateModified]
+	WHEN NOT MATCHED THEN
+		INSERT([EntityGuid], [DateCreated], [DateModified]) VALUES(src.EntityGuid, src.DateCreated, src.DateModified);
+END

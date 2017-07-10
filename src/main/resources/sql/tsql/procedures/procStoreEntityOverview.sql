@@ -18,7 +18,7 @@ BEGIN
 	USING (VALUES (@EntityGuid,@DateCreated,@DateModified,@EntityId)) AS src([EntityGuid],[DateCreated],[DateModified],[EntityId])
 	ON (src.EntityGuid = dest.EntityGuid)
 	WHEN MATCHED THEN
-		UPDATE SET dest.[EntityId] = src.[EntityId]
+		UPDATE SET dest.[EntityId] = src.[EntityId], dest.[DateModified] = src.[DateModified]
 	WHEN NOT MATCHED THEN
 		INSERT([EntityGuid], [DateCreated], [DateModified], [EntityId]) VALUES(src.EntityGuid, src.DateCreated, src.DateModified, src.EntityId);
 END

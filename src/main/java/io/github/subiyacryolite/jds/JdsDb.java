@@ -67,6 +67,7 @@ public abstract class JdsDb implements JdsDbContract {
     private void prepareDatabaseComponents() {
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEntities);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityOverview);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityInheritance);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityBinding);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEnumValues);
         prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefFields);
@@ -210,6 +211,9 @@ public abstract class JdsDb implements JdsDbContract {
                 break;
             case StoreEntityBinding:
                 createStoreEntityBinding();
+                break;
+            case StoreEntityInheritance:
+                createStoreEntityInheritance();
                 break;
         }
         prepareCustomDatabaseComponents(jdsComponent);
@@ -499,6 +503,12 @@ public abstract class JdsDb implements JdsDbContract {
     abstract void createStoreEntityBinding();
 
     /**
+     * Database specific SQL used to create the schema that stores entity to type
+     * bindings
+     */
+    abstract void createStoreEntityInheritance();
+
+    /**
      * Binds all the fields attached to an entity, updates the fields dictionary
      *
      * @param connection the SQL connection to use for DB operations
@@ -567,9 +577,9 @@ public abstract class JdsDb implements JdsDbContract {
         if (parentEntities.isEmpty()) return;
         try (PreparedStatement statement = supportsStatements() ? connection.prepareCall(mapParentToChild()) : connection.prepareStatement(mapParentToChild())) {
             for (long parentEntitiy : parentEntities) {
-                    statement.setLong(1, parentEntitiy);
-                    statement.setLong(2, entityCode);
-                    statement.addBatch();
+                statement.setLong(1, parentEntitiy);
+                statement.setLong(2, entityCode);
+                statement.addBatch();
             }
             statement.executeBatch();
         } catch (Exception ex) {
@@ -669,8 +679,7 @@ public abstract class JdsDb implements JdsDbContract {
             throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
     }
 
-    public Collection<Class<? extends JdsEntity>> getMappedClasses()
-    {
+    public Collection<Class<? extends JdsEntity>> getMappedClasses() {
         return classes.values();
     }
 
@@ -866,6 +875,7 @@ public abstract class JdsDb implements JdsDbContract {
 
     /**
      * Map parents to child entities
+     *
      * @return
      */
     public String mapParentToChild() {

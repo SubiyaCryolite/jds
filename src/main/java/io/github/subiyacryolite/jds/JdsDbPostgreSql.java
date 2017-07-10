@@ -84,6 +84,11 @@ public abstract class JdsDbPostgreSql extends JdsDb {
     }
 
     @Override
+    protected void createStoreEntityInheritance() {
+        executeSqlFromFile("sql/postgresql/createStoreEntityInheritance.sql");
+    }
+
+    @Override
     protected void createStoreText() {
         executeSqlFromFile("sql/postgresql/createStoreText.sql");
     }

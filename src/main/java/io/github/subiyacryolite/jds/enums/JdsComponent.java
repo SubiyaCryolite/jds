@@ -37,6 +37,7 @@ public enum JdsComponent {
     StoreEntityOverview("JdsStoreEntityOverview", "eo"),
     StoreEntityBinding("JdsStoreEntityBinding", "eb"),
     StoreBlob("JdsStoreBlob", "sb"),
+    StoreEntityInheritance("JdsStoreEntityInheritance","sei"),
     RefEntities("JdsRefEntities", "et"),
     RefEnumValues("JdsRefEnumValues", "env"),
     RefFields("JdsRefFields", "fd"),

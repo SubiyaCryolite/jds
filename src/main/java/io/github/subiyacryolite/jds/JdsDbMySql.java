@@ -84,6 +84,11 @@ public abstract class JdsDbMySql extends JdsDb {
     }
 
     @Override
+    protected void createStoreEntityInheritance() {
+        executeSqlFromFile("sql/mysql/createStoreEntityInheritance.sql");
+    }
+
+    @Override
     protected void createStoreText() {
         executeSqlFromFile("sql/mysql/createStoreText.sql");
     }

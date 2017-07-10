@@ -11,10 +11,11 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreEntityOverview
-(
-    EntityGuid          TEXT,
-    DateCreated         TIMESTAMP,
-    DateModified        TIMESTAMP,
-    PRIMARY KEY         (EntityGuid)
-);
+CREATE FUNCTION procStoreEntityOverviewV2(pEntityGuid VARCHAR(48), pDateCreated TIMESTAMP, pDateModified TIMESTAMP)
+RETURNS VOID AS $$
+BEGIN
+	INSERT INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified)
+    VALUES (pEntityGuid, pDateCreated, pDateModified)
+    ON CONFLICT (EntityGuid) DO UPDATE SET DateModified = pDateModified;
+END;
+$$ LANGUAGE plpgsql;

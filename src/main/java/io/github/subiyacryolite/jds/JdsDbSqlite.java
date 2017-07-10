@@ -46,6 +46,11 @@ public abstract class JdsDbSqlite extends JdsDb {
     }
 
     @Override
+    protected void createStoreEntityInheritance() {
+        executeSqlFromFile("sql/sqlite/createStoreEntityInheritance.sql");
+    }
+
+    @Override
     protected void createStoreText() {
         executeSqlFromFile("sql/sqlite/createStoreText.sql");
     }

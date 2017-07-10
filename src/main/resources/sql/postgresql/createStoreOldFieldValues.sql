@@ -21,5 +21,6 @@ CREATE TABLE JdsStoreOldFieldValues(
     FloatValue			REAL,
     DoubleValue			FLOAT,
     LongValue			BIGINT,
-    DateTimeValue		TIMESTAMP
+    DateTimeValue		TIMESTAMP,
+    BlobValue           BYTEA
 );
