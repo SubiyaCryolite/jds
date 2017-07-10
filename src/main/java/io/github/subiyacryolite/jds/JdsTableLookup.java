@@ -15,6 +15,7 @@ class JdsTableLookup {
             case FLOAT:
                 return JdsComponent.StoreFloat.getName();
             case INT:
+            case BOOLEAN:
                 return JdsComponent.StoreInteger.getName();
             case DOUBLE:
                 return JdsComponent.StoreDouble.getName();
@@ -38,8 +39,6 @@ class JdsTableLookup {
                 return JdsComponent.StoreDateTimeArray.getName();
             case ENUM_TEXT:
                 return JdsComponent.StoreTextArray.getName();
-            case BOOLEAN:
-                return JdsComponent.StoreInteger.getName();
             case ZONED_DATE_TIME:
                 return JdsComponent.StoreZonedDateTime.getName();
             case DATE:
@@ -61,6 +60,7 @@ class JdsTableLookup {
             case BLOB:
                 return StoreBlob.getName();
             case INT:
+            case BOOLEAN:
                 return StoreInteger.getName();
             case DOUBLE:
                 return StoreDouble.getName();
@@ -99,6 +99,7 @@ class JdsTableLookup {
             case BLOB:
                 return StoreBlob.getPrefix();
             case INT:
+            case BOOLEAN:
                 return StoreInteger.getPrefix();
             case DOUBLE:
                 return StoreDouble.getPrefix();
