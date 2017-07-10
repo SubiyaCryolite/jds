@@ -6,14 +6,13 @@ import io.github.subiyacryolite.jds.connectivity.JdsDbPostgreSqlmplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbSqliteImplementation;
 import io.github.subiyacryolite.jds.connectivity.JdsDbTransactionalSqllmplementation;
 import io.github.subiyacryolite.jds.entities.*;
+import io.github.subiyacryolite.jds.enums.PrimaryAddress;
 import org.junit.Test;
 
 import java.io.*;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.github.subiyacryolite.jds.enums.SimpleAddressEnums.PRIMARY_ADDRESS_ENUM;
 
 /**
  * Created by ifunga on 08/04/2017.
@@ -44,37 +43,33 @@ public abstract class BaseTestConfig {
         jdsDb.map(SimpleAddressBook.class);
     }
 
-
-    @Test
-    public void initialiseSqlLiteBackend() {
-        jdsDb = new JdsDbSqliteImplementation();
+    private void initJds() {
         jdsDb.init();
-        jdsDb.logEdits(false);
+        jdsDb.logEdits(true);
         initialiseJdsClasses();
     }
 
     @Test
+    public void initialiseSqlLiteBackend() {
+        jdsDb = new JdsDbSqliteImplementation();
+        initJds();
+    }
+    @Test
     public void initialisePostgeSqlBackend() {
         jdsDb = new JdsDbPostgreSqlmplementation();
-        jdsDb.init();
-        jdsDb.logEdits(false);
-        initialiseJdsClasses();
+        initJds();
     }
 
     @Test
     public void initialiseTSqlBackend() {
         jdsDb = new JdsDbTransactionalSqllmplementation();
-        jdsDb.init();
-        jdsDb.logEdits(false);
-        initialiseJdsClasses();
+        initJds();
     }
 
     @Test
     public void initialiseMysqlBackend() {
         jdsDb = new JdsDbMySqlImplementation();
-        jdsDb.init();
-        jdsDb.logEdits(false);
-        initialiseJdsClasses();
+        initJds();
     }
 
     protected <T> void serialize(final T objectToSerialize, final String fileName) {
@@ -120,7 +115,7 @@ public abstract class BaseTestConfig {
         primaryAddress.setPlotNumber(23);
         primaryAddress.setProvinceOrState("Southern");
         primaryAddress.setStreetName("East Street");
-        primaryAddress.getPrimaryAddress().add(PRIMARY_ADDRESS_ENUM.getValue(0));
+        primaryAddress.getPrimaryAddress().add(PrimaryAddress.YES);
 
         SimpleAddress secondAddress = new SimpleAddress();
         secondAddress.setEntityGuid("secondAddress"); //setting a custom Entity Guid
@@ -131,7 +126,7 @@ public abstract class BaseTestConfig {
         secondAddress.setPlotNumber(2);
         secondAddress.setProvinceOrState("Lusaka");
         secondAddress.setStreetName("West Street");
-        secondAddress.getPrimaryAddress().add(PRIMARY_ADDRESS_ENUM.getValue(1));
+        secondAddress.getPrimaryAddress().add(PrimaryAddress.NO);
 
         SimpleAddress thirdAddress = new SimpleAddress();
         thirdAddress.setEntityGuid("thirdAddress"); //setting a custom Entity Guid
@@ -142,7 +137,7 @@ public abstract class BaseTestConfig {
         thirdAddress.setPlotNumber(9);
         thirdAddress.setProvinceOrState("Copperbelt");
         thirdAddress.setStreetName("West Street");
-        thirdAddress.getPrimaryAddress().add(PRIMARY_ADDRESS_ENUM.getValue(1));
+        thirdAddress.getPrimaryAddress().add(PrimaryAddress.NO);
 
         SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
         simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
