@@ -251,19 +251,24 @@ public class JdsSave implements Callable<Boolean> {
     private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) {
         int record = 0;
         int recordTotal = overviews.size();
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveOverview()) : connection.prepareStatement(jdsDb.saveOverview())) {
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveOverview()) : connection.prepareStatement(jdsDb.saveOverview());
+             PreparedStatement inheritance = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveOverviewInheritance()) : connection.prepareStatement(jdsDb.saveOverviewInheritance())) {
             connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
-                //EntityGuid,ParentEntityGuid,DateCreated,DateModified,EntityId
+                //Entity Overview
                 upsert.setString(1, overview.getEntityGuid());
                 upsert.setTimestamp(2, Timestamp.valueOf(overview.getDateCreated()));
                 upsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now())); //always update date modified!!!
-                upsert.setLong(4, overview.getEntityCode());
                 upsert.addBatch();
+                //Entity Inheritance
+                inheritance.setString(1, overview.getEntityGuid());
+                inheritance.setLong(2, overview.getEntityCode());
+                inheritance.addBatch();
                 if (jdsDb.printOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
+            inheritance.executeBatch();
             upsert.executeBatch();
             connection.commit();
         } catch (Exception ex) {

@@ -11,9 +11,12 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreEntityInheritance
-(
-    EntityGuid       TEXT,
-    EntityId         BIGINT,
-    CONSTRAINT unique_entity_inheritance UNIQUE (EntityGuid,EntityId)
-);
+CREATE PROCEDURE procStoreEntityInheritance(@EntityGuid NVARCHAR(48), @EntityId BIGINT)
+AS
+BEGIN
+	MERGE JdsStoreEntityInheritance AS dest
+	USING (VALUES (@EntityGuid, @EntityId)) AS src([EntityGuid], [EntityId])
+	ON (src.EntityGuid = dest.EntityGuid AND src.EntityId = dest.EntityId)
+	WHEN NOT MATCHED THEN
+		INSERT([EntityGuid], [EntityId]) VALUES(src.EntityGuid, src.EntityId);
+END

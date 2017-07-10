@@ -138,6 +138,11 @@ public abstract class JdsDb implements JdsDbContract {
      */
     private final void initiateDatabaseComponent(JdsComponent jdsComponent) {
         switch (jdsComponent) {
+            case StoreEntityInheritance:
+                createStoreEntityInheritance();
+                //one time seamless migration from v1
+                executeSqlFromString("INSERT INTO JdsStoreEntityInheritance(EntityGuid, EntityId) SELECT EntityGuid, EntityId FROM JdsStoreEntityOverview");
+                break;
             case StoreTextArray:
                 createStoreTextArray();
                 break;
@@ -212,9 +217,7 @@ public abstract class JdsDb implements JdsDbContract {
             case StoreEntityBinding:
                 createStoreEntityBinding();
                 break;
-            case StoreEntityInheritance:
-                createStoreEntityInheritance();
-                break;
+
         }
         prepareCustomDatabaseComponents(jdsComponent);
     }
@@ -279,8 +282,16 @@ public abstract class JdsDb implements JdsDbContract {
      * @param fileName the file containing SQL to find
      */
     protected final void executeSqlFromFile(String fileName) {
+        try (InputStream rs=this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+            String innerSql = fileToString(rs);
+            executeSqlFromString(innerSql);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    protected final void executeSqlFromString(String innerSql) {
         try (Connection connection = getConnection(); Statement innerStmt = connection.createStatement();) {
-            String innerSql = fileToString(this.getClass().getClassLoader().getResourceAsStream(fileName));
             innerStmt.executeUpdate(innerSql);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -844,7 +855,16 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveOverview() {
-        return "{call procStoreEntityOverview(?,?,?,?)}";
+        return "{call procStoreEntityOverviewV2(?,?,?)}";
+    }
+
+    /**
+     * SQL call to save entity overview values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    public String saveOverviewInheritance() {
+        return "{call procStoreEntityInheritance(?,?)}";
     }
 
     /**

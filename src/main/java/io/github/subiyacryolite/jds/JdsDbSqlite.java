@@ -221,7 +221,12 @@ public abstract class JdsDbSqlite extends JdsDb {
 
     @Override
     public String saveOverview() {
-        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,DateCreated,DateModified,EntityId) VALUES(?,?,?,?)";
+        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,DateCreated,DateModified) VALUES(?,?,?)";
+    }
+
+    @Override
+    public String saveOverviewInheritance() {
+        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid,EntityId) VALUES(?,?)";
     }
 
     @Override
@@ -254,6 +259,7 @@ public abstract class JdsDbSqlite extends JdsDb {
 
     /**
      * Map parents to child entities
+     *
      * @return
      */
     public String mapParentToChild() {

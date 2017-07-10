@@ -15,5 +15,5 @@ CREATE PROCEDURE procStoreEntityOverviewV2(IN pEntityGuid VARCHAR(48), IN pDateC
 BEGIN
 	INSERT INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified)
     VALUES (pEntityGuid, pDateCreated, pDateModified)
-    ON DUPLICATE KEY UPDATE DateModified = pDateModified
+    ON DUPLICATE KEY UPDATE DateModified = pDateModified;
 END

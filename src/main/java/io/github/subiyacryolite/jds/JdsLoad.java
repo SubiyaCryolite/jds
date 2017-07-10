@@ -601,16 +601,16 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
     /**
      * @param jdsDataBase
      * @param batchSize
-     * @param code
+     * @param entityId
      * @param allBatches
      * @param suppliedEntityGuids
      */
-    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long code, final List<List<String>> allBatches, final String[] suppliedEntityGuids) throws SQLException, ClassNotFoundException {
+    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long entityId, final List<List<String>> allBatches, final String[] suppliedEntityGuids) throws SQLException, ClassNotFoundException {
         int batchIndex = 0;
         int batchContents = 0;
 
         List<Long> entityAndChildren = new ArrayList<>();
-        entityAndChildren.add(code);
+        entityAndChildren.add(entityId);
 
         try (Connection connection = jdsDataBase.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?")) {
@@ -683,10 +683,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
     @Override
     public List<T> call() throws Exception {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
-        long code = annotation.entityId();
+        long entityId = annotation.entityId();
         List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
         List<T> castCollection = collections;
-        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, code, allBatches, entityGuids);
+        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, allBatches, entityGuids);
         boolean initialisePrimitives = true;
         boolean initialiseDatesAndTimes = true;
         boolean initialiseObjects = true;

@@ -15,6 +15,5 @@ CREATE TABLE JdsStoreEntityInheritance
 (
     EntityGuid       VARCHAR(48),
     EntityId         BIGINT,
-    PRIMARY KEY     (EntityGuid,EntityId),
-    FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    CONSTRAINT unique_entity_inheritance UNIQUE (EntityGuid,EntityId)
 );

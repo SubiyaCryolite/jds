@@ -55,6 +55,8 @@ public enum JdsComponent {
     SaveBlob("procStoreBlob", ""),
     SaveZonedDateTime("procStoreZonedDateTime", ""),
     SaveEntity("procStoreEntityOverview", ""),
+    SaveEntityV2("procStoreEntityOverviewV2", ""),
+    SaveEntityInheritance("procStoreEntityInheritance",""),
     MapEntityInheritance("procBindParentToChild", ""),
     MapEntityFields("procBindEntityFields", ""),
     MapEntityEnums("procBindEntityEnums", ""),
