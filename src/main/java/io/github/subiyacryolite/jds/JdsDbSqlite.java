@@ -13,6 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -43,6 +44,22 @@ public abstract class JdsDbSqlite extends JdsDb {
             ex.printStackTrace(System.err);
         }
         return toReturn;
+    }
+
+    public int columnExists(String tableName, String columnName) {
+        String sql = String.format("PRAGMA table_info('%s')", tableName);
+        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String column = resultSet.getString("name");
+                if (column.equalsIgnoreCase("columnName"))
+                    return 1; //does exist
+            }
+            return 0;//doesn't exist
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+            return 0;//doesn't exist
+        }
     }
 
     @Override

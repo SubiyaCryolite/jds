@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
@@ -23,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 
@@ -59,6 +61,10 @@ public abstract class JdsDb implements JdsDbContract {
     public void init() {
         prepareDatabaseComponents();
         prepareCustomDatabaseComponents();
+        //upgrade tasks
+        JdsUpdateHelper.v1ToV2MigrateData(this);
+        JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(this);
+        JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(this);
     }
 
     /**
@@ -140,8 +146,6 @@ public abstract class JdsDb implements JdsDbContract {
         switch (jdsComponent) {
             case StoreEntityInheritance:
                 createStoreEntityInheritance();
-                //one time seamless migration from v1
-                executeSqlFromString("INSERT INTO JdsStoreEntityInheritance(EntityGuid, EntityId) SELECT EntityGuid, EntityId FROM JdsStoreEntityOverview");
                 break;
             case StoreTextArray:
                 createStoreTextArray();
@@ -276,13 +280,41 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     /**
+     * Checks if the specified index exists the the database
+     *
+     * @param columnName the column to look up
+     * @param tableName  the table to inspect
+     * @return true if the specified index exists the the database
+     */
+    private final boolean doesColumnExist(String tableName, String columnName) {
+        int answer = columnExists(tableName, columnName);
+        return answer == 1;
+    }
+
+    protected int columnExistsCommonImpl(String tableName, String columnName, int toReturn, String sql) {
+        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+            preparedStatement.setString("tableName", tableName);
+            preparedStatement.setString("columnName", columnName);
+            preparedStatement.setString("tableCatalog", connection.getCatalog());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
+        return toReturn;
+    }
+
+    /**
      * Executes SQL found in the specified file. We recommend having one
      * statement per file.
      *
      * @param fileName the file containing SQL to find
      */
     protected final void executeSqlFromFile(String fileName) {
-        try (InputStream rs=this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+        try (InputStream rs = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
             String innerSql = fileToString(rs);
             executeSqlFromString(innerSql);
         } catch (Exception ex) {
@@ -366,6 +398,18 @@ public abstract class JdsDb implements JdsDbContract {
      * @return 1 if the specified index exists in the database
      */
     public int indexExists(String indexName) {
+        return 0;
+    }
+
+    /**
+     * Database specific check to see if the specified column exists in the
+     * database
+     *
+     * @param tableName
+     * @param columnName
+     * @return
+     */
+    public int columnExists(String tableName, String columnName) {
         return 0;
     }
 

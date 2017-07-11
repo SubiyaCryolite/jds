@@ -13,12 +13,12 @@
 */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
@@ -34,10 +34,10 @@ public abstract class JdsDbMySql extends JdsDb {
     @Override
     public int tableExists(String tableName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, tableName);
-            preparedStatement.setString(2, connection.getCatalog());
+        String sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = :tableName AND TABLE_SCHEMA = :tableSchema";
+        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+            preparedStatement.setString("tableName", tableName);
+            preparedStatement.setString("tableSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -51,10 +51,10 @@ public abstract class JdsDbMySql extends JdsDb {
 
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ? AND ROUTINE_SCHEMA = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, procedureName);
-            preparedStatement.setString(2, connection.getCatalog());
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName AND ROUTINE_SCHEMA = :procedureSchema";
+        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+            preparedStatement.setString("procedureName", procedureName);
+            preparedStatement.setString("procedureSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -68,10 +68,10 @@ public abstract class JdsDbMySql extends JdsDb {
 
     public int viewExists(String viewName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE AND TABLE_NAME = ? AND TABLE_SCHEMA = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, viewName);
-            preparedStatement.setString(2, connection.getCatalog());
+        String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = :viewName AND TABLE_SCHEMA = :viewSchema";
+        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+            preparedStatement.setString("viewName", viewName);
+            preparedStatement.setString("viewSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -80,6 +80,13 @@ public abstract class JdsDbMySql extends JdsDb {
             toReturn = 0;
             ex.printStackTrace(System.err);
         }
+        return toReturn;
+    }
+
+    public int columnExists(String tableName, String columnName) {
+        int toReturn = 0;
+        String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";
+        toReturn = columnExistsCommonImpl(tableName, columnName, toReturn, sql);
         return toReturn;
     }
 

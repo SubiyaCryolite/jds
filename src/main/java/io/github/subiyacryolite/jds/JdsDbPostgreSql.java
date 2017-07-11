@@ -13,6 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
@@ -80,6 +81,13 @@ public abstract class JdsDbPostgreSql extends JdsDb {
             toReturn = 0;
             ex.printStackTrace(System.err);
         }
+        return toReturn;
+    }
+
+    public int columnExists(String tableName, String columnName) {
+        int toReturn = 0;
+        String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";
+        toReturn = columnExistsCommonImpl(tableName, columnName, toReturn, sql);
         return toReturn;
     }
 

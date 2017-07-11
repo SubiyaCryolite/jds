@@ -108,7 +108,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
         String sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         String sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s) ORDER BY ParentEntityGuid", questionsString);
         //overviews
-        String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, EntityId FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
+        String sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString);
         try (Connection connection = jdsDb.getConnection();
              PreparedStatement blobs = connection.prepareStatement(sqlBlobs);
              PreparedStatement strings = connection.prepareStatement(sqlTextValues);

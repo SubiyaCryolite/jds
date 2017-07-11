@@ -13,6 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
@@ -96,6 +97,13 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
             toReturn = 0;
             ex.printStackTrace(System.err);
         }
+        return toReturn;
+    }
+
+    public int columnExists(String tableName, String columnName) {
+        int toReturn = 0;
+        String sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = :tableCatalog and TABLE_NAME = :tableName and COLUMN_NAME = :columnName";
+        toReturn = columnExistsCommonImpl(tableName, columnName, toReturn, sql);
         return toReturn;
     }
 

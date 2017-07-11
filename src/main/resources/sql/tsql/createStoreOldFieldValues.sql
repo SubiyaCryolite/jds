@@ -11,16 +11,16 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreOldFieldValues(
-    EntityGuid			NVARCHAR(48),
-    FieldId				BIGINT,
-    DateOfModification	DATETIME DEFAULT GETDATE(),
-    Sequence            INTEGER,
-    TextValue			NVARCHAR(MAX),
-    IntegerValue		INTEGER,
-    FloatValue			REAL,
-    DoubleValue			FLOAT,
-    LongValue			INTEGER,
-    DateTimeValue		DATETIME,
-    BlobValue           VARBINARY(MAX)
+CREATE TABLE JdsStoreOldFieldValues (
+  EntityGuid         NVARCHAR(48),
+  FieldId            BIGINT,
+  DateOfModification DATETIME DEFAULT GETDATE(),
+  Sequence           INTEGER,
+  TextValue          NVARCHAR(MAX),
+  IntegerValue       INTEGER,
+  FloatValue         REAL,
+  DoubleValue        FLOAT,
+  LongValue          INTEGER,
+  DateTimeValue      DATETIME,
+  BlobValue          VARBINARY(MAX)
 );
