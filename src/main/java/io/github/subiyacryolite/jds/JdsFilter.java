@@ -126,7 +126,7 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public String toQuery() {
         StringBuilder main = new StringBuilder();
-        main.append("SELECT * FROM JdsStoreEntityOverview eo\n");
+        main.append("SELECT DISTINCT eo.EntityGuid FROM JdsStoreEntityInheritance eo\n");
         main.append("JOIN JdsRefEntities entity ON eo.EntityId = entity.EntityId");
         if (tablesToJoin.size() > 0) {
             main.append(" JOIN ");

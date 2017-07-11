@@ -52,7 +52,7 @@ public abstract class JdsDbSqlite extends JdsDb {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String column = resultSet.getString("name");
-                if (column.equalsIgnoreCase("columnName"))
+                if (column.equalsIgnoreCase(columnName))
                     return 1; //does exist
             }
             return 0;//doesn't exist

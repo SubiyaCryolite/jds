@@ -295,10 +295,9 @@ public class JdsSave implements Callable<Boolean> {
                 for (Map.Entry<Long, SimpleBlobProperty> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    byte[] value = recordEntry.getValue().get();
                     upsert.setString(1, entityGuid);
                     upsert.setLong(2, fieldId);
-                    upsert.setBytes(3, value);
+                    upsert.setBlob(3, recordEntry.getValue().getResourceAsStream());
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize);
