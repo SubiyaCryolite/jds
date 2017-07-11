@@ -144,13 +144,12 @@ public class JdsView {
         for (int index = 0; index < tables.length; index++)
             stringJoiner.add(String.format("LEFT JOIN %s vwn%s ON overview.EntityGuid = vwn%s.EntityGuid", tables[index], index, index));
         stringBuilder.append(stringJoiner.toString());
-        stringBuilder.append("\nWHERE overview.EntityId IN (");
-
+        stringBuilder.append("\nWHERE overview.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (");
         StringJoiner entityHeiarchy = new StringJoiner(",");
         for (Long l : entityId)
             entityHeiarchy.add(l + "");
         stringBuilder.append(entityHeiarchy);
-        stringBuilder.append(")");
+        stringBuilder.append("))");
 
         String viewSql = jdsDb.createOrAlterView(viewName, stringBuilder.toString());
         try (PreparedStatement preparedStatement = connection.prepareStatement(viewSql)) {
@@ -259,18 +258,18 @@ public class JdsView {
         stringBuilder.append(fieldsOfInterest);
         stringBuilder.append("\nFROM\t\n");
         stringBuilder.append("\t(\n");
-        stringBuilder.append("\t\tselect src.EntityGuid, sField.FieldName, src.Value\n");
-        stringBuilder.append("\t\tfrom ");
+        stringBuilder.append("\t\tSELECT src.EntityGuid, sField.FieldName, src.Value\n");
+        stringBuilder.append("\t\tFROM ");
         stringBuilder.append(JdsTableLookup.tableFor(fieldType));
         stringBuilder.append("\tsrc\n");
-        stringBuilder.append("\t\tleft Join JdsStoreEntityOverview ov on ov.EntityGuid = src.EntityGuid\n");
-        stringBuilder.append("\t\tleft join JdsRefFields sField on src.FieldId = sField.FieldId\n");
-        stringBuilder.append("\t\tleft join JdsRefFieldTypes sFieldType on sField.FieldId = sFieldType.TypeId \n");
+        stringBuilder.append("\t\t JOIN JdsStoreEntityOverview ov ON ov.EntityGuid = src.EntityGuid");
         StringJoiner entityHierarchy = new StringJoiner(",");
         for (Long id : entityIds)
             entityHierarchy.add("" + id);
-        stringBuilder.append(String.format("\t\tWHERE ov.EntityId IN (%s)\n", entityHierarchy));
-        stringBuilder.append(String.format("\t\tAND src.FieldId IN (SELECT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId in (%s) and sFieldType.TypeName = '%s')\n", entityHierarchy, fieldType));
+        stringBuilder.append(String.format(" AND ov.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (%s))\n", entityHierarchy));
+        stringBuilder.append("\t\tJOIN JdsRefFields sField on src.FieldId = sField.FieldId\n");
+        stringBuilder.append("\t\tJOIN JdsRefFieldTypes sFieldType on sField.FieldId = sFieldType.TypeId \n");
+        stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId in (%s) and sFieldType.TypeName = '%s')\n", entityHierarchy, fieldType));
         stringBuilder.append("\t) AS t\n");
         stringBuilder.append("\tGROUP BY t.EntityGuid");
 
