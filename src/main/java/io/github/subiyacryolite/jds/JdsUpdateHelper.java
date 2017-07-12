@@ -9,7 +9,7 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation;
 class JdsUpdateHelper {
 
     public static void v1Tov2DropColumnStoreEntityOverview(JdsDb jdsDb) {
-        //SQLite does NOT make dropping columns either
+        //SQLite does NOT make dropping columns easy
         switch (jdsDb.getImplementation()) {
             case TSQL:
             case POSTGRES:
@@ -23,7 +23,6 @@ class JdsUpdateHelper {
 
     public static void v1Tov2AddColumnStoreOldFieldValues(JdsDb jdsDb) {
         if (jdsDb.columnExists("JdsStoreOldFieldValues", "BlobValue") == 0) {
-            //does not exist create
             switch (jdsDb.getImplementation()) {
                 case MYSQL:
                     jdsDb.executeSqlFromString("ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB;");
