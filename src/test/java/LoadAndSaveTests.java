@@ -43,6 +43,12 @@ public class LoadAndSaveTests extends BaseTestConfig {
     }
 
     @Test
+    public void callableSqlLiteLoadNoExisting() throws Exception {
+        initialiseSqlLiteBackend();
+        loadNonExisting();
+    }
+
+    @Test
     public void callableMysqlLoadSave() throws Exception {
         initialiseMysqlBackend();
         save();
@@ -92,6 +98,16 @@ public class LoadAndSaveTests extends BaseTestConfig {
         while (!saving.isDone())
             System.out.println("Waiting for operation 1 to complete");
         System.out.printf("Saved? %s\n", saving.get());
+    }
+
+    @Test
+    public void loadNonExisting() throws ExecutionException, InterruptedException {
+        Callable<List<JdsExample>> loadNonExistingCallable = new JdsLoad(jdsDb, JdsExample.class,"DOES_NOT_EXIST");
+        FutureTask<List<JdsExample>> loadNonExistingTask = new FutureTask(loadNonExistingCallable);
+        while (!loadNonExistingTask.isDone())
+            System.out.println("Waiting for operation 1 to complete");
+        List<JdsExample> loadNonExistingResult = loadNonExistingTask.get();
+        System.out.println(loadNonExistingResult);
     }
 
     @Test

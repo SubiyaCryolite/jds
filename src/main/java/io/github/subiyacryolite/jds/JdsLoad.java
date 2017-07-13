@@ -41,31 +41,31 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
     private final List<T> collections = new ArrayList<>();
     private final JdsDb jdsDb;
     private final Class<T> referenceType;
-    private final String[] entityGuids;
+    private final String[] searchGuids;
     private Comparator<T> comparator;
 
     /**
      * @param jdsDb
      * @param referenceType
      * @param comparator
-     * @param entityGuids
+     * @param searchGuids
      */
-    public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, Comparator<T> comparator, final String... entityGuids) {
+    public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, Comparator<T> comparator, final String... searchGuids) {
         this.jdsDb = jdsDb;
         this.referenceType = referenceType;
-        this.entityGuids = entityGuids;
+        this.searchGuids = searchGuids;
         this.comparator = comparator;
     }
 
     /**
      * @param jdsDb
      * @param referenceType
-     * @param entityGuids
+     * @param searchGuids
      */
-    public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, final String... entityGuids) {
+    public JdsLoad(final JdsDb jdsDb, final Class<T> referenceType, final String... searchGuids) {
         this.jdsDb = jdsDb;
         this.referenceType = referenceType;
-        this.entityGuids = entityGuids;
+        this.searchGuids = searchGuids;
     }
 
 
@@ -602,10 +602,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param jdsDataBase
      * @param batchSize
      * @param entityId
-     * @param allBatches
-     * @param suppliedEntityGuids
+     * @param filterBatches
+     * @param filterGuids
      */
-    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long entityId, final List<List<String>> allBatches, final String[] suppliedEntityGuids) throws SQLException, ClassNotFoundException {
+    private void prepareActionBatches(final JdsDb jdsDataBase, final int batchSize, final long entityId, final List<List<String>> filterBatches, final String[] filterGuids) throws SQLException, ClassNotFoundException {
         int batchIndex = 0;
         int batchContents = 0;
 
@@ -629,7 +629,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
             //if no ids supplied we are looking for all instances of the entity
             String rawSql = "SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance WHERE EntityId IN (%s)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(String.format(rawSql, entityHeirarchy))) {
-                if (suppliedEntityGuids.length == 0) {
+                if (filterGuids.length == 0) {
                     try (ResultSet rs = preparedStatement.executeQuery()) {
                         while (rs.next()) {
                             if (batchContents == batchSize) {
@@ -637,20 +637,20 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                                 batchContents = 0;
                             }
                             if (batchContents == 0)
-                                allBatches.add(new ArrayList<>());
-                            allBatches.get(batchIndex).add(rs.getString("EntityGuid"));
+                                filterBatches.add(new ArrayList<>());
+                            filterBatches.get(batchIndex).add(rs.getString("EntityGuid"));
                             batchContents++;
                         }
                     }
                 } else {
-                    for (String EntityGuid : suppliedEntityGuids) {
+                    for (String filterGuid : filterGuids) {
                         if (batchContents == batchSize) {
                             batchIndex++;
                             batchContents = 0;
                         }
                         if (batchContents == 0)
-                            allBatches.add(new ArrayList<>());
-                        allBatches.get(batchIndex).add(EntityGuid);
+                            filterBatches.add(new ArrayList<>());
+                        filterBatches.get(batchIndex).add(filterGuid);
                         batchContents++;
                     }
                 }
@@ -684,13 +684,13 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
     public List<T> call() throws Exception {
         JdsEntityAnnotation annotation = referenceType.getAnnotation(JdsEntityAnnotation.class);
         long entityId = annotation.entityId();
-        List<List<String>> allBatches = new ArrayList<>(new ArrayList<>());
+        List<List<String>> filterBatches = new ArrayList<>(new ArrayList<>());
         List<T> castCollection = collections;
-        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, allBatches, entityGuids);
+        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, filterBatches, searchGuids);
         boolean initialisePrimitives = true;
         boolean initialiseDatesAndTimes = true;
         boolean initialiseObjects = true;
-        for (List<String> currentBatch : allBatches) {
+        for (List<String> currentBatch : filterBatches) {
             populateInner(jdsDb, referenceType, castCollection, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, currentBatch);
         }
         if (comparator != null)
