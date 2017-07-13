@@ -27,18 +27,20 @@ import java.util.HashMap;
 public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
 
     private static final HashMap<Long, JdsFieldEnum> fieldEnums = new HashMap<>();
-    private final SimpleObjectProperty<JdsField> field;
-    private final Class<T> enumType;
+    private final SimpleObjectProperty<JdsField> field = new SimpleObjectProperty<>();
+    private Class<T> enumType;
     private Enum[] sequenceValues = new Enum[0];//keep order at all times
+
+    public JdsFieldEnum() {
+    }
 
     public JdsFieldEnum(final Class<T> type) {
         this.enumType = type;
-        this.field = new SimpleObjectProperty();
     }
 
     public JdsFieldEnum(final Class<T> type, final JdsField jdsField, final T... values) {
         this(type);
-        this.field.set(jdsField);
+        setField(jdsField);
         sequenceValues = new Enum[values.length];
         System.arraycopy(values, 0, sequenceValues, 0, values.length);
         bind();
@@ -65,6 +67,10 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
     private void bind() {
         if (!fieldEnums.containsKey(field.get()))
             fieldEnums.put(field.get().getId(), this);
+    }
+
+    private void setField(JdsField f) {
+        field.set(f);
     }
 
     public JdsField getField() {
@@ -97,12 +103,14 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(enumType);
         out.writeObject(field.get());
         out.writeObject(sequenceValues);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        enumType = (Class<T>) in.readObject();
         field.set((JdsField) in.readObject());
         sequenceValues = (Enum[]) in.readObject();
     }
