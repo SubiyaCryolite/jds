@@ -21,10 +21,7 @@ import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -300,7 +297,10 @@ public class JdsSave implements Callable<Boolean> {
                     long fieldId = recordEntry.getKey();
                     upsert.setString(1, entityGuid);
                     upsert.setLong(2, fieldId);
-                    upsert.setBlob(3, recordEntry.getValue().getResourceAsStream());
+                    if (recordEntry.getValue().isEmpty())
+                        upsert.setNull(3, Types.BLOB);
+                    else
+                        upsert.setBlob(3, recordEntry.getValue().getResourceAsStream());
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -728,7 +728,6 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param connection
      * @param enums
      */
@@ -1208,7 +1207,8 @@ public class JdsSave implements Callable<Boolean> {
                     parentChildBindings.add(parentChildBinding);
                     jdsEntities.add(jdsEntity);
                     record.set(record.get() + 1);
-                    System.out.printf("Binding array object %s\n", record.get());
+                    if (jdsDb.printOutput())
+                        System.out.printf("Binding array object %s\n", record.get());
                 });
             }
         }

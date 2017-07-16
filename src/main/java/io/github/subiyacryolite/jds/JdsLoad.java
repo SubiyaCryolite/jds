@@ -634,11 +634,15 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
             for (Long id : entityAndChildren)
                 entityHeirarchy.add(id + "");
 
-            //if no ids supplied we are looking for all instances of the entity
+
             String rawSql = "SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance WHERE EntityId IN (%s)";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(String.format(rawSql, entityHeirarchy))) {
+            String rawSql2 = "SELECT DISTINCT EntityGuid from JdsStoreEntityInheritance WHERE EntityGuid IN (%s)";
+            try (PreparedStatement preparedStatement1 = connection.prepareStatement(String.format(rawSql, entityHeirarchy));
+                 PreparedStatement preparedStatement2 = connection.prepareStatement(String.format(rawSql2, quote(filterGuids)))) {
                 if (filterGuids.length == 0) {
-                    try (ResultSet rs = preparedStatement.executeQuery()) {
+                    //if no ids supplied we are looking for all instances of the entity.
+                    //load ALL entities in the in heirarchy
+                    try (ResultSet rs = preparedStatement1.executeQuery()) {
                         while (rs.next()) {
                             if (batchContents == batchSize) {
                                 batchIndex++;
@@ -651,19 +655,29 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                         }
                     }
                 } else {
-                    for (String filterGuid : filterGuids) {
-                        if (batchContents == batchSize) {
-                            batchIndex++;
-                            batchContents = 0;
+                    //load all in filter
+                    try (ResultSet rs = preparedStatement2.executeQuery()) {
+                        while (rs.next()) {
+                            if (batchContents == batchSize) {
+                                batchIndex++;
+                                batchContents = 0;
+                            }
+                            if (batchContents == 0)
+                                filterBatches.add(new ArrayList<>());
+                            filterBatches.get(batchIndex).add(rs.getString("EntityGuid"));
+                            batchContents++;
                         }
-                        if (batchContents == 0)
-                            filterBatches.add(new ArrayList<>());
-                        filterBatches.get(batchIndex).add(filterGuid);
-                        batchContents++;
                     }
                 }
             }
         }
+    }
+
+    private String quote(String[] filterGuids) {
+        List<String> list = new ArrayList<>();
+        for (String s : filterGuids)
+            list.add(String.format("'%s'", s));
+        return String.join(",", list);
     }
 
     /**

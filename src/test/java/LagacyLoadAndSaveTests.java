@@ -2,6 +2,7 @@ import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
 import io.github.subiyacryolite.jds.common.BaseTestConfig;
+import io.github.subiyacryolite.jds.entities.SimpleAddress;
 import io.github.subiyacryolite.jds.entities.SimpleAddressBook;
 import org.junit.Test;
 
@@ -27,8 +28,8 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
     @Test
     @Override
     public void load() throws Exception {
-        List<SimpleAddressBook> allAddressBooks = JdsLoad.load(jdsDb, SimpleAddressBook.class); //load all entities of type SimpleAddressBook
-        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDb, SimpleAddressBook.class, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        List<SimpleAddress> allAddressBooks = new JdsLoad(jdsDb, SimpleAddress.class).call(); //load all entities of type SimpleAddressBook
+        List<SimpleAddress> specificAddressBook = new JdsLoad(jdsDb, SimpleAddress.class, "primaryAddress").call(); //load all entities of type SimpleAddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }

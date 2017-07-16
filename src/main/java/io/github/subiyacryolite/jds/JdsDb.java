@@ -624,7 +624,8 @@ public abstract class JdsDb implements JdsDbContract {
     public final synchronized void mapClassEnums(final Connection connection, final long entityId, final Set<JdsFieldEnum> fields) {
         mapEnumValues(connection, fields);
         mapClassEnumsImplementation(connection, entityId, fields);
-        System.out.printf("Mapped Enums for Entity[%s]\n", entityId);
+        if (printOutput())
+            System.out.printf("Mapped Enums for Entity[%s]\n", entityId);
     }
 
     /**
