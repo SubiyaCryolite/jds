@@ -3,9 +3,7 @@ import io.github.subiyacryolite.jds.common.BaseTestConfig;
 import javafx.beans.property.SimpleBlobProperty;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by indana on 5/10/2017.
@@ -14,12 +12,11 @@ public class SerializationTests extends BaseTestConfig {
 
     @Test
     public void testSerialization() {
-        List<JdsEntity> entities = new ArrayList<>();
-        entities.add(getSimpleAddressBook());
-        for (JdsEntity jdsEntity : entities) {
-            String canonicalName = jdsEntity.getClass().getCanonicalName();
+        initialiseSqlLiteBackend();
+        for (Class<? extends JdsEntity> jdsEntity : jdsDb.getMappedClasses()) {
+            String canonicalName = jdsEntity.getCanonicalName();
             serialize(jdsEntity, canonicalName);
-            deserialize(canonicalName, jdsEntity.getClass());
+            deserialize(canonicalName, jdsEntity);
         }
     }
 
