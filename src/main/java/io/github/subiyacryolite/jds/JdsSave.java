@@ -152,6 +152,7 @@ public class JdsSave implements Callable<Boolean> {
         saveContainer.integerArrays.add(new HashMap<>());
         //enums
         saveContainer.enums.add(new HashMap<>());
+        saveContainer.enumCollections.add(new HashMap<>());
         //objects
         saveContainer.objects.add(new HashMap<>());
         //object arrays
@@ -196,7 +197,8 @@ public class JdsSave implements Callable<Boolean> {
             saveContainer.longArrays.get(step).put(entity.getEntityGuid(), entity.longArrayProperties);
             saveContainer.integerArrays.get(step).put(entity.getEntityGuid(), entity.integerArrayProperties);
             //assign enums
-            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumCollectionProperties);
+            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumProperties);
+            saveContainer.enumCollections.get(step).put(entity.getEntityGuid(), entity.enumCollectionProperties);
             //assign objects
             saveContainer.objectArrays.get(step).put(entity.getEntityGuid(), entity.objectArrayProperties);
             saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);
@@ -226,6 +228,7 @@ public class JdsSave implements Callable<Boolean> {
             saveArrayFloats(connection, saveContainer.floatArrays.get(step));
             //enums
             saveEnums(connection, saveContainer.enums.get(step));
+            saveEnumCollections(connection, saveContainer.enumCollections.get(step));
             //objects and object arrays
             saveArrayObjects(connection, saveContainer.objectArrays.get(step));
             bindAndSaveInnerObjects(connection, saveContainer.objects.get(step));
@@ -1068,13 +1071,52 @@ public class JdsSave implements Callable<Boolean> {
         }
     }
 
+    public void saveEnums(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enumStrings) {
+        int record = 0;
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
+                "SELECT :entityGuid, :fieldId, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
+             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+            connection.setAutoCommit(false);
+            for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enumStrings.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<JdsFieldEnum, SimpleObjectProperty<Enum>> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    JdsFieldEnum jdsFieldEnum = recordEntry.getKey();
+                    Enum value = recordEntry.getValue().get();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, jdsFieldEnum.getField().getId());
+                    upsert.setInt(3, jdsFieldEnum.indexOf(value));
+                    upsert.addBatch();
+                    if (jdsDb.printOutput())
+                        System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDb.logEdits()) continue;
+                    log.setString("entityGuid", entityGuid);
+                    log.setLong("fieldId", jdsFieldEnum.getField().getId());
+                    log.setInt("value", jdsFieldEnum.indexOf(value));
+                    log.addBatch();
+                }
+            }
+            upsert.executeBatch();
+            log.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
     /**
      * @param connection
      * @param enumStrings
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveEnums(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
+    private void saveEnumCollections(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +

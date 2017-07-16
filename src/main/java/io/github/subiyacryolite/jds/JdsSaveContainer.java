@@ -31,7 +31,8 @@ final class JdsSaveContainer {
     public final List<Map<String, Map<Long, SimpleListProperty<Long>>>> longArrays = new ArrayList<>();
     public final List<Map<String, Map<Long, SimpleListProperty<Integer>>>> integerArrays = new ArrayList<>();
     //enums
-    public final List<Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>>> enums = new ArrayList<>();
+    public final List<Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>>> enums = new ArrayList<>();
+    public final List<Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>>> enumCollections = new ArrayList<>();
     //objects
     public final List<Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>>> objects = new ArrayList<>();
     //overviews
