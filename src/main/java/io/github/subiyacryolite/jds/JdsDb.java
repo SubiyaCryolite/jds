@@ -60,12 +60,16 @@ public abstract class JdsDb implements JdsDbContract {
      */
     public void init() {
         prepareDatabaseComponents();
-        prepareCustomDatabaseComponents();
-        //upgrade tasks
-        JdsUpdateHelper.v1ToV2MigrateData(this);
+        //===========================================
         JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(this);
         JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(this);
+        JdsUpdateHelper.v1Tov2AddColumnStoreEntityBindings(this);
+        //===========================================
+        prepareCustomDatabaseComponents();
+        //===========================================
+        JdsUpdateHelper.v1ToV2MigrateData(this);
     }
+
 
     /**
      * Initialise core database components

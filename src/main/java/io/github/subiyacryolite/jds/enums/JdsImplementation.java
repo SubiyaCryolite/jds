@@ -20,5 +20,6 @@ public enum JdsImplementation {
     MYSQL,
     TSQL,
     POSTGRES,
-    SQLITE
+    SQLITE,
+    ORACLE
 }

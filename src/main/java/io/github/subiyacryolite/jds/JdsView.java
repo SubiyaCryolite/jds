@@ -50,7 +50,7 @@ public class JdsView {
                 String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, entityAndChildren, cleanName);
                 String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, entityAndChildren, cleanName);
                 String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, entityAndChildren, cleanName);
-                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM_TEXT, entityAndChildren, cleanName);
+                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, entityAndChildren, cleanName);
                 String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, entityAndChildren, cleanName);
                 String intView = innerView(connection, jdsDb, JdsFieldType.INT, entityAndChildren, cleanName);
                 String longView = innerView(connection, jdsDb, JdsFieldType.LONG, entityAndChildren, cleanName);
@@ -116,7 +116,7 @@ public class JdsView {
                 "ON bound.FieldId = field.FieldId\n" +
                 "LEFT join JdsRefFieldTypes type\n" +
                 "ON field.FieldId = type.TypeId\n" +
-                "WHERE type.TypeName NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_TEXT') AND entity.EntityId = ?\n" +
+                "WHERE type.TypeName NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND entity.EntityId = ?\n" +
                 "ORDER BY field.FieldName";
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -188,7 +188,7 @@ public class JdsView {
                 dropView(jdsDb, getViewName(JdsFieldType.DATE_TIME, name));
                 dropView(jdsDb, getViewName(JdsFieldType.DATE, name));
                 dropView(jdsDb, getViewName(JdsFieldType.DOUBLE, name));
-                dropView(jdsDb, getViewName(JdsFieldType.ENUM_TEXT, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ENUM_COLLECTION, name));
                 dropView(jdsDb, getViewName(JdsFieldType.FLOAT, name));
                 dropView(jdsDb, getViewName(JdsFieldType.INT, name));
                 dropView(jdsDb, getViewName(JdsFieldType.LONG, name));

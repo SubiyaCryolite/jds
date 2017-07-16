@@ -29,12 +29,13 @@ public enum JdsFieldType {
     ARRAY_LONG(9),
     ARRAY_TEXT(10),
     ARRAY_DATE_TIME(11),
-    ENUM_TEXT(12),
+    ENUM_COLLECTION(12),
     BOOLEAN(13),
     ZONED_DATE_TIME(14),
     DATE(15),
     TIME(16),
-    BLOB(17);
+    BLOB(17),
+    ENUM(18),;
 
     private final int type;
 

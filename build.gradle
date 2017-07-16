@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'io.github.subiyacryolite'
-version = '2.17.0711c'
+version = '2.17.0715'
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
@@ -18,9 +18,11 @@ repositories {
     mavenCentral()
     maven { url "https://maven.atlassian.com/3rdparty/" }
     maven { url "http://clojars.org/repo/" }
+    flatDir(dir: 'libs')//, name: 'Local libs'
 }
 
 dependencies {
+    testCompile name: 'ojdbc8'
     testCompile 'junit:junit:4.12'
     testCompile 'org.xerial:sqlite-jdbc:3.16.1'
     testCompile 'com.microsoft.sqlserver:sqljdbc4:4.0'

@@ -94,7 +94,8 @@ JdsFields are big part of the JDS framework. Each field MUST have a unique Field
 |ARRAY_LONG|List\<Long\>|Lists of type Long|
 |ARRAY_TEXT|List\<String\>|Lists of type String|
 |ARRAY_DATE_TIME|List\<LocalDateTime\>|Lists of type LocalDateTime|
-|ENUM_TEXT|List\<Enum\>|Lists of type Enum|
+|ENUM|Enum|Object of type Enum|
+|ENUM_COLLECTION|List\<Enum\>|Lists of type Enum|
 
 I recommend defining your fields as static constants
 
@@ -125,7 +126,7 @@ public class NewTestFields
 {
     //---
     //---
-    public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM_TEXT);
+    public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM);
 }
 ```
 Then, we can define our actual enum in the following manner.
@@ -133,8 +134,7 @@ Then, we can define our actual enum in the following manner.
 public enum SexEnum
 {
     MALE,
-    FEMALE,
-    OTHER
+    FEMALE
 }
 
 
@@ -143,7 +143,7 @@ public class NewTestEnums
     public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(SexEnum.class, NewTestFields.SEX_ENUM, SexEnum.values());
 }
 ```
-Behind the scenes these enums will be stored as an Integer Array. However you'd be presented with a List\<Enum\> in-memory containing one or more of the defined values.
+Behind the scenes these enums will be stored as either an Integer (ENUM) or an Integer Array (ENUM_COLLECTION).
 
 ### 1.1.4 Binding Properties
 Depending on the type of field, JDS will require that you set you objects properties to one of the following JavaFX bean container types.
@@ -169,7 +169,8 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |ARRAY_LONG|[SimpleListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 |ARRAY_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 |ARRAY_DATE_TIME|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
-|ENUM_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
+|ENUM|[SimpleObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|
+|ENUM_COLLECTION|[SimpleListProperty\<Enum\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 
  After your class and its properties have been defined you must map the property to its corresponding field using the **map()** method. I recommend doing this in your constructor. 
  

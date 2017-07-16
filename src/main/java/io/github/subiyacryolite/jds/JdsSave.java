@@ -196,7 +196,7 @@ public class JdsSave implements Callable<Boolean> {
             saveContainer.longArrays.get(step).put(entity.getEntityGuid(), entity.longArrayProperties);
             saveContainer.integerArrays.get(step).put(entity.getEntityGuid(), entity.integerArrayProperties);
             //assign enums
-            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumProperties);
+            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumCollectionProperties);
             //assign objects
             saveContainer.objectArrays.get(step).put(entity.getEntityGuid(), entity.objectArrayProperties);
             saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);

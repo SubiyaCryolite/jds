@@ -13,12 +13,16 @@
 */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.events.JdsPreDeleteListener;
+import io.github.subiyacryolite.jds.events.OnDeleteEventArguments;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDb JdsDataBase}
@@ -48,6 +52,11 @@ public class JdsDelete implements Callable<Boolean> {
 
     public JdsDelete(final JdsDb jdsDb, final JdsEntity... entities) {
         this.jdsDb = jdsDb;
+        Stream<JdsEntity> entityStream = Arrays.stream(entities);
+        entityStream.forEach(entity -> {
+            if(entity instanceof JdsPreDeleteListener)
+            ((JdsPreDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, entity.getEntityGuid()));
+        });
         this.entities = Arrays.stream(entities).map(x -> x.getEntityGuid()).collect(Collectors.toList());
     }
 
@@ -57,33 +66,30 @@ public class JdsDelete implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param jdsDb
      * @param entities
-     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static void delete(final JdsDb jdsDb, final Collection<JdsEntity> entities) throws Exception {
         new JdsDelete(jdsDb, entities).call();
     }
 
     /**
-     *
      * @param jdsDb
      * @param entities
-     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static void delete(final JdsDb jdsDb, final JdsEntity... entities) throws Exception {
         delete(jdsDb, Arrays.asList(entities));
     }
 
     /**
-     *
      * @param jdsDb
      * @param entityGuids
-     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      * @throws Exception
+     * @deprecated please refer to <a href="https://github.com/SubiyaCryolite/Jenesis-Data-Store"> the readme</a> for the most up to date CRUD approach
      */
     public static void delete(final JdsDb jdsDb, final String... entityGuids) throws Exception {
         new JdsDelete(jdsDb, entityGuids).call();

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ifung on 01/07/2017.
+ * Created by ifunga on 01/07/2017.
  */
 public class Ihneritance extends BaseTestConfig {
 
@@ -38,6 +38,14 @@ public class Ihneritance extends BaseTestConfig {
         collection.add(entityc);
 
         return collection;
+    }
+
+    @Test
+    public void testIheritanceOracle() throws Exception {
+        initialiseOracleBackend();
+        JdsSave save = new JdsSave(jdsDb, getInheritanceCollection());
+        save.call();
+        jdsDb.toString();
     }
 
     @Test
@@ -74,6 +82,7 @@ public class Ihneritance extends BaseTestConfig {
 
     @Test
     public void testAllInitialilization() throws Exception {
+        testIheritanceOracle();
         testIheritanceSqlite();
         testIheritanceMySql();
         testIheritancePostgreSQL();

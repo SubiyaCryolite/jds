@@ -1,10 +1,7 @@
 package io.github.subiyacryolite.jds.common;
 
 import io.github.subiyacryolite.jds.JdsDb;
-import io.github.subiyacryolite.jds.connectivity.JdsDbMySqlImplementation;
-import io.github.subiyacryolite.jds.connectivity.JdsDbPostgreSqlmplementation;
-import io.github.subiyacryolite.jds.connectivity.JdsDbSqliteImplementation;
-import io.github.subiyacryolite.jds.connectivity.JdsDbTransactionalSqllmplementation;
+import io.github.subiyacryolite.jds.connectivity.*;
 import io.github.subiyacryolite.jds.entities.*;
 import io.github.subiyacryolite.jds.enums.PrimaryAddress;
 import org.junit.Test;
@@ -54,6 +51,7 @@ public abstract class BaseTestConfig {
         jdsDb = new JdsDbSqliteImplementation();
         initJds();
     }
+
     @Test
     public void initialisePostgeSqlBackend() {
         jdsDb = new JdsDbPostgreSqlmplementation();
@@ -69,6 +67,12 @@ public abstract class BaseTestConfig {
     @Test
     public void initialiseMysqlBackend() {
         jdsDb = new JdsDbMySqlImplementation();
+        initJds();
+    }
+
+    @Test
+    public void initialiseOracleBackend() {
+        jdsDb = new JdsDbOracleSqlmplementation();
         initJds();
     }
 

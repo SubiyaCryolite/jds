@@ -306,10 +306,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                         SimpleListProperty<Integer> property = jdsEntity.integerArrayProperties.get(fieldId);
                         property.add(value);
                     }else {
-                        Optional<JdsFieldEnum> fieldEnum = jdsEntity.enumProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
+                        Optional<JdsFieldEnum> fieldEnum = jdsEntity.enumCollectionProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
                         if (fieldEnum.isPresent()) {
                             JdsFieldEnum jdsFieldEnum = fieldEnum.get();
-                            SimpleListProperty<Enum> property = jdsEntity.enumProperties.get(jdsFieldEnum);
+                            SimpleListProperty<Enum> property = jdsEntity.enumCollectionProperties.get(jdsFieldEnum);
                             Object[] enumValues = jdsFieldEnum.getEnumType().getEnumConstants();
                             if (value < enumValues.length) {
                                 property.add((Enum) enumValues[value]);

@@ -37,7 +37,7 @@ class JdsTableLookup {
                 return JdsComponent.StoreTextArray.getName();
             case ARRAY_DATE_TIME:
                 return JdsComponent.StoreDateTimeArray.getName();
-            case ENUM_TEXT:
+            case ENUM_COLLECTION:
                 return JdsComponent.StoreTextArray.getName();
             case ZONED_DATE_TIME:
                 return JdsComponent.StoreZonedDateTime.getName();
@@ -78,7 +78,7 @@ class JdsTableLookup {
             case ARRAY_TEXT:
                 return StoreTextArray.getName();
             case ARRAY_INT:
-            case ENUM_TEXT:
+            case ENUM_COLLECTION:
                 return StoreIntegerArray.getName();
             case ARRAY_DOUBLE:
                 return StoreDoubleArray.getName();
@@ -117,7 +117,7 @@ class JdsTableLookup {
             case ARRAY_TEXT:
                 return StoreTextArray.getPrefix();
             case ARRAY_INT:
-            case ENUM_TEXT:
+            case ENUM_COLLECTION:
                 return StoreIntegerArray.getPrefix();
             case ARRAY_DOUBLE:
                 return StoreDoubleArray.getPrefix();

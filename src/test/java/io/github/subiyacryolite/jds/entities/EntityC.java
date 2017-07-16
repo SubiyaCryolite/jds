@@ -6,7 +6,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
- * Created by ifung on 01/07/2017.
+ * Created by ifunga on 01/07/2017.
  */
 @JdsEntityAnnotation(entityId = 1002, entityName = "entityc")
 public class EntityC extends EntityB {

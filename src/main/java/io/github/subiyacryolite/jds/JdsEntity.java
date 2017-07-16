@@ -17,7 +17,6 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 import javafx.beans.property.*;
 
-import java.lang.annotation.Annotation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -264,27 +263,60 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
-    protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<? extends Enum> enums) {
+    protected final void map(final JdsFieldEnum jdsFieldEnum, final SimpleObjectProperty<? extends Enum> enums) {
         if (enums == null) {
             return;
         }
         allEnums.add(jdsFieldEnum);
-        if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_TEXT) {
+        if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM) {
             properties.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getName());
             types.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getType().toString());
-            enumProperties.put(jdsFieldEnum, (SimpleListProperty<Enum>) enums);
+            enumProperties.put(jdsFieldEnum, (SimpleObjectProperty<Enum>) enums);
         } else {
             throw new RuntimeException("Please prepareDatabaseComponents field [" + jdsFieldEnum + "] to the correct type");
         }
     }
 
-    protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property) {
+    protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<? extends Enum> enums) {
+        if (enums == null) {
+            return;
+        }
+        allEnums.add(jdsFieldEnum);
+        if (jdsFieldEnum.getField().getType() == JdsFieldType.ENUM_COLLECTION) {
+            properties.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getName());
+            types.put(jdsFieldEnum.getField().getId(), jdsFieldEnum.getField().getType().toString());
+            enumCollectionProperties.put(jdsFieldEnum, (SimpleListProperty<Enum>) enums);
+        } else {
+            throw new RuntimeException("Please prepareDatabaseComponents field [" + jdsFieldEnum + "] to the correct type");
+        }
+    }
+
+    protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
+            JdsEntityAnnotation entityAnnotation  = entity.getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
                 objectProperties.put(entityAnnotation.entityId(), (SimpleObjectProperty<JdsEntity>) property);
                 objects.add(entityAnnotation.entityId());
+                objectCascade.put(entityAnnotation.entityId(), cascadeOnDelete);
+            } else {
+                throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
+            }
+        } else {
+            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
+        }
+    }
+
+    protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property) {
+        map(entity, property, false);
+    }
+
+    protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties, boolean cascadeOnDelete) {
+        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
+            JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
+            if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
+                objectArrayProperties.put(entityAnnotation.entityId(), (SimpleListProperty<JdsEntity>) properties);
+                objects.add(entityAnnotation.entityId());
+                objectCascade.put(entityAnnotation.entityId(), cascadeOnDelete);
             } else {
                 throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
             }
@@ -294,18 +326,7 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            Annotation annotation = entity.getAnnotation(JdsEntityAnnotation.class);
-            JdsEntityAnnotation entityAnnotation = (JdsEntityAnnotation) annotation;
-            if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
-                objectArrayProperties.put(entityAnnotation.entityId(), (SimpleListProperty<JdsEntity>) properties);
-                objects.add(entityAnnotation.entityId());
-            } else {
-                throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
-            }
-        } else {
-            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
-        }
+        map(entity, properties, false);
     }
 
     /**
@@ -483,10 +504,10 @@ public abstract class JdsEntity extends JdsEntityBase {
      */
     private <T extends JdsEntity> void copyEnumValues(T source) {
         JdsEntity dest = this;
-        source.enumProperties.entrySet().parallelStream().forEach(srcEntry -> {
+        source.enumCollectionProperties.entrySet().parallelStream().forEach(srcEntry -> {
             JdsFieldEnum key = srcEntry.getKey();
-            if (dest.enumProperties.containsKey(key)) {
-                SimpleListProperty<Enum> dstEntry = dest.enumProperties.get(srcEntry.getKey());
+            if (dest.enumCollectionProperties.containsKey(key)) {
+                SimpleListProperty<Enum> dstEntry = dest.enumCollectionProperties.get(srcEntry.getKey());
                 dstEntry.clear();
                 Iterator<? extends Enum> it = srcEntry.getValue().iterator();
                 while (it.hasNext()) {

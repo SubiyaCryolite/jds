@@ -32,8 +32,8 @@ abstract class JdsEntityBase implements Externalizable {
 
     //field and enum maps
     protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
-    protected final Map<Long,String> properties = new HashMap<>();
-    protected final Map<Long,String> types = new HashMap<>();
+    protected final Map<Long, String> properties = new HashMap<>();
+    protected final Map<Long, String> types = new HashMap<>();
     protected final Set<Long> objects = new HashSet<>();
     protected final Set<JdsFieldEnum> allEnums = new HashSet<>();
     protected final SimpleStringProperty name = new SimpleStringProperty();
@@ -58,9 +58,11 @@ abstract class JdsEntityBase implements Externalizable {
     protected final Map<Long, SimpleListProperty<Long>> longArrayProperties = new HashMap<>();
     protected final Map<Long, SimpleListProperty<Integer>> integerArrayProperties = new HashMap<>();
     //enums
-    protected final Map<JdsFieldEnum, SimpleListProperty<Enum>> enumProperties = new HashMap<>();
+    protected final Map<JdsFieldEnum, SimpleObjectProperty<Enum>> enumProperties = new HashMap<>();
+    protected final Map<JdsFieldEnum, SimpleListProperty<Enum>> enumCollectionProperties = new HashMap<>();
     //objects
     protected final Map<Long, SimpleObjectProperty<JdsEntity>> objectProperties = new HashMap<>();
+    protected final Map<Long, Boolean> objectCascade = new HashMap<>();
     //blobs
     protected final Map<Long, SimpleBlobProperty> blobProperties = new HashMap<>();
 
@@ -77,6 +79,8 @@ abstract class JdsEntityBase implements Externalizable {
         objectOutputStream.writeObject(objects);
         objectOutputStream.writeObject(allEnums);
         objectOutputStream.writeUTF(name.get());
+        //objects
+        objectOutputStream.writeObject(serializeObject(objectProperties));
         //strings and localDateTimes
         objectOutputStream.writeObject(serializeTemporal(localDateTimeProperties));
         objectOutputStream.writeObject(serializeTemporal(zonedDateTimeProperties));
@@ -99,6 +103,17 @@ abstract class JdsEntityBase implements Externalizable {
         objectOutputStream.writeObject(serializeDoubles(doubleArrayProperties));
         objectOutputStream.writeObject(serializeLongs(longArrayProperties));
         objectOutputStream.writeObject(serializeIntegers(integerArrayProperties));
+        //enums
+        objectOutputStream.writeObject(serializeEnums(enumProperties));
+        objectOutputStream.writeObject(serializeEnumCollections(enumCollectionProperties));
+    }
+
+    private Map<JdsFieldEnum, Enum> serializeEnums(Map<JdsFieldEnum, SimpleObjectProperty<Enum>> input) {
+        return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue().get()));
+    }
+
+    private Map<JdsFieldEnum, List<Enum>> serializeEnumCollections(Map<JdsFieldEnum, SimpleListProperty<Enum>> input) {
+        return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> new LinkedList<>(entry.getValue().get())));
     }
 
     private Map<Long, SimpleBlobProperty> serializeBlobs(Map<Long, SimpleBlobProperty> input) {
@@ -133,6 +148,10 @@ abstract class JdsEntityBase implements Externalizable {
         return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> new LinkedList<>(entry.getValue().get())));
     }
 
+    private Map<Long, JdsEntity> serializeObject(Map<Long, SimpleObjectProperty<JdsEntity>> input) {
+        return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue().get()));
+    }
+
     private Map<Long, Float> serializeFloat(Map<Long, SimpleFloatProperty> input) {
         return input.entrySet().parallelStream().collect(Collectors.toMap((entry) -> entry.getKey(), (entry) -> entry.getValue().get()));
     }
@@ -165,11 +184,13 @@ abstract class JdsEntityBase implements Externalizable {
     public void readExternal(ObjectInput objectInputStream) throws IOException, ClassNotFoundException {
         //field and enum maps
         overview.set((JdsEntityOverview) objectInputStream.readObject());
-        properties.putAll((Map<Long,String>) objectInputStream.readObject());
-        types.putAll((Map<Long,String>) objectInputStream.readObject());
+        properties.putAll((Map<Long, String>) objectInputStream.readObject());
+        types.putAll((Map<Long, String>) objectInputStream.readObject());
         objects.addAll((Set<Long>) objectInputStream.readObject());
         allEnums.addAll((Set<JdsFieldEnum>) objectInputStream.readObject());
         name.set(objectInputStream.readUTF());
+        //objects
+        putObject(objectProperties, (Map<Long, JdsEntity>) objectInputStream.readObject());
         //strings and localDateTimes
         putTemporal(localDateTimeProperties, (Map<Long, Temporal>) objectInputStream.readObject());
         putTemporal(zonedDateTimeProperties, (Map<Long, Temporal>) objectInputStream.readObject());
@@ -192,6 +213,21 @@ abstract class JdsEntityBase implements Externalizable {
         putDoubles(doubleArrayProperties, (Map<Long, List<Double>>) objectInputStream.readObject());
         putLongs(longArrayProperties, (Map<Long, List<Long>>) objectInputStream.readObject());
         putIntegers(integerArrayProperties, (Map<Long, List<Integer>>) objectInputStream.readObject());
+        //enums
+        putEnum(enumProperties,(Map<JdsFieldEnum, Enum>)objectInputStream.readObject());
+        putEnums(enumCollectionProperties,(Map<JdsFieldEnum, List<Enum>>)objectInputStream.readObject());
+    }
+
+    private void putEnums(Map<JdsFieldEnum, SimpleListProperty<Enum>> destination, Map<JdsFieldEnum, List<Enum>> source) {
+        source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
+            destination.get(entry.getKey()).addAll(entry.getValue());
+        });
+    }
+
+    private void putEnum(Map<JdsFieldEnum, SimpleObjectProperty<Enum>> destination, Map<JdsFieldEnum, Enum> source) {
+        source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
+            destination.get(entry.getKey()).set(entry.getValue());
+        });
     }
 
     private void putObjects(Map<Long, SimpleListProperty<JdsEntity>> destination, Map<Long, List<JdsEntity>> source) {
@@ -262,6 +298,12 @@ abstract class JdsEntityBase implements Externalizable {
     }
 
     private void putDouble(Map<Long, SimpleDoubleProperty> destination, Map<Long, Double> source) {
+        source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
+            destination.get(entry.getKey()).set(entry.getValue());
+        });
+    }
+
+    private void putObject(Map<Long, SimpleObjectProperty<JdsEntity>> destination, Map<Long, JdsEntity> source) {
         source.entrySet().stream().filter((entry) -> (destination.containsKey(entry.getKey()))).forEachOrdered((entry) -> {
             destination.get(entry.getKey()).set(entry.getValue());
         });
