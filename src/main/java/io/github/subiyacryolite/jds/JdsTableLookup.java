@@ -39,6 +39,8 @@ class JdsTableLookup {
                 return JdsComponent.StoreDateTimeArray.getName();
             case ENUM_COLLECTION:
                 return JdsComponent.StoreTextArray.getName();
+            case ENUM:
+                return JdsComponent.StoreInteger.getName();
             case ZONED_DATE_TIME:
                 return JdsComponent.StoreZonedDateTime.getName();
             case DATE:
@@ -59,7 +61,8 @@ class JdsTableLookup {
                 return StoreText.getName();
             case BLOB:
                 return StoreBlob.getName();
-            case INT:
+            case ENUM:
+                case INT:
             case BOOLEAN:
                 return StoreInteger.getName();
             case DOUBLE:

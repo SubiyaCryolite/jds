@@ -119,7 +119,7 @@ public abstract class BaseTestConfig {
         primaryAddress.setPlotNumber(23);
         primaryAddress.setProvinceOrState("Southern");
         primaryAddress.setStreetName("East Street");
-        primaryAddress.getPrimaryAddress().add(PrimaryAddress.YES);
+        primaryAddress.setPrimaryAddress(PrimaryAddress.YES);
 
         SimpleAddress secondAddress = new SimpleAddress();
         secondAddress.setEntityGuid("secondAddress"); //setting a custom Entity Guid
@@ -130,7 +130,7 @@ public abstract class BaseTestConfig {
         secondAddress.setPlotNumber(2);
         secondAddress.setProvinceOrState("Lusaka");
         secondAddress.setStreetName("West Street");
-        secondAddress.getPrimaryAddress().add(PrimaryAddress.NO);
+        secondAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         SimpleAddress thirdAddress = new SimpleAddress();
         thirdAddress.setEntityGuid("thirdAddress"); //setting a custom Entity Guid
@@ -141,7 +141,7 @@ public abstract class BaseTestConfig {
         thirdAddress.setPlotNumber(9);
         thirdAddress.setProvinceOrState("Copperbelt");
         thirdAddress.setStreetName("West Street");
-        thirdAddress.getPrimaryAddress().add(PrimaryAddress.NO);
+        thirdAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
         simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid

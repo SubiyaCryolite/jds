@@ -6,14 +6,10 @@ import io.github.subiyacryolite.jds.enums.PrimaryAddress;
 import io.github.subiyacryolite.jds.enums.SimpleAddressEnums;
 import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
 public class SimpleAddress extends JdsEntity {
@@ -23,7 +19,7 @@ public class SimpleAddress extends JdsEntity {
     private final SimpleStringProperty city = new SimpleStringProperty("");
     private final SimpleStringProperty provinceOrState = new SimpleStringProperty("");
     private final SimpleStringProperty country = new SimpleStringProperty("");
-    private final SimpleListProperty<PrimaryAddress> primaryAddress = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final SimpleObjectProperty<PrimaryAddress> primaryAddress = new SimpleObjectProperty<>(PrimaryAddress.NO);
     private final SimpleObjectProperty<ZonedDateTime> timeOfEntry = new SimpleObjectProperty(ZonedDateTime.now());
 
     public SimpleAddress() {
@@ -34,14 +30,14 @@ public class SimpleAddress extends JdsEntity {
         map(SimpleAddressFields.COUNTRY_NAME, country);
         map(SimpleAddressFields.PROVINCE_NAME, provinceOrState);
         map(SimpleAddressFields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
-        mapEnums(SimpleAddressEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
+        map(SimpleAddressEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
     }
 
-    public List<PrimaryAddress> getPrimaryAddress() {
+    public PrimaryAddress getPrimaryAddress() {
         return this.primaryAddress.get();
     }
 
-    public void setPrimaryAddress(ObservableList<PrimaryAddress> value) {
+    public void setPrimaryAddress(PrimaryAddress value) {
         this.primaryAddress.set(value);
     }
 

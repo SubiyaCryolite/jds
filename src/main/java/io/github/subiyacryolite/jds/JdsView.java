@@ -50,7 +50,8 @@ public class JdsView {
                 String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, entityAndChildren, cleanName);
                 String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, entityAndChildren, cleanName);
                 String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, entityAndChildren, cleanName);
-                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, entityAndChildren, cleanName);
+                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM, entityAndChildren, cleanName);
+                String arrayEnumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, entityAndChildren, cleanName);
                 String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, entityAndChildren, cleanName);
                 String intView = innerView(connection, jdsDb, JdsFieldType.INT, entityAndChildren, cleanName);
                 String longView = innerView(connection, jdsDb, JdsFieldType.LONG, entityAndChildren, cleanName);
@@ -64,7 +65,7 @@ public class JdsView {
                         arrayLongView,
                         arrayTextView,
                         arrayDateTimeView,
-                        enumView};
+                        arrayEnumView};
                 createMainView(connection,
                         jdsDb,
                         entityAndChildren,
@@ -72,6 +73,7 @@ public class JdsView {
                         new String[]{
                                 booleanView,
                                 //blobView, problem with PG implementation
+                                enumView,
                                 dateTimeView,
                                 dateView,
                                 doubleView,
@@ -189,6 +191,7 @@ public class JdsView {
                 dropView(jdsDb, getViewName(JdsFieldType.DATE, name));
                 dropView(jdsDb, getViewName(JdsFieldType.DOUBLE, name));
                 dropView(jdsDb, getViewName(JdsFieldType.ENUM_COLLECTION, name));
+                dropView(jdsDb, getViewName(JdsFieldType.ENUM, name));
                 dropView(jdsDb, getViewName(JdsFieldType.FLOAT, name));
                 dropView(jdsDb, getViewName(JdsFieldType.INT, name));
                 dropView(jdsDb, getViewName(JdsFieldType.LONG, name));
