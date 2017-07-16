@@ -728,6 +728,50 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
+     *
+     * @param connection
+     * @param enums
+     */
+    public void saveEnums(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
+        int record = 0;
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
+                "SELECT :entityGuid, :fieldId, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
+        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
+             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+            connection.setAutoCommit(false);
+            for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enums.entrySet()) {
+                record++;
+                int innerRecord = 0;
+                int innerRecordSize = entry.getValue().size();
+                if (innerRecordSize == 0) continue;
+                String entityGuid = entry.getKey();
+                for (Map.Entry<JdsFieldEnum, SimpleObjectProperty<Enum>> recordEntry : entry.getValue().entrySet()) {
+                    innerRecord++;
+                    JdsFieldEnum jdsFieldEnum = recordEntry.getKey();
+                    Enum value = recordEntry.getValue().get();
+                    upsert.setString(1, entityGuid);
+                    upsert.setLong(2, jdsFieldEnum.getField().getId());
+                    upsert.setInt(3, jdsFieldEnum.indexOf(value));
+                    upsert.addBatch();
+                    if (jdsDb.printOutput())
+                        System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDb.logEdits()) continue;
+                    log.setString("entityGuid", entityGuid);
+                    log.setLong("fieldId", jdsFieldEnum.getField().getId());
+                    log.setInt("value", jdsFieldEnum.indexOf(value));
+                    log.addBatch();
+                }
+            }
+            upsert.executeBatch();
+            log.executeBatch();
+            connection.commit();
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
      * Save all dates in one go
      *
      * @param connection
@@ -1065,45 +1109,6 @@ public class JdsSave implements Callable<Boolean> {
             log.executeBatch();
             delete.executeBatch();
             insert.executeBatch();
-            connection.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
-    }
-
-    public void saveEnums(final Connection connection, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enumStrings) {
-        int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
-            connection.setAutoCommit(false);
-            for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enumStrings.entrySet()) {
-                record++;
-                int innerRecord = 0;
-                int innerRecordSize = entry.getValue().size();
-                if (innerRecordSize == 0) continue;
-                String entityGuid = entry.getKey();
-                for (Map.Entry<JdsFieldEnum, SimpleObjectProperty<Enum>> recordEntry : entry.getValue().entrySet()) {
-                    innerRecord++;
-                    JdsFieldEnum jdsFieldEnum = recordEntry.getKey();
-                    Enum value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, jdsFieldEnum.getField().getId());
-                    upsert.setInt(3, jdsFieldEnum.indexOf(value));
-                    upsert.addBatch();
-                    if (jdsDb.printOutput())
-                        System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
-                    log.setString("entityGuid", entityGuid);
-                    log.setLong("fieldId", jdsFieldEnum.getField().getId());
-                    log.setInt("value", jdsFieldEnum.indexOf(value));
-                    log.addBatch();
-                }
-            }
-            upsert.executeBatch();
-            log.executeBatch();
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);

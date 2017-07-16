@@ -27,7 +27,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class is responsible for loading an {@link JdsEntity entities} {@link JdsField fields}
@@ -206,7 +206,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 float value = resultSet.getFloat("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.floatArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(jdsEntity -> jdsEntity.floatArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Float> property = currentEntity.floatArrayProperties.get(fieldId);
                     property.add(value);
                 });
@@ -225,7 +225,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 double value = resultSet.getDouble("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.doubleArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(jdsEntity -> jdsEntity.doubleArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Double> property = currentEntity.doubleArrayProperties.get(fieldId);
                     property.add(value);
                 });
@@ -244,7 +244,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 long value = resultSet.getLong("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.longArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(jdsEntity -> jdsEntity.longArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<Long> property = currentEntity.longArrayProperties.get(fieldId);
                     property.add(value);
                 });
@@ -263,7 +263,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp value = resultSet.getTimestamp("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.dateTimeArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(jdsEntity -> jdsEntity.dateTimeArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<LocalDateTime> property = currentEntity.dateTimeArrayProperties.get(fieldId);
                     property.add(value.toLocalDateTime());
                 });
@@ -282,7 +282,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 String value = resultSet.getString("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).stream().filter(jdsEntity -> jdsEntity.stringArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(jdsEntity -> jdsEntity.stringArrayProperties.containsKey(fieldId)).forEach(currentEntity -> {
                     SimpleListProperty<String> property = currentEntity.stringArrayProperties.get(fieldId);
                     property.add(value);
                 });
@@ -301,11 +301,12 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 int value = resultSet.getInt("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                for (JdsEntity jdsEntity : optimalEntityLookup(jdsEntities, entityGuid)) {
+                optimalEntityLookup(jdsEntities, entityGuid).forEach(jdsEntity -> {
                     if (jdsEntity.integerArrayProperties.containsKey(fieldId)) {
                         SimpleListProperty<Integer> property = jdsEntity.integerArrayProperties.get(fieldId);
                         property.add(value);
-                    }else {
+                    } else {
+                        //enums don't have numeric keys so have to manually them look up
                         Optional<JdsFieldEnum> fieldEnum = jdsEntity.enumCollectionProperties.keySet().stream().filter(entry -> entry.getField().getId() == fieldId).findAny();
                         if (fieldEnum.isPresent()) {
                             JdsFieldEnum jdsFieldEnum = fieldEnum.get();
@@ -316,7 +317,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                             }
                         }
                     }
-                }
+                });
             }
         }
     }
@@ -339,7 +340,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String parentEntityGuid = resultSet.getString("ParentEntityGuid");
                 String entityGuid = resultSet.getString("ChildEntityGuid");
                 long entityId = resultSet.getLong("ChildEntityId");
-                for (JdsEntity parentEntity : optimalEntityLookup(jdsEntities, parentEntityGuid)) {
+                optimalEntityLookup(jdsEntities, parentEntityGuid).forEach(parentEntity -> {
                     try {
                         if (parentEntity.objectArrayProperties.containsKey(entityId)) {
                             SimpleListProperty<JdsEntity> propertyList = parentEntity.objectArrayProperties.get(entityId);
@@ -363,7 +364,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     } catch (Exception ex) {
                         ex.printStackTrace(System.err);
                     }
-                }
+                });
             }
         }
         List<List<String>> batches = createProcessingBatches(entityGuids);
@@ -377,8 +378,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param entityGuid
      * @return
      */
-    private <T extends JdsEntity> Collection<T> optimalEntityLookup(final Collection<T> jdsEntities, final String entityGuid) {
-        return jdsEntities.parallelStream().filter(entryPredicate -> entryPredicate.getEntityGuid().equals(entityGuid)).collect(Collectors.toList());
+    private <T extends JdsEntity> Stream<T> optimalEntityLookup(final Collection<T> jdsEntities, final String entityGuid) {
+        return jdsEntities.parallelStream().filter(entryPredicate -> entryPredicate.getEntityGuid().equals(entityGuid));
     }
 
     /**
@@ -413,12 +414,12 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
                 Timestamp dateModified = resultSet.getTimestamp("DateModified");
-                for (JdsEntity entity : optimalEntityLookup(jdsEntities, entityGuid)) {
+                optimalEntityLookup(jdsEntities, entityGuid).forEach(entity -> {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
                     if (entity instanceof JdsPostLoadListener)
                         ((JdsPostLoadListener) entity).onPostLoad(new OnPostLoadEvent(entity.getEntityGuid()));
-                }
+                });
             }
         }
     }
@@ -434,11 +435,11 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp value = resultSet.getTimestamp("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localDateTimeProperties.containsKey(fieldId)).forEach(entity -> {
-                    entity.localDateTimeProperties.get(fieldId).set(value.toLocalDateTime());
-                });
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localDateProperties.containsKey(fieldId)).forEach(entity -> {
-                    entity.localDateProperties.get(fieldId).set(value.toLocalDateTime().toLocalDate());
+                optimalEntityLookup(jdsEntities, entityGuid).forEach(entity -> {
+                    if (entity.localDateTimeProperties.containsKey(fieldId))
+                        entity.localDateTimeProperties.get(fieldId).set(value.toLocalDateTime());
+                    else if (entity.localDateProperties.containsKey(fieldId))
+                        entity.localDateProperties.get(fieldId).set(value.toLocalDateTime().toLocalDate());
                 });
             }
         }
@@ -455,7 +456,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 double value = resultSet.getDouble("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.doubleProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.doubleProperties.containsKey(fieldId)).forEach(entity -> {
                     entity.doubleProperties.get(fieldId).set(value);
                 });
             }
@@ -473,7 +474,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Blob value = resultSet.getBlob("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.blobProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.blobProperties.containsKey(fieldId)).forEach(entity -> {
                     try {
                         entity.blobProperties.get(fieldId).set(value.getBinaryStream());
                     } catch (IOException | SQLException e) {
@@ -495,11 +496,18 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 int value = resultSet.getInt("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.integerProperties.containsKey(fieldId)).forEach(entity -> {
-                    entity.integerProperties.get(fieldId).set(value);
-                });
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.booleanProperties.containsKey(fieldId)).forEach(entity -> {
-                    entity.booleanProperties.get(fieldId).set(value == 1);
+                optimalEntityLookup(jdsEntities, entityGuid).forEach(entity -> {
+                    if (entity.integerProperties.containsKey(fieldId)) {
+                        entity.integerProperties.get(fieldId).set(value);
+                    } else if (entity.booleanProperties.containsKey(fieldId)) {
+                        entity.booleanProperties.get(fieldId).set(value == 1);
+                    } else {
+                        //enums don't have numeric keys so have to manually them look up
+                        Optional<JdsFieldEnum> fieldEnum = entity.enumProperties.keySet().parallelStream().filter(entry -> entry.getField().getId() == fieldId).findAny();
+                        if (fieldEnum.isPresent()) {
+                            entity.enumProperties.get(fieldEnum.get()).set(fieldEnum.get().valueOf(value));
+                        }
+                    }
                 });
             }
         }
@@ -516,7 +524,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 int value = resultSet.getInt("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.localTimeProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.localTimeProperties.containsKey(fieldId)).forEach(entity -> {
                     LocalTime localTime = LocalTime.ofSecondOfDay(value);
                     entity.localTimeProperties.get(fieldId).set(localTime);
                 });
@@ -535,7 +543,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 float value = resultSet.getFloat("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.floatProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.floatProperties.containsKey(fieldId)).forEach(entity -> {
                     entity.floatProperties.get(fieldId).set(value);
                 });
             }
@@ -553,7 +561,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 long value = resultSet.getLong("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.longProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.longProperties.containsKey(fieldId)).forEach(entity -> {
                     entity.longProperties.get(fieldId).set(value);
                 });
             }
@@ -571,7 +579,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 long value = resultSet.getLong("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.zonedDateTimeProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.zonedDateTimeProperties.containsKey(fieldId)).forEach(entity -> {
                     Instant instant = Instant.ofEpochSecond(value);
                     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
                     entity.zonedDateTimeProperties.get(fieldId).set(zonedDateTime);
@@ -591,7 +599,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 String entityGuid = resultSet.getString("EntityGuid");
                 String value = resultSet.getString("Value");
                 long fieldId = resultSet.getLong("FieldId");
-                optimalEntityLookup(jdsEntities, entityGuid).parallelStream().filter(entity -> entity.stringProperties.containsKey(fieldId)).forEach(entity -> {
+                optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.stringProperties.containsKey(fieldId)).forEach(entity -> {
                     entity.stringProperties.get(fieldId).set(value);
                 });
             }
