@@ -14,8 +14,7 @@
 package io.github.subiyacryolite.jds;
 
 import com.javaworld.NamedParameterStatement;
-import io.github.subiyacryolite.jds.events.JdsPostSaveListener;
-import io.github.subiyacryolite.jds.events.JdsPreSaveListener;
+import io.github.subiyacryolite.jds.events.JdsSaveListener;
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
@@ -167,8 +166,8 @@ public class JdsSave implements Callable<Boolean> {
         int sequence = 0;
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
-            if (entity instanceof JdsPreSaveListener) {
-                ((JdsPreSaveListener) entity).onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
+            if (entity instanceof JdsSaveListener) {
+                ((JdsSaveListener) entity).onPreSave(new OnPreSaveEventArguments(step, sequence, entities.size()));
             }
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
@@ -237,8 +236,8 @@ public class JdsSave implements Callable<Boolean> {
         }
         sequence = 0;
         for (final JdsEntity entity : entities) {
-            if (entity instanceof JdsPostSaveListener) {
-                ((JdsPostSaveListener) entity).onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
+            if (entity instanceof JdsSaveListener) {
+                ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
             }
             sequence++;
         }

@@ -13,7 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.events.JdsPreDeleteListener;
+import io.github.subiyacryolite.jds.events.JdsDeleteListener;
 import io.github.subiyacryolite.jds.events.OnDeleteEventArguments;
 
 import java.sql.Connection;
@@ -54,8 +54,8 @@ public class JdsDelete implements Callable<Boolean> {
         this.jdsDb = jdsDb;
         Stream<JdsEntity> entityStream = Arrays.stream(entities);
         entityStream.forEach(entity -> {
-            if(entity instanceof JdsPreDeleteListener)
-            ((JdsPreDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, entity.getEntityGuid()));
+            if(entity instanceof JdsDeleteListener)
+            ((JdsDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, entity.getEntityGuid()));
         });
         this.entities = Arrays.stream(entities).map(x -> x.getEntityGuid()).collect(Collectors.toList());
     }
