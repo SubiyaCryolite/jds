@@ -16,7 +16,7 @@ import static io.github.subiyacryolite.jds.fields.JdsExampleFields.*;
  * Created by ifunga on 12/04/2017.
  */
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class JdsExample extends JdsEntity implements JdsLoadListener, JdsSaveListener, JdsPreLoadListener, JdsPreSaveListener {
+public class JdsExample extends JdsEntity implements JdsLoadListener, JdsSaveListener {
     private final SimpleStringProperty stringField = new SimpleStringProperty("");
     private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
     private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
