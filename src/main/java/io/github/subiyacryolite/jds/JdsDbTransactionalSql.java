@@ -13,7 +13,6 @@
 */
 package io.github.subiyacryolite.jds;
 
-import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;

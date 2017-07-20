@@ -7,11 +7,11 @@ import java.util.*;
 /*
 * @author adam_crume
 */
-public class NamedParameterCall implements INamedParameter{
+public class NamedCallableStatement implements INamedStatement {
     /**
      * The statement this object is wrapping.
      */
-    private final CallableStatement statement;
+    private final CallableStatement callableStatement;
 
     /**
      * Maps parameter names to arrays of ints which are the parameter indices.
@@ -20,7 +20,7 @@ public class NamedParameterCall implements INamedParameter{
 
 
     /**
-     * Creates a NamedParameterStatement.  Wraps a call to
+     * Creates a NamedPreparedStatement.  Wraps a call to
      * c.{@link Connection#prepareStatement(String)
      * prepareStatement}.
      *
@@ -28,10 +28,10 @@ public class NamedParameterCall implements INamedParameter{
      * @param query      the parameterized query
      * @throws SQLException if the statement could not be created
      */
-    public NamedParameterCall(Connection connection, String query) throws SQLException {
+    public NamedCallableStatement(Connection connection, String query) throws SQLException {
         indexMap = new HashMap();
         String parsedQuery = parse(query, indexMap);
-        statement = connection.prepareCall(parsedQuery);
+        callableStatement = connection.prepareCall(parsedQuery);
     }
 
 
@@ -138,7 +138,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setObject(String name, Object value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setObject(indexes[i], value);
+            callableStatement.setObject(indexes[i], value);
         }
     }
 
@@ -154,7 +154,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setBytes(String name, byte[] value) throws SQLException{
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setBytes(indexes[i], value);
+            callableStatement.setBytes(indexes[i], value);
         }
     }
     /**
@@ -169,7 +169,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setBlob(String name, InputStream value) throws SQLException{
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setBlob(indexes[i], value);
+            callableStatement.setBlob(indexes[i], value);
         }
     }
 
@@ -185,7 +185,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setNull(String name, int value) throws SQLException{
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setNull(indexes[i], value);
+            callableStatement.setNull(indexes[i], value);
         }
     }
 
@@ -202,7 +202,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setString(String name, String value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setString(indexes[i], value);
+            callableStatement.setString(indexes[i], value);
         }
     }
 
@@ -219,7 +219,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setInt(String name, int value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setInt(indexes[i], value);
+            callableStatement.setInt(indexes[i], value);
         }
     }
 
@@ -236,7 +236,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setLong(String name, long value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setLong(indexes[i], value);
+            callableStatement.setLong(indexes[i], value);
         }
     }
 
@@ -252,7 +252,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setFloat(String name, float value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setFloat(indexes[i], value);
+            callableStatement.setFloat(indexes[i], value);
         }
     }
 
@@ -268,7 +268,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setDouble(String name, double value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setDouble(indexes[i], value);
+            callableStatement.setDouble(indexes[i], value);
         }
     }
 
@@ -285,7 +285,7 @@ public class NamedParameterCall implements INamedParameter{
     public void setTimestamp(String name, Timestamp value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
-            statement.setTimestamp(indexes[i], value);
+            callableStatement.setTimestamp(indexes[i], value);
         }
     }
 
@@ -296,7 +296,7 @@ public class NamedParameterCall implements INamedParameter{
      * @return the statement
      */
     public PreparedStatement getStatement() {
-        return statement;
+        return callableStatement;
     }
 
 
@@ -308,7 +308,7 @@ public class NamedParameterCall implements INamedParameter{
      * @see PreparedStatement#execute()
      */
     public boolean execute() throws SQLException {
-        return statement.execute();
+        return callableStatement.execute();
     }
 
 
@@ -320,7 +320,7 @@ public class NamedParameterCall implements INamedParameter{
      * @see PreparedStatement#executeQuery()
      */
     public ResultSet executeQuery() throws SQLException {
-        return statement.executeQuery();
+        return callableStatement.executeQuery();
     }
 
 
@@ -334,7 +334,7 @@ public class NamedParameterCall implements INamedParameter{
      * @see PreparedStatement#executeUpdate()
      */
     public int executeUpdate() throws SQLException {
-        return statement.executeUpdate();
+        return callableStatement.executeUpdate();
     }
 
 
@@ -345,7 +345,7 @@ public class NamedParameterCall implements INamedParameter{
      * @see Statement#close()
      */
     public void close() throws SQLException {
-        statement.close();
+        callableStatement.close();
     }
 
 
@@ -355,7 +355,7 @@ public class NamedParameterCall implements INamedParameter{
      * @throws SQLException if something went wrong
      */
     public void addBatch() throws SQLException {
-        statement.addBatch();
+        callableStatement.addBatch();
     }
 
 
@@ -368,6 +368,6 @@ public class NamedParameterCall implements INamedParameter{
      * @throws SQLException if something went wrong
      */
     public int[] executeBatch() throws SQLException {
-        return statement.executeBatch();
+        return callableStatement.executeBatch();
     }
 }

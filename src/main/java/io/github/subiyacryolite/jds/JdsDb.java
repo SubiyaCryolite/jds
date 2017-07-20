@@ -13,7 +13,9 @@
  */
 package io.github.subiyacryolite.jds;
 
-import com.javaworld.NamedParameterStatement;
+import com.javaworld.INamedStatement;
+import com.javaworld.NamedCallableStatement;
+import com.javaworld.NamedPreparedStatement;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
@@ -296,7 +298,7 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     protected int columnExistsCommonImpl(String tableName, String columnName, int toReturn, String sql) {
-        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName);
             preparedStatement.setString("columnName", columnName);
             preparedStatement.setString("tableCatalog", connection.getCatalog());
@@ -575,17 +577,16 @@ public abstract class JdsDb implements JdsDbContract {
      * @param fields     the values representing the entity's fields
      */
     public final synchronized void mapClassFields(final Connection connection, final long entityId, final Map<Long, String> fields) {
-        try (PreparedStatement mapClassFields = supportsStatements() ? connection.prepareCall(mapClassFields()) : connection.prepareStatement(mapClassFields());
-             PreparedStatement mapFieldNames = supportsStatements() ? connection.prepareCall(mapFieldNames()) : connection.prepareStatement(mapFieldNames())) {
+        try (INamedStatement mapClassFields = supportsStatements() ? new NamedCallableStatement(connection, mapClassFields()) : new NamedPreparedStatement(connection, mapClassFields());
+             INamedStatement mapFieldNames = supportsStatements() ? new NamedCallableStatement(connection, mapFieldNames()) : new NamedPreparedStatement(connection, mapFieldNames())) {
             for (Map.Entry<Long, String> field : fields.entrySet()) {
                 //1. map this field ID to the entity type
-                mapClassFields.setLong(1, entityId);
-                mapClassFields.setLong(2, field.getKey());
+                mapClassFields.setLong("entityId", entityId);
+                mapClassFields.setLong("fieldId", field.getKey());
                 mapClassFields.addBatch();
-
                 //2. map this field to the field dictionary
-                mapFieldNames.setLong(1, field.getKey());
-                mapFieldNames.setString(2, field.getValue());
+                mapFieldNames.setLong("fieldId", field.getKey());
+                mapFieldNames.setString("fieldName", field.getValue());
                 mapFieldNames.addBatch();
             }
             mapClassFields.executeBatch();
@@ -603,10 +604,10 @@ public abstract class JdsDb implements JdsDbContract {
      * @param fieldTypes the values representing the entity's field types
      */
     public final synchronized void mapClassFieldTypes(final Connection connection, final long entityId, final Map<Long, String> fieldTypes) {
-        try (PreparedStatement mapFieldTypes = supportsStatements() ? connection.prepareCall(mapFieldTypes()) : connection.prepareStatement(mapFieldTypes())) {
+        try (INamedStatement mapFieldTypes = supportsStatements() ? new NamedCallableStatement(connection, mapFieldTypes()) : new NamedPreparedStatement(connection, mapFieldTypes())) {
             for (Map.Entry<Long, String> fieldType : fieldTypes.entrySet()) {
-                mapFieldTypes.setLong(1, fieldType.getKey());
-                mapFieldTypes.setString(2, fieldType.getValue());
+                mapFieldTypes.setLong("typeId", fieldType.getKey());
+                mapFieldTypes.setString("typeName", fieldType.getValue());
                 mapFieldTypes.addBatch();
             }
             mapFieldTypes.executeBatch();
@@ -904,7 +905,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveOverview() {
-        return "{call procStoreEntityOverviewV2(?,?,?)}";
+        return "{call procStoreEntityOverviewV2(:entityGuid,:dateCreated,:dateModified)}";
     }
 
     /**
@@ -913,7 +914,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveOverviewInheritance() {
-        return "{call procStoreEntityInheritance(?,?)}";
+        return "{call procStoreEntityInheritance(:entityGuid, :entityId)}";
     }
 
     /**
@@ -922,15 +923,15 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String mapClassFields() {
-        return "{call procBindEntityFields(?,?)}";
+        return "{call procBindEntityFields(:entityId, :fieldId)}";
     }
 
     public String mapFieldNames() {
-        return "{call procBindFieldNames(?,?)}";
+        return "{call procBindFieldNames(:fieldId, :fieldName)}";
     }
 
     public String mapFieldTypes() {
-        return "{call procBindFieldTypes(?,?)}";
+        return "{call procBindFieldTypes(:typeId, :typeName)}";
     }
 
     /**

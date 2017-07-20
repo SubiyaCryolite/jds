@@ -13,12 +13,14 @@
  */
 package io.github.subiyacryolite.jds;
 
-import java.io.*;
-
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -31,14 +33,14 @@ public class JdsEntityOverview implements Externalizable {
 
     private final SimpleObjectProperty<LocalDateTime> dateCreated;
     private final SimpleObjectProperty<LocalDateTime> dateModified;
-    private final SimpleLongProperty serviceCode;
+    private final SimpleLongProperty entityId;
     private final SimpleStringProperty entityGuid;
 
     public JdsEntityOverview() {
         this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
         this.dateModified = new SimpleObjectProperty<>(LocalDateTime.now());
-        this.serviceCode = new SimpleLongProperty();
+        this.entityId = new SimpleLongProperty();
     }
 
     public LocalDateTime getDateCreated() {
@@ -57,12 +59,12 @@ public class JdsEntityOverview implements Externalizable {
         this.dateModified.set(dateModified);
     }
 
-    public long getEntityCode() {
-        return serviceCode.get();
+    public long getEntityId() {
+        return entityId.get();
     }
 
-    public void setEntityCode(long serviceCode) {
-        this.serviceCode.set(serviceCode);
+    public void setEntityId(long entityId) {
+        this.entityId.set(entityId);
     }
 
     public String getEntityGuid() {
@@ -75,14 +77,14 @@ public class JdsEntityOverview implements Externalizable {
 
     public void writeExternal(ObjectOutput objectOutputStream) throws IOException {
         objectOutputStream.writeUTF(getEntityGuid());
-        objectOutputStream.writeLong(getEntityCode());
+        objectOutputStream.writeLong(getEntityId());
         objectOutputStream.writeObject(getDateCreated());
         objectOutputStream.writeObject(getDateModified());
     }
 
     public void readExternal(ObjectInput objectInputStream) throws IOException, ClassNotFoundException {
         setEntityGuid(objectInputStream.readUTF());
-        setEntityCode(objectInputStream.readLong());
+        setEntityId(objectInputStream.readLong());
         setDateCreated((LocalDateTime) objectInputStream.readObject());
         setDateModified((LocalDateTime) objectInputStream.readObject());
     }

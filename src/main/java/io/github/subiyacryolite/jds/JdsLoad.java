@@ -20,7 +20,6 @@ import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.io.IOException;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
@@ -471,14 +470,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
-                Blob value = resultSet.getBlob("Value");
+                byte[] value = resultSet.getBytes("Value");
                 long fieldId = resultSet.getLong("FieldId");
                 optimalEntityLookup(jdsEntities, entityGuid).filter(entity -> entity.blobProperties.containsKey(fieldId)).forEach(entity -> {
-                    try {
-                        entity.blobProperties.get(fieldId).set(value.getBinaryStream());
-                    } catch (IOException | SQLException e) {
-                        e.printStackTrace(System.err);
-                    }
+                    entity.blobProperties.get(fieldId).set(value);
                 });
             }
         }

@@ -64,11 +64,11 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     public long getEntityCode() {
-        return this.getOverview().getEntityCode();
+        return this.getOverview().getEntityId();
     }
 
     private void setEntityCode(long serviceCode) {
-        this.getOverview().setEntityCode(serviceCode);
+        this.getOverview().setEntityId(serviceCode);
     }
 
     public String getEntityName() {

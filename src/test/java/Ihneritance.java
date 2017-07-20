@@ -82,7 +82,7 @@ public class Ihneritance extends BaseTestConfig {
 
     @Test
     public void testAllInitialilization() throws Exception {
-        testIheritanceOracle();
+        //testIheritanceOracle();
         testIheritanceSqlite();
         testIheritanceMySql();
         testIheritancePostgreSQL();

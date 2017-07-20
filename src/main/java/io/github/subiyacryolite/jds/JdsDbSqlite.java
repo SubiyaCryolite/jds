@@ -13,7 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
-import com.javaworld.NamedParameterStatement;
+import com.javaworld.NamedPreparedStatement;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
@@ -48,7 +48,7 @@ public abstract class JdsDbSqlite extends JdsDb {
 
     public int columnExists(String tableName, String columnName) {
         String sql = String.format("PRAGMA table_info('%s')", tableName);
-        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String column = resultSet.getString("name");
@@ -193,85 +193,85 @@ public abstract class JdsDbSqlite extends JdsDb {
 
     @Override
     public String saveString() {
-        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveLong() {
-        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveDouble() {
-        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveFloat() {
-        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveInteger() {
-        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveDateTime() {
-        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveTime() {
-        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveBlob() {
-        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveZonedDateTime() {
-        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
+        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);";
     }
 
     @Override
     public String saveOverview() {
-        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid,DateCreated,DateModified) VALUES(?,?,?)";
+        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified) VALUES(:entityGuid, :dateCreated, :dateModified)";
     }
 
     @Override
     public String saveOverviewInheritance() {
-        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid,EntityId) VALUES(?,?)";
+        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid, EntityId) VALUES(:entityGuid, :entityId)";
     }
 
     @Override
     public String mapClassFields() {
-        return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId,FieldId) VALUES(?,?);";
+        return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId, FieldId) VALUES(:entityId, :fieldId);";
     }
 
     public String mapFieldNames() {
-        return "INSERT OR REPLACE INTO JdsRefFields(FieldId,FieldName) VALUES(?,?);";
+        return "INSERT OR REPLACE INTO JdsRefFields(FieldId, FieldName) VALUES(:fieldId, :fieldName);";
     }
 
     public String mapFieldTypes() {
-        return "INSERT OR REPLACE INTO JdsRefFieldTypes(TypeId,TypeName) VALUES(?,?);";
+        return "INSERT OR REPLACE INTO JdsRefFieldTypes(TypeId, TypeName) VALUES(:typeId, :typeName);";
     }
 
     @Override
     public String mapClassEnumsImplementation() {
-        return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId,FieldId) VALUES(?,?);";
+        return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId, FieldId) VALUES(?,?);";
     }
 
     @Override
     public String mapClassName() {
-        return "INSERT OR REPLACE INTO JdsRefEntities(EntityId,EntityName) VALUES(?,?);";
+        return "INSERT OR REPLACE INTO JdsRefEntities(EntityId, EntityName) VALUES(?,?);";
     }
 
     @Override
     public String mapEnumValues() {
-        return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId,EnumSeq,EnumValue) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId, EnumSeq, EnumValue) VALUES(?,?,?);";
     }
 
     /**

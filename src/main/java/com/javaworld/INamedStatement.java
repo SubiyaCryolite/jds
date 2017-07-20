@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 /**
  * Created by ifunga on 20/07/2017.
  */
-public interface INamedParameter extends AutoCloseable{
+public interface INamedStatement extends AutoCloseable{
 
     void setString(String name, String value) throws SQLException;
     void setInt(String name, int value) throws SQLException;

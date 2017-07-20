@@ -13,7 +13,7 @@
 */
 package io.github.subiyacryolite.jds;
 
-import com.javaworld.NamedParameterStatement;
+import com.javaworld.NamedPreparedStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
@@ -35,7 +35,7 @@ public abstract class JdsDbMySql extends JdsDb {
     public int tableExists(String tableName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = :tableName AND TABLE_SCHEMA = :tableSchema";
-        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName);
             preparedStatement.setString("tableSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -52,7 +52,7 @@ public abstract class JdsDbMySql extends JdsDb {
     public int procedureExists(String procedureName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName AND ROUTINE_SCHEMA = :procedureSchema";
-        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("procedureName", procedureName);
             preparedStatement.setString("procedureSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -69,7 +69,7 @@ public abstract class JdsDbMySql extends JdsDb {
     public int viewExists(String viewName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = :viewName AND TABLE_SCHEMA = :viewSchema";
-        try (Connection connection = getConnection(); NamedParameterStatement preparedStatement = new NamedParameterStatement(connection, sql)) {
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("viewName", viewName);
             preparedStatement.setString("viewSchema", connection.getCatalog());
             ResultSet resultSet = preparedStatement.executeQuery();
