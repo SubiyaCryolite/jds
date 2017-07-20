@@ -13,6 +13,8 @@
 */
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.INamedParameter;
+import com.javaworld.NamedParameterCall;
 import com.javaworld.NamedParameterStatement;
 import io.github.subiyacryolite.jds.events.JdsSaveListener;
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
@@ -282,8 +284,11 @@ public class JdsSave implements Callable<Boolean> {
     private void saveBlobs(final Connection connection, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
         int record = 0;
         //log byte array as text???
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveFloat()) : connection.prepareStatement(jdsDb.saveFloat());
-             PreparedStatement log = connection.prepareStatement("INSERT INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(?,?,?)")) {
+        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
+                "SELECT :entityGuid, :fieldId, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND BlobValue = :value)";
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveBlob()) : new NamedParameterStatement(connection, jdsDb.saveBlob());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBlobProperty>> entry : blobProperties.entrySet()) {
                 record++;
@@ -294,15 +299,23 @@ public class JdsSave implements Callable<Boolean> {
                 for (Map.Entry<Long, SimpleBlobProperty> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
                     if (recordEntry.getValue().isEmpty())
-                        upsert.setNull(3, Types.BLOB);
+                        upsert.setNull("value", Types.BLOB);
                     else
-                        upsert.setBlob(3, recordEntry.getValue().getResourceAsStream());
+                        upsert.setBytes("value", recordEntry.getValue().get());
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize);
+                    if (!jdsDb.logEdits()) continue;
+                    log.setString("entityGuid", entityGuid);
+                    log.setLong("fieldId", fieldId);
+                    if (recordEntry.getValue().isEmpty())
+                        log.setNull("value", Types.BLOB);
+                    else
+                        log.setBytes("value", recordEntry.getValue().get());
+                    log.addBatch();
                 }
             }
             upsert.executeBatch();
@@ -323,8 +336,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveInteger()) : new NamedParameterStatement(connection, jdsDb.saveInteger());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
                 record++;
@@ -336,9 +349,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     int value = recordEntry.getValue().get() ? 1 : 0;
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setInt(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setInt("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Boolean field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -366,8 +379,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveInteger()) : new NamedParameterStatement(connection, jdsDb.saveInteger());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
                 record++;
@@ -379,9 +392,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     int value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setInt(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setInt("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -409,8 +422,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, FloatValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND FloatValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveFloat()) : connection.prepareStatement(jdsDb.saveFloat());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveFloat()) : new NamedParameterStatement(connection, jdsDb.saveFloat());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
                 record++;
@@ -422,9 +435,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     float value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setFloat(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setFloat("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Float field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -452,8 +465,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, DoubleValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND DoubleValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveDouble()) : connection.prepareStatement(jdsDb.saveDouble());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveDouble()) : new NamedParameterStatement(connection, jdsDb.saveDouble());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
                 record++;
@@ -465,9 +478,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     double value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setDouble(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setDouble("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Double field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -495,8 +508,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND LongValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveLong()) : connection.prepareStatement(jdsDb.saveLong());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveLong()) : new NamedParameterStatement(connection, jdsDb.saveLong());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
                 record++;
@@ -508,9 +521,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     long value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setLong(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setLong("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -538,8 +551,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND TextValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveString()) : connection.prepareStatement(jdsDb.saveString());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveString()) : new NamedParameterStatement(connection, jdsDb.saveString());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
                 record++;
@@ -551,9 +564,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     String value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setString(3, value);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setString("value", value);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -582,8 +595,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND DateTimeValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveDateTime()) : connection.prepareStatement(jdsDb.saveDateTime());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveDateTime()) : new NamedParameterStatement(connection, jdsDb.saveDateTime());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
                 record++;
@@ -595,9 +608,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     LocalDateTime localDateTime = (LocalDateTime) recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setTimestamp(3, Timestamp.valueOf(localDateTime));
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setTimestamp("value", Timestamp.valueOf(localDateTime));
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -618,9 +631,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     LocalDate localDate = (LocalDate) recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setTimestamp(3, Timestamp.valueOf(localDate.atStartOfDay()));
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()));
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -648,8 +661,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveTime()) : connection.prepareStatement(jdsDb.saveTime());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveTime()) : new NamedParameterStatement(connection, jdsDb.saveTime());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
                 record++;
@@ -662,9 +675,9 @@ public class JdsSave implements Callable<Boolean> {
                     long fieldId = recordEntry.getKey();
                     LocalTime localTime = (LocalTime) recordEntry.getValue().get();
                     int secondOfDay = localTime.toSecondOfDay();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setInt(3, secondOfDay);
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setInt("value", secondOfDay);
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -692,8 +705,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND LongValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveZonedDateTime()) : connection.prepareStatement(jdsDb.saveZonedDateTime());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveZonedDateTime()) : new NamedParameterStatement(connection, jdsDb.saveZonedDateTime());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
                 record++;
@@ -705,9 +718,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     ZonedDateTime zonedDateTime = (ZonedDateTime) recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, fieldId);
-                    upsert.setLong(3, zonedDateTime.toEpochSecond());
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", fieldId);
+                    upsert.setLong("value", zonedDateTime.toEpochSecond());
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
@@ -735,8 +748,8 @@ public class JdsSave implements Callable<Boolean> {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
-        try (PreparedStatement upsert = jdsDb.supportsStatements() ? connection.prepareCall(jdsDb.saveInteger()) : connection.prepareStatement(jdsDb.saveInteger());
-             NamedParameterStatement log = new NamedParameterStatement(connection, logSql)) {
+        try (INamedParameter upsert = jdsDb.supportsStatements() ? new NamedParameterCall(connection, jdsDb.saveInteger()) : new NamedParameterStatement(connection, jdsDb.saveInteger());
+             INamedParameter log = new NamedParameterStatement(connection, logSql)) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enums.entrySet()) {
                 record++;
@@ -748,9 +761,9 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     JdsFieldEnum jdsFieldEnum = recordEntry.getKey();
                     Enum value = recordEntry.getValue().get();
-                    upsert.setString(1, entityGuid);
-                    upsert.setLong(2, jdsFieldEnum.getField().getId());
-                    upsert.setInt(3, jdsFieldEnum.indexOf(value));
+                    upsert.setString("entityGuid", entityGuid);
+                    upsert.setLong("fieldId", jdsFieldEnum.getField().getId());
+                    upsert.setInt("value", jdsFieldEnum.indexOf(value));
                     upsert.addBatch();
                     if (jdsDb.printOutput())
                         System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize);

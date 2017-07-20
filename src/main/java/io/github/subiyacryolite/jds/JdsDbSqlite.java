@@ -193,47 +193,47 @@ public abstract class JdsDbSqlite extends JdsDb {
 
     @Override
     public String saveString() {
-        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveLong() {
-        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveDouble() {
-        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveFloat() {
-        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveInteger() {
-        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveDateTime() {
-        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveTime() {
-        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveBlob() {
-        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override
     public String saveZonedDateTime() {
-        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid,FieldId,Value) VALUES(?,?,?);";
+        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid,FieldId,Value) VALUES(:entityGuid,:fieldId,:value);";
     }
 
     @Override

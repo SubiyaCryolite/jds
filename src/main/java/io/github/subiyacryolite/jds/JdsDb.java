@@ -814,7 +814,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveString() {
-        return "{call procStoreText(?,?,?)}";
+        return "{call procStoreText(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -823,7 +823,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveLong() {
-        return "{call procStoreLong(?,?,?)}";
+        return "{call procStoreLong(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -832,7 +832,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveDouble() {
-        return "{call procStoreDouble(?,?,?)}";
+        return "{call procStoreDouble(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -841,7 +841,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveBlob() {
-        return "{call procStoreBlob(?,?,?)}";
+        return "{call procStoreBlob(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -850,7 +850,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveFloat() {
-        return "{call procStoreFloat(?,?,?)}";
+        return "{call procStoreFloat(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -859,7 +859,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveInteger() {
-        return "{call procStoreInteger(?,?,?)}";
+        return "{call procStoreInteger(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -868,7 +868,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveDateTime() {
-        return "{call procStoreDateTime(?,?,?)}";
+        return "{call procStoreDateTime(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -877,7 +877,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveZonedDateTime() {
-        return "{call procStoreZonedDateTime(?,?,?)}";
+        return "{call procStoreZonedDateTime(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -886,7 +886,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveDate() {
-        return "{call procStoreDate(?,?,?)}";
+        return "{call procStoreDate(:entityGuid,:fieldId,:value)}";
     }
 
     /**
@@ -895,7 +895,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @return the default or overridden SQL statement for this operation
      */
     public String saveTime() {
-        return "{call procStoreTime(?,?,?)}";
+        return "{call procStoreTime(:entityGuid,:fieldId,:value)}";
     }
 
     /**

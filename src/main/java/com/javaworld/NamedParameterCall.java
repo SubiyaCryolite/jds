@@ -7,11 +7,11 @@ import java.util.*;
 /*
 * @author adam_crume
 */
-public class NamedParameterStatement implements INamedParameter{
+public class NamedParameterCall implements INamedParameter{
     /**
      * The statement this object is wrapping.
      */
-    private final PreparedStatement statement;
+    private final CallableStatement statement;
 
     /**
      * Maps parameter names to arrays of ints which are the parameter indices.
@@ -21,17 +21,17 @@ public class NamedParameterStatement implements INamedParameter{
 
     /**
      * Creates a NamedParameterStatement.  Wraps a call to
-     * c.{@link Connection#prepareStatement(java.lang.String)
+     * c.{@link Connection#prepareStatement(String)
      * prepareStatement}.
      *
      * @param connection the database connection
      * @param query      the parameterized query
      * @throws SQLException if the statement could not be created
      */
-    public NamedParameterStatement(Connection connection, String query) throws SQLException {
+    public NamedParameterCall(Connection connection, String query) throws SQLException {
         indexMap = new HashMap();
         String parsedQuery = parse(query, indexMap);
-        statement = connection.prepareStatement(parsedQuery);
+        statement = connection.prepareCall(parsedQuery);
     }
 
 
@@ -133,7 +133,7 @@ public class NamedParameterStatement implements INamedParameter{
      * @param value parameter value
      * @throws SQLException             if an error occurred
      * @throws IllegalArgumentException if the parameter does not exist
-     * @see PreparedStatement#setObject(int, java.lang.Object)
+     * @see PreparedStatement#setObject(int, Object)
      */
     public void setObject(String name, Object value) throws SQLException {
         int[] indexes = getIndexes(name);
@@ -189,6 +189,7 @@ public class NamedParameterStatement implements INamedParameter{
         }
     }
 
+
     /**
      * Sets a parameter.
      *
@@ -196,7 +197,7 @@ public class NamedParameterStatement implements INamedParameter{
      * @param value parameter value
      * @throws SQLException             if an error occurred
      * @throws IllegalArgumentException if the parameter does not exist
-     * @see PreparedStatement#setString(int, java.lang.String)
+     * @see PreparedStatement#setString(int, String)
      */
     public void setString(String name, String value) throws SQLException {
         int[] indexes = getIndexes(name);
@@ -279,7 +280,7 @@ public class NamedParameterStatement implements INamedParameter{
      * @param value parameter value
      * @throws SQLException             if an error occurred
      * @throws IllegalArgumentException if the parameter does not exist
-     * @see PreparedStatement#setTimestamp(int, java.sql.Timestamp)
+     * @see PreparedStatement#setTimestamp(int, Timestamp)
      */
     public void setTimestamp(String name, Timestamp value) throws SQLException {
         int[] indexes = getIndexes(name);
