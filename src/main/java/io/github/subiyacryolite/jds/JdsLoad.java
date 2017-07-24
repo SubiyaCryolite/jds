@@ -160,11 +160,11 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 setParameterForStatement(batchSequence, entityGuid, overviews);
                 batchSequence++;
             }
-            if (initialisePrimitives) {
+            if (!jdsDb.isPersistingChangesOnly() && initialisePrimitives) {
                 //primitives
                 populateText(entities, strings);
                 populateLong(entities, longs);
-                populateIntegerAndBoolean(entities, integers);
+                populateIntegerEnumAndBoolean(entities, integers);
                 populateFloat(entities, floats);
                 populateDouble(entities, doubles);
                 //integer arrays and enums
@@ -175,15 +175,17 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateDoubleArrays(entities, doubleArrays);
 
             }
-            if (initialiseDatesAndTimes) {
+            if (!jdsDb.isPersistingChangesOnly() && initialiseDatesAndTimes) {
                 populateZonedDateTime(entities, zonedDateTimes);
                 populateDateTimeAndDate(entities, dateTimes);
                 populateTimes(entities, times);
                 populateDateTimeArrays(entities, dateTimeArrays);
             }
             if (initialiseObjects) {
-                //blobs
-                populateBlobs(entities, blobs);
+                if (!jdsDb.isPersistingChangesOnly()) {
+                    //blobs
+                    populateBlobs(entities, blobs);
+                }
                 populateObjectEntriesAndObjectArrays(jdsDb, entities, embeddedAndArrayObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects);
             }
             populateOverviews(entities, overviews);
@@ -485,7 +487,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @param preparedStatement
      * @throws SQLException
      */
-    private <T extends JdsEntity> void populateIntegerAndBoolean(final Collection<T> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
+    private <T extends JdsEntity> void populateIntegerEnumAndBoolean(final Collection<T> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
