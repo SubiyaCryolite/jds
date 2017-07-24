@@ -134,7 +134,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     entity.setEntityGuid(entityGuid);
                     entities.add(entity);
                     if (entity instanceof JdsLoadListener)
-                        ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(entityGuid, batchSequence, entityGuids.size()));
+                        ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entityGuid, batchSequence, entityGuids.size()));
                 }
                 //primitives
                 setParameterForStatement(batchSequence, entityGuid, strings);
@@ -416,7 +416,11 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
                     if (entity instanceof JdsLoadListener)
-                        ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEvent(entity.getEntityGuid()));
+                        try {
+                            ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEvent(preparedStatement.getConnection(), entity.getEntityGuid()));
+                        } catch (SQLException e) {
+                            e.printStackTrace(System.err);
+                        }
                 });
             }
         }

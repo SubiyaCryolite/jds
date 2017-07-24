@@ -56,6 +56,10 @@ public abstract class JdsDb implements JdsDbContract {
      * A value indicating whether JDS should print internal log information
      */
     private boolean printOutput;
+    /**
+     * If you want to use this library to only persist changes without storing to the primary datatables
+     */
+    private boolean persistChangesOnly;
 
     /**
      * Initialise JDS base tables
@@ -769,6 +773,22 @@ public abstract class JdsDb implements JdsDbContract {
      */
     public final boolean logEdits() {
         return logEdits;
+    }
+
+    /**
+     * A value indicating whether JDS is only persisting changes to fields without affecting the primary datastores
+     *
+     * @return true if JDS is only persisting changes to fields without affecting the primary datastores
+     */
+    public final boolean isPersistingChangesOnly() {
+        return persistChangesOnly;
+    }
+
+    /**
+     * @param value
+     */
+    public final void setPersistChangesOnly(boolean value) {
+        this.persistChangesOnly = value;
     }
 
     /**
