@@ -5,11 +5,11 @@ import java.sql.Connection;
 /**
  * Created by ifunga on 13/05/2017.
  */
-public class OnPostLoadEvent {
+public class OnPostLoadEventArguments {
     private final String entityGuid;
     private final Connection connection;
 
-    public OnPostLoadEvent(Connection connection, String entityGuid) {
+    public OnPostLoadEventArguments(Connection connection, String entityGuid) {
         this.entityGuid = entityGuid;
         this.connection = connection;
     }

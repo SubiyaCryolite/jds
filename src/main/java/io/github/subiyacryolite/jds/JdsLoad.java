@@ -15,7 +15,7 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.events.JdsLoadListener;
-import io.github.subiyacryolite.jds.events.OnPostLoadEvent;
+import io.github.subiyacryolite.jds.events.OnPostLoadEventArguments;
 import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -408,6 +408,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      */
     private <T extends JdsEntity> void populateOverviews(final Collection<T> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            Connection connection = preparedStatement.getConnection();
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
@@ -416,11 +417,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
                     if (entity instanceof JdsLoadListener)
-                        try {
-                            ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEvent(preparedStatement.getConnection(), entity.getEntityGuid()));
-                        } catch (SQLException e) {
-                            e.printStackTrace(System.err);
-                        }
+                        ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getEntityGuid()));
                 });
             }
         }

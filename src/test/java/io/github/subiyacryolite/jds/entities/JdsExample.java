@@ -154,22 +154,22 @@ public class JdsExample extends JdsEntity implements JdsLoadListener, JdsSaveLis
     }
 
     @Override
-    public void onPreSave(OnPreSaveEventArguments eventArguments) {
-        System.out.printf("Pre-Save :: Batch Sequence[%s]. Batch Size [%s]. Outer Batch Step [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize(), eventArguments.getOuterBatchStep());
+    public void onPreSave(OnPreSaveEventArguments arguments) {
+        System.out.printf("Pre-Save :: Batch Sequence[%s]. Batch Size [%s]. Outer Batch Step [%s]\n", arguments.getBatchSequence(), arguments.getBatchSize(), arguments.getOuterBatchStep());
     }
 
     @Override
-    public void onPostSave(OnPostSaveEventArguments eventArguments) {
-        System.out.printf("Post-Save :: Batch Sequence[%s]. Batch Size [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize());
+    public void onPostSave(OnPostSaveEventArguments arguments) {
+        System.out.printf("Post-Save :: Batch Sequence[%s]. Batch Size [%s]\n", arguments.getBatchSequence(), arguments.getBatchSize());
     }
 
     @Override
-    public void onPreLoad(OnPreLoadEventArguments eventArguments) {
-        System.out.printf("Pre-Load :: Batch Sequence[%s]. Batch Size [%s]. Entity Guid [%s]\n", eventArguments.getBatchSequence(), eventArguments.getBatchSize(), eventArguments.getEntityGuid());
+    public void onPreLoad(OnPreLoadEventArguments arguments) {
+        System.out.printf("Pre-Load :: Batch Sequence[%s]. Batch Size [%s]. Entity Guid [%s]\n", arguments.getBatchSequence(), arguments.getBatchSize(), arguments.getEntityGuid());
     }
 
     @Override
-    public void onPostLoad(OnPostLoadEvent eventArguments) {
-        System.out.printf("Post-Load :: Entity Guid [%s]\n", eventArguments.getEntityGuid());
+    public void onPostLoad(OnPostLoadEventArguments arguments) {
+        System.out.printf("Post-Load :: Entity Guid [%s]\n", arguments.getEntityGuid());
     }
 }
