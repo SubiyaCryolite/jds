@@ -232,8 +232,16 @@ public class JdsSave implements Callable<Boolean> {
             saveEnums(connection, persistChangesOnly, saveContainer.enums.get(step));
             saveEnumCollections(connection, persistChangesOnly, saveContainer.enumCollections.get(step));
             //objects and object arrays
+            //object entity overviews and entity bindings are ALWAYS persisted
             saveArrayObjects(connection, saveContainer.objectArrays.get(step));
             bindAndSaveInnerObjects(connection, saveContainer.objects.get(step));
+
+            for (final JdsEntity entity : entities) {
+                if (entity instanceof JdsSaveListener) {
+                    ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
+                }
+                sequence++;
+            }
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -241,12 +249,6 @@ public class JdsSave implements Callable<Boolean> {
                 connection.close();
         }
         sequence = 0;
-        for (final JdsEntity entity : entities) {
-            if (entity instanceof JdsSaveListener) {
-                ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
-            }
-            sequence++;
-        }
     }
 
     /**

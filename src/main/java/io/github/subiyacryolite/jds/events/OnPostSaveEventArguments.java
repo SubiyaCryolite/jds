@@ -8,10 +8,12 @@ import java.sql.Connection;
 public class OnPostSaveEventArguments {
     private final int batchSequence;
     private final int batchSize;
+    private final Connection connection;
 
-    public OnPostSaveEventArguments(int batchSequence, int batchSize) {
+    public OnPostSaveEventArguments(Connection connection, int batchSequence, int batchSize) {
         this.batchSequence = batchSequence;
         this.batchSize = batchSize;
+        this.connection = connection;
     }
 
     public int getBatchSequence() {
@@ -22,4 +24,7 @@ public class OnPostSaveEventArguments {
         return batchSize;
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
 }
