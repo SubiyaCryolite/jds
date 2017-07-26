@@ -160,7 +160,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 setParameterForStatement(batchSequence, entityGuid, overviews);
                 batchSequence++;
             }
-            if (!jdsDb.isWritingToPrimaryDataTables() && initialisePrimitives) {
+            if (jdsDb.isWritingToPrimaryDataTables() && initialisePrimitives) {
                 //primitives
                 populateText(entities, strings);
                 populateLong(entities, longs);
@@ -175,14 +175,14 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateDoubleArrays(entities, doubleArrays);
 
             }
-            if (!jdsDb.isWritingToPrimaryDataTables() && initialiseDatesAndTimes) {
+            if (jdsDb.isWritingToPrimaryDataTables() && initialiseDatesAndTimes) {
                 populateZonedDateTime(entities, zonedDateTimes);
                 populateDateTimeAndDate(entities, dateTimes);
                 populateTimes(entities, times);
                 populateDateTimeArrays(entities, dateTimeArrays);
             }
             if (initialiseObjects) {
-                if (!jdsDb.isWritingToPrimaryDataTables()) {
+                if (jdsDb.isWritingToPrimaryDataTables()) {
                     //blobs
                     populateBlobs(entities, blobs);
                 }
