@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.entities;
+package entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import static io.github.subiyacryolite.jds.fields.JdsExampleFields.*;
+import static fields.JdsExampleFields.*;
 
 /**
  * Created by ifunga on 12/04/2017.

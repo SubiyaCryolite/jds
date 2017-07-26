@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.enums;
+package enums;
 
 /**
  * Created by ifung on 16/07/2017.

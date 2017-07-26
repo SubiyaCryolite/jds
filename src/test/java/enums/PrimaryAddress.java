@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.enums;
+package enums;
 
 public enum PrimaryAddress {
     YES, NO;

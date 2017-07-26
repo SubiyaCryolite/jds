@@ -1,7 +1,7 @@
 import io.github.subiyacryolite.jds.JdsFilter;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import io.github.subiyacryolite.jds.entities.SimpleAddress;
-import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
+import common.BaseTestConfig;
+import entities.SimpleAddress;
+import fields.SimpleAddressFields;
 import org.junit.Assert;
 import org.junit.Test;
 

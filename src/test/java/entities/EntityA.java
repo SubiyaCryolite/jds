@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.entities;
+package entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.JdsField;

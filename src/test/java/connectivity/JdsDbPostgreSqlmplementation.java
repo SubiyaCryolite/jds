@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.connectivity;
+package connectivity;
 
 import io.github.subiyacryolite.jds.JdsDbPostgreSql;
 

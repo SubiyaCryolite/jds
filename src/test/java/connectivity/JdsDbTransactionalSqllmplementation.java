@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package io.github.subiyacryolite.jds.connectivity;
+package connectivity;
 
 import io.github.subiyacryolite.jds.JdsDbTransactionalSql;
 

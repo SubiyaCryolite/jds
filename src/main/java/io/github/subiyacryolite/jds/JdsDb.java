@@ -57,7 +57,7 @@ public abstract class JdsDb implements JdsDbContract {
      */
     private boolean printingOutput;
     /**
-     * If you want to use this library to only persist changes without storing to the primary datatables
+     * Indicate whether JDS is persisting to the primary data tables
      */
     private boolean writingToPrimaryDataTables = true;
 
@@ -231,7 +231,6 @@ public abstract class JdsDb implements JdsDbContract {
             case StoreEntityBinding:
                 createStoreEntityBinding();
                 break;
-
         }
         prepareCustomDatabaseComponents(jdsComponent);
     }
@@ -324,7 +323,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param fileName the file containing SQL to find
      */
     protected final void executeSqlFromFile(String fileName) {
-        try (InputStream rs = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+        try (InputStream rs = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             String innerSql = fileToString(rs);
             executeSqlFromString(innerSql);
         } catch (Exception ex) {

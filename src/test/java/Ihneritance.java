@@ -1,10 +1,10 @@
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import io.github.subiyacryolite.jds.entities.EntityA;
-import io.github.subiyacryolite.jds.entities.EntityB;
-import io.github.subiyacryolite.jds.entities.EntityC;
+import common.BaseTestConfig;
+import entities.EntityA;
+import entities.EntityB;
+import entities.EntityC;
 import org.junit.Test;
 
 import java.util.ArrayList;
