@@ -254,7 +254,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param overviews
      */
-    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) {
+    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) throws SQLException {
         int record = 0;
         int recordTotal = overviews.size();
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverview()) : new NamedPreparedStatement(connection, jdsDb.saveOverview());
@@ -279,6 +279,8 @@ public class JdsSave implements Callable<Boolean> {
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 
