@@ -1162,7 +1162,7 @@ public class JdsSave implements Callable<Boolean> {
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveEnumCollections(final Connection connection, boolean persistChangesOnly, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
+    private void saveEnumCollections(final Connection connection, boolean persistChangesOnly, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) throws SQLException {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +
@@ -1214,6 +1214,8 @@ public class JdsSave implements Callable<Boolean> {
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        } finally {
+            connection.setAutoCommit(true);//turn on for sql calls in listeners
         }
     }
 
@@ -1279,6 +1281,8 @@ public class JdsSave implements Callable<Boolean> {
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        } finally {
+            connection.setAutoCommit(true);//turn back for queries called in events
         }
     }
 
