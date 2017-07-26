@@ -1,10 +1,10 @@
-package io.github.subiyacryolite.jds.entities;
+package entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
-import io.github.subiyacryolite.jds.enums.PrimaryAddress;
-import io.github.subiyacryolite.jds.enums.SimpleAddressEnums;
-import io.github.subiyacryolite.jds.fields.SimpleAddressFields;
+import enums.PrimaryAddress;
+import enums.SimpleAddressEnums;
+import fields.SimpleAddressFields;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

@@ -1,8 +1,8 @@
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import io.github.subiyacryolite.jds.entities.JdsExample;
+import common.BaseTestConfig;
+import entities.JdsExample;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -45,7 +45,8 @@ public class LoadAndSaveTests extends BaseTestConfig {
     @Test
     public void callableSqlLiteLoadNoExisting() throws Exception {
         initialiseSqlLiteBackend();
-        loadNonExisting();
+        save();
+        load();
     }
 
     @Test
@@ -101,9 +102,10 @@ public class LoadAndSaveTests extends BaseTestConfig {
     }
 
     @Test
-    public void loadNonExisting() throws ExecutionException, InterruptedException {
+    public void loadNonExisting() throws Exception {
         Callable<List<JdsExample>> loadNonExistingCallable = new JdsLoad(jdsDb, JdsExample.class,"DOES_NOT_EXIST");
         FutureTask<List<JdsExample>> loadNonExistingTask = new FutureTask(loadNonExistingCallable);
+        loadNonExistingTask.run();
         while (!loadNonExistingTask.isDone())
             System.out.println("Waiting for operation 1 to complete");
         List<JdsExample> loadNonExistingResult = loadNonExistingTask.get();

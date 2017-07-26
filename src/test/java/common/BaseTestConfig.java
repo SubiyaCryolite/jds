@@ -1,9 +1,9 @@
-package io.github.subiyacryolite.jds.common;
+package common;
 
+import connectivity.*;
+import entities.*;
 import io.github.subiyacryolite.jds.JdsDb;
-import io.github.subiyacryolite.jds.connectivity.*;
-import io.github.subiyacryolite.jds.entities.*;
-import io.github.subiyacryolite.jds.enums.PrimaryAddress;
+import enums.PrimaryAddress;
 import org.junit.Test;
 
 import java.io.*;
@@ -42,7 +42,7 @@ public abstract class BaseTestConfig {
 
     private void initJds() {
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.isLoggingEdits(true);
         initialiseJdsClasses();
     }
 

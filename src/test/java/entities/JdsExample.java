@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.entities;
+package entities;
 
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import static io.github.subiyacryolite.jds.fields.JdsExampleFields.*;
+import static fields.JdsExampleFields.*;
 
 /**
  * Created by ifunga on 12/04/2017.
@@ -18,10 +18,10 @@ import static io.github.subiyacryolite.jds.fields.JdsExampleFields.*;
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
 public class JdsExample extends JdsEntity implements JdsLoadListener, JdsSaveListener {
     private final SimpleStringProperty stringField = new SimpleStringProperty("");
-    private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
-    private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
-    private final SimpleObjectProperty<LocalDateTime> dateTimeField = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
-    private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField = new SimpleObjectProperty<ZonedDateTime>(ZonedDateTime.now());
+    private final SimpleObjectProperty<LocalTime> timeField = new SimpleObjectProperty<>(LocalTime.now());
+    private final SimpleObjectProperty<LocalDate> dateField = new SimpleObjectProperty<>(LocalDate.now());
+    private final SimpleObjectProperty<LocalDateTime> dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now());
+    private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now());
     private final SimpleLongProperty longField = new SimpleLongProperty(0);
     private final SimpleIntegerProperty intField = new SimpleIntegerProperty(0);
     private final SimpleDoubleProperty doubleField = new SimpleDoubleProperty(0);

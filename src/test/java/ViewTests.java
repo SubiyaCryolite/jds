@@ -1,6 +1,6 @@
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.JdsView;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
+import common.BaseTestConfig;
 import org.junit.Test;
 
 import java.sql.SQLException;

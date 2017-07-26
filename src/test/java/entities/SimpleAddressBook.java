@@ -1,4 +1,4 @@
-package io.github.subiyacryolite.jds.entities;
+package entities;
 
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;

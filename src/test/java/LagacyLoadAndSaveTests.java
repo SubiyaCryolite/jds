@@ -1,9 +1,9 @@
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import io.github.subiyacryolite.jds.entities.SimpleAddress;
-import io.github.subiyacryolite.jds.entities.SimpleAddressBook;
+import common.BaseTestConfig;
+import entities.SimpleAddress;
+import entities.SimpleAddressBook;
 import org.junit.Test;
 
 import java.util.Comparator;

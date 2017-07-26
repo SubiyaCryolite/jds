@@ -1,7 +1,7 @@
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import io.github.subiyacryolite.jds.common.BaseTestConfig;
-import io.github.subiyacryolite.jds.entities.JdsExample;
+import common.BaseTestConfig;
+import entities.JdsExample;
 import org.junit.Assert;
 import org.junit.Test;
 
