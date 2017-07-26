@@ -51,15 +51,15 @@ public abstract class JdsDb implements JdsDbContract {
     /**
      * A value indicating whether JDS should log every write in the system
      */
-    private boolean logEdits;
+    private boolean loggingEdits;
     /**
      * A value indicating whether JDS should print internal log information
      */
-    private boolean printOutput;
+    private boolean printingOutput;
     /**
      * If you want to use this library to only persist changes without storing to the primary datatables
      */
-    private boolean persistChangesOnly;
+    private boolean writingToPrimaryDataTables = true;
 
     /**
      * Initialise JDS base tables
@@ -629,7 +629,7 @@ public abstract class JdsDb implements JdsDbContract {
     public final synchronized void mapClassEnums(final Connection connection, final long entityId, final Set<JdsFieldEnum> fields) {
         mapEnumValues(connection, fields);
         mapClassEnumsImplementation(connection, entityId, fields);
-        if (printOutput())
+        if (isPrintingOutput())
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId);
     }
 
@@ -708,7 +708,7 @@ public abstract class JdsDb implements JdsDbContract {
             statement.setLong(1, entityId);
             statement.setString(2, entityName);
             statement.executeUpdate();
-            if (printOutput)
+            if (printingOutput)
                 System.out.printf("Mapped Entity [%S - %s]\n", entityName, entityId);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -733,7 +733,7 @@ public abstract class JdsDb implements JdsDbContract {
                     mapParentEntities(connection, parentEntities, jdsEntity.getEntityCode());
                     connection.commit();
                     jdsEntity = null;
-                    if (printOutput())
+                    if (isPrintingOutput())
                         System.out.printf("Mapped Entity [%s]\n", jdsEntity.getEntityName());
                 } catch (Exception ex) {
                     ex.printStackTrace(System.err);
@@ -771,8 +771,8 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @return true if JDS is logging every write in the system
      */
-    public final boolean logEdits() {
-        return logEdits;
+    public final boolean isLoggingEdits() {
+        return loggingEdits;
     }
 
     /**
@@ -780,15 +780,15 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @return true if JDS is only persisting changes to fields without affecting the primary datastores
      */
-    public final boolean isPersistingChangesOnly() {
-        return persistChangesOnly;
+    public final boolean isWritingToPrimaryDataTables() {
+        return writingToPrimaryDataTables;
     }
 
     /**
      * @param value
      */
-    public final void setPersistChangesOnly(boolean value) {
-        this.persistChangesOnly = value;
+    public final void isWritingToPrimaryDataTables(boolean value) {
+        this.writingToPrimaryDataTables = value;
     }
 
     /**
@@ -796,8 +796,8 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @param value whether JDS should log every write in the system
      */
-    public final void logEdits(boolean value) {
-        this.logEdits = value;
+    public final void isLoggingEdits(boolean value) {
+        this.loggingEdits = value;
     }
 
     /**
@@ -805,8 +805,8 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @return true if JDS is printing internal log information
      */
-    public final boolean printOutput() {
-        return printOutput;
+    public final boolean isPrintingOutput() {
+        return printingOutput;
     }
 
     /**
@@ -814,8 +814,8 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @param value whether JDS should print internal log information
      */
-    public final void printOutput(boolean value) {
-        this.printOutput = value;
+    public final void isPrintingOutput(boolean value) {
+        this.printingOutput = value;
     }
 
     /**

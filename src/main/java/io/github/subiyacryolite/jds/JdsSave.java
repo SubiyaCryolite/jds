@@ -86,7 +86,7 @@ public class JdsSave implements Callable<Boolean> {
         for (Collection<JdsEntity> current : batchEntities) {
             saveInner(jdsDb, current, saveContainer, step);
             step++;
-            if (jdsDb.printOutput())
+            if (jdsDb.isPrintingOutput())
                 System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
         }
         return true;
@@ -207,35 +207,35 @@ public class JdsSave implements Callable<Boolean> {
         }
         //share one connection for raw saves, helps with performance
         try {
-            boolean persistChangesOnly = jdsDb.isPersistingChangesOnly();
+            boolean writeToPrimaryDataTables = jdsDb.isWritingToPrimaryDataTables();
+            //always save overviews
             saveOverviews(connection, saveContainer.overviews.get(step));
             //properties
-            saveBooleans(connection, persistChangesOnly, saveContainer.booleans.get(step));
-            saveStrings(connection, persistChangesOnly, saveContainer.strings.get(step));
-            saveDatesAndDateTimes(connection, persistChangesOnly, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
-            saveZonedDateTimes(connection, persistChangesOnly, saveContainer.zonedDateTimes.get(step));
-            saveTimes(connection, persistChangesOnly, saveContainer.localTimes.get(step));
-            saveLongs(connection, persistChangesOnly, saveContainer.longs.get(step));
-            saveDoubles(connection, persistChangesOnly, saveContainer.doubles.get(step));
-            saveIntegers(connection, persistChangesOnly, saveContainer.integers.get(step));
-            saveFloats(connection, persistChangesOnly, saveContainer.floats.get(step));
+            saveBooleans(connection, writeToPrimaryDataTables, saveContainer.booleans.get(step));
+            saveStrings(connection, writeToPrimaryDataTables, saveContainer.strings.get(step));
+            saveDatesAndDateTimes(connection, writeToPrimaryDataTables, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
+            saveZonedDateTimes(connection, writeToPrimaryDataTables, saveContainer.zonedDateTimes.get(step));
+            saveTimes(connection, writeToPrimaryDataTables, saveContainer.localTimes.get(step));
+            saveLongs(connection, writeToPrimaryDataTables, saveContainer.longs.get(step));
+            saveDoubles(connection, writeToPrimaryDataTables, saveContainer.doubles.get(step));
+            saveIntegers(connection, writeToPrimaryDataTables, saveContainer.integers.get(step));
+            saveFloats(connection, writeToPrimaryDataTables, saveContainer.floats.get(step));
             //blobs
-            saveBlobs(connection, persistChangesOnly, saveContainer.blobs.get(step));
+            saveBlobs(connection, writeToPrimaryDataTables, saveContainer.blobs.get(step));
             //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-            saveArrayDates(connection, persistChangesOnly, saveContainer.dateTimeArrays.get(step));
-            saveArrayStrings(connection, persistChangesOnly, saveContainer.stringArrays.get(step));
-            saveArrayLongs(connection, persistChangesOnly, saveContainer.longArrays.get(step));
-            saveArrayDoubles(connection, persistChangesOnly, saveContainer.doubleArrays.get(step));
-            saveArrayIntegers(connection, persistChangesOnly, saveContainer.integerArrays.get(step));
-            saveArrayFloats(connection, persistChangesOnly, saveContainer.floatArrays.get(step));
+            saveArrayDates(connection, writeToPrimaryDataTables, saveContainer.dateTimeArrays.get(step));
+            saveArrayStrings(connection, writeToPrimaryDataTables, saveContainer.stringArrays.get(step));
+            saveArrayLongs(connection, writeToPrimaryDataTables, saveContainer.longArrays.get(step));
+            saveArrayDoubles(connection, writeToPrimaryDataTables, saveContainer.doubleArrays.get(step));
+            saveArrayIntegers(connection, writeToPrimaryDataTables, saveContainer.integerArrays.get(step));
+            saveArrayFloats(connection, writeToPrimaryDataTables, saveContainer.floatArrays.get(step));
             //enums
-            saveEnums(connection, persistChangesOnly, saveContainer.enums.get(step));
-            saveEnumCollections(connection, persistChangesOnly, saveContainer.enumCollections.get(step));
+            saveEnums(connection, writeToPrimaryDataTables, saveContainer.enums.get(step));
+            saveEnumCollections(connection, writeToPrimaryDataTables, saveContainer.enumCollections.get(step));
             //objects and object arrays
             //object entity overviews and entity bindings are ALWAYS persisted
-            saveArrayObjects(connection, saveContainer.objectArrays.get(step));
-            bindAndSaveInnerObjects(connection, saveContainer.objects.get(step));
-
+            saveAndBindObjects(connection, saveContainer.objects.get(step));
+            saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
@@ -272,7 +272,7 @@ public class JdsSave implements Callable<Boolean> {
                 inheritance.setString("entityGuid", overview.getEntityGuid());
                 inheritance.setLong("entityId", overview.getEntityId());
                 inheritance.addBatch();
-                if (jdsDb.printOutput())
+                if (jdsDb.isPrintingOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
             inheritance.executeBatch();
@@ -287,7 +287,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param blobProperties
      */
-    private void saveBlobs(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
+    private void saveBlobs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
         int record = 0;
         //log byte array as text???
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, BlobValue) \n" +
@@ -305,15 +305,15 @@ public class JdsSave implements Callable<Boolean> {
                 for (Map.Entry<Long, SimpleBlobProperty> recordEntry : entry.getValue().entrySet()) {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setBytes("value", recordEntry.getValue().get());
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setBytes("value", recordEntry.getValue().get());
@@ -333,7 +333,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private void saveBooleans(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
+    private void saveBooleans(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -351,15 +351,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     int value = recordEntry.getValue().get() ? 1 : 0;
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setInt("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Boolean field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", value);
@@ -378,7 +378,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param integerProperties
      */
-    private void saveIntegers(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
+    private void saveIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -396,15 +396,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     int value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setInt("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", value);
@@ -423,7 +423,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param floatProperties
      */
-    private void saveFloats(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
+    private void saveFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, FloatValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -441,15 +441,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     float value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setFloat("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Float field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setFloat("value", value);
@@ -468,7 +468,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param doubleProperties
      */
-    private void saveDoubles(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
+    private void saveDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, DoubleValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -486,15 +486,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     double value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setDouble("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Double field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setDouble("value", value);
@@ -513,7 +513,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param longProperties
      */
-    private void saveLongs(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
+    private void saveLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -531,15 +531,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     long value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setLong("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setLong("value", value);
@@ -558,7 +558,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param stringProperties
      */
-    private void saveStrings(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
+    private void saveStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -576,15 +576,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     String value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setString("value", value);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setString("value", value);
@@ -604,7 +604,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private void saveDatesAndDateTimes(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
+    private void saveDatesAndDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -622,15 +622,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     LocalDateTime localDateTime = (LocalDateTime) recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setTimestamp("value", Timestamp.valueOf(localDateTime));
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setTimestamp("value", Timestamp.valueOf(localDateTime));
@@ -651,9 +651,9 @@ public class JdsSave implements Callable<Boolean> {
                     upsert.setLong("fieldId", fieldId);
                     upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()));
                     upsert.addBatch();
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()));
@@ -672,7 +672,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param localTimeProperties
      */
-    private void saveTimes(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+    private void saveTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -691,15 +691,15 @@ public class JdsSave implements Callable<Boolean> {
                     long fieldId = recordEntry.getKey();
                     LocalTime localTime = (LocalTime) recordEntry.getValue().get();
                     int secondOfDay = localTime.toSecondOfDay();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setInt("value", secondOfDay);
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", secondOfDay);
@@ -718,7 +718,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param zonedDateProperties
      */
-    private void saveZonedDateTimes(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+    private void saveZonedDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -736,15 +736,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     long fieldId = recordEntry.getKey();
                     ZonedDateTime zonedDateTime = (ZonedDateTime) recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", fieldId);
                         upsert.setLong("value", zonedDateTime.toEpochSecond());
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setLong("value", zonedDateTime.toEpochSecond());
@@ -763,7 +763,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param enums
      */
-    public void saveEnums(final Connection connection, boolean persistChangesOnly, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
+    public void saveEnums(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
         int record = 0;
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :value\n" +
@@ -781,15 +781,15 @@ public class JdsSave implements Callable<Boolean> {
                     innerRecord++;
                     JdsFieldEnum jdsFieldEnum = recordEntry.getKey();
                     Enum value = recordEntry.getValue().get();
-                    if (!persistChangesOnly) {
+                    if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid);
                         upsert.setLong("fieldId", jdsFieldEnum.getField().getId());
                         upsert.setInt("value", jdsFieldEnum.indexOf(value));
                         upsert.addBatch();
                     }
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize);
-                    if (!jdsDb.logEdits()) continue;
+                    if (!jdsDb.isLoggingEdits()) continue;
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", jdsFieldEnum.getField().getId());
                     log.setInt("value", jdsFieldEnum.indexOf(value));
@@ -811,7 +811,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDates(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private void saveArrayDates(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,DateTimeValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DateTimeValue = :value)";
@@ -831,14 +831,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (LocalDateTime value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setTimestamp("value", Timestamp.valueOf(value));
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {
+                        if (writeToPrimaryDataTables) {
                             delete.setLong(1, fieldId);
                             delete.setString(2, entityGuid);
                             delete.addBatch();
@@ -850,7 +850,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -869,7 +869,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayFloats(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private void saveArrayFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,FloatValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND FloatValue = :value)";
@@ -889,14 +889,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Float value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setFloat("value", value);
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {//delete
+                        if (writeToPrimaryDataTables) {//delete
                             delete.setLong(1, fieldId);
                             delete.setString(2, entityGuid);
                             delete.addBatch();
@@ -908,7 +908,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal);
 
                     }
@@ -928,7 +928,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private void saveArrayIntegers(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private void saveArrayIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND IntegerValue = :value)";
@@ -948,14 +948,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Integer value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setInt("value", value);
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {
+                        if (writeToPrimaryDataTables) {
                             //delete
                             delete.setLong("fieldId", fieldId);
                             delete.setString("entityGuid", entityGuid);
@@ -968,7 +968,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -987,7 +987,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDoubles(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private void saveArrayDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,DoubleValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DoubleValue = :value)";
@@ -1007,14 +1007,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Double value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setDouble("value", value);
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {
+                        if (writeToPrimaryDataTables) {
                             //delete
                             delete.setLong("fieldId", fieldId);
                             delete.setString("entityGuid", entityGuid);
@@ -1027,7 +1027,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -1046,7 +1046,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayLongs(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private void saveArrayLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,LongValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND LongValue = :value)";
@@ -1066,14 +1066,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (Long value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setLong("value", value);
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {//delete
+                        if (writeToPrimaryDataTables) {//delete
                             delete.setLong(1, fieldId);
                             delete.setString(2, entityGuid);
                             delete.addBatch();
@@ -1085,7 +1085,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -1104,7 +1104,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayStrings(final Connection connection, boolean persistChangesOnly, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private void saveArrayStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,TextValue) \n" +
                 "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND TextValue = :value)";
@@ -1124,14 +1124,14 @@ public class JdsSave implements Callable<Boolean> {
                     int innerRecord = 0;
                     int innerTotal = it.getValue().get().size();
                     for (String value : it.getValue().get()) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", fieldId);
                             log.setString("value", value);
                             log.setInt("sequence", index.get());
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {
+                        if (writeToPrimaryDataTables) {
                             //delete
                             delete.setLong("fieldId", fieldId);
                             delete.setString("entityGuid", entityGuid);
@@ -1144,7 +1144,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.addBatch();
                         }
                         index.set(index.get() + 1);
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal);
                     }
                 }
@@ -1164,7 +1164,7 @@ public class JdsSave implements Callable<Boolean> {
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveEnumCollections(final Connection connection, boolean persistChangesOnly, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
+    private void saveEnumCollections(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +
@@ -1185,14 +1185,14 @@ public class JdsSave implements Callable<Boolean> {
                     ObservableList<? extends Enum> textValues = fieldEnums.getValue().get();
                     if (textValues.size() == 0) continue;
                     for (Enum anEnum : textValues) {
-                        if (jdsDb.logEdits()) {
+                        if (jdsDb.isLoggingEdits()) {
                             log.setString("entityGuid", entityGuid);
                             log.setLong("fieldId", jdsFieldEnum.getField().getId());
                             log.setInt("value", jdsFieldEnum.indexOf(anEnum));
                             log.setInt("sequence", sequence);
                             log.addBatch();
                         }
-                        if (!persistChangesOnly) {
+                        if (writeToPrimaryDataTables) {
                             //delete
                             delete.setLong("fieldId", jdsFieldEnum.getField().getId());
                             delete.setString("entityGuid", entityGuid);
@@ -1204,7 +1204,7 @@ public class JdsSave implements Callable<Boolean> {
                             insert.setInt("value", jdsFieldEnum.indexOf(anEnum));
                             insert.addBatch();
                         }
-                        if (jdsDb.printOutput())
+                        if (jdsDb.isPrintingOutput())
                             System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", sequence, record, recordTotal);
                         sequence++;
                     }
@@ -1225,7 +1225,7 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private void saveArrayObjects(final Connection connection, final Map<String, Map<Long, SimpleListProperty<JdsEntity>>> objectArrayProperties) throws Exception {
+    private void saveAndBindObjectArrays(final Connection connection, final Map<String, Map<Long, SimpleListProperty<JdsEntity>>> objectArrayProperties) throws Exception {
         if (objectArrayProperties.isEmpty()) return;
         final Collection<JdsEntity> jdsEntities = new ArrayList<>();
         final Collection<JdsParentEntityBinding> parentEntityBindings = new ArrayList<>();
@@ -1253,7 +1253,7 @@ public class JdsSave implements Callable<Boolean> {
                     parentChildBindings.add(parentChildBinding);
                     jdsEntities.add(jdsEntity);
                     record.set(record.get() + 1);
-                    if (jdsDb.printOutput())
+                    if (jdsDb.isPrintingOutput())
                         System.out.printf("Binding array object %s\n", record.get());
                 });
             }
@@ -1289,7 +1289,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param objectProperties
      * @implNote For the love of Christ don't use parallel stream here
      */
-    private void bindAndSaveInnerObjects(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>> objectProperties) throws Exception {
+    private void saveAndBindObjects(final Connection connection, final Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>> objectProperties) throws Exception {
         if (objectProperties.isEmpty()) return;//prevent stack overflow :)
         final IntegerProperty record = new SimpleIntegerProperty(0);
         final BooleanProperty changesMade = new SimpleBooleanProperty(false);

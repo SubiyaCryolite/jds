@@ -42,7 +42,7 @@ public abstract class BaseTestConfig {
 
     private void initJds() {
         jdsDb.init();
-        jdsDb.logEdits(true);
+        jdsDb.isLoggingEdits(true);
         initialiseJdsClasses();
     }
 
