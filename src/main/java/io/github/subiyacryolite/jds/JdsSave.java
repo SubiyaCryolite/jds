@@ -243,7 +243,7 @@ public class JdsSave implements Callable<Boolean> {
         sequence = 0;
         for (final JdsEntity entity : entities) {
             if (entity instanceof JdsSaveListener) {
-                ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
+                ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(sequence, entities.size()));
             }
             sequence++;
         }
