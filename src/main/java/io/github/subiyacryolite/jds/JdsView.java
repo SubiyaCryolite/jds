@@ -31,9 +31,9 @@ public class JdsView {
         if (!jdsDb.supportsStatements())
             throw new IllegalArgumentException("The underlying database does not support the creation of views");
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            JdsEntityAnnotation je = target.getAnnotation(JdsEntityAnnotation.class);
-            long id = je.entityId();
-            String cleanName = cleanViewName(je.entityName());
+            JdsEntityAnnotation jdsEntityAnnotation = target.getAnnotation(JdsEntityAnnotation.class);
+            long id = jdsEntityAnnotation.entityId();
+            String cleanName = cleanViewName(jdsEntityAnnotation.entityName());
             String viewName = getMainViewName(cleanName);
             List<Long> entityAndChildren = new ArrayList<>();
             entityAndChildren.add(id);

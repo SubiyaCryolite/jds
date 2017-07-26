@@ -1243,7 +1243,7 @@ public class JdsSave implements Callable<Boolean> {
                         changesMade.set(true);
                         JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
                         parentEntityBinding.parentGuid = parentGuid;
-                        parentEntityBinding.EntityId = serviceCodeEntity.getKey();
+                        parentEntityBinding.entityId = serviceCodeEntity.getKey();
                         parentEntityBindings.add(parentEntityBinding);
 
                     }
@@ -1267,7 +1267,7 @@ public class JdsSave implements Callable<Boolean> {
             connection.setAutoCommit(false);
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid);
-                clearOldBindings.setLong("childEntityId", parentEntityBinding.EntityId);
+                clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId);
                 clearOldBindings.addBatch();
             }
             for (JdsEntity jdsEntity : jdsEntities) {
@@ -1307,7 +1307,7 @@ public class JdsSave implements Callable<Boolean> {
                         changesMade.set(true);
                         JdsParentEntityBinding parentEntityBinding = new JdsParentEntityBinding();
                         parentEntityBinding.parentGuid = parentGuid;
-                        parentEntityBinding.EntityId = recordEntry.getKey();
+                        parentEntityBinding.entityId = recordEntry.getKey();
                         parentEntityBindings.add(parentEntityBinding);
                     }
                     jdsEntities.add(jdsEntity);
@@ -1316,7 +1316,8 @@ public class JdsSave implements Callable<Boolean> {
                     parentChildBinding.childGuid = jdsEntity.getEntityGuid();
                     parentChildBindings.add(parentChildBinding);
                     record.set(record.get() + 1);
-                    System.out.printf("Binding object %s\n", record.get());
+                    if (jdsDb.isPrintingOutput())
+                        System.out.printf("Binding object %s\n", record.get());
                 }
             }
         }
@@ -1329,7 +1330,7 @@ public class JdsSave implements Callable<Boolean> {
             connection.setAutoCommit(false);
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid);
-                clearOldBindings.setLong("childEntityId", parentEntityBinding.EntityId);
+                clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId);
                 clearOldBindings.addBatch();
             }
             for (JdsEntity jdsEntity : jdsEntities) {

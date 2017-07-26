@@ -18,5 +18,5 @@ package io.github.subiyacryolite.jds;
  */
 final class JdsParentEntityBinding {
     public String parentGuid;
-    public long EntityId;
+    public long entityId;
 }
