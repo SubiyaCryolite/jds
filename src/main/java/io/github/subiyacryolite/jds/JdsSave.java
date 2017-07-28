@@ -171,9 +171,6 @@ public class JdsSave implements Callable<Boolean> {
         int sequence = 0;
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
-            if (entity instanceof JdsSaveListener) {
-                ((JdsSaveListener) entity).onPreSave(new OnPreSaveEventArguments(connection, step, sequence, entities.size()));
-            }
             //update the modified date to time of commit
             entity.setDateModified(LocalDateTime.now());
             saveContainer.overviews.get(step).add(entity.getOverview());
@@ -210,6 +207,14 @@ public class JdsSave implements Callable<Boolean> {
             boolean writeToPrimaryDataTables = jdsDb.isWritingToPrimaryDataTables();
             //always save overviews
             saveOverviews(connection, saveContainer.overviews.get(step));
+            //ensure that overviews are submitted before handing over to listeners
+            sequence = 0;
+            for (final JdsEntity entity : entities) {
+                if (entity instanceof JdsSaveListener) {
+                    ((JdsSaveListener) entity).onPreSave(new OnPreSaveEventArguments(connection, step, sequence, entities.size()));
+                }
+                sequence++;
+            }
             //properties
             saveBooleans(connection, writeToPrimaryDataTables, saveContainer.booleans.get(step));
             saveStrings(connection, writeToPrimaryDataTables, saveContainer.strings.get(step));
@@ -236,6 +241,7 @@ public class JdsSave implements Callable<Boolean> {
             //object entity overviews and entity bindings are ALWAYS persisted
             saveAndBindObjects(connection, saveContainer.objects.get(step));
             saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
+            sequence = 0;
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
@@ -248,7 +254,7 @@ public class JdsSave implements Callable<Boolean> {
             if (!recursiveInnerCall)
                 connection.close();
         }
-        sequence = 0;
+
     }
 
     /**
