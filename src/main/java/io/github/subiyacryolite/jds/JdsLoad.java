@@ -159,10 +159,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 batchSequence++;
             }
             //catch embedded/pre-created objects objects as well
-            for (JdsEntity entity : entities) {
+            for (JdsEntity entity : entities)
                 if (entity instanceof JdsLoadListener)
                     ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entity.getEntityGuid(), batchSequence, entityGuids.size()));
-            }
+
             if (jdsDb.isWritingToPrimaryDataTables() && initialisePrimitives) {
                 //primitives
                 populateText(entities, strings);
@@ -176,7 +176,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateLongArrays(entities, longArrays);
                 populateStringArrays(entities, textArrays);
                 populateDoubleArrays(entities, doubleArrays);
-
             }
             if (jdsDb.isWritingToPrimaryDataTables() && initialiseDatesAndTimes) {
                 populateZonedDateTime(entities, zonedDateTimes);
@@ -193,10 +192,10 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
             }
             populateOverviews(entities, overviews);
             //catch embedded/pre-created objects objects as well
-            for (JdsEntity entity : entities) {
+            for (JdsEntity entity : entities)
                 if (entity instanceof JdsLoadListener)
                     ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getEntityGuid()));
-            }
+
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
