@@ -133,8 +133,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                     T entity = referenceType.newInstance();
                     entity.setEntityGuid(entityGuid);
                     entities.add(entity);
-                    if (entity instanceof JdsLoadListener)
-                        ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entityGuid, batchSequence, entityGuids.size()));
                 }
                 //primitives
                 setParameterForStatement(batchSequence, entityGuid, strings);
@@ -159,6 +157,11 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 //overview
                 setParameterForStatement(batchSequence, entityGuid, overviews);
                 batchSequence++;
+            }
+            //catch embedded/pre-created objects objects as well
+            for (JdsEntity entity : entities) {
+                if (entity instanceof JdsLoadListener)
+                    ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entity.getEntityGuid(), batchSequence, entityGuids.size()));
             }
             if (jdsDb.isWritingToPrimaryDataTables() && initialisePrimitives) {
                 //primitives
@@ -189,6 +192,11 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 populateObjectEntriesAndObjectArrays(jdsDb, entities, embeddedAndArrayObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects);
             }
             populateOverviews(entities, overviews);
+            //catch embedded/pre-created objects objects as well
+            for (JdsEntity entity : entities) {
+                if (entity instanceof JdsLoadListener)
+                    ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getEntityGuid()));
+            }
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -410,7 +418,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      */
     private <T extends JdsEntity> void populateOverviews(final Collection<T> jdsEntities, final PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
-            Connection connection = preparedStatement.getConnection();
             while (resultSet.next()) {
                 String entityGuid = resultSet.getString("EntityGuid");
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
@@ -418,8 +425,6 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 optimalEntityLookup(jdsEntities, entityGuid).forEach(entity -> {
                     entity.setDateModified(dateModified.toLocalDateTime());
                     entity.setDateCreated(dateCreated.toLocalDateTime());
-                    if (entity instanceof JdsLoadListener)
-                        ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getEntityGuid()));
                 });
             }
         }
