@@ -18,8 +18,10 @@ import io.github.subiyacryolite.jds.events.OnDeleteEventArguments;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,13 +32,13 @@ import java.util.stream.Stream;
 public class JdsDelete implements Callable<Boolean> {
     private final static String DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?";
     private final JdsDb jdsDb;
-    private final Collection<String> entities;
+    private final Collection<? extends CharSequence> entities;
 
     public Boolean call() throws Exception {
         try (Connection connection = jdsDb.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
-            for (String entity : entities) {
-                statement.setString(1, entity);
+            for (CharSequence entity : entities) {
+                statement.setString(1, entity.toString());
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -45,24 +47,26 @@ public class JdsDelete implements Callable<Boolean> {
         return true;
     }
 
-    public JdsDelete(final JdsDb jdsDb, final Collection<JdsEntity> entities) {
+    public JdsDelete(final JdsDb jdsDb, List<? extends CharSequence> entityGuids) {
         this.jdsDb = jdsDb;
-        this.entities = entities.stream().map(x -> x.getEntityGuid()).collect(Collectors.toList());
-    }
-
-    public JdsDelete(final JdsDb jdsDb, final JdsEntity... entities) {
-        this.jdsDb = jdsDb;
-        Stream<JdsEntity> entityStream = Arrays.stream(entities);
-        entityStream.forEach(entity -> {
-            if(entity instanceof JdsDeleteListener)
-            ((JdsDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, entity.getEntityGuid()));
-        });
-        this.entities = Arrays.stream(entities).map(x -> x.getEntityGuid()).collect(Collectors.toList());
+        this.entities = entityGuids;
     }
 
     public JdsDelete(final JdsDb jdsDb, final String... entityGuids) {
-        this.jdsDb = jdsDb;
-        this.entities = Arrays.stream(entityGuids).collect(Collectors.toList());
+        this(jdsDb, Arrays.asList(entityGuids));
+    }
+
+    public JdsDelete(final JdsDb jdsDb, final Collection<? extends JdsEntity> entities) throws SQLException, ClassNotFoundException {
+        this(jdsDb, entities.stream().map(x -> x.getEntityGuid()).collect(Collectors.toList()));
+        Connection connection = jdsDb.getConnection();
+        entities.forEach(entity -> {
+            if (entity instanceof JdsDeleteListener)
+                ((JdsDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, connection, entity.getEntityGuid()));
+        });
+    }
+
+    public JdsDelete(final JdsDb jdsDb, final JdsEntity... entities) throws SQLException, ClassNotFoundException {
+        this(jdsDb, Arrays.asList(entities));
     }
 
     /**

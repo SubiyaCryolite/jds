@@ -209,6 +209,7 @@ public class JdsSave implements Callable<Boolean> {
             saveOverviews(connection, saveContainer.overviews.get(step));
             //ensure that overviews are submitted before handing over to listeners
             sequence = 0;
+            connection.setAutoCommit(true);
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPreSave(new OnPreSaveEventArguments(connection, step, sequence, entities.size()));
@@ -242,6 +243,7 @@ public class JdsSave implements Callable<Boolean> {
             saveAndBindObjects(connection, saveContainer.objects.get(step));
             saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
             sequence = 0;
+            connection.setAutoCommit(true);
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
@@ -261,7 +263,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param connection
      * @param overviews
      */
-    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) {
+    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) throws SQLException {
         int record = 0;
         int recordTotal = overviews.size();
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverview()) : new NamedPreparedStatement(connection, jdsDb.saveOverview());
@@ -286,6 +288,8 @@ public class JdsSave implements Callable<Boolean> {
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 
