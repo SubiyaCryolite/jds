@@ -256,7 +256,6 @@ public class JdsSave implements Callable<Boolean> {
             if (!recursiveInnerCall)
                 connection.close();
         }
-
     }
 
     /**
@@ -1354,6 +1353,8 @@ public class JdsSave implements Callable<Boolean> {
             connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 
