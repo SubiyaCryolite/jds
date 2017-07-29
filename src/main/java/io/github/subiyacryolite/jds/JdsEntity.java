@@ -29,6 +29,9 @@ import java.util.Iterator;
  */
 public abstract class JdsEntity extends JdsEntityBase {
 
+    /**
+     *
+     */
     public JdsEntity() {
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation je = getClass().getAnnotation(JdsEntityAnnotation.class);
@@ -39,46 +42,91 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public String getEntityGuid() {
         return getOverview().getEntityGuid();
     }
 
+    /**
+     *
+     * @param actionId
+     */
     public void setEntityGuid(String actionId) {
         getOverview().setEntityGuid(actionId);
     }
 
+    /**
+     *
+     * @return
+     */
     public LocalDateTime getDateCreated() {
         return getOverview().getDateCreated();
     }
 
+    /**
+     *
+     * @param dateCreated
+     */
     public void setDateCreated(LocalDateTime dateCreated) {
         this.getOverview().setDateCreated(dateCreated);
     }
 
+    /**
+     *
+     * @return
+     */
     public LocalDateTime getDateModified() {
         return this.getOverview().getDateModified();
     }
 
+    /**
+     *
+     * @param dateModified
+     */
     public void setDateModified(LocalDateTime dateModified) {
         this.getOverview().setDateModified(dateModified);
     }
 
+    /**
+     *
+     * @return
+     */
     public long getEntityCode() {
         return this.getOverview().getEntityId();
     }
 
+    /**
+     *
+     * @param serviceCode
+     */
     private void setEntityCode(long serviceCode) {
         this.getOverview().setEntityId(serviceCode);
     }
 
+    /**
+     *
+     * @return
+     */
     public String getEntityName() {
         return name.get();
     }
 
+    /**
+     *
+     * @param name
+     */
     private void setEntityName(String name) {
         this.name.set(name);
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param integerProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleBlobProperty integerProperty) {
         if (integerProperty == null) {
             return;
@@ -92,7 +140,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
-
+    /**
+     *
+     * @param jdsField
+     * @param integerProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleIntegerProperty integerProperty) {
         if (integerProperty == null) {
             return;
@@ -106,6 +158,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param temporalProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleObjectProperty temporalProperty) {
         if (temporalProperty == null) {
             return;
@@ -146,6 +203,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param stringProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleStringProperty stringProperty) {
         if (stringProperty == null) {
             return;
@@ -159,6 +221,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param floatProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleFloatProperty floatProperty) {
         if (floatProperty == null) {
             return;
@@ -172,6 +239,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param longProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleLongProperty longProperty) {
         if (longProperty == null) {
             return;
@@ -185,6 +257,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param doubleProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleDoubleProperty doubleProperty) {
         if (doubleProperty == null) {
             return;
@@ -198,6 +275,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param booleanProperty
+     */
     protected final void map(final JdsField jdsField, final SimpleBooleanProperty booleanProperty) {
         if (booleanProperty == null) {
             return;
@@ -211,6 +293,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param strings
+     */
     protected final void mapStrings(final JdsField jdsField, final SimpleListProperty<String> strings) {
         if (strings == null) {
             return;
@@ -224,6 +311,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param floats
+     */
     protected final void mapFloats(final JdsField jdsField, final SimpleListProperty<Float> floats) {
         if (floats == null) {
             return;
@@ -237,6 +329,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param doubles
+     */
     protected final void mapDoubles(final JdsField jdsField, final SimpleListProperty<Double> doubles) {
         if (doubles == null) {
             return;
@@ -250,6 +347,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsField
+     * @param longs
+     */
     protected final void mapLongs(final JdsField jdsField, final SimpleListProperty<Long> longs) {
         if (longs == null) {
             return;
@@ -263,6 +365,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsFieldEnum
+     * @param enums
+     */
     protected final void map(final JdsFieldEnum jdsFieldEnum, final SimpleObjectProperty<? extends Enum> enums) {
         if (enums == null) {
             return;
@@ -277,6 +384,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param jdsFieldEnum
+     * @param enums
+     */
     protected final void mapEnums(final JdsFieldEnum jdsFieldEnum, final SimpleListProperty<? extends Enum> enums) {
         if (enums == null) {
             return;
@@ -291,6 +403,12 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param entity
+     * @param property
+     * @param cascadeOnDelete
+     */
     protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation entityAnnotation  = entity.getAnnotation(JdsEntityAnnotation.class);
@@ -306,10 +424,21 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param entity
+     * @param property
+     */
     protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property) {
         map(entity, property, false);
     }
 
+    /**
+     *
+     * @param entity
+     * @param properties
+     * @param cascadeOnDelete
+     */
     protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
@@ -325,6 +454,11 @@ public abstract class JdsEntity extends JdsEntityBase {
         }
     }
 
+    /**
+     *
+     * @param entity
+     * @param properties
+     */
     protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties) {
         map(entity, properties, false);
     }

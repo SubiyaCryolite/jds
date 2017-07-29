@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This class is responsible for deleting {@link JdsEntity JdsEntities} in the {@link JdsDb JdsDataBase}
@@ -34,6 +33,11 @@ public class JdsDelete implements Callable<Boolean> {
     private final JdsDb jdsDb;
     private final Collection<? extends CharSequence> entities;
 
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     public Boolean call() throws Exception {
         try (Connection connection = jdsDb.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
             connection.setAutoCommit(false);
@@ -47,15 +51,32 @@ public class JdsDelete implements Callable<Boolean> {
         return true;
     }
 
+    /**
+     *
+     * @param jdsDb
+     * @param entityGuids
+     */
     public JdsDelete(final JdsDb jdsDb, List<? extends CharSequence> entityGuids) {
         this.jdsDb = jdsDb;
         this.entities = entityGuids;
     }
 
+    /**
+     *
+     * @param jdsDb
+     * @param entityGuids
+     */
     public JdsDelete(final JdsDb jdsDb, final String... entityGuids) {
         this(jdsDb, Arrays.asList(entityGuids));
     }
 
+    /**
+     *
+     * @param jdsDb
+     * @param entities
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public JdsDelete(final JdsDb jdsDb, final Collection<? extends JdsEntity> entities) throws SQLException, ClassNotFoundException {
         this(jdsDb, entities.stream().map(x -> x.getEntityGuid()).collect(Collectors.toList()));
         Connection connection = jdsDb.getConnection();
@@ -65,6 +86,13 @@ public class JdsDelete implements Callable<Boolean> {
         });
     }
 
+    /**
+     *
+     * @param jdsDb
+     * @param entities
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public JdsDelete(final JdsDb jdsDb, final JdsEntity... entities) throws SQLException, ClassNotFoundException {
         this(jdsDb, Arrays.asList(entities));
     }

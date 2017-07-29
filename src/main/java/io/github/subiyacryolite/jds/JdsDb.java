@@ -389,6 +389,16 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     /**
+     * Database specific check to see if the specified view exists in the
+     * database
+     * @param viewName the view to look up
+     * @return 1 if the specified procedure exists in the database
+     */
+    public int viewExists(String viewName) {
+        return 0;
+    }
+
+    /**
      * Database specific check to see if the specified trigger exists in the
      * database
      *

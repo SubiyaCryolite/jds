@@ -25,8 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static io.github.subiyacryolite.jds.JdsTableLookup.getTableName;
 import static io.github.subiyacryolite.jds.JdsTableLookup.getTablePrefix;
+import static io.github.subiyacryolite.jds.JdsTableLookup.getTable;
 
 /**
  * This class is used to perform basic searches based on defined parameters
@@ -44,6 +44,11 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
     private LinkedList<Object> currentValues;
     private long entityId;
 
+    /**
+     *
+     * @param jdsDb
+     * @param referenceType
+     */
     public JdsFilter(JdsDb jdsDb, final Class<T> referenceType) {
         this.jdsDb = jdsDb;
         this.referenceType = referenceType;
@@ -151,7 +156,7 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
     private String createLeftJoins(HashSet<JdsFieldType> tablesToJoin) {
         List<String> tables = new ArrayList<>();
         for (JdsFieldType ft : tablesToJoin) {
-            tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTableName(ft), getTablePrefix(ft), getTablePrefix(ft)));
+            tables.add(String.format("%s %s on %s.EntityGuid = eo.EntityGuid", getTable(ft), getTablePrefix(ft), getTablePrefix(ft)));
         }
         return String.join(" JOIN\n", tables);
     }

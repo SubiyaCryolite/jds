@@ -45,7 +45,7 @@ public abstract class JdsDbSqlite extends JdsDb {
         }
         return toReturn;
     }
-
+    @Override
     public int columnExists(String tableName, String columnName) {
         String sql = String.format("PRAGMA table_info('%s')", tableName);
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
@@ -251,10 +251,12 @@ public abstract class JdsDbSqlite extends JdsDb {
         return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId, FieldId) VALUES(:entityId, :fieldId);";
     }
 
+    @Override
     public String mapFieldNames() {
         return "INSERT OR REPLACE INTO JdsRefFields(FieldId, FieldName) VALUES(:fieldId, :fieldName);";
     }
 
+    @Override
     public String mapFieldTypes() {
         return "INSERT OR REPLACE INTO JdsRefFieldTypes(TypeId, TypeName) VALUES(:typeId, :typeName);";
     }
@@ -283,6 +285,7 @@ public abstract class JdsDbSqlite extends JdsDb {
         return "INSERT OR REPLACE INTO JdsRefEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?);";
     }
 
+    @Override
     public String createOrAlterView(String viewName, String viewSql) {
         return "";
     }

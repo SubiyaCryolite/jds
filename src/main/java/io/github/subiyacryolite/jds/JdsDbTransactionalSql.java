@@ -48,6 +48,7 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int procedureExists(String procedureName) {
         int toReturn = 0;
         String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
@@ -65,6 +66,7 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int triggerExists(String triggerName) {
         int toReturn = 0;
         String sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
@@ -99,6 +101,7 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int columnExists(String tableName, String columnName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = :tableCatalog and TABLE_NAME = :tableName and COLUMN_NAME = :columnName";

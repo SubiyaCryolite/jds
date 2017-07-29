@@ -31,13 +31,25 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
     private Class<T> enumType;
     private Enum[] sequenceValues = new Enum[0];//keep order at all times
 
+    /**
+     *
+     */
     public JdsFieldEnum() {
     }
 
+    /**
+     * @param type
+     */
     public JdsFieldEnum(final Class<T> type) {
+        this();
         this.enumType = type;
     }
 
+    /**
+     * @param type
+     * @param jdsField
+     * @param values
+     */
     public JdsFieldEnum(final Class<T> type, final JdsField jdsField, final T... values) {
         this(type);
         setField(jdsField);
@@ -46,10 +58,17 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
         bind();
     }
 
+    /**
+     * @return
+     */
     public final Class<? extends Enum> getEnumType() {
         return enumType;
     }
 
+    /**
+     * @param jdsField
+     * @return
+     */
     public static JdsFieldEnum get(final JdsField jdsField) {
         if (fieldEnums.containsKey(jdsField.getId()))
             return fieldEnums.get(jdsField.getId());
@@ -57,6 +76,10 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
             throw new RuntimeException(String.format("This jdsField [%s] has not been bound to any enums", jdsField));
     }
 
+    /**
+     * @param fieldId
+     * @return
+     */
     public static JdsFieldEnum get(final long fieldId) {
         if (fieldEnums.containsKey(fieldId))
             return fieldEnums.get(fieldId);
@@ -64,19 +87,31 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
             throw new RuntimeException(String.format("This field [%s] has not been bound to any enums", fieldId));
     }
 
+    /**
+     *
+     */
     private void bind() {
         if (!fieldEnums.containsKey(field.get()))
             fieldEnums.put(field.get().getId(), this);
     }
 
+    /**
+     * @param f
+     */
     private void setField(JdsField f) {
         field.set(f);
     }
 
+    /**
+     * @return
+     */
     public JdsField getField() {
         return field.get();
     }
 
+    /**
+     * @return
+     */
     public Enum[] getSequenceValues() {
         return this.sequenceValues;
     }
@@ -89,6 +124,10 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
                 '}';
     }
 
+    /**
+     * @param enumText
+     * @return
+     */
     public int indexOf(Enum enumText) {
         for (int i = 0; i < sequenceValues.length; i++) {
             if (sequenceValues[i] == enumText)
@@ -97,6 +136,10 @@ public class JdsFieldEnum<T extends Enum<T>> implements Externalizable {
         return -1;
     }
 
+    /**
+     * @param index
+     * @return
+     */
     public Enum valueOf(int index) {
         return (index >= sequenceValues.length) ? null : sequenceValues[index];
     }

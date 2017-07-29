@@ -3,11 +3,15 @@ package io.github.subiyacryolite.jds;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 /**
- * Internal helper class to handle update
+ * Internal helper class to handle JDS updates
  * Created by indana on 7/11/2017.
  */
 class JdsUpdateHelper {
 
+    /**
+     * Columns to drop when upgrading from version 1 to version 2
+     * @param jdsDb the {@link JdsDb JdsDb} instance
+     */
     public static void v1Tov2DropColumnStoreEntityOverview(JdsDb jdsDb) {
         //SQLite does NOT make dropping columns easy
         if (jdsDb.columnExists("JdsStoreEntityOverview", "EntityId") >= 1) {
@@ -22,6 +26,10 @@ class JdsUpdateHelper {
         }
     }
 
+    /**
+     * Method to add the new BlobValue column to an upgraded schema
+     * @param jdsDb the {@link JdsDb JdsDb} instance
+     */
     public static void v1Tov2AddColumnStoreOldFieldValues(JdsDb jdsDb) {
         if (jdsDb.columnExists("JdsStoreOldFieldValues", "BlobValue") == 0) {
             switch (jdsDb.getImplementation()) {
@@ -41,6 +49,10 @@ class JdsUpdateHelper {
         }
     }
 
+    /**
+     * Method to migrate data from version 1 to version 2 of {@link JdsDb JdsDb}
+     * @param jdsDb the {@link JdsDb JdsDb} instance
+     */
     public static void v1ToV2MigrateData(JdsDb jdsDb) {
         if (jdsDb.getImplementation() == JdsImplementation.SQLITE)
             return;//SQLite doest drop the column, thus this could prove problematic
@@ -49,6 +61,10 @@ class JdsUpdateHelper {
         }
     }
 
+    /**
+     * Method to add new columns to facilitate cascade on delete options
+     * @param jdsDb the {@link JdsDb JdsDb} instance
+     */
     public static void v1Tov2AddColumnStoreEntityBindings(JdsDb jdsDb) {
         if (jdsDb.columnExists("JdsStoreEntityBinding", "CascadeOnDelete") == 0) {
             switch (jdsDb.getImplementation()) {

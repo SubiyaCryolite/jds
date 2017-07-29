@@ -49,6 +49,7 @@ public abstract class JdsDbMySql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int procedureExists(String procedureName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName AND ROUTINE_SCHEMA = :procedureSchema";
@@ -66,6 +67,7 @@ public abstract class JdsDbMySql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int viewExists(String viewName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = :viewName AND TABLE_SCHEMA = :viewSchema";
@@ -83,6 +85,7 @@ public abstract class JdsDbMySql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int columnExists(String tableName, String columnName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";

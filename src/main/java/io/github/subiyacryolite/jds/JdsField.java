@@ -34,12 +34,21 @@ public class JdsField implements Externalizable {
     private final SimpleStringProperty name;
     private JdsFieldType type;
 
+    /**
+     *
+     */
     public JdsField() {
         id = new SimpleLongProperty();
         name = new SimpleStringProperty();
         type = TEXT;
     }
 
+    /**
+     *
+     * @param id
+     * @param name
+     * @param type
+     */
     public JdsField(long id, String name, JdsFieldType type) {
         this();
         setId(id);
@@ -48,6 +57,10 @@ public class JdsField implements Externalizable {
         bind(this);
     }
 
+    /**
+     *
+     * @param jdsField
+     */
     private static void bind(final JdsField jdsField) {
         if (!fields.containsKey(jdsField.getId()))
             fields.put(jdsField.getId(), jdsField.getName());
@@ -55,26 +68,50 @@ public class JdsField implements Externalizable {
             throw new RuntimeException(String.format("This jdsField ID [%s] is already bound", jdsField.getId()));
     }
 
+    /**
+     *
+     * @return
+     */
     public long getId() {
         return id.get();
     }
 
+    /**
+     *
+     * @param id
+     */
     private void setId(long id) {
         this.id.set(id);
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name.get();
     }
 
+    /**
+     *
+     * @param name
+     */
     private void setName(String name) {
         this.name.set(name);
     }
 
+    /**
+     *
+     * @return
+     */
     public JdsFieldType getType() {
         return this.type;
     }
 
+    /**
+     *
+     * @param type
+     */
     private void setType(JdsFieldType type) {
         this.type = type;
     }

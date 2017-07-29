@@ -32,32 +32,32 @@ public class JdsView {
             throw new IllegalArgumentException("The underlying database does not support the creation of views");
         if (target.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation jdsEntityAnnotation = target.getAnnotation(JdsEntityAnnotation.class);
-            long id = jdsEntityAnnotation.entityId();
+            long entityId = jdsEntityAnnotation.entityId();
             String cleanName = cleanViewName(jdsEntityAnnotation.entityName());
             String viewName = getMainViewName(cleanName);
-            List<Long> entityAndChildren = new ArrayList<>();
-            entityAndChildren.add(id);
+            List<Long> inheritanceHierarchy = new ArrayList<>();
+            inheritanceHierarchy.add(entityId);
             try (Connection connection = jdsDb.getConnection()) {
-                populateChildEntities(connection, entityAndChildren, id);
-                String arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, entityAndChildren, cleanName);
-                String arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, entityAndChildren, cleanName);
-                String arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, entityAndChildren, cleanName);
-                String arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, entityAndChildren, cleanName);
-                String arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, entityAndChildren, cleanName);
-                String arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, entityAndChildren, cleanName);
-                String booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, entityAndChildren, cleanName);
+                populateChildEntities(connection, inheritanceHierarchy, entityId);
+                String arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, inheritanceHierarchy, cleanName);
+                String arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, inheritanceHierarchy, cleanName);
+                String arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, inheritanceHierarchy, cleanName);
+                String arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, inheritanceHierarchy, cleanName);
+                String arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, inheritanceHierarchy, cleanName);
+                String arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, inheritanceHierarchy, cleanName);
+                String booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, inheritanceHierarchy, cleanName);
                 //String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, entityAndChildren, name);, problem with PG implementation
-                String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, entityAndChildren, cleanName);
-                String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, entityAndChildren, cleanName);
-                String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, entityAndChildren, cleanName);
-                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM, entityAndChildren, cleanName);
-                String arrayEnumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, entityAndChildren, cleanName);
-                String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, entityAndChildren, cleanName);
-                String intView = innerView(connection, jdsDb, JdsFieldType.INT, entityAndChildren, cleanName);
-                String longView = innerView(connection, jdsDb, JdsFieldType.LONG, entityAndChildren, cleanName);
-                String timeView = innerView(connection, jdsDb, JdsFieldType.TIME, entityAndChildren, cleanName);
-                String textView = innerView(connection, jdsDb, JdsFieldType.TEXT, entityAndChildren, cleanName);
-                String zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, entityAndChildren, cleanName);
+                String dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, inheritanceHierarchy, cleanName);
+                String dateView = innerView(connection, jdsDb, JdsFieldType.DATE, inheritanceHierarchy, cleanName);
+                String doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, inheritanceHierarchy, cleanName);
+                String enumView = innerView(connection, jdsDb, JdsFieldType.ENUM, inheritanceHierarchy, cleanName);
+                String arrayEnumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, inheritanceHierarchy, cleanName);
+                String floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, inheritanceHierarchy, cleanName);
+                String intView = innerView(connection, jdsDb, JdsFieldType.INT, inheritanceHierarchy, cleanName);
+                String longView = innerView(connection, jdsDb, JdsFieldType.LONG, inheritanceHierarchy, cleanName);
+                String timeView = innerView(connection, jdsDb, JdsFieldType.TIME, inheritanceHierarchy, cleanName);
+                String textView = innerView(connection, jdsDb, JdsFieldType.TEXT, inheritanceHierarchy, cleanName);
+                String zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, inheritanceHierarchy, cleanName);
                 String[] unused = new String[]{
                         arrayFloatView,
                         arrayIntView,
@@ -68,7 +68,7 @@ public class JdsView {
                         arrayEnumView};
                 createMainView(connection,
                         jdsDb,
-                        entityAndChildren,
+                        inheritanceHierarchy,
                         viewName,
                         new String[]{
                                 booleanView,
@@ -92,13 +92,20 @@ public class JdsView {
         }
     }
 
-    private static void populateChildEntities(Connection connection, List<Long> entityAndChildren, long id) throws SQLException {
+    /**
+     * Determine the inheritance hierarchy of the supplied Entity Id
+     * @param connection the shared SQL connection to use
+     * @param inheritanceHierarchy the inheritance hierarchy of the supplied Entity type
+     * @param entityId the id of the Entity type
+     * @throws SQLException a possible SQL exception
+     */
+    private static void populateChildEntities(Connection connection, List<Long> inheritanceHierarchy, long entityId) throws SQLException {
         String sql = "SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setLong(1, id);
+            ps.setLong(1, entityId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    entityAndChildren.add(rs.getLong("ChildEntityCode"));
+                    inheritanceHierarchy.add(rs.getLong("ChildEntityCode"));
                 }
             }
         }
@@ -221,11 +228,11 @@ public class JdsView {
      * @param connection the SQL connection that will be used for this operation
      * @param jdsDb      an instance of JdsDb
      * @param fieldType  the data-type of this view
-     * @param entityIds  the id codes of the JdsEntity and its children
+     * @param inheritanceHierarchy  the id codes of the JdsEntity and its children
      * @param entityName the raw entity name
      * @return the created inner view name
      */
-    private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final List<Long> entityIds, final String entityName) {
+    private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final List<Long> inheritanceHierarchy, final String entityName) {
         String sql = "select distinct field.FieldName from \n" +
                 "JdsRefEntities entity\n" +
                 "left join JdsBindEntityFields bound\n" +
@@ -240,7 +247,7 @@ public class JdsView {
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, fieldType.toString());
-            ps.setLong(2, entityIds.get(0));
+            ps.setLong(2, inheritanceHierarchy.get(0));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 fieldNames.add(rs.getString("FieldName"));
@@ -263,11 +270,11 @@ public class JdsView {
         stringBuilder.append("\t(\n");
         stringBuilder.append("\t\tSELECT src.EntityGuid, sField.FieldName, src.Value\n");
         stringBuilder.append("\t\tFROM ");
-        stringBuilder.append(JdsTableLookup.tableFor(fieldType));
+        stringBuilder.append(JdsTableLookup.getTable(fieldType));
         stringBuilder.append("\tsrc\n");
         stringBuilder.append("\t\t JOIN JdsStoreEntityOverview ov ON ov.EntityGuid = src.EntityGuid");
         StringJoiner entityHierarchy = new StringJoiner(",");
-        for (Long id : entityIds)
+        for (Long id : inheritanceHierarchy)
             entityHierarchy.add("" + id);
         stringBuilder.append(String.format(" AND ov.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (%s))\n", entityHierarchy));
         stringBuilder.append("\t\tJOIN JdsRefFields sField on src.FieldId = sField.FieldId\n");

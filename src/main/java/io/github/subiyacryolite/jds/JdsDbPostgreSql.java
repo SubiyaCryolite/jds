@@ -49,6 +49,7 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int procedureExists(String procedureName) {
         int toReturn = 0;
         String sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? and routine_name = ?";
@@ -66,6 +67,7 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int viewExists(String viewName) {
         int toReturn = 0;
         String sql = "select COUNT(*) AS Result from information_schema.views where table_catalog = ? and table_name = ?";
@@ -83,6 +85,7 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         return toReturn;
     }
 
+    @Override
     public int columnExists(String tableName, String columnName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_CATALOG = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";

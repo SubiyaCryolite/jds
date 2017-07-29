@@ -36,6 +36,9 @@ public class JdsEntityOverview implements Externalizable {
     private final SimpleLongProperty entityId;
     private final SimpleStringProperty entityGuid;
 
+    /**
+     *
+     */
     public JdsEntityOverview() {
         this.entityGuid = new SimpleStringProperty(UUID.randomUUID().toString());
         this.dateCreated = new SimpleObjectProperty<>(LocalDateTime.now());
@@ -43,34 +46,66 @@ public class JdsEntityOverview implements Externalizable {
         this.entityId = new SimpleLongProperty();
     }
 
+    /**
+     *
+     * @return
+     */
     public LocalDateTime getDateCreated() {
         return dateCreated.get();
     }
 
+    /**
+     *
+     * @param dateCreated
+     */
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated.set(dateCreated);
     }
 
+    /**
+     *
+     * @return
+     */
     public LocalDateTime getDateModified() {
         return dateModified.get();
     }
 
+    /**
+     *
+     * @param dateModified
+     */
     public void setDateModified(LocalDateTime dateModified) {
         this.dateModified.set(dateModified);
     }
 
+    /**
+     *
+     * @return
+     */
     public long getEntityId() {
         return entityId.get();
     }
 
+    /**
+     *
+     * @param entityId
+     */
     public void setEntityId(long entityId) {
         this.entityId.set(entityId);
     }
 
+    /**
+     *
+     * @return
+     */
     public String getEntityGuid() {
         return entityGuid.get();
     }
 
+    /**
+     *
+     * @param entityGuid
+     */
     public void setEntityGuid(String entityGuid) {
         this.entityGuid.set(entityGuid);
     }

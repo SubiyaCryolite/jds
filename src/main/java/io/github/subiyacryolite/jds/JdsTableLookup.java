@@ -1,100 +1,71 @@
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
 import static io.github.subiyacryolite.jds.enums.JdsComponent.*;
 
 /**
  * Class used to look up the datastore of Jds Field Types
+ * Used in dynamic view creation, filtering and other operations
  * Created by ifunga on 24/06/2017.
  */
 class JdsTableLookup {
-    public static String tableFor(JdsFieldType fieldType) {
+
+    /**
+     * Retrieve the table that stores the requested field type
+     *
+     * @param fieldType the requested field type
+     * @return the table that stores the requested field type
+     */
+    public static String getTable(JdsFieldType fieldType) {
         switch (fieldType) {
             case FLOAT:
-                return JdsComponent.StoreFloat.getName();
+                return StoreFloat.getName();
             case INT:
             case BOOLEAN:
-                return JdsComponent.StoreInteger.getName();
+                return StoreInteger.getName();
             case DOUBLE:
-                return JdsComponent.StoreDouble.getName();
+                return StoreDouble.getName();
             case LONG:
-                return JdsComponent.StoreLong.getName();
+                return StoreLong.getName();
             case TEXT:
-                return JdsComponent.StoreText.getName();
+                return StoreText.getName();
             case DATE_TIME:
-                return JdsComponent.StoreDateTime.getName();
+                return StoreDateTime.getName();
             case ARRAY_FLOAT:
-                return JdsComponent.StoreFloatArray.getName();
+                return StoreFloatArray.getName();
             case ARRAY_INT:
-                return JdsComponent.StoreIntegerArray.getName();
+                return StoreIntegerArray.getName();
             case ARRAY_DOUBLE:
-                return JdsComponent.StoreDoubleArray.getName();
+                return StoreDoubleArray.getName();
             case ARRAY_LONG:
-                return JdsComponent.StoreLongArray.getName();
+                return StoreLongArray.getName();
             case ARRAY_TEXT:
-                return JdsComponent.StoreTextArray.getName();
+                return StoreTextArray.getName();
             case ARRAY_DATE_TIME:
-                return JdsComponent.StoreDateTimeArray.getName();
+                return StoreDateTimeArray.getName();
             case ENUM_COLLECTION:
-                return JdsComponent.StoreTextArray.getName();
+                return StoreIntegerArray.getName();
             case ENUM:
-                return JdsComponent.StoreInteger.getName();
+                return StoreInteger.getName();
             case ZONED_DATE_TIME:
-                return JdsComponent.StoreZonedDateTime.getName();
+                return StoreZonedDateTime.getName();
             case DATE:
-                return JdsComponent.StoreDateTime.getName();
+                return StoreDateTime.getName();
             case TIME:
-                return JdsComponent.StoreTime.getName();
+                return StoreTime.getName();
             case BLOB:
-                return JdsComponent.StoreBlob.getName();
+                return StoreBlob.getName();
             default:
                 return "INVALID";
         }
     }
 
-
-    public static String getTableName(JdsFieldType jdsFieldType) {
-        switch (jdsFieldType) {
-            case TEXT:
-                return StoreText.getName();
-            case BLOB:
-                return StoreBlob.getName();
-            case ENUM:
-                case INT:
-            case BOOLEAN:
-                return StoreInteger.getName();
-            case DOUBLE:
-                return StoreDouble.getName();
-            case FLOAT:
-                return StoreFloat.getName();
-            case LONG:
-                return StoreLong.getName();
-            case DATE:
-            case DATE_TIME:
-                return StoreDateTime.getName();
-            case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getName();
-            case TIME:
-                return StoreTime.getName();
-            case ARRAY_TEXT:
-                return StoreTextArray.getName();
-            case ARRAY_INT:
-            case ENUM_COLLECTION:
-                return StoreIntegerArray.getName();
-            case ARRAY_DOUBLE:
-                return StoreDoubleArray.getName();
-            case ARRAY_FLOAT:
-                return StoreFloatArray.getName();
-            case ARRAY_LONG:
-                return StoreLongArray.getName();
-            case ARRAY_DATE_TIME:
-                return StoreDateTimeArray.getName();
-        }
-        return "undefined";
-    }
-
+    /**
+     * Get the short version of the table that holds the requested field type
+     * @param jdsFieldType the requested field type
+     * @return the short version of the table that holds the requested field type
+     */
     public static String getTablePrefix(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
             case TEXT:
@@ -131,6 +102,6 @@ class JdsTableLookup {
             case ARRAY_DATE_TIME:
                 return StoreDateTimeArray.getPrefix();
         }
-        return "undefined";
+        return "INVALID";
     }
 }
