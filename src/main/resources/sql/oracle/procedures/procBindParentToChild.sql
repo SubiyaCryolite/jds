@@ -11,11 +11,11 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE FUNCTION procBindParentToChild(pParentEntityCode BIGINT, pChildEntityCode BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procBindParentToChild(p_ParentEntityCode IN NUMBER, p_ChildEntityCode IN NUMBER)
+AS
 BEGIN
-	INSERT INTO JdsRefEntityInheritance(ParentEntityCode, ChildEntityCode)
-    VALUES (pParentEntityCode, pChildEntityCode)
-    ON CONFLICT (ParentEntityCode, ChildEntityCode) DO UPDATE SET ParentEntityCode = pParentEntityCode, ChildEntityCode = pChildEntityCode;
-END;
-$$ LANGUAGE plpgsql;
+    MERGE INTO JdsRefEntityInheritance dest
+    USING DUAL ON (p_ParentEntityCode = ParentEntityCode AND p_ChildEntityCode = ChildEntityCode)
+    WHEN NOT MATCHED THEN
+        INSERT(ParentEntityCode, ChildEntityCode) VALUES(p_ParentEntityCode, p_ChildEntityCode);
+END procBindParentToChild;

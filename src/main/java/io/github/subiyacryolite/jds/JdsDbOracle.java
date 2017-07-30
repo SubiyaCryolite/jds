@@ -1,5 +1,6 @@
 package io.github.subiyacryolite.jds;
 
+import com.javaworld.NamedPreparedStatement;
 import io.github.subiyacryolite.jds.enums.JdsComponent;
 import io.github.subiyacryolite.jds.enums.JdsComponentType;
 import io.github.subiyacryolite.jds.enums.JdsImplementation;
@@ -13,8 +14,7 @@ import java.sql.ResultSet;
  */
 public abstract class JdsDbOracle extends JdsDb {
 
-    public JdsDbOracle()
-    {
+    public JdsDbOracle() {
         supportsStatements = true;
         implementation = JdsImplementation.ORACLE;
     }
@@ -24,7 +24,7 @@ public abstract class JdsDbOracle extends JdsDb {
         int toReturn = 0;
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, tableName.toLowerCase());
+            preparedStatement.setString(1, tableName.toUpperCase());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -41,7 +41,7 @@ public abstract class JdsDbOracle extends JdsDb {
         int toReturn = 0;
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, viewName.toLowerCase());
+            preparedStatement.setString(1, viewName.toUpperCase());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -56,9 +56,9 @@ public abstract class JdsDbOracle extends JdsDb {
     @Override
     public int procedureExists(String procedureName) {
         int toReturn = 0;
-        String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('FUNCTION') AND object_name = ?";
+        String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, procedureName.toLowerCase());
+            preparedStatement.setString(1, procedureName.toUpperCase());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 toReturn = resultSet.getInt("Result");
@@ -74,7 +74,17 @@ public abstract class JdsDbOracle extends JdsDb {
     public int columnExists(String tableName, String columnName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";
-        toReturn = columnExistsCommonImpl(tableName.toLowerCase(), columnName.toLowerCase(), toReturn, sql);
+        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
+            preparedStatement.setString("tableName", tableName.toUpperCase());
+            preparedStatement.setString("columnName", columnName.toUpperCase());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                toReturn = resultSet.getInt("Result");
+            }
+        } catch (Exception ex) {
+            toReturn = 0;
+            ex.printStackTrace(System.err);
+        }
         return toReturn;
     }
 

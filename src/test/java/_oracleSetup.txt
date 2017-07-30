@@ -1,0 +1,10 @@
+create tablespace jds_tabspace datafile 'jds_tabspace.dat' size 10M autoextend on;
+create temporary tablespace jds_tabspace_temp tempfile 'jds_tabspace_temp.dat' size 5M autoextend on;
+
+create user jds identified by jds default tablespace jds_tabspace temporary tablespace jds_tabspace_temp
+
+grant create session to jds;
+grant create table to jds;
+grant create procedure to jds;
+grant create trigger to jds;
+grant unlimited tablespace to jds;

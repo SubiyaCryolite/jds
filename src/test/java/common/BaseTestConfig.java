@@ -72,7 +72,7 @@ public abstract class BaseTestConfig {
 
     @Test
     public void initialiseOracleBackend() {
-        jdsDb = new JdsDbOracleSqlmplementation();
+        jdsDb = new JdsDbOracleImplementation();
         initJds();
     }
 

@@ -11,11 +11,11 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE FUNCTION procStoreEntityInheritance(pEntityGuid VARCHAR(48), pEntityId BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procStoreEntityInheritance(p_EntityGuid IN NVARCHAR2, p_EntityId IN NUMBER)
+AS
 BEGIN
-	INSERT INTO JdsStoreEntityInheritance(EntityGuid, EntityId)
-    VALUES (pEntityGuid, pEntityId)
-    ON CONFLICT ON CONSTRAINT unique_entity_inheritance DO NOTHING;
-END;
-$$ LANGUAGE plpgsql;
+	MERGE INTO JdsStoreEntityInheritance dest
+	USING DUAL ON (p_EntityGuid = EntityGuid AND p_EntityId = EntityId)
+	WHEN NOT MATCHED THEN
+		INSERT(EntityGuid, EntityId) VALUES(p_EntityGuid, p_EntityId);
+END procStoreEntityInheritance;

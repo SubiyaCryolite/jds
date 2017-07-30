@@ -11,11 +11,13 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE FUNCTION procStoreEntityOverview(pEntityGuid VARCHAR(48), pDateCreated TIMESTAMP, pDateModified TIMESTAMP, pEntityId BIGINT)
-RETURNS VOID AS $$
+CREATE PROCEDURE procStoreEntityOverview(p_EntityGuid IN NVARCHAR2, p_DateCreated DATE, p_DateModified DATE, p_EntityId IN NUMBER)
+AS
 BEGIN
-	INSERT INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified, EntityId)
-    VALUES (pEntityGuid, pDateCreated, pDateModified, pEntityId)
-    ON CONFLICT (EntityGuid) DO UPDATE SET DateModified = pDateModified, EntityId = pEntityId;
-END;
-$$ LANGUAGE plpgsql;
+	MERGE INTO JdsStoreEntityOverview dest
+	USING DUAL ON (p_EntityGuid = EntityGuid)
+	WHEN MATCHED THEN
+		UPDATE SET EntityId = p_EntityId, DateModified = p_DateModified
+	WHEN NOT MATCHED THEN
+		INSERT(EntityGuid, DateCreated, DateModified, EntityId) VALUES(p_EntityGuid, p_DateCreated, p_DateModified, p_EntityId);
+END procStoreEntityOverview;

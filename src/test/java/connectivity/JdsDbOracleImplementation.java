@@ -9,11 +9,11 @@ import java.sql.SQLException;
 /**
  * @author indana
  */
-public class JdsDbOracleSqlmplementation extends JdsDbOracle {
+public class JdsDbOracleImplementation extends JdsDbOracle {
 
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("oracle.jdbc.driver.OracleDriver");
-        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "hr", "hr");
+        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "jdsx", "jdsx");
     }
 }
