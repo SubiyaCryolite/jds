@@ -20,42 +20,42 @@ class JdsTableLookup {
     public static String getTable(JdsFieldType fieldType) {
         switch (fieldType) {
             case FLOAT:
-                return StoreFloat.getName();
+                return STORE_FLOAT.getName();
             case INT:
             case BOOLEAN:
-                return StoreInteger.getName();
+                return STORE_INTEGER.getName();
             case DOUBLE:
-                return StoreDouble.getName();
+                return STORE_DOUBLE.getName();
             case LONG:
-                return StoreLong.getName();
+                return STORE_LONG.getName();
             case TEXT:
-                return StoreText.getName();
+                return STORE_TEXT.getName();
             case DATE_TIME:
-                return StoreDateTime.getName();
+                return STORE_DATE_TIME.getName();
             case ARRAY_FLOAT:
-                return StoreFloatArray.getName();
+                return STORE_FLOAT_ARRAY.getName();
             case ARRAY_INT:
-                return StoreIntegerArray.getName();
+                return STORE_INTEGER_ARRAY.getName();
             case ARRAY_DOUBLE:
-                return StoreDoubleArray.getName();
+                return STORE_DOUBLE_ARRAY.getName();
             case ARRAY_LONG:
-                return StoreLongArray.getName();
+                return STORE_LONG_ARRAY.getName();
             case ARRAY_TEXT:
-                return StoreTextArray.getName();
+                return STORE_TEXT_ARRAY.getName();
             case ARRAY_DATE_TIME:
-                return StoreDateTimeArray.getName();
+                return STORE_DATE_TIME_ARRAY.getName();
             case ENUM_COLLECTION:
-                return StoreIntegerArray.getName();
+                return STORE_INTEGER_ARRAY.getName();
             case ENUM:
-                return StoreInteger.getName();
+                return STORE_INTEGER.getName();
             case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getName();
+                return STORE_ZONED_DATE_TIME.getName();
             case DATE:
-                return StoreDateTime.getName();
+                return STORE_DATE_TIME.getName();
             case TIME:
-                return StoreTime.getName();
+                return STORE_TIME.getName();
             case BLOB:
-                return StoreBlob.getName();
+                return STORE_BLOB.getName();
             default:
                 return "INVALID";
         }
@@ -69,38 +69,38 @@ class JdsTableLookup {
     public static String getTablePrefix(JdsFieldType jdsFieldType) {
         switch (jdsFieldType) {
             case TEXT:
-                return StoreText.getPrefix();
+                return STORE_TEXT.getPrefix();
             case BLOB:
-                return StoreBlob.getPrefix();
+                return STORE_BLOB.getPrefix();
             case INT:
             case BOOLEAN:
-                return StoreInteger.getPrefix();
+                return STORE_INTEGER.getPrefix();
             case DOUBLE:
-                return StoreDouble.getPrefix();
+                return STORE_DOUBLE.getPrefix();
             case FLOAT:
-                return StoreFloat.getPrefix();
+                return STORE_FLOAT.getPrefix();
             case LONG:
-                return StoreLong.getPrefix();
+                return STORE_LONG.getPrefix();
             case DATE:
             case DATE_TIME:
-                return StoreDateTime.getPrefix();
+                return STORE_DATE_TIME.getPrefix();
             case ZONED_DATE_TIME:
-                return StoreZonedDateTime.getPrefix();
+                return STORE_ZONED_DATE_TIME.getPrefix();
             case TIME:
-                return StoreTime.getPrefix();
+                return STORE_TIME.getPrefix();
             case ARRAY_TEXT:
-                return StoreTextArray.getPrefix();
+                return STORE_TEXT_ARRAY.getPrefix();
             case ARRAY_INT:
             case ENUM_COLLECTION:
-                return StoreIntegerArray.getPrefix();
+                return STORE_INTEGER_ARRAY.getPrefix();
             case ARRAY_DOUBLE:
-                return StoreDoubleArray.getPrefix();
+                return STORE_DOUBLE_ARRAY.getPrefix();
             case ARRAY_FLOAT:
-                return StoreFloatArray.getPrefix();
+                return STORE_FLOAT_ARRAY.getPrefix();
             case ARRAY_LONG:
-                return StoreLongArray.getPrefix();
+                return STORE_LONG_ARRAY.getPrefix();
             case ARRAY_DATE_TIME:
-                return StoreDateTimeArray.getPrefix();
+                return STORE_DATE_TIME_ARRAY.getPrefix();
         }
         return "INVALID";
     }

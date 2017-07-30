@@ -227,86 +227,150 @@ public abstract class JdsDbOracle extends JdsDb {
 
     @Override
     protected void prepareCustomDatabaseComponents() {
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveBlob);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveLong);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveInteger);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveFloat);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDouble);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDateTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveZonedDateTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntityV2);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityFields);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityInheritance);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntityInheritance);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_INTEGER);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_FLOAT);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DOUBLE);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE);
+        //============================ Oracle Specific Procedures======================================
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_TEXT_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_DOUBLE_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_LONG_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_INTEGER_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_FLOAT_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_DATE_TIME_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_BLOB_VALUES);
     }
 
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
-            case SaveEntityV2:
+            case SAVE_ENTITY_V_2:
                 executeSqlFromFile("sql/oracle/procedures/procStoreEntityOverviewV2.sql");
                 break;
-            case SaveEntityInheritance:
+            case SAVE_ENTITY_INHERITANCE:
                 executeSqlFromFile("sql/oracle/procedures/procStoreEntityInheritance.sql");
                 break;
-            case MapFieldNames:
+            case MAP_FIELD_NAMES:
                 executeSqlFromFile("sql/oracle/procedures/procBindFieldNames.sql");
                 break;
-            case MapFieldTypes:
+            case MAP_FIELD_TYPES:
                 executeSqlFromFile("sql/oracle/procedures/procBindFieldTypes.sql");
                 break;
-            case SaveBlob:
+            case SAVE_BLOB:
                 executeSqlFromFile("sql/oracle/procedures/procStoreBlob.sql");
                 break;
-            case SaveTime:
+            case SAVE_TIME:
                 executeSqlFromFile("sql/oracle/procedures/procStoreTime.sql");
                 break;
-            case SaveText:
+            case SAVE_TEXT:
                 executeSqlFromFile("sql/oracle/procedures/procStoreText.sql");
                 break;
-            case SaveLong:
+            case SAVE_LONG:
                 executeSqlFromFile("sql/oracle/procedures/procStoreLong.sql");
                 break;
-            case SaveInteger:
+            case SAVE_INTEGER:
                 executeSqlFromFile("sql/oracle/procedures/procStoreInteger.sql");
                 break;
-            case SaveFloat:
+            case SAVE_FLOAT:
                 executeSqlFromFile("sql/oracle/procedures/procStoreFloat.sql");
                 break;
-            case SaveDouble:
+            case SAVE_DOUBLE:
                 executeSqlFromFile("sql/oracle/procedures/procStoreDouble.sql");
                 break;
-            case SaveDateTime:
+            case SAVE_DATE_TIME:
                 executeSqlFromFile("sql/oracle/procedures/procStoreDateTime.sql");
                 break;
-            case SaveZonedDateTime:
+            case SAVE_ZONED_DATE_TIME:
                 executeSqlFromFile("sql/oracle/procedures/procStoreZonedDateTime.sql");
                 break;
-            case SaveEntity:
+            case SAVE_ENTITY:
                 executeSqlFromFile("sql/oracle/procedures/procStoreEntityOverview.sql");
                 break;
-            case MapEntityFields:
+            case MAP_ENTITY_FIELDS:
                 executeSqlFromFile("sql/oracle/procedures/procBindEntityFields.sql");
                 break;
-            case MapEntityEnums:
+            case MAP_ENTITY_ENUMS:
                 executeSqlFromFile("sql/oracle/procedures/procBindEntityEnums.sql");
                 break;
-            case MapClassName:
+            case MAP_CLASS_NAME:
                 executeSqlFromFile("sql/oracle/procedures/procRefEntities.sql");
                 break;
-            case MapEnumValues:
+            case MAP_ENUM_VALUES:
                 executeSqlFromFile("sql/oracle/procedures/procRefEnumValues.sql");
                 break;
-            case MapEntityInheritance:
+            case MAP_ENTITY_INHERITANCE:
                 executeSqlFromFile("sql/oracle/procedures/procBindParentToChild.sql");
                 break;
+            case ORA_SAVE_OLD_TEXT_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldTextValues.sql");
+                break;
+            case ORA_SAVE_OLD_DOUBLE_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldDoubleValues.sql");
+                break;
+            case ORA_SAVE_OLD_LONG_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldLongValues.sql");
+                break;
+            case ORA_SAVE_OLD_INTEGER_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldIntegerValues.sql");
+                break;
+            case ORA_SAVE_OLD_FLOAT_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldFloatValues.sql");
+                break;
+            case ORA_SAVE_OLD_DATE_TIME_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldDateTimeValues.sql");
+                break;
+            case ORA_SAVE_OLD_BLOB_VALUES:
+                executeSqlFromFile("sql/oracle/procedures/custom/updateOldBlobValues.sql");
+                break;
         }
+    }
+
+    @Override
+    protected String getSaveOldTextValues() {
+        return "{call procUpdateOldTextValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldDoubleValues() {
+        return "{call procUpdateOldDoubleValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldLongValues() {
+        return "{call procUpdateOldLongValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldIntegerValues() {
+        return "{call procUpdateOldIntegerValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldFloatValues() {
+        return "{call procUpdateOldFloatValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldDateTimeValues() {
+        return "{call procUpdateOldDateTimeValues(:entityGuid, :fieldId, :sequence, :value)}";
+    }
+
+    @Override
+    protected String getSaveOldBlobValues() {
+        return "{call procUpdateOldBlobValues(:entityGuid, :fieldId, :sequence, :value)}";
     }
 }

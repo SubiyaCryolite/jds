@@ -81,32 +81,32 @@ public abstract class JdsDb implements JdsDbContract {
      * Initialise core database components
      */
     private void prepareDatabaseComponents() {
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEntities);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityOverview);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityInheritance);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreEntityBinding);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefEnumValues);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefFields);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefFieldTypes);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreTextArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreFloatArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreIntegerArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreLongArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDoubleArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDateTimeArray);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreText);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreBlob);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreFloat);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreInteger);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreLong);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDouble);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreDateTime);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreZonedDateTime);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreTime);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.StoreOldFieldValues);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityFields);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BindEntityEnums);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.RefInheritance);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_ENTITIES);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_FIELDS);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_FIELD_TYPES);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TEXT_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_LONG_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME_ARRAY);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TEXT);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_BLOB);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_FLOAT);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_INTEGER);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_LONG);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TIME);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS);
+        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE);
     }
 
     /**
@@ -116,6 +116,26 @@ public abstract class JdsDb implements JdsDbContract {
      */
     public JdsImplementation getImplementation() {
         return this.implementation;
+    }
+
+    public boolean isOracleDb() {
+        return getImplementation() == JdsImplementation.ORACLE;
+    }
+
+    public boolean isTransactionalSqlDb() {
+        return getImplementation() == JdsImplementation.TSQL;
+    }
+
+    public boolean isMySqlDb() {
+        return getImplementation() == JdsImplementation.MYSQL;
+    }
+
+    public boolean isSqLiteDb() {
+        return getImplementation() == JdsImplementation.SQLITE;
+    }
+
+    public boolean isPosgreSqlDb() {
+        return getImplementation() == JdsImplementation.POSTGRES;
     }
 
     /**
@@ -154,81 +174,81 @@ public abstract class JdsDb implements JdsDbContract {
      */
     private final void initiateDatabaseComponent(JdsComponent jdsComponent) {
         switch (jdsComponent) {
-            case StoreEntityInheritance:
+            case STORE_ENTITY_INHERITANCE:
                 createStoreEntityInheritance();
                 break;
-            case StoreTextArray:
+            case STORE_TEXT_ARRAY:
                 createStoreTextArray();
                 break;
-            case StoreFloatArray:
+            case STORE_FLOAT_ARRAY:
                 createStoreFloatArray();
                 break;
-            case StoreIntegerArray:
+            case STORE_INTEGER_ARRAY:
                 createStoreIntegerArray();
                 break;
-            case StoreLongArray:
+            case STORE_LONG_ARRAY:
                 createStoreLongArray();
                 break;
-            case StoreDoubleArray:
+            case STORE_DOUBLE_ARRAY:
                 createStoreDoubleArray();
                 break;
-            case StoreDateTimeArray:
+            case STORE_DATE_TIME_ARRAY:
                 createStoreDateTimeArray();
-            case StoreBlob:
+            case STORE_BLOB:
                 createStoreBlob();
                 break;
-            case StoreText:
+            case STORE_TEXT:
                 createStoreText();
                 break;
-            case StoreFloat:
+            case STORE_FLOAT:
                 createStoreFloat();
                 break;
-            case StoreInteger:
+            case STORE_INTEGER:
                 createStoreInteger();
                 break;
-            case StoreLong:
+            case STORE_LONG:
                 createStoreLong();
                 break;
-            case StoreDouble:
+            case STORE_DOUBLE:
                 createStoreDouble();
                 break;
-            case StoreDateTime:
+            case STORE_DATE_TIME:
                 createStoreDateTime();
                 break;
-            case StoreZonedDateTime:
+            case STORE_ZONED_DATE_TIME:
                 createStoreZonedDateTime();
                 break;
-            case StoreTime:
+            case STORE_TIME:
                 createStoreTime();
                 break;
-            case RefEntities:
+            case REF_ENTITIES:
                 createStoreEntities();
                 break;
-            case RefEnumValues:
+            case REF_ENUM_VALUES:
                 createRefEnumValues();
                 break;
-            case RefInheritance:
+            case REF_INHERITANCE:
                 createRefInheritance();
                 break;
-            case RefFields:
+            case REF_FIELDS:
                 createRefFields();
                 break;
-            case RefFieldTypes:
+            case REF_FIELD_TYPES:
                 createRefFieldTypes();
                 break;
-            case BindEntityFields:
+            case BIND_ENTITY_FIELDS:
                 createBindEntityFields();
                 break;
-            case BindEntityEnums:
+            case BIND_ENTITY_ENUMS:
                 createBindEntityEnums();
                 break;
-            case StoreEntityOverview:
+            case STORE_ENTITY_OVERVIEW:
                 createRefEntityOverview();
                 break;
-            case StoreOldFieldValues:
+            case STORE_OLD_FIELD_VALUES:
                 createRefOldFieldValues();
                 break;
-            case StoreEntityBinding:
+            case STORE_ENTITY_BINDING:
                 createStoreEntityBinding();
                 break;
         }
@@ -391,6 +411,7 @@ public abstract class JdsDb implements JdsDbContract {
     /**
      * Database specific check to see if the specified view exists in the
      * database
+     *
      * @param viewName the view to look up
      * @return 1 if the specified procedure exists in the database
      */
@@ -1000,4 +1021,46 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     public abstract String createOrAlterView(String viewName, String viewSql);
+
+    protected String getSaveOldTextValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND TextValue = :value)";
+    }
+
+    protected String getSaveOldDoubleValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) \n" +
+                "SELECT :entityGuid, :fieldId, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DoubleValue = :value)";
+    }
+
+    protected String getSaveOldLongValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND LongValue = :value)";
+    }
+
+    protected String getSaveOldIntegerValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND IntegerValue = :value)";
+    }
+
+    protected String getSaveOldFloatValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND FloatValue = :value)";
+    }
+
+    protected String getSaveOldDateTimeValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DateTimeValue = :value)";
+    }
+
+    protected String getSaveOldBlobValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) \n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
+                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND BlobValue = :value)";
+    }
 }

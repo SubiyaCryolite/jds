@@ -225,84 +225,84 @@ public abstract class JdsDbMySql extends JdsDb {
 
     @Override
     protected void prepareCustomDatabaseComponents() {
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveBlob);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveText);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveLong);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveInteger);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveFloat);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDouble);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveDateTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveZonedDateTime);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntityV2);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityFields);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityEnums);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapClassName);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEnumValues);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldNames);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapFieldTypes);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MapEntityInheritance);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SaveEntityInheritance);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_INTEGER);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_FLOAT);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DOUBLE);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE);
+        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE);
     }
 
     @Override
     protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
         switch (jdsComponent) {
-            case SaveEntityV2:
+            case SAVE_ENTITY_V_2:
                 executeSqlFromFile("sql/mysql/procedures/procStoreEntityOverviewV2.sql");
                 break;
-            case SaveEntityInheritance:
+            case SAVE_ENTITY_INHERITANCE:
                 executeSqlFromFile("sql/mysql/procedures/procStoreEntityInheritance.sql");
                 break;
-            case MapFieldNames:
+            case MAP_FIELD_NAMES:
                 executeSqlFromFile("sql/mysql/procedures/procBindFieldNames.sql");
                 break;
-            case MapFieldTypes:
+            case MAP_FIELD_TYPES:
                 executeSqlFromFile("sql/mysql/procedures/procBindFieldTypes.sql");
                 break;
-            case SaveBlob:
+            case SAVE_BLOB:
                 executeSqlFromFile("sql/mysql/procedures/procStoreBlob.sql");
                 break;
-            case SaveTime:
+            case SAVE_TIME:
                 executeSqlFromFile("sql/mysql/procedures/procStoreTime.sql");
                 break;
-            case SaveText:
+            case SAVE_TEXT:
                 executeSqlFromFile("sql/mysql/procedures/procStoreText.sql");
                 break;
-            case SaveLong:
+            case SAVE_LONG:
                 executeSqlFromFile("sql/mysql/procedures/procStoreLong.sql");
                 break;
-            case SaveInteger:
+            case SAVE_INTEGER:
                 executeSqlFromFile("sql/mysql/procedures/procStoreInteger.sql");
                 break;
-            case SaveFloat:
+            case SAVE_FLOAT:
                 executeSqlFromFile("sql/mysql/procedures/procStoreFloat.sql");
                 break;
-            case SaveDouble:
+            case SAVE_DOUBLE:
                 executeSqlFromFile("sql/mysql/procedures/procStoreDouble.sql");
                 break;
-            case SaveDateTime:
+            case SAVE_DATE_TIME:
                 executeSqlFromFile("sql/mysql/procedures/procStoreDateTime.sql");
                 break;
-            case SaveZonedDateTime:
+            case SAVE_ZONED_DATE_TIME:
                 executeSqlFromFile("sql/mysql/procedures/procStoreZonedDateTime.sql");
                 break;
-            case SaveEntity:
+            case SAVE_ENTITY:
                 executeSqlFromFile("sql/mysql/procedures/procStoreEntityOverview.sql");
                 break;
-            case MapEntityFields:
+            case MAP_ENTITY_FIELDS:
                 executeSqlFromFile("sql/mysql/procedures/procBindEntityFields.sql");
                 break;
-            case MapEntityEnums:
+            case MAP_ENTITY_ENUMS:
                 executeSqlFromFile("sql/mysql/procedures/procBindEntityEnums.sql");
                 break;
-            case MapClassName:
+            case MAP_CLASS_NAME:
                 executeSqlFromFile("sql/mysql/procedures/procRefEntities.sql");
                 break;
-            case MapEnumValues:
+            case MAP_ENUM_VALUES:
                 executeSqlFromFile("sql/mysql/procedures/procRefEnumValues.sql");
                 break;
-            case MapEntityInheritance:
+            case MAP_ENTITY_INHERITANCE:
                 executeSqlFromFile("sql/mysql/procedures/procBindParentToChild.sql");
                 break;
         }

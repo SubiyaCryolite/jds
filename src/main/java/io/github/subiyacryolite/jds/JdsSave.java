@@ -299,11 +299,8 @@ public class JdsSave implements Callable<Boolean> {
     private void saveBlobs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
         int record = 0;
         //log byte array as text???
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, BlobValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND BlobValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveBlob()) : new NamedPreparedStatement(connection, jdsDb.saveBlob());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldBlobValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldBlobValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBlobProperty>> entry : blobProperties.entrySet()) {
                 record++;
@@ -326,6 +323,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setBytes("value", recordEntry.getValue().get());
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -344,11 +342,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveBooleans(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
                 record++;
@@ -372,6 +367,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -389,11 +385,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
                 record++;
@@ -417,6 +410,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -434,11 +428,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, FloatValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND FloatValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveFloat()) : new NamedPreparedStatement(connection, jdsDb.saveFloat());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldFloatValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldFloatValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
                 record++;
@@ -462,6 +453,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setFloat("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -479,11 +471,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, DoubleValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND DoubleValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveDouble()) : new NamedPreparedStatement(connection, jdsDb.saveDouble());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDoubleValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDoubleValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
                 record++;
@@ -507,6 +496,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setDouble("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -524,11 +514,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND LongValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveLong()) : new NamedPreparedStatement(connection, jdsDb.saveLong());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
                 record++;
@@ -552,6 +539,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setLong("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -569,11 +557,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,TextValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND TextValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveString()) : new NamedPreparedStatement(connection, jdsDb.saveString());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldTextValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldTextValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
                 record++;
@@ -597,6 +582,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setString("value", value);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -615,11 +601,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveDatesAndDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,DateTimeValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND DateTimeValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveDateTime()) : new NamedPreparedStatement(connection, jdsDb.saveDateTime());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDateTimeValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDateTimeValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
                 record++;
@@ -643,6 +626,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setTimestamp("value", Timestamp.valueOf(localDateTime));
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -666,6 +650,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()));
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -683,11 +668,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveTime()) : new NamedPreparedStatement(connection, jdsDb.saveTime());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
                 record++;
@@ -712,6 +694,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setInt("value", secondOfDay);
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -729,11 +712,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     private void saveZonedDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,LongValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND LongValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveZonedDateTime()) : new NamedPreparedStatement(connection, jdsDb.saveZonedDateTime());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
                 record++;
@@ -757,6 +737,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", fieldId);
                     log.setLong("value", zonedDateTime.toEpochSecond());
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -774,11 +755,8 @@ public class JdsSave implements Callable<Boolean> {
      */
     public void saveEnums(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
         int record = 0;
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND IntegerValue = :value)";
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = new NamedPreparedStatement(connection, logSql)) {
+             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
             connection.setAutoCommit(false);
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enums.entrySet()) {
                 record++;
@@ -802,6 +780,7 @@ public class JdsSave implements Callable<Boolean> {
                     log.setString("entityGuid", entityGuid);
                     log.setLong("fieldId", jdsFieldEnum.getField().getId());
                     log.setInt("value", jdsFieldEnum.indexOf(value));
+                    log.setInt("sequence", 0);
                     log.addBatch();
                 }
             }
@@ -821,12 +800,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private void saveArrayDates(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,DateTimeValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DateTimeValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
-        try (NamedPreparedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDateTimeValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDateTimeValues());
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -879,12 +855,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private void saveArrayFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,FloatValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND FloatValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
-        try (NamedPreparedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldFloatValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldFloatValues());
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -938,12 +911,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
     private void saveArrayIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND IntegerValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues());
              INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
              INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
             connection.setAutoCommit(false);
@@ -997,12 +967,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private void saveArrayDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,DoubleValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DoubleValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDoubleValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDoubleValues());
              INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
              INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
             connection.setAutoCommit(false);
@@ -1056,12 +1023,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private void saveArrayLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,LongValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND LongValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (NamedPreparedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues());
              PreparedStatement delete = connection.prepareStatement(deleteSql);
              PreparedStatement insert = connection.prepareStatement(insertSql)) {
             connection.setAutoCommit(false);
@@ -1114,12 +1078,9 @@ public class JdsSave implements Callable<Boolean> {
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private void saveArrayStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,TextValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND TextValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldTextValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldTextValues());
              INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
              INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
             connection.setAutoCommit(false);
@@ -1176,12 +1137,9 @@ public class JdsSave implements Callable<Boolean> {
     private void saveEnumCollections(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
-        String logSql = "INSERT INTO JdsStoreOldFieldValues(EntityGuid,FieldId,Sequence,IntegerValue) \n" +
-                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
-                "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND IntegerValue = :value)";
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = new NamedPreparedStatement(connection, logSql);
+        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues());
              INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
              INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
             connection.setAutoCommit(false);
