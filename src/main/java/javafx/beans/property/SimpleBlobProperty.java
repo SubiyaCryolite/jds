@@ -12,21 +12,22 @@ public class SimpleBlobProperty implements Serializable {
     /**
      * Required no-args constructor
      */
-    public SimpleBlobProperty()
-    {}
+    public SimpleBlobProperty() {
+    }
 
     /**
      * Constructor
+     *
      * @param value byte array input
      */
-    public SimpleBlobProperty(byte[] value)
-    {
+    public SimpleBlobProperty(byte[] value) {
         this();
         set(value);
     }
 
     /**
      * Constructor
+     *
      * @param value input stream source
      * @throws IOException
      */
@@ -37,6 +38,7 @@ public class SimpleBlobProperty implements Serializable {
 
     /**
      * Acquire the blob as an array of bytes
+     *
      * @return the blob as an array of bytes
      */
     public final byte[] get() {
@@ -45,6 +47,7 @@ public class SimpleBlobProperty implements Serializable {
 
     /**
      * Set the blob
+     *
      * @param bytes the blob as an array of bytes
      */
     public final void set(final byte[] bytes) {
@@ -53,6 +56,7 @@ public class SimpleBlobProperty implements Serializable {
 
     /**
      * Set the blob
+     *
      * @param inputStream the blob as an input stream
      * @throws IOException possible IO exception
      */
@@ -70,6 +74,7 @@ public class SimpleBlobProperty implements Serializable {
 
     /**
      * Acquire the blob as an input stream
+     *
      * @return the blob as an input stream
      */
     public final InputStream getResourceAsStream() {
@@ -78,6 +83,7 @@ public class SimpleBlobProperty implements Serializable {
 
     /**
      * Determine if the blob is empty
+     *
      * @return true if the blob is empty
      */
     public final boolean isEmpty() {

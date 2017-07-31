@@ -47,7 +47,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public LocalDateTime getDateCreated() {
@@ -55,7 +54,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @param dateCreated
      */
     public void setDateCreated(LocalDateTime dateCreated) {
@@ -63,7 +61,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public LocalDateTime getDateModified() {
@@ -71,7 +68,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @param dateModified
      */
     public void setDateModified(LocalDateTime dateModified) {
@@ -79,7 +75,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public long getEntityId() {
@@ -87,7 +82,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @param entityId
      */
     public void setEntityId(long entityId) {
@@ -95,7 +89,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public String getEntityGuid() {
@@ -103,7 +96,6 @@ public class JdsEntityOverview implements Externalizable {
     }
 
     /**
-     *
      * @param entityGuid
      */
     public void setEntityGuid(String entityGuid) {

@@ -45,7 +45,6 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
     private long entityId;
 
     /**
-     *
      * @param jdsDb
      * @param referenceType
      */

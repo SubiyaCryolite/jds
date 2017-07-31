@@ -214,8 +214,8 @@ abstract class JdsEntityBase implements Externalizable {
         putLongs(longArrayProperties, (Map<Long, List<Long>>) objectInputStream.readObject());
         putIntegers(integerArrayProperties, (Map<Long, List<Integer>>) objectInputStream.readObject());
         //enums
-        putEnum(enumProperties,(Map<JdsFieldEnum, Enum>)objectInputStream.readObject());
-        putEnums(enumCollectionProperties,(Map<JdsFieldEnum, List<Enum>>)objectInputStream.readObject());
+        putEnum(enumProperties, (Map<JdsFieldEnum, Enum>) objectInputStream.readObject());
+        putEnums(enumCollectionProperties, (Map<JdsFieldEnum, List<Enum>>) objectInputStream.readObject());
     }
 
     private void putEnums(Map<JdsFieldEnum, SimpleListProperty<Enum>> destination, Map<JdsFieldEnum, List<Enum>> source) {

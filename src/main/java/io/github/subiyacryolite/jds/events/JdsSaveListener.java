@@ -5,5 +5,6 @@ package io.github.subiyacryolite.jds.events;
  */
 public interface JdsSaveListener {
     void onPreSave(final OnPreSaveEventArguments arguments);
+
     void onPostSave(final OnPostSaveEventArguments arguments);
 }

@@ -5,5 +5,6 @@ package io.github.subiyacryolite.jds.events;
  */
 public interface JdsLoadListener {
     void onPostLoad(final OnPostLoadEventArguments arguments);
+
     void onPreLoad(final OnPreLoadEventArguments arguments);
 }

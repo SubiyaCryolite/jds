@@ -10,6 +10,7 @@ class JdsUpdateHelper {
 
     /**
      * Columns to drop when upgrading from version 1 to version 2
+     *
      * @param jdsDb the {@link JdsDb JdsDb} instance
      */
     public static void v1Tov2DropColumnStoreEntityOverview(JdsDb jdsDb) {
@@ -28,6 +29,7 @@ class JdsUpdateHelper {
 
     /**
      * Method to add the new BlobValue column to an upgraded schema
+     *
      * @param jdsDb the {@link JdsDb JdsDb} instance
      */
     public static void v1Tov2AddColumnStoreOldFieldValues(JdsDb jdsDb) {
@@ -51,6 +53,7 @@ class JdsUpdateHelper {
 
     /**
      * Method to migrate data from version 1 to version 2 of {@link JdsDb JdsDb}
+     *
      * @param jdsDb the {@link JdsDb JdsDb} instance
      */
     public static void v1ToV2MigrateData(JdsDb jdsDb) {
@@ -63,6 +66,7 @@ class JdsUpdateHelper {
 
     /**
      * Method to add new columns to facilitate cascade on delete options
+     *
      * @param jdsDb the {@link JdsDb JdsDb} instance
      */
     public static void v1Tov2AddColumnStoreEntityBindings(JdsDb jdsDb) {

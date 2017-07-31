@@ -94,9 +94,10 @@ public class JdsView {
 
     /**
      * Determine the inheritance hierarchy of the supplied Entity Id
-     * @param connection the shared SQL connection to use
+     *
+     * @param connection           the shared SQL connection to use
      * @param inheritanceHierarchy the inheritance hierarchy of the supplied Entity type
-     * @param entityId the id of the Entity type
+     * @param entityId             the id of the Entity type
      * @throws SQLException a possible SQL exception
      */
     private static void populateChildEntities(Connection connection, List<Long> inheritanceHierarchy, long entityId) throws SQLException {
@@ -225,11 +226,11 @@ public class JdsView {
     /**
      * Create a view of a specific data-type for a JdsEntity
      *
-     * @param connection the SQL connection that will be used for this operation
-     * @param jdsDb      an instance of JdsDb
-     * @param fieldType  the data-type of this view
-     * @param inheritanceHierarchy  the id codes of the JdsEntity and its children
-     * @param entityName the raw entity name
+     * @param connection           the SQL connection that will be used for this operation
+     * @param jdsDb                an instance of JdsDb
+     * @param fieldType            the data-type of this view
+     * @param inheritanceHierarchy the id codes of the JdsEntity and its children
+     * @param entityName           the raw entity name
      * @return the created inner view name
      */
     private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final List<Long> inheritanceHierarchy, final String entityName) {

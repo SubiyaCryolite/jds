@@ -30,12 +30,16 @@ public class OnPostSaveEventArguments {
         return connection;
     }
 
-    public PreparedStatement getOrAddStatement(String key) throws SQLException {
-        return statements.getOrDefault(key, connection.prepareStatement(key));
+    public synchronized PreparedStatement getOrAddStatement(String key) throws SQLException {
+        if (!statements.containsKey(key))
+            statements.put(key, connection.prepareStatement(key));
+        return statements.get(key);
     }
 
-    public CallableStatement getOrAddCall(String key) throws SQLException {
-        return calls.getOrDefault(key, connection.prepareCall(key));
+    public synchronized CallableStatement getOrAddCall(String key) throws SQLException {
+        if (!calls.containsKey(key))
+            calls.put(key, connection.prepareCall(key));
+        return calls.get(key);
     }
 
     public void executeBatches() throws SQLException {

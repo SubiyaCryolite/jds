@@ -44,7 +44,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @param id
      * @param name
      * @param type
@@ -58,7 +57,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @param jdsField
      */
     private static void bind(final JdsField jdsField) {
@@ -69,7 +67,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public long getId() {
@@ -77,7 +74,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @param id
      */
     private void setId(long id) {
@@ -85,7 +81,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public String getName() {
@@ -93,7 +88,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @param name
      */
     private void setName(String name) {
@@ -101,7 +95,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @return
      */
     public JdsFieldType getType() {
@@ -109,7 +102,6 @@ public class JdsField implements Externalizable {
     }
 
     /**
-     *
      * @param type
      */
     private void setType(JdsFieldType type) {

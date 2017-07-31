@@ -63,6 +63,7 @@ class JdsTableLookup {
 
     /**
      * Get the short version of the table that holds the requested field type
+     *
      * @param jdsFieldType the requested field type
      * @return the short version of the table that holds the requested field type
      */

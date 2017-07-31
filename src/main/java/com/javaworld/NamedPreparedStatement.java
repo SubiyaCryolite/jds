@@ -151,12 +151,13 @@ public class NamedPreparedStatement implements INamedStatement {
      * @throws IllegalArgumentException if the parameter does not exist
      * @see PreparedStatement#setObject(int, Object)
      */
-    public void setBytes(String name, byte[] value) throws SQLException{
+    public void setBytes(String name, byte[] value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
             preparedStatement.setBytes(indexes[i], value);
         }
     }
+
     /**
      * Sets a parameter.
      *
@@ -166,7 +167,7 @@ public class NamedPreparedStatement implements INamedStatement {
      * @throws IllegalArgumentException if the parameter does not exist
      * @see PreparedStatement#setObject(int, Object)
      */
-    public void setBlob(String name, InputStream value) throws SQLException{
+    public void setBlob(String name, InputStream value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
             preparedStatement.setBlob(indexes[i], value);
@@ -182,7 +183,7 @@ public class NamedPreparedStatement implements INamedStatement {
      * @throws IllegalArgumentException if the parameter does not exist
      * @see PreparedStatement#setObject(int, Object)
      */
-    public void setNull(String name, int value) throws SQLException{
+    public void setNull(String name, int value) throws SQLException {
         int[] indexes = getIndexes(name);
         for (int i = 0; i < indexes.length; i++) {
             preparedStatement.setNull(indexes[i], value);

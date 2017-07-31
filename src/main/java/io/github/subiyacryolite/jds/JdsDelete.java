@@ -34,7 +34,6 @@ public class JdsDelete implements Callable<Boolean> {
     private final Collection<? extends CharSequence> entities;
 
     /**
-     *
      * @return
      * @throws Exception
      */
@@ -52,7 +51,6 @@ public class JdsDelete implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param jdsDb
      * @param entityGuids
      */
@@ -62,7 +60,6 @@ public class JdsDelete implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param jdsDb
      * @param entityGuids
      */
@@ -71,7 +68,6 @@ public class JdsDelete implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param jdsDb
      * @param entities
      * @throws SQLException
@@ -87,7 +83,6 @@ public class JdsDelete implements Callable<Boolean> {
     }
 
     /**
-     *
      * @param jdsDb
      * @param entities
      * @throws SQLException

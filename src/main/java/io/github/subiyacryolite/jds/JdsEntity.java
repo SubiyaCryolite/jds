@@ -43,7 +43,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @return
      */
     public String getEntityGuid() {
@@ -51,7 +50,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param actionId
      */
     public void setEntityGuid(String actionId) {
@@ -59,7 +57,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @return
      */
     public LocalDateTime getDateCreated() {
@@ -67,7 +64,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param dateCreated
      */
     public void setDateCreated(LocalDateTime dateCreated) {
@@ -75,7 +71,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @return
      */
     public LocalDateTime getDateModified() {
@@ -83,7 +78,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param dateModified
      */
     public void setDateModified(LocalDateTime dateModified) {
@@ -91,7 +85,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @return
      */
     public long getEntityCode() {
@@ -99,7 +92,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param serviceCode
      */
     private void setEntityCode(long serviceCode) {
@@ -107,7 +99,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @return
      */
     public String getEntityName() {
@@ -115,7 +106,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param name
      */
     private void setEntityName(String name) {
@@ -123,7 +113,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param integerProperty
      */
@@ -141,7 +130,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param integerProperty
      */
@@ -159,7 +147,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param temporalProperty
      */
@@ -204,7 +191,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param stringProperty
      */
@@ -222,7 +208,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param floatProperty
      */
@@ -240,7 +225,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param longProperty
      */
@@ -258,7 +242,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param doubleProperty
      */
@@ -276,7 +259,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param booleanProperty
      */
@@ -294,7 +276,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param strings
      */
@@ -312,7 +293,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param floats
      */
@@ -330,7 +310,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param doubles
      */
@@ -348,7 +327,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsField
      * @param longs
      */
@@ -366,7 +344,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsFieldEnum
      * @param enums
      */
@@ -385,7 +362,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param jdsFieldEnum
      * @param enums
      */
@@ -404,14 +380,13 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param entity
      * @param property
      * @param cascadeOnDelete
      */
     protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            JdsEntityAnnotation entityAnnotation  = entity.getAnnotation(JdsEntityAnnotation.class);
+            JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
                 objectProperties.put(entityAnnotation.entityId(), (SimpleObjectProperty<JdsEntity>) property);
                 objects.add(entityAnnotation.entityId());
@@ -425,7 +400,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param entity
      * @param property
      */
@@ -434,7 +408,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param entity
      * @param properties
      * @param cascadeOnDelete
@@ -455,7 +428,6 @@ public abstract class JdsEntity extends JdsEntityBase {
     }
 
     /**
-     *
      * @param entity
      * @param properties
      */
