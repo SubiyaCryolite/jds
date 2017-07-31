@@ -92,7 +92,7 @@ public class JdsSave implements Callable<Boolean> {
         int step = 0;
         int stepsRequired = batchEntities.size() + 1;
         for (Collection<JdsEntity> current : batchEntities) {
-            saveInner(jdsDb, current, saveContainer, step, onPreSaveEventArguments, onPostSaveEventArguments);
+            saveInner(jdsDb, current, saveContainer, step);
             step++;
             if (jdsDb.isPrintingOutput())
                 System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
@@ -174,7 +174,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param saveContainer
      * @param step
      */
-    private void saveInner(final JdsDb database, final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step, final OnPreSaveEventArguments onPreSaveEventArguments, final OnPostSaveEventArguments onPostSaveEventArguments) throws Exception {
+    private void saveInner(final JdsDb database, final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) throws Exception {
         //fire
         int sequence = 0;
         for (final JdsEntity entity : entities) {
@@ -216,7 +216,6 @@ public class JdsSave implements Callable<Boolean> {
             //always save overviews
             saveOverviews(connection, saveContainer.overviews.get(step));
             //ensure that overviews are submitted before handing over to listeners
-            connection.setAutoCommit(true);
 
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
@@ -227,32 +226,31 @@ public class JdsSave implements Callable<Boolean> {
                 onPreSaveEventArguments.executeBatches();
 
             //properties
-            saveBooleans(connection, writeToPrimaryDataTables, saveContainer.booleans.get(step));
-            saveStrings(connection, writeToPrimaryDataTables, saveContainer.strings.get(step));
-            saveDatesAndDateTimes(connection, writeToPrimaryDataTables, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
-            saveZonedDateTimes(connection, writeToPrimaryDataTables, saveContainer.zonedDateTimes.get(step));
-            saveTimes(connection, writeToPrimaryDataTables, saveContainer.localTimes.get(step));
-            saveLongs(connection, writeToPrimaryDataTables, saveContainer.longs.get(step));
-            saveDoubles(connection, writeToPrimaryDataTables, saveContainer.doubles.get(step));
-            saveIntegers(connection, writeToPrimaryDataTables, saveContainer.integers.get(step));
-            saveFloats(connection, writeToPrimaryDataTables, saveContainer.floats.get(step));
+            saveBooleans(writeToPrimaryDataTables, saveContainer.booleans.get(step));
+            saveStrings(writeToPrimaryDataTables, saveContainer.strings.get(step));
+            saveDatesAndDateTimes(writeToPrimaryDataTables, saveContainer.localDateTimes.get(step), saveContainer.localDates.get(step));
+            saveZonedDateTimes(writeToPrimaryDataTables, saveContainer.zonedDateTimes.get(step));
+            saveTimes(writeToPrimaryDataTables, saveContainer.localTimes.get(step));
+            saveLongs(writeToPrimaryDataTables, saveContainer.longs.get(step));
+            saveDoubles(writeToPrimaryDataTables, saveContainer.doubles.get(step));
+            saveIntegers(writeToPrimaryDataTables, saveContainer.integers.get(step));
+            saveFloats(writeToPrimaryDataTables, saveContainer.floats.get(step));
             //blobs
-            saveBlobs(connection, writeToPrimaryDataTables, saveContainer.blobs.get(step));
+            saveBlobs(writeToPrimaryDataTables, saveContainer.blobs.get(step));
             //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-            saveArrayDates(connection, writeToPrimaryDataTables, saveContainer.dateTimeArrays.get(step));
-            saveArrayStrings(connection, writeToPrimaryDataTables, saveContainer.stringArrays.get(step));
-            saveArrayLongs(connection, writeToPrimaryDataTables, saveContainer.longArrays.get(step));
-            saveArrayDoubles(connection, writeToPrimaryDataTables, saveContainer.doubleArrays.get(step));
-            saveArrayIntegers(connection, writeToPrimaryDataTables, saveContainer.integerArrays.get(step));
-            saveArrayFloats(connection, writeToPrimaryDataTables, saveContainer.floatArrays.get(step));
+            saveArrayDates(writeToPrimaryDataTables, saveContainer.dateTimeArrays.get(step));
+            saveArrayStrings(writeToPrimaryDataTables, saveContainer.stringArrays.get(step));
+            saveArrayLongs(writeToPrimaryDataTables, saveContainer.longArrays.get(step));
+            saveArrayDoubles(writeToPrimaryDataTables, saveContainer.doubleArrays.get(step));
+            saveArrayIntegers(writeToPrimaryDataTables, saveContainer.integerArrays.get(step));
+            saveArrayFloats(writeToPrimaryDataTables, saveContainer.floatArrays.get(step));
             //enums
-            saveEnums(connection, writeToPrimaryDataTables, saveContainer.enums.get(step));
-            saveEnumCollections(connection, writeToPrimaryDataTables, saveContainer.enumCollections.get(step));
+            saveEnums(writeToPrimaryDataTables, saveContainer.enums.get(step));
+            saveEnumCollections(writeToPrimaryDataTables, saveContainer.enumCollections.get(step));
             //objects and object arrays
             //object entity overviews and entity bindings are ALWAYS persisted
             saveAndBindObjects(connection, saveContainer.objects.get(step));
             saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
-            connection.setAutoCommit(true);
 
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
@@ -271,15 +269,13 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param connection
      * @param overviews
      */
-    private void saveOverviews(final Connection connection, final HashSet<JdsEntityOverview> overviews) throws SQLException {
+    private void saveOverviews(Connection connection, final HashSet<JdsEntityOverview> overviews) throws SQLException {
         int record = 0;
         int recordTotal = overviews.size();
         try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverview()) : new NamedPreparedStatement(connection, jdsDb.saveOverview());
              INamedStatement inheritance = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverviewInheritance()) : new NamedPreparedStatement(connection, jdsDb.saveOverviewInheritance())) {
-            connection.setAutoCommit(false);
             for (JdsEntityOverview overview : overviews) {
                 record++;
                 //Entity Overview
@@ -294,26 +290,22 @@ public class JdsSave implements Callable<Boolean> {
                 if (jdsDb.isPrintingOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
-            inheritance.executeBatch();
             upsert.executeBatch();
-            connection.commit();
+            inheritance.executeBatch();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
-        } finally {
-            connection.setAutoCommit(true);
         }
     }
 
     /**
-     * @param connection
      * @param blobProperties
      */
-    private void saveBlobs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
+    private void saveBlobs(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBlobProperty>> blobProperties) {
         int record = 0;
         //log byte array as text???
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveBlob()) : new NamedPreparedStatement(connection, jdsDb.saveBlob());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldBlobValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldBlobValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldBlobValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldBlobValues());
             for (Map.Entry<String, Map<Long, SimpleBlobProperty>> entry : blobProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -339,24 +331,20 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private void saveBooleans(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
+    private void saveBooleans(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleBooleanProperty>> booleanProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -383,23 +371,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param integerProperties
      */
-    private void saveIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
+    private void saveIntegers(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleIntegerProperty>> integerProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -426,23 +410,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param floatProperties
      */
-    private void saveFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
+    private void saveFloats(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleFloatProperty>> floatProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveFloat()) : new NamedPreparedStatement(connection, jdsDb.saveFloat());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldFloatValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldFloatValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldFloatValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldFloatValues());
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -469,23 +449,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param doubleProperties
      */
-    private void saveDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
+    private void saveDoubles(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleDoubleProperty>> doubleProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveDouble()) : new NamedPreparedStatement(connection, jdsDb.saveDouble());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDoubleValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDoubleValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldDoubleValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDoubleValues());
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -512,23 +488,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param longProperties
      */
-    private void saveLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
+    private void saveLongs(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleLongProperty>> longProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveLong()) : new NamedPreparedStatement(connection, jdsDb.saveLong());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldLongValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -555,23 +527,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param stringProperties
      */
-    private void saveStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
+    private void saveStrings(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleStringProperty>> stringProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveString()) : new NamedPreparedStatement(connection, jdsDb.saveString());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldTextValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldTextValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldTextValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldTextValues());
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -598,24 +566,20 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private void saveDatesAndDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
+    private void saveDatesAndDateTimes(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateTimeProperties, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localDateProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveDateTime()) : new NamedPreparedStatement(connection, jdsDb.saveDateTime());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDateTimeValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDateTimeValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldDateTimeValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDateTimeValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -666,23 +630,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param localTimeProperties
      */
-    private void saveTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
+    private void saveTimes(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> localTimeProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveTime()) : new NamedPreparedStatement(connection, jdsDb.saveTime());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -710,23 +670,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param zonedDateProperties
      */
-    private void saveZonedDateTimes(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
+    private void saveZonedDateTimes(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleObjectProperty<Temporal>>> zonedDateProperties) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveZonedDateTime()) : new NamedPreparedStatement(connection, jdsDb.saveZonedDateTime());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldLongValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -753,23 +709,19 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param enums
      */
-    public void saveEnums(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
+    public void saveEnums(boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> enums) {
         int record = 0;
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveInteger()) : new NamedPreparedStatement(connection, jdsDb.saveInteger());
-             INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues())) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enums.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -796,9 +748,6 @@ public class JdsSave implements Callable<Boolean> {
                     log.addBatch();
                 }
             }
-            upsert.executeBatch();
-            log.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -807,17 +756,16 @@ public class JdsSave implements Callable<Boolean> {
     /**
      * Save all dates in one go
      *
-     * @param connection
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDates(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
+    private void saveArrayDates(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<LocalDateTime>>> dateTimeArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDateTimeValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDateTimeValues());
-             PreparedStatement delete = connection.prepareStatement(deleteSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldDateTimeValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDateTimeValues());
+            PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
+            PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<LocalDateTime>>> entry : dateTimeArrayProperties.entrySet()) {
                 record++;
@@ -852,27 +800,22 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayFloats(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
+    private void saveArrayFloats(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Float>>> floatArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldFloatValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldFloatValues());
-             PreparedStatement delete = connection.prepareStatement(deleteSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldFloatValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldFloatValues());
+            PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
+            PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<Float>>> entry : floatArrayProperties.entrySet()) {
                 record++;
@@ -908,27 +851,22 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private void saveArrayIntegers(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
+    private void saveArrayIntegers(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Integer>>> integerArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues());
-             INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
-             INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
+            INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<Integer>>> entry : integerArrayProperties.entrySet()) {
                 record++;
@@ -964,27 +902,22 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayDoubles(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
+    private void saveArrayDoubles(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Double>>> doubleArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldDoubleValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldDoubleValues());
-             INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
-             INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldDoubleValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDoubleValues());
+            INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
+            INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<Double>>> entry : doubleArrayProperties.entrySet()) {
                 record++;
@@ -1020,27 +953,22 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayLongs(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
+    private void saveArrayLongs(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<Long>>> longArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldLongValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldLongValues());
-             PreparedStatement delete = connection.prepareStatement(deleteSql);
-             PreparedStatement insert = connection.prepareStatement(insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldLongValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
+            PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
+            PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<Long>>> entry : longArrayProperties.entrySet()) {
                 record++;
@@ -1075,27 +1003,22 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveArrayStrings(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
+    private void saveArrayStrings(boolean writeToPrimaryDataTables, final Map<String, Map<Long, SimpleListProperty<String>>> stringArrayProperties) {
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldTextValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldTextValues());
-             INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
-             INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldTextValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldTextValues());
+            INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
+            INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
             for (Map.Entry<String, Map<Long, SimpleListProperty<String>>> entry : stringArrayProperties.entrySet()) {
                 record++;
@@ -1131,30 +1054,25 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
     /**
-     * @param connection
      * @param enumStrings
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private void saveEnumCollections(final Connection connection, boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
+    private void saveEnumCollections(boolean writeToPrimaryDataTables, final Map<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> enumStrings) {
         int record = 0;
         int recordTotal = enumStrings.size();
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
-        try (INamedStatement log = jdsDb.isOracleDb() ? new NamedCallableStatement(connection, jdsDb.getSaveOldIntegerValues()) : new NamedPreparedStatement(connection, jdsDb.getSaveOldIntegerValues());
-             INamedStatement delete = new NamedPreparedStatement(connection, deleteSql);
-             INamedStatement insert = new NamedPreparedStatement(connection, insertSql)) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement log = jdsDb.isOracleDb() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.getSaveOldIntegerValues()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
+            INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> entry : enumStrings.entrySet()) {
                 record++;
                 String entityGuid = entry.getKey();
@@ -1189,10 +1107,6 @@ public class JdsSave implements Callable<Boolean> {
                     }
                 }
             }
-            log.executeBatch();
-            delete.executeBatch();
-            insert.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -1241,9 +1155,9 @@ public class JdsSave implements Callable<Boolean> {
         new JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call();
 
         //bind children below
-        try (INamedStatement clearOldBindings = new NamedPreparedStatement(connection, "DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");
-             INamedStatement writeNewBindings = new NamedPreparedStatement(connection, "INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)")) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");
+            INamedStatement writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)");
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid);
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId);
@@ -1255,9 +1169,6 @@ public class JdsSave implements Callable<Boolean> {
                 writeNewBindings.setLong("childEntityId", jdsEntity.getEntityCode());
                 writeNewBindings.addBatch();
             }
-            int[] res2 = clearOldBindings.executeBatch();
-            int[] res3 = writeNewBindings.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -1304,9 +1215,9 @@ public class JdsSave implements Callable<Boolean> {
         new JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call();
 
         //bind children below
-        try (INamedStatement clearOldBindings = new NamedPreparedStatement(connection, "DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");
-             INamedStatement writeNewBindings = new NamedPreparedStatement(connection, "INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)")) {
-            connection.setAutoCommit(false);
+        try {
+            INamedStatement clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");
+            INamedStatement writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)");
             for (JdsParentEntityBinding parentEntityBinding : parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid);
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId);
@@ -1318,13 +1229,8 @@ public class JdsSave implements Callable<Boolean> {
                 writeNewBindings.setLong("childEntityId", jdsEntity.getEntityCode());
                 writeNewBindings.addBatch();
             }
-            int[] res2 = clearOldBindings.executeBatch();
-            int[] res3 = writeNewBindings.executeBatch();
-            connection.commit();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
-        } finally {
-            connection.setAutoCommit(true);
         }
     }
 

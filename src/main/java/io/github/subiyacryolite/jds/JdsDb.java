@@ -1031,7 +1031,7 @@ public abstract class JdsDb implements JdsDbContract {
 
     protected String getSaveOldDoubleValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) \n" +
-                "SELECT :entityGuid, :fieldId, :value\n" +
+                "SELECT :entityGuid, :fieldId, :sequence, :value\n" +
                 "WHERE NOT EXISTS (SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid AND FieldId = :fieldId AND Sequence = :sequence AND DoubleValue = :value)";
     }
 
