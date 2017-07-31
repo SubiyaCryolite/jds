@@ -44,6 +44,8 @@ public class JdsSave implements Callable<Boolean> {
     private final Connection connection;
     private final Collection<? extends JdsEntity> entities;
     private final boolean recursiveInnerCall;
+    private final OnPreSaveEventArguments onPreSaveEventArguments;
+    private final OnPostSaveEventArguments onPostSaveEventArguments;
 
     /**
      * @param jdsDb
@@ -63,11 +65,17 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     private JdsSave(final JdsDb jdsDb, Connection connection, final int batchSize, final Collection<? extends JdsEntity> entities, boolean recursiveInnerCall) {
+        this(jdsDb, connection, batchSize, entities, recursiveInnerCall, new OnPreSaveEventArguments(connection), new OnPostSaveEventArguments(connection));
+    }
+
+    private JdsSave(final JdsDb jdsDb, Connection connection, final int batchSize, final Collection<? extends JdsEntity> entities, boolean recursiveInnerCall, final OnPreSaveEventArguments onPreSaveEventArguments, final OnPostSaveEventArguments onPostSaveEventArguments) {
         this.jdsDb = jdsDb;
         this.batchSize = batchSize;
         this.entities = entities;
         this.connection = connection;
         this.recursiveInnerCall = recursiveInnerCall;
+        this.onPreSaveEventArguments = onPreSaveEventArguments;
+        this.onPostSaveEventArguments = onPostSaveEventArguments;
     }
 
     /**
@@ -84,7 +92,7 @@ public class JdsSave implements Callable<Boolean> {
         int step = 0;
         int stepsRequired = batchEntities.size() + 1;
         for (Collection<JdsEntity> current : batchEntities) {
-            saveInner(jdsDb, current, saveContainer, step);
+            saveInner(jdsDb, current, saveContainer, step, onPreSaveEventArguments, onPostSaveEventArguments);
             step++;
             if (jdsDb.isPrintingOutput())
                 System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
@@ -166,7 +174,7 @@ public class JdsSave implements Callable<Boolean> {
      * @param saveContainer
      * @param step
      */
-    private void saveInner(final JdsDb database, final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) throws Exception {
+    private void saveInner(final JdsDb database, final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step, final OnPreSaveEventArguments onPreSaveEventArguments, final OnPostSaveEventArguments onPostSaveEventArguments) throws Exception {
         //fire
         int sequence = 0;
         for (final JdsEntity entity : entities) {
@@ -210,13 +218,13 @@ public class JdsSave implements Callable<Boolean> {
             //ensure that overviews are submitted before handing over to listeners
             connection.setAutoCommit(true);
 
-            OnPreSaveEventArguments onPreSaveEventArguments = new OnPreSaveEventArguments(connection, step, entities.size());
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPreSave(onPreSaveEventArguments);
                 }
             }
-            onPreSaveEventArguments.executeBatches();
+            if (!recursiveInnerCall)
+                onPreSaveEventArguments.executeBatches();
 
             //properties
             saveBooleans(connection, writeToPrimaryDataTables, saveContainer.booleans.get(step));
@@ -246,13 +254,13 @@ public class JdsSave implements Callable<Boolean> {
             saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
             connection.setAutoCommit(true);
 
-            OnPostSaveEventArguments onPostSaveEventArguments = new OnPostSaveEventArguments(connection, entities.size());
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
                     ((JdsSaveListener) entity).onPostSave(onPostSaveEventArguments);
                 }
             }
-            onPostSaveEventArguments.executeBatches();
+            if (!recursiveInnerCall)
+                onPostSaveEventArguments.executeBatches();
 
         } catch (Exception ex) {
             throw ex;
@@ -1230,7 +1238,7 @@ public class JdsSave implements Callable<Boolean> {
             }
         }
         //save children first
-        new JdsSave(jdsDb, connection, -1, jdsEntities, true).call();
+        new JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call();
 
         //bind children below
         try (INamedStatement clearOldBindings = new NamedPreparedStatement(connection, "DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");
@@ -1293,7 +1301,7 @@ public class JdsSave implements Callable<Boolean> {
             }
         }
         //save children first
-        new JdsSave(jdsDb, connection, -1, jdsEntities, true).call();
+        new JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call();
 
         //bind children below
         try (INamedStatement clearOldBindings = new NamedPreparedStatement(connection, "DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId");

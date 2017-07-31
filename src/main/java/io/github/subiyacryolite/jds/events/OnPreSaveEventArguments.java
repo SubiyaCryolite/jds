@@ -11,15 +11,11 @@ import java.util.LinkedHashMap;
  * Created by ifunga on 13/05/2017.
  */
 public class OnPreSaveEventArguments {
-    private final int outerBatchStep;
-    private final int batchSize;
     private final Connection connection;
     private final LinkedHashMap<String, PreparedStatement> statements;
     private final LinkedHashMap<String, CallableStatement> calls;
 
-    public OnPreSaveEventArguments(Connection connection, int outerBatchStep, int batchSize) {
-        this.outerBatchStep = outerBatchStep;
-        this.batchSize = batchSize;
+    public OnPreSaveEventArguments(Connection connection) {
         this.connection = connection;
         this.statements = new LinkedHashMap<>();
         this.calls = new LinkedHashMap<>();
@@ -27,14 +23,6 @@ public class OnPreSaveEventArguments {
 
     public Connection getConnection() {
         return connection;
-    }
-
-    public int getOuterBatchStep() {
-        return outerBatchStep;
-    }
-
-    public int getBatchSize() {
-        return batchSize;
     }
 
     public synchronized PreparedStatement getOrAddStatement(String key) throws SQLException {
