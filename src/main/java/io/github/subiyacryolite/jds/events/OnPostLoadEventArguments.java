@@ -34,7 +34,7 @@ public class OnPostLoadEventArguments {
         return statements.getOrDefault(key, connection.prepareStatement(key));
     }
 
-    public PreparedStatement getOrAddCall(String key) throws SQLException {
+    public CallableStatement getOrAddCall(String key) throws SQLException {
         return calls.getOrDefault(key, connection.prepareCall(key));
     }
 
