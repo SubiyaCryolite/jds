@@ -38,9 +38,10 @@ public abstract class JdsDbMySql extends JdsDb {
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName);
             preparedStatement.setString("tableSchema", connection.getCatalog());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -56,9 +57,10 @@ public abstract class JdsDbMySql extends JdsDb {
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("procedureName", procedureName);
             preparedStatement.setString("procedureSchema", connection.getCatalog());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -74,9 +76,10 @@ public abstract class JdsDbMySql extends JdsDb {
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("viewName", viewName);
             preparedStatement.setString("viewSchema", connection.getCatalog());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;

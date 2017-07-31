@@ -25,9 +25,10 @@ public abstract class JdsDbOracle extends JdsDb {
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName.toUpperCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -42,9 +43,10 @@ public abstract class JdsDbOracle extends JdsDb {
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, viewName.toUpperCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -59,9 +61,10 @@ public abstract class JdsDbOracle extends JdsDb {
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName.toUpperCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -77,9 +80,10 @@ public abstract class JdsDbOracle extends JdsDb {
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName.toUpperCase());
             preparedStatement.setString("columnName", columnName.toUpperCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;

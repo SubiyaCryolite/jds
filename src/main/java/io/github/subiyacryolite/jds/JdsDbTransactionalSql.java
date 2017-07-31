@@ -37,9 +37,10 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         String sql = "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result ";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -55,9 +56,10 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName);
             preparedStatement.setString(2, "P");
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -73,9 +75,10 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, triggerName);
             preparedStatement.setString(2, "TR");
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -90,9 +93,10 @@ public abstract class JdsDbTransactionalSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, viewName);
             preparedStatement.setString(2, "V");
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;

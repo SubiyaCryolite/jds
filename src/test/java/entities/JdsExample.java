@@ -155,12 +155,12 @@ public class JdsExample extends JdsEntity implements JdsLoadListener, JdsSaveLis
 
     @Override
     public void onPreSave(OnPreSaveEventArguments arguments) {
-        System.out.printf("Pre-Save :: Batch Sequence[%s]. Batch Size [%s]. Outer Batch Step [%s]\n", arguments.getBatchSequence(), arguments.getBatchSize(), arguments.getOuterBatchStep());
+        System.out.printf("Pre-Save :: Batch Size [%s]. Outer Batch Step [%s]\n", arguments.getBatchSize(), arguments.getOuterBatchStep());
     }
 
     @Override
     public void onPostSave(OnPostSaveEventArguments arguments) {
-        System.out.printf("Post-Save :: Batch Sequence[%s]. Batch Size [%s]\n", arguments.getBatchSequence(), arguments.getBatchSize());
+        System.out.printf("Post-Save :: Batch Size [%s]\n", arguments.getBatchSize());
     }
 
     @Override

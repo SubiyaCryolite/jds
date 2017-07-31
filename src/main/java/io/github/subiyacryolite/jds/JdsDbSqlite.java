@@ -36,24 +36,27 @@ public abstract class JdsDbSqlite extends JdsDb {
         String sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;";
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
         return toReturn;
     }
+
     @Override
     public int columnExists(String tableName, String columnName) {
         String sql = String.format("PRAGMA table_info('%s')", tableName);
         try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String column = resultSet.getString("name");
-                if (column.equalsIgnoreCase(columnName))
-                    return 1; //does exist
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String column = resultSet.getString("name");
+                    if (column.equalsIgnoreCase(columnName))
+                        return 1; //does exist
+                }
             }
             return 0;//doesn't exist
         } catch (Exception ex) {

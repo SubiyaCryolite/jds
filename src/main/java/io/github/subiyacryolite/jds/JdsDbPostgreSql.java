@@ -38,9 +38,10 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, connection.getCatalog());
             preparedStatement.setString(2, tableName.toLowerCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -56,9 +57,10 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, connection.getCatalog());
             preparedStatement.setString(2, procedureName.toLowerCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;
@@ -74,9 +76,10 @@ public abstract class JdsDbPostgreSql extends JdsDb {
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, connection.getCatalog());
             preparedStatement.setString(2, viewName.toLowerCase());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;

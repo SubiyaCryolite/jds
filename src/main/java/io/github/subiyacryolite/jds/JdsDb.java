@@ -325,9 +325,10 @@ public abstract class JdsDb implements JdsDbContract {
             preparedStatement.setString("tableName", tableName);
             preparedStatement.setString("columnName", columnName);
             preparedStatement.setString("tableCatalog", connection.getCatalog());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                toReturn = resultSet.getInt("Result");
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    toReturn = resultSet.getInt("Result");
+                }
             }
         } catch (Exception ex) {
             toReturn = 0;

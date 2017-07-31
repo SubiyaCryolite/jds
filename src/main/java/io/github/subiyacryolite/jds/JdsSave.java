@@ -208,14 +208,16 @@ public class JdsSave implements Callable<Boolean> {
             //always save overviews
             saveOverviews(connection, saveContainer.overviews.get(step));
             //ensure that overviews are submitted before handing over to listeners
-            sequence = 0;
             connection.setAutoCommit(true);
+
+            OnPreSaveEventArguments onPreSaveEventArguments = new OnPreSaveEventArguments(connection, step, entities.size());
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
-                    ((JdsSaveListener) entity).onPreSave(new OnPreSaveEventArguments(connection, step, sequence, entities.size()));
+                    ((JdsSaveListener) entity).onPreSave(onPreSaveEventArguments);
                 }
-                sequence++;
             }
+            onPreSaveEventArguments.executeBatches();
+
             //properties
             saveBooleans(connection, writeToPrimaryDataTables, saveContainer.booleans.get(step));
             saveStrings(connection, writeToPrimaryDataTables, saveContainer.strings.get(step));
@@ -242,14 +244,16 @@ public class JdsSave implements Callable<Boolean> {
             //object entity overviews and entity bindings are ALWAYS persisted
             saveAndBindObjects(connection, saveContainer.objects.get(step));
             saveAndBindObjectArrays(connection, saveContainer.objectArrays.get(step));
-            sequence = 0;
             connection.setAutoCommit(true);
+
+            OnPostSaveEventArguments onPostSaveEventArguments = new OnPostSaveEventArguments(connection, entities.size());
             for (final JdsEntity entity : entities) {
                 if (entity instanceof JdsSaveListener) {
-                    ((JdsSaveListener) entity).onPostSave(new OnPostSaveEventArguments(connection, sequence, entities.size()));
+                    ((JdsSaveListener) entity).onPostSave(onPostSaveEventArguments);
                 }
-                sequence++;
             }
+            onPostSaveEventArguments.executeBatches();
+
         } catch (Exception ex) {
             throw ex;
         } finally {
