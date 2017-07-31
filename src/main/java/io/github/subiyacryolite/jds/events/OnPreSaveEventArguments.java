@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Created by ifunga on 13/05/2017.
@@ -13,15 +14,15 @@ public class OnPreSaveEventArguments {
     private final int outerBatchStep;
     private final int batchSize;
     private final Connection connection;
-    private final HashMap<String, PreparedStatement> statements;
-    private final HashMap<String, CallableStatement> calls;
+    private final LinkedHashMap<String, PreparedStatement> statements;
+    private final LinkedHashMap<String, CallableStatement> calls;
 
     public OnPreSaveEventArguments(Connection connection, int outerBatchStep, int batchSize) {
         this.outerBatchStep = outerBatchStep;
         this.batchSize = batchSize;
         this.connection = connection;
-        this.statements = new HashMap<>();
-        this.calls = new HashMap<>();
+        this.statements = new LinkedHashMap<>();
+        this.calls = new LinkedHashMap<>();
     }
 
     public Connection getConnection() {
