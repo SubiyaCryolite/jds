@@ -15,6 +15,6 @@ CREATE OR REPLACE PROCEDURE procUpdateOldTextValues(p_EntityGuid IN NVARCHAR2, p
 AS
 BEGIN
 	MERGE INTO JdsStoreOldFieldValues dest
-	USING DUAL ON (p_EntityGuid = EntityGuid AND p_FieldId = FieldId AND p_Sequence = Sequence AND p_Value = TextValue)
+	USING DUAL ON (p_EntityGuid = EntityGuid AND p_FieldId = FieldId AND p_Sequence = Sequence) --oracle cant compare LOB types so always update
 	WHEN NOT MATCHED THEN INSERT(EntityGuid, FieldId, Sequence, TextValue) VALUES(p_EntityGuid, p_FieldId, p_Sequence, p_Value);
 END procUpdateOldTextValues;

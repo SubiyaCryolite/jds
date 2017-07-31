@@ -16,6 +16,16 @@ public class ViewTests extends BaseTestConfig {
         createFlatTableMysql();
         createFlatTablePostgres();
         createFlatTableTSql();
+        createFlatTableOracle();
+    }
+
+    @Test
+    public void createFlatTableOracle() throws SQLException, ClassNotFoundException {
+        initialiseOracleBackend();
+        for (Class<? extends JdsEntity> entry : jdsDb.getMappedClasses()) {
+            boolean delete = JdsView.delete(entry, jdsDb);
+            boolean create = JdsView.create(entry, jdsDb);
+        }
     }
 
     @Test

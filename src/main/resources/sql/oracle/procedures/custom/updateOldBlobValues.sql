@@ -11,10 +11,10 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE OR REPLACE PROCEDURE procUpdateOldBlobValues(p_EntityGuid IN NVARCHAR2, p_FieldId IN NUMBER, p_Sequence IN NUMBER, p_Value IN BLOB)
+create or replace PROCEDURE procUpdateOldBlobValues( p_Value IN BLOB, p_EntityGuid IN NVARCHAR2, p_FieldId IN NUMBER, p_Sequence IN NUMBER)
 AS
 BEGIN
 	MERGE INTO JdsStoreOldFieldValues dest
-	USING DUAL ON (p_EntityGuid = EntityGuid AND p_FieldId = FieldId AND p_Sequence = Sequence AND p_Value = BlobValue)
+	USING DUAL ON (p_EntityGuid = EntityGuid AND p_FieldId = FieldId AND p_Sequence = Sequence) --oracle cant compare LOB types so always update
 	WHEN NOT MATCHED THEN INSERT(EntityGuid, FieldId, Sequence, BlobValue) VALUES(p_EntityGuid, p_FieldId, p_Sequence, p_Value);
 END procUpdateOldBlobValues;

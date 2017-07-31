@@ -282,7 +282,7 @@ public class JdsView {
         stringBuilder.append("\t\tJOIN JdsRefFieldTypes sFieldType on sField.FieldId = sFieldType.TypeId \n");
         stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId in (%s) and sFieldType.TypeName = '%s')\n", entityHierarchy, fieldType));
         stringBuilder.append("\t) AS t\n");
-        stringBuilder.append("\tGROUP BY t.EntityGuid");
+        stringBuilder.append("\tGROUP BY t.EntityGuid;");
 
         String sqlToExecute = jdsDb.createOrAlterView(viewName, stringBuilder.toString());
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlToExecute)) {
