@@ -214,7 +214,7 @@ public class JdsSave implements Callable<Boolean> {
         try {
             boolean writeToPrimaryDataTables = jdsDb.isWritingToPrimaryDataTables();
             //always save overviews
-            saveOverviews(connection, saveContainer.overviews.get(step));
+            saveOverviews(saveContainer.overviews.get(step));
             //ensure that overviews are submitted before handing over to listeners
 
             for (final JdsEntity entity : entities) {
@@ -222,8 +222,6 @@ public class JdsSave implements Callable<Boolean> {
                     ((JdsSaveListener) entity).onPreSave(onPreSaveEventArguments);
                 }
             }
-            if (!recursiveInnerCall)
-                onPreSaveEventArguments.executeBatches();
 
             //properties
             saveBooleans(writeToPrimaryDataTables, saveContainer.booleans.get(step));
@@ -257,9 +255,11 @@ public class JdsSave implements Callable<Boolean> {
                     ((JdsSaveListener) entity).onPostSave(onPostSaveEventArguments);
                 }
             }
-            if (!recursiveInnerCall)
+            //at this point embedded objects will be captured as well
+            if (!recursiveInnerCall) {
+                onPreSaveEventArguments.executeBatches();
                 onPostSaveEventArguments.executeBatches();
-
+            }
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -271,11 +271,12 @@ public class JdsSave implements Callable<Boolean> {
     /**
      * @param overviews
      */
-    private void saveOverviews(Connection connection, final HashSet<JdsEntityOverview> overviews) throws SQLException {
+    private void saveOverviews(final HashSet<JdsEntityOverview> overviews) throws SQLException {
         int record = 0;
         int recordTotal = overviews.size();
-        try (INamedStatement upsert = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverview()) : new NamedPreparedStatement(connection, jdsDb.saveOverview());
-             INamedStatement inheritance = jdsDb.supportsStatements() ? new NamedCallableStatement(connection, jdsDb.saveOverviewInheritance()) : new NamedPreparedStatement(connection, jdsDb.saveOverviewInheritance())) {
+        try {
+            INamedStatement upsert = jdsDb.supportsStatements() ? onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) : onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview());
+            INamedStatement inheritance = jdsDb.supportsStatements() ? onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) : onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance());
             for (JdsEntityOverview overview : overviews) {
                 record++;
                 //Entity Overview
@@ -290,8 +291,6 @@ public class JdsSave implements Callable<Boolean> {
                 if (jdsDb.isPrintingOutput())
                     System.out.printf("Saving Overview [%s of %s]\n", record, recordTotal);
             }
-            upsert.executeBatch();
-            inheritance.executeBatch();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
