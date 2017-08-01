@@ -22,10 +22,7 @@ import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -44,8 +41,8 @@ public class JdsSave implements Callable<Boolean> {
     private final Connection connection;
     private final Collection<? extends JdsEntity> entities;
     private final boolean recursiveInnerCall;
-    private final OnPreSaveEventArguments onPreSaveEventArguments;
-    private final OnPostSaveEventArguments onPostSaveEventArguments;
+    private OnPreSaveEventArguments onPreSaveEventArguments;
+    private OnPostSaveEventArguments onPostSaveEventArguments;
 
     /**
      * @param jdsDb
