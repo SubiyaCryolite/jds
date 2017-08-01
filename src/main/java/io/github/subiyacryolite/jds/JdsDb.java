@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -353,8 +352,8 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     protected final void executeSqlFromString(String innerSql) {
-        try (Connection connection = getConnection(); Statement innerStmt = connection.createStatement();) {
-            innerStmt.executeUpdate(innerSql);
+        try (Connection connection = getConnection(); PreparedStatement innerStmt = connection.prepareStatement(innerSql)) {
+            innerStmt.execute();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
