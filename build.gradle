@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'io.github.subiyacryolite'
-version = '3.1.8' //majorv.minorv.bugfixincrement
+version = '3.1.9' //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
