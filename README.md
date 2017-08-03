@@ -417,7 +417,8 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/DB_NAME?autoReconnect=true&useSSL=false", "DB_USER", "DB_PASSWORD");
+        //note you MUST enabe support for multi queries in the connection string
+        return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/DB_NAME?allowMultiQueries=true&useSSL=false&rewriteBatchedStatements=true", "DB_USER", "DB_PASSWORD");
     }
 }
 
