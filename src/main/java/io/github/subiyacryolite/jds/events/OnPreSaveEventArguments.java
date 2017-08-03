@@ -13,12 +13,10 @@ import java.util.LinkedHashMap;
 public class OnPreSaveEventArguments {
     private final Connection connection;
     private final LinkedHashMap<String, PreparedStatement> statements;
-    private final LinkedHashMap<String, INamedStatement> namedStatements;
 
     public OnPreSaveEventArguments(Connection connection) {
         this.connection = connection;
         this.statements = new LinkedHashMap<>();
-        this.namedStatements = new LinkedHashMap<>();
     }
 
     public Connection getConnection() {
@@ -38,26 +36,25 @@ public class OnPreSaveEventArguments {
     }
 
     public synchronized INamedStatement getOrAddNamedStatement(String key) throws SQLException {
-        if (!namedStatements.containsKey(key))
-            namedStatements.put(key, new NamedPreparedStatement(connection, key));
-        return namedStatements.get(key);
+        if (!statements.containsKey(key))
+            statements.put(key, new NamedPreparedStatement(connection, key));
+        return (INamedStatement) statements.get(key);
     }
 
     public synchronized INamedStatement getOrAddNamedCall(String key) throws SQLException {
-        if (!namedStatements.containsKey(key))
-            namedStatements.put(key, new NamedCallableStatement(connection, key));
-        return namedStatements.get(key);
+        if (!statements.containsKey(key))
+            statements.put(key, new NamedCallableStatement(connection, key));
+        return (INamedStatement) statements.get(key);
     }
 
     public void executeBatches() throws SQLException {
         //start with named statements
-        for (INamedStatement preparedStatement : namedStatements.values()) {
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        }
+        connection.setAutoCommit(false);
         for (Statement preparedStatement : statements.values()) {
             preparedStatement.executeBatch();
             preparedStatement.close();
         }
+        connection.commit();
+        connection.setAutoCommit(true);
     }
 }

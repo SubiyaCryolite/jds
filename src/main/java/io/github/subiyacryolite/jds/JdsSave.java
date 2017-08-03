@@ -110,7 +110,7 @@ public class JdsSave implements Callable<Boolean> {
         int iteration = 0;
         if (batchSize > 0) {
             for (JdsEntity jdsEntity : entities) {
-                if (currentBatch == batchSize) {
+                if (iteration == batchSize) {
                     currentBatch++;
                     iteration = 0;
                 }
