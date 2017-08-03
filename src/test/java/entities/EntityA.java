@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
 @JdsEntityAnnotation(entityId = 1000, entityName = "entitya")
 public class EntityA extends JdsEntity {
     private static final JdsField ENTITY_A_FIELD = new JdsField(5002, "entity_a_field", JdsFieldType.TEXT);
-    private final SimpleStringProperty field = new SimpleStringProperty("C");
+    private final SimpleStringProperty field = new SimpleStringProperty("A");
 
     public EntityA() {
         map(ENTITY_A_FIELD, field);

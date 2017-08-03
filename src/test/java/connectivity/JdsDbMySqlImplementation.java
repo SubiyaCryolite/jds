@@ -10,6 +10,7 @@ import io.github.subiyacryolite.jds.JdsDbMySql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  *
@@ -20,7 +21,15 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?autoReconnect=true&allowMultiQueries=true&rewriteBatchedStatements=true", "root", "p@nkP#55W0rd");
-        //return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?autoReconnect=true&allowMultiQueries=true&rewriteBatchedStatements=true", "root", "");
+        Properties properties = new Properties();
+        properties.put("user", "root");
+        properties.put("password", "p@nkP#55W0rd");
+        //info.put("password", "");
+        properties.put("autoReconnect","true");
+        properties.put("allowMultiQueries","false");
+        properties.put("useSSL","false");
+        properties.put("rewriteBatchedStatements","false");//known to cause problems with saves
+        properties.put("continueBatchOnError","true");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?", properties);
     }
 }

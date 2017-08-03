@@ -64,14 +64,7 @@ public enum JdsComponent {
     MAP_ENUM_VALUES("procRefEnumValues", ""),
     TSQL_CASCADE_ENTITY_BINDING("triggerEntityBindingCascade", ""),
     MAP_FIELD_NAMES("procBindFieldNames", ""),
-    MAP_FIELD_TYPES("procBindFieldTypes", ""),
-    ORA_SAVE_OLD_TEXT_VALUES("procUpdateOldTextValues", ""),
-    ORA_SAVE_OLD_DOUBLE_VALUES("procUpdateOldDoubleValues", ""),
-    ORA_SAVE_OLD_LONG_VALUES("procUpdateOldLongValues", ""),
-    ORA_SAVE_OLD_INTEGER_VALUES("procUpdateOldIntegerValues", ""),
-    ORA_SAVE_OLD_FLOAT_VALUES("procUpdateOldFloatValues", ""),
-    ORA_SAVE_OLD_DATE_TIME_VALUES("procUpdateOldDateTimeValues", ""),
-    ORA_SAVE_OLD_BLOB_VALUES("procUpdateOldBlobValues", "");
+    MAP_FIELD_TYPES("procBindFieldTypes", "");
 
     private String name, prefix;
 

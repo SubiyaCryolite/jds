@@ -16,7 +16,7 @@ public class BulkTests extends BaseTestConfig {
             entry.setEntityGuid(String.format("guidBulk%s", i));
             memObjects.add(entry);
         }
-        JdsSave jdsSave = new JdsSave(jdsDb, 1000, memObjects);
+        JdsSave jdsSave = new JdsSave(jdsDb, 400, memObjects);
         jdsSave.call();
         System.out.printf("Saved %s\n", memObjects);
     }
@@ -28,32 +28,32 @@ public class BulkTests extends BaseTestConfig {
 
     @Test
     public void saveAndLoadPostreSqlImplementation() throws Exception {
-        initialisePostgeSqlBackend();//20ms
+        initialisePostgeSqlBackend();//??
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadOracleSqlImplementation() throws Exception {
-        initialiseOracleBackend();//28ms
+        initialiseOracleBackend();//??
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadTsqlImplementation() throws Exception {
-        initialiseTSqlBackend();//32ms
+        initialiseTSqlBackend();//11ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadSqliteImplementation() throws Exception {
-        initialiseSqlLiteBackend();//30ms
+        initialiseSqlLiteBackend();//3ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadMySqlImplementation() throws Exception {
         initialiseMysqlBackend();
-        saveAndLoad();//31ms
+        saveAndLoad();//19ms
     }
 
     @Test

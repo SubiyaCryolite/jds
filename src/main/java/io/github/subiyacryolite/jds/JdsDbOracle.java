@@ -249,14 +249,6 @@ public abstract class JdsDbOracle extends JdsDb {
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE);
         prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE);
-        //============================ Oracle Specific Procedures======================================
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_TEXT_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_DOUBLE_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_LONG_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_INTEGER_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_FLOAT_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_DATE_TIME_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.ORA_SAVE_OLD_BLOB_VALUES);
     }
 
     @Override
@@ -319,62 +311,6 @@ public abstract class JdsDbOracle extends JdsDb {
             case MAP_ENTITY_INHERITANCE:
                 executeSqlFromFile("sql/oracle/procedures/procBindParentToChild.sql");
                 break;
-            case ORA_SAVE_OLD_TEXT_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldTextValues.sql");
-                break;
-            case ORA_SAVE_OLD_DOUBLE_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldDoubleValues.sql");
-                break;
-            case ORA_SAVE_OLD_LONG_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldLongValues.sql");
-                break;
-            case ORA_SAVE_OLD_INTEGER_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldIntegerValues.sql");
-                break;
-            case ORA_SAVE_OLD_FLOAT_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldFloatValues.sql");
-                break;
-            case ORA_SAVE_OLD_DATE_TIME_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldDateTimeValues.sql");
-                break;
-            case ORA_SAVE_OLD_BLOB_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/custom/updateOldBlobValues.sql");
-                break;
         }
-    }
-
-    @Override
-    protected String getSaveOldTextValues() {
-        return "{call procUpdateOldTextValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldDoubleValues() {
-        return "{call procUpdateOldDoubleValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldLongValues() {
-        return "{call procUpdateOldLongValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldIntegerValues() {
-        return "{call procUpdateOldIntegerValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldFloatValues() {
-        return "{call procUpdateOldFloatValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldDateTimeValues() {
-        return "{call procUpdateOldDateTimeValues(:entityGuid, :fieldId, :sequence, :value)}";
-    }
-
-    @Override
-    protected String getSaveOldBlobValues() {
-        return "{call procUpdateOldBlobValues(:entityGuid, :fieldId, :sequence, :value)}";
     }
 }
