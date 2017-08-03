@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
  */
 public class OnPostSaveEventArguments {
     private final Connection connection;
-    private final LinkedHashMap<String, PreparedStatement> statements;
+    private final LinkedHashMap<String, Statement> statements;
 
     public OnPostSaveEventArguments(Connection connection) {
         this.connection = connection;
@@ -27,13 +27,13 @@ public class OnPostSaveEventArguments {
     public synchronized PreparedStatement getOrAddStatement(String key) throws SQLException {
         if (!statements.containsKey(key))
             statements.put(key, connection.prepareStatement(key));
-        return statements.get(key);
+        return (PreparedStatement) statements.get(key);
     }
 
-    public synchronized PreparedStatement getOrAddCall(String key) throws SQLException {
+    public synchronized CallableStatement getOrAddCall(String key) throws SQLException {
         if (!statements.containsKey(key))
             statements.put(key, connection.prepareCall(key));
-        return statements.get(key);
+        return (CallableStatement) statements.get(key);
     }
 
     public synchronized INamedStatement getOrAddNamedStatement(String key) throws SQLException {

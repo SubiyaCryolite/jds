@@ -1,15 +1,12 @@
 package com.javaworld;
 
 import java.io.InputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 
 /**
  * Created by ifunga on 20/07/2017.
  */
-public interface INamedStatement extends PreparedStatement {
+public interface INamedStatement extends Statement {
 
     void setString(String name, String value) throws SQLException;
 

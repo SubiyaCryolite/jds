@@ -79,14 +79,12 @@ public class NamedCallableStatement implements INamedStatement {
                     String name = query.substring(i + 1, j);
                     c = '?'; // replace the parameter with a question mark
                     i += name.length(); // skip past the end if the parameter
-
                     List indexList = (List) paramMap.get(name);
                     if (indexList == null) {
                         indexList = new LinkedList();
                         paramMap.put(name, indexList);
                     }
                     indexList.add(new Integer(index));
-
                     index++;
                 }
             }
@@ -105,7 +103,6 @@ public class NamedCallableStatement implements INamedStatement {
             }
             entry.setValue(indexes);
         }
-
         return parsedQuery.toString();
     }
 
@@ -338,6 +335,17 @@ public class NamedCallableStatement implements INamedStatement {
         return callableStatement.executeUpdate();
     }
 
+    //==================================================================================================================
+
+    @Override
+    public ResultSet executeQuery(String sql) throws SQLException {
+        return callableStatement.executeQuery(sql);
+    }
+
+    @Override
+    public int executeUpdate(String sql) throws SQLException {
+        return callableStatement.executeUpdate(sql);
+    }
 
     /**
      * Closes the statement.
@@ -349,6 +357,120 @@ public class NamedCallableStatement implements INamedStatement {
         callableStatement.close();
     }
 
+    @Override
+    public int getMaxFieldSize() throws SQLException {
+        return callableStatement.getMaxFieldSize();
+    }
+
+    @Override
+    public void setMaxFieldSize(int max) throws SQLException {
+        callableStatement.setMaxFieldSize(max);
+    }
+
+    @Override
+    public int getMaxRows() throws SQLException {
+        return callableStatement.getMaxRows();
+    }
+
+    @Override
+    public void setMaxRows(int max) throws SQLException {
+        callableStatement.setMaxRows(max);
+    }
+
+    @Override
+    public void setEscapeProcessing(boolean enable) throws SQLException {
+        callableStatement.setEscapeProcessing(enable);
+    }
+
+    @Override
+    public int getQueryTimeout() throws SQLException {
+        return callableStatement.getQueryTimeout();
+    }
+
+    @Override
+    public void setQueryTimeout(int seconds) throws SQLException {
+        callableStatement.setQueryTimeout(seconds);
+    }
+
+    @Override
+    public void cancel() throws SQLException {
+        callableStatement.cancel();
+    }
+
+    @Override
+    public SQLWarning getWarnings() throws SQLException {
+        return callableStatement.getWarnings();
+    }
+
+    @Override
+    public void clearWarnings() throws SQLException {
+        callableStatement.clearWarnings();
+    }
+
+    @Override
+    public void setCursorName(String name) throws SQLException {
+        callableStatement.setCursorName(name);
+    }
+
+    @Override
+    public boolean execute(String sql) throws SQLException {
+        return callableStatement.execute(sql);
+    }
+
+    @Override
+    public ResultSet getResultSet() throws SQLException {
+        return callableStatement.getResultSet();
+    }
+
+    @Override
+    public int getUpdateCount() throws SQLException {
+        return callableStatement.getUpdateCount();
+    }
+
+    @Override
+    public boolean getMoreResults() throws SQLException {
+        return callableStatement.getMoreResults();
+    }
+
+    @Override
+    public void setFetchDirection(int direction) throws SQLException {
+        callableStatement.setFetchDirection(direction);
+    }
+
+    @Override
+    public int getFetchDirection() throws SQLException {
+        return callableStatement.getFetchDirection();
+    }
+
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+        callableStatement.setFetchSize(rows);
+    }
+
+    @Override
+    public int getFetchSize() throws SQLException {
+        return callableStatement.getFetchSize();
+    }
+
+    @Override
+    public int getResultSetConcurrency() throws SQLException {
+        return callableStatement.getResultSetConcurrency();
+    }
+
+    @Override
+    public int getResultSetType() throws SQLException {
+        return callableStatement.getResultSetType();
+    }
+
+    @Override
+    public void addBatch(String sql) throws SQLException {
+        callableStatement.addBatch(sql);
+    }
+
+    @Override
+    public void clearBatch() throws SQLException {
+        callableStatement.clearBatch();
+    }
 
     /**
      * Adds the current set of parameters as a batch entry.
@@ -370,5 +492,90 @@ public class NamedCallableStatement implements INamedStatement {
      */
     public int[] executeBatch() throws SQLException {
         return callableStatement.executeBatch();
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        return callableStatement.getConnection();
+    }
+
+    @Override
+    public boolean getMoreResults(int current) throws SQLException {
+        return callableStatement.getMoreResults(current);
+    }
+
+    @Override
+    public ResultSet getGeneratedKeys() throws SQLException {
+        return callableStatement.getResultSet();
+    }
+
+    @Override
+    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
+        return callableStatement.executeUpdate(sql, autoGeneratedKeys);
+    }
+
+    @Override
+    public int executeUpdate(String sql, int[] columnIndexes) throws SQLException {
+        return callableStatement.executeUpdate(sql, columnIndexes);
+    }
+
+    @Override
+    public int executeUpdate(String sql, String[] columnNames) throws SQLException {
+        return callableStatement.executeUpdate(sql, columnNames);
+    }
+
+    @Override
+    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
+        return callableStatement.execute(sql, autoGeneratedKeys);
+    }
+
+    @Override
+    public boolean execute(String sql, int[] columnIndexes) throws SQLException {
+        return callableStatement.execute(sql, columnIndexes);
+    }
+
+    @Override
+    public boolean execute(String sql, String[] columnNames) throws SQLException {
+        return callableStatement.execute(sql, columnNames);
+    }
+
+    @Override
+    public int getResultSetHoldability() throws SQLException {
+        return callableStatement.getResultSetHoldability();
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return callableStatement.isClosed();
+    }
+
+    @Override
+    public void setPoolable(boolean poolable) throws SQLException {
+        callableStatement.setPoolable(poolable);
+    }
+
+    @Override
+    public boolean isPoolable() throws SQLException {
+        return callableStatement.isPoolable();
+    }
+
+    @Override
+    public void closeOnCompletion() throws SQLException {
+        callableStatement.closeOnCompletion();
+    }
+
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        return callableStatement.isCloseOnCompletion();
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return callableStatement.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return callableStatement.isWrapperFor(iface);
     }
 }

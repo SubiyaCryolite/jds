@@ -4,10 +4,7 @@ import com.javaworld.INamedStatement;
 import com.javaworld.NamedCallableStatement;
 import com.javaworld.NamedPreparedStatement;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -19,7 +16,7 @@ public class OnPreLoadEventArguments {
     private final int batchSequence;
     private final int batchSize;
     private final Connection connection;
-    private final LinkedHashMap<String, PreparedStatement> statements;
+    private final LinkedHashMap<String, Statement> statements;
 
     public OnPreLoadEventArguments(Connection connection, String entityGuid, int batchSequence, int batchSize) {
         this.entityGuid = entityGuid;
@@ -48,7 +45,7 @@ public class OnPreLoadEventArguments {
     public synchronized PreparedStatement getOrAddStatement(String key) throws SQLException {
         if (!statements.containsKey(key))
             statements.put(key, connection.prepareStatement(key));
-        return statements.get(key);
+        return (PreparedStatement)statements.get(key);
     }
 
     public synchronized CallableStatement getOrAddCall(String key) throws SQLException {
@@ -71,7 +68,7 @@ public class OnPreLoadEventArguments {
 
     public void executeBatches() throws SQLException {
         connection.setAutoCommit(false);
-        for (PreparedStatement preparedStatement : statements.values()) {
+        for (Statement preparedStatement : statements.values()) {
             preparedStatement.executeBatch();
             preparedStatement.close();
         }

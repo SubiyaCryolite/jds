@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
  */
 public class OnPreSaveEventArguments {
     private final Connection connection;
-    private final LinkedHashMap<String, PreparedStatement> statements;
+    private final LinkedHashMap<String, Statement> statements;
 
     public OnPreSaveEventArguments(Connection connection) {
         this.connection = connection;
@@ -26,13 +26,13 @@ public class OnPreSaveEventArguments {
     public synchronized PreparedStatement getOrAddStatement(String key) throws SQLException {
         if (!statements.containsKey(key))
             statements.put(key, connection.prepareStatement(key));
-        return statements.get(key);
+        return (PreparedStatement) statements.get(key);
     }
 
     public synchronized PreparedStatement getOrAddCall(String key) throws SQLException {
         if (!statements.containsKey(key))
             statements.put(key, connection.prepareCall(key));
-        return statements.get(key);
+        return (PreparedStatement) statements.get(key);
     }
 
     public synchronized INamedStatement getOrAddNamedStatement(String key) throws SQLException {
