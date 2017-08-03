@@ -48,7 +48,6 @@ public class OnPreSaveEventArguments {
     }
 
     public void executeBatches() throws SQLException {
-        //start with named statements
         connection.setAutoCommit(false);
         for (Statement preparedStatement : statements.values()) {
             preparedStatement.executeBatch();

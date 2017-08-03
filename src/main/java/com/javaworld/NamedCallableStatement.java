@@ -79,12 +79,14 @@ public class NamedCallableStatement implements INamedStatement {
                     String name = query.substring(i + 1, j);
                     c = '?'; // replace the parameter with a question mark
                     i += name.length(); // skip past the end if the parameter
+
                     List indexList = (List) paramMap.get(name);
                     if (indexList == null) {
                         indexList = new LinkedList();
                         paramMap.put(name, indexList);
                     }
                     indexList.add(new Integer(index));
+
                     index++;
                 }
             }
@@ -103,6 +105,7 @@ public class NamedCallableStatement implements INamedStatement {
             }
             entry.setValue(indexes);
         }
+
         return parsedQuery.toString();
     }
 
@@ -154,7 +157,6 @@ public class NamedCallableStatement implements INamedStatement {
             callableStatement.setBytes(indexes[i], value);
         }
     }
-
     /**
      * Sets a parameter.
      *
@@ -335,17 +337,6 @@ public class NamedCallableStatement implements INamedStatement {
         return callableStatement.executeUpdate();
     }
 
-    //==================================================================================================================
-
-    @Override
-    public ResultSet executeQuery(String sql) throws SQLException {
-        return callableStatement.executeQuery(sql);
-    }
-
-    @Override
-    public int executeUpdate(String sql) throws SQLException {
-        return callableStatement.executeUpdate(sql);
-    }
 
     /**
      * Closes the statement.
@@ -355,6 +346,40 @@ public class NamedCallableStatement implements INamedStatement {
      */
     public void close() throws SQLException {
         callableStatement.close();
+    }
+
+
+    /**
+     * Adds the current set of parameters as a batch entry.
+     *
+     * @throws SQLException if something went wrong
+     */
+    public void addBatch() throws SQLException {
+        callableStatement.addBatch();
+    }
+
+
+    /**
+     * Executes all of the batched statements.
+     * <p>
+     * See {@link Statement#executeBatch()} for details.
+     *
+     * @return update counts for each statement
+     * @throws SQLException if something went wrong
+     */
+    public int[] executeBatch() throws SQLException {
+        return callableStatement.executeBatch();
+    }
+    //==========================================================
+
+    @Override
+    public ResultSet executeQuery(String sql) throws SQLException {
+        return callableStatement.executeQuery(sql);
+    }
+
+    @Override
+    public int executeUpdate(String sql) throws SQLException {
+        return callableStatement.executeUpdate(sql);
     }
 
     @Override
@@ -472,27 +497,7 @@ public class NamedCallableStatement implements INamedStatement {
         callableStatement.clearBatch();
     }
 
-    /**
-     * Adds the current set of parameters as a batch entry.
-     *
-     * @throws SQLException if something went wrong
-     */
-    public void addBatch() throws SQLException {
-        callableStatement.addBatch();
-    }
 
-
-    /**
-     * Executes all of the batched statements.
-     * <p>
-     * See {@link Statement#executeBatch()} for details.
-     *
-     * @return update counts for each statement
-     * @throws SQLException if something went wrong
-     */
-    public int[] executeBatch() throws SQLException {
-        return callableStatement.executeBatch();
-    }
 
     @Override
     public Connection getConnection() throws SQLException {

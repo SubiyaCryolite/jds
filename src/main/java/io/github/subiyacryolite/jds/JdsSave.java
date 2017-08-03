@@ -87,12 +87,12 @@ public class JdsSave implements Callable<Boolean> {
         List<Collection<JdsEntity>> batchEntities = new ArrayList<>();
         setupBatches(batchSize, entities, saveContainer, batchEntities);
         int step = 0;
-        int stepsRequired = batchEntities.size() + 1;
+        int steps = batchEntities.size();
         for (Collection<JdsEntity> current : batchEntities) {
-            saveInner(jdsDb, current, saveContainer, step);
+            saveInner(current, saveContainer, step, steps);
             step++;
             if (jdsDb.isPrintingOutput())
-                System.out.printf("Processed batch [%s of %s]\n", step, stepsRequired);
+                System.out.printf("Processed batch [%s of %s]\n", step, steps + 1);
         }
         return true;
     }
@@ -166,12 +166,11 @@ public class JdsSave implements Callable<Boolean> {
     }
 
     /**
-     * @param database
      * @param entities
      * @param saveContainer
      * @param step
      */
-    private void saveInner(final JdsDb database, final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step) throws Exception {
+    private void saveInner(final Collection<JdsEntity> entities, final JdsSaveContainer saveContainer, final int step, final int steps) throws Exception {
         //fire
         int sequence = 0;
         for (final JdsEntity entity : entities) {
@@ -208,6 +207,7 @@ public class JdsSave implements Callable<Boolean> {
             sequence++;
         }
         //share one connection for raw saves, helps with performance
+        boolean finalStep = !recursiveInnerCall && (step == (steps - 1));
         try {
             boolean writeToPrimaryDataTables = jdsDb.isWritingToPrimaryDataTables();
             //always save overviews
@@ -253,14 +253,14 @@ public class JdsSave implements Callable<Boolean> {
                 }
             }
             //at this point embedded objects will be captured as well
-            if (!recursiveInnerCall) {
+            if (finalStep) {
                 onPreSaveEventArguments.executeBatches();
                 onPostSaveEventArguments.executeBatches();
             }
         } catch (Exception ex) {
             throw ex;
         } finally {
-            if (!recursiveInnerCall)
+            if (finalStep)
                 connection.close();
         }
     }
