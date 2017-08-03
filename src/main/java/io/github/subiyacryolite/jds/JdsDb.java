@@ -1023,30 +1023,30 @@ public abstract class JdsDb implements JdsDbContract {
     public abstract String createOrAlterView(String viewName, String viewSql);
 
     protected String getSaveOldTextValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldDoubleValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldLongValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldIntegerValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldFloatValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldDateTimeValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
     protected String getSaveOldBlobValues() {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value);";
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 }

@@ -25,8 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static io.github.subiyacryolite.jds.JdsTableLookup.getTablePrefix;
 import static io.github.subiyacryolite.jds.JdsTableLookup.getTable;
+import static io.github.subiyacryolite.jds.JdsTableLookup.getTablePrefix;
 
 /**
  * This class is used to perform basic searches based on defined parameters
@@ -165,9 +165,17 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
     }
 
     //========================================================CONDITIONS START HERE
+
+    private boolean isLob(JdsField jdsField) {
+        return jdsField.getType() == JdsFieldType.TEXT || jdsField.getType() == JdsFieldType.BLOB;
+    }
+
     public JdsFilter isNotNull(JdsField jdsField) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value IS NOT NULL)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s IS NOT NULL)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add("");
         return this;
@@ -175,7 +183,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter isNull(JdsField jdsField) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value IS NULL)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s IS NULL)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add("");
         return this;
@@ -183,7 +194,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter between(JdsField jdsField, Object value1, Object value2) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND (%s.Value BETWEEN ? AND ?) )", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND (%s BETWEEN ? AND ?) )",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value1);
         currentValues.add(value2);
@@ -192,7 +206,9 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter notLessThan(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value !< ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s !< ?)",
+                getTablePrefix(jdsField.getType()), jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -200,7 +216,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter lessThan(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value < ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s < ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -208,7 +227,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter lessThanOrEqualTo(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value < ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s < ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -216,7 +238,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter notGreaterThan(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value !> ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s !> ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -224,7 +249,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter greaterThan(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value > ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s > ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -232,7 +260,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter greaterThanOrEqualTo(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value >= ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s >= ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -240,7 +271,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter equals(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value = ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s = ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -248,7 +282,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter notEquals(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value <> ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s <> ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -256,7 +293,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter like(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s LIKE ?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -264,7 +304,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter startsLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE ?%)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s LIKE ?%)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -272,7 +315,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter endsLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value LIKE %?)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s LIKE %?)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -280,7 +326,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter notLike(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT LIKE %)", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s NOT LIKE %)",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         return this;
@@ -288,7 +337,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter in(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s IN (?))",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         currentValues.add(value);
@@ -297,7 +349,10 @@ public class JdsFilter<T extends JdsEntity> implements AutoCloseable, Callable<L
 
     public JdsFilter notIn(JdsField jdsField, Object value) {
         tablesToJoin.add(jdsField.getType());
-        String builder = String.format("(%s.FieldId = %s AND %s.Value NOT IN (?))", getTablePrefix(jdsField.getType()), jdsField.getId(), getTablePrefix(jdsField.getType()));
+        String builder = String.format("(%s.FieldId = %s AND %s NOT IN (?))",
+                getTablePrefix(jdsField.getType()),
+                jdsField.getId(),
+                (jdsDb.isOracleDb() && isLob(jdsField) ? "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" : "PLACE_HOLD.Value").replaceAll("PLACE_HOLD", getTablePrefix(jdsField.getType())));
         currentStrings.add(builder);
         currentValues.add(value);
         currentValues.add(value);

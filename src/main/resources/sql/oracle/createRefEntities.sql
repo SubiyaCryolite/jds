@@ -1,5 +1,5 @@
 CREATE TABLE JdsRefEntities(
     EntityId    NUMBER(19),
-    EntityName  CLOB,
+    EntityName  NCLOB,
     PRIMARY KEY (EntityId)
 )

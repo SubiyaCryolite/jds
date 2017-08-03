@@ -3,7 +3,6 @@ package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
-import io.github.subiyacryolite.jds.enums.JdsImplementation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -118,7 +117,7 @@ public class JdsView {
      * @param tables     the tables that will make up this view
      */
     private static void createMainView(Connection connection, JdsDb jdsDb, List<Long> entityId, String viewName, String[] tables) {
-        String sql = "SELECT field.FieldName FROM \n" +
+        String sql = String.format("SELECT field.FieldName FROM \n" +
                 "JdsRefEntities entity\n" +
                 "LEFT JOIN JdsBindEntityFields bound\n" +
                 "ON entity.EntityId = bound.EntityId\n" +
@@ -126,8 +125,10 @@ public class JdsView {
                 "ON bound.FieldId = field.FieldId\n" +
                 "LEFT join JdsRefFieldTypes type\n" +
                 "ON field.FieldId = type.TypeId\n" +
-                "WHERE type.TypeName NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND entity.EntityId = ?\n" +
-                "ORDER BY field.FieldName";
+                "WHERE %s NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND entity.EntityId = ?\n" +
+                "ORDER BY field.FieldName", jdsDb.isOracleDb() ? "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" : "type.TypeName");
+        //handle oracle nclobs
+        //omit ; as oracle jdbc is a pain
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, entityId.get(0));
@@ -159,7 +160,7 @@ public class JdsView {
         for (Long l : entityId)
             entityHeiarchy.add(l + "");
         stringBuilder.append(entityHeiarchy);
-        stringBuilder.append("))");
+        stringBuilder.append("))");//oracle jdbc hates ; terminators
 
         String viewSql = jdsDb.createOrAlterView(viewName, stringBuilder.toString());
         try (PreparedStatement preparedStatement = connection.prepareStatement(viewSql)) {
@@ -234,7 +235,7 @@ public class JdsView {
      * @return the created inner view name
      */
     private static String innerView(final Connection connection, final JdsDb jdsDb, final JdsFieldType fieldType, final List<Long> inheritanceHierarchy, final String entityName) {
-        String sql = "select distinct field.FieldName from \n" +
+        String sql = String.format("select distinct field.FieldName from \n" +
                 "JdsRefEntities entity\n" +
                 "left join JdsBindEntityFields bound\n" +
                 "on entity.EntityId = bound.EntityId\n" +
@@ -242,9 +243,10 @@ public class JdsView {
                 "on bound.FieldId = field.FieldId\n" +
                 "left join JdsRefFieldTypes type\n" +
                 "on field.FieldId = type.TypeId\n" +
-                "where type.TypeName = ? and entity.EntityId = ?\n" +
-                "order by field.FieldName";
-
+                "where %s = ? and entity.EntityId = ?\n" +
+                "order by field.FieldName", jdsDb.isOracleDb() ? "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" : "type.TypeName");
+        //handle oracle nclobs
+        //omit ; as oracle jdbc is a pain
         List<String> fieldNames = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, fieldType.toString());
@@ -269,7 +271,7 @@ public class JdsView {
         stringBuilder.append(fieldsOfInterest);
         stringBuilder.append("\nFROM\t\n");
         stringBuilder.append("\t(\n");
-        stringBuilder.append("\t\tSELECT src.EntityGuid, sField.FieldName, src.Value\n");
+        stringBuilder.append("\t\tSELECT src.EntityGuid, field.FieldName, src.Value\n");
         stringBuilder.append("\t\tFROM ");
         stringBuilder.append(JdsTableLookup.getTable(fieldType));
         stringBuilder.append("\tsrc\n");
@@ -278,11 +280,14 @@ public class JdsView {
         for (Long id : inheritanceHierarchy)
             entityHierarchy.add("" + id);
         stringBuilder.append(String.format(" AND ov.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (%s))\n", entityHierarchy));
-        stringBuilder.append("\t\tJOIN JdsRefFields sField on src.FieldId = sField.FieldId\n");
-        stringBuilder.append("\t\tJOIN JdsRefFieldTypes sFieldType on sField.FieldId = sFieldType.TypeId \n");
-        stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields EF where ef.EntityId in (%s) and sFieldType.TypeName = '%s')\n", entityHierarchy, fieldType));
-        stringBuilder.append("\t) AS t\n");
-        stringBuilder.append("\tGROUP BY t.EntityGuid;");
+        stringBuilder.append("\t\tJOIN JdsRefFields field on src.FieldId = field.FieldId\n");
+        stringBuilder.append("\t\tJOIN JdsRefFieldTypes fieldType on field.FieldId = fieldType.TypeId \n");
+        stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields ef where ef.EntityId in (%s) and %s = '%s')\n",
+                entityHierarchy,
+                jdsDb.isOracleDb() ? "dbms_lob.substr(fieldType.TypeName, dbms_lob.getlength(fieldType.TypeName), 1)" : "fieldType.TypeName", //nclob magic
+                fieldType));
+        stringBuilder.append("\t) t\n");
+        stringBuilder.append("\tGROUP BY t.EntityGuid");//oracle jdbc hates ; terminators
 
         String sqlToExecute = jdsDb.createOrAlterView(viewName, stringBuilder.toString());
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlToExecute)) {
@@ -323,7 +328,7 @@ public class JdsView {
      * @return whether the action completed successfully
      */
     private static boolean dropView(final JdsDb jdsDb, final String name) {
-        try (Connection connection = jdsDb.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(String.format("DROP VIEW %s%s", name, jdsDb.implementation == JdsImplementation.POSTGRES ? " CASCADE" : ""))) {
+        try (Connection connection = jdsDb.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(String.format("DROP VIEW %s%s", name, jdsDb.isPosgreSqlDb() ? " CASCADE" : ""))) {
             return preparedStatement.execute();
         } catch (Exception e) {
             return false;

@@ -28,32 +28,32 @@ public class BulkTests extends BaseTestConfig {
 
     @Test
     public void saveAndLoadPostreSqlImplementation() throws Exception {
-        initialisePostgeSqlBackend();//??
+        initialisePostgeSqlBackend();//13s 175ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadOracleSqlImplementation() throws Exception {
-        initialiseOracleBackend();//??
+        initialiseOracleBackend();//11s 79ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadTsqlImplementation() throws Exception {
-        initialiseTSqlBackend();//11ms
+        initialiseTSqlBackend();//8s 326ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadSqliteImplementation() throws Exception {
-        initialiseSqlLiteBackend();//3ms
+        initialiseSqlLiteBackend();//12s 501ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadMySqlImplementation() throws Exception {
         initialiseMysqlBackend();
-        saveAndLoad();//19ms
+        saveAndLoad();//8s 126ms
     }
 
     @Test

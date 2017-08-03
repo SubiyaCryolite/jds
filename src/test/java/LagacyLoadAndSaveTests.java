@@ -19,6 +19,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
     @Test
     @Override
     public void save() throws Exception {
+        System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
         SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
         JdsSave.save(jdsDb, 1, simpleAddressBook);
         System.out.printf("Saved %s\n", simpleAddressBook);
@@ -59,11 +60,18 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
     }
 
     @Test
+    public void saveAndLoadOracleImplementation() throws Exception {
+        initialiseOracleBackend();
+        saveAndLoad();
+    }
+
+    @Test
     public void saveAndLoadAllImplementations() throws Exception {
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
         saveAndLoadMySqlImplementation();
         saveAndLoadSqliteImplementation();
+        saveAndLoadOracleImplementation();
     }
 
     @Test
