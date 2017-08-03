@@ -34,9 +34,5 @@ public interface INamedStatement extends Statement {
 
     int executeUpdate() throws SQLException;
 
-    void close() throws SQLException;
-
     void addBatch() throws SQLException;
-
-    int[] executeBatch() throws SQLException;
 }
