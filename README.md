@@ -187,7 +187,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class TypeClass extends JdsEntity {
+public class JdsExample extends JdsEntity {
         private final SimpleStringProperty stringField;
         private final SimpleObjectProperty<LocalTime> timeField;
         private final SimpleObjectProperty<LocalDate> dateField;
@@ -199,7 +199,7 @@ public class TypeClass extends JdsEntity {
         private final SimpleFloatProperty floatField;
         private final SimpleBooleanProperty booleanField;
     
-        public TypeClass() {
+        public JdsExample() {
             stringField = new SimpleStringProperty("");
             timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
             dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
@@ -223,7 +223,7 @@ public class TypeClass extends JdsEntity {
             map(NewTestFields.BOOLEAN_FIELD, booleanField);
         }
     
-        public TypeClass(String str, 
+        public JdsExample(String str, 
                          LocalTime timeField, 
                          LocalDate localDate, 
                          LocalDateTime localDateTime, 
@@ -328,7 +328,7 @@ public class TypeClass extends JdsEntity {
 
     @Override
     public String toString() {
-        return "TypeClass{" +
+        return "JdsExample{" +
                 "stringField = " + getStringField() +
                 ", timeField = " + getTimeField() +
                 ", dateField = " + getDateField() +
@@ -539,7 +539,7 @@ private List<JdsExample> getCollection() {
     instance1.setEntityGuid("instance1");
     instance1.setStringField("One");
     
-    TypeClass instance2 = new TypeClass();
+    JdsExample instance2 = new JdsExample();
     instance2.setStringField("tWO");
     instance2.setTimeField(LocalTime.of(15, 24));
     instance2.setDateField(LocalDate.of(2012, 8, 26));
@@ -669,7 +669,7 @@ A filter mechanisim is present. It is failry basic and is still being refined. A
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
-List<TypeClass> collection = getCollection();
+List<JdsExample> collection = getCollection();
     
 //NEW APPROACH (INTRODUCED IN 1.170514)
     Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
