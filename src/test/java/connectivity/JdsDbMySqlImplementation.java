@@ -26,10 +26,9 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
         properties.put("password", "p@nkP#55W0rd");
         //info.put("password", "");
         properties.put("autoReconnect","true");
-        properties.put("allowMultiQueries","false");
+        properties.put("allowMultiQueries","true");
         properties.put("useSSL","false");
-        properties.put("rewriteBatchedStatements","false");//known to cause problems with saves
-        properties.put("continueBatchOnError","true");
+        properties.put("rewriteBatchedStatements","true");//known to cause problems with saves
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?", properties);
     }
 }

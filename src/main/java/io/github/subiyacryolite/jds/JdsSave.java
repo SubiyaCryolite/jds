@@ -14,8 +14,6 @@
 package io.github.subiyacryolite.jds;
 
 import com.javaworld.INamedStatement;
-import com.javaworld.NamedCallableStatement;
-import com.javaworld.NamedPreparedStatement;
 import io.github.subiyacryolite.jds.events.JdsSaveListener;
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments;
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments;
@@ -301,7 +299,7 @@ public class JdsSave implements Callable<Boolean> {
         //log byte array as text???
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldBlobValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldBlobValues());
             for (Map.Entry<String, Map<Long, SimpleBlobProperty>> entry : blobProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -340,7 +338,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleBooleanProperty>> entry : booleanProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -379,7 +377,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleIntegerProperty>> entry : integerProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -418,7 +416,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldFloatValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldFloatValues());
             for (Map.Entry<String, Map<Long, SimpleFloatProperty>> entry : floatProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -457,7 +455,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDoubleValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldDoubleValues());
             for (Map.Entry<String, Map<Long, SimpleDoubleProperty>> entry : doubleProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -496,7 +494,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldLongValues());
             for (Map.Entry<String, Map<Long, SimpleLongProperty>> entry : longProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -535,7 +533,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldTextValues());
+            PreparedStatement log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues());
             for (Map.Entry<String, Map<Long, SimpleStringProperty>> entry : stringProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -555,10 +553,10 @@ public class JdsSave implements Callable<Boolean> {
                     if (jdsDb.isPrintingOutput())
                         System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize);
                     if (!jdsDb.isLoggingEdits()) continue;
-                    log.setString("entityGuid", entityGuid);
-                    log.setLong("fieldId", fieldId);
-                    log.setString("value", value);
-                    log.setInt("sequence", 0);
+                    log.setString(1, entityGuid);
+                    log.setLong(2, fieldId);
+                    log.setInt(3, 0);
+                    log.setString(4, value);
                     log.addBatch();
                 }
             }
@@ -575,7 +573,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDateTimeValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldDateTimeValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localDateTimeProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -638,7 +636,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : localTimeProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -678,7 +676,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldLongValues());
             for (Map.Entry<String, Map<Long, SimpleObjectProperty<Temporal>>> entry : zonedDateProperties.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -717,7 +715,7 @@ public class JdsSave implements Callable<Boolean> {
         int record = 0;
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) : onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger());
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleObjectProperty<Enum>>> entry : enums.entrySet()) {
                 record++;
                 int innerRecord = 0;
@@ -759,7 +757,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDateTimeValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldDateTimeValues());
             PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
             PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
@@ -809,7 +807,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldFloatValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldFloatValues());
             PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
             PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
@@ -860,7 +858,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
             INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
@@ -911,7 +909,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldDoubleValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldDoubleValues());
             INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
             INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
@@ -962,7 +960,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?";
         String insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldLongValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldLongValues());
             PreparedStatement delete = onPostSaveEventArguments.getOrAddStatement(deleteSql);
             PreparedStatement insert = onPostSaveEventArguments.getOrAddStatement(insertSql);
             int record = 0;
@@ -1012,7 +1010,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldTextValues());
+            PreparedStatement log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues());
             INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
             INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             int record = 0;
@@ -1026,10 +1024,10 @@ public class JdsSave implements Callable<Boolean> {
                     int innerTotal = it.getValue().get().size();
                     for (String value : it.getValue().get()) {
                         if (jdsDb.isLoggingEdits()) {
-                            log.setString("entityGuid", entityGuid);
-                            log.setLong("fieldId", fieldId);
-                            log.setString("value", value);
-                            log.setInt("sequence", index.get());
+                            log.setString(1, entityGuid);
+                            log.setLong(2, fieldId);
+                            log.setInt(3, index.get());
+                            log.setString(4, value);
                             log.addBatch();
                         }
                         if (writeToPrimaryDataTables) {
@@ -1066,7 +1064,7 @@ public class JdsSave implements Callable<Boolean> {
         String deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid";
         String insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)";
         try {
-            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.getSaveOldIntegerValues());
+            INamedStatement log = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldIntegerValues());
             INamedStatement delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql);
             INamedStatement insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql);
             for (Map.Entry<String, Map<JdsFieldEnum, SimpleListProperty<Enum>>> entry : enumStrings.entrySet()) {

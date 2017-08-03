@@ -40,20 +40,20 @@ public class BulkTests extends BaseTestConfig {
 
     @Test
     public void saveAndLoadTsqlImplementation() throws Exception {
-        initialiseTSqlBackend();//11ms
+        initialiseTSqlBackend();//4s64ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadSqliteImplementation() throws Exception {
-        initialiseSqlLiteBackend();//3ms
+        initialiseSqlLiteBackend();//8s958ms
         saveAndLoad();
     }
 
     @Test
     public void saveAndLoadMySqlImplementation() throws Exception {
         initialiseMysqlBackend();
-        saveAndLoad();//19ms
+        saveAndLoad();//40s383ms
     }
 
     @Test
