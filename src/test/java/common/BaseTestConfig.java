@@ -30,7 +30,6 @@ public abstract class BaseTestConfig {
     public void load() throws Exception {
     }
 
-    @Test
     public void initialiseJdsClasses() {
         jdsDb.map(EntityA.class);
         jdsDb.map(EntityB.class);
@@ -46,31 +45,26 @@ public abstract class BaseTestConfig {
         initialiseJdsClasses();
     }
 
-    @Test
     public void initialiseSqlLiteBackend() {
         jdsDb = new JdsDbSqliteImplementation();
         initJds();
     }
 
-    @Test
     public void initialisePostgeSqlBackend() {
         jdsDb = new JdsDbPostgreSqlmplementation();
         initJds();
     }
 
-    @Test
-    public void initialiseTSqlBackend() {
+     public void initialiseTSqlBackend() {
         jdsDb = new JdsDbTransactionalSqllmplementation();
         initJds();
     }
 
-    @Test
     public void initialiseMysqlBackend() {
         jdsDb = new JdsDbMySqlImplementation();
         initJds();
     }
 
-    @Test
     public void initialiseOracleBackend() {
         jdsDb = new JdsDbOracleImplementation();
         initJds();

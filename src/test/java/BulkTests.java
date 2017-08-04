@@ -16,7 +16,7 @@ public class BulkTests extends BaseTestConfig {
             entry.setEntityGuid(String.format("guidBulk%s", i));
             memObjects.add(entry);
         }
-        JdsSave jdsSave = new JdsSave(jdsDb, 400, memObjects);
+        JdsSave jdsSave = new JdsSave(jdsDb, 1024, memObjects);
         jdsSave.call();
         System.out.printf("Saved %s\n", memObjects);
     }

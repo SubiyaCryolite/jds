@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- *
  * @author indana
  */
 public class JdsDbMySqlImplementation extends JdsDbMySql {
@@ -23,13 +22,13 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
         Class.forName("com.mysql.cj.jdbc.Driver");
         Properties properties = new Properties();
         properties.put("user", "root");
-        //properties.put("password", "p@nkP#55W0rd");
-        properties.put("password", "");
-        properties.put("autoReconnect","true");
-        properties.put("allowMultiQueries","false");
-        properties.put("useSSL","false");
-        properties.put("rewriteBatchedStatements","true");//known to cause problems with saves
-        properties.put("continueBatchOnError","true");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?", properties);
+        properties.put("password", "p@nkP#55W0rd");
+        //properties.put("password", "");
+        properties.put("autoReconnect", "true");
+        properties.put("allowMultiQueries", "false");
+        properties.put("useSSL", "false");
+        properties.put("rewriteBatchedStatements", "true");
+        properties.put("continueBatchOnError", "true");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties);
     }
 }

@@ -51,9 +51,15 @@ public class OnPreSaveEventArguments {
         connection.setAutoCommit(false);
         for (Statement preparedStatement : statements.values()) {
             preparedStatement.executeBatch();
-            preparedStatement.close();
         }
         connection.commit();
+        connection.setAutoCommit(true);
+    }
+
+    public void closeBatches() throws SQLException {
+        for (Statement preparedStatement : statements.values()) {
+            preparedStatement.close();
+        }
         connection.setAutoCommit(true);
     }
 }

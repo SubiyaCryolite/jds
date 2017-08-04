@@ -250,16 +250,19 @@ public class JdsSave implements Callable<Boolean> {
                     ((JdsSaveListener) entity).onPostSave(onPostSaveEventArguments);
                 }
             }
-            //at this point embedded objects will be captured as well
-            if (finalStep) {
-                onPreSaveEventArguments.executeBatches();
-                onPostSaveEventArguments.executeBatches();
-            }
+
+            //respect execution sequence
+            //respect JDS batches in each call
+            onPreSaveEventArguments.executeBatches();
+            onPostSaveEventArguments.executeBatches();
         } catch (Exception ex) {
             throw ex;
         } finally {
-            if (finalStep)
+            if (finalStep) {
+                onPreSaveEventArguments.closeBatches();
+                onPostSaveEventArguments.closeBatches();
                 connection.close();
+            }
         }
     }
 

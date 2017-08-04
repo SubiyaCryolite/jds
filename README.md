@@ -391,13 +391,17 @@ Please note that your project must have the correct JDBC driver in its class pat
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class JdsDbPostgreSqlmplementation extends JdsDbPostgreSql {
 
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DATABASE", "USER_NAME", "PASSWORD");
+        Properties properties = new Properties();
+        properties.put("user", "USER_NAME");
+        properties.put("password", "PASSWORD");
+        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DATABASE", properties);
     }
 }
 
@@ -425,7 +429,7 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
         properties.put("useSSL","false");
         properties.put("rewriteBatchedStatements","true");
         properties.put("continueBatchOnError","true");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/DATABASE?", properties);
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/DATABASE", properties);
     }
 }
 
@@ -439,14 +443,17 @@ jdsDb.init();
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+import java.util.Properties;
 
 public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
 
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", "USER_NAME", "PASSWORD");
+        Properties properties = new Properties();
+        properties.put("user", "USER_NAME");
+        properties.put("password", "PASSWORD");
+        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", properties);
     }
 }
 
@@ -460,6 +467,7 @@ jdsDb.init();
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 
 public class JdsDbOracleImplementation extends JdsDbOracle {
@@ -467,7 +475,10 @@ public class JdsDbOracleImplementation extends JdsDbOracle {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("oracle.jdbc.driver.OracleDriver");
-        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", "USER_NAME", "PASSWORD");
+        Properties properties = new Properties();
+        properties.put("user", "USER_NAME");
+        properties.put("password", "PASSWORD");
+        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", properties);
     }
 }
 
