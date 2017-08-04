@@ -1022,31 +1022,31 @@ public abstract class JdsDb implements JdsDbContract {
 
     public abstract String createOrAlterView(String viewName, String viewSql);
 
-    protected String getSaveOldTextValues() {
+    protected String saveOldTextValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldDoubleValues() {
+    protected String saveOldDoubleValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldLongValues() {
+    protected String saveOldLongValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldIntegerValues() {
+    protected String saveOldIntegerValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldFloatValues() {
+    protected String saveOldFloatValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldDateTimeValues() {
+    protected String saveOldDateTimeValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String getSaveOldBlobValues() {
+    protected String saveOldBlobValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 }
