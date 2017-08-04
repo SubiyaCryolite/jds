@@ -1022,38 +1022,31 @@ public abstract class JdsDb implements JdsDbContract {
 
     public abstract String createOrAlterView(String viewName, String viewSql);
 
-    protected String saveOldTextValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(?, ?, ?, ?)";
+    protected String getSaveOldTextValues() {
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldDoubleValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldDoubleValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldLongValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldLongValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldIntegerValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldIntegerValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldFloatValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldFloatValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldDateTimeValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldDateTimeValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 
-    protected String saveOldBlobValues() {
-        //ensure that the erminating semicolon is absent s this messes with MySQLs rewriteBatchedStatements=true
+    protected String getSaveOldBlobValues() {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value)";
     }
 }

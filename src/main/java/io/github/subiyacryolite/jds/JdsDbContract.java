@@ -21,5 +21,5 @@ public interface JdsDbContract {
      *                                correctly
      * @throws SQLException           when a standard SQL Exception occurs
      */
-    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
+    Connection getConnection() throws ClassNotFoundException, SQLException;
 }

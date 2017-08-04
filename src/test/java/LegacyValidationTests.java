@@ -15,6 +15,7 @@ public class LegacyValidationTests extends BaseTestConfig {
     @Test
     @Override
     public void saveAndLoad() throws Exception {
+        System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
         List<JdsExample> memObjects = getCollection();
         JdsSave.save(jdsDb, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
@@ -99,10 +100,17 @@ public class LegacyValidationTests extends BaseTestConfig {
     }
 
     @Test
+    public void saveAndLoadOracleImplementation() throws Exception {
+        initialiseOracleBackend();
+        saveAndLoad();
+    }
+
+    @Test
     public void saveAndLoadAllImplementations() throws Exception {
         saveAndLoadSqliteImplementation();
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
         saveAndLoadMySqlImplementation();
+        saveAndLoadOracleImplementation();
     }
 }

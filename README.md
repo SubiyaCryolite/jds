@@ -53,7 +53,7 @@ The API currently supports the following Relational Databases, each of which has
 | MySQL            |5.7.14         | [Official Site](https://www.mysql.com/downloads/)        | [com.mysql.cj.jdbc.Driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java)|
 | Microsoft SQL Server | 2008 R2     | [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)        | [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
 | SQLite            | 3.16.1   | [Official Site](https://www.sqlite.org/)    | [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
-
+| Oracle            | 11g Release 2   | [Official Site](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html)    | [oracle.jdbc.driver.OracleDriver](https://mvnrepository.com/artifact/com.oracle/ojdbc6/12.1.0.1-atlassian-hosted)|
 
 # 1 How it works
 
@@ -187,7 +187,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class TypeClass extends JdsEntity {
+public class JdsExample extends JdsEntity {
         private final SimpleStringProperty stringField;
         private final SimpleObjectProperty<LocalTime> timeField;
         private final SimpleObjectProperty<LocalDate> dateField;
@@ -199,7 +199,7 @@ public class TypeClass extends JdsEntity {
         private final SimpleFloatProperty floatField;
         private final SimpleBooleanProperty booleanField;
     
-        public TypeClass() {
+        public JdsExample() {
             stringField = new SimpleStringProperty("");
             timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
             dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
@@ -223,7 +223,7 @@ public class TypeClass extends JdsEntity {
             map(NewTestFields.BOOLEAN_FIELD, booleanField);
         }
     
-        public TypeClass(String str, 
+        public JdsExample(String str, 
                          LocalTime timeField, 
                          LocalDate localDate, 
                          LocalDateTime localDateTime, 
@@ -328,7 +328,7 @@ public class TypeClass extends JdsEntity {
 
     @Override
     public String toString() {
-        return "TypeClass{" +
+        return "JdsExample{" +
                 "stringField = " + getStringField() +
                 ", timeField = " + getTimeField() +
                 ", dateField = " + getDateField() +
@@ -397,7 +397,7 @@ public class JdsDbPostgreSqlmplementation extends JdsDbPostgreSql {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DB_NAME", "DB_USER", "DB_PASSWORD");
+        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DATABASE", "USER_NAME", "PASSWORD");
     }
 }
 
@@ -411,6 +411,7 @@ jdsDb.init();
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class JdsDbMySqlImplementation extends JdsDbMySql {
 
@@ -419,12 +420,12 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
         Class.forName("com.mysql.cj.jdbc.Driver");
         Properties properties = new Properties();
         properties.put("user", "USER_NAME");
-        properties.put("password", "USER_PASSWORD");
+        properties.put("password", "PASSWORD");
         properties.put("autoReconnect","true");
-        properties.put("allowMultiQueries","true");//necessary for JDS init
         properties.put("useSSL","false");
-        properties.put("rewriteBatchedStatements","false");//known to cause problems with saves
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds?", properties);
+        properties.put("rewriteBatchedStatements","true");
+        properties.put("continueBatchOnError","true");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/DATABASE?", properties);
     }
 }
 
@@ -445,13 +446,34 @@ public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
     @Override
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DB_NAME", "DB_USER", "DB_PASSWORD");
+        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", "USER_NAME", "PASSWORD");
     }
 }
 
 ....
 
 JdsDb jdsDb = new JdsDbTransactionalSqllmplementation();
+jdsDb.init();
+```
+#### Oracle Example
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+
+public class JdsDbOracleImplementation extends JdsDbOracle {
+
+    @Override
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", "USER_NAME", "PASSWORD");
+    }
+}
+
+....
+
+JdsDb jdsDb = new JdsDbOracleImplementation();
 jdsDb.init();
 ```
 #### Sqlite Example
@@ -517,7 +539,7 @@ private List<JdsExample> getCollection() {
     instance1.setEntityGuid("instance1");
     instance1.setStringField("One");
     
-    TypeClass instance2 = new TypeClass();
+    JdsExample instance2 = new JdsExample();
     instance2.setStringField("tWO");
     instance2.setTimeField(LocalTime.of(15, 24));
     instance2.setDateField(LocalDate.of(2012, 8, 26));
@@ -647,7 +669,7 @@ A filter mechanisim is present. It is failry basic and is still being refined. A
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
-List<TypeClass> collection = getCollection();
+List<JdsExample> collection = getCollection();
     
 //NEW APPROACH (INTRODUCED IN 1.170514)
     Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");

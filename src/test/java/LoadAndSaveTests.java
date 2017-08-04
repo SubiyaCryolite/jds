@@ -16,6 +16,19 @@ import java.util.concurrent.FutureTask;
  */
 public class LoadAndSaveTests extends BaseTestConfig {
 
+
+    @Test
+    public void callableOracleBulkSave() throws Exception {
+        initialiseOracleBackend();
+        bulkSave();
+    }
+
+    @Test
+    public void callableOracleBulkLoad() throws ExecutionException, InterruptedException {
+        initialiseOracleBackend();
+        load();
+    }
+
     @Test
     public void callableSqlLiteBulkSave() throws Exception {
         initialiseTSqlBackend();
@@ -83,6 +96,7 @@ public class LoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void bulkSave() throws Exception {
+        System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
         List<JdsExample> collection = new ArrayList<>();
         for (int i = 0; i < 5000; i++) {
             JdsExample jdsExample = new JdsExample();

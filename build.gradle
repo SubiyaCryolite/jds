@@ -2,17 +2,17 @@ apply plugin: 'java'
 apply plugin: 'idea' //run idea to resolve dependencies in intellij
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-archivesBaseName = project.name
 group = 'io.github.subiyacryolite'
-version = '3.1.12-SNAPSHOT' //majorv.minorv.bugfixincrement
+version = '3.2.0' //majorv.minorv.bugfixincrement
+archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
-
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
@@ -41,7 +41,8 @@ jar {
 }
 
 test {
-    exclude '**' //prevent problems with TravisCI
+    //prevent problems with TravisCI
+    exclude '**'
 }
 
 task javadocJar(type: Jar) {
