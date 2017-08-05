@@ -172,6 +172,12 @@ public abstract class JdsDbSqlite extends JdsDb {
     @Override
     void createRefOldFieldValues() {
         executeSqlFromFile("sql/sqlite/createStoreOldFieldValues.sql");
+        executeSqlFromString("CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);");
+        executeSqlFromString("CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);");
+        executeSqlFromString("CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);");
+        executeSqlFromString("CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);");
+        executeSqlFromString("CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);");
+        executeSqlFromString("CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);");
     }
 
     @Override

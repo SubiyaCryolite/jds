@@ -11,8 +11,7 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-BEGIN;
-    CREATE TABLE JdsStoreOldFieldValues(
+CREATE TABLE JdsStoreOldFieldValues(
         EntityGuid			 TEXT,
         FieldId				 BIGINT,
         DateOfModification	 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -24,11 +23,4 @@ BEGIN;
         LongValue			 INTEGER,
         DateTimeValue		 TIMESTAMP,
         BlobValue            BLOB
-    );
-    CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);
-    CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);
-    CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);
-    CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);
-    CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);
-    CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);
-COMMIT;
+);
