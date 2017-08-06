@@ -64,48 +64,52 @@ public abstract class JdsDb implements JdsDbContract {
      * Initialise JDS base tables
      */
     public void init() {
-        prepareDatabaseComponents();
-        //===========================================
-        JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(this);
-        JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(this);
-        JdsUpdateHelper.v1Tov2AddColumnStoreEntityBindings(this);
-        //===========================================
-        prepareCustomDatabaseComponents();
-        //===========================================
-        JdsUpdateHelper.v1ToV2MigrateData(this);
+        try (Connection connection = getConnection()) {
+            prepareDatabaseComponents(connection);
+            //===========================================
+            JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(connection, this);
+            JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(connection, this);
+            JdsUpdateHelper.v1Tov2AddColumnStoreEntityBindings(connection, this);
+            //===========================================
+            prepareCustomDatabaseComponents(connection);
+            //===========================================
+            JdsUpdateHelper.v1ToV2MigrateData(connection, this);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
     }
 
 
     /**
      * Initialise core database components
      */
-    private void prepareDatabaseComponents() {
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_ENTITIES);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_FIELDS);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_FIELD_TYPES);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TEXT_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_LONG_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME_ARRAY);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TEXT);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_BLOB);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_FLOAT);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_INTEGER);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_LONG);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_TIME);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS);
-        prepareDatabaseComponent(JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE);
+    private void prepareDatabaseComponents(Connection connection) {
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENTITIES);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELDS);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELD_TYPES);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_LONG_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME_ARRAY);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BLOB);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_LONG);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS);
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE);
     }
 
     /**
@@ -141,25 +145,26 @@ public abstract class JdsDb implements JdsDbContract {
      * Delegates the creation of custom database components depending on the
      * underlying JDS Database implementation
      *
+     * @param connection        the connection to use for this operation
      * @param databaseComponent the type of database component to create
      * @param jdsComponent      an enum that maps to the components concrete
      *                          implementation details
      */
-    protected final void prepareDatabaseComponent(JdsComponentType databaseComponent, JdsComponent jdsComponent) {
+    protected final void prepareDatabaseComponent(Connection connection, JdsComponentType databaseComponent, JdsComponent jdsComponent) {
         switch (databaseComponent) {
             case TABLE:
-                if (!doesTableExist(jdsComponent.getName())) {
-                    initiateDatabaseComponent(jdsComponent);
+                if (!doesTableExist(connection, jdsComponent.getName())) {
+                    initiateDatabaseComponent(connection, jdsComponent);
                 }
                 break;
             case STORED_PROCEDURE:
-                if (!doesProcedureExist(jdsComponent.getName())) {
-                    initiateDatabaseComponent(jdsComponent);
+                if (!doesProcedureExist(connection, jdsComponent.getName())) {
+                    initiateDatabaseComponent(connection, jdsComponent);
                 }
                 break;
             case TRIGGER:
-                if (!doesTriggerExist(jdsComponent.getName())) {
-                    initiateDatabaseComponent(jdsComponent);
+                if (!doesTriggerExist(connection, jdsComponent.getName())) {
+                    initiateDatabaseComponent(connection, jdsComponent);
                 }
                 break;
         }
@@ -168,99 +173,101 @@ public abstract class JdsDb implements JdsDbContract {
     /**
      * Initialises core JDS Database components
      *
+     * @param connection   the SQL connection top use for this operation
      * @param jdsComponent an enum that maps to the components concrete
      *                     implementation details
      */
-    private final void initiateDatabaseComponent(JdsComponent jdsComponent) {
+    private final void initiateDatabaseComponent(Connection connection, JdsComponent jdsComponent) {
         switch (jdsComponent) {
             case STORE_ENTITY_INHERITANCE:
-                createStoreEntityInheritance();
+                createStoreEntityInheritance(connection);
                 break;
             case STORE_TEXT_ARRAY:
-                createStoreTextArray();
+                createStoreTextArray(connection);
                 break;
             case STORE_FLOAT_ARRAY:
-                createStoreFloatArray();
+                createStoreFloatArray(connection);
                 break;
             case STORE_INTEGER_ARRAY:
-                createStoreIntegerArray();
+                createStoreIntegerArray(connection);
                 break;
             case STORE_LONG_ARRAY:
-                createStoreLongArray();
+                createStoreLongArray(connection);
                 break;
             case STORE_DOUBLE_ARRAY:
-                createStoreDoubleArray();
+                createStoreDoubleArray(connection);
                 break;
             case STORE_DATE_TIME_ARRAY:
-                createStoreDateTimeArray();
+                createStoreDateTimeArray(connection);
             case STORE_BLOB:
-                createStoreBlob();
+                createStoreBlob(connection);
                 break;
             case STORE_TEXT:
-                createStoreText();
+                createStoreText(connection);
                 break;
             case STORE_FLOAT:
-                createStoreFloat();
+                createStoreFloat(connection);
                 break;
             case STORE_INTEGER:
-                createStoreInteger();
+                createStoreInteger(connection);
                 break;
             case STORE_LONG:
-                createStoreLong();
+                createStoreLong(connection);
                 break;
             case STORE_DOUBLE:
-                createStoreDouble();
+                createStoreDouble(connection);
                 break;
             case STORE_DATE_TIME:
-                createStoreDateTime();
+                createStoreDateTime(connection);
                 break;
             case STORE_ZONED_DATE_TIME:
-                createStoreZonedDateTime();
+                createStoreZonedDateTime(connection);
                 break;
             case STORE_TIME:
-                createStoreTime();
+                createStoreTime(connection);
                 break;
             case REF_ENTITIES:
-                createStoreEntities();
+                createStoreEntities(connection);
                 break;
             case REF_ENUM_VALUES:
-                createRefEnumValues();
+                createRefEnumValues(connection);
                 break;
             case REF_INHERITANCE:
-                createRefInheritance();
+                createRefInheritance(connection);
                 break;
             case REF_FIELDS:
-                createRefFields();
+                createRefFields(connection);
                 break;
             case REF_FIELD_TYPES:
-                createRefFieldTypes();
+                createRefFieldTypes(connection);
                 break;
             case BIND_ENTITY_FIELDS:
-                createBindEntityFields();
+                createBindEntityFields(connection);
                 break;
             case BIND_ENTITY_ENUMS:
-                createBindEntityEnums();
+                createBindEntityEnums(connection);
                 break;
             case STORE_ENTITY_OVERVIEW:
-                createRefEntityOverview();
+                createRefEntityOverview(connection);
                 break;
             case STORE_OLD_FIELD_VALUES:
-                createRefOldFieldValues();
+                createRefOldFieldValues(connection);
                 break;
             case STORE_ENTITY_BINDING:
-                createStoreEntityBinding();
+                createStoreEntityBinding(connection);
                 break;
         }
-        prepareCustomDatabaseComponents(jdsComponent);
+        prepareCustomDatabaseComponents(connection, jdsComponent);
     }
 
     /**
      * Initialises custom JDS Database components
      *
+     * @param connection   The SQL connection to use
      * @param jdsComponent an enum that maps to the components concrete
      *                     implementation details
      */
-    protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
+    protected void prepareCustomDatabaseComponents(Connection connection, JdsComponent jdsComponent) {
     }
 
     /**
@@ -269,8 +276,8 @@ public abstract class JdsDb implements JdsDbContract {
      * @param tableName the table to look up
      * @return true if the specified table exists the the database
      */
-    private final boolean doesTableExist(String tableName) {
-        int answer = tableExists(tableName);
+    private final boolean doesTableExist(Connection connection, String tableName) {
+        int answer = tableExists(connection, tableName);
         return answer == 1;
     }
 
@@ -280,8 +287,8 @@ public abstract class JdsDb implements JdsDbContract {
      * @param procedureName the procedure to look up
      * @return true if the specified procedure exists the the database
      */
-    private final boolean doesProcedureExist(String procedureName) {
-        int answer = procedureExists(procedureName);
+    private final boolean doesProcedureExist(Connection connection, String procedureName) {
+        int answer = procedureExists(connection, procedureName);
         return answer == 1;
     }
 
@@ -291,8 +298,8 @@ public abstract class JdsDb implements JdsDbContract {
      * @param triggerName the trigger to look up
      * @return true if the specified trigger exists the the database
      */
-    private final boolean doesTriggerExist(String triggerName) {
-        int answer = triggerExists(triggerName);
+    private final boolean doesTriggerExist(Connection connection, String triggerName) {
+        int answer = triggerExists(connection, triggerName);
         return answer == 1;
     }
 
@@ -302,8 +309,8 @@ public abstract class JdsDb implements JdsDbContract {
      * @param indexName the index to look up
      * @return true if the specified index exists the the database
      */
-    private final boolean doesIndexExist(String indexName) {
-        int answer = indexExists(indexName);
+    private final boolean doesIndexExist(Connection connection, String indexName) {
+        int answer = indexExists(connection, indexName);
         return answer == 1;
     }
 
@@ -314,13 +321,13 @@ public abstract class JdsDb implements JdsDbContract {
      * @param tableName  the table to inspect
      * @return true if the specified index exists the the database
      */
-    private final boolean doesColumnExist(String tableName, String columnName) {
-        int answer = columnExists(tableName, columnName);
+    private final boolean doesColumnExist(Connection connection, String tableName, String columnName) {
+        int answer = columnExists(connection, tableName, columnName);
         return answer == 1;
     }
 
-    protected int columnExistsCommonImpl(String tableName, String columnName, int toReturn, String sql) {
-        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
+    protected int columnExistsCommonImpl(Connection connection, String tableName, String columnName, int toReturn, String sql) {
+        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName);
             preparedStatement.setString("columnName", columnName);
             preparedStatement.setString("tableCatalog", connection.getCatalog());
@@ -342,17 +349,17 @@ public abstract class JdsDb implements JdsDbContract {
      *
      * @param fileName the file containing SQL to find
      */
-    protected final void executeSqlFromFile(String fileName) {
+    protected final void executeSqlFromFile(Connection connection, String fileName) {
         try (InputStream rs = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             String innerSql = fileToString(rs);
-            executeSqlFromString(innerSql);
+            executeSqlFromString(connection, innerSql);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
     }
 
-    protected final void executeSqlFromString(String innerSql) {
-        try (Connection connection = getConnection(); PreparedStatement innerStmt = connection.prepareStatement(innerSql)) {
+    protected final void executeSqlFromString(Connection connection, String innerSql) {
+        try (PreparedStatement innerStmt = connection.prepareStatement(innerSql)) {
             innerStmt.execute();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -380,12 +387,14 @@ public abstract class JdsDb implements JdsDbContract {
     }
 
     /**
-     * Override this method with custom implementations of {@link #prepareDatabaseComponent(JdsComponentType, JdsComponent) prepareDatabaseComponents}
-     * {@link #prepareDatabaseComponent(JdsComponentType, JdsComponent) prepareDatabaseComponents}
+     * Override this method with custom implementations of {@link #prepareDatabaseComponent(Connection, JdsComponentType, JdsComponent) prepareDatabaseComponents}
+     * {@link #prepareDatabaseComponent(Connection, JdsComponentType, JdsComponent) prepareDatabaseComponents}
      * delegates the creation of custom database components depending on the
      * underlying JDS Database implementation
+     *
+     * @param connection the SQL connection to use
      */
-    protected void prepareCustomDatabaseComponents() {
+    protected void prepareCustomDatabaseComponents(Connection connection) {
     }
 
     /**
@@ -395,7 +404,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param tableName the table to look up
      * @return 1 if the specified table exists in the database
      */
-    public abstract int tableExists(String tableName);
+    public abstract int tableExists(Connection connection, String tableName);
 
     /**
      * Database specific check to see if the specified procedure exists in the
@@ -404,7 +413,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param procedureName the procedure to look up
      * @return 1 if the specified procedure exists in the database
      */
-    public int procedureExists(String procedureName) {
+    public int procedureExists(Connection connection, String procedureName) {
         return 0;
     }
 
@@ -415,7 +424,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param viewName the view to look up
      * @return 1 if the specified procedure exists in the database
      */
-    public int viewExists(String viewName) {
+    public int viewExists(Connection connection, String viewName) {
         return 0;
     }
 
@@ -426,7 +435,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param triggerName the trigger to look up
      * @return 1 if the specified trigger exists in the database
      */
-    public int triggerExists(String triggerName) {
+    public int triggerExists(Connection connection, String triggerName) {
         return 0;
     }
 
@@ -437,7 +446,7 @@ public abstract class JdsDb implements JdsDbContract {
      * @param indexName the trigger to look up
      * @return 1 if the specified index exists in the database
      */
-    public int indexExists(String indexName) {
+    public int indexExists(Connection connection, String indexName) {
         return 0;
     }
 
@@ -449,159 +458,159 @@ public abstract class JdsDb implements JdsDbContract {
      * @param columnName
      * @return
      */
-    public int columnExists(String tableName, String columnName) {
+    public int columnExists(Connection connection, String tableName, String columnName) {
         return 0;
     }
 
     /**
      * Database specific SQL used to create the schema that stores text values
      */
-    abstract void createStoreText();
+    abstract void createStoreText(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores blob
      * values
      */
-    abstract void createStoreBlob();
+    abstract void createStoreBlob(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores datetime
      * values
      */
-    abstract void createStoreDateTime();
+    abstract void createStoreDateTime(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores zoned
      * datetime values
      */
-    abstract void createStoreZonedDateTime();
+    abstract void createStoreZonedDateTime(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores time values
      */
-    abstract void createStoreTime();
+    abstract void createStoreTime(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores integer
      * values
      */
-    abstract void createStoreInteger();
+    abstract void createStoreInteger(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores float values
      */
-    abstract void createStoreFloat();
+    abstract void createStoreFloat(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores double values
      */
-    abstract void createStoreDouble();
+    abstract void createStoreDouble(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores long values
      */
-    abstract void createStoreLong();
+    abstract void createStoreLong(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores text array
      * values
      */
-    abstract void createStoreTextArray();
+    abstract void createStoreTextArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores datetime
      * array values
      */
-    abstract void createStoreDateTimeArray();
+    abstract void createStoreDateTimeArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores integer array
      * values
      */
-    abstract void createStoreIntegerArray();
+    abstract void createStoreIntegerArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores float array
      * values
      */
-    abstract void createStoreFloatArray();
+    abstract void createStoreFloatArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores double array
      * values
      */
-    abstract void createStoreDoubleArray();
+    abstract void createStoreDoubleArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores long array
      * values
      */
-    abstract void createStoreLongArray();
+    abstract void createStoreLongArray(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity
      * definitions
      */
-    abstract void createStoreEntities();
+    abstract void createStoreEntities(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores enum
      * definitions
      */
-    abstract void createRefEnumValues();
+    abstract void createRefEnumValues(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores inheritance information
      */
-    abstract void createRefInheritance();
+    abstract void createRefInheritance(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores field
      * definitions
      */
-    abstract void createRefFields();
+    abstract void createRefFields(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores field type
      * definitions
      */
-    abstract void createRefFieldTypes();
+    abstract void createRefFieldTypes(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity
      * binding information
      */
-    abstract void createBindEntityFields();
+    abstract void createBindEntityFields(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity to
      * enum binding information
      */
-    abstract void createBindEntityEnums();
+    abstract void createBindEntityEnums(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity
      * overview
      */
-    abstract void createRefEntityOverview();
+    abstract void createRefEntityOverview(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores old field
      * values of every type
      */
-    abstract void createRefOldFieldValues();
+    abstract void createRefOldFieldValues(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity to
      * entity bindings
      */
-    abstract void createStoreEntityBinding();
+    abstract void createStoreEntityBinding(Connection connection);
 
     /**
      * Database specific SQL used to create the schema that stores entity to type
      * bindings
      */
-    abstract void createStoreEntityInheritance();
+    abstract void createStoreEntityInheritance(Connection connection);
 
     /**
      * Binds all the fields attached to an entity, updates the fields dictionary

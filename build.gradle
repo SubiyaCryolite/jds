@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'io.github.subiyacryolite'
-version = '3.2.2-SNAPSHOT' //majorv.minorv.bugfixincrement
+version = '3.2.3-SNAPSHOT' //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
 description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
@@ -69,10 +69,10 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
+                authentication(userName: ossrhUsername, password: ossrhPassword)
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
+                authentication(userName: ossrhUsername, password: ossrhPassword)
             }
             pom.project {
                 name 'Jenesis Data Store'

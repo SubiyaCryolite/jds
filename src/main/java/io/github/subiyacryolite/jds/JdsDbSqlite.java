@@ -31,10 +31,10 @@ public abstract class JdsDbSqlite extends JdsDb {
     }
 
     @Override
-    public int tableExists(String tableName) {
+    public int tableExists(Connection connection, String tableName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -48,9 +48,9 @@ public abstract class JdsDbSqlite extends JdsDb {
     }
 
     @Override
-    public int columnExists(String tableName, String columnName) {
+    public int columnExists(Connection connection, String tableName, String columnName) {
         String sql = String.format("PRAGMA table_info('%s')", tableName);
-        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
+        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String column = resultSet.getString("name");
@@ -66,137 +66,137 @@ public abstract class JdsDbSqlite extends JdsDb {
     }
 
     @Override
-    protected void createStoreEntityInheritance() {
-        executeSqlFromFile("sql/sqlite/createStoreEntityInheritance.sql");
+    protected void createStoreEntityInheritance(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityInheritance.sql");
     }
 
     @Override
-    protected void createStoreText() {
-        executeSqlFromFile("sql/sqlite/createStoreText.sql");
+    protected void createStoreText(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreText.sql");
     }
 
     @Override
-    protected void createStoreDateTime() {
-        executeSqlFromFile("sql/sqlite/createStoreDateTime.sql");
+    protected void createStoreDateTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreDateTime.sql");
     }
 
     @Override
-    protected void createStoreZonedDateTime() {
-        executeSqlFromFile("sql/sqlite/createStoreZonedDateTime.sql");
+    protected void createStoreZonedDateTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreZonedDateTime.sql");
     }
 
     @Override
-    protected void createStoreInteger() {
-        executeSqlFromFile("sql/sqlite/createStoreInteger.sql");
+    protected void createStoreInteger(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreInteger.sql");
     }
 
     @Override
-    protected void createStoreFloat() {
-        executeSqlFromFile("sql/sqlite/createStoreFloat.sql");
+    protected void createStoreFloat(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreFloat.sql");
     }
 
     @Override
-    protected void createStoreDouble() {
-        executeSqlFromFile("sql/sqlite/createStoreDouble.sql");
+    protected void createStoreDouble(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreDouble.sql");
     }
 
     @Override
-    protected void createStoreLong() {
-        executeSqlFromFile("sql/sqlite/createStoreLong.sql");
+    protected void createStoreLong(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreLong.sql");
     }
 
     @Override
-    protected void createStoreTextArray() {
-        executeSqlFromFile("sql/sqlite/createStoreTextArray.sql");
+    protected void createStoreTextArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreTextArray.sql");
     }
 
     @Override
-    protected void createStoreDateTimeArray() {
-        executeSqlFromFile("sql/sqlite/createStoreDateTimeArray.sql");
+    protected void createStoreDateTimeArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreDateTimeArray.sql");
     }
 
     @Override
-    protected void createStoreIntegerArray() {
-        executeSqlFromFile("sql/sqlite/createStoreIntegerArray.sql");
+    protected void createStoreIntegerArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreIntegerArray.sql");
     }
 
     @Override
-    protected void createStoreFloatArray() {
-        executeSqlFromFile("sql/sqlite/createStoreFloatArray.sql");
+    protected void createStoreFloatArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreFloatArray.sql");
     }
 
     @Override
-    protected void createStoreDoubleArray() {
-        executeSqlFromFile("sql/sqlite/createStoreDoubleArray.sql");
+    protected void createStoreDoubleArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreDoubleArray.sql");
     }
 
     @Override
-    protected void createStoreLongArray() {
-        executeSqlFromFile("sql/sqlite/createStoreLongArray.sql");
+    protected void createStoreLongArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreLongArray.sql");
     }
 
     @Override
-    protected void createStoreEntities() {
-        executeSqlFromFile("sql/sqlite/createRefEntities.sql");
+    protected void createStoreEntities(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createRefEntities.sql");
     }
 
     @Override
-    protected void createRefEnumValues() {
-        executeSqlFromFile("sql/sqlite/createRefEnumValues.sql");
+    protected void createRefEnumValues(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createRefEnumValues.sql");
     }
 
     @Override
-    protected void createRefFields() {
-        executeSqlFromFile("sql/sqlite/createRefFields.sql");
+    protected void createRefFields(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createRefFields.sql");
     }
 
     @Override
-    protected void createRefFieldTypes() {
-        executeSqlFromFile("sql/sqlite/createRefFieldTypes.sql");
+    protected void createRefFieldTypes(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createRefFieldTypes.sql");
     }
 
     @Override
-    protected void createBindEntityFields() {
-        executeSqlFromFile("sql/sqlite/createBindEntityFields.sql");
+    protected void createBindEntityFields(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createBindEntityFields.sql");
     }
 
     @Override
-    protected void createBindEntityEnums() {
-        executeSqlFromFile("sql/sqlite/createBindEntityEnums.sql");
+    protected void createBindEntityEnums(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createBindEntityEnums.sql");
     }
 
-    protected void createRefEntityOverview() {
-        executeSqlFromFile("sql/sqlite/createStoreEntityOverview.sql");
-    }
-
-    @Override
-    void createRefOldFieldValues() {
-        executeSqlFromFile("sql/sqlite/createStoreOldFieldValues.sql");
-        executeSqlFromString("CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);");
-        executeSqlFromString("CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);");
-        executeSqlFromString("CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);");
-        executeSqlFromString("CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);");
-        executeSqlFromString("CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);");
-        executeSqlFromString("CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);");
+    protected void createRefEntityOverview(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityOverview.sql");
     }
 
     @Override
-    protected void createStoreEntityBinding() {
-        executeSqlFromFile("sql/sqlite/createStoreEntityBinding.sql");
+    void createRefOldFieldValues(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreOldFieldValues.sql");
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);");
+        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);");
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);");
+        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);");
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);");
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);");
     }
 
     @Override
-    protected void createStoreTime() {
-        executeSqlFromFile("sql/sqlite/createStoreTime.sql");
-    }
-
-    protected void createStoreBlob() {
-        executeSqlFromFile("sql/sqlite/createStoreBlob.sql");
+    protected void createStoreEntityBinding(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityBinding.sql");
     }
 
     @Override
-    protected void createRefInheritance() {
-        executeSqlFromFile("sql/sqlite/createRefInheritance.sql");
+    protected void createStoreTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreTime.sql");
+    }
+
+    protected void createStoreBlob(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createStoreBlob.sql");
+    }
+
+    @Override
+    protected void createRefInheritance(Connection connection) {
+        executeSqlFromFile(connection, "sql/sqlite/createRefInheritance.sql");
     }
 
 

@@ -20,10 +20,10 @@ public abstract class JdsDbOracle extends JdsDb {
     }
 
     @Override
-    public int tableExists(String tableName) {
+    public int tableExists(Connection connection, String tableName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, tableName.toUpperCase());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -38,10 +38,10 @@ public abstract class JdsDbOracle extends JdsDb {
     }
 
     @Override
-    public int viewExists(String viewName) {
+    public int viewExists(Connection connection, String viewName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, viewName.toUpperCase());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -56,10 +56,10 @@ public abstract class JdsDbOracle extends JdsDb {
     }
 
     @Override
-    public int procedureExists(String procedureName) {
+    public int procedureExists(Connection connection, String procedureName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?";
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, procedureName.toUpperCase());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -74,10 +74,10 @@ public abstract class JdsDbOracle extends JdsDb {
     }
 
     @Override
-    public int columnExists(String tableName, String columnName) {
+    public int columnExists(Connection connection, String tableName, String columnName) {
         int toReturn = 0;
         String sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = :tableName AND COLUMN_NAME = :columnName";
-        try (Connection connection = getConnection(); NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
+        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, sql)) {
             preparedStatement.setString("tableName", tableName.toUpperCase());
             preparedStatement.setString("columnName", columnName.toUpperCase());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -102,222 +102,222 @@ public abstract class JdsDbOracle extends JdsDb {
     }
 
     @Override
-    protected void createStoreEntityInheritance() {
-        executeSqlFromFile("sql/oracle/createStoreEntityInheritance.sql");
+    protected void createStoreEntityInheritance(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreEntityInheritance.sql");
     }
 
     @Override
-    protected void createStoreText() {
-        executeSqlFromFile("sql/oracle/createStoreText.sql");
+    protected void createStoreText(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreText.sql");
     }
 
     @Override
-    protected void createStoreDateTime() {
-        executeSqlFromFile("sql/oracle/createStoreDateTime.sql");
+    protected void createStoreDateTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreDateTime.sql");
     }
 
     @Override
-    protected void createStoreZonedDateTime() {
-        executeSqlFromFile("sql/oracle/createStoreZonedDateTime.sql");
+    protected void createStoreZonedDateTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreZonedDateTime.sql");
     }
 
     @Override
-    protected void createStoreInteger() {
-        executeSqlFromFile("sql/oracle/createStoreInteger.sql");
+    protected void createStoreInteger(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreInteger.sql");
     }
 
     @Override
-    protected void createStoreFloat() {
-        executeSqlFromFile("sql/oracle/createStoreFloat.sql");
+    protected void createStoreFloat(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreFloat.sql");
     }
 
     @Override
-    protected void createStoreDouble() {
-        executeSqlFromFile("sql/oracle/createStoreDouble.sql");
+    protected void createStoreDouble(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreDouble.sql");
     }
 
     @Override
-    protected void createStoreLong() {
-        executeSqlFromFile("sql/oracle/createStoreLong.sql");
+    protected void createStoreLong(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreLong.sql");
     }
 
     @Override
-    protected void createStoreTextArray() {
-        executeSqlFromFile("sql/oracle/createStoreTextArray.sql");
+    protected void createStoreTextArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreTextArray.sql");
     }
 
     @Override
-    protected void createStoreDateTimeArray() {
-        executeSqlFromFile("sql/oracle/createStoreDateTimeArray.sql");
+    protected void createStoreDateTimeArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreDateTimeArray.sql");
     }
 
     @Override
-    protected void createStoreIntegerArray() {
-        executeSqlFromFile("sql/oracle/createStoreIntegerArray.sql");
+    protected void createStoreIntegerArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreIntegerArray.sql");
     }
 
     @Override
-    protected void createStoreFloatArray() {
-        executeSqlFromFile("sql/oracle/createStoreFloatArray.sql");
+    protected void createStoreFloatArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreFloatArray.sql");
     }
 
     @Override
-    protected void createStoreDoubleArray() {
-        executeSqlFromFile("sql/oracle/createStoreDoubleArray.sql");
+    protected void createStoreDoubleArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreDoubleArray.sql");
     }
 
     @Override
-    protected void createStoreLongArray() {
-        executeSqlFromFile("sql/oracle/createStoreLongArray.sql");
+    protected void createStoreLongArray(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreLongArray.sql");
     }
 
     @Override
-    protected void createStoreEntities() {
-        executeSqlFromFile("sql/oracle/createRefEntities.sql");
+    protected void createStoreEntities(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createRefEntities.sql");
     }
 
     @Override
-    protected void createRefEnumValues() {
-        executeSqlFromFile("sql/oracle/createRefEnumValues.sql");
+    protected void createRefEnumValues(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createRefEnumValues.sql");
     }
 
     @Override
-    protected void createRefFields() {
-        executeSqlFromFile("sql/oracle/createRefFields.sql");
+    protected void createRefFields(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createRefFields.sql");
     }
 
     @Override
-    protected void createRefFieldTypes() {
-        executeSqlFromFile("sql/oracle/createRefFieldTypes.sql");
+    protected void createRefFieldTypes(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createRefFieldTypes.sql");
     }
 
     @Override
-    protected void createBindEntityFields() {
-        executeSqlFromFile("sql/oracle/createBindEntityFields.sql");
+    protected void createBindEntityFields(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createBindEntityFields.sql");
     }
 
     @Override
-    protected void createBindEntityEnums() {
-        executeSqlFromFile("sql/oracle/createBindEntityEnums.sql");
+    protected void createBindEntityEnums(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createBindEntityEnums.sql");
     }
 
     @Override
-    protected void createRefEntityOverview() {
-        executeSqlFromFile("sql/oracle/createStoreEntityOverview.sql");
+    protected void createRefEntityOverview(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreEntityOverview.sql");
     }
 
     @Override
-    protected void createRefOldFieldValues() {
-        executeSqlFromFile("sql/oracle/createStoreOldFieldValues.sql");
+    protected void createRefOldFieldValues(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreOldFieldValues.sql");
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
         //oracle jdbc hates semi-colons
-        executeSqlFromString("CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)");
-        executeSqlFromString("CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)");
-        executeSqlFromString("CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)");
-        executeSqlFromString("CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)");
-        executeSqlFromString("CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)");
-        executeSqlFromString("CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)");
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)");
+        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)");
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)");
+        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)");
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)");
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)");
     }
 
     @Override
-    protected void createStoreEntityBinding() {
-        executeSqlFromFile("sql/oracle/createStoreEntityBinding.sql");
+    protected void createStoreEntityBinding(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreEntityBinding.sql");
     }
 
-    protected void createStoreTime() {
-        executeSqlFromFile("sql/oracle/createStoreTime.sql");
+    protected void createStoreTime(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreTime.sql");
     }
 
-    protected void createStoreBlob() {
-        executeSqlFromFile("sql/oracle/createStoreBlob.sql");
-    }
-
-    @Override
-    protected void createRefInheritance() {
-        executeSqlFromFile("sql/oracle/createRefInheritance.sql");
+    protected void createStoreBlob(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createStoreBlob.sql");
     }
 
     @Override
-    protected void prepareCustomDatabaseComponents() {
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_INTEGER);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_FLOAT);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DOUBLE);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE);
-        prepareDatabaseComponent(JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE);
+    protected void createRefInheritance(Connection connection) {
+        executeSqlFromFile(connection, "sql/oracle/createRefInheritance.sql");
     }
 
     @Override
-    protected void prepareCustomDatabaseComponents(JdsComponent jdsComponent) {
+    protected void prepareCustomDatabaseComponents(Connection connection) {
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_INTEGER);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_FLOAT);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DOUBLE);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE);
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE);
+    }
+
+    @Override
+    protected void prepareCustomDatabaseComponents(Connection connection, JdsComponent jdsComponent) {
         switch (jdsComponent) {
             case SAVE_ENTITY_V_2:
-                executeSqlFromFile("sql/oracle/procedures/procStoreEntityOverviewV2.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityOverviewV2.sql");
                 break;
             case SAVE_ENTITY_INHERITANCE:
-                executeSqlFromFile("sql/oracle/procedures/procStoreEntityInheritance.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityInheritance.sql");
                 break;
             case MAP_FIELD_NAMES:
-                executeSqlFromFile("sql/oracle/procedures/procBindFieldNames.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldNames.sql");
                 break;
             case MAP_FIELD_TYPES:
-                executeSqlFromFile("sql/oracle/procedures/procBindFieldTypes.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldTypes.sql");
                 break;
             case SAVE_BLOB:
-                executeSqlFromFile("sql/oracle/procedures/procStoreBlob.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreBlob.sql");
                 break;
             case SAVE_TIME:
-                executeSqlFromFile("sql/oracle/procedures/procStoreTime.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreTime.sql");
                 break;
             case SAVE_TEXT:
-                executeSqlFromFile("sql/oracle/procedures/procStoreText.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreText.sql");
                 break;
             case SAVE_LONG:
-                executeSqlFromFile("sql/oracle/procedures/procStoreLong.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreLong.sql");
                 break;
             case SAVE_INTEGER:
-                executeSqlFromFile("sql/oracle/procedures/procStoreInteger.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreInteger.sql");
                 break;
             case SAVE_FLOAT:
-                executeSqlFromFile("sql/oracle/procedures/procStoreFloat.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreFloat.sql");
                 break;
             case SAVE_DOUBLE:
-                executeSqlFromFile("sql/oracle/procedures/procStoreDouble.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreDouble.sql");
                 break;
             case SAVE_DATE_TIME:
-                executeSqlFromFile("sql/oracle/procedures/procStoreDateTime.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreDateTime.sql");
                 break;
             case SAVE_ZONED_DATE_TIME:
-                executeSqlFromFile("sql/oracle/procedures/procStoreZonedDateTime.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreZonedDateTime.sql");
                 break;
             case SAVE_ENTITY:
-                executeSqlFromFile("sql/oracle/procedures/procStoreEntityOverview.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityOverview.sql");
                 break;
             case MAP_ENTITY_FIELDS:
-                executeSqlFromFile("sql/oracle/procedures/procBindEntityFields.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procBindEntityFields.sql");
                 break;
             case MAP_ENTITY_ENUMS:
-                executeSqlFromFile("sql/oracle/procedures/procBindEntityEnums.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procBindEntityEnums.sql");
                 break;
             case MAP_CLASS_NAME:
-                executeSqlFromFile("sql/oracle/procedures/procRefEntities.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procRefEntities.sql");
                 break;
             case MAP_ENUM_VALUES:
-                executeSqlFromFile("sql/oracle/procedures/procRefEnumValues.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procRefEnumValues.sql");
                 break;
             case MAP_ENTITY_INHERITANCE:
-                executeSqlFromFile("sql/oracle/procedures/procBindParentToChild.sql");
+                executeSqlFromFile(connection, "sql/oracle/procedures/procBindParentToChild.sql");
                 break;
         }
     }
