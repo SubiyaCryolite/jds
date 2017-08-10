@@ -4,7 +4,6 @@ import connectivity.*;
 import entities.*;
 import io.github.subiyacryolite.jds.JdsDb;
 import enums.PrimaryAddress;
-import org.junit.Test;
 
 import java.io.*;
 import java.time.*;
@@ -35,8 +34,8 @@ public abstract class BaseTestConfig {
         jdsDb.map(EntityB.class);
         jdsDb.map(EntityC.class);
         jdsDb.map(JdsExample.class);
-        jdsDb.map(SimpleAddress.class);
-        jdsDb.map(SimpleAddressBook.class);
+        jdsDb.map(Address.class);
+        jdsDb.map(AddressBook.class);
     }
 
     private void initJds() {
@@ -103,8 +102,8 @@ public abstract class BaseTestConfig {
         return objectOut;
     }
 
-    protected SimpleAddressBook getSimpleAddressBook() {
-        SimpleAddress primaryAddress = new SimpleAddress();
+    protected AddressBook getSimpleAddressBook() {
+        Address primaryAddress = new Address();
         primaryAddress.setEntityGuid("primaryAddress"); //setting a custom Entity Guid
         primaryAddress.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
         primaryAddress.setArea("Norte Broad");
@@ -115,7 +114,7 @@ public abstract class BaseTestConfig {
         primaryAddress.setStreetName("East Street");
         primaryAddress.setPrimaryAddress(PrimaryAddress.YES);
 
-        SimpleAddress secondAddress = new SimpleAddress();
+        Address secondAddress = new Address();
         secondAddress.setEntityGuid("secondAddress"); //setting a custom Entity Guid
         secondAddress.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
         secondAddress.setArea("Roma");
@@ -126,7 +125,7 @@ public abstract class BaseTestConfig {
         secondAddress.setStreetName("West Street");
         secondAddress.setPrimaryAddress(PrimaryAddress.NO);
 
-        SimpleAddress thirdAddress = new SimpleAddress();
+        Address thirdAddress = new Address();
         thirdAddress.setEntityGuid("thirdAddress"); //setting a custom Entity Guid
         thirdAddress.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
         thirdAddress.setArea("Riverdale");
@@ -137,12 +136,12 @@ public abstract class BaseTestConfig {
         thirdAddress.setStreetName("West Street");
         thirdAddress.setPrimaryAddress(PrimaryAddress.NO);
 
-        SimpleAddressBook simpleAddressBook = new SimpleAddressBook();
-        simpleAddressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
-        simpleAddressBook.getAddresses().add(primaryAddress);
-        simpleAddressBook.getAddresses().add(secondAddress);
-        simpleAddressBook.getAddresses().add(thirdAddress);
-        return simpleAddressBook;
+        AddressBook addressBook = new AddressBook();
+        addressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
+        addressBook.getAddresses().add(primaryAddress);
+        addressBook.getAddresses().add(secondAddress);
+        addressBook.getAddresses().add(thirdAddress);
+        return addressBook;
     }
 
     protected List<JdsExample> getCollection() {

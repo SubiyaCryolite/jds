@@ -1,6 +1,6 @@
 import common.BaseTestConfig;
-import entities.SimpleAddress;
-import fields.SimpleAddressFields;
+import entities.Address;
+import fields.Fields;
 import io.github.subiyacryolite.jds.JdsFilter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,8 +53,8 @@ public class FilterTests extends BaseTestConfig {
 
     private void basicQuery() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        JdsFilter filter = new JdsFilter(jdsDb, SimpleAddress.class).between(SimpleAddressFields.PLOT_NUMBER, 1, 2).like(SimpleAddressFields.COUNTRY_NAME, "Zam").or().equals(SimpleAddressFields.PROVINCE_NAME, "Copperbelt");
-        List<SimpleAddress> output = filter.call();
+        JdsFilter filter = new JdsFilter(jdsDb, Address.class).between(Fields.PLOT_NUMBER, 1, 2).like(Fields.COUNTRY_NAME, "Zam").or().equals(Fields.PROVINCE_NAME, "Copperbelt");
+        List<Address> output = filter.call();
         Assert.assertNotNull(output);
         System.out.println(output);
     }

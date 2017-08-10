@@ -3,16 +3,16 @@ package entities;
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import enums.PrimaryAddress;
-import enums.SimpleAddressEnums;
-import fields.SimpleAddressFields;
+import enums.Enums;
+import fields.Fields;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 import java.time.ZonedDateTime;
 
-@JdsEntityAnnotation(entityId = 1, entityName = "Simple Address")
-public class SimpleAddress extends JdsEntity {
+@JdsEntityAnnotation(entityId = 1, entityName = "address")
+public class Address extends JdsEntity {
     private final SimpleStringProperty streetName = new SimpleStringProperty("");
     private final SimpleIntegerProperty plotNumber = new SimpleIntegerProperty(0);
     private final SimpleStringProperty area = new SimpleStringProperty("");
@@ -22,15 +22,15 @@ public class SimpleAddress extends JdsEntity {
     private final SimpleObjectProperty<PrimaryAddress> primaryAddress = new SimpleObjectProperty<>(PrimaryAddress.NO);
     private final SimpleObjectProperty<ZonedDateTime> timeOfEntry = new SimpleObjectProperty(ZonedDateTime.now());
 
-    public SimpleAddress() {
-        map(SimpleAddressFields.STREET_NAME, streetName);
-        map(SimpleAddressFields.PLOT_NUMBER, plotNumber);
-        map(SimpleAddressFields.AREA_NAME, area);
-        map(SimpleAddressFields.CITY_NAME, city);
-        map(SimpleAddressFields.COUNTRY_NAME, country);
-        map(SimpleAddressFields.PROVINCE_NAME, provinceOrState);
-        map(SimpleAddressFields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
-        map(SimpleAddressEnums.PRIMARY_ADDRESS_ENUM, primaryAddress);
+    public Address() {
+        map(Fields.STREET_NAME, streetName);
+        map(Fields.PLOT_NUMBER, plotNumber);
+        map(Fields.AREA_NAME, area);
+        map(Fields.CITY_NAME, city);
+        map(Fields.COUNTRY_NAME, country);
+        map(Fields.PROVINCE_NAME, provinceOrState);
+        map(Fields.ZONED_DATE_OF_REGISTRATION, timeOfEntry);
+        map(Enums.PRIMARY_ADDRESS_ENUM, primaryAddress);
     }
 
     public PrimaryAddress getPrimaryAddress() {
@@ -99,7 +99,7 @@ public class SimpleAddress extends JdsEntity {
 
     @Override
     public String toString() {
-        return "SimpleAddress{" +
+        return "Address{" +
                 "primaryAddress=" + getPrimaryAddress() +
                 ", streetName=" + getStreetName() +
                 ", plotNumber=" + getPlotNumber() +

@@ -1,9 +1,9 @@
+import entities.Address;
+import entities.AddressBook;
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
 import common.BaseTestConfig;
-import entities.SimpleAddress;
-import entities.SimpleAddressBook;
 import org.junit.Test;
 
 import java.util.Comparator;
@@ -20,17 +20,17 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
     @Override
     public void save() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
-        JdsSave.save(jdsDb, 1, simpleAddressBook);
-        System.out.printf("Saved %s\n", simpleAddressBook);
+        AddressBook addressBook = getSimpleAddressBook();
+        JdsSave.save(jdsDb, 1, addressBook);
+        System.out.printf("Saved %s\n", addressBook);
     }
 
 
     @Test
     @Override
     public void load() throws Exception {
-        List<SimpleAddress> allAddressBooks = new JdsLoad(jdsDb, SimpleAddress.class).call(); //load all entities of type SimpleAddressBook
-        List<SimpleAddress> specificAddressBook = new JdsLoad(jdsDb, SimpleAddress.class, "primaryAddress").call(); //load all entities of type SimpleAddressBook with Entity Guids in range
+        List<Address> allAddressBooks = new JdsLoad(jdsDb, Address.class).call(); //load all entities of type AddressBook
+        List<Address> specificAddressBook = new JdsLoad(jdsDb, Address.class, "primaryAddress").call(); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
@@ -76,9 +76,9 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void testSortedLoads() throws Exception {
-        Comparator<SimpleAddressBook> comparator = Comparator.comparing(SimpleAddressBook::getDateCreated);
-        List<SimpleAddressBook> allAddressBooks = new JdsLoad(jdsDb, SimpleAddressBook.class, comparator).call(); //load all entities of type SimpleAddressBook
-        List<SimpleAddressBook> specificAddressBook = JdsLoad.load(jdsDb, SimpleAddressBook.class, comparator, "testGuid0001"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        Comparator<AddressBook> comparator = Comparator.comparing(AddressBook::getDateCreated);
+        List<AddressBook> allAddressBooks = new JdsLoad(jdsDb, AddressBook.class, comparator).call(); //load all entities of type AddressBook
+        List<AddressBook> specificAddressBook = JdsLoad.load(jdsDb, AddressBook.class, comparator, "testGuid0001"); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);
         System.out.printf("Specific entities [%s]\n", specificAddressBook);
     }
@@ -92,7 +92,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void deleteUsingObjectOrCollection() throws Exception {
-        SimpleAddressBook simpleAddressBook = getSimpleAddressBook();
-        JdsDelete.delete(jdsDb, simpleAddressBook);
+        AddressBook addressBook = getSimpleAddressBook();
+        JdsDelete.delete(jdsDb, addressBook);
     }
 }

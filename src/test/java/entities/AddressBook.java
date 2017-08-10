@@ -7,23 +7,23 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 
-@JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
-public class SimpleAddressBook extends JdsEntity {
-    private final SimpleListProperty<SimpleAddress> addresses;
+@JdsEntityAnnotation(entityId = 2, entityName = "address_book")
+public class AddressBook extends JdsEntity {
+    private final SimpleListProperty<Address> addresses;
 
-    public SimpleAddressBook() {
+    public AddressBook() {
         this.addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
         //map your objects
-        map(SimpleAddress.class, addresses);
+        map(Address.class, addresses);
     }
 
-    public List<SimpleAddress> getAddresses() {
+    public List<Address> getAddresses() {
         return this.addresses.get();
     }
 
     @Override
     public String toString() {
-        return "SimpleAddressBook{" +
+        return "AddressBook{" +
                 "addresses = " + getAddresses() +
                 '}';
     }

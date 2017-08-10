@@ -20,8 +20,8 @@ public class LegacyValidationTests extends BaseTestConfig {
         JdsSave.save(jdsDb, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
-        List<JdsExample> savObjects = JdsLoad.load(jdsDb, JdsExample.class); //load all entities of type SimpleAddressBook
-        List<JdsExample> specificObject = JdsLoad.load(jdsDb, JdsExample.class, "instance4"); //load all entities of type SimpleAddressBook with Entity Guids in range
+        List<JdsExample> savObjects = JdsLoad.load(jdsDb, JdsExample.class); //load all entities of type AddressBook
+        List<JdsExample> specificObject = JdsLoad.load(jdsDb, JdsExample.class, "instance4"); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", savObjects);
         System.out.printf("Specific entities [%s]\n", specificObject);
 

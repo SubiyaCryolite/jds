@@ -103,7 +103,7 @@ I recommend defining your fields as static constants
 import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
 
-public class NewTestFields {
+public class Fields {
     public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
     public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
     public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);
@@ -122,7 +122,7 @@ public class NewTestFields {
 JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard field of type ENUM_TEXT.
 ```java
-public class NewTestFields
+public class Fields
 {
     //---
     //---
@@ -131,16 +131,16 @@ public class NewTestFields
 ```
 Then, we can define our actual enum in the following manner.
 ```java
-public enum SexEnum
+public enum Sex
 {
     MALE,
     FEMALE
 }
 
 
-public class NewTestEnums
+public class Enums
 {
-    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(SexEnum.class, NewTestFields.SEX_ENUM, SexEnum.values());
+    public final static JdsFieldEnum SEX_ENUMS = new JdsFieldEnum(Sex.class, Fields.SEX_ENUM, Sex.values());
 }
 ```
 Behind the scenes these enums will be stored as either an Integer (ENUM) or an Integer Array (ENUM_COLLECTION).
@@ -186,8 +186,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
-public class JdsExample extends JdsEntity {
+@JdsEntityAnnotation(entityId = 3, entityName = "example")
+public class Example extends JdsEntity {
         private final SimpleStringProperty stringField;
         private final SimpleObjectProperty<LocalTime> timeField;
         private final SimpleObjectProperty<LocalDate> dateField;
@@ -199,7 +199,7 @@ public class JdsExample extends JdsEntity {
         private final SimpleFloatProperty floatField;
         private final SimpleBooleanProperty booleanField;
     
-        public JdsExample() {
+        public Example() {
             stringField = new SimpleStringProperty("");
             timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
             dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
@@ -211,19 +211,19 @@ public class JdsExample extends JdsEntity {
             floatField = new SimpleFloatProperty(0);
             booleanField = new SimpleBooleanProperty(false);
             //map
-            map(NewTestFields.STRING_FIELD, stringField);
-            map(NewTestFields.DATE_FIELD, dateField);
-            map(NewTestFields.TIME_FIELD, timeField);
-            map(NewTestFields.DATE_TIME_FIELD, dateTimeField);
-            map(NewTestFields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
-            map(NewTestFields.LONG_FIELD, longField);
-            map(NewTestFields.INT_FIELD, intField);
-            map(NewTestFields.DOUBLE_FIELD, doubleField);
-            map(NewTestFields.FLOAT_FIELD, floatField);
-            map(NewTestFields.BOOLEAN_FIELD, booleanField);
+            map(Fields.STRING_FIELD, stringField);
+            map(Fields.DATE_FIELD, dateField);
+            map(Fields.TIME_FIELD, timeField);
+            map(Fields.DATE_TIME_FIELD, dateTimeField);
+            map(Fields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
+            map(Fields.LONG_FIELD, longField);
+            map(Fields.INT_FIELD, intField);
+            map(Fields.DOUBLE_FIELD, doubleField);
+            map(Fields.FLOAT_FIELD, floatField);
+            map(Fields.BOOLEAN_FIELD, booleanField);
         }
     
-        public JdsExample(String str, 
+        public Example(String str, 
                          LocalTime timeField, 
                          LocalDate localDate, 
                          LocalDateTime localDateTime, 
@@ -328,7 +328,7 @@ public class JdsExample extends JdsEntity {
 
     @Override
     public String toString() {
-        return "JdsExample{" +
+        return "Example{" +
                 "stringField = " + getStringField() +
                 ", timeField = " + getTimeField() +
                 ", dateField = " + getDateField() +
@@ -358,24 +358,24 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import java.util.List;
 
 @JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
-public class SimpleAddressBook extends JdsEntity {
-    private final SimpleListProperty<SimpleAddress> addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
+public class AddressBook extends JdsEntity {
+    private final SimpleListProperty<Address> addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    public SimpleAddressBook() {
-        map(SimpleAddress.class, addresses);
+    public AddressBook() {
+        map(Address.class, addresses);
     }
 
-    public List<SimpleAddress> getAddresses() {
+    public List<Address> getAddresses() {
         return this.addresses.get();
     }
 
-    public void setAddresses(List<SimpleAddress> value) {
-        this.addresses.set((ObservableList<SimpleAddress>) value);
+    public void setAddresses(List<Address> value) {
+        this.addresses.set((ObservableList<Address>) value);
     }
 
     @Override
     public String toString() {
-        return "SimpleAddressBook{" +
+        return "AddressBook{" +
                 "addresses = " + getAddresses() +
                 '}';
     }
@@ -533,9 +533,9 @@ Once you have initialised your database you can go ahead and initialise all your
 public void initialiseJdsClasses()
 {
     //jdsDb is a reference to your instance of JdsDb.java
-    jdsDb.map(JdsExample.class);
-    jdsDb.map(SimpleAddress.class);
-    jdsDb.map(SimpleAddressBook.class);
+    jdsDb.map(Example.class);
+    jdsDb.map(Address.class);
+    jdsDb.map(AddressBook.class);
 }
 ```
 You only have to do this once at start-up but it is vital that you do so. Without this you will face problems when loading or saving records
@@ -543,14 +543,14 @@ You only have to do this once at start-up but it is vital that you do so. Withou
 ### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
 ```java
-private List<JdsExample> getCollection() {
-    List<JdsExample> collection = new ArrayList<>();
+private List<Example> getCollection() {
+    List<Example> collection = new ArrayList<>();
     
-    JdsExample instance1 = new JdsExample();
+    Example instance1 = new Example();
     instance1.setEntityGuid("instance1");
     instance1.setStringField("One");
     
-    JdsExample instance2 = new JdsExample();
+    Example instance2 = new Example();
     instance2.setStringField("tWO");
     instance2.setTimeField(LocalTime.of(15, 24));
     instance2.setDateField(LocalDate.of(2012, 8, 26));
@@ -563,7 +563,7 @@ private List<JdsExample> getCollection() {
     instance2.setBooleanField(false);
     instance2.setEntityGuid("instance2");
     
-    JdsExample instance3 = new JdsExample();
+    Example instance3 = new Example();
     instance3.setStringField("Three");
     instance3.setTimeField(LocalTime.of(03, 14));
     instance3.setDateField(LocalDate.of(2034, 6, 14));
@@ -576,7 +576,7 @@ private List<JdsExample> getCollection() {
     instance3.setBooleanField(false);
     instance3.setEntityGuid("instance3");
     
-    JdsExample instance4 = new JdsExample();
+    Example instance4 = new Example();
     instance4.setStringField("Four");
     instance4.setTimeField(LocalTime.of(12, 44));
     instance4.setDateField(LocalDate.of(3034, 12, 1));
@@ -600,10 +600,10 @@ private List<JdsExample> getCollection() {
 ### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
 ```java
-List<JdsExample> collection = getCollection();
+List<Example> collection = getCollection();
 
 //NEW APPROACH (INTRODUCED IN 1.170514)
-List<JdsExample> collection = getCollection();
+List<Example> collection = getCollection();
 Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
 FutureTask<Boolean> saving = new FutureTask(save);
 saving.run();
@@ -619,24 +619,24 @@ System.out.printf("Saved %s\n", collection);
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
-//all entities of type SimpleAddressBook
-List<JdsExample> allInstances;
-//all entities of type SimpleAddressBook with Entity Guids in range
-List<JdsExample> specificInstance;
-//all entities of type SimpleAddressBook with Entity Guids in range SORTED by creation date
-List<JdsExample> sortedInstances;
+//all entities of type AddressBook
+List<Example> allInstances;
+//all entities of type AddressBook with Entity Guids in range
+List<Example> specificInstance;
+//all entities of type AddressBook with Entity Guids in range SORTED by creation date
+List<Example> sortedInstances;
 //ordering comparator
-Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateField);
+Comparator<Example> comparator = Comparator.comparing(Example::getDateField);
 
 //NEW APPROACH (INTRODUCED IN 1.170514)
 
-    Callable<List<JdsExample>> loadAllInstances = new JdsLoad(jdsDb, JdsExample.class);
-    Callable<List<JdsExample>> loadSpecificInstance = new JdsLoad(jdsDb, JdsExample.class, "instance3");
-    Callable<List<JdsExample>> loadSortedInstances = new JdsLoad(jdsDb, JdsExample.class, comparator);
+    Callable<List<Example>> loadAllInstances = new JdsLoad(jdsDb, Example.class);
+    Callable<List<Example>> loadSpecificInstance = new JdsLoad(jdsDb, Example.class, "instance3");
+    Callable<List<Example>> loadSortedInstances = new JdsLoad(jdsDb, Example.class, comparator);
     
-    FutureTask<List<JdsExample>> loadingAllInstances = new FutureTask(loadAllInstances);
-    FutureTask<List<JdsExample>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
-    FutureTask<List<JdsExample>> loadingSortedInstances = new FutureTask(loadSortedInstances);
+    FutureTask<List<Example>> loadingAllInstances = new FutureTask(loadAllInstances);
+    FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
+    FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
     
     loadingAllInstances.run();
     loadingSpecificInstance.run();
@@ -649,9 +649,9 @@ Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateFiel
     while (!loadingSortedInstances.isDone())
         System.out.println("Waiting for operation 3 to complete");
     
-    List<JdsExample> allInstances = loadingAllInstances.get();
-    List<JdsExample> specificInstance = loadingSpecificInstance.get();
-    List<JdsExample> sortedInstances = loadingSortedInstances.get();
+    List<Example> allInstances = loadingAllInstances.get();
+    List<Example> specificInstance = loadingSpecificInstance.get();
+    List<Example> sortedInstances = loadingSortedInstances.get();
     
     System.out.println(allInstances);
     System.out.println(specificInstance);
@@ -660,9 +660,9 @@ Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateFiel
 
 //OLD APPROACH (DEPRECATED IN 1.170514)
 
-    allInstances = JdsLoad.load(jdsDb, JdsExample.class);
-    specificInstance = JdsLoad.load(jdsDb, JdsExample.class, "instance3");
-    specificAddressBook = JdsLoad.load(jdsDb, JdsExample.class, comparator);
+    allInstances = JdsLoad.load(jdsDb, Example.class);
+    specificInstance = JdsLoad.load(jdsDb, Example.class, "instance3");
+    specificAddressBook = JdsLoad.load(jdsDb, Example.class, comparator);
     
     System.out.println(allInstances);
     System.out.println(specificInstance);
@@ -673,14 +673,14 @@ Comparator<JdsExample> comparator = Comparator.comparing(JdsExample::getDateFiel
 ### 1.2.6 Load with Filter
 A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
 ```java
-    JdsFilter filter = new JdsFilter(jdsDb, SimpleAddress.class).equals(SimpleAddressFields.AREA_NAME, "Riverdale").like(SimpleAddressFields.COUNTRY_NAME, "Zam").or().equals(SimpleAddressFields.PROVINCE_NAME, "Copperbelt");
-    List<SimpleAddress> output = new FutureTask<List<SimpleAddress>>(filter).get();
+    JdsFilter filter = new JdsFilter(jdsDb, Address.class).equals(AddressFields.AREA_NAME, "Riverdale").like(AddressFields.COUNTRY_NAME, "Zam").or().equals(AddressFields.PROVINCE_NAME, "Copperbelt");
+    List<Address> output = new FutureTask<List<Address>>(filter).get();
 ```
 
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
 ```java
-List<JdsExample> collection = getCollection();
+List<Example> collection = getCollection();
     
 //NEW APPROACH (INTRODUCED IN 1.170514)
     Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
