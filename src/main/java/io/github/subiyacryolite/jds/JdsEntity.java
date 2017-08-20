@@ -34,70 +34,13 @@ public abstract class JdsEntity extends JdsEntityBase {
      */
     public JdsEntity() {
         if (getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
-            JdsEntityAnnotation je = getClass().getAnnotation(JdsEntityAnnotation.class);
-            setEntityCode(je.entityId());
-            setEntityName(je.entityName());
+            JdsEntityAnnotation entityAnnotation = getClass().getAnnotation(JdsEntityAnnotation.class);
+            getOverview().setEntityId(entityAnnotation.entityId());
+            setEntityName(entityAnnotation.entityName());
         } else {
             throw new RuntimeException("You must annotate the class [" + getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
-
-    /**
-     * @return
-     */
-    public String getEntityGuid() {
-        return getOverview().getEntityGuid();
-    }
-
-    /**
-     * @param actionId
-     */
-    public void setEntityGuid(String actionId) {
-        getOverview().setEntityGuid(actionId);
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getDateCreated() {
-        return getOverview().getDateCreated();
-    }
-
-    /**
-     * @param dateCreated
-     */
-    public void setDateCreated(LocalDateTime dateCreated) {
-        this.getOverview().setDateCreated(dateCreated);
-    }
-
-    /**
-     * @return
-     */
-    public LocalDateTime getDateModified() {
-        return this.getOverview().getDateModified();
-    }
-
-    /**
-     * @param dateModified
-     */
-    public void setDateModified(LocalDateTime dateModified) {
-        this.getOverview().setDateModified(dateModified);
-    }
-
-    /**
-     * @return
-     */
-    public long getEntityCode() {
-        return this.getOverview().getEntityId();
-    }
-
-    /**
-     * @param serviceCode
-     */
-    private void setEntityCode(long serviceCode) {
-        this.getOverview().setEntityId(serviceCode);
-    }
-
     /**
      * @return
      */

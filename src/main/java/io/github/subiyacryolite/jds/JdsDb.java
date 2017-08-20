@@ -765,11 +765,11 @@ public abstract class JdsDb implements JdsDbContract {
                     List<Long> parentEntities = new ArrayList<>();
                     JdsEntity jdsEntity = entity.newInstance();
                     determineParents(entity, parentEntities);
-                    mapClassName(connection, jdsEntity.getEntityCode(), jdsEntity.getEntityName());
-                    mapClassFields(connection, jdsEntity.getEntityCode(), jdsEntity.properties);
-                    mapClassFieldTypes(connection, jdsEntity.getEntityCode(), jdsEntity.types);
-                    mapClassEnums(connection, jdsEntity.getEntityCode(), jdsEntity.allEnums);
-                    mapParentEntities(connection, parentEntities, jdsEntity.getEntityCode());
+                    mapClassName(connection, jdsEntity.getOverview().getEntityId(), jdsEntity.getEntityName());
+                    mapClassFields(connection, jdsEntity.getOverview().getEntityId(), jdsEntity.properties);
+                    mapClassFieldTypes(connection, jdsEntity.getOverview().getEntityId(), jdsEntity.types);
+                    mapClassEnums(connection, jdsEntity.getOverview().getEntityId(), jdsEntity.allEnums);
+                    mapParentEntities(connection, parentEntities, jdsEntity.getOverview().getEntityId());
                     connection.commit();
                     jdsEntity = null;
                     if (isPrintingOutput())

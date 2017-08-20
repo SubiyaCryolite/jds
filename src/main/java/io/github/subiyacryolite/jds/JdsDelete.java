@@ -74,11 +74,11 @@ public class JdsDelete implements Callable<Boolean> {
      * @throws ClassNotFoundException
      */
     public JdsDelete(final JdsDb jdsDb, final Collection<? extends JdsEntity> entities) throws SQLException, ClassNotFoundException {
-        this(jdsDb, entities.stream().map(x -> x.getEntityGuid()).collect(Collectors.toList()));
+        this(jdsDb, entities.stream().map(x -> x.getOverview().getEntityGuid()).collect(Collectors.toList()));
         Connection connection = jdsDb.getConnection();
         entities.forEach(entity -> {
             if (entity instanceof JdsDeleteListener)
-                ((JdsDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, connection, entity.getEntityGuid()));
+                ((JdsDeleteListener) entity).onDelete(new OnDeleteEventArguments(this.jdsDb, connection, entity.getOverview().getEntityGuid()));
         });
     }
 

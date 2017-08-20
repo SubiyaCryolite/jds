@@ -131,7 +131,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 if (referenceType != null && (initialisePrimitives || initialiseDatesAndTimes || initialiseObjects)) {
                     //sometimes the entities would already have been instanciated, thus we only need to populate
                     T entity = referenceType.newInstance();
-                    entity.setEntityGuid(entityGuid);
+                    entity.getOverview().setEntityGuid(entityGuid);
                     entities.add(entity);
                 }
                 //primitives
@@ -161,7 +161,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
             //catch embedded/pre-created objects objects as well
             for (JdsEntity entity : entities)
                 if (entity instanceof JdsLoadListener)
-                    ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entity.getEntityGuid(), batchSequence, entityGuids.size()));
+                    ((JdsLoadListener) entity).onPreLoad(new OnPreLoadEventArguments(connection, entity.getOverview().getEntityGuid(), batchSequence, entityGuids.size()));
 
             if (jdsDb.isWritingToPrimaryDataTables() && initialisePrimitives) {
                 //primitives
@@ -194,7 +194,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
             //catch embedded/pre-created objects objects as well
             for (JdsEntity entity : entities)
                 if (entity instanceof JdsLoadListener)
-                    ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getEntityGuid()));
+                    ((JdsLoadListener) entity).onPostLoad(new OnPostLoadEventArguments(connection, entity.getOverview().getEntityGuid()));
 
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
@@ -354,7 +354,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                             Class<? extends JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
-                            jdsEntity.setEntityGuid(entityGuid);
+                            jdsEntity.getOverview().setEntityGuid(entityGuid);
                             entityGuids.add(entityGuid);
                             propertyList.get().add(jdsEntity);
                             innerObjects.add(jdsEntity);
@@ -363,7 +363,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                             Class<? extends JdsEntity> jdsEntityClass = jdsDb.getBoundClass(entityId);
                             JdsEntity jdsEntity = jdsEntityClass.newInstance();
                             //
-                            jdsEntity.setEntityGuid(entityGuid);
+                            jdsEntity.getOverview().setEntityGuid(entityGuid);
                             entityGuids.add(entityGuid);
                             property.set(jdsEntity);
                             innerObjects.add(jdsEntity);
@@ -386,7 +386,7 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
      * @return
      */
     private <T extends JdsEntity> Stream<T> optimalEntityLookup(final Collection<T> jdsEntities, final String entityGuid) {
-        return jdsEntities.parallelStream().filter(entryPredicate -> entryPredicate.getEntityGuid().equals(entityGuid));
+        return jdsEntities.parallelStream().filter(entryPredicate -> entryPredicate.getOverview().getEntityGuid().equals(entityGuid));
     }
 
     /**
@@ -422,8 +422,8 @@ public class JdsLoad<T extends JdsEntity> implements Callable<List<T>> {
                 Timestamp dateCreated = resultSet.getTimestamp("DateCreated");
                 Timestamp dateModified = resultSet.getTimestamp("DateModified");
                 optimalEntityLookup(jdsEntities, entityGuid).forEach(entity -> {
-                    entity.setDateModified(dateModified.toLocalDateTime());
-                    entity.setDateCreated(dateCreated.toLocalDateTime());
+                    entity.getOverview().setDateModified(dateModified.toLocalDateTime());
+                    entity.getOverview().setDateCreated(dateCreated.toLocalDateTime());
                 });
             }
         }

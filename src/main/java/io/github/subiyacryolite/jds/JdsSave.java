@@ -174,34 +174,34 @@ public class JdsSave implements Callable<Boolean> {
         for (final JdsEntity entity : entities) {
             if (entity == null) continue;
             //update the modified date to time of commit
-            entity.setDateModified(LocalDateTime.now());
+            entity.getOverview().setDateModified(LocalDateTime.now());
             saveContainer.overviews.get(step).add(entity.getOverview());
             //assign properties
-            saveContainer.booleans.get(step).put(entity.getEntityGuid(), entity.booleanProperties);
-            saveContainer.localDateTimes.get(step).put(entity.getEntityGuid(), entity.localDateTimeProperties);
-            saveContainer.zonedDateTimes.get(step).put(entity.getEntityGuid(), entity.zonedDateTimeProperties);
-            saveContainer.localTimes.get(step).put(entity.getEntityGuid(), entity.localTimeProperties);
-            saveContainer.localDates.get(step).put(entity.getEntityGuid(), entity.localDateProperties);
-            saveContainer.strings.get(step).put(entity.getEntityGuid(), entity.stringProperties);
-            saveContainer.floats.get(step).put(entity.getEntityGuid(), entity.floatProperties);
-            saveContainer.doubles.get(step).put(entity.getEntityGuid(), entity.doubleProperties);
-            saveContainer.longs.get(step).put(entity.getEntityGuid(), entity.longProperties);
-            saveContainer.integers.get(step).put(entity.getEntityGuid(), entity.integerProperties);
+            saveContainer.booleans.get(step).put(entity.getOverview().getEntityGuid(), entity.booleanProperties);
+            saveContainer.localDateTimes.get(step).put(entity.getOverview().getEntityGuid(), entity.localDateTimeProperties);
+            saveContainer.zonedDateTimes.get(step).put(entity.getOverview().getEntityGuid(), entity.zonedDateTimeProperties);
+            saveContainer.localTimes.get(step).put(entity.getOverview().getEntityGuid(), entity.localTimeProperties);
+            saveContainer.localDates.get(step).put(entity.getOverview().getEntityGuid(), entity.localDateProperties);
+            saveContainer.strings.get(step).put(entity.getOverview().getEntityGuid(), entity.stringProperties);
+            saveContainer.floats.get(step).put(entity.getOverview().getEntityGuid(), entity.floatProperties);
+            saveContainer.doubles.get(step).put(entity.getOverview().getEntityGuid(), entity.doubleProperties);
+            saveContainer.longs.get(step).put(entity.getOverview().getEntityGuid(), entity.longProperties);
+            saveContainer.integers.get(step).put(entity.getOverview().getEntityGuid(), entity.integerProperties);
             //assign blobs
-            saveContainer.blobs.get(step).put(entity.getEntityGuid(), entity.blobProperties);
+            saveContainer.blobs.get(step).put(entity.getOverview().getEntityGuid(), entity.blobProperties);
             //assign lists
-            saveContainer.stringArrays.get(step).put(entity.getEntityGuid(), entity.stringArrayProperties);
-            saveContainer.dateTimeArrays.get(step).put(entity.getEntityGuid(), entity.dateTimeArrayProperties);
-            saveContainer.floatArrays.get(step).put(entity.getEntityGuid(), entity.floatArrayProperties);
-            saveContainer.doubleArrays.get(step).put(entity.getEntityGuid(), entity.doubleArrayProperties);
-            saveContainer.longArrays.get(step).put(entity.getEntityGuid(), entity.longArrayProperties);
-            saveContainer.integerArrays.get(step).put(entity.getEntityGuid(), entity.integerArrayProperties);
+            saveContainer.stringArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.stringArrayProperties);
+            saveContainer.dateTimeArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.dateTimeArrayProperties);
+            saveContainer.floatArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.floatArrayProperties);
+            saveContainer.doubleArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.doubleArrayProperties);
+            saveContainer.longArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.longArrayProperties);
+            saveContainer.integerArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.integerArrayProperties);
             //assign enums
-            saveContainer.enums.get(step).put(entity.getEntityGuid(), entity.enumProperties);
-            saveContainer.enumCollections.get(step).put(entity.getEntityGuid(), entity.enumCollectionProperties);
+            saveContainer.enums.get(step).put(entity.getOverview().getEntityGuid(), entity.enumProperties);
+            saveContainer.enumCollections.get(step).put(entity.getOverview().getEntityGuid(), entity.enumCollectionProperties);
             //assign objects
-            saveContainer.objectArrays.get(step).put(entity.getEntityGuid(), entity.objectArrayProperties);
-            saveContainer.objects.get(step).put(entity.getEntityGuid(), entity.objectProperties);
+            saveContainer.objectArrays.get(step).put(entity.getOverview().getEntityGuid(), entity.objectArrayProperties);
+            saveContainer.objects.get(step).put(entity.getOverview().getEntityGuid(), entity.objectProperties);
             sequence++;
         }
         //share one connection for raw saves, helps with performance
@@ -1139,7 +1139,7 @@ public class JdsSave implements Callable<Boolean> {
                     }
                     JdsParentChildBinding parentChildBinding = new JdsParentChildBinding();
                     parentChildBinding.parentGuid = parentGuid;
-                    parentChildBinding.childGuid = jdsEntity.getEntityGuid();
+                    parentChildBinding.childGuid = jdsEntity.getOverview().getEntityGuid();
                     parentChildBindings.add(parentChildBinding);
                     jdsEntities.add(jdsEntity);
                     record.set(record.get() + 1);
@@ -1161,9 +1161,9 @@ public class JdsSave implements Callable<Boolean> {
                 clearOldBindings.addBatch();
             }
             for (JdsEntity jdsEntity : jdsEntities) {
-                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.getEntityGuid()));
-                writeNewBindings.setString("childEntityGuid", jdsEntity.getEntityGuid());
-                writeNewBindings.setLong("childEntityId", jdsEntity.getEntityCode());
+                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.getOverview().getEntityGuid()));
+                writeNewBindings.setString("childEntityGuid", jdsEntity.getOverview().getEntityGuid());
+                writeNewBindings.setLong("childEntityId", jdsEntity.getOverview().getEntityId());
                 writeNewBindings.addBatch();
             }
         } catch (Exception ex) {
@@ -1200,7 +1200,7 @@ public class JdsSave implements Callable<Boolean> {
                     jdsEntities.add(jdsEntity);
                     JdsParentChildBinding parentChildBinding = new JdsParentChildBinding();
                     parentChildBinding.parentGuid = parentGuid;
-                    parentChildBinding.childGuid = jdsEntity.getEntityGuid();
+                    parentChildBinding.childGuid = jdsEntity.getOverview().getEntityGuid();
                     parentChildBindings.add(parentChildBinding);
                     record.set(record.get() + 1);
                     if (jdsDb.isPrintingOutput())
@@ -1221,9 +1221,9 @@ public class JdsSave implements Callable<Boolean> {
                 clearOldBindings.addBatch();
             }
             for (JdsEntity jdsEntity : jdsEntities) {
-                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.getEntityGuid()));
-                writeNewBindings.setString("childEntityGuid", jdsEntity.getEntityGuid());
-                writeNewBindings.setLong("childEntityId", jdsEntity.getEntityCode());
+                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.getOverview().getEntityGuid()));
+                writeNewBindings.setString("childEntityGuid", jdsEntity.getOverview().getEntityGuid());
+                writeNewBindings.setLong("childEntityId", jdsEntity.getOverview().getEntityId());
                 writeNewBindings.addBatch();
             }
         } catch (Exception ex) {
