@@ -13,7 +13,7 @@ public class BulkTests extends BaseTestConfig {
         List<EntityA> memObjects = new ArrayList<>();
         for (int i = 0; i < 10_000; i++) {
             EntityA entry = new EntityA();
-            entry.setEntityGuid(String.format("guidBulk%s", i));
+            entry.getOverview().setEntityGuid(String.format("guidBulk%s", i));
             memObjects.add(entry);
         }
         JdsSave jdsSave = new JdsSave(jdsDb, 1024, memObjects);

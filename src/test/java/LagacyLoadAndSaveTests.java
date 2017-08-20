@@ -1,9 +1,9 @@
+import common.BaseTestConfig;
 import entities.Address;
 import entities.AddressBook;
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import common.BaseTestConfig;
 import org.junit.Test;
 
 import java.util.Comparator;
@@ -76,7 +76,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void testSortedLoads() throws Exception {
-        Comparator<AddressBook> comparator = Comparator.comparing(AddressBook::getDateCreated);
+        Comparator<AddressBook> comparator = Comparator.comparing(entry -> entry.getOverview().getDateCreated());
         List<AddressBook> allAddressBooks = new JdsLoad(jdsDb, AddressBook.class, comparator).call(); //load all entities of type AddressBook
         List<AddressBook> specificAddressBook = JdsLoad.load(jdsDb, AddressBook.class, comparator, "testGuid0001"); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", allAddressBooks);

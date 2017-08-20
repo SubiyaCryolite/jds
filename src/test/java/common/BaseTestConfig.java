@@ -104,8 +104,8 @@ public abstract class BaseTestConfig {
 
     protected AddressBook getSimpleAddressBook() {
         Address primaryAddress = new Address();
-        primaryAddress.setEntityGuid("primaryAddress"); //setting a custom Entity Guid
-        primaryAddress.setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
+        primaryAddress.getOverview().setEntityGuid("primaryAddress"); //setting a custom Entity Guid
+        primaryAddress.getOverview().setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
         primaryAddress.setArea("Norte Broad");
         primaryAddress.setCity("Livingstone");
         primaryAddress.setCountry("Zambia");
@@ -115,8 +115,8 @@ public abstract class BaseTestConfig {
         primaryAddress.setPrimaryAddress(PrimaryAddress.YES);
 
         Address secondAddress = new Address();
-        secondAddress.setEntityGuid("secondAddress"); //setting a custom Entity Guid
-        secondAddress.setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
+        secondAddress.getOverview().setEntityGuid("secondAddress"); //setting a custom Entity Guid
+        secondAddress.getOverview().setDateModified(LocalDateTime.of(2009, Month.OCTOBER, 16, 03, 34));
         secondAddress.setArea("Roma");
         secondAddress.setCity("Lusaka");
         secondAddress.setCountry("Zambia");
@@ -126,8 +126,8 @@ public abstract class BaseTestConfig {
         secondAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         Address thirdAddress = new Address();
-        thirdAddress.setEntityGuid("thirdAddress"); //setting a custom Entity Guid
-        thirdAddress.setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
+        thirdAddress.getOverview().setEntityGuid("thirdAddress"); //setting a custom Entity Guid
+        thirdAddress.getOverview().setDateModified(LocalDateTime.of(2007, Month.JULY, 04, 05, 10));
         thirdAddress.setArea("Riverdale");
         thirdAddress.setCity("Ndola");
         thirdAddress.setCountry("Zambia");
@@ -137,7 +137,7 @@ public abstract class BaseTestConfig {
         thirdAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         AddressBook addressBook = new AddressBook();
-        addressBook.setEntityGuid("testGuid0001"); //setting a custom Entity Guid
+        addressBook.getOverview().setEntityGuid("testGuid0001"); //setting a custom Entity Guid
         addressBook.getAddresses().add(primaryAddress);
         addressBook.getAddresses().add(secondAddress);
         addressBook.getAddresses().add(thirdAddress);
@@ -158,7 +158,7 @@ public abstract class BaseTestConfig {
         instance1.setDoubleField(777.666);
         instance1.setFloatField(5555.4444f);
         instance1.setBooleanField(true);
-        instance1.setEntityGuid("instance1");
+        instance1.getOverview().setEntityGuid("instance1");
 
         JdsExample instance2 = new JdsExample();
         instance2.setStringField("tWO");
@@ -171,7 +171,7 @@ public abstract class BaseTestConfig {
         instance2.setDoubleField(444.333);
         instance2.setFloatField(2222.1111f);
         instance2.setBooleanField(false);
-        instance2.setEntityGuid("instance2");
+        instance2.getOverview().setEntityGuid("instance2");
 
         JdsExample instance3 = new JdsExample();
         instance3.setStringField("Three");
@@ -184,7 +184,7 @@ public abstract class BaseTestConfig {
         instance3.setDoubleField(444.555);
         instance3.setFloatField(5555.6666f);
         instance3.setBooleanField(true);
-        instance3.setEntityGuid("instance3");
+        instance3.getOverview().setEntityGuid("instance3");
 
         JdsExample instance4 = new JdsExample();
         instance4.setStringField("Four");
@@ -197,7 +197,7 @@ public abstract class BaseTestConfig {
         instance4.setDoubleField(100.22);
         instance4.setFloatField(1000.0f);
         instance4.setBooleanField(false);
-        instance4.setEntityGuid("instance4");
+        instance4.getOverview().setEntityGuid("instance4");
 
         collection.add(instance1);
         collection.add(instance2);

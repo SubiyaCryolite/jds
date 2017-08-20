@@ -119,16 +119,16 @@ public class Ihneritance extends BaseTestConfig {
         List<JdsEntity> collection = new ArrayList<>();
 
         EntityA entitya = new EntityA();
-        entitya.setEntityGuid("entityA");//constant
+        entitya.getOverview().setEntityGuid("entityA");//constant
         entitya.setEntityAValue("entity A - ValueA");
 
         EntityB entityb = new EntityB();
-        entityb.setEntityGuid("entityB");//constant
+        entityb.getOverview().setEntityGuid("entityB");//constant
         entityb.setEntityAValue("entity B - Value A");
         entityb.setEntityBValue("entity B - Value B");
 
         EntityC entityc = new EntityC();
-        entityc.setEntityGuid("entityC");//constant
+        entityc.getOverview().setEntityGuid("entityC");//constant
         entityc.setEntityAValue("entity C - Value A");
         entityc.setEntityBValue("entity C - Value B");
         entityc.setEntityCValue("entity C - Value C");

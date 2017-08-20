@@ -100,7 +100,7 @@ public class LoadAndSaveTests extends BaseTestConfig {
         List<JdsExample> collection = new ArrayList<>();
         for (int i = 0; i < 5000; i++) {
             JdsExample jdsExample = new JdsExample();
-            jdsExample.setEntityGuid("guid_" + i);
+            jdsExample.getOverview().setEntityGuid("guid_" + i);
             jdsExample.setIntField(i);
             jdsExample.setFloatField(i + 1);
             jdsExample.setDoubleField(i + 2);
