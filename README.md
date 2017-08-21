@@ -606,7 +606,7 @@ List<Example> collection = getCollection();
 List<Example> collection = getCollection();
 Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
 FutureTask<Boolean> saving = new FutureTask(save);
-saving.run();
+new Thread(saving).start();
 while (!saving.isDone())
     System.out.println("Waiting for operation 1 to complete");
 System.out.printf("Saved? %s\n", saving.get());
@@ -638,9 +638,9 @@ Comparator<Example> comparator = Comparator.comparing(Example::getDateField);
     FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
     FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
     
-    loadingAllInstances.run();
-    loadingSpecificInstance.run();
-    loadingSortedInstances.run();
+    new Thread(loadingAllInstances).start();
+    new Thread(loadingSpecificInstance).start();
+    new Thread(loadingSortedInstances).start();
     
     while (!loadingAllInstances.isDone())
         System.out.println("Waiting for operation 1 to complete");
@@ -685,7 +685,7 @@ List<Example> collection = getCollection();
 //NEW APPROACH (INTRODUCED IN 1.170514)
     Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
     FutureTask<Boolean> deleting = new FutureTask(delete);
-    deleting.run();
+    new Thread(deleting).start();
     while(!deleting.isDone())
         System.out.println("Waiting for operation to complete");
     System.out.println("Deleted? "+ deleting.get());
