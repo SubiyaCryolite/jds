@@ -16,73 +16,6 @@ import java.util.concurrent.FutureTask;
  */
 public class LoadAndSaveTests extends BaseTestConfig {
 
-
-    @Test
-    public void callableOracleBulkSave() throws Exception {
-        initialiseOracleBackend();
-        bulkSave();
-    }
-
-    @Test
-    public void callableOracleBulkLoad() throws ExecutionException, InterruptedException {
-        initialiseOracleBackend();
-        load();
-    }
-
-    @Test
-    public void callableSqlLiteBulkSave() throws Exception {
-        initialiseTSqlBackend();
-        bulkSave();
-    }
-
-    @Test
-    public void callableSqlLiteBulkLoad() throws ExecutionException, InterruptedException {
-        initialiseMysqlBackend();
-        load();
-    }
-
-    @Test
-    public void callableSqlLiteBulkLoadSave() throws Exception {
-        initialiseSqlLiteBackend();
-        bulkSave();
-        load();
-    }
-
-    @Test
-    public void callableSqlLiteLoadSave() throws Exception {
-        initialiseSqlLiteBackend();
-        save();
-        load();
-    }
-
-    @Test
-    public void callableSqlLiteLoadNoExisting() throws Exception {
-        initialiseSqlLiteBackend();
-        save();
-        load();
-    }
-
-    @Test
-    public void callableMysqlLoadSave() throws Exception {
-        initialiseMysqlBackend();
-        save();
-        load();
-    }
-
-    @Test
-    public void callablePostgeSqlLoadSave() throws Exception {
-        initialisePostgeSqlBackend();
-        save();
-        load();
-    }
-
-    @Test
-    public void callableTSqlLoadSave() throws Exception {
-        initialiseTSqlBackend();
-        save();
-        load();
-    }
-
     @Test
     public void save() throws Exception {
         List<JdsExample> collection = getCollection();
@@ -171,5 +104,77 @@ public class LoadAndSaveTests extends BaseTestConfig {
         while (!deleting.isDone())
             System.out.println("Waiting for operation to complete");
         System.out.println("Deleted? " + deleting.get());
+    }
+
+    @Test
+    public void callableOracleBulkSave() throws Exception {
+        initialiseOracleBackend();
+        bulkSave();
+    }
+
+    @Test
+    public void callableOracleBulkLoad() throws ExecutionException, InterruptedException {
+        initialiseOracleBackend();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteBulkSave() throws Exception {
+        initialiseTSqlBackend();
+        bulkSave();
+    }
+
+    @Test
+    public void callableSqlLiteBulkLoad() throws ExecutionException, InterruptedException {
+        initialiseMysqlBackend();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteBulkLoadSave() throws Exception {
+        initialiseSqlLiteBackend();
+        bulkSave();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteLoadSave() throws Exception {
+        initialiseSqlLiteBackend();
+        save();
+        load();
+    }
+
+    @Test
+    public void callableSqlLiteLoadNoExisting() throws Exception {
+        initialiseSqlLiteBackend();
+        save();
+        load();
+    }
+
+    @Test
+    public void callableMysqlLoadSave() throws Exception {
+        initialiseMysqlBackend();
+        save();
+        load();
+    }
+
+    @Test
+    public void callablePostgeSqlLoadSave() throws Exception {
+        initialisePostgeSqlBackend();
+        save();
+        load();
+    }
+
+    @Test
+    public void callableTSqlLoadSave() throws Exception {
+        initialiseTSqlBackend();
+        save();
+        load();
+    }
+
+    @Test
+    public void callableTSqlBulkLoad() throws ExecutionException, InterruptedException {
+        initialiseTSqlBackend();
+        load();
     }
 }
