@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * This class simply hides all underlying data structures from the user However,
  * these fields are visible in package class JdsSave
  */
-abstract class JdsEntityBase implements Externalizable {
+abstract class JdsEntityBase implements IJdsEntityBase, Externalizable {
 
     //field and enum maps
     protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());

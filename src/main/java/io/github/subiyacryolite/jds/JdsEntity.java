@@ -27,7 +27,7 @@ import java.util.Iterator;
  * This class allows for all mapping operations in JDS, it also uses
  * {@link JdsEntityBase JdsEntityBase} to store overview data
  */
-public abstract class JdsEntity extends JdsEntityBase {
+public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
 
     /**
      *
@@ -327,9 +327,9 @@ public abstract class JdsEntity extends JdsEntityBase {
      * @param property
      * @param cascadeOnDelete
      */
-    protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property, boolean cascadeOnDelete) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
+    protected final <T extends IJdsEntity> void map(T entity, final SimpleObjectProperty<T> property, boolean cascadeOnDelete) {
+        if (entity.getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
+            JdsEntityAnnotation entityAnnotation = entity.getClass().getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
                 objectProperties.put(entityAnnotation.entityId(), (SimpleObjectProperty<JdsEntity>) property);
                 objects.add(entityAnnotation.entityId());
@@ -338,7 +338,7 @@ public abstract class JdsEntity extends JdsEntityBase {
                 throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
             }
         } else {
-            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
+            throw new RuntimeException("You must annotate the class [" + entity.getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
 
@@ -346,7 +346,7 @@ public abstract class JdsEntity extends JdsEntityBase {
      * @param entity
      * @param property
      */
-    protected final void map(Class<? extends JdsEntity> entity, final SimpleObjectProperty<? extends JdsEntity> property) {
+    protected final <T extends IJdsEntity> void map(T entity, final SimpleObjectProperty<T> property) {
         map(entity, property, false);
     }
 
