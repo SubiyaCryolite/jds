@@ -36,5 +36,5 @@ final class JdsSaveContainer {
     //objects
     public final List<Map<String, Map<Long, SimpleObjectProperty<JdsEntity>>>> objects = new ArrayList<>();
     //overviews
-    public final List<HashSet<JdsEntityOverview>> overviews = new LinkedList<>();
+    public final List<HashSet<IJdsEntityOverview>> overviews = new LinkedList<>();
 }

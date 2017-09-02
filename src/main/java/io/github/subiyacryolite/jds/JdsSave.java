@@ -269,13 +269,13 @@ public class JdsSave implements Callable<Boolean> {
     /**
      * @param overviews
      */
-    private void saveOverviews(final HashSet<JdsEntityOverview> overviews) throws SQLException {
+    private void saveOverviews(final HashSet<IJdsEntityOverview> overviews) throws SQLException {
         int record = 0;
         int recordTotal = overviews.size();
         try {
             INamedStatement upsert = jdsDb.supportsStatements() ? onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) : onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview());
             INamedStatement inheritance = jdsDb.supportsStatements() ? onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) : onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance());
-            for (JdsEntityOverview overview : overviews) {
+            for (IJdsEntityOverview overview : overviews) {
                 record++;
                 //Entity Overview
                 upsert.setString("entityGuid", overview.getEntityGuid());

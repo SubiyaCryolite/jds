@@ -29,7 +29,7 @@ import java.util.UUID;
  * {@link JdsEntity}. Instances of this class are initialised in
  * {@link JdsEntityBase JdsEntityBase} and exposed via inheritance
  */
-public class JdsEntityOverview implements Externalizable {
+public class JdsEntityOverview implements IJdsEntityOverview, Externalizable {
 
     private final SimpleObjectProperty<LocalDateTime> dateCreated;
     private final SimpleObjectProperty<LocalDateTime> dateModified;

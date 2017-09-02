@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 abstract class JdsEntityBase implements IJdsEntityBase, Externalizable {
 
     //field and enum maps
-    protected final SimpleObjectProperty<JdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
+    protected final SimpleObjectProperty<IJdsEntityOverview> overview = new SimpleObjectProperty<>(new JdsEntityOverview());
     protected final Map<Long, String> properties = new HashMap<>();
     protected final Map<Long, String> types = new HashMap<>();
     protected final Set<Long> objects = new HashSet<>();
@@ -66,7 +66,8 @@ abstract class JdsEntityBase implements IJdsEntityBase, Externalizable {
     //blobs
     protected final Map<Long, SimpleBlobProperty> blobProperties = new HashMap<>();
 
-    public final JdsEntityOverview getOverview() {
+    @Override
+    public final IJdsEntityOverview getOverview() {
         return this.overview.get();
     }
 

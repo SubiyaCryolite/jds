@@ -27,7 +27,7 @@ import java.util.Iterator;
  * This class allows for all mapping operations in JDS, it also uses
  * {@link JdsEntityBase JdsEntityBase} to store overview data
  */
-public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
+public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity {
 
     /**
      *
@@ -41,9 +41,11 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
             throw new RuntimeException("You must annotate the class [" + getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
+
     /**
      * @return
      */
+    @Override
     public String getEntityName() {
         return name.get();
     }
@@ -51,7 +53,8 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
     /**
      * @param name
      */
-    private void setEntityName(String name) {
+    @Override
+    public void setEntityName(String name) {
         this.name.set(name);
     }
 
@@ -398,8 +401,8 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
      * @param source The entity to copy values from
      * @param <T>    A valid JDSEntity
      */
-    private <T extends JdsEntity> void copyArrayValues(final T source) {
-        JdsEntityOverview dest = this.getOverview();
+    private <T extends IJdsEntity> void copyArrayValues(final T source) {
+        IJdsEntityOverview dest = this.getOverview();
         dest.setDateCreated(source.getOverview().getDateCreated());
         dest.setDateModified(source.getOverview().getDateModified());
         dest.setEntityGuid(source.getOverview().getEntityGuid());
