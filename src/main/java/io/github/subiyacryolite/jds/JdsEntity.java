@@ -330,7 +330,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity {
      * @param property
      * @param cascadeOnDelete
      */
-    protected final <T extends IJdsEntity> void map(Class<T> entity, final SimpleObjectProperty<T> property, boolean cascadeOnDelete) {
+    protected final <T extends IJdsEntity> void map(Class<? extends T> entity, final SimpleObjectProperty<T> property, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
@@ -349,7 +349,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity {
      * @param entity
      * @param property
      */
-    protected final <T extends IJdsEntity> void map(Class<T> entity, final SimpleObjectProperty<T> property) {
+    protected final <T extends IJdsEntity> void map(Class<? extends T> entity, final SimpleObjectProperty<T> property) {
         map(entity, property, false);
     }
 
@@ -358,7 +358,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity {
      * @param properties
      * @param cascadeOnDelete
      */
-    protected final <T extends IJdsEntity> void map(Class<T> entity, final SimpleListProperty<T> properties, boolean cascadeOnDelete) {
+    protected final <T extends IJdsEntity> void map(Class<? extends T> entity, final SimpleListProperty<T> properties, boolean cascadeOnDelete) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
             JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
@@ -377,7 +377,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity {
      * @param entity
      * @param properties
      */
-    protected final <T extends IJdsEntity> void map(Class<T> entity, final SimpleListProperty<T> properties) {
+    protected final <T extends IJdsEntity> void map(Class<? extends T> entity, final SimpleListProperty<T> properties) {
         map(entity, properties, false);
     }
 
