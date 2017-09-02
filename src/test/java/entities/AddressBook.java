@@ -1,9 +1,9 @@
 package entities;
 
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 
 import java.util.List;
 
