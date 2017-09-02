@@ -355,9 +355,9 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
      * @param properties
      * @param cascadeOnDelete
      */
-    protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties, boolean cascadeOnDelete) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation.class)) {
-            JdsEntityAnnotation entityAnnotation = entity.getAnnotation(JdsEntityAnnotation.class);
+    protected final <T extends IJdsEntity> void map(T entity, final SimpleListProperty<T> properties, boolean cascadeOnDelete) {
+        if (entity.getClass().isAnnotationPresent(JdsEntityAnnotation.class)) {
+            JdsEntityAnnotation entityAnnotation = entity.getClass().getAnnotation(JdsEntityAnnotation.class);
             if (!objectArrayProperties.containsKey(entityAnnotation.entityId()) && !objectProperties.containsKey(entityAnnotation.entityId())) {
                 objectArrayProperties.put(entityAnnotation.entityId(), (SimpleListProperty<JdsEntity>) properties);
                 objects.add(entityAnnotation.entityId());
@@ -366,7 +366,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
                 throw new RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array");
             }
         } else {
-            throw new RuntimeException("You must annotate the class [" + entity.getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
+            throw new RuntimeException("You must annotate the class [" + entity.getClass().getCanonicalName() + "] with [" + JdsEntityAnnotation.class + "]");
         }
     }
 
@@ -374,7 +374,7 @@ public abstract class JdsEntity extends JdsEntityBase implements IJdsEntity{
      * @param entity
      * @param properties
      */
-    protected final void map(Class<? extends JdsEntity> entity, final SimpleListProperty<? extends JdsEntity> properties) {
+    protected final <T extends IJdsEntity> void map(T entity, final SimpleListProperty<T> properties) {
         map(entity, properties, false);
     }
 
