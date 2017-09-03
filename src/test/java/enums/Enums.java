@@ -1,7 +1,7 @@
 package enums;
 
-import io.github.subiyacryolite.jds.JdsFieldEnum;
 import fields.Fields;
+import io.github.subiyacryolite.jds.JdsFieldEnum;
 
 /**
  * Created by ifunga on 18/02/2017.

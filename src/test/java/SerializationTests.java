@@ -1,5 +1,5 @@
-import io.github.subiyacryolite.jds.JdsEntity;
 import common.BaseTestConfig;
+import io.github.subiyacryolite.jds.JdsEntity;
 import javafx.beans.property.SimpleBlobProperty;
 import org.junit.Test;
 

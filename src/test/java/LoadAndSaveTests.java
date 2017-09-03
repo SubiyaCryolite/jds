@@ -1,8 +1,8 @@
+import common.BaseTestConfig;
+import entities.JdsExample;
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import common.BaseTestConfig;
-import entities.JdsExample;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -24,9 +24,9 @@ public class Ihneritance extends BaseTestConfig {
     @Override
     public void load() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        List<EntityA> entityAs = JdsLoad.load(jdsDb, EntityA.class);
-        List<EntityB> entityBs = JdsLoad.load(jdsDb, EntityB.class);
-        List<EntityC> entityCs = JdsLoad.load(jdsDb, EntityC.class);
+        List<EntityA> entityAs = JdsLoad.Companion.load(jdsDb, EntityA.class);
+        List<EntityB> entityBs = JdsLoad.Companion.load(jdsDb, EntityB.class);
+        List<EntityC> entityCs = JdsLoad.Companion.load(jdsDb, EntityC.class);
         System.out.printf("All A s [%s]\n", entityAs);
         System.out.printf("All B s [%s]\n", entityBs);
         System.out.printf("All C s [%s]\n", entityCs);

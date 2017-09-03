@@ -2,8 +2,8 @@ package common;
 
 import connectivity.*;
 import entities.*;
-import io.github.subiyacryolite.jds.JdsDb;
 import enums.PrimaryAddress;
+import io.github.subiyacryolite.jds.JdsDb;
 
 import java.io.*;
 import java.time.*;

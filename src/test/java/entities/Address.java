@@ -1,10 +1,10 @@
 package entities;
 
+import enums.Enums;
+import enums.PrimaryAddress;
+import fields.Fields;
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
-import enums.PrimaryAddress;
-import enums.Enums;
-import fields.Fields;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

@@ -22,7 +22,7 @@ public class BulkTests extends BaseTestConfig {
     }
 
     public void load() throws Exception {
-        List<EntityA> entityAs = JdsLoad.load(jdsDb, EntityA.class);
+        List<EntityA> entityAs = JdsLoad.Companion.load(jdsDb, EntityA.class);
         System.out.printf("All A s [%s]\n", entityAs);
     }
 

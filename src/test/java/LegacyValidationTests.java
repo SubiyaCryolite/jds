@@ -1,7 +1,7 @@
-import io.github.subiyacryolite.jds.JdsLoad;
-import io.github.subiyacryolite.jds.JdsSave;
 import common.BaseTestConfig;
 import entities.JdsExample;
+import io.github.subiyacryolite.jds.JdsLoad;
+import io.github.subiyacryolite.jds.JdsSave;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,11 +17,11 @@ public class LegacyValidationTests extends BaseTestConfig {
     public void saveAndLoad() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
         List<JdsExample> memObjects = getCollection();
-        JdsSave.save(jdsDb, 1, memObjects);
+        JdsSave.Companion.save(jdsDb, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
-        List<JdsExample> savObjects = JdsLoad.load(jdsDb, JdsExample.class); //load all entities of type AddressBook
-        List<JdsExample> specificObject = JdsLoad.load(jdsDb, JdsExample.class, "instance4"); //load all entities of type AddressBook with Entity Guids in range
+        List<JdsExample> savObjects = JdsLoad.Companion.load(jdsDb, JdsExample.class); //load all entities of type AddressBook
+        List<JdsExample> specificObject = JdsLoad.Companion.load(jdsDb, JdsExample.class, "instance4"); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", savObjects);
         System.out.printf("Specific entities [%s]\n", specificObject);
 
