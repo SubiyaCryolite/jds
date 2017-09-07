@@ -7,7 +7,10 @@ import java.sql.*
 import java.util.*
 
 /**
- * Created by ifunga on 13/05/2017.
+ * Event arguments to handle this listener invocation.
+ * This class supports batching via the use of the {@link #getOrAddCall(String) getOrAddCall},
+ * {@link #getOrAddStatement(String) getOrAddStatement}, {@link #getOrAddNamedCall(String) getOrAddNamedCall} and
+ * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
 class OnPreLoadEventArguments {
     val entityGuid: String
