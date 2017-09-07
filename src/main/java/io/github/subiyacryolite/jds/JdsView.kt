@@ -174,26 +174,26 @@ class JdsView {
                 val name = cleanViewName(je.entityName)
                 val viewName = getMainViewName(name)
                 jdsDb.getConnection().use { connection ->
-                    dropView(jdsDb, viewName)
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_FLOAT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_INT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_DOUBLE, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_LONG, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_TEXT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ARRAY_DATE_TIME, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.BOOLEAN, name))
+                    dropView(jdsDb, connection, viewName)
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_FLOAT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_INT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DOUBLE, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_LONG, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_TEXT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DATE_TIME, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.BOOLEAN, name))
                     //dropView(connection, getViewName(JdsFieldType.BLOB, name));
-                    dropView(jdsDb, getViewName(JdsFieldType.DATE_TIME, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.DATE, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.DOUBLE, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ENUM_COLLECTION, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ENUM, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.FLOAT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.INT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.LONG, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.TIME, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.TEXT, name))
-                    dropView(jdsDb, getViewName(JdsFieldType.ZONED_DATE_TIME, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE_TIME, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DOUBLE, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM_COLLECTION, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.FLOAT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.INT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.LONG, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.TIME, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.TEXT, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ZONED_DATE_TIME, name))
                 }
                 return true
             } else {
@@ -286,7 +286,6 @@ class JdsView {
                 System.err.println(sqlToExecute)
                 ex.printStackTrace(System.err)
             }
-
             return viewName
         }
 
@@ -318,13 +317,12 @@ class JdsView {
          * @param name  the view to drop
          * @return whether the action completed successfully
          */
-        private fun dropView(jdsDb: JdsDb, name: String): Boolean {
+        private fun dropView(jdsDb: JdsDb, connection: Connection, name: String): Boolean {
             try {
-                jdsDb.getConnection().use { connection -> connection.prepareStatement(String.format("DROP VIEW %s%s", name, if (jdsDb.isPosgreSqlDb) " CASCADE" else "")).use { preparedStatement -> return preparedStatement.execute() } }
+                connection.prepareStatement(String.format("DROP VIEW %s%s", name, if (jdsDb.isPosgreSqlDb) " CASCADE" else "")).use { preparedStatement -> return preparedStatement.execute() }
             } catch (e: Exception) {
                 return false
             }
-
         }
     }
 }

@@ -74,8 +74,8 @@ class JdsFilter<T : JdsEntity>
         blockStrings.clear()
         blockSwitches.clear()
         tablesToJoin.clear()
-        currentStrings!!.clear()
-        currentValues!!.clear()
+        currentStrings.clear()
+        currentValues.clear()
     }
 
     @Throws(Exception::class)
@@ -159,8 +159,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add("")
+        currentStrings.add(builder)
+        currentValues.add("")
         return this
     }
 
@@ -170,8 +170,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add("")
+        currentStrings.add(builder)
+        currentValues.add("")
         return this
     }
 
@@ -181,9 +181,9 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value1)
-        currentValues!!.add(value2)
+        currentStrings.add(builder)
+        currentValues.add(value1)
+        currentValues.add(value2)
         return this
     }
 
@@ -192,8 +192,8 @@ class JdsFilter<T : JdsEntity>
         val builder = String.format("(%s.FieldId = %s AND %s !< ?)",
                 JdsTableLookup.getTablePrefix(jdsField.type), jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -203,8 +203,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -214,8 +214,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -225,8 +225,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -236,8 +236,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -247,8 +247,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -258,8 +258,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -269,8 +269,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -280,8 +280,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -291,8 +291,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -302,8 +302,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -313,8 +313,8 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
         return this
     }
 
@@ -324,9 +324,9 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
+        currentValues.add(value)
         return this
     }
 
@@ -336,9 +336,9 @@ class JdsFilter<T : JdsEntity>
                 JdsTableLookup.getTablePrefix(jdsField.type),
                 jdsField.id,
                 (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTablePrefix(jdsField.type)))
-        currentStrings!!.add(builder)
-        currentValues!!.add(value)
-        currentValues!!.add(value)
+        currentStrings.add(builder)
+        currentValues.add(value)
+        currentValues.add(value)
         return this
     }
 }

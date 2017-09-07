@@ -150,7 +150,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         //fire
         var sequence = 0
         for (entity in entities) {
-            if (entity == null) continue
             //update the modified date to time of commit
             entity.overview.dateModified = LocalDateTime.now()
             saveContainer.overviews[step].add(entity.overview)

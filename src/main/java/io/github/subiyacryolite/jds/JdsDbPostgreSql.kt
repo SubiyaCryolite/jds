@@ -241,6 +241,8 @@ abstract class JdsDbPostgreSql : JdsDb() {
             JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/postgresql/procedures/procRefEntities.sql")
             JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/postgresql/procedures/procRefEnumValues.sql")
             JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindParentToChild.sql")
+            else -> {
+            }
         }
     }
 

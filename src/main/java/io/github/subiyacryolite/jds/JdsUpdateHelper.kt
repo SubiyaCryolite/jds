@@ -24,6 +24,8 @@ object JdsUpdateHelper {
                     jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId;")
                 }
                 JdsImplementation.TSQL, JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId;")
+                else -> {
+                }
             }
         }
     }
@@ -40,6 +42,8 @@ object JdsUpdateHelper {
                 JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD BlobValue VARBINARY(MAX);")
                 JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BYTEA;")
                 JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB;")
+                else -> {
+                }
             }
         }
     }
@@ -69,6 +73,8 @@ object JdsUpdateHelper {
                 JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INTEGER;")
                 JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
                 JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
+                else -> {
+                }
             }
         }
     }

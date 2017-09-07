@@ -263,6 +263,8 @@ abstract class JdsDbTransactionalSql protected constructor() : JdsDb() {
             JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/tsql/procedures/procRefEnumValues.sql")
             JdsComponent.TSQL_CASCADE_ENTITY_BINDING -> executeSqlFromFile(connection, "sql/tsql/triggers/createEntityBindingCascade.sql")
             JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindParentToChild.sql")
+            else -> {
+            }
         }
     }
 
