@@ -1,22 +1,21 @@
-apply plugin: 'java'
-apply plugin: 'idea' //run idea to resolve dependencies in intellij
-apply plugin: 'maven'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
-apply plugin: 'kotlin'
-apply plugin: 'org.jetbrains.dokka'
+apply plugin: "java"
+apply plugin: "idea" //run idea to resolve dependencies in intellij
+apply plugin: "maven"
+apply plugin: "signing"
+apply plugin: "jacoco"
+apply plugin: "kotlin"
+apply plugin: "org.jetbrains.dokka"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-group = 'io.github.subiyacryolite'
-version = '3.4.1-SNAPSHOT' //majorv.minorv.bugfixincrement
+group = "io.github.subiyacryolite"
+version = "3.4.1-SNAPSHOT" //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
-description = 'A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining'
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-ext.dokka_version = '1.1.4-3'
 
 buildscript {
     repositories {
@@ -24,8 +23,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${dokka_version}"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.4-3"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.15"
     }
 }
 
@@ -37,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${dokka_version}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.4-3"
     testCompile "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
     testCompile "junit:junit:4.12"
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
@@ -59,7 +58,7 @@ jar {
 
 test {
     //prevent problems with TravisCI
-    exclude '**'
+    exclude "**"
 }
 
 dokka {
@@ -68,12 +67,12 @@ dokka {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
+    classifier = "javadoc"
     from dokka
 }
 
 task sourceJar(type: Jar) {
-    classifier = 'sources'
+    classifier = "sources"
     from sourceSets.main.allJava
 }
 
@@ -91,32 +90,32 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
+                authentication(userName: hasProperty("ossrhUsername") ? ossrhUsername : "", password: hasProperty("ossrhPassword") ? ossrhPassword : "")
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: hasProperty('ossrhUsername') ? ossrhUsername : '', password: hasProperty('ossrhPassword') ? ossrhPassword : '')
+                authentication(userName: hasProperty("ossrhUsername") ? ossrhUsername : "", password: hasProperty("ossrhPassword") ? ossrhPassword : "")
             }
             pom.project {
-                name 'Jenesis Data Store'
-                packaging 'jar'
+                name "Jenesis Data Store"
+                packaging "jar"
                 description = project.description
-                url 'https://github.com/SubiyaCryolite/Jenesis-Data-Store'
+                url "https://github.com/SubiyaCryolite/Jenesis-Data-Store"
                 scm {
-                    connection 'scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git'
-                    developerConnection 'scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git'
-                    url 'https://github.com/SubiyaCryolite/Jenesis-Data-Store'
+                    connection "scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git"
+                    developerConnection "scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git"
+                    url "https://github.com/SubiyaCryolite/Jenesis-Data-Store"
                 }
                 licenses {
                     license {
-                        name 'The 3-Clause BSD License'
-                        url 'https://opensource.org/licenses/BSD-3-Clause'
+                        name "The 3-Clause BSD License"
+                        url "https://opensource.org/licenses/BSD-3-Clause"
                     }
                 }
                 developers {
                     developer {
-                        id 'SubiyaCryolite'
-                        name 'Ifunga Ndana'
-                        email 'ifungandana@gmail.com'
+                        id "SubiyaCryolite"
+                        name "Ifunga Ndana"
+                        email "ifungandana@gmail.com"
                     }
                 }
             }
