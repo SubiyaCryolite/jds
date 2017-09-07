@@ -4,6 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'jacoco'
 apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.dokka'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -15,24 +16,28 @@ description = 'A dynamic, cross platform, high performance, ORM data-mapper. Des
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+ext.dokka_version = '1.1.4-3'
 
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.4-3"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${dokka_version}"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
     }
 }
 
 repositories {
     mavenCentral()
+    jcenter()
     maven { url "https://maven.atlassian.com/3rdparty/" }
     maven { url "http://clojars.org/repo/" }
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.4-3"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${dokka_version}"
     testCompile "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
     testCompile "junit:junit:4.12"
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
@@ -57,9 +62,14 @@ test {
     exclude '**'
 }
 
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
-    from javadoc
+    from dokka
 }
 
 task sourceJar(type: Jar) {

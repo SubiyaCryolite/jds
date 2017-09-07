@@ -99,7 +99,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
 
@@ -299,7 +298,6 @@ abstract class JdsDb : IJdsDb {
             toReturn = 0
             ex.printStackTrace(System.err)
         }
-
         return toReturn
     }
 
@@ -318,7 +316,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     fun executeSqlFromString(connection: Connection, innerSql: String) {
@@ -604,7 +601,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -628,7 +624,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -664,7 +659,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -689,7 +683,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -714,7 +707,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -737,7 +729,6 @@ abstract class JdsDb : IJdsDb {
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     @Synchronized
