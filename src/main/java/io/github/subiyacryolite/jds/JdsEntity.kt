@@ -199,7 +199,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsField
      * @param strings
      */
-    protected fun mapStrings(jdsField: JdsField, strings: SimpleListProperty<String>?) {
+    protected fun mapStrings(jdsField: JdsField, strings: SimpleListProperty<String>) {
         if (strings == null) {
             return
         }
@@ -216,7 +216,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsField
      * @param floats
      */
-    protected fun mapFloats(jdsField: JdsField, floats: SimpleListProperty<Float>?) {
+    protected fun mapFloats(jdsField: JdsField, floats: SimpleListProperty<Float>) {
         if (floats == null) {
             return
         }
@@ -233,7 +233,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsField
      * @param doubles
      */
-    protected fun mapDoubles(jdsField: JdsField, doubles: SimpleListProperty<Double>?) {
+    protected fun mapDoubles(jdsField: JdsField, doubles: SimpleListProperty<Double>) {
         if (doubles == null) {
             return
         }
@@ -250,7 +250,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsField
      * @param longs
      */
-    protected fun mapLongs(jdsField: JdsField, longs: SimpleListProperty<Long>?) {
+    protected fun mapLongs(jdsField: JdsField, longs: SimpleListProperty<Long>) {
         if (longs == null) {
             return
         }
@@ -267,7 +267,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsFieldEnum
      * @param enums
      */
-    protected fun map(jdsFieldEnum: JdsFieldEnum<*>, enums: SimpleObjectProperty<out Enum<*>>?) {
+    protected fun map(jdsFieldEnum: JdsFieldEnum<*>, enums: SimpleObjectProperty<out Enum<*>>) {
         if (enums == null) {
             return
         }
@@ -285,7 +285,7 @@ abstract class JdsEntity : JdsEntityBase(), IJdsEntity {
      * @param jdsFieldEnum
      * @param enums
      */
-    protected fun mapEnums(jdsFieldEnum: JdsFieldEnum<*>, enums: SimpleListProperty<out Enum<*>>?) {
+    protected fun mapEnums(jdsFieldEnum: JdsFieldEnum<*>, enums: SimpleListProperty<out Enum<*>>) {
         if (enums == null) {
             return
         }
