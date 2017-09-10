@@ -1,13 +1,12 @@
 package io.github.subiyacryolite.jds;
 
-interface IJdsEntity : IJdsEntityBase {
-    /**
-     * @return
-     */
+import java.io.Externalizable
+
+interface IJdsEntity : Externalizable {
+
+    val overview: IJdsEntityOverview
+
     fun getEntityName(): String;
 
-    /**
-     * @param name
-     */
     fun setEntityName(name: String);
 }

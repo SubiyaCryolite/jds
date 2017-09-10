@@ -1,5 +1,4 @@
 apply plugin: "java"
-apply plugin: "idea" //run idea to resolve dependencies in intellij
 apply plugin: "maven"
 apply plugin: "signing"
 apply plugin: "jacoco"
@@ -10,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "3.4.1-SNAPSHOT" //majorv.minorv.bugfixincrement
+version = "3.4.2-SNAPSHOT" //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
