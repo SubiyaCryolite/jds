@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "3.4.3-SNAPSHOT" //majorv.minorv.bugfixincrement
+version = "3.4.3" //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -37,7 +37,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.4-3"
 
-    testCompile "com.fasterxml.jackson.core:jackson-databind:2.9.1"
+    testCompile "com.fasterxml.jackson.core:jackson-databind:2.7.5"
 
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
     testCompile "com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
