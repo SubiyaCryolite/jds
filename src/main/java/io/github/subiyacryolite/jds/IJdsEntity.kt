@@ -6,7 +6,5 @@ interface IJdsEntity : Externalizable {
 
     val overview: IJdsEntityOverview
 
-    fun getEntityName(): String;
-
-    fun setEntityName(name: String);
+    var entityName: String
 }

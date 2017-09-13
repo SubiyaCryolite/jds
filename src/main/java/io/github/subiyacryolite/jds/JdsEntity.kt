@@ -43,7 +43,7 @@ abstract class JdsEntity : IJdsEntity {
     private val types: MutableMap<Long, String> = HashMap()
     private val objects: MutableSet<Long> = HashSet()
     private val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
-    protected val name = SimpleStringProperty()
+    private val _entityName = SimpleStringProperty("")
     //strings and localDateTimes
     private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
     private val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
@@ -78,19 +78,15 @@ abstract class JdsEntity : IJdsEntity {
         if (javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
             overview.entityId = entityAnnotation.entityId
-            setEntityName(entityAnnotation.entityName)
+            _entityName.set(entityAnnotation.entityName)
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
     }
 
-    override fun getEntityName(): String {
-        return name.get()
-    }
-
-    override fun setEntityName(name: String) {
-        this.name.set(name)
-    }
+    override var entityName: String
+        get() = _entityName.get()
+        set(value) = _entityName.set(value)
 
     /**
      * @param jdsField
@@ -588,7 +584,7 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(types)
         objectOutputStream.writeObject(objects)
         objectOutputStream.writeObject(allEnums)
-        objectOutputStream.writeUTF(name.get())
+        objectOutputStream.writeUTF(entityName)
         //objects
         objectOutputStream.writeObject(serializeObject(objectProperties))
         //strings and localDateTimes
@@ -698,7 +694,7 @@ abstract class JdsEntity : IJdsEntity {
         types.putAll(objectInputStream.readObject() as Map<Long, String>)
         objects.addAll(objectInputStream.readObject() as Set<Long>)
         allEnums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
-        name.set(objectInputStream.readUTF())
+        entityName = objectInputStream.readUTF()
         //objects
         putObject(objectProperties, objectInputStream.readObject() as Map<Long, JdsEntity>)
         //strings and localDateTimes
@@ -894,7 +890,7 @@ abstract class JdsEntity : IJdsEntity {
                 localDateProperties[key]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
             }
             JdsFieldType.TIME -> {
-                localTimeProperties[key]?.set(LocalTime.ofSecondOfDay(value as Long))
+                localTimeProperties[key]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))
             }
             JdsFieldType.BLOB -> {
                 blobProperties[key]?.set(value as ByteArray)
