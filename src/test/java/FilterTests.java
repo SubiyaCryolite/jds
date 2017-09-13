@@ -2,10 +2,11 @@ import common.BaseTestConfig;
 import entities.Address;
 import fields.Fields;
 import io.github.subiyacryolite.jds.JdsFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by ifunga on 05/03/2017.
@@ -55,7 +56,7 @@ public class FilterTests extends BaseTestConfig {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
         JdsFilter filter = new JdsFilter(jdsDb, Address.class).between(Fields.PLOT_NUMBER, 1, 2).like(Fields.COUNTRY_NAME, "Zam").or().equals(Fields.PROVINCE_NAME, "Copperbelt");
         List<Address> output = filter.call();
-        Assert.assertNotNull(output);
+        assertNotNull(output);
         System.out.println(output);
     }
 }

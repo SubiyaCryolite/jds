@@ -2,7 +2,7 @@ import common.BaseTestConfig;
 import entities.EntityA;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

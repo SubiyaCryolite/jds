@@ -14,15 +14,12 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.events.JdsLoadListener
 import io.github.subiyacryolite.jds.events.OnPostLoadEventArguments
 import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments
 import java.sql.PreparedStatement
 import java.sql.SQLException
-import java.time.Instant
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -217,140 +214,6 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
 
     }
 
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateFloatArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getFloat("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { jdsEntity -> jdsEntity.floatArrayProperties.containsKey(fieldId) }.forEach { currentEntity ->
-                    val property = currentEntity.floatArrayProperties[fieldId]
-                    property?.add(value)
-                }
-            }
-        }
-    }
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateDoubleArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getDouble("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { jdsEntity -> jdsEntity.doubleArrayProperties.containsKey(fieldId) }.forEach { currentEntity ->
-                    val property = currentEntity.doubleArrayProperties[fieldId]
-                    property?.add(value)
-                }
-            }
-        }
-    }
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateLongArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getLong("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { jdsEntity -> jdsEntity.longArrayProperties.containsKey(fieldId) }.forEach { currentEntity ->
-                    val property = currentEntity.longArrayProperties[fieldId]
-                    property?.add(value)
-                }
-            }
-        }
-    }
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateDateTimeArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getTimestamp("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { jdsEntity -> jdsEntity.dateTimeArrayProperties.containsKey(fieldId) }.forEach { currentEntity ->
-                    val property = currentEntity.dateTimeArrayProperties[fieldId]
-                    property?.add(value.toLocalDateTime())
-                }
-            }
-        }
-    }
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateStringArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getString("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { jdsEntity -> jdsEntity.stringArrayProperties.containsKey(fieldId) }.forEach { currentEntity ->
-                    val property = currentEntity.stringArrayProperties[fieldId]
-                    property?.add(value)
-                }
-            }
-        }
-    }
-
-    /**
-     * @param jdsEntities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateIntegerArraysAndEnums(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use { resultSet ->
-            while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getInt("Value")
-                val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).forEach { jdsEntity ->
-                    if (jdsEntity.integerArrayProperties.containsKey(fieldId)) {
-                        val property = jdsEntity.integerArrayProperties[fieldId]
-                        property?.add(value)
-                    } else {
-                        //enums don't have numeric keys so have to manually them look up
-                        val fieldEnum = jdsEntity.enumCollectionProperties.keys.stream().filter { entry -> entry.getField().id == fieldId }.findAny()
-                        if (fieldEnum.isPresent) {
-                            val jdsFieldEnum = fieldEnum.get()
-                            val property = jdsEntity.enumCollectionProperties[jdsFieldEnum]
-                            val enumValues = jdsFieldEnum.getEnumType()!!.enumConstants
-                            if (value < enumValues.size) {
-                                property?.add(enumValues[value] as Enum<*>)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * @param jdsDb
      * @param jdsEntities
@@ -371,34 +234,117 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("ChildEntityGuid")
                 val entityId = resultSet.getLong("ChildEntityId")
                 optimalEntityLookup(jdsEntities, parentEntityGuid).forEach { parentEntity ->
-                    try {
-                        if (parentEntity.objectArrayProperties.containsKey(entityId)) {
-                            val propertyList = parentEntity.objectArrayProperties[entityId]
-                            val jdsEntityClass = jdsDb.getBoundClass(entityId)
-                            val jdsEntity = jdsEntityClass!!.newInstance()
-                            //
-                            jdsEntity.overview.entityGuid = entityGuid
-                            entityGuids.add(entityGuid)
-                            propertyList?.get()?.add(jdsEntity)
-                            innerObjects.add(jdsEntity)
-                        } else if (parentEntity.objectProperties.containsKey(entityId)) {
-                            val property = parentEntity.objectProperties[entityId]
-                            val jdsEntityClass = jdsDb.getBoundClass(entityId)
-                            val jdsEntity = jdsEntityClass!!.newInstance()
-                            //
-                            jdsEntity.overview.entityGuid = entityGuid
-                            entityGuids.add(entityGuid)
-                            property?.set(jdsEntity)
-                            innerObjects.add(jdsEntity)
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace(System.err)
-                    }
+                    parentEntity.populateObjects(jdsDb, entityId, entityGuid, innerObjects, entityGuids)
                 }
             }
         }
         val batches = createProcessingBatches(entityGuids)
         batches.stream().forEach { batch -> populateInner(jdsDb, null, innerObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, batch) }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateFloatArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getFloat("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_FLOAT, fieldId, value) }
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDoubleArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getDouble("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_DOUBLE, fieldId, value) }
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateLongArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getLong("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_LONG, fieldId, value) }
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDateTimeArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getTimestamp("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_DATE_TIME, fieldId, value) }
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateStringArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getString("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_TEXT, fieldId, value) }
+            }
+        }
+    }
+
+    /**
+     * @param jdsEntities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateIntegerArraysAndEnums(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val entityGuid = resultSet.getString("EntityGuid")
+                val value = resultSet.getInt("Value")
+                val fieldId = resultSet.getLong("FieldId")
+                optimalEntityLookup(jdsEntities, entityGuid).forEach {
+                    it.populateProperties(JdsFieldType.ARRAY_INT, fieldId, value)
+                    it.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
+                }
+            }
+        }
     }
 
     /**
@@ -464,10 +410,8 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val value = resultSet.getTimestamp("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { entity ->
-                    if (entity.localDateTimeProperties.containsKey(fieldId))
-                        entity.localDateTimeProperties[fieldId]?.set(value.toLocalDateTime())
-                    else if (entity.localDateProperties.containsKey(fieldId))
-                        entity.localDateProperties[fieldId]?.set(value.toLocalDateTime().toLocalDate())
+                    entity.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
+                    entity.populateProperties(JdsFieldType.DATE, fieldId, value)
                 }
             }
         }
@@ -485,7 +429,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getDouble("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.doubleProperties.containsKey(fieldId) }.forEach { entity -> entity.doubleProperties[fieldId]?.set(value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.DOUBLE, fieldId, value) }
             }
         }
     }
@@ -502,7 +446,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getBytes("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.blobProperties.containsKey(fieldId) }.forEach { entity -> entity.blobProperties[fieldId]?.set(value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.BLOB, fieldId, value) }
             }
         }
     }
@@ -520,17 +464,9 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val value = resultSet.getInt("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { entity ->
-                    if (entity.integerProperties.containsKey(fieldId)) {
-                        entity.integerProperties[fieldId]?.set(value)
-                    } else if (entity.booleanProperties.containsKey(fieldId)) {
-                        entity.booleanProperties[fieldId]?.set(value == 1)
-                    } else {
-                        //enums don't have numeric keys so have to manually them look up
-                        val fieldEnum = entity.enumProperties.keys.parallelStream().filter { entry -> entry.getField().id == fieldId }.findAny()
-                        if (fieldEnum.isPresent) {
-                            entity.enumProperties[fieldEnum.get()]?.set(fieldEnum.get().valueOf(value))
-                        }
-                    }
+                    entity.populateProperties(JdsFieldType.INT, fieldId, value)
+                    entity.populateProperties(JdsFieldType.BOOLEAN, fieldId, value)
+                    entity.populateProperties(JdsFieldType.ENUM, fieldId, value)
                 }
             }
         }
@@ -548,10 +484,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getInt("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.localTimeProperties.containsKey(fieldId) }.forEach { entity ->
-                    val localTime = LocalTime.ofSecondOfDay(value.toLong())
-                    entity.localTimeProperties[fieldId]?.set(localTime)
-                }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.TIME, fieldId, value) }
             }
         }
     }
@@ -568,7 +501,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getFloat("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.floatProperties.containsKey(fieldId) }.forEach { entity -> entity.floatProperties[fieldId]?.set(value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.FLOAT, fieldId, value) }
             }
         }
     }
@@ -585,7 +518,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getLong("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.longProperties.containsKey(fieldId) }.forEach { entity -> entity.longProperties[fieldId]?.set(value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.LONG, fieldId, value) }
             }
         }
     }
@@ -602,11 +535,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getLong("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.zonedDateTimeProperties.containsKey(fieldId) }.forEach { entity ->
-                    val instant = Instant.ofEpochSecond(value)
-                    val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-                    entity.zonedDateTimeProperties[fieldId]?.set(zonedDateTime)
-                }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value) }
             }
         }
     }
@@ -623,7 +552,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getString("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).filter { entity -> entity.stringProperties.containsKey(fieldId) }.forEach { entity -> entity.stringProperties[fieldId]?.set(value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.TEXT, fieldId, value) }
             }
         }
     }

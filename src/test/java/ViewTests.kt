@@ -2,7 +2,7 @@
 
 import common.BaseTestConfig
 import io.github.subiyacryolite.jds.JdsView
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.sql.SQLException
 
 /**

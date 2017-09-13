@@ -13,7 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsComponent
@@ -573,74 +572,6 @@ abstract class JdsDb : IJdsDb {
     protected abstract fun createStoreEntityInheritance(connection: Connection)
 
     /**
-     * Binds all the fields attached to an entity, updates the fields dictionary
-     *
-     * @param connection the SQL connection to use for DB operations
-     * @param entityId   the value representing the entity
-     * @param fields     the values representing the entity's fields
-     */
-    @Synchronized
-    fun mapClassFields(connection: Connection, entityId: Long, fields: Map<Long, String>) {
-        try {
-            (if (supportsStatements()) NamedCallableStatement(connection, mapClassFields()) else NamedPreparedStatement(connection, mapClassFields())).use { mapClassFields ->
-                (if (supportsStatements()) NamedCallableStatement(connection, mapFieldNames()) else NamedPreparedStatement(connection, mapFieldNames())).use { mapFieldNames ->
-                    for ((key, value) in fields) {
-                        //1. map this field ID to the entity type
-                        mapClassFields.setLong("entityId", entityId)
-                        mapClassFields.setLong("fieldId", key)
-                        mapClassFields.addBatch()
-                        //2. map this field to the field dictionary
-                        mapFieldNames.setLong("fieldId", key)
-                        mapFieldNames.setString("fieldName", value)
-                        mapFieldNames.addBatch()
-                    }
-                    mapClassFields.executeBatch()
-                    mapFieldNames.executeBatch()
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-    }
-
-    /**
-     * Binds all the field types and updates reference tables
-     *
-     * @param connection the SQL connection to use for DB operations
-     * @param entityId   the value representing the entity
-     * @param fieldTypes the values representing the entity's field types
-     */
-    @Synchronized
-    fun mapClassFieldTypes(connection: Connection, entityId: Long, fieldTypes: Map<Long, String>) {
-        try {
-            (if (supportsStatements()) NamedCallableStatement(connection, mapFieldTypes()) else NamedPreparedStatement(connection, mapFieldTypes())).use { mapFieldTypes ->
-                for ((key, value) in fieldTypes) {
-                    mapFieldTypes.setLong("typeId", key)
-                    mapFieldTypes.setString("typeName", value)
-                    mapFieldTypes.addBatch()
-                }
-                mapFieldTypes.executeBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-    }
-
-    /**
-     * Binds all the enums attached to an entity
-     *
-     * @param entityId the value representing the entity
-     * @param fields   the entity's enums
-     */
-    @Synchronized
-    fun mapClassEnums(connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) {
-        mapEnumValues(connection, fields)
-        mapClassEnumsImplementation(connection, entityId, fields)
-        if (isPrintingOutput)
-            System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
-    }
-
-    /**
      * @param connection     the SQL connection to use for DB operations
      * @param parentEntities a collection of parent classes
      * @param entityCode     the value representing the entity
@@ -653,54 +584,6 @@ abstract class JdsDb : IJdsDb {
                     statement.setLong(1, parentEntitiy)
                     statement.setLong(2, entityCode)
                     statement.addBatch()
-                }
-                statement.executeBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-    }
-
-    /**
-     * Binds all the enums attached to an entity
-     *
-     * @param connection the SQL connection to use for DB operations
-     * @param entityId   the value representing the entity
-     * @param fields     the entity's enums
-     */
-    @Synchronized private fun mapClassEnumsImplementation(connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) {
-        try {
-            (if (supportsStatements()) connection.prepareCall(mapClassEnumsImplementation()) else connection.prepareStatement(mapClassEnumsImplementation())).use { statement ->
-                for (field in fields) {
-                    for (index in 0..field.sequenceValues.size - 1) {
-                        statement.setLong(1, entityId)
-                        statement.setLong(2, field.getField().id)
-                        statement.addBatch()
-                    }
-                }
-                statement.executeBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-    }
-
-    /**
-     * Binds all the values attached to an enum
-     *
-     * @param connection the SQL connection to use for DB operations
-     * @param fieldEnums the field enum
-     */
-    @Synchronized private fun mapEnumValues(connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) {
-        try {
-            (if (supportsStatements()) connection.prepareCall(mapEnumValues()) else connection.prepareStatement(mapEnumValues())).use { statement ->
-                for (field in fieldEnums) {
-                    for (index in 0..field.sequenceValues.size - 1) {
-                        statement.setLong(1, field.getField().id)
-                        statement.setInt(2, index)
-                        statement.setString(3, field.sequenceValues[index].toString())
-                        statement.addBatch()
-                    }
                 }
                 statement.executeBatch()
             }
@@ -745,9 +628,9 @@ abstract class JdsDb : IJdsDb {
                         var jdsEntity: JdsEntity? = entity.newInstance()
                         determineParents(entity, parentEntities)
                         mapClassName(connection, jdsEntity!!.overview.entityId, jdsEntity.getEntityName())
-                        mapClassFields(connection, jdsEntity.overview.entityId, jdsEntity.properties)
-                        mapClassFieldTypes(connection, jdsEntity.overview.entityId, jdsEntity.types)
-                        mapClassEnums(connection, jdsEntity.overview.entityId, jdsEntity.allEnums)
+                        jdsEntity.mapClassFields(this,connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassFieldTypes(this,connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassEnums(this,connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         jdsEntity = null

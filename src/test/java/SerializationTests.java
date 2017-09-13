@@ -1,7 +1,7 @@
 import common.BaseTestConfig;
 import io.github.subiyacryolite.jds.JdsEntity;
 import javafx.beans.property.SimpleBlobProperty;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

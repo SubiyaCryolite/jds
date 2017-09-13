@@ -154,31 +154,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             entity.overview.dateModified = LocalDateTime.now()
             saveContainer.overviews[step].add(entity.overview)
             //assign properties
-            saveContainer.booleans[step].put(entity.overview.entityGuid, entity.booleanProperties)
-            saveContainer.localDateTimes[step].put(entity.overview.entityGuid, entity.localDateTimeProperties)
-            saveContainer.zonedDateTimes[step].put(entity.overview.entityGuid, entity.zonedDateTimeProperties)
-            saveContainer.localTimes[step].put(entity.overview.entityGuid, entity.localTimeProperties)
-            saveContainer.localDates[step].put(entity.overview.entityGuid, entity.localDateProperties)
-            saveContainer.strings[step].put(entity.overview.entityGuid, entity.stringProperties)
-            saveContainer.floats[step].put(entity.overview.entityGuid, entity.floatProperties)
-            saveContainer.doubles[step].put(entity.overview.entityGuid, entity.doubleProperties)
-            saveContainer.longs[step].put(entity.overview.entityGuid, entity.longProperties)
-            saveContainer.integers[step].put(entity.overview.entityGuid, entity.integerProperties)
-            //assign blobs
-            saveContainer.blobs[step].put(entity.overview.entityGuid, entity.blobProperties)
-            //assign lists
-            saveContainer.stringArrays[step].put(entity.overview.entityGuid, entity.stringArrayProperties)
-            saveContainer.dateTimeArrays[step].put(entity.overview.entityGuid, entity.dateTimeArrayProperties)
-            saveContainer.floatArrays[step].put(entity.overview.entityGuid, entity.floatArrayProperties)
-            saveContainer.doubleArrays[step].put(entity.overview.entityGuid, entity.doubleArrayProperties)
-            saveContainer.longArrays[step].put(entity.overview.entityGuid, entity.longArrayProperties)
-            saveContainer.integerArrays[step].put(entity.overview.entityGuid, entity.integerArrayProperties)
-            //assign enums
-            saveContainer.enums[step].put(entity.overview.entityGuid, entity.enumProperties)
-            saveContainer.enumCollections[step].put(entity.overview.entityGuid, entity.enumCollectionProperties)
-            //assign objects
-            saveContainer.objectArrays[step].put(entity.overview.entityGuid, entity.objectArrayProperties)
-            saveContainer.objects[step].put(entity.overview.entityGuid, entity.objectProperties)
+            entity.assign(step,saveContainer)
             sequence++
         }
         //share one connection for raw saves, helps with performance

@@ -13,18 +13,20 @@
  */
 package io.github.subiyacryolite.jds
 
+import com.javaworld.NamedCallableStatement
+import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import javafx.beans.property.*
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZonedDateTime
+import java.sql.Connection
+import java.sql.Timestamp
+import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
@@ -37,39 +39,39 @@ abstract class JdsEntity : IJdsEntity {
         get() = _overview.get()
 
     //field and enum maps
-    internal val properties: MutableMap<Long, String> = HashMap()
-    internal val types: MutableMap<Long, String> = HashMap()
-    internal val objects: MutableSet<Long> = HashSet()
-    internal val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
+    private val properties: MutableMap<Long, String> = HashMap()
+    private val types: MutableMap<Long, String> = HashMap()
+    private val objects: MutableSet<Long> = HashSet()
+    private val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
     protected val name = SimpleStringProperty()
     //strings and localDateTimes
-    internal val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
-    internal val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
-    internal val localDateProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
-    internal val localTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
-    internal val stringProperties: HashMap<Long, SimpleStringProperty> = HashMap()
+    private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
+    private val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
+    private val localDateProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
+    private val localTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
+    private val stringProperties: HashMap<Long, SimpleStringProperty> = HashMap()
     //numeric
-    internal val floatProperties: HashMap<Long, SimpleFloatProperty> = HashMap()
-    internal val doubleProperties: HashMap<Long, SimpleDoubleProperty> = HashMap()
-    internal val booleanProperties: HashMap<Long, SimpleBooleanProperty> = HashMap()
-    internal val longProperties: HashMap<Long, SimpleLongProperty> = HashMap()
-    internal val integerProperties: HashMap<Long, SimpleIntegerProperty> = HashMap()
+    private val floatProperties: HashMap<Long, SimpleFloatProperty> = HashMap()
+    private val doubleProperties: HashMap<Long, SimpleDoubleProperty> = HashMap()
+    private val booleanProperties: HashMap<Long, SimpleBooleanProperty> = HashMap()
+    private val longProperties: HashMap<Long, SimpleLongProperty> = HashMap()
+    private val integerProperties: HashMap<Long, SimpleIntegerProperty> = HashMap()
     //arrays
-    internal val objectArrayProperties: HashMap<Long, SimpleListProperty<JdsEntity>> = HashMap()
-    internal val stringArrayProperties: HashMap<Long, SimpleListProperty<String>> = HashMap()
-    internal val dateTimeArrayProperties: HashMap<Long, SimpleListProperty<LocalDateTime>> = HashMap()
-    internal val floatArrayProperties: HashMap<Long, SimpleListProperty<Float>> = HashMap()
-    internal val doubleArrayProperties: HashMap<Long, SimpleListProperty<Double>> = HashMap()
-    internal val longArrayProperties: HashMap<Long, SimpleListProperty<Long>> = HashMap()
-    internal val integerArrayProperties: HashMap<Long, SimpleListProperty<Int>> = HashMap()
+    private val objectArrayProperties: HashMap<Long, SimpleListProperty<JdsEntity>> = HashMap()
+    private val stringArrayProperties: HashMap<Long, SimpleListProperty<String>> = HashMap()
+    private val dateTimeArrayProperties: HashMap<Long, SimpleListProperty<LocalDateTime>> = HashMap()
+    private val floatArrayProperties: HashMap<Long, SimpleListProperty<Float>> = HashMap()
+    private val doubleArrayProperties: HashMap<Long, SimpleListProperty<Double>> = HashMap()
+    private val longArrayProperties: HashMap<Long, SimpleListProperty<Long>> = HashMap()
+    private val integerArrayProperties: HashMap<Long, SimpleListProperty<Int>> = HashMap()
     //enums
-    internal val enumProperties: HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>> = HashMap()
-    internal val enumCollectionProperties: HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>> = HashMap()
+    private val enumProperties: HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>> = HashMap()
+    private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>> = HashMap()
     //objects
-    internal val objectProperties: HashMap<Long, SimpleObjectProperty<JdsEntity>> = HashMap()
-    internal val objectCascade: HashMap<Long, Boolean> = HashMap()
+    private val objectProperties: HashMap<Long, SimpleObjectProperty<JdsEntity>> = HashMap()
+    private val objectCascade: HashMap<Long, Boolean> = HashMap()
     //blobs
-    internal val blobProperties: HashMap<Long, SimpleBlobProperty> = HashMap()
+    private val blobProperties: HashMap<Long, SimpleBlobProperty> = HashMap()
 
 
     init {
@@ -798,4 +800,250 @@ abstract class JdsEntity : IJdsEntity {
     private fun putString(destination: Map<Long, SimpleStringProperty>, source: Map<Long, String>) {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
     }
+
+    internal fun assign(step: Int, saveContainer: JdsSaveContainer) {
+        saveContainer.booleans[step].put(overview.entityGuid, booleanProperties)
+        saveContainer.localDateTimes[step].put(overview.entityGuid, localDateTimeProperties)
+        saveContainer.zonedDateTimes[step].put(overview.entityGuid, zonedDateTimeProperties)
+        saveContainer.localTimes[step].put(overview.entityGuid, localTimeProperties)
+        saveContainer.localDates[step].put(overview.entityGuid, localDateProperties)
+        saveContainer.strings[step].put(overview.entityGuid, stringProperties)
+        saveContainer.floats[step].put(overview.entityGuid, floatProperties)
+        saveContainer.doubles[step].put(overview.entityGuid, doubleProperties)
+        saveContainer.longs[step].put(overview.entityGuid, longProperties)
+        saveContainer.integers[step].put(overview.entityGuid, integerProperties)
+        //assign blobs
+        saveContainer.blobs[step].put(overview.entityGuid, blobProperties)
+        //assign lists
+        saveContainer.stringArrays[step].put(overview.entityGuid, stringArrayProperties)
+        saveContainer.dateTimeArrays[step].put(overview.entityGuid, dateTimeArrayProperties)
+        saveContainer.floatArrays[step].put(overview.entityGuid, floatArrayProperties)
+        saveContainer.doubleArrays[step].put(overview.entityGuid, doubleArrayProperties)
+        saveContainer.longArrays[step].put(overview.entityGuid, longArrayProperties)
+        saveContainer.integerArrays[step].put(overview.entityGuid, integerArrayProperties)
+        //assign
+        saveContainer.enums[step].put(overview.entityGuid, enumProperties)
+        saveContainer.enumCollections[step].put(overview.entityGuid, enumCollectionProperties)
+        //assign objects
+        saveContainer.objectArrays[step].put(overview.entityGuid, objectArrayProperties)
+        saveContainer.objects[step].put(overview.entityGuid, objectProperties)
+    }
+
+    /**
+     * @param jdsFieldType
+     * @param key
+     * @param value
+     */
+    internal fun populateProperties(jdsFieldType: JdsFieldType, key: Long, value: Any?) {
+        when (jdsFieldType) {
+            JdsFieldType.FLOAT -> {
+                floatProperties[key]?.set(value as Float)
+            }
+            JdsFieldType.INT -> {
+                integerProperties[key]?.set(value as Int)
+            }
+            JdsFieldType.DOUBLE -> {
+                doubleProperties[key]?.set(value as Double)
+            }
+            JdsFieldType.LONG -> {
+                longProperties[key]?.set(value as Long)
+            }
+            JdsFieldType.TEXT -> {
+                stringProperties[key]?.set(value as String)
+            }
+            JdsFieldType.DATE_TIME -> {
+                localDateTimeProperties[key]?.set((value as Timestamp).toLocalDateTime())
+            }
+            JdsFieldType.ARRAY_DOUBLE -> {
+                doubleArrayProperties[key]?.get()?.add(value as Double)
+            }
+            JdsFieldType.ARRAY_FLOAT -> {
+                floatArrayProperties[key]?.get()?.add(value as Float)
+            }
+            JdsFieldType.ARRAY_INT -> {
+                integerArrayProperties[key]?.get()?.add(value as Int)
+            }
+            JdsFieldType.ARRAY_LONG -> {
+                longArrayProperties[key]?.get()?.add(value as Long)
+            }
+            JdsFieldType.ARRAY_TEXT -> {
+                stringArrayProperties[key]?.get()?.add(value as String)
+            }
+            JdsFieldType.ARRAY_DATE_TIME -> {
+                dateTimeArrayProperties[key]?.get()?.add((value as Timestamp).toLocalDateTime())
+            }
+            JdsFieldType.ENUM_COLLECTION -> {
+                enumCollectionProperties.filter { it.key.getField().id == key }.forEach {
+                    val enumValues = it.key.getEnumType()!!.enumConstants
+                    val index = value as Int
+                    if (index < enumValues.size) {
+                        it.value.get().add(enumValues[index] as Enum<*>)
+                        enumCollectionProperties.keys.any { it -> it.getField().id == key }
+                    }
+                }
+            }
+            JdsFieldType.BOOLEAN -> {
+                booleanProperties[key]?.set((value as Int) == 1)
+            }
+            JdsFieldType.ZONED_DATE_TIME -> {
+                val instant = Instant.ofEpochSecond(value as Long)
+                val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                zonedDateTimeProperties[key]?.set(zonedDateTime)
+            }
+            JdsFieldType.DATE -> {
+                localDateProperties[key]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
+            }
+            JdsFieldType.TIME -> {
+                localTimeProperties[key]?.set(LocalTime.ofSecondOfDay(value as Long))
+            }
+            JdsFieldType.BLOB -> {
+                blobProperties[key]?.set(value as ByteArray)
+            }
+            JdsFieldType.ENUM -> {
+                enumProperties.filter { it.key.getField().id == key }.forEach {
+                    it.value?.set(it.key.valueOf(value as Int))
+                }
+            }
+        }
+    }
+
+    internal fun populateObjects(jdsDb: JdsDb, entityId: Long, entityGuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, entityGuids: HashSet<String>) {
+        try {
+            val entityClass = jdsDb.getBoundClass(entityId)!!
+            if (objectArrayProperties.containsKey(entityId)) {
+                val properties = objectArrayProperties[entityId]!!
+                val entity = entityClass.newInstance()
+                entity.overview.entityGuid = entityGuid
+                entityGuids.add(entityGuid)
+                properties.get().add(entity)
+                innerObjects.add(entity)
+            } else if (objectProperties.containsKey(entityId)) {
+                val properties = objectProperties[entityId]!!
+                val jdsEntity = entityClass!!.newInstance()
+                jdsEntity.overview.entityGuid = entityGuid
+                entityGuids.add(entityGuid)
+                properties.set(jdsEntity)
+                innerObjects.add(jdsEntity)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
+    /**
+     * Binds all the fields attached to an entity, updates the fields dictionary
+     *
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     * @param fields     the values representing the entity's fields
+     */
+    internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) {
+        try {
+            (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
+                (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
+                    for ((key, value) in properties) {
+                        //1. map this field ID to the entity type
+                        mapClassFields.setLong("entityId", entityId)
+                        mapClassFields.setLong("fieldId", key)
+                        mapClassFields.addBatch()
+                        //2. map this field to the field dictionary
+                        mapFieldNames.setLong("fieldId", key)
+                        mapFieldNames.setString("fieldName", value)
+                        mapFieldNames.addBatch()
+                    }
+                    mapClassFields.executeBatch()
+                    mapFieldNames.executeBatch()
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
+    /**
+     * Binds all the enums attached to an entity
+     *
+     * @param entityId the value representing the entity
+     * @param fields   the entity's enums
+     */
+    @Synchronized
+    internal fun mapClassEnums(jdsDb: JdsDb, connection: Connection, entityId: Long) {
+        mapEnumValues(jdsDb, connection, allEnums)
+        mapClassEnumsImplementation(jdsDb, connection, entityId, allEnums)
+        if (jdsDb.isPrintingOutput)
+            System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
+    }
+
+    /**
+     * Binds all the field types and updates reference tables
+     *
+     * @param jdsDb the current database implementation
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     */
+    internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection, entityId: Long) {
+        try {
+            (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
+                for ((key, value) in types) {
+                    mapFieldTypes.setLong("typeId", key)
+                    mapFieldTypes.setString("typeName", value)
+                    mapFieldTypes.addBatch()
+                }
+                mapFieldTypes.executeBatch()
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
+    /**
+     * Binds all the enums attached to an entity
+     *
+     * @param connection the SQL connection to use for DB operations
+     * @param entityId   the value representing the entity
+     * @param fields     the entity's enums
+     */
+    @Synchronized
+    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) {
+        try {
+            (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use { statement ->
+                for (field in fields) {
+                    for (index in 0..field.sequenceValues.size - 1) {
+                        statement.setLong(1, entityId)
+                        statement.setLong(2, field.getField().id)
+                        statement.addBatch()
+                    }
+                }
+                statement.executeBatch()
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
+    /**
+     * Binds all the values attached to an enum
+     *
+     * @param connection the SQL connection to use for DB operations
+     * @param fieldEnums the field enum
+     */
+    @Synchronized
+    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) {
+        try {
+            (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use { statement ->
+                for (field in fieldEnums) {
+                    for (index in 0 until field.sequenceValues.size) {
+                        statement.setLong(1, field.getField().id)
+                        statement.setInt(2, index)
+                        statement.setString(3, field.sequenceValues[index].toString())
+                        statement.addBatch()
+                    }
+                }
+                statement.executeBatch()
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
 }
