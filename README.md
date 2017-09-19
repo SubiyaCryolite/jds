@@ -203,22 +203,19 @@ import java.time.ZonedDateTime;
 
 import static fields.JdsExampleFields.*;
 
-/**
- * Created by ifunga on 12/04/2017.
- */
-@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+@JdsEntityAnnotation(entityId = 3, entityName = "example")
 public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
-    private final SimpleStringProperty _stringField = new SimpleStringProperty("");
-    private final SimpleObjectProperty<LocalTime> _timeField = new SimpleObjectProperty<>(LocalTime.now());
-    private final SimpleObjectProperty<LocalDate> _dateField = new SimpleObjectProperty<>(LocalDate.now());
-    private final SimpleObjectProperty<LocalDateTime> _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now());
-    private final SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now());
-    private final SimpleLongProperty _longField = new SimpleLongProperty(0);
-    private final SimpleIntegerProperty _intField = new SimpleIntegerProperty(0);
-    private final SimpleDoubleProperty _doubleField = new SimpleDoubleProperty(0);
-    private final SimpleFloatProperty _floatField = new SimpleFloatProperty(0);
-    private final SimpleBooleanProperty _booleanField = new SimpleBooleanProperty(false);
-    private final SimpleBlobProperty _blobField = new SimpleBlobProperty(new byte[0]);
+    private SimpleStringProperty _stringField = new SimpleStringProperty("");
+    private SimpleObjectProperty<LocalTime> _timeField = new SimpleObjectProperty<>(LocalTime.now());
+    private SimpleObjectProperty<LocalDate> _dateField = new SimpleObjectProperty<>(LocalDate.now());
+    private SimpleObjectProperty<LocalDateTime> _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now());
+    private SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now());
+    private SimpleLongProperty _longField = new SimpleLongProperty(0);
+    private SimpleIntegerProperty _intField = new SimpleIntegerProperty(0);
+    private SimpleDoubleProperty _doubleField = new SimpleDoubleProperty(0);
+    private SimpleFloatProperty _floatField = new SimpleFloatProperty(0);
+    private SimpleBooleanProperty _booleanField = new SimpleBooleanProperty(false);
+    private SimpleBlobProperty _blobField = new SimpleBlobProperty(new byte[0]);
 
     public Example() {
         map(STRING_FIELD, _stringField);
