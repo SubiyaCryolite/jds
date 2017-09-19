@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-import fields.JdsExampleFields.*
+import fields.Fields.*
 
 /**
  * Created by ifunga on 12/04/2017.

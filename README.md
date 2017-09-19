@@ -203,7 +203,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import static fields.JdsExampleFields.*;
+import static fields.Fields.*;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "example")
 public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
@@ -368,7 +368,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-import fields.JdsExampleFields.*
+import fields.Fields.*
 
 @JdsEntityAnnotation(entityId = 3, entityName = "example")
 class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
