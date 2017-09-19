@@ -196,6 +196,8 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 import io.github.subiyacryolite.jds.events.*;
 import javafx.beans.property.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -205,30 +207,30 @@ import static fields.JdsExampleFields.*;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "example")
 public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
-    private SimpleStringProperty _stringField = new SimpleStringProperty("");
-    private SimpleObjectProperty<LocalTime> _timeField = new SimpleObjectProperty<>(LocalTime.now());
-    private SimpleObjectProperty<LocalDate> _dateField = new SimpleObjectProperty<>(LocalDate.now());
-    private SimpleObjectProperty<LocalDateTime> _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now());
-    private SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now());
-    private SimpleLongProperty _longField = new SimpleLongProperty(0);
-    private SimpleIntegerProperty _intField = new SimpleIntegerProperty(0);
-    private SimpleDoubleProperty _doubleField = new SimpleDoubleProperty(0);
-    private SimpleFloatProperty _floatField = new SimpleFloatProperty(0);
-    private SimpleBooleanProperty _booleanField = new SimpleBooleanProperty(false);
-    private SimpleBlobProperty _blobField = new SimpleBlobProperty(new byte[0]);
+    private final SimpleStringProperty _stringField;
+    private final SimpleObjectProperty<LocalTime> _timeField;
+    private final SimpleObjectProperty<LocalDate> _dateField;
+    private final SimpleObjectProperty<LocalDateTime> _dateTimeField;
+    private final SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField;
+    private final SimpleLongProperty _longField;
+    private final SimpleIntegerProperty _intField;
+    private final SimpleDoubleProperty _doubleField;
+    private final SimpleFloatProperty _floatField;
+    private final SimpleBooleanProperty _booleanField;
+    private final SimpleBlobProperty _blobField;
 
     public Example() {
-        map(STRING_FIELD, _stringField);
-        map(DATE_FIELD, _dateField);
-        map(TIME_FIELD, _timeField);
-        map(DATE_TIME_FIELD, _dateTimeField);
-        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField);
-        map(LONG_FIELD, _longField);
-        map(INT_FIELD, _intField);
-        map(DOUBLE_FIELD, _doubleField);
-        map(FLOAT_FIELD, _floatField);
-        map(BOOLEAN_FIELD, _booleanField);
-        map(BLOB_FIELD, _blobField);
+        map(STRING_FIELD, _stringField = new SimpleStringProperty(""));
+        map(DATE_FIELD, _dateField = new SimpleObjectProperty<>(LocalDate.now()));
+        map(TIME_FIELD, _timeField = new SimpleObjectProperty<>(LocalTime.now()));
+        map(DATE_TIME_FIELD, _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now()));
+        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now()));
+        map(LONG_FIELD, _longField = new SimpleLongProperty(0));
+        map(INT_FIELD, _intField = new SimpleIntegerProperty(0));
+        map(DOUBLE_FIELD, _doubleField = new SimpleDoubleProperty(0));
+        map(FLOAT_FIELD, _floatField = new SimpleFloatProperty(0));
+        map(BOOLEAN_FIELD, _booleanField = new SimpleBooleanProperty(false));
+        map(BLOB_FIELD, _blobField = new SimpleBlobProperty(new byte[0]));
     }
 
     public String getStringField() {
@@ -236,7 +238,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setStringField(String stringField) {
-        this._stringField.set(stringField);
+        _stringField.set(stringField);
     }
 
     public LocalTime getTimeField() {
@@ -244,7 +246,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setTimeField(LocalTime dateField) {
-        this._timeField.set(dateField);
+        _timeField.set(dateField);
     }
 
     public LocalDate getDateField() {
@@ -252,7 +254,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setDateField(LocalDate dateField) {
-        this._dateField.set(dateField);
+        _dateField.set(dateField);
     }
 
     public LocalDateTime getDateTimeField() {
@@ -260,7 +262,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setDateTimeField(LocalDateTime dateTimeField) {
-        this._dateTimeField.set(dateTimeField);
+        _dateTimeField.set(dateTimeField);
     }
 
     public ZonedDateTime getZonedDateTimeField() {
@@ -268,7 +270,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setZonedDateTimeField(ZonedDateTime zonedDateTimeField) {
-        this._zonedDateTimeField.set(zonedDateTimeField);
+        _zonedDateTimeField.set(zonedDateTimeField);
     }
 
     public long getLongField() {
@@ -276,7 +278,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setLongField(long longField) {
-        this._longField.set(longField);
+        _longField.set(longField);
     }
 
     public int getIntField() {
@@ -284,7 +286,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setIntField(int intField) {
-        this._intField.set(intField);
+        _intField.set(intField);
     }
 
     public double getDoubleField() {
@@ -292,7 +294,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setDoubleField(double doubleField) {
-        this._doubleField.set(doubleField);
+        _doubleField.set(doubleField);
     }
 
     public float getFloatField() {
@@ -300,7 +302,7 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setFloatField(float floatField) {
-        this._floatField.set(floatField);
+        _floatField.set(floatField);
     }
 
     public boolean getBooleanField() {
@@ -308,7 +310,23 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     }
 
     public void setBooleanField(boolean booleanField) {
-        this._booleanField.set(booleanField);
+        _booleanField.set(booleanField);
+    }
+
+    public byte[] getBlobAsByteArray() {
+        return _blobField.get();
+    }
+
+    public InputStream getBlobAsInputStream() {
+        return _blobField.getResourceAsStream();
+    }
+
+    public void setBlob(byte[] blob) {
+        _blobField.set(blob);
+    }
+
+    public void setBlob(InputStream blob) throws IOException {
+        _blobField.set(blob);
     }
 
     @Override
@@ -343,6 +361,8 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.events.*
 import javafx.beans.property.*
 
+import java.io.IOException
+import java.io.InputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -350,7 +370,7 @@ import java.time.ZonedDateTime
 
 import fields.JdsExampleFields.*
 
-@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+@JdsEntityAnnotation(entityId = 3, entityName = "example")
 class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     private val _stringField = SimpleStringProperty("")
     private val _timeField = SimpleObjectProperty(LocalTime.now())
@@ -380,43 +400,58 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 
     var stringField: String
         get() = _stringField.get()
-        set(stringField) = this._stringField.set(stringField)
+        set(stringField) = _stringField.set(stringField)
 
     var timeField: LocalTime
         get() = _timeField.get()
-        set(dateField) = this._timeField.set(dateField)
+        set(dateField) = _timeField.set(dateField)
 
     var dateField: LocalDate
         get() = _dateField.get()
-        set(dateField) = this._dateField.set(dateField)
+        set(dateField) = _dateField.set(dateField)
 
     var dateTimeField: LocalDateTime
         get() = _dateTimeField.get()
-        set(dateTimeField) = this._dateTimeField.set(dateTimeField)
+        set(dateTimeField) = _dateTimeField.set(dateTimeField)
 
     var zonedDateTimeField: ZonedDateTime
         get() = _zonedDateTimeField.get()
-        set(zonedDateTimeField) = this._zonedDateTimeField.set(zonedDateTimeField)
+        set(zonedDateTimeField) = _zonedDateTimeField.set(zonedDateTimeField)
 
     var longField: Long
         get() = _longField.get()
-        set(longField) = this._longField.set(longField)
+        set(longField) = _longField.set(longField)
 
     var intField: Int
         get() = _intField.get()
-        set(intField) = this._intField.set(intField)
+        set(intField) = _intField.set(intField)
 
     var doubleField: Double
         get() = _doubleField.get()
-        set(doubleField) = this._doubleField.set(doubleField)
+        set(doubleField) = _doubleField.set(doubleField)
 
     var floatField: Float
         get() = _floatField.get()
-        set(floatField) = this._floatField.set(floatField)
+        set(floatField) = _floatField.set(floatField)
 
     var booleanField: Boolean
         get() = _booleanField.get()
-        set(booleanField) = this._booleanField.set(booleanField)
+        set(booleanField) = _booleanField.set(booleanField)
+
+    val blobAsByteArray: ByteArray?
+        get() = _blobField.get()
+
+    val blobAsInputStream: InputStream
+        get() = _blobField.resourceAsStream
+
+    fun setBlob(blob: ByteArray) {
+        _blobField.set(blob)
+    }
+
+    @Throws(IOException::class)
+    fun setBlob(blob: InputStream) {
+        _blobField.set(blob)
+    }
 
     override fun onPreSave(eventArguments: OnPreSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
@@ -440,7 +475,7 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 }
 ```
 ### 1.1.5 Binding Objects and Object Arrays
-Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays. All that's required is a valid JdsEntity subclass to be mapped based on the embedded objects annotations.
+Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays. All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped based on the embedded objects annotations.
 
 The class below shows how you can achieve this.
 
