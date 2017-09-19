@@ -1,5 +1,5 @@
 import common.BaseTestConfig;
-import entities.JdsExample;
+import entities.Example;
 import io.github.subiyacryolite.jds.JdsDelete;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
@@ -18,7 +18,7 @@ public class LoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void save() throws Exception {
-        List<JdsExample> collection = getCollection();
+        List<Example> collection = getCollection();
         Callable<Boolean> save = new JdsSave(jdsDb, collection);
         FutureTask<Boolean> saving = new FutureTask(save);
         new Thread(saving).start();
@@ -30,15 +30,15 @@ public class LoadAndSaveTests extends BaseTestConfig {
     @Test
     public void bulkSave() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        List<JdsExample> collection = new ArrayList<>();
+        List<Example> collection = new ArrayList<>();
         for (int i = 0; i < 5000; i++) {
-            JdsExample jdsExample = new JdsExample();
-            jdsExample.getOverview().setEntityGuid("guid_" + i);
-            jdsExample.setIntField(i);
-            jdsExample.setFloatField(i + 1);
-            jdsExample.setDoubleField(i + 2);
-            jdsExample.setLongField(i + 3);
-            collection.add(jdsExample);
+            Example example = new Example();
+            example.getOverview().setEntityGuid("guid_" + i);
+            example.setIntField(i);
+            example.setFloatField(i + 1);
+            example.setDoubleField(i + 2);
+            example.setLongField(i + 3);
+            collection.add(example);
         }
         Callable<Boolean> save = new JdsSave(jdsDb, collection);
         FutureTask<Boolean> saving = new FutureTask(save);
@@ -51,26 +51,26 @@ public class LoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void loadNonExisting() throws Exception {
-        Callable<List<JdsExample>> loadNonExistingCallable = new JdsLoad(jdsDb, JdsExample.class,"DOES_NOT_EXIST");
-        FutureTask<List<JdsExample>> loadNonExistingTask = new FutureTask(loadNonExistingCallable);
+        Callable<List<Example>> loadNonExistingCallable = new JdsLoad(jdsDb, Example.class,"DOES_NOT_EXIST");
+        FutureTask<List<Example>> loadNonExistingTask = new FutureTask(loadNonExistingCallable);
 
         new Thread(loadNonExistingTask).start();
 
         while (!loadNonExistingTask.isDone())
             System.out.println("Waiting for operation 1 to complete");
-        List<JdsExample> loadNonExistingResult = loadNonExistingTask.get();
+        List<Example> loadNonExistingResult = loadNonExistingTask.get();
         System.out.println(loadNonExistingResult);
     }
 
     @Test
     public void load() throws ExecutionException, InterruptedException {
-        Callable<List<JdsExample>> loadAllInstances = new JdsLoad(jdsDb, JdsExample.class);
-        Callable<List<JdsExample>> loadSpecificInstance = new JdsLoad(jdsDb, JdsExample.class, "instance3");
-        Callable<List<JdsExample>> loadSortedInstances = new JdsLoad(jdsDb, JdsExample.class);
+        Callable<List<Example>> loadAllInstances = new JdsLoad(jdsDb, Example.class);
+        Callable<List<Example>> loadSpecificInstance = new JdsLoad(jdsDb, Example.class, "instance3");
+        Callable<List<Example>> loadSortedInstances = new JdsLoad(jdsDb, Example.class);
 
-        FutureTask<List<JdsExample>> loadingAllInstances = new FutureTask(loadAllInstances);
-        FutureTask<List<JdsExample>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
-        FutureTask<List<JdsExample>> loadingSortedInstances = new FutureTask(loadSortedInstances);
+        FutureTask<List<Example>> loadingAllInstances = new FutureTask(loadAllInstances);
+        FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
+        FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
 
         new Thread(loadingAllInstances).start();
         new Thread(loadingSpecificInstance).start();
@@ -83,9 +83,9 @@ public class LoadAndSaveTests extends BaseTestConfig {
         while (!loadingSortedInstances.isDone())
             System.out.println("Waiting for operation 3 to complete");
 
-        List<JdsExample> allInstances = loadingAllInstances.get();
-        List<JdsExample> specificInstance = loadingSpecificInstance.get();
-        List<JdsExample> sortedInstances = loadingSortedInstances.get();
+        List<Example> allInstances = loadingAllInstances.get();
+        List<Example> specificInstance = loadingSpecificInstance.get();
+        List<Example> sortedInstances = loadingSortedInstances.get();
 
         System.out.println(allInstances);
         System.out.println(specificInstance);

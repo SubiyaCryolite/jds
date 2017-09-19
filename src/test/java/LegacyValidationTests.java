@@ -1,5 +1,5 @@
 import common.BaseTestConfig;
-import entities.JdsExample;
+import entities.Example;
 import io.github.subiyacryolite.jds.JdsLoad;
 import io.github.subiyacryolite.jds.JdsSave;
 import org.junit.jupiter.api.Test;
@@ -18,30 +18,30 @@ public class LegacyValidationTests extends BaseTestConfig {
     @Override
     public void saveAndLoad() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        List<JdsExample> memObjects = getCollection();
+        List<Example> memObjects = getCollection();
         JdsSave.Companion.save(jdsDb, 1, memObjects);
         System.out.printf("Saved %s\n", memObjects);
 
-        List<JdsExample> savObjects = JdsLoad.Companion.load(jdsDb, JdsExample.class); //load all entities of type AddressBook
-        List<JdsExample> specificObject = JdsLoad.Companion.load(jdsDb, JdsExample.class, "instance4"); //load all entities of type AddressBook with Entity Guids in range
+        List<Example> savObjects = JdsLoad.Companion.load(jdsDb, Example.class); //load all entities of type AddressBook
+        List<Example> specificObject = JdsLoad.Companion.load(jdsDb, Example.class, "instance4"); //load all entities of type AddressBook with Entity Guids in range
         System.out.printf("All entities [%s]\n", savObjects);
         System.out.printf("Specific entities [%s]\n", specificObject);
 
-        Optional<JdsExample> srcA = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance1")).findAny();
-        Optional<JdsExample> srcB = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance1")).findAny();
-        Optional<JdsExample> srcC = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance2")).findAny();
-        Optional<JdsExample> srcD = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance2")).findAny();
-        Optional<JdsExample> srcE = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance3")).findAny();
-        Optional<JdsExample> srcF = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance3")).findAny();
-        Optional<JdsExample> srcG = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance4")).findAny();
-        Optional<JdsExample> srcH = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance4")).findAny();
+        Optional<Example> srcA = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance1")).findAny();
+        Optional<Example> srcB = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance1")).findAny();
+        Optional<Example> srcC = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance2")).findAny();
+        Optional<Example> srcD = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance2")).findAny();
+        Optional<Example> srcE = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance3")).findAny();
+        Optional<Example> srcF = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance3")).findAny();
+        Optional<Example> srcG = savObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance4")).findAny();
+        Optional<Example> srcH = memObjects.parallelStream().filter(z -> z.getOverview().getEntityGuid().equals("instance4")).findAny();
         match(srcA, srcB);
         match(srcC, srcD);
         match(srcE, srcF);
         match(srcG, srcH);
     }
 
-    private void match(Optional<JdsExample> srcA, Optional<JdsExample> srcB) {
+    private void match(Optional<Example> srcA, Optional<Example> srcB) {
         assertTrue(srcA.isPresent(), "srcA is not present");
         assertTrue(srcB.isPresent(), "srcB is not present");
         //date, localTime, zonedDateTime and localDateTime is accurate up to seconds [not nanoseconds]

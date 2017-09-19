@@ -33,7 +33,7 @@ public abstract class BaseTestConfig {
         jdsDb.map(EntityA.class);
         jdsDb.map(EntityB.class);
         jdsDb.map(EntityC.class);
-        jdsDb.map(JdsExample.class);
+        jdsDb.map(Example.class);
         jdsDb.map(Address.class);
         jdsDb.map(AddressBook.class);
     }
@@ -144,10 +144,10 @@ public abstract class BaseTestConfig {
         return addressBook;
     }
 
-    protected List<JdsExample> getCollection() {
-        List<JdsExample> collection = new ArrayList<>();
+    protected List<Example> getCollection() {
+        List<Example> collection = new ArrayList<>();
 
-        JdsExample instance1 = new JdsExample();
+        Example instance1 = new Example();
         instance1.setStringField("One");
         instance1.setTimeField(LocalTime.of(15, 24));
         instance1.setDateField(LocalDate.of(2012, 8, 26));
@@ -160,7 +160,7 @@ public abstract class BaseTestConfig {
         instance1.setBooleanField(true);
         instance1.getOverview().setEntityGuid("instance1");
 
-        JdsExample instance2 = new JdsExample();
+        Example instance2 = new Example();
         instance2.setStringField("tWO");
         instance2.setTimeField(LocalTime.of(19, 24));
         instance2.setDateField(LocalDate.of(2011, 4, 2));
@@ -173,7 +173,7 @@ public abstract class BaseTestConfig {
         instance2.setBooleanField(false);
         instance2.getOverview().setEntityGuid("instance2");
 
-        JdsExample instance3 = new JdsExample();
+        Example instance3 = new Example();
         instance3.setStringField("Three");
         instance3.setTimeField(LocalTime.of(03, 14));
         instance3.setDateField(LocalDate.of(2034, 6, 14));
@@ -186,7 +186,7 @@ public abstract class BaseTestConfig {
         instance3.setBooleanField(true);
         instance3.getOverview().setEntityGuid("instance3");
 
-        JdsExample instance4 = new JdsExample();
+        Example instance4 = new Example();
         instance4.setStringField("Four");
         instance4.setTimeField(LocalTime.of(12, 44));
         instance4.setDateField(LocalDate.of(3034, 12, 1));

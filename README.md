@@ -60,8 +60,21 @@ The API currently supports the following Relational Databases, each of which has
 ## 1.1 Creating Classes
 Classes that use JDS need to extend JdsEntity.
 ```java
+import io.github.subiyacryolite.jds.JdsEntity;
+
 public class Customer extends JdsEntity
 ```
+
+However, if you plan on using interfaces they must extend IJdsEntity. Concrete classes can then extend JdsEntity
+
+```java
+import io.github.subiyacryolite.jds.JdsEntity;
+import io.github.subiyacryolite.jds.IJdsEntity;
+
+public interface ICustomer extends IJdsEntity
+public class Customer extends JdsEntity implements ICustomer
+```
+
 Following that the following steps need to be taken.
 
 ### 1.1.1 Annotating Classes
@@ -176,9 +189,11 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
  
  The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
+
 ```java
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
+import io.github.subiyacryolite.jds.events.*;
 import javafx.beans.property.*;
 
 import java.time.LocalDate;
@@ -186,160 +201,244 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-@JdsEntityAnnotation(entityId = 3, entityName = "example")
-public class Example extends JdsEntity {
-        private final SimpleStringProperty stringField;
-        private final SimpleObjectProperty<LocalTime> timeField;
-        private final SimpleObjectProperty<LocalDate> dateField;
-        private final SimpleObjectProperty<LocalDateTime> dateTimeField;
-        private final SimpleObjectProperty<ZonedDateTime> zonedDateTimeField;
-        private final SimpleLongProperty longField;
-        private final SimpleIntegerProperty intField;
-        private final SimpleDoubleProperty doubleField;
-        private final SimpleFloatProperty floatField;
-        private final SimpleBooleanProperty booleanField;
-    
-        public Example() {
-            stringField = new SimpleStringProperty("");
-            timeField = new SimpleObjectProperty<LocalTime>(LocalTime.now());
-            dateField = new SimpleObjectProperty<LocalDate>(LocalDate.now());
-            dateTimeField = new SimpleObjectProperty<LocalDateTime>(LocalDateTime.now());
-            zonedDateTimeField = new SimpleObjectProperty<ZonedDateTime>(ZonedDateTime.now());
-            longField = new SimpleLongProperty(0);
-            intField = new SimpleIntegerProperty(0);
-            doubleField = new SimpleDoubleProperty(0);
-            floatField = new SimpleFloatProperty(0);
-            booleanField = new SimpleBooleanProperty(false);
-            //map
-            map(Fields.STRING_FIELD, stringField);
-            map(Fields.DATE_FIELD, dateField);
-            map(Fields.TIME_FIELD, timeField);
-            map(Fields.DATE_TIME_FIELD, dateTimeField);
-            map(Fields.ZONED_DATE_TIME_FIELD, zonedDateTimeField);
-            map(Fields.LONG_FIELD, longField);
-            map(Fields.INT_FIELD, intField);
-            map(Fields.DOUBLE_FIELD, doubleField);
-            map(Fields.FLOAT_FIELD, floatField);
-            map(Fields.BOOLEAN_FIELD, booleanField);
-        }
-    
-        public Example(String str, 
-                         LocalTime timeField, 
-                         LocalDate localDate, 
-                         LocalDateTime localDateTime, 
-                         ZonedDateTime zonedDateTime, 
-                         long l, 
-                         int i, 
-                         double d, 
-                         float f, 
-                         boolean b) {
-            this();
-            setStringField(str);
-            setTimeField(timeField);
-            setDateField(localDate);
-            setDateTimeField(localDateTime);
-            setZonedDateTimeField(zonedDateTime);
-            setLongField(l);
-            setIntField(i);
-            setDoubleField(d);
-            setFloatField(f);
-            setBooleanField(b);
-        }
+import static fields.JdsExampleFields.*;
+
+/**
+ * Created by ifunga on 12/04/2017.
+ */
+@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
+    private final SimpleStringProperty _stringField = new SimpleStringProperty("");
+    private final SimpleObjectProperty<LocalTime> _timeField = new SimpleObjectProperty<>(LocalTime.now());
+    private final SimpleObjectProperty<LocalDate> _dateField = new SimpleObjectProperty<>(LocalDate.now());
+    private final SimpleObjectProperty<LocalDateTime> _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now());
+    private final SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now());
+    private final SimpleLongProperty _longField = new SimpleLongProperty(0);
+    private final SimpleIntegerProperty _intField = new SimpleIntegerProperty(0);
+    private final SimpleDoubleProperty _doubleField = new SimpleDoubleProperty(0);
+    private final SimpleFloatProperty _floatField = new SimpleFloatProperty(0);
+    private final SimpleBooleanProperty _booleanField = new SimpleBooleanProperty(false);
+    private final SimpleBlobProperty _blobField = new SimpleBlobProperty(new byte[0]);
+
+    public Example() {
+        map(STRING_FIELD, _stringField);
+        map(DATE_FIELD, _dateField);
+        map(TIME_FIELD, _timeField);
+        map(DATE_TIME_FIELD, _dateTimeField);
+        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField);
+        map(LONG_FIELD, _longField);
+        map(INT_FIELD, _intField);
+        map(DOUBLE_FIELD, _doubleField);
+        map(FLOAT_FIELD, _floatField);
+        map(BOOLEAN_FIELD, _booleanField);
+        map(BLOB_FIELD, _blobField);
+    }
 
     public String getStringField() {
-        return stringField.get();
+        return _stringField.get();
     }
 
     public void setStringField(String stringField) {
-        this.stringField.set(stringField);
+        this._stringField.set(stringField);
     }
 
     public LocalTime getTimeField() {
-        return timeField.get();
+        return _timeField.get();
     }
 
     public void setTimeField(LocalTime dateField) {
-        this.timeField.set(dateField);
+        this._timeField.set(dateField);
     }
 
     public LocalDate getDateField() {
-        return dateField.get();
+        return _dateField.get();
     }
 
     public void setDateField(LocalDate dateField) {
-        this.dateField.set(dateField);
+        this._dateField.set(dateField);
     }
 
     public LocalDateTime getDateTimeField() {
-        return dateTimeField.get();
+        return _dateTimeField.get();
     }
 
     public void setDateTimeField(LocalDateTime dateTimeField) {
-        this.dateTimeField.set(dateTimeField);
+        this._dateTimeField.set(dateTimeField);
     }
 
     public ZonedDateTime getZonedDateTimeField() {
-        return zonedDateTimeField.get();
+        return _zonedDateTimeField.get();
     }
 
     public void setZonedDateTimeField(ZonedDateTime zonedDateTimeField) {
-        this.zonedDateTimeField.set(zonedDateTimeField);
+        this._zonedDateTimeField.set(zonedDateTimeField);
     }
 
     public long getLongField() {
-        return longField.get();
+        return _longField.get();
     }
 
     public void setLongField(long longField) {
-        this.longField.set(longField);
+        this._longField.set(longField);
     }
 
     public int getIntField() {
-        return intField.get();
+        return _intField.get();
     }
 
     public void setIntField(int intField) {
-        this.intField.set(intField);
+        this._intField.set(intField);
     }
 
     public double getDoubleField() {
-        return doubleField.get();
+        return _doubleField.get();
     }
 
     public void setDoubleField(double doubleField) {
-        this.doubleField.set(doubleField);
+        this._doubleField.set(doubleField);
     }
 
     public float getFloatField() {
-        return floatField.get();
+        return _floatField.get();
     }
 
     public void setFloatField(float floatField) {
-        this.floatField.set(floatField);
+        this._floatField.set(floatField);
     }
 
     public boolean getBooleanField() {
-        return booleanField.get();
+        return _booleanField.get();
     }
 
     public void setBooleanField(boolean booleanField) {
-        this.booleanField.set(booleanField);
+        this._booleanField.set(booleanField);
     }
 
     @Override
-    public String toString() {
-        return "Example{" +
-                "stringField = " + getStringField() +
-                ", timeField = " + getTimeField() +
-                ", dateField = " + getDateField() +
-                ", dateTimeField = " + getDateTimeField() +
-                ", zonedDateTimeField = " + getZonedDateTimeField() +
-                ", longField = " + getLongField() +
-                ", intField = " + getIntField() +
-                ", doubleField = " + getDoubleField() +
-                ", floatField = " + getFloatField() +
-                ", booleanField = " + getBooleanField() +
-                '}';
+    public void onPreSave(OnPreSaveEventArguments eventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute") 
+    }
+
+    @Override
+    public void onPostSave(OnPostSaveEventArguments eventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    @Override
+    public void onPreLoad(OnPreLoadEventArguments eventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    @Override
+    public void onPostLoad(OnPostLoadEventArguments eventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+}
+```
+Or in Kotlin
+```kotlin
+import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.events.*
+import javafx.beans.property.*
+
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
+
+import fields.JdsExampleFields.*
+
+@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
+    private val _stringField = SimpleStringProperty("")
+    private val _timeField = SimpleObjectProperty(LocalTime.now())
+    private val _dateField = SimpleObjectProperty(LocalDate.now())
+    private val _dateTimeField = SimpleObjectProperty(LocalDateTime.now())
+    private val _zonedDateTimeField = SimpleObjectProperty(ZonedDateTime.now())
+    private val _longField = SimpleLongProperty(0)
+    private val _intField = SimpleIntegerProperty(0)
+    private val _doubleField = SimpleDoubleProperty(0.0)
+    private val _floatField = SimpleFloatProperty(0f)
+    private val _booleanField = SimpleBooleanProperty(false)
+    private val _blobField = SimpleBlobProperty(ByteArray(0))
+
+    init {
+        map(STRING_FIELD, _stringField)
+        map(DATE_FIELD, _dateField)
+        map(TIME_FIELD, _timeField)
+        map(DATE_TIME_FIELD, _dateTimeField)
+        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField)
+        map(LONG_FIELD, _longField)
+        map(INT_FIELD, _intField)
+        map(DOUBLE_FIELD, _doubleField)
+        map(FLOAT_FIELD, _floatField)
+        map(BOOLEAN_FIELD, _booleanField)
+        map(BLOB_FIELD, _blobField)
+    }
+
+    var stringField: String
+        get() = _stringField.get()
+        set(stringField) = this._stringField.set(stringField)
+
+    var timeField: LocalTime
+        get() = _timeField.get()
+        set(dateField) = this._timeField.set(dateField)
+
+    var dateField: LocalDate
+        get() = _dateField.get()
+        set(dateField) = this._dateField.set(dateField)
+
+    var dateTimeField: LocalDateTime
+        get() = _dateTimeField.get()
+        set(dateTimeField) = this._dateTimeField.set(dateTimeField)
+
+    var zonedDateTimeField: ZonedDateTime
+        get() = _zonedDateTimeField.get()
+        set(zonedDateTimeField) = this._zonedDateTimeField.set(zonedDateTimeField)
+
+    var longField: Long
+        get() = _longField.get()
+        set(longField) = this._longField.set(longField)
+
+    var intField: Int
+        get() = _intField.get()
+        set(intField) = this._intField.set(intField)
+
+    var doubleField: Double
+        get() = _doubleField.get()
+        set(doubleField) = this._doubleField.set(doubleField)
+
+    var floatField: Float
+        get() = _floatField.get()
+        set(floatField) = this._floatField.set(floatField)
+
+    var booleanField: Boolean
+        get() = _booleanField.get()
+        set(booleanField) = this._booleanField.set(booleanField)
+
+    override fun onPreSave(eventArguments: OnPreSaveEventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    override fun onPostSave(eventArguments: OnPostSaveEventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    override fun onPreLoad(eventArguments: OnPreLoadEventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    override fun onPostLoad(eventArguments: OnPostLoadEventArguments) {
+        //Optional event i.e write to custom reporting tables, perform custom validation
+        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
     }
 }
 ```
