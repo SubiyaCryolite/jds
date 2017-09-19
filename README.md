@@ -499,12 +499,12 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 
-@JdsEntityAnnotation(entityId = 2, entityName = "Simple Address Book")
+@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook")
 public class AddressBook extends JdsEntity {
-    private final SimpleListProperty<Address> addresses = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final SimpleListProperty<Address> addresses;
 
     public AddressBook() {
-        map(Address.class, addresses);
+        map(Address.class, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
     }
 
     public List<Address> getAddresses() {
@@ -693,7 +693,7 @@ private List<Example> getCollection() {
     instance1.setStringField("One");
     
     Example instance2 = new Example();
-    instance2.setStringField("tWO");
+    instance2.setStringField("Two");
     instance2.setTimeField(LocalTime.of(15, 24));
     instance2.setDateField(LocalDate.of(2012, 8, 26));
     instance2.setDateTimeField(LocalDateTime.of(1991, 07, 01, 8, 33, 12));
