@@ -148,14 +148,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     @Throws(Exception::class)
     private fun saveInner(entities: Collection<JdsEntity>, saveContainer: JdsSaveContainer, step: Int, steps: Int) {
         //fire
-        var sequence = 0
-        for (entity in entities) {
+        for ((sequence, entity) in entities.withIndex()) {
             //update the modified date to time of commit
             entity.overview.dateModified = LocalDateTime.now()
             saveContainer.overviews[step].add(entity.overview)
             //assign properties
-            entity.assign(step,saveContainer)
-            sequence++
+            entity.assign(step, saveContainer)
         }
         //share one connection for raw saves, helps with performance
         val finalStep = !recursiveInnerCall && step == steps - 1
@@ -165,11 +163,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             saveOverviews(saveContainer.overviews[step])
             //ensure that overviews are submitted before handing over to listeners
 
-            for (entity in entities) {
-                if (entity is JdsSaveListener) {
-                    (entity as JdsSaveListener).onPreSave(onPreSaveEventArguments)
-                }
-            }
+            entities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
             //properties
             saveBooleans(writeToPrimaryDataTables, saveContainer.booleans[step])
@@ -198,11 +192,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             saveAndBindObjects(connection, saveContainer.objects[step])
             saveAndBindObjectArrays(connection, saveContainer.objectArrays[step])
 
-            for (entity in entities) {
-                if (entity is JdsSaveListener) {
-                    (entity as JdsSaveListener).onPostSave(onPostSaveEventArguments)
-                }
-            }
+            entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //respect execution sequence
             //respect JDS batches in each call
