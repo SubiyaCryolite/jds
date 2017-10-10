@@ -11,13 +11,13 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE PROCEDURE procStoreEntityOverviewV3(p_EntityGuid IN NVARCHAR2, p_DateCreated DATE, p_DateModified DATE, p_Live NUMBER(1), p_Version NUMBER(19))
+CREATE PROCEDURE procStoreEntityOverviewV3(pEntityGuid IN NVARCHAR2, pDateCreated IN DATE, pDateModified IN DATE, pLive IN NUMBER, pVersion IN NUMBER)
 AS
 BEGIN
 	MERGE INTO JdsStoreEntityOverview dest
-	USING DUAL ON (p_EntityGuid = EntityGuid)
+	USING DUAL ON (pEntityGuid = EntityGuid)
 	WHEN MATCHED THEN
-		UPDATE SET DateModified = p_DateModified, Live = p_Live, Version = p_Version
+		UPDATE SET DateModified = pDateModified, Live = pLive, Version = pVersion
 	WHEN NOT MATCHED THEN
-		INSERT(EntityGuid, DateCreated, DateModified, Live, Version) VALUES(p_EntityGuid, p_DateCreated, p_DateModified, p_Live, p_Version);
+		INSERT(EntityGuid, DateCreated, DateModified, Live, Version) VALUES(pEntityGuid, pDateCreated, pDateModified, pLive, pVersion);
 END procStoreEntityOverviewV3;

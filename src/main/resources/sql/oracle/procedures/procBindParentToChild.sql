@@ -11,11 +11,11 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE PROCEDURE procBindParentToChild(p_ParentEntityCode IN NUMBER, p_ChildEntityCode IN NUMBER)
+CREATE PROCEDURE procBindParentToChild(pParentEntityCode IN NUMBER, pChildEntityCode IN NUMBER)
 AS
 BEGIN
     MERGE INTO JdsRefEntityInheritance dest
-    USING DUAL ON (p_ParentEntityCode = ParentEntityCode AND p_ChildEntityCode = ChildEntityCode)
+    USING DUAL ON (pParentEntityCode = ParentEntityCode AND pChildEntityCode = ChildEntityCode)
     WHEN NOT MATCHED THEN
-        INSERT(ParentEntityCode, ChildEntityCode) VALUES(p_ParentEntityCode, p_ChildEntityCode);
+        INSERT(ParentEntityCode, ChildEntityCode) VALUES(pParentEntityCode, pChildEntityCode);
 END procBindParentToChild;

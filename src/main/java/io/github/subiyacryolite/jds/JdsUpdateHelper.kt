@@ -21,10 +21,10 @@ object JdsUpdateHelper {
         if (jdsDb.columnExists(connection, "JdsStoreEntityOverview", "EntityId") >= 1) {
             when (jdsDb.implementation) {
                 JdsImplementation.POSTGRES -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN entityid CASCADE;")//postgres makes everything lower case
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId;")
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN entityid CASCADE")//postgres makes everything lower case
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId")
                 }
-                JdsImplementation.TSQL, JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId;")
+                JdsImplementation.TSQL, JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview DROP COLUMN EntityId")
                 else -> {
                 }
             }
@@ -40,10 +40,10 @@ object JdsUpdateHelper {
     fun v1Tov2AddColumnStoreOldFieldValues(connection: Connection, jdsDb: JdsDb) {
         if (jdsDb.columnExists(connection, "JdsStoreOldFieldValues", "BlobValue") == 0) {
             when (jdsDb.implementation) {
-                JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB;")
-                JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD BlobValue VARBINARY(MAX);")
-                JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BYTEA;")
-                JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB;")
+                JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB")
+                JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD BlobValue VARBINARY(MAX)")
+                JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BYTEA")
+                JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreOldFieldValues ADD COLUMN BlobValue BLOB")
                 else -> {
                 }
             }
@@ -73,10 +73,10 @@ object JdsUpdateHelper {
     fun v1Tov2AddColumnStoreEntityBindings(connection: Connection, jdsDb: JdsDb) {
         if (jdsDb.columnExists(connection, "JdsStoreEntityBinding", "CascadeOnDelete") == 0) {
             when (jdsDb.implementation) {
-                JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INT;")
-                JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INTEGER;")
-                JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
-                JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
+                JdsImplementation.MYSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INT")
+                JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INTEGER")
+                JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER")
+                JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER")
                 else -> {
                 }
             }
@@ -93,24 +93,24 @@ object JdsUpdateHelper {
         if (jdsDb.columnExists(connection, "JdsStoreEntityOverview", "Version") == 0) {
             when (jdsDb.implementation) {
                 JdsImplementation.MYSQL -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT;")
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT")
                     jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
                 }
                 JdsImplementation.TSQL -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
                 }
                 JdsImplementation.POSTGRES -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
                 }
                 JdsImplementation.SQLITE -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
                 }
                 JdsImplementation.ORACLE -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version NUMBER(19);")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version NUMBER(19)")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
                 }
                 else -> {
                 }
@@ -128,24 +128,24 @@ object JdsUpdateHelper {
         if (jdsDb.columnExists(connection, "JdsStoreEntityOverview", "Live") == 0) {
             when (jdsDb.implementation) {
                 JdsImplementation.MYSQL -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BOOLEAN;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BOOLEAN")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1", true)
                 }
                 JdsImplementation.TSQL -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BIT;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BIT")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1", true)
                 }
                 JdsImplementation.POSTGRES -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live BOOLEAN;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = TRUE;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live BOOLEAN")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = TRUE", true)
                 }
                 JdsImplementation.SQLITE -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live INTEGER;")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live INTEGER")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1", true)
                 }
                 JdsImplementation.ORACLE -> {
-                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live NUMBER(1);")
-                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live NUMBER(1)")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1", true)
                 }
                 else -> {
                 }

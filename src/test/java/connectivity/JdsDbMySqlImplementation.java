@@ -22,8 +22,8 @@ public class JdsDbMySqlImplementation extends JdsDbMySql {
         Class.forName("com.mysql.cj.jdbc.Driver");
         Properties properties = new Properties();
         properties.put("user", "root");
-        properties.put("password", "p@nkP#55W0rd");
-        //properties.put("password", "");
+        //properties.put("password", "p@nkP#55W0rd");
+        properties.put("password", "");
         properties.put("autoReconnect", "true");
         properties.put("allowMultiQueries", "false");
         properties.put("useSSL", "false");

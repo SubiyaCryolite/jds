@@ -848,6 +848,15 @@ The **JdsRef[X]** and **JdsBind[X]** tables are used by the systems to link diff
 
 **JdsSoreOldFieldValues** stores every single update/insert in the system and is the single point of reference for historical data. It is written to by calling **logEdits(true)** on an instance of JdsDb. This behaviour is disabled by default.
 
+If you wanted to view the changes made to a specific field you could use a query such as
+
+```sql
+select EntityGuid, FieldId, IntegerValue, min(DateOfModification) 
+from JdsStoreOldFieldValues
+where EntityGuid = 'record_of_interest' and FieldId = 1001
+group by (EntityGuid, FieldId, IntegerValue)
+```
+
 ![Database design](database_design.png?raw=true)
 
 # Development

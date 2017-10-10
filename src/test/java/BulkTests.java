@@ -62,5 +62,6 @@ public class BulkTests extends BaseTestConfig {
         saveAndLoadTsqlImplementation();
         saveAndLoadPostreSqlImplementation();
         saveAndLoadMySqlImplementation();
+        saveAndLoadOracleSqlImplementation();
     }
 }
