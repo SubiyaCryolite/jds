@@ -7,4 +7,6 @@ interface IJdsEntity : Externalizable {
     val overview: IJdsEntityOverview
 
     var entityName: String
+
+    var version: Long
 }

@@ -44,6 +44,7 @@ abstract class JdsEntity : IJdsEntity {
     private val objects: MutableSet<Long> = HashSet()
     private val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
     private val _entityName = SimpleStringProperty("")
+    private val _version = SimpleLongProperty(1)
     //strings and localDateTimes
     private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
     private val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
@@ -79,6 +80,7 @@ abstract class JdsEntity : IJdsEntity {
             val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
             overview.entityId = entityAnnotation.entityId
             _entityName.set(entityAnnotation.entityName)
+            _version.set(entityAnnotation.version)
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
@@ -87,6 +89,10 @@ abstract class JdsEntity : IJdsEntity {
     override var entityName: String
         get() = _entityName.get()
         set(value) = _entityName.set(value)
+
+    override var version: Long
+        get() = _version.get()
+        set(value) = _version.set(value)
 
     /**
      * @param jdsField
@@ -585,6 +591,7 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(objects)
         objectOutputStream.writeObject(allEnums)
         objectOutputStream.writeUTF(entityName)
+        objectOutputStream.writeLong(version)
         //objects
         objectOutputStream.writeObject(serializeObject(objectProperties))
         //strings and localDateTimes
@@ -695,6 +702,7 @@ abstract class JdsEntity : IJdsEntity {
         objects.addAll(objectInputStream.readObject() as Set<Long>)
         allEnums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
         entityName = objectInputStream.readUTF()
+        version = objectInputStream.readLong()
         //objects
         putObject(objectProperties, objectInputStream.readObject() as Map<Long, JdsEntity>)
         //strings and localDateTimes

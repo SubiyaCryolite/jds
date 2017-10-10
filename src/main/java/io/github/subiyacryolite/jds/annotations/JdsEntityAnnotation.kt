@@ -23,4 +23,4 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-annotation class JdsEntityAnnotation(val entityName: String = "", val entityId: Long = 1)
+annotation class JdsEntityAnnotation(val entityName: String = "", val entityId: Long = 1, val version: Long = 1)
