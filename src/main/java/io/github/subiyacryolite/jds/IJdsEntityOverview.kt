@@ -11,4 +11,8 @@ interface IJdsEntityOverview {
     var entityId:Long
 
     var entityGuid:String
+
+    var live:Boolean
+
+    var version:Long
 }

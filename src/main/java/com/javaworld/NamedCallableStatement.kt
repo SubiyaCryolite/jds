@@ -103,10 +103,18 @@ constructor(connection: Connection, query: String) : INamedStatement {
     }
 
     @Throws(SQLException::class)
-    fun setObject(name: String, value: Any) {
+    override fun setObject(name: String, value: Any) {
         val indexes = getIndexes(name)
         for (i in indexes.indices) {
             callableStatement.setObject(indexes[i], value)
+        }
+    }
+
+    @Throws(SQLException::class)
+    override fun setBoolean(name: String, value: Boolean){
+        val indexes = getIndexes(name)
+        for (i in indexes.indices) {
+            callableStatement.setBoolean(indexes[i], value)
         }
     }
 

@@ -224,6 +224,7 @@ abstract class JdsDbOracle : JdsDb() {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_3)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME)
@@ -237,6 +238,7 @@ abstract class JdsDbOracle : JdsDb() {
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
             JdsComponent.SAVE_ENTITY_V_2 -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityOverviewV2.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityOverviewV3.sql")
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityInheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldNames.sql")
             JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldTypes.sql")

@@ -11,10 +11,14 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreLong(
-	FieldId         BIGINT,
-	EntityGuid      TEXT,
-	Value           BIGINT,
-	PRIMARY KEY (FieldId,EntityGuid),
-	FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
-);
+CREATE PROCEDURE procStoreEntityOverviewV3(@EntityGuid NVARCHAR(48), @DateCreated DATETIME, @DateModified DATETIME, @Live BIT, @Version BIGINT)
+AS
+BEGIN
+	MERGE JdsStoreEntityOverview AS dest
+	USING (VALUES (@EntityGuid, @DateCreated, @DateModified, @Live, @Version)) AS src([EntityGuid], [DateCreated], [DateModified], [Live], [Version])
+	ON (src.EntityGuid = dest.EntityGuid)
+	WHEN MATCHED THEN
+		UPDATE SET dest.[DateModified] = src.[DateModified], dest.[Live] = src.[Live], dest.[Version] = src.[Version]
+	WHEN NOT MATCHED THEN
+		INSERT([EntityGuid], [DateCreated], [DateModified], [Live], [Version]) VALUES(src.EntityGuid, src.DateCreated, src.DateModified, src.Live, src.Version);
+END

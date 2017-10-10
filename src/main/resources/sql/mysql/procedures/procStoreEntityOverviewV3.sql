@@ -11,10 +11,9 @@
 *    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 *    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-CREATE TABLE JdsStoreLong(
-	FieldId         BIGINT,
-	EntityGuid      TEXT,
-	Value           BIGINT,
-	PRIMARY KEY (FieldId,EntityGuid),
-	FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
-);
+CREATE PROCEDURE procStoreEntityOverviewV3(IN pEntityGuid VARCHAR(48), IN pDateCreated DATETIME, IN pDateModified DATETIME, IN pLive BOOLEAN, IN pVersion BIGINT)
+BEGIN
+	INSERT INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified, Live, Version)
+    VALUES (pEntityGuid, pDateCreated, pDateModified, pLive, pVersion)
+    ON DUPLICATE KEY UPDATE DateModified = pDateModified, Live = pLive, Version = pVersion;
+END

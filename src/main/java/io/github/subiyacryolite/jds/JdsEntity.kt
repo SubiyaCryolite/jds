@@ -44,7 +44,6 @@ abstract class JdsEntity : IJdsEntity {
     private val objects: MutableSet<Long> = HashSet()
     private val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
     private val _entityName = SimpleStringProperty("")
-    private val _version = SimpleLongProperty(1)
     //strings and localDateTimes
     private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
     private val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
@@ -78,9 +77,9 @@ abstract class JdsEntity : IJdsEntity {
     init {
         if (javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
-            overview.entityId = entityAnnotation.entityId
             _entityName.set(entityAnnotation.entityName)
-            _version.set(entityAnnotation.version)
+            overview.entityId = entityAnnotation.entityId
+            overview.version = entityAnnotation.version
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
@@ -90,9 +89,6 @@ abstract class JdsEntity : IJdsEntity {
         get() = _entityName.get()
         set(value) = _entityName.set(value)
 
-    override var version: Long
-        get() = _version.get()
-        set(value) = _version.set(value)
 
     /**
      * @param jdsField
@@ -591,7 +587,6 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(objects)
         objectOutputStream.writeObject(allEnums)
         objectOutputStream.writeUTF(entityName)
-        objectOutputStream.writeLong(version)
         //objects
         objectOutputStream.writeObject(serializeObject(objectProperties))
         //strings and localDateTimes
@@ -702,7 +697,6 @@ abstract class JdsEntity : IJdsEntity {
         objects.addAll(objectInputStream.readObject() as Set<Long>)
         allEnums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
         entityName = objectInputStream.readUTF()
-        version = objectInputStream.readLong()
         //objects
         putObject(objectProperties, objectInputStream.readObject() as Map<Long, JdsEntity>)
         //strings and localDateTimes
@@ -840,42 +834,24 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun populateProperties(jdsFieldType: JdsFieldType, key: Long, value: Any?) {
         when (jdsFieldType) {
-            JdsFieldType.FLOAT -> {
-                floatProperties[key]?.set(value as Float)
-            }
-            JdsFieldType.INT -> {
-                integerProperties[key]?.set(value as Int)
-            }
-            JdsFieldType.DOUBLE -> {
-                doubleProperties[key]?.set(value as Double)
-            }
-            JdsFieldType.LONG -> {
-                longProperties[key]?.set(value as Long)
-            }
-            JdsFieldType.TEXT -> {
-                stringProperties[key]?.set(value as String)
-            }
-            JdsFieldType.DATE_TIME -> {
-                localDateTimeProperties[key]?.set((value as Timestamp).toLocalDateTime())
-            }
-            JdsFieldType.ARRAY_DOUBLE -> {
-                doubleArrayProperties[key]?.get()?.add(value as Double)
-            }
-            JdsFieldType.ARRAY_FLOAT -> {
-                floatArrayProperties[key]?.get()?.add(value as Float)
-            }
-            JdsFieldType.ARRAY_INT -> {
-                integerArrayProperties[key]?.get()?.add(value as Int)
-            }
-            JdsFieldType.ARRAY_LONG -> {
-                longArrayProperties[key]?.get()?.add(value as Long)
-            }
-            JdsFieldType.ARRAY_TEXT -> {
-                stringArrayProperties[key]?.get()?.add(value as String)
-            }
-            JdsFieldType.ARRAY_DATE_TIME -> {
-                dateTimeArrayProperties[key]?.get()?.add((value as Timestamp).toLocalDateTime())
-            }
+            JdsFieldType.FLOAT -> floatProperties[key]?.set(value as Float)
+            JdsFieldType.INT -> integerProperties[key]?.set(value as Int)
+            JdsFieldType.DOUBLE -> doubleProperties[key]?.set(value as Double)
+            JdsFieldType.LONG -> longProperties[key]?.set(value as Long)
+            JdsFieldType.TEXT -> stringProperties[key]?.set(value as String)
+            JdsFieldType.DATE_TIME -> localDateTimeProperties[key]?.set((value as Timestamp).toLocalDateTime())
+            JdsFieldType.ARRAY_DOUBLE -> doubleArrayProperties[key]?.get()?.add(value as Double)
+            JdsFieldType.ARRAY_FLOAT -> floatArrayProperties[key]?.get()?.add(value as Float)
+            JdsFieldType.ARRAY_INT -> integerArrayProperties[key]?.get()?.add(value as Int)
+            JdsFieldType.ARRAY_LONG -> longArrayProperties[key]?.get()?.add(value as Long)
+            JdsFieldType.ARRAY_TEXT -> stringArrayProperties[key]?.get()?.add(value as String)
+            JdsFieldType.ARRAY_DATE_TIME -> dateTimeArrayProperties[key]?.get()?.add((value as Timestamp).toLocalDateTime())
+            JdsFieldType.BOOLEAN -> booleanProperties[key]?.set((value as Int) == 1)
+            JdsFieldType.ZONED_DATE_TIME -> zonedDateTimeProperties[key]?.set(ZonedDateTime.ofInstant(Instant.ofEpochSecond(value as Long), ZoneId.systemDefault()))
+            JdsFieldType.DATE -> localDateProperties[key]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
+            JdsFieldType.TIME -> localTimeProperties[key]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))
+            JdsFieldType.BLOB -> blobProperties[key]?.set(value as ByteArray)
+            JdsFieldType.ENUM -> enumProperties.filter { it.key.getField().id == key }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
             JdsFieldType.ENUM_COLLECTION -> {
                 enumCollectionProperties.filter { it.key.getField().id == key }.forEach {
                     val enumValues = it.key.getEnumType()!!.enumConstants
@@ -884,28 +860,6 @@ abstract class JdsEntity : IJdsEntity {
                         it.value.get().add(enumValues[index] as Enum<*>)
                         enumCollectionProperties.keys.any { it -> it.getField().id == key }
                     }
-                }
-            }
-            JdsFieldType.BOOLEAN -> {
-                booleanProperties[key]?.set((value as Int) == 1)
-            }
-            JdsFieldType.ZONED_DATE_TIME -> {
-                val instant = Instant.ofEpochSecond(value as Long)
-                val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-                zonedDateTimeProperties[key]?.set(zonedDateTime)
-            }
-            JdsFieldType.DATE -> {
-                localDateProperties[key]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
-            }
-            JdsFieldType.TIME -> {
-                localTimeProperties[key]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))
-            }
-            JdsFieldType.BLOB -> {
-                blobProperties[key]?.set(value as ByteArray)
-            }
-            JdsFieldType.ENUM -> {
-                enumProperties.filter { it.key.getField().id == key }.forEach {
-                    it.value?.set(it.key.valueOf(value as Int))
                 }
             }
         }

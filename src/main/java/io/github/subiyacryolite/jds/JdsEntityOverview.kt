@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -34,6 +35,8 @@ class JdsEntityOverview : IJdsEntityOverview, Externalizable {
     private var _dateModified: SimpleObjectProperty<LocalDateTime> = SimpleObjectProperty(LocalDateTime.now())
     private var _entityId: SimpleLongProperty = SimpleLongProperty(0)
     private var _entityGuid: SimpleStringProperty = SimpleStringProperty(UUID.randomUUID().toString())
+    private var _live: SimpleBooleanProperty = SimpleBooleanProperty(true)
+    private var _version: SimpleLongProperty = SimpleLongProperty(1)
 
     override var dateCreated: LocalDateTime
         get() = this._dateCreated.get()
@@ -51,12 +54,22 @@ class JdsEntityOverview : IJdsEntityOverview, Externalizable {
         get() = this._entityGuid.get()
         set(value) = this._entityGuid.set(value)
 
+    override var version: Long
+        get() = this._version.get()
+        set(value) = this._version.set(value)
+
+    override var live: Boolean
+        get() = this._live.get()
+        set(value) = this._live.set(value)
+
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
         objectOutputStream.writeUTF(entityGuid)
         objectOutputStream.writeLong(entityId)
         objectOutputStream.writeObject(dateCreated)
         objectOutputStream.writeObject(dateModified)
+        objectOutputStream.writeBoolean(live)
+        objectOutputStream.writeLong(version)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
@@ -65,5 +78,7 @@ class JdsEntityOverview : IJdsEntityOverview, Externalizable {
         entityId = objectInputStream.readLong()
         dateCreated = objectInputStream.readObject() as LocalDateTime
         dateModified = objectInputStream.readObject() as LocalDateTime
+        live = objectInputStream.readBoolean()
+        version = objectInputStream.readLong()
     }
 }

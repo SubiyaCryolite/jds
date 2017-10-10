@@ -86,14 +86,17 @@ abstract class JdsDb : IJdsDb {
         try {
             getConnection().use { connection ->
                 prepareDatabaseComponents(connection)
-                //===========================================
+                //============= BASE SCHEMA CHANGES====================
                 JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(connection, this)
                 JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(connection, this)
                 JdsUpdateHelper.v1Tov2AddColumnStoreEntityBindings(connection, this)
-                //===========================================
-                prepareCustomDatabaseComponents(connection)
-                //===========================================
                 JdsUpdateHelper.v1ToV2MigrateData(connection, this)
+                JdsUpdateHelper.v3AddLiveColumn(connection, this)
+                JdsUpdateHelper.v3AddVersionColumn(connection, this)
+                //======================================
+                prepareCustomDatabaseComponents(connection)
+                //======================= V3 ========================
+
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
@@ -317,9 +320,15 @@ abstract class JdsDb : IJdsDb {
         }
     }
 
-    fun executeSqlFromString(connection: Connection, innerSql: String) {
+    @JvmOverloads
+    fun executeSqlFromString(connection: Connection, sql: String, update: Boolean = false) {
         try {
-            connection.prepareStatement(innerSql).use { innerStmt -> innerStmt.execute() }
+            connection.prepareStatement(sql).use { statement ->
+                when (update) {
+                    true -> statement.executeUpdate()
+                    false -> statement.execute()
+                }
+            }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
@@ -628,9 +637,9 @@ abstract class JdsDb : IJdsDb {
                         var jdsEntity: JdsEntity? = entity.newInstance()
                         determineParents(entity, parentEntities)
                         mapClassName(connection, jdsEntity!!.overview.entityId, jdsEntity.entityName)
-                        jdsEntity.mapClassFields(this,connection, jdsEntity.overview.entityId)
-                        jdsEntity.mapClassFieldTypes(this,connection, jdsEntity.overview.entityId)
-                        jdsEntity.mapClassEnums(this,connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         jdsEntity = null
@@ -800,7 +809,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveOverview(): String {
-        return "{call procStoreEntityOverviewV2(:entityGuid,:dateCreated,:dateModified)}"
+        return "{call procStoreEntityOverviewV3(:entityGuid,:dateCreated,:dateModified,:live,:version)}"
     }
 
     /**

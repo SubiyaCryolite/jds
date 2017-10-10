@@ -213,11 +213,11 @@ abstract class JdsDbSqlite protected constructor() : JdsDb() {
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified) VALUES(:entityGuid, :dateCreated, :dateModified)"
+        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified, Live, Version) VALUES(:entityGuid, :dateCreated, :dateModified, :live, :version);"
     }
 
     override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid, EntityId) VALUES(:entityGuid, :entityId)"
+        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid, EntityId) VALUES(:entityGuid, :entityId);"
     }
 
     override fun mapClassFields(): String {

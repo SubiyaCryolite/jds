@@ -14,6 +14,7 @@ object JdsUpdateHelper {
      * Columns to drop when upgrading from version 1 to version 2
      *
      * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
      */
     fun v1Tov2DropColumnStoreEntityOverview(connection: Connection, jdsDb: JdsDb) {
         //SQLite does NOT make dropping columns easy
@@ -34,6 +35,7 @@ object JdsUpdateHelper {
      * Method to add the new BlobValue column to an upgraded schema
      *
      * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
      */
     fun v1Tov2AddColumnStoreOldFieldValues(connection: Connection, jdsDb: JdsDb) {
         if (jdsDb.columnExists(connection, "JdsStoreOldFieldValues", "BlobValue") == 0) {
@@ -52,6 +54,7 @@ object JdsUpdateHelper {
      * Method to migrate data from version 1 to version 2 of [JdsDb]
      *
      * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
      */
     fun v1ToV2MigrateData(connection: Connection, jdsDb: JdsDb) {
         if (jdsDb.implementation === JdsImplementation.SQLITE)
@@ -65,6 +68,7 @@ object JdsUpdateHelper {
      * Method to add new columns to facilitate cascade on delete options
      *
      * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
      */
     fun v1Tov2AddColumnStoreEntityBindings(connection: Connection, jdsDb: JdsDb) {
         if (jdsDb.columnExists(connection, "JdsStoreEntityBinding", "CascadeOnDelete") == 0) {
@@ -73,6 +77,76 @@ object JdsUpdateHelper {
                 JdsImplementation.TSQL -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD CascadeOnDelete INTEGER;")
                 JdsImplementation.POSTGRES -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
                 JdsImplementation.SQLITE -> jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityBinding ADD COLUMN CascadeOnDelete INTEGER;")
+                else -> {
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to add new Version column to facilitate extra-metadata
+     *
+     * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
+     */
+    fun v3AddVersionColumn(connection: Connection, jdsDb: JdsDb) {
+        if (jdsDb.columnExists(connection, "JdsStoreEntityOverview", "Version") == 0) {
+            when (jdsDb.implementation) {
+                JdsImplementation.MYSQL -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1", true)
+                }
+                JdsImplementation.TSQL -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Version BIGINT;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                }
+                JdsImplementation.POSTGRES -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                }
+                JdsImplementation.SQLITE -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version BIGINT;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                }
+                JdsImplementation.ORACLE -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Version NUMBER(19);")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Version = 1;", true)
+                }
+                else -> {
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to add new Version column to facilitate extra-metadata
+     *
+     * @param jdsDb the [JdsDb] instance
+     * @param connection the active connection to use
+     */
+    fun v3AddLiveColumn(connection: Connection, jdsDb: JdsDb) {
+        if (jdsDb.columnExists(connection, "JdsStoreEntityOverview", "Live") == 0) {
+            when (jdsDb.implementation) {
+                JdsImplementation.MYSQL -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BOOLEAN;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                }
+                JdsImplementation.TSQL -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD Live BIT;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                }
+                JdsImplementation.POSTGRES -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live BOOLEAN;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = TRUE;", true)
+                }
+                JdsImplementation.SQLITE -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live INTEGER;")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                }
+                JdsImplementation.ORACLE -> {
+                    jdsDb.executeSqlFromString(connection, "ALTER TABLE JdsStoreEntityOverview ADD COLUMN Live NUMBER(1);")
+                    jdsDb.executeSqlFromString(connection, "UPDATE JdsStoreEntityOverview SET Live = 1;", true)
+                }
                 else -> {
                 }
             }

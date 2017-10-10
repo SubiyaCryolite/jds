@@ -21,7 +21,7 @@ BEGIN;
       IntegerValue       INTEGER,
       FloatValue         REAL,
       DoubleValue        FLOAT,
-      LongValue          INTEGER,
+      LongValue          BIGINT,
       DateTimeValue      DATETIME,
       BlobValue          VARBINARY(MAX)
     );

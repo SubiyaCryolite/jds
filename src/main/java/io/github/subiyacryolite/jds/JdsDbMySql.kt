@@ -184,12 +184,12 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
     override fun createRefOldFieldValues(connection: Connection) {
         executeSqlFromFile(connection, "sql/mysql/createStoreOldFieldValues.sql")
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);")
-        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);")
-        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
@@ -219,6 +219,7 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_2)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_3)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME)
@@ -232,6 +233,7 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
             JdsComponent.SAVE_ENTITY_V_2 -> executeSqlFromFile(connection, "sql/mysql/procedures/procStoreEntityOverviewV2.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/mysql/procedures/procStoreEntityOverviewV3.sql")
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/procStoreEntityInheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/mysql/procedures/procBindFieldNames.sql")
             JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/mysql/procedures/procBindFieldTypes.sql")

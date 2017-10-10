@@ -9,6 +9,9 @@ import java.sql.*
 interface INamedStatement : Statement {
 
     @Throws(SQLException::class)
+    fun setObject(name: String, value: Any)
+
+    @Throws(SQLException::class)
     fun setString(name: String, value: String)
 
     @Throws(SQLException::class)
@@ -16,6 +19,9 @@ interface INamedStatement : Statement {
 
     @Throws(SQLException::class)
     fun setLong(name: String, value: Long)
+
+    @Throws(SQLException::class)
+    fun setBoolean(name: String, value: Boolean)
 
     @Throws(SQLException::class)
     fun setBytes(name: String, value: ByteArray)

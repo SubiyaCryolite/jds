@@ -23,7 +23,7 @@ public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
         Properties properties = new Properties();
         properties.put("user", "sa");
         properties.put("password", "p@nkP#55W0rd");
-        //return DriverManager.getConnection("jdbc:sqlserver://ICT-INDANA\\JDSINSTANCE;databaseName=jds", properties);
-        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
+        return DriverManager.getConnection("jdbc:sqlserver://ICT-INDANA\\JDSINSTANCE;databaseName=jds", properties);
+        //return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
     }
 }

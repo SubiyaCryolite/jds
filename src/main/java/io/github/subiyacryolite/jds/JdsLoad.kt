@@ -80,26 +80,26 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                               entityGuids: Collection<String>) {
         val questionsString = getQuestions(entityGuids.size)
         //primitives
-        val sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlLongValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreLong WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlIntegerValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreInteger WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlFloatValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreFloat WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlDoubleValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDouble WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlZonedDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
+        val sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s)", questionsString)
+        val sqlLongValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreLong WHERE EntityGuid IN (%s)", questionsString)
+        val sqlIntegerValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreInteger WHERE EntityGuid IN (%s)", questionsString)
+        val sqlFloatValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreFloat WHERE EntityGuid IN (%s)", questionsString)
+        val sqlDoubleValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDouble WHERE EntityGuid IN (%s)", questionsString)
+        val sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s)", questionsString)
+        val sqlTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreTime WHERE EntityGuid IN (%s)", questionsString)
+        val sqlZonedDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE EntityGuid IN (%s)", questionsString)
         //blobs
-        val sqlBlobs = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreBlob WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
+        val sqlBlobs = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreBlob WHERE EntityGuid IN (%s)", questionsString)
         //array
-        val sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlIntegerArrayAndEnumValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlLongArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
-        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s) ORDER BY ParentEntityGuid", questionsString)
+        val sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlIntegerArrayAndEnumValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlLongArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s)", questionsString)
+        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s)", questionsString)
         //overviews
-        val sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s) ORDER BY EntityGuid", questionsString)
+        val sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, Live, Version FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s)", questionsString)
         try {
             jdsDb.getConnection().use { connection ->
                 connection.prepareStatement(sqlBlobs).use { blobs ->
@@ -389,9 +389,13 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val dateCreated = resultSet.getTimestamp("DateCreated")
                 val dateModified = resultSet.getTimestamp("DateModified")
+                val version = resultSet.getLong("Version")
+                val live = resultSet.getBoolean("Live")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { entity ->
                     entity.overview.dateModified = dateModified.toLocalDateTime()
                     entity.overview.dateCreated = dateCreated.toLocalDateTime()
+                    entity.overview.version = version
+                    entity.overview.live = live
                 }
             }
         }

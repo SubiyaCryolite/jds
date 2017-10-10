@@ -225,6 +225,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 upsert.setString("entityGuid", overview.entityGuid)
                 upsert.setTimestamp("dateCreated", Timestamp.valueOf(overview.dateCreated))
                 upsert.setTimestamp("dateModified", Timestamp.valueOf(LocalDateTime.now())) //always update date modified!!!
+                upsert.setBoolean("live", overview.live)
+                upsert.setLong("version", overview.version) //always update date modified!!!
                 upsert.addBatch()
                 //Entity Inheritance
                 inheritance.setString("entityGuid", overview.entityGuid)

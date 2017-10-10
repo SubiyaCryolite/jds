@@ -56,6 +56,7 @@ enum class JdsComponent(val componentName: String, val prefix: String) {
     SAVE_ZONED_DATE_TIME("procStoreZonedDateTime", ""),
     SAVE_ENTITY("procStoreEntityOverview", ""),
     SAVE_ENTITY_V_2("procStoreEntityOverviewV2", ""),
+    SAVE_ENTITY_V_3("procStoreEntityOverviewV3", ""),
     SAVE_ENTITY_INHERITANCE("procStoreEntityInheritance", ""),
     MAP_ENTITY_INHERITANCE("procBindParentToChild", ""),
     MAP_ENTITY_FIELDS("procBindEntityFields", ""),
