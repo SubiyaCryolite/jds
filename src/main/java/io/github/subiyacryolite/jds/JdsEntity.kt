@@ -89,7 +89,6 @@ abstract class JdsEntity : IJdsEntity {
         get() = _entityName.get()
         set(value) = _entityName.set(value)
 
-
     /**
      * @param jdsField
      * @param integerProperty
