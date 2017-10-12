@@ -31,7 +31,7 @@ import java.util.*
  */
 abstract class JdsDb : IJdsDb {
 
-    private val classes = HashMap<Long, Class<out JdsEntity>>()
+    val classes = HashMap<Long, Class<out JdsEntity>>()
 
     /**
      * A value indicating whether the underlying database implementation

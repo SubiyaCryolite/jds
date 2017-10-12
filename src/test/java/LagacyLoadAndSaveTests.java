@@ -19,7 +19,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
     @Override
     public void save() throws Exception {
         System.out.printf("=========== %s ===========\n", jdsDb.getImplementation());
-        AddressBook addressBook = getSimpleAddressBook();
+        AddressBook addressBook = getSampleAddressBook();
         new JdsSave(jdsDb, 1, Arrays.asList(addressBook)).call();
         System.out.printf("Saved %s\n", addressBook);
     }
@@ -91,7 +91,7 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
 
     @Test
     public void deleteUsingObjectOrCollection() throws Exception {
-        AddressBook addressBook = getSimpleAddressBook();
+        AddressBook addressBook = getSampleAddressBook();
         JdsDelete.Companion.delete(jdsDb, addressBook);
     }
 }

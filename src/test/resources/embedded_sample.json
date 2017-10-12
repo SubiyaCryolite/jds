@@ -1,0 +1,206 @@
+{
+  "e": [{
+    "blv": [],
+    "bv": [],
+    "ldtv": [],
+    "dv": [],
+    "iv": [],
+    "lv": [],
+    "sv": [],
+    "fv": [],
+    "ltv": [],
+    "zdtv": [],
+    "ldv": [],
+    "dtav": [],
+    "dav": [],
+    "iav": [],
+    "lav": [],
+    "sav": [],
+    "fav": [],
+    "ev": [],
+    "eav": [],
+    "eb": [{
+      "pid": "testGuid0001",
+      "uid": "primaryAddress",
+      "id": 1,
+      "cd": 0
+    }, {
+      "pid": "testGuid0001",
+      "uid": "secondAddress",
+      "id": 1,
+      "cd": 0
+    }, {
+      "pid": "testGuid0001",
+      "uid": "thirdAddress",
+      "id": 1,
+      "cd": 0
+    }],
+    "eo": [{
+      "blv": [],
+      "bv": [],
+      "ldtv": [],
+      "dv": [],
+      "iv": [{
+        "id": 2,
+        "val": 23
+      }],
+      "lv": [],
+      "sv": [{
+        "id": 4,
+        "val": "Southern"
+      }, {
+        "id": 1,
+        "val": "East Street"
+      }, {
+        "id": 5,
+        "val": "Livingstone"
+      }, {
+        "id": 3,
+        "val": "Norte Broad"
+      }, {
+        "id": 7,
+        "val": "Zambia"
+      }],
+      "fv": [],
+      "ltv": [],
+      "zdtv": [{
+        "id": 10,
+        "val": 1507206540971
+      }],
+      "ldv": [],
+      "dtav": [],
+      "dav": [],
+      "iav": [],
+      "lav": [],
+      "sav": [],
+      "fav": [],
+      "ev": [{
+        "id": 8,
+        "val": 0
+      }],
+      "eav": [],
+      "eb": [],
+      "eo": [],
+      "o": {
+        "uuid": "primaryAddress",
+        "id": 1,
+        "l": true,
+        "dc": [2017, 10, 12, 14, 29, 0, 971000000],
+        "dm": [2012, 4, 12, 13, 49]
+      }
+    }, {
+      "blv": [],
+      "bv": [],
+      "ldtv": [],
+      "dv": [],
+      "iv": [{
+        "id": 2,
+        "val": 2
+      }],
+      "lv": [],
+      "sv": [{
+        "id": 4,
+        "val": "Lusaka"
+      }, {
+        "id": 5,
+        "val": "Lusaka"
+      }, {
+        "id": 7,
+        "val": "Zambia"
+      }, {
+        "id": 1,
+        "val": "West Street"
+      }, {
+        "id": 3,
+        "val": "Roma"
+      }],
+      "fv": [],
+      "ltv": [],
+      "zdtv": [{
+        "id": 10,
+        "val": 1502540940971
+      }],
+      "ldv": [],
+      "dtav": [],
+      "dav": [],
+      "iav": [],
+      "lav": [],
+      "sav": [],
+      "fav": [],
+      "ev": [{
+        "id": 8,
+        "val": 1
+      }],
+      "eav": [],
+      "eb": [],
+      "eo": [],
+      "o": {
+        "uuid": "secondAddress",
+        "id": 1,
+        "l": true,
+        "dc": [2017, 10, 12, 14, 29, 0, 971000000],
+        "dm": [2009, 10, 16, 3, 34]
+      }
+    }, {
+      "blv": [],
+      "bv": [],
+      "ldtv": [],
+      "dv": [],
+      "iv": [{
+        "id": 2,
+        "val": 9
+      }],
+      "lv": [],
+      "sv": [{
+        "id": 4,
+        "val": "Copperbelt"
+      }, {
+        "id": 5,
+        "val": "Ndola"
+      }, {
+        "id": 7,
+        "val": "Zambia"
+      }, {
+        "id": 1,
+        "val": "West Street"
+      }, {
+        "id": 3,
+        "val": "Riverdale"
+      }],
+      "fv": [],
+      "ltv": [],
+      "zdtv": [{
+        "id": 10,
+        "val": 1507552140971
+      }],
+      "ldv": [],
+      "dtav": [],
+      "dav": [],
+      "iav": [],
+      "lav": [],
+      "sav": [],
+      "fav": [],
+      "ev": [{
+        "id": 8,
+        "val": 1
+      }],
+      "eav": [],
+      "eb": [],
+      "eo": [],
+      "o": {
+        "uuid": "thirdAddress",
+        "id": 1,
+        "l": true,
+        "dc": [2017, 10, 12, 14, 29, 0, 971000000],
+        "dm": [2007, 7, 4, 5, 10]
+      }
+    }],
+    "o": {
+      "uuid": "testGuid0001",
+      "id": 2,
+      "l": true,
+      "dc": [2017, 10, 12, 14, 29, 0, 971000000],
+      "dm": [2017, 10, 12, 14, 29, 0, 971000000]
+    }
+  }]
+}

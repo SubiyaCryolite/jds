@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds
 import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import javafx.beans.property.*
 import java.io.IOException
@@ -305,9 +306,9 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         allEnums.add(jdsFieldEnum)
-        if (jdsFieldEnum.getField().type === JdsFieldType.ENUM) {
-            properties.put(jdsFieldEnum.getField().id, jdsFieldEnum.getField().name)
-            types.put(jdsFieldEnum.getField().id, jdsFieldEnum.getField().type!!.toString())
+        if (jdsFieldEnum.field.type === JdsFieldType.ENUM) {
+            properties.put(jdsFieldEnum.field.id, jdsFieldEnum.field.name)
+            types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
             enumProperties.put(jdsFieldEnum, enums as SimpleObjectProperty<Enum<*>>)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents field [$jdsFieldEnum] to the correct type")
@@ -323,9 +324,9 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         allEnums.add(jdsFieldEnum)
-        if (jdsFieldEnum.getField().type === JdsFieldType.ENUM_COLLECTION) {
-            properties.put(jdsFieldEnum.getField().id, jdsFieldEnum.getField().name)
-            types.put(jdsFieldEnum.getField().id, jdsFieldEnum.getField().type!!.toString())
+        if (jdsFieldEnum.field.type === JdsFieldType.ENUM_COLLECTION) {
+            properties.put(jdsFieldEnum.field.id, jdsFieldEnum.field.name)
+            types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
             enumCollectionProperties.put(jdsFieldEnum, enums as SimpleListProperty<Enum<*>>)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents field [$jdsFieldEnum] to the correct type")
@@ -799,31 +800,98 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     internal fun assign(step: Int, saveContainer: JdsSaveContainer) {
+        //==============================================
+        //PRIMITIVES
+        //==============================================
         saveContainer.booleans[step].put(overview.entityGuid, booleanProperties)
-        saveContainer.localDateTimes[step].put(overview.entityGuid, localDateTimeProperties)
-        saveContainer.zonedDateTimes[step].put(overview.entityGuid, zonedDateTimeProperties)
-        saveContainer.localTimes[step].put(overview.entityGuid, localTimeProperties)
-        saveContainer.localDates[step].put(overview.entityGuid, localDateProperties)
         saveContainer.strings[step].put(overview.entityGuid, stringProperties)
         saveContainer.floats[step].put(overview.entityGuid, floatProperties)
         saveContainer.doubles[step].put(overview.entityGuid, doubleProperties)
         saveContainer.longs[step].put(overview.entityGuid, longProperties)
         saveContainer.integers[step].put(overview.entityGuid, integerProperties)
-        //assign blobs
+        //==============================================
+        //Dates & Time
+        //==============================================
+        saveContainer.localDateTimes[step].put(overview.entityGuid, localDateTimeProperties)
+        saveContainer.zonedDateTimes[step].put(overview.entityGuid, zonedDateTimeProperties)
+        saveContainer.localTimes[step].put(overview.entityGuid, localTimeProperties)
+        saveContainer.localDates[step].put(overview.entityGuid, localDateProperties)
+        //==============================================
+        //BLOB
+        //==============================================
         saveContainer.blobs[step].put(overview.entityGuid, blobProperties)
-        //assign lists
+        //==============================================
+        //Enums
+        //==============================================
+        saveContainer.enums[step].put(overview.entityGuid, enumProperties)
+        saveContainer.enumCollections[step].put(overview.entityGuid, enumCollectionProperties)
+        //==============================================
+        //ARRAYS
+        //==============================================
         saveContainer.stringArrays[step].put(overview.entityGuid, stringArrayProperties)
         saveContainer.dateTimeArrays[step].put(overview.entityGuid, dateTimeArrayProperties)
         saveContainer.floatArrays[step].put(overview.entityGuid, floatArrayProperties)
         saveContainer.doubleArrays[step].put(overview.entityGuid, doubleArrayProperties)
         saveContainer.longArrays[step].put(overview.entityGuid, longArrayProperties)
         saveContainer.integerArrays[step].put(overview.entityGuid, integerArrayProperties)
-        //assign
-        saveContainer.enums[step].put(overview.entityGuid, enumProperties)
-        saveContainer.enumCollections[step].put(overview.entityGuid, enumCollectionProperties)
-        //assign objects
+        //==============================================
+        //EMBEDDED OBJECTS
+        //==============================================
         saveContainer.objectArrays[step].put(overview.entityGuid, objectArrayProperties)
         saveContainer.objects[step].put(overview.entityGuid, objectProperties)
+    }
+
+    internal fun assign(embeddedObject: JdsEmbeddedObject) {
+        //==============================================
+        //PRIMITIVES
+        //==============================================
+        booleanProperties.entries.parallelStream().forEach {
+            embeddedObject.bv.add(JdsStoreBoolean(it.key, when (it.value.value) {true -> 1;false -> 0
+            }))
+        }
+        stringProperties.entries.parallelStream().forEach { embeddedObject.sv.add(JdsStoreText(it.key, it.value.value)) }
+        floatProperties.entries.parallelStream().forEach { embeddedObject.fv.add(JdsStoreFloat(it.key, it.value.value)) }
+        doubleProperties.entries.parallelStream().forEach { embeddedObject.dv.add(JdsStoreDouble(it.key, it.value.value)) }
+        longProperties.entries.parallelStream().forEach { embeddedObject.lv.add(JdsStoreLong(it.key, it.value.value)) }
+        integerProperties.entries.parallelStream().forEach { embeddedObject.iv.add(JdsStoreInteger(it.key, it.value.value)) }
+        //==============================================
+        //Dates & Time
+        //==============================================
+        localDateTimeProperties.entries.parallelStream().forEach { embeddedObject.ldtv.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
+        zonedDateTimeProperties.entries.parallelStream().forEach { embeddedObject.zdtv.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
+        localTimeProperties.entries.parallelStream().forEach { embeddedObject.ltv.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toSecondOfDay())) }
+        localDateProperties.entries.parallelStream().forEach { embeddedObject.ldv.add(JdsStoreLocalDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        //==============================================
+        //BLOB
+        //==============================================
+        blobProperties.entries.parallelStream().forEach { embeddedObject.blv.add(JdsStoreBlob(it.key, it.value.get() ?: ByteArray(0))) }
+        //==============================================
+        //Enums
+        //==============================================
+        enumProperties.entries.parallelStream().forEach { embeddedObject.ev.add(JdsStoreEnum(it.key.field.id, it.value.value.ordinal)) }
+        enumCollectionProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.eav.add(JdsStoreEnumArray(it.key.field.id, i, child.ordinal)) } }
+        //==============================================
+        //ARRAYS
+        //==============================================
+        stringArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.sav.add(JdsStoreTextArray(it.key, i, child)) } }
+        dateTimeArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dtav.add(JdsStoreDateTimeArray(it.key, i, Timestamp.valueOf(child))) } }
+        floatArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.fav.add(JdsStoreFloatArray(it.key, i, child)) } }
+        doubleArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dav.add(JdsStoreDoubleArray(it.key, i, child)) } }
+        longArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.lav.add(JdsStoreLongArray(it.key, i, child)) } }
+        integerArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.iav.add(JdsStoreIntegerArray(it.key, i, child)) } }
+        //==============================================
+        //EMBEDDED OBJECTS
+        //==============================================
+        objectArrayProperties.entries.parallelStream().forEach {
+            it.value.forEach {
+                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, it.overview.entityId, 0))
+                embeddedObject.eo.add(JdsEmbeddedObject(it))
+            }
+        }
+        objectProperties.entries.parallelStream().forEach {
+            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.value.value.overview.entityId, 0))
+            embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
+        }
     }
 
     /**
@@ -832,6 +900,8 @@ abstract class JdsEntity : IJdsEntity {
      * @param value
      */
     internal fun populateProperties(jdsFieldType: JdsFieldType, key: Long, value: Any?) {
+        if (value == null)
+            return //I.HATE.NULL - Rather retain default values
         when (jdsFieldType) {
             JdsFieldType.FLOAT -> floatProperties[key]?.set(value as Float)
             JdsFieldType.INT -> integerProperties[key]?.set(value as Int)
@@ -846,18 +916,18 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.ARRAY_TEXT -> stringArrayProperties[key]?.get()?.add(value as String)
             JdsFieldType.ARRAY_DATE_TIME -> dateTimeArrayProperties[key]?.get()?.add((value as Timestamp).toLocalDateTime())
             JdsFieldType.BOOLEAN -> booleanProperties[key]?.set((value as Int) == 1)
-            JdsFieldType.ZONED_DATE_TIME -> zonedDateTimeProperties[key]?.set(ZonedDateTime.ofInstant(Instant.ofEpochSecond(value as Long), ZoneId.systemDefault()))
+            JdsFieldType.ZONED_DATE_TIME -> zonedDateTimeProperties[key]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value as Long), ZoneId.systemDefault()))
             JdsFieldType.DATE -> localDateProperties[key]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
             JdsFieldType.TIME -> localTimeProperties[key]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))
             JdsFieldType.BLOB -> blobProperties[key]?.set(value as ByteArray)
-            JdsFieldType.ENUM -> enumProperties.filter { it.key.getField().id == key }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
+            JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == key }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
             JdsFieldType.ENUM_COLLECTION -> {
-                enumCollectionProperties.filter { it.key.getField().id == key }.forEach {
+                enumCollectionProperties.filter { it.key.field.id == key }.forEach {
                     val enumValues = it.key.getEnumType()!!.enumConstants
                     val index = value as Int
                     if (index < enumValues.size) {
                         it.value.get().add(enumValues[index] as Enum<*>)
-                        enumCollectionProperties.keys.any { it -> it.getField().id == key }
+                        enumCollectionProperties.keys.any { it -> it.field.id == key }
                     }
                 }
             }
@@ -965,9 +1035,9 @@ abstract class JdsEntity : IJdsEntity {
         try {
             (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use { statement ->
                 for (field in fields) {
-                    for (index in 0..field.sequenceValues.size - 1) {
+                    for (index in 0 until field.sequenceValues.size) {
                         statement.setLong(1, entityId)
-                        statement.setLong(2, field.getField().id)
+                        statement.setLong(2, field.field.id)
                         statement.addBatch()
                     }
                 }
@@ -990,7 +1060,7 @@ abstract class JdsEntity : IJdsEntity {
             (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use { statement ->
                 for (field in fieldEnums) {
                     for (index in 0 until field.sequenceValues.size) {
-                        statement.setLong(1, field.getField().id)
+                        statement.setLong(1, field.field.id)
                         statement.setInt(2, index)
                         statement.setString(3, field.sequenceValues[index].toString())
                         statement.addBatch()

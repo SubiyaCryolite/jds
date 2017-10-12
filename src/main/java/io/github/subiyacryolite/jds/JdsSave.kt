@@ -627,7 +627,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid)
                         upsert.setLong("fieldId", fieldId)
-                        upsert.setLong("value", zonedDateTime.toEpochSecond())
+                        upsert.setLong("value", zonedDateTime.toInstant().toEpochMilli())
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
@@ -635,7 +635,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
-                    log.setLong("value", zonedDateTime.toEpochSecond())
+                    log.setLong("value", zonedDateTime.toInstant().toEpochMilli())
                     log.setInt("sequence", 0)
                     log.addBatch()
                 }
@@ -664,7 +664,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     val value = value2.get()
                     if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid)
-                        upsert.setLong("fieldId", jdsFieldEnum.getField().id)
+                        upsert.setLong("fieldId", jdsFieldEnum.field.id)
                         upsert.setInt("value", jdsFieldEnum.indexOf(value))
                         upsert.addBatch()
                     }
@@ -672,7 +672,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
-                    log.setLong("fieldId", jdsFieldEnum.getField().id)
+                    log.setLong("fieldId", jdsFieldEnum.field.id)
                     log.setInt("value", jdsFieldEnum.indexOf(value))
                     log.setInt("sequence", 0)
                     log.addBatch()
@@ -1007,18 +1007,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     for (anEnum in textValues) {
                         if (jdsDb.isLoggingEdits) {
                             log.setString("entityGuid", entityGuid)
-                            log.setLong("fieldId", jdsFieldEnum.getField().id)
+                            log.setLong("fieldId", jdsFieldEnum.field.id)
                             log.setInt("value", jdsFieldEnum.indexOf(anEnum))
                             log.setInt("sequence", sequence)
                             log.addBatch()
                         }
                         if (writeToPrimaryDataTables) {
                             //delete
-                            delete.setLong("fieldId", jdsFieldEnum.getField().id)
+                            delete.setLong("fieldId", jdsFieldEnum.field.id)
                             delete.setString("entityGuid", entityGuid)
                             delete.addBatch()
                             //insert
-                            insert.setLong("fieldId", jdsFieldEnum.getField().id)
+                            insert.setLong("fieldId", jdsFieldEnum.field.id)
                             insert.setString("entityGuid", entityGuid)
                             insert.setInt("sequence", sequence)
                             insert.setInt("value", jdsFieldEnum.indexOf(anEnum))

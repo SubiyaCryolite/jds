@@ -37,6 +37,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.51"
     testCompile "com.fasterxml.jackson.core:jackson-databind:2.9.1"
+    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.1"
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
     testCompile "com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
     testCompile "org.postgresql:postgresql:42.0.0"

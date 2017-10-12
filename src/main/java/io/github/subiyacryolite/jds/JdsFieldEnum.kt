@@ -24,8 +24,12 @@ import java.util.*
  * Represents a field enum in JDS
  */
 class JdsFieldEnum<T : Enum<T>>() : Externalizable {
-    private val field = SimpleObjectProperty<JdsField>()
+    private val _field = SimpleObjectProperty<JdsField>()
     private var enumType: Class<T>? = null
+
+    var field: JdsField
+        get() = _field.get()
+        set(value) = _field.set(value)
 
     var sequenceValues = arrayOfNulls<Enum<T>>(0)
         private set//keep order at all times
@@ -35,7 +39,7 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     constructor(type: Class<T>, jdsField: JdsField, vararg values: T) : this(type) {
-        setField(jdsField)
+        field=jdsField
         sequenceValues = arrayOfNulls(values.size)
         System.arraycopy(values, 0, sequenceValues, 0, values.size)
         bind()
@@ -46,21 +50,13 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     private fun bind() {
-        if (!fieldEnums.containsKey(field.get().id))
-            fieldEnums.put(field.get().id, this)
-    }
-
-    private fun setField(f: JdsField) {
-        field.set(f)
-    }
-
-    fun getField(): JdsField {
-        return field.get()
+        if (!fieldEnums.containsKey(_field.get().id))
+            fieldEnums.put(_field.get().id, this)
     }
 
     override fun toString(): String {
         return "JdsFieldEnum{" +
-                "field=" + field.get() +
+                "field=" + _field.get() +
                 ", sequenceValues=" + sequenceValues +
                 '}'
     }
@@ -80,20 +76,20 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     @Throws(IOException::class)
     override fun writeExternal(out: ObjectOutput) {
         out.writeObject(enumType)
-        out.writeObject(field.get())
+        out.writeObject(_field.get())
         out.writeObject(sequenceValues)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(input: ObjectInput) {
         enumType = input.readObject() as Class<T>
-        field.set(input.readObject() as JdsField)
+        _field.set(input.readObject() as JdsField)
         sequenceValues = input.readObject() as Array<Enum<T>?>
     }
 
     companion object {
 
-        private val fieldEnums:HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
+        private val fieldEnums: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
 
         operator fun get(jdsField: JdsField): JdsFieldEnum<*>? {
             return if (fieldEnums.containsKey(jdsField.id))

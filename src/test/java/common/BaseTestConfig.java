@@ -102,7 +102,7 @@ public abstract class BaseTestConfig {
         return objectOut;
     }
 
-    protected AddressBook getSimpleAddressBook() {
+    protected AddressBook getSampleAddressBook() {
         Address primaryAddress = new Address();
         primaryAddress.getOverview().setEntityGuid("primaryAddress"); //setting a custom Entity Guid
         primaryAddress.getOverview().setDateModified(LocalDateTime.of(2012, Month.APRIL, 12, 13, 49));
@@ -112,6 +112,7 @@ public abstract class BaseTestConfig {
         primaryAddress.setPlotNumber(23);
         primaryAddress.setProvinceOrState("Southern");
         primaryAddress.setStreetName("East Street");
+        primaryAddress.setTimeOfEntry(ZonedDateTime.now().minusWeeks(1));
         primaryAddress.setPrimaryAddress(PrimaryAddress.YES);
 
         Address secondAddress = new Address();
@@ -123,6 +124,7 @@ public abstract class BaseTestConfig {
         secondAddress.setPlotNumber(2);
         secondAddress.setProvinceOrState("Lusaka");
         secondAddress.setStreetName("West Street");
+        secondAddress.setTimeOfEntry(ZonedDateTime.now().minusMonths(2));
         secondAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         Address thirdAddress = new Address();
@@ -134,6 +136,7 @@ public abstract class BaseTestConfig {
         thirdAddress.setPlotNumber(9);
         thirdAddress.setProvinceOrState("Copperbelt");
         thirdAddress.setStreetName("West Street");
+        thirdAddress.setTimeOfEntry(ZonedDateTime.now().minusDays(3));
         thirdAddress.setPrimaryAddress(PrimaryAddress.NO);
 
         AddressBook addressBook = new AddressBook();
