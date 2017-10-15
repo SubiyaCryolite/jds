@@ -24,7 +24,6 @@ public class LagacyLoadAndSaveTests extends BaseTestConfig {
         System.out.printf("Saved %s\n", addressBook);
     }
 
-
     @Test
     @Override
     public void load() throws Exception {

@@ -13,6 +13,7 @@ class JdsStoreLong(val id: Long, val `val`: Long?)
 class JdsStoreText(val id: Long, val `val`: String?)
 class JdsStoreFloat(val id: Long, val `val`: Float?)
 class JdsStoreTime(val id: Long, val `val`: Int?)
+class JdsStoreMonthDay(val id: Long, val `val`: Int?)
 class JdsStoreZonedDateTime(val id: Long, val `val`: Long?)
 class JdsStoreLocalDate(val id: Long, val `val`: Timestamp?)
 class JdsStoreEnum(val id: Long, val `val`: Int?)//ordinal
@@ -25,8 +26,8 @@ class JdsStoreTextArray(val id: Long, val index: Int, val `val`: String?)
 class JdsStoreFloatArray(val id: Long, val index: Int, val `val`: Float?)
 class JdsStoreEnumArray(val id: Long, val index: Int, val `val`: Int?)//ordinal
 
-class JdsStoreEntityOverview(val uuid: String, val id: Long, val l: Boolean, val dc: LocalDateTime, val dm: LocalDateTime)
-class JdsStoreEntityBinding(val pid: String, val uid: String, val id: Long, val cd: Int)
+class JdsStoreEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
+class JdsStoreEntityBinding(val pid: String, val uid: String, val fid: Long, val id: Long, val cd: Int)
 
 class JdsEmbeddedContainer(sources: Collection<JdsEntity>) {
     /**

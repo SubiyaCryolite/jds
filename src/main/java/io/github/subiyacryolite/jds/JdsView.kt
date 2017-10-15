@@ -101,14 +101,14 @@ class JdsView {
          * @param tables     the tables that will make up this view
          */
         private fun createMainView(connection: Connection, jdsDb: JdsDb, entityId: List<Long>, viewName: String, tables: Array<String>) {
-            val sql = String.format("SELECT field.FieldName FROM \n" +
+            val sql = String.format("SELECT fieldEntity.FieldName FROM \n" +
                     "JdsRefEntities entity\n" +
                     "LEFT JOIN JdsBindEntityFields bound\n" +
                     "ON entity.EntityId = bound.EntityId\n" +
-                    "LEFT JOIN JdsRefFields field \n" +
-                    "ON bound.FieldId = field.FieldId\n" +
+                    "LEFT JOIN JdsRefFields fieldEntity \n" +
+                    "ON bound.FieldId = fieldEntity.FieldId\n" +
                     "LEFT join JdsRefFieldTypes type\n" +
-                    "ON field.FieldId = type.TypeId\n" +
+                    "ON fieldEntity.FieldId = type.TypeId\n" +
                     "WHERE %s NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND entity.EntityId = ?\n" +
                     "ORDER BY field.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" else "type.TypeName")
             //handle oracle nclobs
@@ -222,14 +222,14 @@ class JdsView {
          * @return the created inner view name
          */
         private fun innerView(connection: Connection, jdsDb: JdsDb, fieldType: JdsFieldType, inheritanceHierarchy: List<Long>, entityName: String): String {
-            val sql = String.format("select distinct field.FieldName from \n" +
+            val sql = String.format("select distinct fieldEntity.FieldName from \n" +
                     "JdsRefEntities entity\n" +
                     "left join JdsBindEntityFields bound\n" +
                     "on entity.EntityId = bound.EntityId\n" +
-                    "left join JdsRefFields field \n" +
-                    "on bound.FieldId = field.FieldId\n" +
+                    "left join JdsRefFields fieldEntity \n" +
+                    "on bound.FieldId = fieldEntity.FieldId\n" +
                     "left join JdsRefFieldTypes type\n" +
-                    "on field.FieldId = type.TypeId\n" +
+                    "on fieldEntity.FieldId = type.TypeId\n" +
                     "where %s = ? and entity.EntityId = ?\n" +
                     "order by field.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" else "type.TypeName")
             //handle oracle nclobs
@@ -261,7 +261,7 @@ class JdsView {
             stringBuilder.append(fieldsOfInterest)
             stringBuilder.append("\nFROM\t\n")
             stringBuilder.append("\t(\n")
-            stringBuilder.append("\t\tSELECT src.EntityGuid, field.FieldName, src.Value\n")
+            stringBuilder.append("\t\tSELECT src.EntityGuid, fieldEntity.FieldName, src.Value\n")
             stringBuilder.append("\t\tFROM ")
             stringBuilder.append(JdsTableLookup.getTable(fieldType))
             stringBuilder.append("\tsrc\n")
@@ -270,8 +270,8 @@ class JdsView {
             for (id in inheritanceHierarchy)
                 entityHierarchy.add("" + id)
             stringBuilder.append(String.format(" AND ov.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (%s))\n", entityHierarchy))
-            stringBuilder.append("\t\tJOIN JdsRefFields field on src.FieldId = field.FieldId\n")
-            stringBuilder.append("\t\tJOIN JdsRefFieldTypes fieldType on field.FieldId = fieldType.TypeId \n")
+            stringBuilder.append("\t\tJOIN JdsRefFields fieldEntity on src.FieldId = fieldEntity.FieldId\n")
+            stringBuilder.append("\t\tJOIN JdsRefFieldTypes fieldType on fieldEntity.FieldId = fieldType.TypeId \n")
             stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields ef where ef.EntityId in (%s) and %s = '%s')\n",
                     entityHierarchy,
                     if (jdsDb.isOracleDb) "dbms_lob.substr(fieldType.TypeName, dbms_lob.getlength(fieldType.TypeName), 1)" else "fieldType.TypeName", //nclob magic

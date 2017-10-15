@@ -15,6 +15,7 @@ CREATE TABLE JdsStoreEntityBinding
 (
     ParentEntityGuid    NVARCHAR(48),
     ChildEntityGuid     NVARCHAR(48),
+    FieldId             BIGINT,
     ChildEntityId       BIGINT,
     CascadeOnDelete     INTEGER,
     CONSTRAINT fk_JdsStoreEntityBinding_ParentEntityGuid FOREIGN KEY(ParentEntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid),

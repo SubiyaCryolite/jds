@@ -19,4 +19,5 @@ package io.github.subiyacryolite.jds
 internal class JdsParentEntityBinding {
     var parentGuid: String = ""
     var entityId: Long = 0
+    var fieldId: Long = 0
 }

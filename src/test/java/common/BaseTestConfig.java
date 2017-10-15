@@ -2,7 +2,7 @@ package common;
 
 import connectivity.*;
 import entities.*;
-import enums.PrimaryAddress;
+import constants.PrimaryAddress;
 import io.github.subiyacryolite.jds.JdsDb;
 
 import java.io.*;
@@ -15,7 +15,8 @@ import java.util.List;
  */
 public abstract class BaseTestConfig {
 
-    protected final double DELTA = 1e-15;
+    protected final double DOUBLE_DELTA = 1e-15;
+    protected final float FLOAT_DELTA = 1e-2f;
     protected JdsDb jdsDb;
 
     public void saveAndLoad() throws Exception {

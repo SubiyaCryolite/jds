@@ -135,9 +135,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         saveContainer.enums.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>())
         saveContainer.enumCollections.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>())
         //objects
-        saveContainer.objects.add(HashMap<String, HashMap<Long, SimpleObjectProperty<JdsEntity>>>())
+        saveContainer.objects.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>())
         //object arrays
-        saveContainer.objectArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<JdsEntity>>>())
+        saveContainer.objectArrays.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>())
     }
 
     /**
@@ -264,7 +264,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Blob field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Blob fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -303,7 +303,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Boolean field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Boolean fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -341,7 +341,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Integer fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -379,7 +379,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Float field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Float fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -417,7 +417,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Double field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Double fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -455,7 +455,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Long field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Long fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -493,7 +493,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Text field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Text fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -532,7 +532,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. LocalDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. LocalDateTime fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -554,7 +554,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()))
                     upsert.addBatch()
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. LocalDate field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. LocalDate fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -593,7 +593,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. LocalTime field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. LocalTime fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -631,7 +631,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. ZonedDateTime field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. ZonedDateTime fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", fieldId)
@@ -669,7 +669,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record [%s]. Enum field [%s of %s]\n", record, innerRecord, innerRecordSize)
+                        System.out.printf("Updating record [%s]. Enum fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
                     if (!jdsDb.isLoggingEdits) continue
                     log.setString("entityGuid", entityGuid)
                     log.setLong("fieldId", jdsFieldEnum.field.id)
@@ -725,7 +725,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. DateTime field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. DateTime fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
                     }
                 }
             }
@@ -774,7 +774,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. Float field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. Float fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
 
                     }
                 }
@@ -825,7 +825,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. Integer field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. Integer fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
                     }
                 }
             }
@@ -875,7 +875,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. Double field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. Double fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
                     }
                 }
             }
@@ -924,7 +924,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. Long field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. Long fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
                     }
                 }
             }
@@ -974,7 +974,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         }
                         index.set(index.get() + 1)
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Inserting array record [%s]. String field [%s of %s]\n", record, innerRecord, innerTotal)
+                            System.out.printf("Inserting array record [%s]. String fieldEntity [%s of %s]\n", record, innerRecord, innerTotal)
                     }
                 }
             }
@@ -1025,7 +1025,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                             insert.addBatch()
                         }
                         if (jdsDb.isPrintingOutput)
-                            System.out.printf("Updating enum [%s]. Object field [%s of %s]\n", sequence, record, recordTotal)
+                            System.out.printf("Updating enum [%s]. Object fieldEntity [%s of %s]\n", sequence, record, recordTotal)
                         sequence++
                     }
                 }
@@ -1043,13 +1043,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<JdsEntity>>>) {
+    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>) {
         if (objectArrayProperties.isEmpty()) return
         val jdsEntities = ArrayList<JdsEntity>()
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
         val parentChildBindings = ArrayList<JdsParentChildBinding>()
         val record = SimpleIntegerProperty(0)
         val changesMade = SimpleBooleanProperty(false)
+        val map: MutableMap<String, Long> = HashMap<String, Long>()
+
         for ((parentGuid, value) in objectArrayProperties) {
             for ((key, value1) in value) {
                 record.set(0)
@@ -1058,17 +1060,23 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     if (!changesMade.get()) {
                         //only clear if changes are made. else you wipe out old bindings regardless
                         changesMade.set(true)
+
                         val parentEntityBinding = JdsParentEntityBinding()
                         parentEntityBinding.parentGuid = parentGuid
-                        parentEntityBinding.entityId = key
+                        parentEntityBinding.entityId = jdsEntity.overview.entityId
+                        parentEntityBinding.fieldId = key.fieldEntity.id
                         parentEntityBindings.add(parentEntityBinding)
+
 
                     }
                     val parentChildBinding = JdsParentChildBinding()
                     parentChildBinding.parentGuid = parentGuid
                     parentChildBinding.childGuid = jdsEntity.overview.entityGuid
                     parentChildBindings.add(parentChildBinding)
+
                     jdsEntities.add(jdsEntity)
+                    map.put(jdsEntity.overview.entityGuid, key.fieldEntity.id)
+
                     record.set(record.get() + 1)
                     if (jdsDb.isPrintingOutput)
                         System.out.printf("Binding array object %s\n", record.get())
@@ -1080,17 +1088,19 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)")
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid, ChildEntityGuid, FieldId, ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid)
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
+                clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
                 writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
                 writeNewBindings.setString("childEntityGuid", jdsEntity.overview.entityGuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
+                writeNewBindings.setLong("fieldId", map[jdsEntity.overview.entityGuid]!!)
                 writeNewBindings.addBatch()
             }
         } catch (ex: Exception) {
@@ -1105,13 +1115,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(connection: Connection, objectProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<JdsEntity>>>) {
+    private fun saveAndBindObjects(connection: Connection, objectProperties: HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>) {
         if (objectProperties.isEmpty()) return //prevent stack overflow :)
         val record = SimpleIntegerProperty(0)
         val changesMade = SimpleBooleanProperty(false)
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
         val parentChildBindings = ArrayList<JdsParentChildBinding>()
         val jdsEntities = ArrayList<JdsEntity>()
+        val map: MutableMap<String, Long> = HashMap<String, Long>()
+
         for ((parentGuid, value) in objectProperties) {
             for ((key, value1) in value) {
                 record.set(0)
@@ -1122,14 +1134,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                         changesMade.set(true)
                         val parentEntityBinding = JdsParentEntityBinding()
                         parentEntityBinding.parentGuid = parentGuid
-                        parentEntityBinding.entityId = key
+                        parentEntityBinding.entityId = value1.get().overview.entityId
+                        parentEntityBinding.fieldId = key.fieldEntity.id
                         parentEntityBindings.add(parentEntityBinding)
                     }
                     jdsEntities.add(jdsEntity)
                     val parentChildBinding = JdsParentChildBinding()
                     parentChildBinding.parentGuid = parentGuid
                     parentChildBinding.childGuid = jdsEntity.overview.entityGuid
+
                     parentChildBindings.add(parentChildBinding)
+                    map.put(value1.get().overview.entityGuid, key.fieldEntity.id)
+
                     record.set(record.get() + 1)
                     if (jdsDb.isPrintingOutput)
                         System.out.printf("Binding object %s\n", record.get())
@@ -1141,17 +1157,19 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid,ChildEntityGuid,ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :childEntityId)")
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid, ChildEntityGuid, FieldId, ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
                 clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid)
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
+                clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
                 writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
                 writeNewBindings.setString("childEntityGuid", jdsEntity.overview.entityGuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
+                writeNewBindings.setLong("fieldId", map[jdsEntity.overview.entityGuid]!!)
                 writeNewBindings.addBatch()
             }
         } catch (ex: Exception) {

@@ -23,7 +23,7 @@ internal class JdsSaveContainer {
     val integers: MutableList<HashMap<String, HashMap<Long, SimpleIntegerProperty>>> = ArrayList()
     val blobs: MutableList<HashMap<String, HashMap<Long, SimpleBlobProperty>>> = ArrayList()
     //arrays
-    val objectArrays: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<JdsEntity>>>> = ArrayList()
+    val objectArrays: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>> = ArrayList()
     val stringArrays: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<String>>>> = ArrayList()
     val dateTimeArrays: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>> = ArrayList()
     val floatArrays: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<Float>>>> = ArrayList()
@@ -34,7 +34,7 @@ internal class JdsSaveContainer {
     val enums: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>> = ArrayList()
     val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>> = ArrayList()
     //objects
-    val objects: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<JdsEntity>>>> = ArrayList()
+    val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
     val overviews: MutableList<HashSet<IJdsEntityOverview>> = LinkedList()
 }

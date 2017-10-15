@@ -7,6 +7,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 import java.util.HashSet
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.collections.ArrayList
 
 class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<List<T>> {
 
@@ -35,6 +36,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         target.overview.entityId = source.o.id
         target.overview.entityGuid = source.o.uuid
         target.overview.live = source.o.l
+        target.overview.version = source.o.v
         //==============================================
         //PRIMITIVES
         //==============================================
@@ -51,6 +53,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         source.ldv.forEach { target.populateProperties(JdsFieldType.DATE, it.id, it.`val`) }
         source.zdtv.forEach { target.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.id, it.`val`) }
         source.ltv.forEach { target.populateProperties(JdsFieldType.TIME, it.id, it.`val`) }
+        source.mdv.forEach { target.populateProperties(JdsFieldType.MONTH_DAY, it.id, it.`val`) }
         //==============================================
         //BLOB
         //==============================================
@@ -74,14 +77,12 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         val entityGuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
-        val lookup = HashMap<String, JdsEmbeddedObject>()
-        source.eo.forEach {
-            target.populateObjects(jdsDb, it.o.id, it.o.uuid, innerObjects, entityGuids)
-            lookup[it.o.uuid] = it
+        source.eb.forEach {
+            target.populateObjects(jdsDb, it.fid, it.id, it.uid, innerObjects, entityGuids)
         }
         innerObjects.forEach {
             //populate the inner objects
-            populate(outerIndex, innerIndex, it, lookup[it.overview.entityGuid]!!)
+            populate(outerIndex, innerIndex, it, source.eo.find { itx -> itx.o.uuid == it.overview.entityGuid }!!)
         }
     }
 }

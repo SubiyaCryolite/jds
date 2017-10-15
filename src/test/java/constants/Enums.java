@@ -1,6 +1,5 @@
-package enums;
+package constants;
 
-import fields.Fields;
 import io.github.subiyacryolite.jds.JdsFieldEnum;
 
 /**

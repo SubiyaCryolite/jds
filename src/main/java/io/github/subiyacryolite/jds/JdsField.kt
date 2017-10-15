@@ -22,7 +22,7 @@ import java.io.ObjectOutput
 import java.util.*
 
 /**
- * Represents a field in JDS
+ * Represents a fieldEntity in JDS
  */
 class JdsField() : Externalizable {
     var id: Long = 0
@@ -88,5 +88,7 @@ class JdsField() : Externalizable {
             else
                 throw RuntimeException(String.format("This jdsField ID [%s] is already bound", jdsField.id))
         }
+
+        val NULL = JdsField()
     }
 }

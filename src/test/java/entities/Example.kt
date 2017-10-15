@@ -1,16 +1,14 @@
 package entities
 
+import constants.Fields.*
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.events.*
 import javafx.beans.property.*
-
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
-
-import fields.Fields.*
 
 /**
  * Created by ifunga on 12/04/2017.
@@ -101,5 +99,18 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     override fun onPostLoad(eventArguments: OnPostLoadEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+    }
+
+    override fun toString(): String {
+        return "Example {stringField = $stringField," +
+                "dateField = $dateField," +
+                "timeField = $timeField," +
+                "dateTimeField = $dateTimeField," +
+                "zonedDateTimeField = $zonedDateTimeField," +
+                "longField = $longField," +
+                "intField = $intField," +
+                "doubleField = $doubleField," +
+                "floatField = $floatField," +
+                "booleanField = $booleanField}"
     }
 }

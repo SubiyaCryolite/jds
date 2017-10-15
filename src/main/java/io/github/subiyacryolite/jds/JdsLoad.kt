@@ -232,10 +232,9 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
             while (resultSet.next()) {
                 val parentEntityGuid = resultSet.getString("ParentEntityGuid")
                 val entityGuid = resultSet.getString("ChildEntityGuid")
+                val fieldId = resultSet.getLong("FieldId")
                 val entityId = resultSet.getLong("ChildEntityId")
-                optimalEntityLookup(jdsEntities, parentEntityGuid).forEach { parentEntity ->
-                    parentEntity.populateObjects(jdsDb, entityId, entityGuid, innerObjects, entityGuids)
-                }
+                optimalEntityLookup(jdsEntities, parentEntityGuid).forEach { it.populateObjects(jdsDb, fieldId, entityId, entityGuid, innerObjects, entityGuids) }
             }
         }
         val batches = createProcessingBatches(entityGuids)

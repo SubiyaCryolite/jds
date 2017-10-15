@@ -86,7 +86,7 @@ public class Customer extends JdsEntity
 Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
 
 ### 1.1.2 Defining Fields
-JdsFields are big part of the JDS framework. Each field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every field that you define can be one of the following types.
+JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every fieldEntity that you define can be one of the following types.
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
@@ -145,7 +145,7 @@ public class Fields {
 
 ### 1.1.3 Defining Enums
 JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
-First of all we'd have to define a standard field of type ENUM_TEXT.
+First of all we'd have to define a standard fieldEntity of type ENUM_TEXT.
 ```java
 public class Fields
 {
@@ -170,7 +170,7 @@ public class Enums
 Behind the scenes these enums will be stored as either an Integer (ENUM) or an Integer Array (ENUM_COLLECTION).
 
 ### 1.1.4 Binding Properties
-Depending on the type of field, JDS will require that you set you objects properties to one of the following JavaFX bean container types.
+Depending on the type of fieldEntity, JDS will require that you set you objects properties to one of the following JavaFX bean container types.
 
 Kindly note that none of the JavaFX beans are serializable, however JDS supports serialization via the explicit implementation of Javas Externalizable interface. That said only Property values are serialized, not listeners or their states.
 
@@ -196,7 +196,7 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |ENUM|[SimpleObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|
 |ENUM_COLLECTION|[SimpleListProperty\<Enum\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|
 
- After your class and its properties have been defined you must map the property to its corresponding field using the **map()** method. I recommend doing this in your constructor. 
+ After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
  
  The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
@@ -214,7 +214,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import static fields.Fields.*;
+import static constants.Fields.*;
 
 @JdsEntityAnnotation(entityId = 3, entityName = "example")
 public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
@@ -379,7 +379,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-import fields.Fields.*
+import constants.Fields.*
 
 @JdsEntityAnnotation(entityId = 3, entityName = "example")
 class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
@@ -848,7 +848,7 @@ The **JdsRef[X]** and **JdsBind[X]** tables are used by the systems to link diff
 
 **JdsSoreOldFieldValues** stores every single update/insert in the system and is the single point of reference for historical data. It is written to by calling **logEdits(true)** on an instance of JdsDb. This behaviour is disabled by default.
 
-If you wanted to view the changes made to a specific field you could use a query such as
+If you wanted to view the changes made to a specific fieldEntity you could use a query such as
 
 ```sql
 select EntityGuid, FieldId, IntegerValue, min(DateOfModification) 

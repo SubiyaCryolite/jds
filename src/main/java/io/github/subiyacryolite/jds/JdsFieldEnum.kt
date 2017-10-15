@@ -13,7 +13,6 @@
 */
 package io.github.subiyacryolite.jds
 
-import javafx.beans.property.SimpleObjectProperty
 import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
@@ -21,15 +20,11 @@ import java.io.ObjectOutput
 import java.util.*
 
 /**
- * Represents a field enum in JDS
+ * Represents a fieldEntity enum in JDS
  */
 class JdsFieldEnum<T : Enum<T>>() : Externalizable {
-    private val _field = SimpleObjectProperty<JdsField>()
-    private var enumType: Class<T>? = null
-
-    var field: JdsField
-        get() = _field.get()
-        set(value) = _field.set(value)
+    lateinit var enumType: Class<T>
+    lateinit var field: JdsField
 
     var sequenceValues = arrayOfNulls<Enum<T>>(0)
         private set//keep order at all times
@@ -39,34 +34,23 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     constructor(type: Class<T>, jdsField: JdsField, vararg values: T) : this(type) {
-        field=jdsField
+        field = jdsField
         sequenceValues = arrayOfNulls(values.size)
         System.arraycopy(values, 0, sequenceValues, 0, values.size)
         bind()
     }
 
-    fun getEnumType(): Class<out Enum<*>>? {
-        return enumType
-    }
-
     private fun bind() {
-        if (!fieldEnums.containsKey(_field.get().id))
-            fieldEnums.put(_field.get().id, this)
+        if (!fieldEnums.containsKey(field.id))
+            fieldEnums.put(field.id, this)
     }
 
     override fun toString(): String {
-        return "JdsFieldEnum{" +
-                "field=" + _field.get() +
-                ", sequenceValues=" + sequenceValues +
-                '}'
+        return "JdsFieldEnum{ fieldEntity= $field , sequenceValues=$sequenceValues }"
     }
 
     fun indexOf(enumText: Enum<*>): Int {
-        for (i in sequenceValues.indices) {
-            if (sequenceValues[i] === enumText)
-                return i
-        }
-        return -1
+        return sequenceValues.indices.firstOrNull { sequenceValues[it] === enumText } ?: -1
     }
 
     fun valueOf(index: Int): Enum<*>? {
@@ -76,14 +60,14 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     @Throws(IOException::class)
     override fun writeExternal(out: ObjectOutput) {
         out.writeObject(enumType)
-        out.writeObject(_field.get())
+        out.writeObject(field)
         out.writeObject(sequenceValues)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(input: ObjectInput) {
         enumType = input.readObject() as Class<T>
-        _field.set(input.readObject() as JdsField)
+        field = input.readObject() as JdsField
         sequenceValues = input.readObject() as Array<Enum<T>?>
     }
 

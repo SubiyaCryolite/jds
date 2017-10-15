@@ -1,4 +1,4 @@
-package fields;
+package constants;
 
 import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enums.JdsFieldType;
@@ -28,4 +28,5 @@ public class Fields {
     public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
     public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
     public static final JdsField BLOB_FIELD = new JdsField(1010, "BLOB_FIELD", JdsFieldType.BLOB);
+    public static final JdsField ADDRESS_BROOK = new JdsField(1011, "ADDRESS_BROOK", JdsFieldType.CLASS);
 }

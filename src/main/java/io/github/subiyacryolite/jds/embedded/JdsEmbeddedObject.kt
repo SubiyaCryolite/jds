@@ -40,6 +40,10 @@ class JdsEmbeddedObject(source: JdsEntity) {
      */
     val ltv: MutableList<JdsStoreTime> = ArrayList()
     /**
+     * Month day values
+     */
+    val mdv: MutableList<JdsStoreMonthDay> = ArrayList()
+    /**
      * Zoned Date Time values
      */
     val zdtv: MutableList<JdsStoreZonedDateTime> = ArrayList()
@@ -90,7 +94,7 @@ class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * Object overview
      */
-    val o: JdsStoreEntityOverview = JdsStoreEntityOverview(source.overview.entityGuid, source.overview.entityId, source.overview.live, source.overview.dateCreated, source.overview.dateModified)
+    val o: JdsStoreEntityOverview = JdsStoreEntityOverview(source.overview.entityGuid, source.overview.entityId, source.overview.live, source.overview.version, source.overview.dateCreated, source.overview.dateModified)
 
     init {
         source.assign(this);

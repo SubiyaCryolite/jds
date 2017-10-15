@@ -39,7 +39,7 @@ abstract class JdsEntity : IJdsEntity {
     override val overview: IJdsEntityOverview
         get() = _overview.get()
 
-    //field and enum maps
+    //fieldEntity and enum maps
     private val properties: MutableMap<Long, String> = HashMap()
     private val types: MutableMap<Long, String> = HashMap()
     private val objects: MutableSet<Long> = HashSet()
@@ -58,7 +58,7 @@ abstract class JdsEntity : IJdsEntity {
     private val longProperties: HashMap<Long, SimpleLongProperty> = HashMap()
     private val integerProperties: HashMap<Long, SimpleIntegerProperty> = HashMap()
     //arrays
-    private val objectArrayProperties: HashMap<Long, SimpleListProperty<JdsEntity>> = HashMap()
+    private val objectArrayProperties: HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>> = HashMap()
     private val stringArrayProperties: HashMap<Long, SimpleListProperty<String>> = HashMap()
     private val dateTimeArrayProperties: HashMap<Long, SimpleListProperty<LocalDateTime>> = HashMap()
     private val floatArrayProperties: HashMap<Long, SimpleListProperty<Float>> = HashMap()
@@ -69,8 +69,8 @@ abstract class JdsEntity : IJdsEntity {
     private val enumProperties: HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>> = HashMap()
     private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>> = HashMap()
     //objects
-    private val objectProperties: HashMap<Long, SimpleObjectProperty<JdsEntity>> = HashMap()
-    private val objectCascade: HashMap<Long, Boolean> = HashMap()
+    private val objectProperties: HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>> = HashMap()
+    private val objectCascade: HashMap<JdsFieldEntity<*>, Boolean> = HashMap()
     //blobs
     private val blobProperties: HashMap<Long, SimpleBlobProperty> = HashMap()
 
@@ -311,7 +311,7 @@ abstract class JdsEntity : IJdsEntity {
             types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
             enumProperties.put(jdsFieldEnum, enums as SimpleObjectProperty<Enum<*>>)
         } else {
-            throw RuntimeException("Please prepareDatabaseComponents field [$jdsFieldEnum] to the correct type")
+            throw RuntimeException("Please prepareDatabaseComponents fieldEntity [$jdsFieldEnum] to the correct type")
         }
     }
 
@@ -329,7 +329,7 @@ abstract class JdsEntity : IJdsEntity {
             types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
             enumCollectionProperties.put(jdsFieldEnum, enums as SimpleListProperty<Enum<*>>)
         } else {
-            throw RuntimeException("Please prepareDatabaseComponents field [$jdsFieldEnum] to the correct type")
+            throw RuntimeException("Please prepareDatabaseComponents fieldEntity [$jdsFieldEnum] to the correct type")
         }
     }
 
@@ -338,18 +338,20 @@ abstract class JdsEntity : IJdsEntity {
      * @param property
      * @param cascadeOnDelete
      */
-    protected fun <T : IJdsEntity> map(entity: Class<out T>, property: SimpleObjectProperty<T>, cascadeOnDelete: Boolean) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val entityAnnotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
-            if (!objectArrayProperties.containsKey(entityAnnotation.entityId) && !objectProperties.containsKey(entityAnnotation.entityId)) {
-                objectProperties.put(entityAnnotation.entityId, property as SimpleObjectProperty<JdsEntity>)
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>, cascadeOnDelete: Boolean) {
+        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
+            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
+        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
+                val entityAnnotation = fieldEntity.entityType.getAnnotation(JdsEntityAnnotation::class.java)
+                objectProperties.put(fieldEntity, property as SimpleObjectProperty<JdsEntity>)
                 objects.add(entityAnnotation.entityId)
-                objectCascade.put(entityAnnotation.entityId, cascadeOnDelete)
+                objectCascade.put(fieldEntity, cascadeOnDelete)
             } else {
                 throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
             }
         } else {
-            throw RuntimeException("You must annotate the class [" + entity.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
     }
 
@@ -357,8 +359,8 @@ abstract class JdsEntity : IJdsEntity {
      * @param entity
      * @param property
      */
-    protected fun <T : IJdsEntity> map(entity: Class<out T>, property: SimpleObjectProperty<T>) {
-        map(entity, property, false)
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>) {
+        map(fieldEntity, property, false)
     }
 
     /**
@@ -366,27 +368,29 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      * @param cascadeOnDelete
      */
-    protected fun <T : IJdsEntity> map(entity: Class<out T>, properties: SimpleListProperty<T>, cascadeOnDelete: Boolean) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val entityAnnotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
-            if (!objectArrayProperties.containsKey(entityAnnotation.entityId) && !objectProperties.containsKey(entityAnnotation.entityId)) {
-                objectArrayProperties.put(entityAnnotation.entityId, properties as SimpleListProperty<JdsEntity>)
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: SimpleListProperty<T>, cascadeOnDelete: Boolean) {
+        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
+            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
+        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            if (!objectArrayProperties.containsKey(fieldEntity)) {
+                val entityAnnotation = fieldEntity.entityType.getAnnotation(JdsEntityAnnotation::class.java)
+                objectArrayProperties.put(fieldEntity, properties as SimpleListProperty<JdsEntity>)
                 objects.add(entityAnnotation.entityId)
-                objectCascade.put(entityAnnotation.entityId, cascadeOnDelete)
+                objectCascade.put(fieldEntity, cascadeOnDelete)
             } else {
                 throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
             }
         } else {
-            throw RuntimeException("You must annotate the class [" + entity.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
     }
 
     /**
-     * @param entity
+     * @param fieldEntity
      * @param properties
      */
-    protected fun <T : IJdsEntity> map(entity: Class<out T>, properties: SimpleListProperty<T>) {
-        map(entity, properties, false)
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: SimpleListProperty<T>) {
+        map(fieldEntity, properties, false)
     }
 
     /**
@@ -580,7 +584,7 @@ abstract class JdsEntity : IJdsEntity {
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
-        //field and enum maps
+        //fieldEntity and enum maps
         objectOutputStream.writeObject(overview)
         objectOutputStream.writeObject(properties)
         objectOutputStream.writeObject(types)
@@ -652,11 +656,11 @@ abstract class JdsEntity : IJdsEntity {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
-    private fun serializeObjects(input: Map<Long, SimpleListProperty<JdsEntity>>): Map<Long, List<JdsEntity>> {
+    private fun serializeObjects(input: Map<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
-    private fun serializeObject(input: Map<Long, SimpleObjectProperty<JdsEntity>>): Map<Long, JdsEntity> {
+    private fun serializeObject(input: Map<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>): Map<JdsFieldEntity<*>, JdsEntity> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
@@ -690,7 +694,7 @@ abstract class JdsEntity : IJdsEntity {
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
-        //field and enum maps
+        //fieldEntity and enum maps
         _overview.set(objectInputStream.readObject() as JdsEntityOverview)
         properties.putAll(objectInputStream.readObject() as Map<Long, String>)
         types.putAll(objectInputStream.readObject() as Map<Long, String>)
@@ -698,7 +702,7 @@ abstract class JdsEntity : IJdsEntity {
         allEnums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
         entityName = objectInputStream.readUTF()
         //objects
-        putObject(objectProperties, objectInputStream.readObject() as Map<Long, JdsEntity>)
+        putObject(objectProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
         //strings and localDateTimes
         putTemporal(localDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
         putTemporal(zonedDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
@@ -714,7 +718,7 @@ abstract class JdsEntity : IJdsEntity {
         //blobs
         putBlobs(blobProperties, objectInputStream.readObject() as Map<Long, SimpleBlobProperty>)
         //arrays
-        putObjects(objectArrayProperties, objectInputStream.readObject() as Map<Long, List<JdsEntity>>)
+        putObjects(objectArrayProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
         putStrings(stringArrayProperties, objectInputStream.readObject() as Map<Long, List<String>>)
         putDateTimes(dateTimeArrayProperties, objectInputStream.readObject() as Map<Long, List<LocalDateTime>>)
         putFloats(floatArrayProperties, objectInputStream.readObject() as Map<Long, List<Float>>)
@@ -734,7 +738,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putObjects(destination: Map<Long, SimpleListProperty<JdsEntity>>, source: Map<Long, List<JdsEntity>>) {
+    private fun putObjects(destination: Map<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
@@ -783,7 +787,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putObject(destination: Map<Long, SimpleObjectProperty<JdsEntity>>, source: Map<Long, JdsEntity>) {
+    private fun putObject(destination: Map<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, JdsEntity>) {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
     }
 
@@ -882,14 +886,14 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        objectArrayProperties.entries.parallelStream().forEach {
-            it.value.forEach {
-                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, it.overview.entityId, 0))
+        objectArrayProperties.entries.parallelStream().forEach { itx ->
+            itx.value.forEach {
+                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId, 0))
                 embeddedObject.eo.add(JdsEmbeddedObject(it))
             }
         }
         objectProperties.entries.parallelStream().forEach {
-            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.value.value.overview.entityId, 0))
+            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId, 0))
             embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
         }
     }
@@ -923,33 +927,35 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == key }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
             JdsFieldType.ENUM_COLLECTION -> {
                 enumCollectionProperties.filter { it.key.field.id == key }.forEach {
-                    val enumValues = it.key.getEnumType()!!.enumConstants
+                    val enumValues = it.key.enumType.enumConstants
                     val index = value as Int
                     if (index < enumValues.size) {
                         it.value.get().add(enumValues[index] as Enum<*>)
-                        enumCollectionProperties.keys.any { it -> it.field.id == key }
                     }
                 }
             }
         }
     }
 
-    internal fun populateObjects(jdsDb: JdsDb, entityId: Long, entityGuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, entityGuids: HashSet<String>) {
+    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, entityGuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, entityGuids: HashSet<String>) {
         try {
             val entityClass = jdsDb.getBoundClass(entityId)!!
-            if (objectArrayProperties.containsKey(entityId)) {
-                val properties = objectArrayProperties[entityId]!!
+            objectArrayProperties.filter {
+                it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
+            }.forEach {
                 val entity = entityClass.newInstance()
                 entity.overview.entityGuid = entityGuid
                 entityGuids.add(entityGuid)
-                properties.get().add(entity)
+                it.value.get().add(entity)
                 innerObjects.add(entity)
-            } else if (objectProperties.containsKey(entityId)) {
-                val properties = objectProperties[entityId]!!
-                val jdsEntity = entityClass!!.newInstance()
+            }
+            objectProperties.filter {
+                it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
+            }.forEach {
+                val jdsEntity = entityClass.newInstance()
                 jdsEntity.overview.entityGuid = entityGuid
                 entityGuids.add(entityGuid)
-                properties.set(jdsEntity)
+                it.value.set(jdsEntity)
                 innerObjects.add(jdsEntity)
             }
         } catch (ex: Exception) {
@@ -969,11 +975,11 @@ abstract class JdsEntity : IJdsEntity {
             (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
                 (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
                     for ((key, value) in properties) {
-                        //1. map this field ID to the entity type
+                        //1. map this fieldEntity ID to the entity type
                         mapClassFields.setLong("entityId", entityId)
                         mapClassFields.setLong("fieldId", key)
                         mapClassFields.addBatch()
-                        //2. map this field to the field dictionary
+                        //2. map this fieldEntity to the fieldEntity dictionary
                         mapFieldNames.setLong("fieldId", key)
                         mapFieldNames.setString("fieldName", value)
                         mapFieldNames.addBatch()
@@ -1002,7 +1008,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     /**
-     * Binds all the field types and updates reference tables
+     * Binds all the fieldEntity types and updates reference tables
      *
      * @param jdsDb the current database implementation
      * @param connection the SQL connection to use for DB operations
@@ -1052,7 +1058,7 @@ abstract class JdsEntity : IJdsEntity {
      * Binds all the values attached to an enum
      *
      * @param connection the SQL connection to use for DB operations
-     * @param fieldEnums the field enum
+     * @param fieldEnums the fieldEntity enum
      */
     @Synchronized
     private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) {

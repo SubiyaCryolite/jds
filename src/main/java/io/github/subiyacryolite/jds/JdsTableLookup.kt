@@ -11,10 +11,10 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 object JdsTableLookup {
 
     /**
-     * Retrieve the table that stores the requested field type
+     * Retrieve the table that stores the requested fieldEntity type
      *
-     * @param fieldType the requested field type
-     * @return the table that stores the requested field type
+     * @param fieldType the requested fieldEntity type
+     * @return the table that stores the requested fieldEntity type
      */
     fun getTable(fieldType: JdsFieldType): String {
         when (fieldType) {
@@ -41,10 +41,10 @@ object JdsTableLookup {
     }
 
     /**
-     * Get the short version of the table that holds the requested field type
+     * Get the short version of the table that holds the requested fieldEntity type
      *
-     * @param jdsFieldType the requested field type
-     * @return the short version of the table that holds the requested field type
+     * @param jdsFieldType the requested fieldEntity type
+     * @return the short version of the table that holds the requested fieldEntity type
      */
     fun getTablePrefix(jdsFieldType: JdsFieldType): String {
         when (jdsFieldType) {
