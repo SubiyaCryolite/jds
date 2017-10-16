@@ -144,7 +144,7 @@ public class Fields {
 ```
 
 ### 1.1.3 Defining Enums
-JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes or RadioButtons in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
+JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes, RadioButtons or Combo Boxes in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard fieldEntity of type ENUM_TEXT.
 ```java
 public class Fields
@@ -486,9 +486,27 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 }
 ```
 ### 1.1.5 Binding Objects and Object Arrays
-Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays. All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped based on the embedded objects annotations.
+Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays.
 
-The class below shows how you can achieve this.
+All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped to a JdsField of type **CLASS**.
+
+This allows a single parent entity to have multiple child entities of the same entity type i.e transfer: AccountTransfer { source: Account , destination: Account, amount: double }
+
+```java
+public class Fields
+{
+    //Create a field of type CLASS
+    public static final JdsField ADDRESS_FIELD = new JdsField(9000, "ADDRESS_FIELD", JdsFieldType.CLASS);
+}
+```
+
+```java
+public class Entities
+{
+    //Create the appropriate JdsFieldEntity entry
+    public static final JdsFieldEntity<Address> ADDRESS_FIELD = new JdsFieldEntity(Address.class, Fields.ADDRESS_FIELD);
+}
+```
 
 ```java
 import javafx.beans.property.SimpleListProperty;
@@ -499,12 +517,12 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
 
 import java.util.List;
 
-@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook")
+@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook", version = 1)
 public class AddressBook extends JdsEntity {
     private final SimpleListProperty<Address> addresses;
 
     public AddressBook() {
-        map(Address.class, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
+        map(Entities.ADDRESS_FIELD, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
     }
 
     public List<Address> getAddresses() {
@@ -520,6 +538,30 @@ public class AddressBook extends JdsEntity {
         return "AddressBook{" +
                 "addresses = " + getAddresses() +
                 '}';
+    }
+}
+```
+Or in Kotlin
+```kotlin
+import constants.Entities
+import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import javafx.beans.property.SimpleListProperty
+import javafx.collections.FXCollections
+
+@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook", version = 1)
+class AddressBook : JdsEntity() {
+    private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
+
+    init {
+        map(Entities.ADDRESS_FIELD, _addresses)
+    }
+
+    val addresses: MutableList<Address>
+        get() = _addresses.get()
+
+    override fun toString(): String {
+        return "AddressBook{ addresses = $addresses }"
     }
 }
 ```

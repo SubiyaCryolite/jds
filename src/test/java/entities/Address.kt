@@ -10,7 +10,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.ZonedDateTime
 
-@JdsEntityAnnotation(entityId = 1, entityName = "address")
+@JdsEntityAnnotation(entityId = 1, entityName = "address", version = 1)
 class Address : JdsEntity() {
     private val _streetName = SimpleStringProperty("")
     private val _plotNumber = SimpleIntegerProperty(0)
