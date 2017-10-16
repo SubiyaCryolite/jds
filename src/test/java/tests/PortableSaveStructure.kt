@@ -6,29 +6,37 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import common.BaseTestConfig
 import entities.AddressBook
+import entities.Example
 import entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
 import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.util.*
 
 class PortableSaveStructure : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
     fun addressBook() {
-        testPortableSave(sampleAddressBook, AddressBook::class.java)
+        testPortableSave(Arrays.asList(sampleAddressBook), AddressBook::class.java)
     }
 
     @Test
     @Throws(Exception::class)
     fun timeConstruct() {
-        testPortableSave(timeConstruct, TimeConstruct::class.java)
+        testPortableSave(Arrays.asList(timeConstruct), TimeConstruct::class.java)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun example() {
+        testPortableSave(collection, Example::class.java)
     }
 
     @Throws(Exception::class)
-    private fun testPortableSave(entity: JdsEntity, clazz: Class<out JdsEntity>) {
+    private fun testPortableSave(entity: Collection<JdsEntity>, clazz: Class<out JdsEntity>) {
         //fire-up JDS
         initialiseSqlLiteBackend()
 
@@ -50,7 +58,7 @@ class PortableSaveStructure : BaseTestConfig() {
         val loadedEntity = loadEmbedded.call()
 
         val stringRepresentation1 = entity.toString()
-        val stringRepresentation2 = loadedEntity[0].toString()
+        val stringRepresentation2 = loadedEntity.toString()
 
         println("Before = $stringRepresentation1")
         println("After  = $stringRepresentation2")
