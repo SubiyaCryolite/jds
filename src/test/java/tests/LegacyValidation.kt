@@ -1,3 +1,5 @@
+package tests
+
 import common.BaseTestConfig
 import entities.Example
 import io.github.subiyacryolite.jds.JdsLoad
@@ -10,7 +12,7 @@ import java.util.*
 /**
  * Created by indana on 5/17/2017.
  */
-class LegacyValidationTests : BaseTestConfig() {
+class LegacyValidation : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     override fun saveAndLoad() {

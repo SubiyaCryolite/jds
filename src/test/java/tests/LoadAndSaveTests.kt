@@ -1,3 +1,5 @@
+package tests
+
 import common.BaseTestConfig
 import entities.Example
 import io.github.subiyacryolite.jds.JdsDelete

@@ -1,4 +1,4 @@
-
+package tests
 
 import common.BaseTestConfig
 import entities.EntityA
@@ -7,7 +7,7 @@ import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class BulkTests : BaseTestConfig() {
+class BulkSaveAndLoad : BaseTestConfig() {
 
     @Throws(Exception::class)
     override fun save() {

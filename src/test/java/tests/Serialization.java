@@ -1,3 +1,5 @@
+package tests;
+
 import common.BaseTestConfig;
 import io.github.subiyacryolite.jds.JdsEntity;
 import javafx.beans.property.SimpleBlobProperty;
@@ -8,7 +10,7 @@ import java.util.Arrays;
 /**
  * Created by indana on 5/10/2017.
  */
-public class SerializationTests extends BaseTestConfig {
+public class Serialization extends BaseTestConfig {
 
     @Test
     public void testSerialization() {

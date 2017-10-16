@@ -1,4 +1,4 @@
-
+package tests
 
 import common.BaseTestConfig
 import io.github.subiyacryolite.jds.JdsView
@@ -8,7 +8,7 @@ import java.sql.SQLException
 /**
  * Created by ifunga on 24/06/2017.
  */
-class ViewTests : BaseTestConfig() {
+class Views : BaseTestConfig() {
 
 
     @Test

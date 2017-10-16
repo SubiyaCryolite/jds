@@ -1,3 +1,5 @@
+package tests
+
 import common.BaseTestConfig
 import entities.Address
 import entities.AddressBook
@@ -13,7 +15,7 @@ import java.util.Comparator
 /**
  * Created by ifunga on 18/02/2017.
  */
-class LagacyLoadAndSaveTests : BaseTestConfig() {
+class LagacyLoadAndSave : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)

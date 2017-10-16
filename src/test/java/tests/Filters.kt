@@ -1,4 +1,4 @@
-
+package tests
 
 import common.BaseTestConfig
 import constants.Fields
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 /**
  * Created by ifunga on 05/03/2017.
  */
-class FilterTests : BaseTestConfig() {
+class Filters : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)

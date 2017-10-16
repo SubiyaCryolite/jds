@@ -1,4 +1,4 @@
-
+package tests
 
 import common.BaseTestConfig
 import entities.EntityA

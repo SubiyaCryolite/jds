@@ -160,7 +160,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                     if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
                                                                                         //primitives
                                                                                         populateTextMonthDayYearMonthAndPeriod(entities, strings)
-                                                                                        populateLong(entities, longs)
+                                                                                        populateLongAndDuration(entities, longs)
                                                                                         populateIntegerEnumAndBoolean(entities, integers)
                                                                                         populateFloat(entities, floats)
                                                                                         populateDouble(entities, doubles)
@@ -515,13 +515,16 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @throws SQLException
      */
     @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateLong(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+    private fun <T : JdsEntity> populateLongAndDuration(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getLong("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.LONG, fieldId, value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach {
+                    it.populateProperties(JdsFieldType.LONG, fieldId, value)
+                    it.populateProperties(JdsFieldType.DURATION, fieldId, value)
+                }
             }
         }
     }

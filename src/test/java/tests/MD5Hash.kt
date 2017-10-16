@@ -1,3 +1,5 @@
+package tests
+
 import org.apache.commons.codec.digest.DigestUtils
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -11,7 +13,7 @@ import com.sun.deploy.util.Base64Wrapper.encodeToString
 import java.util.*
 
 
-class MD5HashDemo {
+class MD5Hash {
 
     @Test
     fun testDates() {

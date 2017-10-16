@@ -1,9 +1,11 @@
+package tests
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import entities.AddressBook
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class JsonTests {
+class Json {
     @Test
     @Throws(Exception::class)
     fun serialization() {

@@ -152,6 +152,7 @@ abstract class BaseTestConfig {
         jdsDb.map(Example::class.java)
         jdsDb.map(Address::class.java)
         jdsDb.map(AddressBook::class.java)
+        jdsDb.map(TimeConstruct::class.java)
     }
 
     private fun initJds() {
