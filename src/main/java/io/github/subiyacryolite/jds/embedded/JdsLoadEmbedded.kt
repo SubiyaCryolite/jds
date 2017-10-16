@@ -40,38 +40,41 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         //PRIMITIVES
         //==============================================
-        source.sv.forEach { target.populateProperties(JdsFieldType.TEXT, it.id, it.v) }
-        source.lv.forEach { target.populateProperties(JdsFieldType.LONG, it.id, it.v) }
-        source.iv.forEach { target.populateProperties(JdsFieldType.INT, it.id, it.v) }
-        source.bv.forEach { target.populateProperties(JdsFieldType.BOOLEAN, it.id, it.v) }
-        source.fv.forEach { target.populateProperties(JdsFieldType.FLOAT, it.id, it.v) }
-        source.dv.forEach { target.populateProperties(JdsFieldType.DOUBLE, it.id, it.v) }
+        source.s.forEach { target.populateProperties(JdsFieldType.TEXT, it.id, it.v) }
+        source.l.forEach { target.populateProperties(JdsFieldType.LONG, it.id, it.v) }
+        source.i.forEach { target.populateProperties(JdsFieldType.INT, it.id, it.v) }
+        source.b.forEach { target.populateProperties(JdsFieldType.BOOLEAN, it.id, it.v) }
+        source.f.forEach { target.populateProperties(JdsFieldType.FLOAT, it.id, it.v) }
+        source.d.forEach { target.populateProperties(JdsFieldType.DOUBLE, it.id, it.v) }
         //==============================================
         //Dates & Time
         //==============================================
-        source.ldtv.forEach { target.populateProperties(JdsFieldType.DATE_TIME, it.id, it.v) }
-        source.ldv.forEach { target.populateProperties(JdsFieldType.DATE, it.id, it.v) }
-        source.zdtv.forEach { target.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.id, it.v) }
-        source.ltv.forEach { target.populateProperties(JdsFieldType.TIME, it.id, it.v) }
-        source.mdv.forEach { target.populateProperties(JdsFieldType.MONTH_DAY, it.id, it.v) }
+        source.ldt.forEach { target.populateProperties(JdsFieldType.DATE_TIME, it.id, it.v) }
+        source.ld.forEach { target.populateProperties(JdsFieldType.DATE, it.id, it.v) }
+        source.zdt.forEach { target.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.id, it.v) }
+        source.t.forEach { target.populateProperties(JdsFieldType.TIME, it.id, it.v) }
+        source.du.forEach { target.populateProperties(JdsFieldType.DURATION, it.id, it.v) }
+        source.md.forEach { target.populateProperties(JdsFieldType.MONTH_DAY, it.id, it.v) }
+        source.ym.forEach { target.populateProperties(JdsFieldType.YEAR_MONTH, it.id, it.v) }
+        source.p.forEach { target.populateProperties(JdsFieldType.PERIOD, it.id, it.v) }
         //==============================================
         //BLOB
         //==============================================
-        source.blv.forEach { target.populateProperties(JdsFieldType.BLOB, it.id, it.v) }
+        source.bl.forEach { target.populateProperties(JdsFieldType.BLOB, it.id, it.v) }
         //==============================================
         //Enums
         //==============================================
-        source.ev.forEach { target.populateProperties(JdsFieldType.ENUM, it.i, it.v) }
-        source.eav.forEach { target.populateProperties(JdsFieldType.ENUM_COLLECTION, it.i, it.v) }
+        source.e.forEach { target.populateProperties(JdsFieldType.ENUM, it.i, it.v) }
+        source.ea.forEach { target.populateProperties(JdsFieldType.ENUM_COLLECTION, it.i, it.v) }
         //==============================================
         //ARRAYS
         //==============================================
-        source.iav.forEach { target.populateProperties(JdsFieldType.ARRAY_INT, it.i, it.v) }
-        source.fav.forEach { target.populateProperties(JdsFieldType.ARRAY_FLOAT, it.i, it.v) }
-        source.lav.forEach { target.populateProperties(JdsFieldType.ARRAY_LONG, it.i, it.v) }
-        source.sav.forEach { target.populateProperties(JdsFieldType.ARRAY_TEXT, it.i, it.v) }
-        source.dav.forEach { target.populateProperties(JdsFieldType.ARRAY_DOUBLE, it.i, it.v) }
-        source.dtav.forEach { target.populateProperties(JdsFieldType.ARRAY_DATE_TIME, it.i, it.v) }
+        source.ia.forEach { target.populateProperties(JdsFieldType.ARRAY_INT, it.i, it.v) }
+        source.fa.forEach { target.populateProperties(JdsFieldType.ARRAY_FLOAT, it.i, it.v) }
+        source.la.forEach { target.populateProperties(JdsFieldType.ARRAY_LONG, it.i, it.v) }
+        source.sa.forEach { target.populateProperties(JdsFieldType.ARRAY_TEXT, it.i, it.v) }
+        source.da.forEach { target.populateProperties(JdsFieldType.ARRAY_DOUBLE, it.i, it.v) }
+        source.dta.forEach { target.populateProperties(JdsFieldType.ARRAY_DATE_TIME, it.i, it.v) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================

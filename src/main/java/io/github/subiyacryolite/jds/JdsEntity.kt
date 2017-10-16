@@ -866,39 +866,43 @@ abstract class JdsEntity : IJdsEntity {
         //PRIMITIVES
         //==============================================
         booleanProperties.entries.parallelStream().forEach {
-            embeddedObject.bv.add(JdsStoreBoolean(it.key, when (it.value.value) {true -> 1;false -> 0
+            embeddedObject.b.add(JdsBooleanValues(it.key, when (it.value.value) {true -> 1;false -> 0
             }))
         }
-        stringProperties.entries.parallelStream().forEach { embeddedObject.sv.add(JdsStoreText(it.key, it.value.value)) }
-        floatProperties.entries.parallelStream().forEach { embeddedObject.fv.add(JdsStoreFloat(it.key, it.value.value)) }
-        doubleProperties.entries.parallelStream().forEach { embeddedObject.dv.add(JdsStoreDouble(it.key, it.value.value)) }
-        longProperties.entries.parallelStream().forEach { embeddedObject.lv.add(JdsStoreLong(it.key, it.value.value)) }
-        integerProperties.entries.parallelStream().forEach { embeddedObject.iv.add(JdsStoreInteger(it.key, it.value.value)) }
+        stringProperties.entries.parallelStream().forEach { embeddedObject.s.add(JdsTextValues(it.key, it.value.value)) }
+        floatProperties.entries.parallelStream().forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
+        doubleProperties.entries.parallelStream().forEach { embeddedObject.d.add(JdsDoubleValues(it.key, it.value.value)) }
+        longProperties.entries.parallelStream().forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value)) }
+        integerProperties.entries.parallelStream().forEach { embeddedObject.i.add(JdsIntegerValues(it.key, it.value.value)) }
         //==============================================
         //Dates & Time
         //==============================================
-        localDateTimeProperties.entries.parallelStream().forEach { embeddedObject.ldtv.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        zonedDateTimeProperties.entries.parallelStream().forEach { embeddedObject.zdtv.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.parallelStream().forEach { embeddedObject.ltv.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toSecondOfDay())) }
-        localDateProperties.entries.parallelStream().forEach { embeddedObject.ldv.add(JdsStoreLocalDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        localDateTimeProperties.entries.parallelStream().forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
+        zonedDateTimeProperties.entries.parallelStream().forEach { embeddedObject.zdt.add(JdsZonedDateTimeValues(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
+        localTimeProperties.entries.parallelStream().forEach { embeddedObject.t.add(JdsTimeValues(it.key, (it.value.value as LocalTime).toSecondOfDay())) }
+        localDateProperties.entries.parallelStream().forEach { embeddedObject.ld.add(JdsLocalDateValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        durationProperties.entries.parallelStream().forEach { embeddedObject.du.add(JdsDurationValues(it.key, it.value.value.toNanos())) }
+        monthDayProperties.entries.parallelStream().forEach { embeddedObject.md.add(JdsMonthDayValues(it.key, it.value.value.toString())) }
+        yearMonthProperties.entries.parallelStream().forEach { embeddedObject.ym.add(JdsYearMonthValues(it.key, (it.value.value as YearMonth).toString())) }
+        periodProperties.entries.parallelStream().forEach { embeddedObject.p.add(JdsPeriodValues(it.key, it.value.value.toString())) }
         //==============================================
         //BLOB
         //==============================================
-        blobProperties.entries.parallelStream().forEach { embeddedObject.blv.add(JdsStoreBlob(it.key, it.value.get() ?: ByteArray(0))) }
+        blobProperties.entries.parallelStream().forEach { embeddedObject.bl.add(JdsBlobValues(it.key, it.value.get() ?: ByteArray(0))) }
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.parallelStream().forEach { embeddedObject.ev.add(JdsStoreEnum(it.key.field.id, it.value.value.ordinal)) }
-        enumCollectionProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.eav.add(JdsStoreEnumArray(it.key.field.id, i, child.ordinal)) } }
+        enumProperties.entries.parallelStream().forEach { embeddedObject.e.add(JdsEnumValues(it.key.field.id, it.value.value.ordinal)) }
+        enumCollectionProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.ea.add(JdsEnumCollections(it.key.field.id, i, child.ordinal)) } }
         //==============================================
         //ARRAYS
         //==============================================
-        stringArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.sav.add(JdsStoreTextArray(it.key, i, child)) } }
-        dateTimeArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dtav.add(JdsStoreDateTimeArray(it.key, i, Timestamp.valueOf(child))) } }
-        floatArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.fav.add(JdsStoreFloatArray(it.key, i, child)) } }
-        doubleArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dav.add(JdsStoreDoubleArray(it.key, i, child)) } }
-        longArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.lav.add(JdsStoreLongArray(it.key, i, child)) } }
-        integerArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.iav.add(JdsStoreIntegerArray(it.key, i, child)) } }
+        stringArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.sa.add(JdsTextCollections(it.key, i, child)) } }
+        dateTimeArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dta.add(JdsDateCollections(it.key, i, Timestamp.valueOf(child))) } }
+        floatArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.fa.add(JdsFloatCollections(it.key, i, child)) } }
+        doubleArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.da.add(JdsDoubleCollections(it.key, i, child)) } }
+        longArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.la.add(JdsLongCollections(it.key, i, child)) } }
+        integerArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.ia.add(JdsIntegerCollections(it.key, i, child)) } }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================

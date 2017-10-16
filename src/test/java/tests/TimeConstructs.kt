@@ -12,12 +12,7 @@ import java.util.*
 class TimeConstructs : BaseTestConfig() {
     @Throws(Exception::class)
     override fun save() {
-        val timeConstruct = TimeConstruct()
-        timeConstruct.overview.entityGuid = "timeConstruct"
-        timeConstruct.duration = Duration.ofDays(2).minusHours(4)
-        timeConstruct.monthDay = MonthDay.of(Month.JULY, 1)
-        timeConstruct.yearMonth = YearMonth.of(1991, Month.OCTOBER)
-        timeConstruct.period = Period.ofYears(4).minusMonths(4).minusDays(12)
+        val timeConstruct = timeConstruct;
         JdsSave(jdsDb, Arrays.asList(timeConstruct)).call()
         println("saved entities [$timeConstruct]")
     }

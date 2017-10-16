@@ -1,88 +1,107 @@
 package io.github.subiyacryolite.jds.embedded
 
 import io.github.subiyacryolite.jds.JdsEntity
+import java.time.MonthDay
+import java.time.Period
+import java.time.YearMonth
 
 class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * Blob Values
      */
-    val blv: MutableList<JdsStoreBlob> = ArrayList()
+    val bl: MutableList<JdsBlobValues> = ArrayList()
     /**
      * Boolean values
      */
-    val bv: MutableList<JdsStoreBoolean> = ArrayList()
+    val b: MutableList<JdsBooleanValues> = ArrayList()
     /**
      * Local Date Time Values
      */
-    val ldtv: MutableList<JdsStoreDateTime> = ArrayList()
+    val ldt: MutableList<JdsLocalDateTimeValues> = ArrayList()
     /**
      * Double values
      */
-    val dv: MutableList<JdsStoreDouble> = ArrayList()
+    val d: MutableList<JdsDoubleValues> = ArrayList()
     /**
      * Integer values
      */
-    val iv: MutableList<JdsStoreInteger> = ArrayList()
+    val i: MutableList<JdsIntegerValues> = ArrayList()
     /**
      * Long values
      */
-    val lv: MutableList<JdsStoreLong> = ArrayList()
+    val l: MutableList<JdsLongValues> = ArrayList()
     /**
      * String values
      */
-    val sv: MutableList<JdsStoreText> = ArrayList()
+    val s: MutableList<JdsTextValues> = ArrayList()
     /**
      * Float values
      */
-    val fv: MutableList<JdsStoreFloat> = ArrayList()
+    val f: MutableList<JdsFloatValues> = ArrayList()
     /**
      * Local Time values
      */
-    val ltv: MutableList<JdsStoreTime> = ArrayList()
+    val t: MutableList<JdsTimeValues> = ArrayList()
     /**
      * Month day values
      */
-    val mdv: MutableList<JdsStoreMonthDay> = ArrayList()
+    val mdv: MutableList<JdsMonthDayValues> = ArrayList()
     /**
      * Zoned Date Time values
      */
-    val zdtv: MutableList<JdsStoreZonedDateTime> = ArrayList()
+    val zdt: MutableList<JdsZonedDateTimeValues> = ArrayList()
     /**
      * Local Date values
      */
-    val ldv: MutableList<JdsStoreLocalDate> = ArrayList()
+    val ld: MutableList<JdsLocalDateValues> = ArrayList()
     /**
      * Date-Time collection values
      */
-    val dtav: MutableList<JdsStoreDateTimeArray> = ArrayList()
+    val dta: MutableList<JdsDateCollections> = ArrayList()
     /**
      * Double collection values
      */
-    val dav: MutableList<JdsStoreDoubleArray> = ArrayList()
+    val da: MutableList<JdsDoubleCollections> = ArrayList()
     /**
      * Integer collection values
      */
-    val iav: MutableList<JdsStoreIntegerArray> = ArrayList()
+    val ia: MutableList<JdsIntegerCollections> = ArrayList()
     /**
      * Long collection tavles
      */
-    val lav: MutableList<JdsStoreLongArray> = ArrayList()
+    val la: MutableList<JdsLongCollections> = ArrayList()
     /**
      * String collection values
      */
-    val sav: MutableList<JdsStoreTextArray> = ArrayList()
+    val sa: MutableList<JdsTextCollections> = ArrayList()
     /**
      * Float collection values
      */
-    val fav: MutableList<JdsStoreFloatArray> = ArrayList()
+    val fa: MutableList<JdsFloatCollections> = ArrayList()
     /**
      * Enum values
      */
-    val ev: MutableList<JdsStoreEnum> = ArrayList()
+    val e: MutableList<JdsEnumValues> = ArrayList()
     /**
      * Enum collection values
      */
-    val eav: MutableList<JdsStoreEnumArray> = ArrayList()
+    val ea: MutableList<JdsEnumCollections> = ArrayList()
+    /**
+     * Duration values
+     */
+    val du: MutableList<JdsDurationValues> = ArrayList()
+    /**
+     * Month Day values
+     */
+    val md: MutableList<JdsMonthDayValues> = ArrayList()
+    /**
+     * Year Month values
+     */
+    val ym: MutableList<JdsYearMonthValues> = ArrayList()
+    /**
+     * Period values
+     */
+    val p: MutableList<JdsPeriodValues> = ArrayList()
     /**
      * Entity bindings [parent to child]
      */
