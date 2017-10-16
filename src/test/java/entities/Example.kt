@@ -1,6 +1,6 @@
 package entities
 
-import constants.Fields.*
+import constants.Fields
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.events.*
@@ -28,17 +28,17 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     private val _blobField = SimpleBlobProperty(ByteArray(0))
 
     init {
-        map(STRING_FIELD, _stringField)
-        map(DATE_FIELD, _dateField)
-        map(TIME_FIELD, _timeField)
-        map(DATE_TIME_FIELD, _dateTimeField)
-        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField)
-        map(LONG_FIELD, _longField)
-        map(INT_FIELD, _intField)
-        map(DOUBLE_FIELD, _doubleField)
-        map(FLOAT_FIELD, _floatField)
-        map(BOOLEAN_FIELD, _booleanField)
-        map(BLOB_FIELD, _blobField)
+        map(Fields.STRING_FIELD, _stringField)
+        map(Fields.DATE_FIELD, _dateField)
+        map(Fields.TIME_FIELD, _timeField)
+        map(Fields.DATE_TIME_FIELD, _dateTimeField)
+        map(Fields.ZONED_DATE_TIME_FIELD, _zonedDateTimeField)
+        map(Fields.LONG_FIELD, _longField)
+        map(Fields.INT_FIELD, _intField)
+        map(Fields.DOUBLE_FIELD, _doubleField)
+        map(Fields.FLOAT_FIELD, _floatField)
+        map(Fields.BOOLEAN_FIELD, _booleanField)
+        map(Fields.BLOB_FIELD, _blobField)
     }
 
     var stringField: String
