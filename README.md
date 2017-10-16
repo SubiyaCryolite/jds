@@ -90,25 +90,30 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
-|BOOLEAN|boolean|Boolean values|
-|BLOB|byte[] or InputStream|Blob values|
-|FLOAT|float|Numeric float values|
-|INT|int|Numeric integer values|
-|DOUBLE|double|Numeric double values|
-|LONG|long|Numeric long values|
-|TEXT|String|String values with no max limit|
-|DATE_TIME|LocalDateTime|DateTime instances based on the host machines local timezone|
-|ZONED_DATE_TIME|ZonedDateTime|Zoned DateTime instances|
-|TIME|LocalTime|Local time instances|
-|DATE|LocalDate|Local date instances|
+|ARRAY_DATE_TIME|List\<LocalDateTime\>|Lists of type LocalDateTime|
+|ARRAY_DOUBLE|List\<Double\>|Lists of type Double|
 |ARRAY_FLOAT|List\<Float\>|Lists of type Float|
 |ARRAY_INT|List\<Integer\>|Lists of type Integer|
-|ARRAY_DOUBLE|List\<Double\>|Lists of type Double|
 |ARRAY_LONG|List\<Long\>|Lists of type Long|
 |ARRAY_TEXT|List\<String\>|Lists of type String|
-|ARRAY_DATE_TIME|List\<LocalDateTime\>|Lists of type LocalDateTime|
-|ENUM|Enum|Object of type Enum|
+|BLOB|byte[] or InputStream|Blob values|
+|BOOLEAN|boolean|Boolean values|
+|CLASS|Class\<? extends JdsEntity\>|Object of type JdsEntity|
+|DATE_TIME|LocalDateTime|DateTime instances based on the host machines local timezone|
+|DATE|LocalDate|Local date instances|
+|DOUBLE|double|Numeric double values|
+|DURATION|Duration|Object of type Duration|
 |ENUM_COLLECTION|List\<Enum\>|Lists of type Enum|
+|ENUM|Enum|Object of type Enum|
+|FLOAT|float|Numeric float values|
+|INT|int|Numeric integer values|
+|LONG|long|Numeric long values|
+|MONTH_DAY|MonthDay|Object of type MonthDay|
+|PERIOD|Period|Object of type Period|
+|TEXT|String|String values with no max limit|
+|TIME|LocalTime|Local time instances|
+|YEAR_MONTH|YearMonth|Object of type YearMonth|
+|ZONED_DATE_TIME|ZonedDateTime|Zoned DateTime instances|
 
 I recommend defining your fields as static constants
 
@@ -176,30 +181,30 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 
 |JDS Field Type|Container|Mapping Call|
 |-----|-----|-----|
-|ARRAY_DATE_TIME|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDateTimes(JdsField, SimpleListProperty\<LocalDateTime\>)|
-|ARRAY_DOUBLE|[SimpleListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDoubles(JdsField, SimpleListProperty\<Double\>)|
-|ARRAY_FLOAT|[SimpleListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapFloats(JdsField, SimpleListProperty\<Float\>)|
-|ARRAY_INT|[SimpleListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapIntegers(JdsField, SimpleListProperty\<Integer\>)|
-|ARRAY_LONG|[SimpleListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapLongs(JdsField, SimpleListProperty\<Long\>)|
-|ARRAY_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapStrings(JdsField, SimpleListProperty\<String\>)|
-|BOOLEAN|[SimpleBooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleBooleanProperty.html)|map(JdsField, SimpleBooleanProperty)|
-|BLOB|[SimpleBlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/SimpleBlobProperty.html)|map(JdsField, SimpleBlobProperty)|
-|CLASS|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map(JdsFieldEntity, \<? extends JdsEntity\>.class)|
-|DATE|[SimpleObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)|map(JdsFieldEntity, SimpleObjectProperty\<LocalDate\>)|
-|DATE_TIME|[SimpleObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)|map(JdsField, SimpleObjectProperty\<LocalDateTime\>)|
-|DOUBLE|[SimpleDoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleDoubleProperty.html)|map(JdsField, SimpleDoubleProperty)|
-|DURATION|[SimpleObjectProperty\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)|mapDuration(JdsField, SimpleObjectProperty\<Duration\>)|
-|ENUM|[SimpleObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|map(JdsFieldEnum, SimpleObjectProperty\<Enum\>)|
-|ENUM_COLLECTION|[SimpleListProperty\<Enum\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapEnums(JdsFieldEnum, SimpleListProperty\<Enum\>)|
-|FLOAT|[SimpleFloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleFloatProperty.html)|map(JdsField, SimpleFloatProperty)|
-|INT|[SimpleIntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleIntegerProperty.html)|map(JdsField, SimpleIntegerProperty)|
-|LONG|[SimpleLongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleLongProperty.html)|map(JdsField, SimpleLongProperty)|
-|MONTH_DAY|[SimpleObjectProperty\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)|mapMonthDay(JdsField, SimpleObjectProperty\<MonthDay\>)|
-|PERIOD|[SimpleObjectProperty\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)|mapPeriod(JdsField, SimpleObjectProperty\<Period\>)|
-|TEXT|[SimpleStringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleStringProperty.html)|map(JdsField, SimpleStringProperty)|
-|TIME|[SimpleObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)|map(JdsFieldEntity, SimpleObjectProperty\<LocalTime\>)|
-|YEAR_MONTH|[SimpleObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map(JdsField, SimpleObjectProperty\<YearMonth\>)|
-|ZONED_DATE_TIME|[SimpleObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map(JdsField, SimpleObjectProperty\<ZonedDateTime\>)|
+|ARRAY_DATE_TIME|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDateTimes|
+|ARRAY_DOUBLE|[SimpleListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDoubles|
+|ARRAY_FLOAT|[SimpleListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapFloats|
+|ARRAY_INT|[SimpleListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapIntegers|
+|ARRAY_LONG|[SimpleListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapLongs|
+|ARRAY_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapStrings|
+|BOOLEAN|[SimpleBooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleBooleanProperty.html)|map|
+|BLOB|[SimpleBlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/SimpleBlobProperty.html)|map|
+|CLASS|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
+|DATE|[SimpleObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)|map|
+|DATE_TIME|[SimpleObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)|map|
+|DOUBLE|[SimpleDoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleDoubleProperty.html)|map|
+|DURATION|[SimpleObjectProperty\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)|mapDuration|
+|ENUM|[SimpleObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|map|
+|ENUM_COLLECTION|[SimpleListProperty\<Enum\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapEnums|
+|FLOAT|[SimpleFloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleFloatProperty.html)|map|
+|INT|[SimpleIntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleIntegerProperty.html)|map|
+|LONG|[SimpleLongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleLongProperty.html)|map|
+|MONTH_DAY|[SimpleObjectProperty\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)|mapMonthDay|
+|PERIOD|[SimpleObjectProperty\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)|mapPeriod|
+|TEXT|[SimpleStringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleStringProperty.html)|map|
+|TIME|[SimpleObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)|map|
+|YEAR_MONTH|[SimpleObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map|
+|ZONED_DATE_TIME|[SimpleObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map|
 
  After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
  
