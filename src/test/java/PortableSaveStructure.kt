@@ -7,6 +7,9 @@ import entities.AddressBook
 import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
 import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
 import org.junit.jupiter.api.Test
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat
+
+
 
 class PortableSaveStructure : BaseTestConfig() {
     @Test
@@ -20,10 +23,10 @@ class PortableSaveStructure : BaseTestConfig() {
 
         val objectMapper = ObjectMapper()
         objectMapper.registerModule(JavaTimeModule())
-        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
-        objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        //objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+        //objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
+        //objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
 
         val output = objectMapper.writeValueAsString(embeddedObject)
         println("================ Object JSON ================")

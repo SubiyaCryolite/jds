@@ -13,7 +13,7 @@ public class SerializationTests extends BaseTestConfig {
     @Test
     public void testSerialization() {
         initialiseSqlLiteBackend();
-        for (Class<? extends JdsEntity> jdsEntity : jdsDb.getMappedClasses()) {
+        for (Class<? extends JdsEntity> jdsEntity : getJdsDb().getMappedClasses()) {
             String canonicalName = jdsEntity.getCanonicalName();
             serialize(jdsEntity, canonicalName);
             deserialize(canonicalName, jdsEntity);

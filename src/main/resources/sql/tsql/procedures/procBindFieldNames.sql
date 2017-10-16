@@ -1,11 +1,11 @@
-CREATE PROCEDURE procBindFieldNames(@FieldId BIGINT, @FieldName NVARCHAR(MAX))
+CREATE PROCEDURE procBindFieldNames(@FieldId BIGINT, @FieldName NVARCHAR(MAX), @FieldDescription NVARCHAR(MAX))
 AS
 BEGIN
     MERGE JdsRefFields AS dest
-    USING (VALUES (@FieldId,@FieldName)) AS src([FieldId],[FieldName])
+    USING (VALUES (@FieldId,@FieldName,@FieldDescription)) AS src([FieldId],[FieldName],[FieldDescription])
     ON (src.FieldId = dest.FieldId)
     WHEN NOT MATCHED THEN
-        INSERT([FieldId], [FieldName]) VALUES(src.FieldId, src.FieldName)
+        INSERT([FieldId], [FieldName], [FieldDescription]) VALUES(src.FieldId, src.FieldName, src.FieldDescription)
     WHEN MATCHED THEN
-        UPDATE SET dest.[FieldName] = src.[FieldName];
+        UPDATE SET dest.[FieldName] = src.[FieldName], dest.[FieldDescription] = src.[FieldDescription];
 END

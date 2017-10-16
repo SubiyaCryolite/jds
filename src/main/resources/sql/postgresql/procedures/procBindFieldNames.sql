@@ -1,8 +1,8 @@
-CREATE FUNCTION procBindFieldNames(pFieldId BIGINT, pFieldName TEXT)
+CREATE FUNCTION procBindFieldNames(pFieldId BIGINT, pFieldName TEXT, ppFieldDescription TEXT)
 RETURNS VOID AS $$
 BEGIN
-	INSERT INTO JdsRefFields(FieldId, FieldName)
-    VALUES (pFieldId, pFieldName)
-    ON CONFLICT (FieldId) DO UPDATE SET FieldName = pFieldName;
+	INSERT INTO JdsRefFields(FieldId, FieldName, FieldDescription)
+    VALUES (pFieldId, pFieldName, pFieldDescription)
+    ON CONFLICT (FieldId) DO UPDATE SET FieldName = pFieldName, FieldDescription = pFieldDescription;
 END;
 $$ LANGUAGE plpgsql;

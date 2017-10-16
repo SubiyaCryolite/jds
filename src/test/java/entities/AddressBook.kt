@@ -14,7 +14,7 @@ class AddressBook : JdsEntity() {
         map(Entities.ADDRESS_BROOK, _addresses)
     }
 
-    val addresses: List<Address>
+    val addresses: MutableList<Address>
         get() = _addresses.get()
 
     override fun toString(): String {

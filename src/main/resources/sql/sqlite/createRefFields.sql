@@ -1,5 +1,6 @@
 CREATE TABLE JdsRefFields(
-     FieldId        BIGINT,
-     FieldName      TEXT,
-     PRIMARY KEY    (FieldId)
+     FieldId               BIGINT,
+     FieldName             TEXT,
+     FieldDescription      TEXT,
+     PRIMARY KEY(FieldId)
 );

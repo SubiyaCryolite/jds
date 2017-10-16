@@ -1,9 +1,9 @@
-package constants;
+package constants
 
 /**
  * Created by ifunga on 16/07/2017.
  */
-public enum Sex {
+enum class Sex {
     MALE,
     FEMALE
 }
