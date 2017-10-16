@@ -18,7 +18,7 @@ package io.github.subiyacryolite.jds.enums;
  * Each enum contains the components name as well as an optional alias primarily used to create
  * joins that implement search {@link io.github.subiyacryolite.jds.JdsFilter filter's}.
  */
-enum class JdsComponent(val componentName: String, val prefix: String) {
+enum class JdsComponent(val component: String, val prefix: String) {
     STORE_TEXT_ARRAY("JdsStoreTextArray", "sta"),
     STORE_FLOAT_ARRAY("JdsStoreFloatArray", "sfa"),
     STORE_INTEGER_ARRAY("JdsStoreIntegerArray", "sia"),

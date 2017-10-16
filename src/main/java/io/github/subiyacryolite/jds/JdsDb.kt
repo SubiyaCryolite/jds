@@ -132,13 +132,13 @@ abstract class JdsDb : IJdsDb {
      */
     internal fun prepareDatabaseComponent(connection: Connection, databaseComponent: JdsComponentType, jdsComponent: JdsComponent) {
         when (databaseComponent) {
-            JdsComponentType.TABLE -> if (!doesTableExist(connection, jdsComponent.componentName)) {
+            JdsComponentType.TABLE -> if (!doesTableExist(connection, jdsComponent.component)) {
                 initiateDatabaseComponent(connection, jdsComponent)
             }
-            JdsComponentType.STORED_PROCEDURE -> if (!doesProcedureExist(connection, jdsComponent.componentName)) {
+            JdsComponentType.STORED_PROCEDURE -> if (!doesProcedureExist(connection, jdsComponent.component)) {
                 initiateDatabaseComponent(connection, jdsComponent)
             }
-            JdsComponentType.TRIGGER -> if (!doesTriggerExist(connection, jdsComponent.componentName)) {
+            JdsComponentType.TRIGGER -> if (!doesTriggerExist(connection, jdsComponent.component)) {
                 initiateDatabaseComponent(connection, jdsComponent)
             }
         }

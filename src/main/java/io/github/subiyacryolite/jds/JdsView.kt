@@ -2,7 +2,9 @@ package io.github.subiyacryolite.jds
 
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.enums.JdsComponent
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -29,32 +31,36 @@ class JdsView {
             if (target.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
                 val jdsEntityAnnotation = target.getAnnotation(JdsEntityAnnotation::class.java)
                 val entityId = jdsEntityAnnotation.entityId
-                val cleanName = cleanViewName(jdsEntityAnnotation.entityName)
-                val viewName = getMainViewName(cleanName)
+                val entityViewName = cleanViewName(jdsEntityAnnotation.entityName)
+                val viewName = getMainViewName(entityViewName)
                 val inheritanceHierarchy = ArrayList<Long>()
                 inheritanceHierarchy.add(entityId)
                 try {
                     jdsDb.getConnection().use { connection ->
                         populateChildEntities(connection, inheritanceHierarchy, entityId)
-                        val arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, inheritanceHierarchy, cleanName)
-                        val arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, inheritanceHierarchy, cleanName)
-                        val arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, inheritanceHierarchy, cleanName)
-                        val arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, inheritanceHierarchy, cleanName)
-                        val arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, inheritanceHierarchy, cleanName)
-                        val arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, inheritanceHierarchy, cleanName)
-                        val booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, inheritanceHierarchy, cleanName)
+                        val arrayFloatView = innerView(connection, jdsDb, JdsFieldType.ARRAY_FLOAT, inheritanceHierarchy, entityViewName)
+                        val arrayIntView = innerView(connection, jdsDb, JdsFieldType.ARRAY_INT, inheritanceHierarchy, entityViewName)
+                        val arrayDoubleView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DOUBLE, inheritanceHierarchy, entityViewName)
+                        val arrayLongView = innerView(connection, jdsDb, JdsFieldType.ARRAY_LONG, inheritanceHierarchy, entityViewName)
+                        val arrayTextView = innerView(connection, jdsDb, JdsFieldType.ARRAY_TEXT, inheritanceHierarchy, entityViewName)
+                        val arrayDateTimeView = innerView(connection, jdsDb, JdsFieldType.ARRAY_DATE_TIME, inheritanceHierarchy, entityViewName)
+                        val booleanView = innerView(connection, jdsDb, JdsFieldType.BOOLEAN, inheritanceHierarchy, entityViewName)
                         //String blobView = innerView(connection, jdsDb, JdsFieldType.BLOB, entityAndChildren, name);, problem with PG implementation
-                        val dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, inheritanceHierarchy, cleanName)
-                        val dateView = innerView(connection, jdsDb, JdsFieldType.DATE, inheritanceHierarchy, cleanName)
-                        val doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, inheritanceHierarchy, cleanName)
-                        val enumView = innerView(connection, jdsDb, JdsFieldType.ENUM, inheritanceHierarchy, cleanName)
-                        val arrayEnumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, inheritanceHierarchy, cleanName)
-                        val floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, inheritanceHierarchy, cleanName)
-                        val intView = innerView(connection, jdsDb, JdsFieldType.INT, inheritanceHierarchy, cleanName)
-                        val longView = innerView(connection, jdsDb, JdsFieldType.LONG, inheritanceHierarchy, cleanName)
-                        val timeView = innerView(connection, jdsDb, JdsFieldType.TIME, inheritanceHierarchy, cleanName)
-                        val textView = innerView(connection, jdsDb, JdsFieldType.TEXT, inheritanceHierarchy, cleanName)
-                        val zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, inheritanceHierarchy, cleanName)
+                        val dateTimeView = innerView(connection, jdsDb, JdsFieldType.DATE_TIME, inheritanceHierarchy, entityViewName)
+                        val dateView = innerView(connection, jdsDb, JdsFieldType.DATE, inheritanceHierarchy, entityViewName)
+                        val doubleView = innerView(connection, jdsDb, JdsFieldType.DOUBLE, inheritanceHierarchy, entityViewName)
+                        val enumView = innerView(connection, jdsDb, JdsFieldType.ENUM, inheritanceHierarchy, entityViewName)
+                        val arrayEnumView = innerView(connection, jdsDb, JdsFieldType.ENUM_COLLECTION, inheritanceHierarchy, entityViewName)
+                        val floatView = innerView(connection, jdsDb, JdsFieldType.FLOAT, inheritanceHierarchy, entityViewName)
+                        val intView = innerView(connection, jdsDb, JdsFieldType.INT, inheritanceHierarchy, entityViewName)
+                        val longView = innerView(connection, jdsDb, JdsFieldType.LONG, inheritanceHierarchy, entityViewName)
+                        val timeView = innerView(connection, jdsDb, JdsFieldType.TIME, inheritanceHierarchy, entityViewName)
+                        val textView = innerView(connection, jdsDb, JdsFieldType.TEXT, inheritanceHierarchy, entityViewName)
+                        val zonedDateTimeView = innerView(connection, jdsDb, JdsFieldType.ZONED_DATE_TIME, inheritanceHierarchy, entityViewName)
+                        val periodView = innerView(connection, jdsDb, JdsFieldType.PERIOD, inheritanceHierarchy, entityViewName)
+                        val durationView = innerView(connection, jdsDb, JdsFieldType.DURATION, inheritanceHierarchy, entityViewName)
+                        val yearMonthView = innerView(connection, jdsDb, JdsFieldType.YEAR_MONTH, inheritanceHierarchy, entityViewName)
+                        val monthDayView = innerView(connection, jdsDb, JdsFieldType.MONTH_DAY, inheritanceHierarchy, entityViewName)
                         val unused = arrayOf(arrayFloatView, arrayIntView, arrayDoubleView, arrayLongView, arrayTextView, arrayDateTimeView, arrayEnumView)
                         createMainView(connection,
                                 jdsDb,
@@ -62,7 +68,7 @@ class JdsView {
                                 viewName,
                                 arrayOf(booleanView,
                                         //blobView, problem with PG implementation
-                                        enumView, dateTimeView, dateView, doubleView, floatView, intView, longView, timeView, textView, zonedDateTimeView))
+                                        enumView, dateTimeView, dateView, doubleView, floatView, intView, longView, timeView, textView, zonedDateTimeView, periodView, durationView, yearMonthView, monthDayView))
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
@@ -101,16 +107,16 @@ class JdsView {
          * @param tables     the tables that will make up this view
          */
         private fun createMainView(connection: Connection, jdsDb: JdsDb, entityId: List<Long>, viewName: String, tables: Array<String>) {
-            val sql = String.format("SELECT fieldEntity.FieldName FROM \n" +
-                    "JdsRefEntities entity\n" +
-                    "LEFT JOIN JdsBindEntityFields bound\n" +
-                    "ON entity.EntityId = bound.EntityId\n" +
-                    "LEFT JOIN JdsRefFields fieldEntity \n" +
-                    "ON bound.FieldId = fieldEntity.FieldId\n" +
-                    "LEFT join JdsRefFieldTypes type\n" +
-                    "ON fieldEntity.FieldId = type.TypeId\n" +
-                    "WHERE %s NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND entity.EntityId = ?\n" +
-                    "ORDER BY field.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" else "type.TypeName")
+            val sql = String.format("SELECT ${JdsComponent.REF_FIELDS.prefix}.FieldName FROM \n" +
+                    "${JdsComponent.REF_ENTITIES.component} ${JdsComponent.REF_ENTITIES.prefix}\n" +
+                    "LEFT JOIN ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix}\n" +
+                    "ON ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId\n" +
+                    "LEFT JOIN ${JdsComponent.REF_FIELDS.component} ${JdsComponent.REF_FIELDS.prefix} \n" +
+                    "ON ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELDS.prefix}.FieldId\n" +
+                    "LEFT join ${JdsComponent.REF_FIELD_TYPES.component} ${JdsComponent.REF_FIELD_TYPES.prefix}\n" +
+                    "ON ${JdsComponent.REF_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELD_TYPES.prefix}.TypeId\n" +
+                    "WHERE %s NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ?\n" +
+                    "ORDER BY ${JdsComponent.REF_FIELDS.prefix}.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName, dbms_lob.getlength(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName), 1)" else "${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName")
             //handle oracle nclobs
             //omit ; as oracle jdbc is a pain
             val fieldNames = ArrayList<String>()
@@ -129,7 +135,10 @@ class JdsView {
             val stringBuilder = StringBuilder("SELECT overview.EntityGuid, overview.DateCreated, overview.DateModified")
             if (!fieldNames.isEmpty()) {
                 stringBuilder.append(", ")
-                val stringJoiner = StringJoiner(", ")
+                val stringJoiner = when (jdsDb.isMySqlDb) {
+                    true -> StringJoiner(", ", "'", "'")
+                    false -> StringJoiner(",")
+                }
                 for (entry in fieldNames) {
                     stringJoiner.add(entry)
                 }
@@ -171,29 +180,33 @@ class JdsView {
                 throw IllegalArgumentException("The underlying database does not support the creation of views")
             if (target.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
                 val je = target.getAnnotation(JdsEntityAnnotation::class.java)
-                val name = cleanViewName(je.entityName)
-                val viewName = getMainViewName(name)
+                val cleanViewName = cleanViewName(je.entityName)
+                val viewName = getMainViewName(cleanViewName)
                 jdsDb.getConnection().use { connection ->
                     dropView(jdsDb, connection, viewName)
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_FLOAT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_INT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DOUBLE, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_LONG, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_TEXT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DATE_TIME, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.BOOLEAN, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_FLOAT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_INT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DOUBLE, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_LONG, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_TEXT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ARRAY_DATE_TIME, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.BOOLEAN, cleanViewName))
                     //dropView(connection, getViewName(JdsFieldType.BLOB, name));
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE_TIME, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.DOUBLE, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM_COLLECTION, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.FLOAT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.INT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.LONG, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.TIME, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.TEXT, name))
-                    dropView(jdsDb, connection, getViewName(JdsFieldType.ZONED_DATE_TIME, name))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE_TIME, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DATE, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DOUBLE, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM_COLLECTION, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ENUM, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.FLOAT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.INT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.LONG, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.TIME, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.TEXT, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.ZONED_DATE_TIME, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.PERIOD, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.DURATION, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.YEAR_MONTH, cleanViewName))
+                    dropView(jdsDb, connection, getViewName(JdsFieldType.MONTH_DAY, cleanViewName))
                 }
                 return true
             } else {
@@ -222,18 +235,17 @@ class JdsView {
          * @return the created inner view name
          */
         private fun innerView(connection: Connection, jdsDb: JdsDb, fieldType: JdsFieldType, inheritanceHierarchy: List<Long>, entityName: String): String {
-            val sql = String.format("select distinct fieldEntity.FieldName from \n" +
+            val prefix = if (jdsDb.isOracleDb) "dbms_lob.substr(field.FieldName, dbms_lob.getlength(field.FieldName), 1)" else "field.FieldName"
+            val sql = String.format("SELECT DISTINCT $prefix fieldNameValue FROM \n" +
                     "JdsRefEntities entity\n" +
-                    "left join JdsBindEntityFields bound\n" +
-                    "on entity.EntityId = bound.EntityId\n" +
-                    "left join JdsRefFields fieldEntity \n" +
-                    "on bound.FieldId = fieldEntity.FieldId\n" +
-                    "left join JdsRefFieldTypes type\n" +
-                    "on fieldEntity.FieldId = type.TypeId\n" +
-                    "where %s = ? and entity.EntityId = ?\n" +
-                    "order by field.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" else "type.TypeName")
-            //handle oracle nclobs
-            //omit ; as oracle jdbc is a pain
+                    "LEFT JOIN JdsBindEntityFields bound\n" +
+                    "ON entity.EntityId = bound.EntityId\n" +
+                    "LEFT JOIN JdsRefFields field \n" +
+                    "ON bound.FieldId = field.FieldId\n" +
+                    "LEFT JOIN JdsRefFieldTypes type\n" +
+                    "ON field.FieldId = type.TypeId\n" +
+                    "WHERE %s = ? AND entity.EntityId = ?\n" +
+                    "ORDER BY fieldNameValue", if (jdsDb.isOracleDb) "dbms_lob.substr(type.TypeName, dbms_lob.getlength(type.TypeName), 1)" else "type.TypeName")
             val fieldNames = ArrayList<String>()
             try {
                 connection.prepareStatement(sql).use { ps ->
@@ -241,7 +253,7 @@ class JdsView {
                     ps.setLong(2, inheritanceHierarchy[0])
                     val rs = ps.executeQuery()
                     while (rs.next()) {
-                        fieldNames.add(rs.getString("FieldName"))
+                        fieldNames.add(rs.getString("fieldNameValue"))
                     }
                 }
             } catch (ex: Exception) {
@@ -256,28 +268,29 @@ class JdsView {
             }
             val fieldsOfInterest = StringJoiner(",\n")
             for (entry in fieldNames) {
-                fieldsOfInterest.add(String.format("MAX(CASE WHEN t.FieldName = '%s' THEN t.Value ELSE NULL END) AS %s", entry, entry))
+                if (jdsDb.isMySqlDb)
+                    fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS '$entry'")
+                else
+                    fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS $entry")
             }
             stringBuilder.append(fieldsOfInterest)
             stringBuilder.append("\nFROM\t\n")
             stringBuilder.append("\t(\n")
-            stringBuilder.append("\t\tSELECT src.EntityGuid, fieldEntity.FieldName, src.Value\n")
+            stringBuilder.append("\t\tSELECT src.EntityGuid, ${JdsComponent.REF_FIELDS.prefix}.FieldName, src.Value\n")
             stringBuilder.append("\t\tFROM ")
             stringBuilder.append(JdsTableLookup.getTable(fieldType))
             stringBuilder.append("\tsrc\n")
-            stringBuilder.append("\t\t JOIN JdsStoreEntityOverview ov ON ov.EntityGuid = src.EntityGuid")
+            stringBuilder.append("\t\t JOIN ${JdsComponent.STORE_ENTITY_OVERVIEW.component} ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix} ON ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix}.EntityGuid = src.EntityGuid")
             val entityHierarchy = StringJoiner(",")
             for (id in inheritanceHierarchy)
                 entityHierarchy.add("" + id)
-            stringBuilder.append(String.format(" AND ov.EntityGuid IN (SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance eh WHERE eh.EntityId IN (%s))\n", entityHierarchy))
-            stringBuilder.append("\t\tJOIN JdsRefFields fieldEntity on src.FieldId = fieldEntity.FieldId\n")
-            stringBuilder.append("\t\tJOIN JdsRefFieldTypes fieldType on fieldEntity.FieldId = fieldType.TypeId \n")
-            stringBuilder.append(String.format("\t\tWHERE src.FieldId IN (SELECT DISTINCT ef.FieldId FROM JdsBindEntityFields ef where ef.EntityId in (%s) and %s = '%s')\n",
-                    entityHierarchy,
-                    if (jdsDb.isOracleDb) "dbms_lob.substr(fieldType.TypeName, dbms_lob.getlength(fieldType.TypeName), 1)" else "fieldType.TypeName", //nclob magic
-                    fieldType))
+            stringBuilder.append(" AND ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix}.EntityGuid IN (SELECT DISTINCT EntityGuid FROM ${JdsComponent.STORE_ENTITY_INHERITANCE.component} ${JdsComponent.STORE_ENTITY_INHERITANCE.prefix} WHERE ${JdsComponent.STORE_ENTITY_INHERITANCE.prefix}.EntityId IN ($entityHierarchy))\n")
+            stringBuilder.append("\t\tJOIN ${JdsComponent.REF_FIELDS.component} ${JdsComponent.REF_FIELDS.prefix} on src.FieldId = ${JdsComponent.REF_FIELDS.prefix}.FieldId\n")
+            stringBuilder.append("\t\tJOIN ${JdsComponent.REF_FIELD_TYPES.component} ${JdsComponent.REF_FIELD_TYPES.prefix} on ${JdsComponent.REF_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELD_TYPES.prefix}.TypeId \n")
+            val cond = if (jdsDb.isOracleDb) "dbms_lob.substr(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName, dbms_lob.getlength(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName), 1)" else "${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName" //nclob magic
+            stringBuilder.append("\t\tWHERE src.FieldId IN (SELECT DISTINCT ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId FROM ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix} where ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId in ($entityHierarchy) and $cond = '$fieldType')\n")
             stringBuilder.append("\t) t\n")
-            stringBuilder.append("\tGROUP BY t.EntityGuid")//oracle jdbc hates ; terminators
+            stringBuilder.append("GROUP BY t.EntityGuid")//oracle jdbc hates ; terminators
 
             val sqlToExecute = jdsDb.createOrAlterView(viewName, stringBuilder.toString())
             try {
@@ -297,7 +310,7 @@ class JdsView {
          * @return
          */
         private fun getViewName(fieldType: JdsFieldType, entityName: String): String {
-            return String.format("vw_%s_%s", entityName, cleanViewName(fieldType.toString()))
+            return String.format("vw_%s_%s", entityName, cleanViewName(fieldType.shortCode))
         }
 
         /**
@@ -318,8 +331,17 @@ class JdsView {
          * @return whether the action completed successfully
          */
         private fun dropView(jdsDb: JdsDb, connection: Connection, name: String): Boolean {
+            val pre = when (jdsDb.isOracleDb) {
+                true -> "'$name'"
+                else -> name
+            }
+            val post = when (jdsDb.implementation) {
+                JdsImplementation.POSTGRES, JdsImplementation.ORACLE -> " CASCADE"
+                else -> ""
+            }
+            val src = "DROP VIEW $pre$post"
             try {
-                connection.prepareStatement(String.format("DROP VIEW %s%s", name, if (jdsDb.isPosgreSqlDb) " CASCADE" else "")).use { preparedStatement -> return preparedStatement.execute() }
+                connection.prepareStatement(src).use { preparedStatement -> return preparedStatement.execute() }
             } catch (e: Exception) {
                 return false
             }
