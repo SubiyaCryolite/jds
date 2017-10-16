@@ -35,16 +35,15 @@ import java.util.concurrent.ConcurrentLinkedQueue
  */
 abstract class JdsEntity : IJdsEntity {
 
-    private val _overview = SimpleObjectProperty<IJdsEntityOverview>(JdsEntityOverview())
-    override val overview: IJdsEntityOverview
-        get() = _overview.get()
+    override var overview: IJdsEntityOverview = JdsEntityOverview()
+
+    override var entityName: String = ""
+
 
     //fieldEntity and enum maps
-    private val properties: MutableMap<Long, String> = HashMap()
-    private val types: MutableMap<Long, String> = HashMap()
+    private val fields: MutableSet<JdsField> = HashSet()
     private val objects: MutableSet<Long> = HashSet()
     private val allEnums: MutableSet<JdsFieldEnum<*>> = HashSet()
-    private val _entityName = SimpleStringProperty("")
     //strings and localDateTimes
     private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
     private val zonedDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
@@ -78,7 +77,7 @@ abstract class JdsEntity : IJdsEntity {
     init {
         if (javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
-            _entityName.set(entityAnnotation.entityName)
+            entityName = entityAnnotation.entityName
             overview.entityId = entityAnnotation.entityId
             overview.version = entityAnnotation.version
         } else {
@@ -86,18 +85,13 @@ abstract class JdsEntity : IJdsEntity {
         }
     }
 
-    override var entityName: String
-        get() = _entityName.get()
-        set(value) = _entityName.set(value)
-
     /**
      * @param jdsField
      * @param integerProperty
      */
     protected fun map(jdsField: JdsField, integerProperty: SimpleBlobProperty) {
         if (jdsField.type === JdsFieldType.BLOB) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             blobProperties.put(jdsField.id, integerProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -110,8 +104,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, integerProperty: SimpleIntegerProperty) {
         if (jdsField.type === JdsFieldType.INT) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             integerProperties.put(jdsField.id, integerProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -126,32 +119,28 @@ abstract class JdsEntity : IJdsEntity {
         val temporal = temporalProperty.get()
         if (temporal is LocalDateTime) {
             if (jdsField.type === JdsFieldType.DATE_TIME) {
-                properties.put(jdsField.id, jdsField.name)
-                types.put(jdsField.id, jdsField.type.toString())
+                fields.add(jdsField)
                 localDateTimeProperties.put(jdsField.id, temporalProperty as SimpleObjectProperty<Temporal>)
             } else {
                 throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
             }
         } else if (temporal is ZonedDateTime) {
             if (jdsField.type === JdsFieldType.ZONED_DATE_TIME) {
-                properties.put(jdsField.id, jdsField.name)
-                types.put(jdsField.id, jdsField.type.toString())
+                fields.add(jdsField)
                 zonedDateTimeProperties.put(jdsField.id, temporalProperty as SimpleObjectProperty<Temporal>)
             } else {
                 throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
             }
         } else if (temporal is LocalDate) {
             if (jdsField.type === JdsFieldType.DATE) {
-                properties.put(jdsField.id, jdsField.name)
-                types.put(jdsField.id, jdsField.type.toString())
+                fields.add(jdsField)
                 localDateProperties.put(jdsField.id, temporalProperty as SimpleObjectProperty<Temporal>)
             } else {
                 throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
             }
         } else if (temporal is LocalTime) {
             if (jdsField.type === JdsFieldType.TIME) {
-                properties.put(jdsField.id, jdsField.name)
-                types.put(jdsField.id, jdsField.type.toString())
+                fields.add(jdsField)
                 localTimeProperties.put(jdsField.id, temporalProperty as SimpleObjectProperty<Temporal>)
             } else {
                 throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -165,8 +154,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, stringProperty: SimpleStringProperty) {
         if (jdsField.type === JdsFieldType.TEXT) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             stringProperties.put(jdsField.id, stringProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -179,8 +167,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, floatProperty: SimpleFloatProperty) {
         if (jdsField.type === JdsFieldType.FLOAT) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             floatProperties.put(jdsField.id, floatProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -193,8 +180,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, longProperty: SimpleLongProperty) {
         if (jdsField.type === JdsFieldType.LONG) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             longProperties.put(jdsField.id, longProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -207,8 +193,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, doubleProperty: SimpleDoubleProperty) {
         if (jdsField.type === JdsFieldType.DOUBLE) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             doubleProperties.put(jdsField.id, doubleProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -221,8 +206,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(jdsField: JdsField, booleanProperty: SimpleBooleanProperty) {
         if (jdsField.type === JdsFieldType.BOOLEAN) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             booleanProperties.put(jdsField.id, booleanProperty)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -238,8 +222,7 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         if (jdsField.type === JdsFieldType.ARRAY_TEXT) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             stringArrayProperties.put(jdsField.id, strings)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -255,8 +238,7 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         if (jdsField.type === JdsFieldType.ARRAY_FLOAT) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             floatArrayProperties.put(jdsField.id, floats)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -272,8 +254,7 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         if (jdsField.type === JdsFieldType.ARRAY_DOUBLE) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             doubleArrayProperties.put(jdsField.id, doubles)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -289,8 +270,7 @@ abstract class JdsEntity : IJdsEntity {
             return
         }
         if (jdsField.type === JdsFieldType.ARRAY_LONG) {
-            properties.put(jdsField.id, jdsField.name)
-            types.put(jdsField.id, jdsField.type.toString())
+            fields.add(jdsField)
             longArrayProperties.put(jdsField.id, longs)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents jdsField [$jdsField] to the correct type")
@@ -307,8 +287,7 @@ abstract class JdsEntity : IJdsEntity {
         }
         allEnums.add(jdsFieldEnum)
         if (jdsFieldEnum.field.type === JdsFieldType.ENUM) {
-            properties.put(jdsFieldEnum.field.id, jdsFieldEnum.field.name)
-            types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
+            fields.add(jdsFieldEnum.field)
             enumProperties.put(jdsFieldEnum, enums as SimpleObjectProperty<Enum<*>>)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents fieldEntity [$jdsFieldEnum] to the correct type")
@@ -325,8 +304,7 @@ abstract class JdsEntity : IJdsEntity {
         }
         allEnums.add(jdsFieldEnum)
         if (jdsFieldEnum.field.type === JdsFieldType.ENUM_COLLECTION) {
-            properties.put(jdsFieldEnum.field.id, jdsFieldEnum.field.name)
-            types.put(jdsFieldEnum.field.id, jdsFieldEnum.field.type!!.toString())
+            fields.add(jdsFieldEnum.field)
             enumCollectionProperties.put(jdsFieldEnum, enums as SimpleListProperty<Enum<*>>)
         } else {
             throw RuntimeException("Please prepareDatabaseComponents fieldEntity [$jdsFieldEnum] to the correct type")
@@ -586,8 +564,7 @@ abstract class JdsEntity : IJdsEntity {
     override fun writeExternal(objectOutputStream: ObjectOutput) {
         //fieldEntity and enum maps
         objectOutputStream.writeObject(overview)
-        objectOutputStream.writeObject(properties)
-        objectOutputStream.writeObject(types)
+        objectOutputStream.writeObject(fields)
         objectOutputStream.writeObject(objects)
         objectOutputStream.writeObject(allEnums)
         objectOutputStream.writeUTF(entityName)
@@ -695,9 +672,8 @@ abstract class JdsEntity : IJdsEntity {
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
         //fieldEntity and enum maps
-        _overview.set(objectInputStream.readObject() as JdsEntityOverview)
-        properties.putAll(objectInputStream.readObject() as Map<Long, String>)
-        types.putAll(objectInputStream.readObject() as Map<Long, String>)
+        overview = (objectInputStream.readObject() as JdsEntityOverview)
+        fields.addAll(objectInputStream.readObject() as Set<JdsField>)
         objects.addAll(objectInputStream.readObject() as Set<Long>)
         allEnums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
         entityName = objectInputStream.readUTF()
@@ -741,7 +717,6 @@ abstract class JdsEntity : IJdsEntity {
     private fun putObjects(destination: Map<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
     }
-
 
     private fun putStrings(destination: Map<Long, SimpleListProperty<String>>, source: Map<Long, List<String>>) {
         source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
@@ -888,12 +863,12 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         objectArrayProperties.entries.parallelStream().forEach { itx ->
             itx.value.forEach {
-                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId, 0))
+                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId))
                 embeddedObject.eo.add(JdsEmbeddedObject(it))
             }
         }
         objectProperties.entries.parallelStream().forEach {
-            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId, 0))
+            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
             embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
         }
     }
@@ -974,14 +949,15 @@ abstract class JdsEntity : IJdsEntity {
         try {
             (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
                 (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
-                    for ((key, value) in properties) {
+                    fields.forEach {
                         //1. map this fieldEntity ID to the entity type
                         mapClassFields.setLong("entityId", entityId)
-                        mapClassFields.setLong("fieldId", key)
+                        mapClassFields.setLong("fieldId", it.id)
                         mapClassFields.addBatch()
                         //2. map this fieldEntity to the fieldEntity dictionary
-                        mapFieldNames.setLong("fieldId", key)
-                        mapFieldNames.setString("fieldName", value)
+                        mapFieldNames.setLong("fieldId", it.id)
+                        mapFieldNames.setString("fieldName", it.name)
+                        mapFieldNames.setString("fieldDescription", it.description)
                         mapFieldNames.addBatch()
                     }
                     mapClassFields.executeBatch()
@@ -1017,9 +993,9 @@ abstract class JdsEntity : IJdsEntity {
     internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         try {
             (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
-                for ((key, value) in types) {
-                    mapFieldTypes.setLong("typeId", key)
-                    mapFieldTypes.setString("typeName", value)
+                fields.forEach {
+                    mapFieldTypes.setLong("typeId", it.id)
+                    mapFieldTypes.setString("typeName", it.type.toString())
                     mapFieldTypes.addBatch()
                 }
                 mapFieldTypes.executeBatch()

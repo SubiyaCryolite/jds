@@ -97,7 +97,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         val sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s)", questionsString)
         val sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s)", questionsString)
         val sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s)", questionsString)
+        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId, FieldId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s)", questionsString)
         //overviews
         val sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, Live, Version FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s)", questionsString)
         try {

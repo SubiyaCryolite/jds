@@ -31,36 +31,17 @@ import java.util.*
  */
 class JdsEntityOverview : IJdsEntityOverview, Externalizable {
 
-    private var _dateCreated: SimpleObjectProperty<LocalDateTime> = SimpleObjectProperty(LocalDateTime.now())
-    private var _dateModified: SimpleObjectProperty<LocalDateTime> = SimpleObjectProperty(LocalDateTime.now())
-    private var _entityId: SimpleLongProperty = SimpleLongProperty(0)
-    private var _entityGuid: SimpleStringProperty = SimpleStringProperty(UUID.randomUUID().toString())
-    private var _live: SimpleBooleanProperty = SimpleBooleanProperty(true)
-    private var _version: SimpleLongProperty = SimpleLongProperty(1)
+    override var dateCreated: LocalDateTime = LocalDateTime.now()
 
-    override var dateCreated: LocalDateTime
-        get() = this._dateCreated.get()
-        set(value) = this._dateCreated.set(value)
+    override var dateModified: LocalDateTime = LocalDateTime.now()
 
-    override var dateModified: LocalDateTime
-        get() = this._dateModified.get()
-        set(value) = this._dateModified.set(value)
+    override var entityId: Long = 0
 
-    override var entityId: Long
-        get() = this._entityId.get()
-        set(value) = this._entityId.set(value)
+    override var entityGuid: String = UUID.randomUUID().toString()
 
-    override var entityGuid: String
-        get() = this._entityGuid.get()
-        set(value) = this._entityGuid.set(value)
+    override var version: Long = 1L
 
-    override var version: Long
-        get() = this._version.get()
-        set(value) = this._version.set(value)
-
-    override var live: Boolean
-        get() = this._live.get()
-        set(value) = this._live.set(value)
+    override var live: Boolean = true
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
@@ -80,5 +61,9 @@ class JdsEntityOverview : IJdsEntityOverview, Externalizable {
         dateModified = objectInputStream.readObject() as LocalDateTime
         live = objectInputStream.readBoolean()
         version = objectInputStream.readLong()
+    }
+
+    override fun toString(): String {
+        return "JdsEntityOverview { entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
     }
 }

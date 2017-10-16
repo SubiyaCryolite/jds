@@ -29,6 +29,9 @@ class JdsField() : Externalizable {
         private set
     var name: String = ""
         private set
+    var description: String = ""
+        private set
+
     /**
      * @return
      */
@@ -47,25 +50,24 @@ class JdsField() : Externalizable {
      * @param name
      * @param type
      */
-    constructor(id: Long, name: String, type: JdsFieldType) : this() {
+    @JvmOverloads
+    constructor(id: Long, name: String, type: JdsFieldType, description: String = "") : this() {
         this.id = id
         this.name = name
-        this.type = type;
+        this.type = type
+        this.description = description
         bind(this)
     }
 
     override fun toString(): String {
-        return "JdsField{" +
-                "id=" + id +
-                ", name=" + name +
-                ", type=" + type +
-                '}'
+        return "JdsField{ id = $id, name = $name, type = $type, description = $description }"
     }
 
     @Throws(IOException::class)
     override fun writeExternal(output: ObjectOutput) {
         output.writeLong(id)
         output.writeUTF(name)
+        output.writeUTF(description)
         output.writeObject(type)
     }
 
@@ -73,6 +75,7 @@ class JdsField() : Externalizable {
     override fun readExternal(input: ObjectInput) {
         id = input.readLong()
         name = input.readUTF()
+        description = input.readUTF()
         type = input.readObject() as JdsFieldType
     }
 
@@ -86,7 +89,7 @@ class JdsField() : Externalizable {
             if (!fields.containsKey(jdsField.id))
                 fields.put(jdsField.id, jdsField.name)
             else
-                throw RuntimeException(String.format("This jdsField ID [%s] is already bound", jdsField.id))
+                throw RuntimeException(String.format("This jdsField ID [${jdsField.id}] is already bound"))
         }
 
         val NULL = JdsField()

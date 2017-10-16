@@ -98,91 +98,91 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreEntityInheritance.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreText.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreText.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreDateTime.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreZonedDateTime.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreInteger.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreFloat.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreDouble.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreLong.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreLong.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreTextArray.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreDateTimeArray.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreIntegerArray.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreFloatArray.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreDoubleArray.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreLongArray.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createRefEntities.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefEntities.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createRefEnumValues.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefEnumValues.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createRefFields.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefFields.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createRefFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefFieldTypes.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createBindEntityFields.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsBindEntityFields.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createBindEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsBindEntityEnums.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreOldFieldValues.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreOldFieldValues.sql")
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
         executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
         executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
@@ -193,19 +193,19 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreEntityBinding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreTime.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsStoreBlob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/createRefInheritance.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {

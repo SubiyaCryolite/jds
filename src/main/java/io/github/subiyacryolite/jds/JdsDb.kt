@@ -41,40 +41,20 @@ abstract class JdsDb : IJdsDb {
     /**
      * The underlying database implementation
      */
-    /**
-     * Indicates the underlying implementation of this JDS Database instance
-     *
-     * @return the underlying implementation of this JDS Database instance
-     */
     var implementation: JdsImplementation? = null
         protected set
     /**
      * A value indicating whether JDS should log every write in the system
-     */
-    /**
-     * A value indicating whether JDS is logging every write in the system
-     *
-     * @return true if JDS is logging every write in the system
      */
     var isLoggingEdits: Boolean = false
         private set
     /**
      * A value indicating whether JDS should print internal log information
      */
-    /**
-     * A value indicating whether JDS is printing internal log information
-     *
-     * @return true if JDS is printing internal log information
-     */
     var isPrintingOutput: Boolean = false
         private set
     /**
      * Indicate whether JDS is persisting to the primary data tables
-     */
-    /**
-     * A value indicating whether JDS is only persisting changes to fields without affecting the primary datastores
-     *
-     * @return true if JDS is only persisting changes to fields without affecting the primary datastores
      */
     var isWritingToPrimaryDataTables = true
         private set
@@ -86,17 +66,7 @@ abstract class JdsDb : IJdsDb {
         try {
             getConnection().use { connection ->
                 prepareDatabaseComponents(connection)
-                //============= BASE SCHEMA CHANGES====================
-                JdsUpdateHelper.v1Tov2DropColumnStoreEntityOverview(connection, this)
-                JdsUpdateHelper.v1Tov2AddColumnStoreOldFieldValues(connection, this)
-                JdsUpdateHelper.v1Tov2AddColumnStoreEntityBindings(connection, this)
-                JdsUpdateHelper.v1ToV2MigrateData(connection, this)
-                JdsUpdateHelper.v3AddLiveColumn(connection, this)
-                JdsUpdateHelper.v3AddVersionColumn(connection, this)
-                //======================================
                 prepareCustomDatabaseComponents(connection)
-                //======================= V3 ========================
-
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
@@ -831,7 +801,7 @@ abstract class JdsDb : IJdsDb {
     }
 
     open fun mapFieldNames(): String {
-        return "{call procBindFieldNames(:fieldId, :fieldName)}"
+        return "{call procBindFieldNames(:fieldId, :fieldName, :fieldDescription)}"
     }
 
     open fun mapFieldTypes(): String {
@@ -877,7 +847,9 @@ abstract class JdsDb : IJdsDb {
     abstract fun createOrAlterView(viewName: String, viewSql: String): String
 
     internal fun saveOldTextValues(): String {
+        //will indexes sped this up
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+               //"WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid, FieldId = :fieldId, Sequence = :sequence, TextValue = :value)"
     }
 
     internal fun saveOldDoubleValues(): String {

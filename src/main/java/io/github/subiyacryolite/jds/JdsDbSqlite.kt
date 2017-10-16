@@ -225,7 +225,7 @@ abstract class JdsDbSqlite protected constructor() : JdsDb() {
     }
 
     override fun mapFieldNames(): String {
-        return "INSERT OR REPLACE INTO JdsRefFields(FieldId, FieldName) VALUES(:fieldId, :fieldName);"
+        return "INSERT OR REPLACE INTO JdsRefFields(FieldId, FieldName, FieldDescription) VALUES(:fieldId, :fieldName, :fieldDescription);"
     }
 
     override fun mapFieldTypes(): String {

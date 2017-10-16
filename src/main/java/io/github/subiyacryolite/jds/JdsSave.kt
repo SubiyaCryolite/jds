@@ -238,7 +238,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -276,7 +275,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -315,7 +313,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -353,7 +350,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -391,7 +387,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -429,7 +424,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -467,7 +461,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -505,7 +498,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -566,7 +558,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -605,7 +596,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -643,7 +633,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -681,7 +670,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -732,7 +720,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -782,7 +769,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -832,7 +818,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -882,7 +867,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -931,7 +915,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -981,7 +964,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -1033,7 +1015,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -1083,6 +1064,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 }
             }
         }
+
         //save children first
         JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
@@ -1106,7 +1088,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -1152,6 +1133,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 }
             }
         }
+
         //save children first
         JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
@@ -1175,7 +1157,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
-
     }
 
     /**
@@ -1195,7 +1176,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
          * @param batchSize
          * @param entities
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach")
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsSave(jdsDb, batchSize, entities).call()", "io.github.subiyacryolite.jds.JdsSave"))
         @Throws(Exception::class)
         fun save(jdsDb: JdsDb, batchSize: Int, entities: Collection<JdsEntity>) {
             JdsSave(jdsDb, batchSize, entities).call()
@@ -1206,7 +1187,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
          * @param batchSize
          * @param entities
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach")
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("save(jdsDb, batchSize, Arrays.asList(*entities))", "io.github.subiyacryolite.jds.JdsSave.Companion.save", "java.util.Arrays"))
         @Throws(Exception::class)
         fun save(jdsDb: JdsDb, batchSize: Int, vararg entities: JdsEntity) {
             save(jdsDb, batchSize, Arrays.asList(*entities))
