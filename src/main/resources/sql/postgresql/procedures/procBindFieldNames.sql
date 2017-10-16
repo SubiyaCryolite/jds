@@ -1,4 +1,4 @@
-CREATE FUNCTION procBindFieldNames(pFieldId BIGINT, pFieldName TEXT, ppFieldDescription TEXT)
+CREATE FUNCTION procBindFieldNames(pFieldId BIGINT, pFieldName TEXT, pFieldDescription TEXT)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsRefFields(FieldId, FieldName, FieldDescription)

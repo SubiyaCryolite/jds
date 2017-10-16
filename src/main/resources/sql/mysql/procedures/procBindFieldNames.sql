@@ -1,4 +1,4 @@
-CREATE PROCEDURE procBindFieldNames(IN pFieldId BIGINT, IN pFieldName TEXT IN pFieldDescription TEXT)
+CREATE PROCEDURE procBindFieldNames(IN pFieldId BIGINT, IN pFieldName TEXT, IN pFieldDescription TEXT)
 BEGIN
 	INSERT INTO JdsRefFields(FieldId, FieldName, FieldDescription)
     VALUES (pFieldId, pFieldName, pFieldDescription)

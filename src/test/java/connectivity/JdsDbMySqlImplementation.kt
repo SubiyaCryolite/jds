@@ -22,8 +22,8 @@ class JdsDbMySqlImplementation : JdsDbMySql() {
         Class.forName("com.mysql.cj.jdbc.Driver")
         val properties = Properties()
         properties.put("user", "root")
-        //properties.put("password", "p@nkP#55W0rd");
-        properties.put("password", "")
+        properties.put("password", "p@nkP#55W0rd");
+        //properties.put("password", "")
         properties.put("autoReconnect", "true")
         properties.put("allowMultiQueries", "false")
         properties.put("useSSL", "false")
