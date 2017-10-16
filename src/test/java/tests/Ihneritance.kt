@@ -23,7 +23,6 @@ class Ihneritance : BaseTestConfig() {
 
     @Throws(Exception::class)
     override fun load() {
-        System.out.printf("=========== %s ===========\n", jdsDb.implementation)
         val entityAs = JdsLoad.load(jdsDb, EntityA::class.java)
         val entityBs = JdsLoad.load(jdsDb, EntityB::class.java)
         val entityCs = JdsLoad.load(jdsDb, EntityC::class.java)
@@ -34,103 +33,50 @@ class Ihneritance : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun testIheritanceOracle() {
-        initialiseOracleBackend()
-        save()
-        jdsDb.toString()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIheritanceSqlite() {
-        initialiseSqlLiteBackend()
-        save()
-        jdsDb.toString()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIheritanceMySql() {
-        initialiseMysqlBackend()
-        save()
-        jdsDb.toString()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIheritancePostgreSQL() {
-        initialisePostgeSqlBackend()
-        save()
-        jdsDb.toString()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testIheritanceTSql() {
+    fun tSqlImplementation() {
         initialiseTSqlBackend()
-        save()
-        jdsDb.toString()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun testAllInitialilization() {
-        testIheritanceSqlite()
-        testIheritancePostgreSQL()
-        testIheritanceTSql()
-        testIheritanceMySql()
-        testIheritanceOracle()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun loadInheritedTsql() {
-        initialiseTSqlBackend()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun loadInheritedMysSql() {
+    fun mysSqlImplementation() {
         initialiseMysqlBackend()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun loadInheritedPostgresSql() {
+    fun postgresSqlImplementation() {
         initialisePostgeSqlBackend()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun loadInheritedSqLite() {
+    fun sqLiteImplementation() {
         initialiseSqlLiteBackend()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun loadInheritedOracle() {
+    fun oracleImplementation() {
         initialiseOracleBackend()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun loadInheritedAll() {
-        loadInheritedTsql()
-        loadInheritedSqLite()
-        loadInheritedMysSql()
-        loadInheritedPostgresSql()
-        loadInheritedOracle()
+    fun allImplementations() {
+        tSqlImplementation()
+        sqLiteImplementation()
+        mysSqlImplementation()
+        postgresSqlImplementation()
+        oracleImplementation()
     }
 
-    private //constant
-            //constant
-            //constant
-    val inheritanceCollection: List<JdsEntity>
+    private val inheritanceCollection: List<JdsEntity>
         get() {
             val collection = ArrayList<JdsEntity>()
 

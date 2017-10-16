@@ -2,11 +2,9 @@ package tests
 
 import common.BaseTestConfig
 import entities.Example
-import io.github.subiyacryolite.jds.JdsDelete
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 
@@ -26,43 +24,6 @@ class LoadAndSaveTests : BaseTestConfig() {
         while (!saving.isDone)
             println("Waiting for operation 1 to complete")
         System.out.printf("Saved? %s\n", saving.get())
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun bulkSave() {
-        System.out.printf("=========== %s ===========\n", jdsDb.implementation)
-        val collection = ArrayList<Example>()
-        for (i in 0..4999) {
-            val example = Example()
-            example.overview.entityGuid = "guid_" + i
-            example.intField = i
-            example.floatField = (i + 1).toFloat()
-            example.doubleField = (i + 2).toDouble()
-            example.longField = (i + 3).toLong()
-            collection.add(example)
-        }
-        val save = JdsSave(jdsDb, collection)
-        val saving = FutureTask(save)
-        Thread(saving).start()
-
-        while (!saving.isDone)
-            println("Waiting for operation 1 to complete")
-        System.out.printf("Saved? %s\n", saving.get())
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun loadNonExisting() {
-        val loadNonExistingCallable = JdsLoad(jdsDb, Example::class.java, "DOES_NOT_EXIST")
-        val loadNonExistingTask = FutureTask(loadNonExistingCallable)
-
-        Thread(loadNonExistingTask).start()
-
-        while (!loadNonExistingTask.isDone)
-            println("Waiting for operation 1 to complete")
-        val loadNonExistingResult = loadNonExistingTask.get()
-        println(loadNonExistingResult)
     }
 
     @Test
@@ -99,98 +60,48 @@ class LoadAndSaveTests : BaseTestConfig() {
     }
 
     @Test
-    @Throws(ExecutionException::class, InterruptedException::class)
-    fun isolatedDelete() {
-        val delete = JdsDelete(jdsDb, "instance2")
-
-        val deleting = FutureTask(delete)
-        Thread(deleting).start()
-
-        while (!deleting.isDone)
-            println("Waiting for operation to complete")
-        println("Deleted? " + deleting.get())
+    @Throws(Exception::class)
+    fun sqlLiteImplementation() {
+        initialiseSqlLiteBackend()
+        saveAndLoad()
     }
+
 
     @Test
     @Throws(Exception::class)
-    fun callableOracleBulkSave() {
-        initialiseOracleBackend()
-        bulkSave()
-    }
-
-    @Test
-    @Throws(ExecutionException::class, InterruptedException::class)
-    fun callableOracleBulkLoad() {
-        initialiseOracleBackend()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun callableSqlLiteBulkSave() {
-        initialiseTSqlBackend()
-        bulkSave()
-    }
-
-    @Test
-    @Throws(ExecutionException::class, InterruptedException::class)
-    fun callableSqlLiteBulkLoad() {
+    fun mysqlImplementation() {
         initialiseMysqlBackend()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun callableSqlLiteBulkLoadSave() {
-        initialiseSqlLiteBackend()
-        bulkSave()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun callableSqlLiteLoadSave() {
-        initialiseSqlLiteBackend()
-        save()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun callableSqlLiteLoadNoExisting() {
-        initialiseSqlLiteBackend()
-        save()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun callableMysqlLoadSave() {
-        initialiseMysqlBackend()
-        save()
-        load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun callablePostgeSqlLoadSave() {
+    fun postgeSqlImplementation() {
         initialisePostgeSqlBackend()
-        save()
-        load()
+        saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun callableTSqlLoadSave() {
+    fun tSqlImplementation() {
         initialiseTSqlBackend()
-        save()
-        load()
+        saveAndLoad()
     }
 
     @Test
-    @Throws(ExecutionException::class, InterruptedException::class)
-    fun callableTSqlBulkLoad() {
-        initialiseTSqlBackend()
-        load()
+    @Throws(Exception::class)
+    fun oracleImplementation() {
+        initialiseOracleBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun allImplementations() {
+        sqlLiteImplementation()
+        mysqlImplementation()
+        postgeSqlImplementation()
+        tSqlImplementation()
+        oracleImplementation()
     }
 }

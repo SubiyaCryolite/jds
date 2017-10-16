@@ -107,7 +107,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
         batchEntities.add(ArrayList())
-        saveContainer.overviews.add(HashSet<IJdsEntityOverview>())
+        saveContainer.overviews.add(HashSet<IJdsOverview>())
         //time constructs
         saveContainer.localDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
         saveContainer.zonedDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
@@ -223,7 +223,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param overviews
      */
     @Throws(SQLException::class)
-    private fun saveOverviews(overviews: HashSet<IJdsEntityOverview>) {
+    private fun saveOverviews(overviews: HashSet<IJdsOverview>) {
         var record = 0
         val recordTotal = overviews.size
         try {

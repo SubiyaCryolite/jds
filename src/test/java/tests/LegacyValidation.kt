@@ -16,7 +16,6 @@ class LegacyValidation : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     override fun saveAndLoad() {
-        System.out.printf("=========== %s ===========\n", jdsDb.implementation)
         val memObjects = collection
         JdsSave.save(jdsDb, 1, memObjects)
         System.out.printf("Saved %s\n", memObjects)
@@ -79,35 +78,35 @@ class LegacyValidation : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadPostreSqlImplementation() {
+    fun postreSqlImplementation() {
         initialisePostgeSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadTsqlImplementation() {
+    fun tsqlImplementation() {
         initialiseTSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadSqliteImplementation() {
+    fun sqliteImplementation() {
         initialiseSqlLiteBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadMySqlImplementation() {
+    fun mySqlImplementation() {
         initialiseMysqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadOracleImplementation() {
+    fun oracleImplementation() {
         initialiseOracleBackend()
         saveAndLoad()
     }
@@ -115,10 +114,10 @@ class LegacyValidation : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun saveAndLoadAllImplementations() {
-        saveAndLoadSqliteImplementation()
-        saveAndLoadTsqlImplementation()
-        saveAndLoadPostreSqlImplementation()
-        saveAndLoadOracleImplementation()
-        saveAndLoadMySqlImplementation()
+        sqliteImplementation()
+        tsqlImplementation()
+        postreSqlImplementation()
+        oracleImplementation()
+        mySqlImplementation()
     }
 }

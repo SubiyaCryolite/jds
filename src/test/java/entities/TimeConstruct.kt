@@ -38,6 +38,10 @@ class TimeConstruct : JdsEntity() {
         set(value) = _yearMonth.set(value)
 
     override fun toString(): String {
-        return "TimeConstruct{ period = $period, duration = $duration, monthDay = $monthDay, yearMonth = $yearMonth }"
+        return "{ period = $period" +
+                ", duration = $duration" +
+                ", monthDay = $monthDay" +
+                ", yearMonth = $yearMonth " +
+                "}"
     }
 }

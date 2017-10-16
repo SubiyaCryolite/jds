@@ -1,13 +1,16 @@
 package common
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import connectivity.*
-import entities.*
 import constants.PrimaryAddress
+import entities.*
 import io.github.subiyacryolite.jds.JdsDb
-
 import java.io.*
 import java.time.*
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Created by ifunga on 08/04/2017.
@@ -18,7 +21,7 @@ abstract class BaseTestConfig {
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
 
-    protected//setting a custom Entity Guid
+    protected //setting a custom Entity Guid
             //setting a custom Entity Guid
             //setting a custom Entity Guid
             //setting a custom Entity Guid
@@ -142,6 +145,17 @@ abstract class BaseTestConfig {
             return collection
         }
 
+    protected val objectMapper: ObjectMapper
+        get() {
+            val _objectMapper = ObjectMapper()
+            _objectMapper.registerModule(JavaTimeModule())
+            _objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            _objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            _objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
+            _objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            return _objectMapper;
+        }
+
     @Throws(Exception::class)
     open fun saveAndLoad() {
         save()
@@ -170,6 +184,7 @@ abstract class BaseTestConfig {
         jdsDb.init()
         jdsDb.isLoggingEdits(true)
         initialiseJdsClasses()
+        System.out.printf("=========== %s ===========\n", jdsDb.implementation)
     }
 
     fun initialiseSqlLiteBackend() {

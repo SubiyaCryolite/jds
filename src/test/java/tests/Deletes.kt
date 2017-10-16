@@ -1,50 +1,52 @@
 package tests
 
 import common.BaseTestConfig
-import constants.Fields
-import entities.Address
-import io.github.subiyacryolite.jds.JdsFilter
-import org.junit.jupiter.api.Assertions.assertNotNull
+import io.github.subiyacryolite.jds.JdsDelete
 import org.junit.jupiter.api.Test
 
-/**
- * Created by ifunga on 05/03/2017.
- */
-class Filters : BaseTestConfig() {
+class Deletes : BaseTestConfig() {
+
+    @Test
+    @Throws(Exception::class)
+    fun deleteUsingStrings() {
+        initialiseSqlLiteBackend()
+        val result = JdsDelete(jdsDb, "primaryAddress1").call()
+        print("Completed " + result!!)
+    }
 
     @Test
     @Throws(Exception::class)
     fun sqLiteImplementation() {
         initialiseSqlLiteBackend()
-        basicQuery()
+        deleteUsingStrings()
     }
 
     @Test
     @Throws(Exception::class)
     fun mysqlImplementation() {
         initialiseMysqlBackend()
-        basicQuery()
+        deleteUsingStrings()
     }
 
     @Test
     @Throws(Exception::class)
     fun postgreSqlImplementation() {
         initialisePostgeSqlBackend()
-        basicQuery()
+        deleteUsingStrings()
     }
 
     @Test
     @Throws(Exception::class)
     fun tSqlImplementation() {
         initialiseTSqlBackend()
-        basicQuery()
+        deleteUsingStrings()
     }
 
     @Test
     @Throws(Exception::class)
     fun oracleImplementation() {
         initialiseOracleBackend()
-        basicQuery()
+        deleteUsingStrings()
     }
 
     @Test
@@ -55,13 +57,5 @@ class Filters : BaseTestConfig() {
         postgreSqlImplementation()
         sqLiteImplementation()
         tSqlImplementation()
-    }
-
-    @Throws(Exception::class)
-    private fun basicQuery() {
-        val filter = JdsFilter(jdsDb, Address::class.java).between(Fields.PLOT_NUMBER, 1, 2).like(Fields.COUNTRY_NAME, "Zam").or().equals(Fields.PROVINCE_NAME, "Copperbelt")
-        val output = filter.call()
-        assertNotNull(output)
-        println(output)
     }
 }

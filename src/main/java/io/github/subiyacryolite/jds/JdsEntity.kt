@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  */
 abstract class JdsEntity : IJdsEntity {
 
-    override var overview: IJdsEntityOverview = JdsEntityOverview()
+    override var overview: IJdsOverview = JdsOverview()
 
     override var entityName: String = ""
 
@@ -688,7 +688,7 @@ abstract class JdsEntity : IJdsEntity {
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
         //fieldEntity and enum maps
-        overview = objectInputStream.readObject() as JdsEntityOverview
+        overview = objectInputStream.readObject() as JdsOverview
         fields.addAll(objectInputStream.readObject() as Set<JdsField>)
         objects.addAll(objectInputStream.readObject() as Set<Long>)
         enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)

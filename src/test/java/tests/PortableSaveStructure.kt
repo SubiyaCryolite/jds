@@ -1,9 +1,5 @@
 package tests
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import common.BaseTestConfig
 import entities.AddressBook
 import entities.Example
@@ -11,7 +7,6 @@ import entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
 import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -43,12 +38,6 @@ class PortableSaveStructure : BaseTestConfig() {
         val saveEmbedded = JdsSaveEmbedded(entity)
         val embeddedObject = saveEmbedded.call()
 
-        val objectMapper = ObjectMapper()
-        objectMapper.registerModule(JavaTimeModule())
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
-        objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
 
         val output = objectMapper.writeValueAsString(embeddedObject)
         println("================ Object JSON ================")

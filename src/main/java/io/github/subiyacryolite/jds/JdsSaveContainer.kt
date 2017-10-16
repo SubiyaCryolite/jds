@@ -43,5 +43,5 @@ internal class JdsSaveContainer {
     //objects
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
-    val overviews: MutableList<HashSet<IJdsEntityOverview>> = LinkedList()
+    val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
 }

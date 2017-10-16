@@ -4,7 +4,7 @@ import java.io.Externalizable
 
 interface IJdsEntity : Externalizable {
 
-    val overview: IJdsEntityOverview
+    val overview: IJdsOverview
 
     var entityName: String
 }

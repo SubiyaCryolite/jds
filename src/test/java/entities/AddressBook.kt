@@ -18,6 +18,6 @@ class AddressBook : JdsEntity() {
         get() = _addresses.get()
 
     override fun toString(): String {
-        return "AddressBook{ addresses = $addresses }"
+        return "{ addresses = $addresses }"
     }
 }

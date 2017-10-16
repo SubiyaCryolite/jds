@@ -102,15 +102,17 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     }
 
     override fun toString(): String {
-        return "Example {stringField = $stringField," +
-                "dateField = $dateField," +
-                "timeField = $timeField," +
-                "dateTimeField = $dateTimeField," +
-                "zonedDateTimeField = $zonedDateTimeField," +
-                "longField = $longField," +
-                "intField = $intField," +
-                "doubleField = $doubleField," +
-                "floatField = $floatField," +
-                "booleanField = $booleanField}"
+        return "{" +
+                ", overview = $overview" +
+                ", stringField = $stringField" +
+                ", dateField = $dateField" +
+                ", timeField = $timeField" +
+                ", dateTimeField = $dateTimeField" +
+                ", zonedDateTimeField = $zonedDateTimeField" +
+                ", longField = $longField" +
+                ", intField = $intField" +
+                ", doubleField = $doubleField" +
+                ", floatField = $floatField" +
+                ", booleanField = $booleanField}"
     }
 }

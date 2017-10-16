@@ -2,7 +2,7 @@ package io.github.subiyacryolite.jds;
 
 import java.time.LocalDateTime;
 
-interface IJdsEntityOverview {
+interface IJdsOverview {
 
     var dateCreated:LocalDateTime
 

@@ -13,10 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleLongProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
@@ -29,7 +25,7 @@ import java.util.*
  * [JdsEntity]. Instances of this class are initialised in
  * [JdsEntityBase] and exposed via inheritance
  */
-class JdsEntityOverview : IJdsEntityOverview, Externalizable {
+class JdsOverview : IJdsOverview, Externalizable {
 
     override var dateCreated: LocalDateTime = LocalDateTime.now()
 
@@ -64,6 +60,6 @@ class JdsEntityOverview : IJdsEntityOverview, Externalizable {
     }
 
     override fun toString(): String {
-        return "JdsEntityOverview { entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
+        return "Overview { entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
     }
 }

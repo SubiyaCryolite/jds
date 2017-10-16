@@ -65,15 +65,16 @@ class Address : JdsEntity() {
         set(timeOfEntry) = _timeOfEntry.set(timeOfEntry)
 
     override fun toString(): String {
-        return "Address{" +
-                "primaryAddress= $primaryAddress " +
-                ", streetName= $streetName " +
-                ", plotNumber= $plotNumber " +
-                ", area= $area " +
-                ", city= $city " +
-                ", provinceOrState= $provinceOrState " +
-                ", country= $country " +
-                ", timeOfEntry= $timeOfEntry " +
+        return "{" +
+                "overview = $overview," +
+                ", primaryAddress = $primaryAddress " +
+                ", streetName = $streetName " +
+                ", plotNumber = $plotNumber " +
+                ", area = $area " +
+                ", city = $city " +
+                ", provinceOrState = $provinceOrState " +
+                ", country = $country " +
+                ", timeOfEntry = $timeOfEntry " +
                 '}'
     }
 }
