@@ -66,91 +66,91 @@ abstract class JdsDbSqlite protected constructor() : JdsDb() {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityInheritance.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreText.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreText.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDateTime.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreZonedDateTime.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreInteger.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreFloat.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDouble.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreLong.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreLong.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreTextArray.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDateTimeArray.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreIntegerArray.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreFloatArray.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDoubleArray.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreLongArray.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createRefEntities.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntities.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createRefEnumValues.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefEnumValues.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createRefFields.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefFields.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createRefFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefFieldTypes.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createBindEntityFields.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsBindEntityFields.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createBindEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsBindEntityEnums.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreOldFieldValues.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValues.sql")
         executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);")
         executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);")
         executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);")
@@ -160,19 +160,19 @@ abstract class JdsDbSqlite protected constructor() : JdsDb() {
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityBinding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreTime.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreBlob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/createRefInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityInheritance.sql")
     }
 
 
