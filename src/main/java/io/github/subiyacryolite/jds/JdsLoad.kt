@@ -159,12 +159,12 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
 
                                                                                     if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
                                                                                         //primitives
-                                                                                        populateText(entities, strings)
+                                                                                        populateTextMonthDayYearMonthAndPeriod(entities, strings)
                                                                                         populateLong(entities, longs)
                                                                                         populateIntegerEnumAndBoolean(entities, integers)
                                                                                         populateFloat(entities, floats)
                                                                                         populateDouble(entities, doubles)
-                                                                                        //integer arrays and enums
+                                                                                        //integer arrays and enumProperties
                                                                                         populateIntegerArraysAndEnums(entities, integerArraysAndEnums)
                                                                                         populateFloatArrays(entities, floatArrays)
                                                                                         populateLongArrays(entities, longArrays)
@@ -549,13 +549,18 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @throws SQLException
      */
     @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateText(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
+    private fun <T : JdsEntity> populateTextMonthDayYearMonthAndPeriod(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val entityGuid = resultSet.getString("EntityGuid")
                 val value = resultSet.getString("Value")
                 val fieldId = resultSet.getLong("FieldId")
-                optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.TEXT, fieldId, value) }
+                optimalEntityLookup(jdsEntities, entityGuid).forEach {
+                    it.populateProperties(JdsFieldType.TEXT, fieldId, value)
+                    it.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
+                    it.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
+                    it.populateProperties(JdsFieldType.PERIOD, fieldId, value)
+                }
             }
         }
     }

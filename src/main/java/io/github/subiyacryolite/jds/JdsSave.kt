@@ -20,10 +20,7 @@ import javafx.beans.property.*
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.Callable
@@ -111,33 +108,39 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
         batchEntities.add(ArrayList())
         saveContainer.overviews.add(HashSet<IJdsEntityOverview>())
+        //time constructs
+        saveContainer.localDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
+        saveContainer.zonedDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
+        saveContainer.localTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
+        saveContainer.localDateProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
+        saveContainer.monthDayProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<MonthDay>>>())
+        saveContainer.yearMonthProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
+        saveContainer.periodProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Period>>>())
+        saveContainer.durationProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Duration>>>())
         //primitives
-        saveContainer.localDateTimes.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.zonedDateTimes.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.localTimes.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.localDates.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.strings.add(HashMap<String, HashMap<Long, SimpleStringProperty>>())
-        saveContainer.booleans.add(HashMap<String, HashMap<Long, SimpleBooleanProperty>>())
-        saveContainer.floats.add(HashMap<String, HashMap<Long, SimpleFloatProperty>>())
-        saveContainer.doubles.add(HashMap<String, HashMap<Long, SimpleDoubleProperty>>())
-        saveContainer.longs.add(HashMap<String, HashMap<Long, SimpleLongProperty>>())
-        saveContainer.integers.add(HashMap<String, HashMap<Long, SimpleIntegerProperty>>())
+        saveContainer.booleanProperties.add(HashMap<String, HashMap<Long, SimpleBooleanProperty>>())
+        saveContainer.floatProperties.add(HashMap<String, HashMap<Long, SimpleFloatProperty>>())
+        saveContainer.doubleProperties.add(HashMap<String, HashMap<Long, SimpleDoubleProperty>>())
+        saveContainer.longProperties.add(HashMap<String, HashMap<Long, SimpleLongProperty>>())
+        saveContainer.integerProperties.add(HashMap<String, HashMap<Long, SimpleIntegerProperty>>())
+        //string
+        saveContainer.stringProperties.add(HashMap<String, HashMap<Long, SimpleStringProperty>>())
         //blob
-        saveContainer.blobs.add(HashMap<String, HashMap<Long, SimpleBlobProperty>>())
+        saveContainer.blobProperties.add(HashMap<String, HashMap<Long, SimpleBlobProperty>>())
         //arrays
-        saveContainer.stringArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<String>>>())
-        saveContainer.dateTimeArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>())
-        saveContainer.floatArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<Float>>>())
-        saveContainer.doubleArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<Double>>>())
-        saveContainer.longArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<Long>>>())
-        saveContainer.integerArrays.add(HashMap<String, HashMap<Long, SimpleListProperty<Int>>>())
-        //enums
-        saveContainer.enums.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>())
+        saveContainer.stringCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<String>>>())
+        saveContainer.localDateTimeCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>())
+        saveContainer.floatCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Float>>>())
+        saveContainer.doubleCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Double>>>())
+        saveContainer.longCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Long>>>())
+        saveContainer.integerCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Int>>>())
+        //enumProperties
+        saveContainer.enumProperties.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>())
         saveContainer.enumCollections.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>())
         //objects
         saveContainer.objects.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>())
         //object arrays
-        saveContainer.objectArrays.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>())
+        saveContainer.objectCollections.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>())
     }
 
     /**
@@ -165,32 +168,39 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
-            //properties
-            saveBooleans(writeToPrimaryDataTables, saveContainer.booleans[step])
-            saveStrings(writeToPrimaryDataTables, saveContainer.strings[step])
-            saveDatesAndDateTimes(writeToPrimaryDataTables, saveContainer.localDateTimes[step], saveContainer.localDates[step])
-            saveZonedDateTimes(writeToPrimaryDataTables, saveContainer.zonedDateTimes[step])
-            saveTimes(writeToPrimaryDataTables, saveContainer.localTimes[step])
-            saveLongs(writeToPrimaryDataTables, saveContainer.longs[step])
-            saveDoubles(writeToPrimaryDataTables, saveContainer.doubles[step])
-            saveIntegers(writeToPrimaryDataTables, saveContainer.integers[step])
-            saveFloats(writeToPrimaryDataTables, saveContainer.floats[step])
+            //time constraints
+            saveDateConstructs(writeToPrimaryDataTables,
+                    saveContainer.monthDayProperties[step],
+                    saveContainer.yearMonthProperties[step],
+                    saveContainer.periodProperties[step],
+                    saveContainer.durationProperties[step])
+            saveDatesAndDateTimes(writeToPrimaryDataTables, saveContainer.localDateTimeProperties[step], saveContainer.localDateProperties[step])
+            saveZonedDateTimes(writeToPrimaryDataTables, saveContainer.zonedDateTimeProperties[step])
+            saveTimes(writeToPrimaryDataTables, saveContainer.localTimeProperties[step])
+            //primitives
+            saveBooleans(writeToPrimaryDataTables, saveContainer.booleanProperties[step])
+            saveLongs(writeToPrimaryDataTables, saveContainer.longProperties[step])
+            saveDoubles(writeToPrimaryDataTables, saveContainer.doubleProperties[step])
+            saveIntegers(writeToPrimaryDataTables, saveContainer.integerProperties[step])
+            saveFloats(writeToPrimaryDataTables, saveContainer.floatProperties[step])
+            //strings
+            saveStrings(writeToPrimaryDataTables, saveContainer.stringProperties[step])
             //blobs
-            saveBlobs(writeToPrimaryDataTables, saveContainer.blobs[step])
+            saveBlobs(writeToPrimaryDataTables, saveContainer.blobProperties[step])
             //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-            saveArrayDates(writeToPrimaryDataTables, saveContainer.dateTimeArrays[step])
-            saveArrayStrings(writeToPrimaryDataTables, saveContainer.stringArrays[step])
-            saveArrayLongs(writeToPrimaryDataTables, saveContainer.longArrays[step])
-            saveArrayDoubles(writeToPrimaryDataTables, saveContainer.doubleArrays[step])
-            saveArrayIntegers(writeToPrimaryDataTables, saveContainer.integerArrays[step])
-            saveArrayFloats(writeToPrimaryDataTables, saveContainer.floatArrays[step])
-            //enums
-            saveEnums(writeToPrimaryDataTables, saveContainer.enums[step])
+            saveArrayDates(writeToPrimaryDataTables, saveContainer.localDateTimeCollections[step])
+            saveArrayStrings(writeToPrimaryDataTables, saveContainer.stringCollections[step])
+            saveArrayLongs(writeToPrimaryDataTables, saveContainer.longCollections[step])
+            saveArrayDoubles(writeToPrimaryDataTables, saveContainer.doubleCollections[step])
+            saveArrayIntegers(writeToPrimaryDataTables, saveContainer.integerCollections[step])
+            saveArrayFloats(writeToPrimaryDataTables, saveContainer.floatCollections[step])
+            //enumProperties
+            saveEnums(writeToPrimaryDataTables, saveContainer.enumProperties[step])
             saveEnumCollections(writeToPrimaryDataTables, saveContainer.enumCollections[step])
             //objects and object arrays
             //object entity overviews and entity bindings are ALWAYS persisted
             saveAndBindObjects(connection, saveContainer.objects[step])
-            saveAndBindObjectArrays(connection, saveContainer.objectArrays[step])
+            saveAndBindObjectArrays(connection, saveContainer.objectCollections[step])
 
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
@@ -493,6 +503,127 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     log.setString("value", value)
                     log.setInt("sequence", 0)
                     log.addBatch()
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+        }
+    }
+
+    private fun saveDateConstructs(writeToPrimaryDataTables: Boolean,
+                                   monthDayProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<MonthDay>>>,
+                                   yearMonthProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>,
+                                   periodProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Period>>>,
+                                   durationProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Duration>>>) {
+        var record = 0
+        try {
+            val upsertText = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
+            val upsertLong = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
+
+            val logText = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldTextValues())
+            val logLong = onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOldLongValues())
+
+            for ((entityGuid, hashMap) in monthDayProperties) {
+                record++
+                var innerRecord = 0
+                val innerRecordSize = hashMap.size
+                if (innerRecordSize == 0) continue
+                for ((fieldId, monthDayProperty) in hashMap) {
+                    innerRecord++
+                    val monthDay = monthDayProperty.get()
+                    val value = monthDay.toString()
+                    if (writeToPrimaryDataTables) {
+                        upsertText.setString("entityGuid", entityGuid)
+                        upsertText.setLong("fieldId", fieldId)
+                        upsertText.setString("value", value)
+                        upsertText.addBatch()
+                    }
+                    if (jdsDb.isPrintingOutput)
+                        System.out.printf("Updating record [%s]. MonthDay fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
+                    if (!jdsDb.isLoggingEdits) continue
+                    logText.setString("entityGuid", entityGuid)
+                    logText.setLong("fieldId", fieldId)
+                    logText.setString("value", value)
+                    logText.setInt("sequence", 0)
+                    logText.addBatch()
+                }
+            }
+
+            for ((entityGuid, hashMap) in yearMonthProperties) {
+                record++
+                var innerRecord = 0
+                val innerRecordSize = hashMap.size
+                if (innerRecordSize == 0) continue
+                for ((fieldId, yearMonthProperty) in hashMap) {
+                    innerRecord++
+                    val yearMonth = yearMonthProperty.get() as YearMonth
+                    val value = yearMonth.toString()
+                    if (writeToPrimaryDataTables) {
+                        upsertText.setString("entityGuid", entityGuid)
+                        upsertText.setLong("fieldId", fieldId)
+                        upsertText.setString("value", value)
+                        upsertText.addBatch()
+                    }
+                    if (jdsDb.isPrintingOutput)
+                        System.out.printf("Updating record [%s]. YearMonth fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
+                    if (!jdsDb.isLoggingEdits) continue
+                    logText.setString("entityGuid", entityGuid)
+                    logText.setLong("fieldId", fieldId)
+                    logText.setString("value", value)
+                    logText.setInt("sequence", 0)
+                    logText.addBatch()
+                }
+            }
+
+            for ((entityGuid, hashMap) in periodProperties) {
+                record++
+                var innerRecord = 0
+                val innerRecordSize = hashMap.size
+                if (innerRecordSize == 0) continue
+                for ((fieldId, periodProperty) in hashMap) {
+                    innerRecord++
+                    val period = periodProperty.get()
+                    val value = period.toString()
+                    if (writeToPrimaryDataTables) {
+                        upsertText.setString("entityGuid", entityGuid)
+                        upsertText.setLong("fieldId", fieldId)
+                        upsertText.setString("value", value)
+                        upsertText.addBatch()
+                    }
+                    if (jdsDb.isPrintingOutput)
+                        System.out.printf("Updating record [%s]. Period fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
+                    if (!jdsDb.isLoggingEdits) continue
+                    logText.setString("entityGuid", entityGuid)
+                    logText.setLong("fieldId", fieldId)
+                    logText.setString("value", value)
+                    logText.setInt("sequence", 0)
+                    logText.addBatch()
+                }
+            }
+
+            for ((entityGuid, hashMap) in durationProperties) {
+                record++
+                var innerRecord = 0
+                val innerRecordSize = hashMap.size
+                if (innerRecordSize == 0) continue
+                for ((fieldId, durationProperty) in hashMap) {
+                    innerRecord++
+                    val duration = durationProperty.get()
+                    val value = duration.toNanos()
+                    if (writeToPrimaryDataTables) {
+                        upsertLong.setString("entityGuid", entityGuid)
+                        upsertLong.setLong("fieldId", fieldId)
+                        upsertLong.setLong("value", value)
+                        upsertLong.addBatch()
+                    }
+                    if (jdsDb.isPrintingOutput)
+                        System.out.printf("Updating record [%s]. Duration fieldEntity [%s of %s]\n", record, innerRecord, innerRecordSize)
+                    if (!jdsDb.isLoggingEdits) continue
+                    logLong.setString("entityGuid", entityGuid)
+                    logLong.setLong("fieldId", fieldId)
+                    logLong.setLong("value", value)
+                    logLong.setInt("sequence", 0)
+                    logLong.addBatch()
                 }
             }
         } catch (ex: Exception) {

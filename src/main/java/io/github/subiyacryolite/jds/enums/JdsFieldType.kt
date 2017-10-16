@@ -37,5 +37,8 @@ enum class JdsFieldType(val type: Int) {
     BLOB(17),
     ENUM(18),
     CLASS(19),
-    MONTH_DAY(20);
+    MONTH_DAY(20),
+    YEAR_MONTH(21),
+    PERIOD(22),
+    DURATION(23);
 }

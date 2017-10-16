@@ -809,7 +809,7 @@ abstract class JdsDb : IJdsDb {
     }
 
     /**
-     * SQL call to bind enums to entities
+     * SQL call to bind enumProperties to entities
      *
      * @return the default or overridden SQL statement for this operation
      */
