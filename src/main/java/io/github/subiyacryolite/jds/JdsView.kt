@@ -85,7 +85,6 @@ class JdsView {
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
                 }
-
                 return true
             } else {
                 throw IllegalArgumentException("You must annotate the class [" + target.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
@@ -105,9 +104,9 @@ class JdsView {
             val sql = "SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?"
             connection.prepareStatement(sql).use { ps ->
                 ps.setLong(1, entityId)
-                ps.executeQuery().use { rs ->
-                    while (rs.next()) {
-                        inheritanceHierarchy.add(rs.getLong("ChildEntityCode"))
+                ps.executeQuery().use {
+                    while (it.next()) {
+                        inheritanceHierarchy.add(it.getLong("ChildEntityCode"))
                     }
                 }
             }
