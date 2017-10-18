@@ -60,6 +60,6 @@ class JdsOverview : IJdsOverview, Externalizable {
     }
 
     override fun toString(): String {
-        return "Overview { entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
+        return "{ entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
     }
 }

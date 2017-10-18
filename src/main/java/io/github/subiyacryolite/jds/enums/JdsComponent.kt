@@ -19,6 +19,7 @@ package io.github.subiyacryolite.jds.enums;
  * joins that implement search {@link io.github.subiyacryolite.jds.JdsFilter filter's}.
  */
 enum class JdsComponent(val component: String, val prefix: String) {
+    NULL("Null", "null"),
     STORE_TEXT_ARRAY("JdsStoreTextArray", "sta"),
     STORE_FLOAT_ARRAY("JdsStoreFloatArray", "sfa"),
     STORE_INTEGER_ARRAY("JdsStoreIntegerArray", "sia"),

@@ -118,16 +118,14 @@ class JdsView {
          * @param tables     the tables that will make up this view
          */
         private fun createMainView(connection: Connection, jdsDb: JdsDb, entityId: List<Long>, viewName: String, tables: Array<String>) {
-            val sql = String.format("SELECT ${JdsComponent.REF_FIELDS.prefix}.FieldName FROM \n" +
-                    "${JdsComponent.REF_ENTITIES.component} ${JdsComponent.REF_ENTITIES.prefix}\n" +
-                    "LEFT JOIN ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix}\n" +
-                    "ON ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId\n" +
-                    "LEFT JOIN ${JdsComponent.REF_FIELDS.component} ${JdsComponent.REF_FIELDS.prefix} \n" +
-                    "ON ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELDS.prefix}.FieldId\n" +
-                    "LEFT join ${JdsComponent.REF_FIELD_TYPES.component} ${JdsComponent.REF_FIELD_TYPES.prefix}\n" +
-                    "ON ${JdsComponent.REF_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELD_TYPES.prefix}.TypeId\n" +
-                    "WHERE %s NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ?\n" +
-                    "ORDER BY ${JdsComponent.REF_FIELDS.prefix}.FieldName", if (jdsDb.isOracleDb) "dbms_lob.substr(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName, dbms_lob.getlength(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName), 1)" else "${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName")
+            val condition = if (jdsDb.isOracleDb) "dbms_lob.substr(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName, dbms_lob.getlength(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName), 1)" else "${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName"
+            val orderBy = if (jdsDb.isOracleDb)"ORDER BY dbms_lob.substr(${JdsComponent.REF_FIELDS.prefix}.FieldName, dbms_lob.getlength(${JdsComponent.REF_FIELDS.prefix}.FieldName), 1)" else "ORDER BY ${JdsComponent.REF_FIELDS.prefix}.FieldName"
+            val sql = "SELECT ${JdsComponent.REF_FIELDS.prefix}.FieldName FROM ${JdsComponent.REF_ENTITIES.component} ${JdsComponent.REF_ENTITIES.prefix}\n" +
+                    "LEFT JOIN ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix} ON ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId\n" +
+                    "LEFT JOIN ${JdsComponent.REF_FIELDS.component} ${JdsComponent.REF_FIELDS.prefix} ON ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELDS.prefix}.FieldId\n" +
+                    "LEFT join ${JdsComponent.REF_FIELD_TYPES.component} ${JdsComponent.REF_FIELD_TYPES.prefix} ON ${JdsComponent.REF_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELD_TYPES.prefix}.TypeId\n" +
+                    "WHERE $condition NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ?\n" +
+                    "$orderBy"
             //handle oracle nclobs
             //omit ; as oracle jdbc is a pain
             val fieldNames = ArrayList<String>()
@@ -140,6 +138,7 @@ class JdsView {
                     }
                 }
             } catch (ex: Exception) {
+                System.err.println(sql)
                 ex.printStackTrace(System.err)
             }
 
@@ -279,19 +278,23 @@ class JdsView {
             }
             val fieldsOfInterest = StringJoiner(",\n")
             for (entry in fieldNames) {
-                if (jdsDb.isMySqlDb)
-                    fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS '$entry'")
-                else
-                    fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS $entry")
+                when {
+                    jdsDb.isMySqlDb -> fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS '$entry'")
+                    jdsDb.isOracleDb -> when (JdsTableLookup.getComponent(fieldType)) {
+                        JdsComponent.STORE_TEXT -> fieldsOfInterest.add("MAX(CASE WHEN dbms_lob.substr(t.FieldName, dbms_lob.getlength(t.FieldName), 1) = '$entry' THEN dbms_lob.substr(t.Value, dbms_lob.getlength(t.Value), 1) ELSE NULL END) AS $entry")
+                        else -> fieldsOfInterest.add("MAX(CASE WHEN dbms_lob.substr(t.FieldName, dbms_lob.getlength(t.FieldName), 1) = '$entry' THEN t.Value ELSE NULL END) AS $entry")
+                    }
+                    else -> fieldsOfInterest.add("MAX(CASE WHEN t.FieldName = '$entry' THEN t.Value ELSE NULL END) AS $entry")
+                }
             }
             stringBuilder.append(fieldsOfInterest)
             stringBuilder.append("\nFROM\t\n")
             stringBuilder.append("\t(\n")
             stringBuilder.append("\t\tSELECT src.EntityGuid, ${JdsComponent.REF_FIELDS.prefix}.FieldName, src.Value\n")
             stringBuilder.append("\t\tFROM ")
-            stringBuilder.append(JdsTableLookup.getTable(fieldType))
+            stringBuilder.append(JdsTableLookup.getComponentTable(fieldType))
             stringBuilder.append("\tsrc\n")
-            stringBuilder.append("\t\t JOIN ${JdsComponent.STORE_ENTITY_OVERVIEW.component} ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix} ON ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix}.EntityGuid = src.EntityGuid")
+            stringBuilder.append("\t\tJOIN ${JdsComponent.STORE_ENTITY_OVERVIEW.component} ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix} ON ${JdsComponent.STORE_ENTITY_OVERVIEW.prefix}.EntityGuid = src.EntityGuid")
             val entityHierarchy = StringJoiner(",")
             for (id in inheritanceHierarchy)
                 entityHierarchy.add("" + id)
@@ -301,7 +304,7 @@ class JdsView {
             val cond = if (jdsDb.isOracleDb) "dbms_lob.substr(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName, dbms_lob.getlength(${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName), 1)" else "${JdsComponent.REF_FIELD_TYPES.prefix}.TypeName" //nclob magic
             stringBuilder.append("\t\tWHERE src.FieldId IN (SELECT DISTINCT ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId FROM ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix} where ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId in ($entityHierarchy) and $cond = '$fieldType')\n")
             stringBuilder.append("\t) t\n")
-            stringBuilder.append("GROUP BY t.EntityGuid")//oracle jdbc hates ; terminators
+            stringBuilder.append("GROUP BY EntityGuid")//oracle jdbc hates ; terminators
 
             val sqlToExecute = jdsDb.createOrAlterView(viewName, stringBuilder.toString())
             try {
@@ -331,7 +334,7 @@ class JdsView {
          * @return
          */
         private fun getMainViewName(entityName: String): String {
-            return String.format("_%s", entityName)
+            return String.format("v_%s", entityName)
         }
 
         /**
@@ -343,11 +346,11 @@ class JdsView {
          */
         private fun dropView(jdsDb: JdsDb, connection: Connection, name: String): Boolean {
             val pre = when (jdsDb.isOracleDb) {
-                true -> "'$name'"
+                true -> name
                 else -> name
             }
             val post = when (jdsDb.implementation) {
-                JdsImplementation.POSTGRES, JdsImplementation.ORACLE -> " CASCADE"
+                JdsImplementation.POSTGRES -> " CASCADE"
                 else -> ""
             }
             val src = "DROP VIEW $pre$post"
