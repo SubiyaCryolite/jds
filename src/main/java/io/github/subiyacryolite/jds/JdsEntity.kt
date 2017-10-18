@@ -42,7 +42,6 @@ abstract class JdsEntity : IJdsEntity {
 
     //fieldEntity and enum maps
     private val fields: MutableSet<JdsField> = HashSet()
-    private val objects: MutableSet<Long> = HashSet()
     private val enums: MutableSet<JdsFieldEnum<*>> = HashSet()
     //time constructs
     private val localDateTimeProperties: HashMap<Long, SimpleObjectProperty<Temporal>> = HashMap()
@@ -74,7 +73,6 @@ abstract class JdsEntity : IJdsEntity {
     private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>> = HashMap()
     //objects
     private val objectProperties: HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>> = HashMap()
-    private val objectCascade: HashMap<JdsFieldEntity<*>, Boolean> = HashMap()
     //blobs
     private val blobProperties: HashMap<Long, SimpleBlobProperty> = HashMap()
 
@@ -325,47 +323,13 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * @param entity
      * @param property
-     * @param cascadeOnDelete
      */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>, cascadeOnDelete: Boolean) {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
-                val entityAnnotation = fieldEntity.entityType.getAnnotation(JdsEntityAnnotation::class.java)
                 objectProperties.put(fieldEntity, property as SimpleObjectProperty<JdsEntity>)
-                objects.add(entityAnnotation.entityId)
-                objectCascade.put(fieldEntity, cascadeOnDelete)
-            } else {
-                throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
-            }
-        } else {
-            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
-        }
-    }
-
-    /**
-     * @param entity
-     * @param property
-     */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>) {
-        map(fieldEntity, property, false)
-    }
-
-    /**
-     * @param entity
-     * @param properties
-     * @param cascadeOnDelete
-     */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: SimpleListProperty<T>, cascadeOnDelete: Boolean) {
-        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
-            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
-        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            if (!objectArrayProperties.containsKey(fieldEntity)) {
-                val entityAnnotation = fieldEntity.entityType.getAnnotation(JdsEntityAnnotation::class.java)
-                objectArrayProperties.put(fieldEntity, properties as SimpleListProperty<JdsEntity>)
-                objects.add(entityAnnotation.entityId)
-                objectCascade.put(fieldEntity, cascadeOnDelete)
             } else {
                 throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
             }
@@ -379,7 +343,17 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: SimpleListProperty<T>) {
-        map(fieldEntity, properties, false)
+        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
+            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
+        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            if (!objectArrayProperties.containsKey(fieldEntity)) {
+                objectArrayProperties.put(fieldEntity, properties as SimpleListProperty<JdsEntity>)
+            } else {
+                throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
+            }
+        } else {
+            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+        }
     }
 
     /**
@@ -576,7 +550,6 @@ abstract class JdsEntity : IJdsEntity {
         //fieldEntity and enum maps
         objectOutputStream.writeObject(overview)
         objectOutputStream.writeObject(fields)
-        objectOutputStream.writeObject(objects)
         objectOutputStream.writeObject(enums)
         objectOutputStream.writeUTF(entityName)
         //objects
@@ -690,7 +663,6 @@ abstract class JdsEntity : IJdsEntity {
         //fieldEntity and enum maps
         overview = objectInputStream.readObject() as JdsOverview
         fields.addAll(objectInputStream.readObject() as Set<JdsField>)
-        objects.addAll(objectInputStream.readObject() as Set<Long>)
         enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
         entityName = objectInputStream.readUTF()
         //objects

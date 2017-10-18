@@ -124,7 +124,7 @@ class JdsView {
                     "LEFT JOIN ${JdsComponent.BIND_ENTITY_FIELDS.component} ${JdsComponent.BIND_ENTITY_FIELDS.prefix} ON ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.EntityId\n" +
                     "LEFT JOIN ${JdsComponent.REF_FIELDS.component} ${JdsComponent.REF_FIELDS.prefix} ON ${JdsComponent.BIND_ENTITY_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELDS.prefix}.FieldId\n" +
                     "LEFT join ${JdsComponent.REF_FIELD_TYPES.component} ${JdsComponent.REF_FIELD_TYPES.prefix} ON ${JdsComponent.REF_FIELDS.prefix}.FieldId = ${JdsComponent.REF_FIELD_TYPES.prefix}.TypeId\n" +
-                    "WHERE $condition NOT IN ('BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ?\n" +
+                    "WHERE $condition NOT IN ('CLASS','BLOB','ARRAY_FLOAT', 'ARRAY_INT', 'ARRAY_DOUBLE', 'ARRAY_LONG', 'ARRAY_TEXT', 'ARRAY_DATE_TIME','ENUM_COLLECTION') AND ${JdsComponent.REF_ENTITIES.prefix}.EntityId = ?\n" +
                     "$orderBy"
             //handle oracle nclobs
             //omit ; as oracle jdbc is a pain
