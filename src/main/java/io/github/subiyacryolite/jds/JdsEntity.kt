@@ -363,9 +363,9 @@ abstract class JdsEntity : IJdsEntity {
      * @param <T>    A valid JDSEntity
     </T> */
     fun <T : JdsEntity> copy(source: T) {
-        copyHeaderValues(source)
-        copyPropertyValues(source)
         copyArrayValues(source)
+        copyPropertyValues(source)
+        copyOverviewValues(source)
         copyEnumValues(source)
         copyObjectAndObjectArrayValues(source)
     }
@@ -376,10 +376,12 @@ abstract class JdsEntity : IJdsEntity {
      * @param source The entity to copy values from
      * @param <T>    A valid JDSEntity
     </T> */
-    private fun <T : IJdsEntity> copyArrayValues(source: T) {
+    private fun <T : IJdsEntity> copyOverviewValues(source: T) {
         overview.dateCreated = source.overview.dateCreated
         overview.dateModified = source.overview.dateModified
         overview.entityGuid = source.overview.entityGuid
+        overview.live = source.overview.live
+        overview.version = source.overview.version
     }
 
     /**
@@ -445,6 +447,26 @@ abstract class JdsEntity : IJdsEntity {
                 dest.blobProperties[srcEntry.key]?.set(srcEntry.value.get()!!)
             }
         }
+        source.durationProperties.entries.parallelStream().forEach { srcEntry ->
+            if (dest.durationProperties.containsKey(srcEntry.key)) {
+                dest.durationProperties[srcEntry.key]?.set(srcEntry.value.get())
+            }
+        }
+        source.periodProperties.entries.parallelStream().forEach { srcEntry ->
+            if (dest.periodProperties.containsKey(srcEntry.key)) {
+                dest.periodProperties[srcEntry.key]?.set(srcEntry.value.get())
+            }
+        }
+        source.yearMonthProperties.entries.parallelStream().forEach { srcEntry ->
+            if (dest.yearMonthProperties.containsKey(srcEntry.key)) {
+                dest.yearMonthProperties[srcEntry.key]?.set(srcEntry.value.get())
+            }
+        }
+        source.monthDayProperties.entries.parallelStream().forEach { srcEntry ->
+            if (dest.monthDayProperties.containsKey(srcEntry.key)) {
+                dest.monthDayProperties[srcEntry.key]?.set(srcEntry.value.get()!!)
+            }
+        }
     }
 
     /**
@@ -453,7 +475,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param source The entity to copy values from
      * @param <T>    A valid JDSEntity A valid JDSEntity
     </T> */
-    private fun <T : JdsEntity> copyHeaderValues(source: T) {
+    private fun <T : JdsEntity> copyArrayValues(source: T) {
         val dest = this
         source.stringArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.stringArrayProperties.containsKey(srcEntry.key)) {
