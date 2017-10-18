@@ -1,12 +1,10 @@
 package tests
 
 import common.BaseTestConfig
-import entities.Address
 import entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
-import java.time.*
 import java.util.*
 
 class TimeConstructs : BaseTestConfig() {
@@ -55,7 +53,7 @@ class TimeConstructs : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testOracle() {
-        initialiseSqlLiteBackend()
+        initialiseOracleBackend()
         saveAndLoad()
     }
 

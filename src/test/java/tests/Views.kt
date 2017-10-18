@@ -10,7 +10,6 @@ import java.sql.SQLException
  */
 class Views : BaseTestConfig() {
 
-
     @Test
     @Throws(SQLException::class, ClassNotFoundException::class)
     fun allImplementation() {
@@ -24,39 +23,36 @@ class Views : BaseTestConfig() {
     @Throws(SQLException::class, ClassNotFoundException::class)
     fun oracleImplementation() {
         initialiseOracleBackend()
-        for (entry in jdsDb.mappedClasses) {
-            val delete = JdsView.delete(entry, jdsDb)
-            val create = JdsView.create(entry, jdsDb)
-        }
+        dropAndRecreateViews()
     }
 
     @Test
     @Throws(SQLException::class, ClassNotFoundException::class)
     fun tSqlImplementation() {
         initialiseTSqlBackend()
-        for (entry in jdsDb.mappedClasses) {
-            val delete = JdsView.delete(entry, jdsDb)
-            val create = JdsView.create(entry, jdsDb)
-        }
+        dropAndRecreateViews()
     }
 
     @Test
     @Throws(SQLException::class, ClassNotFoundException::class)
     fun postgresImplementation() {
         initialisePostgeSqlBackend()
-        for (entry in jdsDb.mappedClasses) {
-            val delete = JdsView.delete(entry, jdsDb)
-            val create = JdsView.create(entry, jdsDb)
-        }
+        dropAndRecreateViews()
     }
 
     @Test
     @Throws(SQLException::class, ClassNotFoundException::class)
     fun mysqlImplementation() {
         initialiseMysqlBackend()
+        dropAndRecreateViews()
+    }
+
+    @Throws(SQLException::class, ClassNotFoundException::class)
+    private fun dropAndRecreateViews() {
         for (entry in jdsDb.mappedClasses) {
             val delete = JdsView.delete(entry, jdsDb)
             val create = JdsView.create(entry, jdsDb)
         }
+        println("Created views :)")
     }
 }

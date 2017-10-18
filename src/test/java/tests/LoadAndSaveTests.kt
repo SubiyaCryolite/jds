@@ -22,7 +22,7 @@ class LoadAndSaveTests : BaseTestConfig() {
         val thread = Thread(saving)
         thread.start()
         while (!saving.isDone)
-            println("Waiting for operation 1 to complete")
+            Thread.sleep(16)
         System.out.printf("Saved? %s\n", saving.get())
     }
 
@@ -42,11 +42,11 @@ class LoadAndSaveTests : BaseTestConfig() {
         Thread(loadingSortedInstances).start()
 
         while (!loadingAllInstances.isDone)
-            println("Waiting for operation 1 to complete")
+            Thread.sleep(16)
         while (!loadingSpecificInstance.isDone)
-            println("Waiting for operation 2 to complete")
+            Thread.sleep(16)
         while (!loadingSortedInstances.isDone)
-            println("Waiting for operation 3 to complete")
+            Thread.sleep(16)
 
         val allInstances = loadingAllInstances.get()
         val specificInstance = loadingSpecificInstance.get()
