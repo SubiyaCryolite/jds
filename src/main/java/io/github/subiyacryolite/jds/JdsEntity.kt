@@ -327,14 +327,10 @@ abstract class JdsEntity : IJdsEntity {
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: SimpleObjectProperty<T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
-        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
-                objectProperties.put(fieldEntity, property as SimpleObjectProperty<JdsEntity>)
-            } else {
-                throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
-            }
+        if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
+            objectProperties.put(fieldEntity, property as SimpleObjectProperty<JdsEntity>)
         } else {
-            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
     }
 
@@ -345,14 +341,10 @@ abstract class JdsEntity : IJdsEntity {
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: SimpleListProperty<T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
-        if (fieldEntity.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            if (!objectArrayProperties.containsKey(fieldEntity)) {
-                objectArrayProperties.put(fieldEntity, properties as SimpleListProperty<JdsEntity>)
-            } else {
-                throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
-            }
+        if (!objectArrayProperties.containsKey(fieldEntity)) {
+            objectArrayProperties.put(fieldEntity, properties as SimpleListProperty<JdsEntity>)
         } else {
-            throw RuntimeException("You must annotate the class [" + fieldEntity.entityType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
     }
 
