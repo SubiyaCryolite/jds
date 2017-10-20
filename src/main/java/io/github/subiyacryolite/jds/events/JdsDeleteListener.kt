@@ -19,6 +19,7 @@ package io.github.subiyacryolite.jds.events
 interface JdsDeleteListener {
     /**
      * Action to perform when deleting a {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity}
+     * @param onDeleteEventArguments the arguments to reference for this invocation
      */
-    fun onDelete(arguments: OnDeleteEventArguments)
+    fun onDelete(onDeleteEventArguments: OnDeleteEventArguments)
 }

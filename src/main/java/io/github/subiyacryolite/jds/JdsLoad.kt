@@ -155,7 +155,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                     //catch embedded/pre-created objects objects as well
                                                                                     for (entity in entities)
                                                                                         if (entity is JdsLoadListener)
-                                                                                            (entity as JdsLoadListener).onPreLoad(OnPreLoadEventArguments(connection, entity.overview.entityGuid, batchSequence, entityGuids.size))
+                                                                                            (entity as JdsLoadListener).onPreLoad(OnPreLoadEventArguments(jdsDb, connection, entity.overview.entityGuid, batchSequence, entityGuids.size))
 
                                                                                     if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
                                                                                         //primitives
@@ -188,7 +188,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                     //catch embedded/pre-created objects objects as well
                                                                                     for (entity in entities)
                                                                                         if (entity is JdsLoadListener)
-                                                                                            (entity as JdsLoadListener).onPostLoad(OnPostLoadEventArguments(connection, entity.overview.entityGuid))
+                                                                                            (entity as JdsLoadListener).onPostLoad(OnPostLoadEventArguments(jdsDb, connection, entity.overview.entityGuid))
 
                                                                                 }
                                                                             }

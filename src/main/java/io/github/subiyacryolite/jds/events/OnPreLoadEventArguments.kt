@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds.events
 import com.javaworld.INamedStatement
 import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
+import io.github.subiyacryolite.jds.IJdsDb
 import java.sql.*
 import java.util.*
 
@@ -29,47 +30,96 @@ class OnPreLoadEventArguments {
     val entityGuid: String
     val batchSequence: Int
     val batchSize: Int
+    val jdsDb: IJdsDb
     val connection: Connection
+    val alternateConnection: LinkedHashMap<Int, Connection>
     private val statements: LinkedHashMap<String, Statement>
+    private val alternateStatements: LinkedHashMap<Int, LinkedHashMap<String, Statement>>
 
-    constructor(connection: Connection, entityGuid: String, batchSequence: Int, batchSize: Int) {
+    constructor(jdsDb: IJdsDb,connection: Connection, entityGuid: String, batchSequence: Int, batchSize: Int) {
         this.entityGuid = entityGuid
         this.batchSequence = batchSequence
         this.batchSize = batchSize
+        this.jdsDb = jdsDb
         this.connection = connection
-        this.statements = LinkedHashMap<String, Statement>()
+        this.alternateConnection = LinkedHashMap()
+        this.statements = LinkedHashMap()
+        this.alternateStatements = LinkedHashMap()
     }
 
     @Synchronized
     @Throws(SQLException::class)
-    fun getOrAddStatement(key: String): PreparedStatement {
-        if (!statements.containsKey(key))
-            statements.put(key, connection.prepareStatement(key))
-        return statements[key] as PreparedStatement
+    fun getOrAddStatement(query: String): PreparedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, connection.prepareStatement(query))
+        return statements[query] as PreparedStatement
     }
 
     @Synchronized
     @Throws(SQLException::class)
-    fun getOrAddCall(key: String): CallableStatement {
-        if (!statements.containsKey(key))
-            statements.put(key, connection.prepareCall(key))
-        return statements.get(key) as CallableStatement
+    fun getOrAddCall(query: String): CallableStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, connection.prepareCall(query))
+        return statements[query] as CallableStatement
     }
 
     @Synchronized
     @Throws(SQLException::class)
-    fun getOrAddNamedStatement(key: String): INamedStatement {
-        if (!statements.containsKey(key))
-            statements.put(key, NamedPreparedStatement(connection, key))
-        return statements[key] as INamedStatement
+    fun getOrAddNamedStatement(query: String): INamedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, NamedPreparedStatement(connection, query))
+        return statements[query] as INamedStatement
     }
 
     @Synchronized
     @Throws(SQLException::class)
-    fun getOrAddNamedCall(key: String): INamedStatement {
-        if (!statements.containsKey(key))
-            statements.put(key, NamedCallableStatement(connection, key))
-        return statements[key] as INamedStatement
+    fun getOrAddNamedCall(query: String): INamedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, NamedCallableStatement(connection, query))
+        return statements[query] as INamedStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddStatement(targetConnection: Int, query: String): PreparedStatement {
+        prepareConnection(targetConnection)
+        if (!alternateStatements[targetConnection]!!.containsKey(query))
+            alternateStatements[targetConnection]!!.put(query, alternateConnection[targetConnection]!!.prepareStatement(query))
+        return alternateStatements[targetConnection]!![query] as PreparedStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddCall(targetConnection: Int, query: String): CallableStatement {
+        prepareConnection(targetConnection)
+        if (!alternateStatements[targetConnection]!!.containsKey(query))
+            alternateStatements[targetConnection]!!.put(query, alternateConnection[targetConnection]!!.prepareCall(query))
+        return alternateStatements[targetConnection]!![query] as CallableStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
+        prepareConnection(targetConnection)
+        if (!alternateStatements[targetConnection]!!.containsKey(query))
+            alternateStatements[targetConnection]!!.put(query, NamedPreparedStatement(alternateConnection[targetConnection]!!, query))
+        return alternateStatements[targetConnection]!![query] as INamedStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
+        prepareConnection(targetConnection)
+        if (!alternateStatements[targetConnection]!!.containsKey(query))
+            alternateStatements[targetConnection]!!.put(query, NamedCallableStatement(alternateConnection[targetConnection]!!, query))
+        return statements[query] as INamedStatement
+    }
+
+    private fun prepareConnection(targetConnection: Int) {
+        if (!alternateConnection.containsKey(targetConnection))
+            alternateConnection.put(targetConnection, jdsDb.getConnection(targetConnection))
+        if (!alternateStatements.containsKey(targetConnection))
+            alternateStatements.put(targetConnection, LinkedHashMap<String, Statement>())
     }
 
     @Throws(SQLException::class)
@@ -81,5 +131,21 @@ class OnPreLoadEventArguments {
         }
         connection.commit()
         connection.autoCommit = true
+
+        alternateConnection.forEach { targetConnection, con ->
+            con.autoCommit = false
+            executeStatementsOnConnection(targetConnection)
+            con.commit()
+            con.autoCommit = true
+        }
+    }
+
+    private fun executeStatementsOnConnection(targetConnection: Int) {
+        alternateStatements.filter { it.key == targetConnection }.forEach {
+            it.value.forEach {
+                it.value.executeBatch()
+                it.value.close()
+            }
+        }
     }
 }

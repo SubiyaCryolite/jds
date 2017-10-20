@@ -22,6 +22,7 @@ import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.sql.Connection
+import java.sql.SQLException
 import java.util.*
 
 /**
@@ -849,7 +850,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldTextValues(): String {
         //will indexes sped this up
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
-               //"WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid, FieldId = :fieldId, Sequence = :sequence, TextValue = :value)"
+        //"WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid, FieldId = :fieldId, Sequence = :sequence, TextValue = :value)"
     }
 
     internal fun saveOldDoubleValues(): String {
@@ -874,5 +875,18 @@ abstract class JdsDb : IJdsDb {
 
     internal fun saveOldBlobValues(): String {
         return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+    }
+
+    /**
+     * Acquire a custom connection to a database
+     * @param targetConnection a custom flag to access a custom database
+     *
+     * @return standard connection to the database
+     * @throws ClassNotFoundException when JDBC driver is not configured correctly
+     * @throws SQLException when a standard SQL Exception occurs
+     */
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(targetConnection: Int): Connection {
+        return getConnection()
     }
 }

@@ -30,4 +30,15 @@ interface IJdsDb {
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
     fun getConnection(): Connection
+
+    /**
+     * Acquire a custom connection to a database
+     * @param targetConnection a custom flag to access a custom database
+     *
+     * @return standard connection to the database
+     * @throws ClassNotFoundException when JDBC driver is not configured correctly
+     * @throws SQLException when a standard SQL Exception occurs
+     */
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    fun getConnection(targetConnection: Int): Connection
 }

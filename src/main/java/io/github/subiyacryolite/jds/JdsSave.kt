@@ -28,7 +28,7 @@ import java.util.concurrent.Callable
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Collection<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(connection), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(connection)) : Callable<Boolean> {
+class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Collection<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection)) : Callable<Boolean> {
 
     /**
      * @param jdsDb
@@ -212,8 +212,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             throw ex
         } finally {
             if (finalStep) {
-                onPreSaveEventArguments.closeBatches()
-                onPostSaveEventArguments.closeBatches()
                 connection.close()
             }
         }
