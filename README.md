@@ -122,28 +122,28 @@ import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enumProperties.JdsFieldType;
 
 public class Fields {
-        public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
-        public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
-        public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);
-        public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "DATE_TIME_FIELD", JdsFieldType.DATE_TIME);
-        public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "ZONED_DATE_TIME_FIELD", JdsFieldType.ZONED_DATE_TIME);
-        public static final JdsField LONG_FIELD = new JdsField(1004, "LONG_FIELD", JdsFieldType.LONG);
-        public static final JdsField INT_FIELD = new JdsField(1005, "INT_FIELD", JdsFieldType.INT);
-        public static final JdsField DOUBLE_FIELD = new JdsField(1006, "DOUBLE_FIELD", JdsFieldType.DOUBLE);
-        public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
-        public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
-        public static final JdsField BLOB_FIELD = new JdsField(1010, "BLOB_FIELD", JdsFieldType.BLOB);
-        //=============================================================================================    
-        public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
-        public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
-        public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);
-        public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.TEXT);
-        public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
-        public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM);
-        public static final JdsField COUNTRY_NAME = new JdsField(7, "country_name", JdsFieldType.TEXT);
-        public static final JdsField PRIMARY_ADDRESS_ENUM = new JdsField(8, "primary_address_enum", JdsFieldType.ENUM);
-        public static final JdsField LOCAL_DATE_OF_REGISTRATION = new JdsField(9, "local_date_of_registration", JdsFieldType.DATE_TIME);
-        public static final JdsField ZONED_DATE_OF_REGISTRATION = new JdsField(10, "zoned_date_of_registration", JdsFieldType.ZONED_DATE_TIME);        
+    public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
+    public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
+    public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);
+    public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "DATE_TIME_FIELD", JdsFieldType.DATE_TIME);
+    public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "ZONED_DATE_TIME_FIELD", JdsFieldType.ZONED_DATE_TIME);
+    public static final JdsField LONG_FIELD = new JdsField(1004, "LONG_FIELD", JdsFieldType.LONG);
+    public static final JdsField INT_FIELD = new JdsField(1005, "INT_FIELD", JdsFieldType.INT);
+    public static final JdsField DOUBLE_FIELD = new JdsField(1006, "DOUBLE_FIELD", JdsFieldType.DOUBLE);
+    public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
+    public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
+    public static final JdsField BLOB_FIELD = new JdsField(1010, "BLOB_FIELD", JdsFieldType.BLOB);
+    //=============================================================================================
+    public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
+    public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
+    public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);
+    public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.TEXT);
+    public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
+    public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM);
+    public static final JdsField COUNTRY_NAME = new JdsField(7, "country_name", JdsFieldType.TEXT);
+    public static final JdsField PRIMARY_ADDRESS_ENUM = new JdsField(8, "primary_address_enum", JdsFieldType.ENUM);
+    public static final JdsField LOCAL_DATE_OF_REGISTRATION = new JdsField(9, "local_date_of_registration", JdsFieldType.DATE_TIME);
+    public static final JdsField ZONED_DATE_OF_REGISTRATION = new JdsField(10, "zoned_date_of_registration", JdsFieldType.ZONED_DATE_TIME);        
 }
 
 ```
@@ -796,7 +796,6 @@ The API has a single **save()** method within the class **JdsSave**. The method 
 ```java
 List<Example> collection = getCollection();
 
-//NEW APPROACH (INTRODUCED IN 1.170514)
 List<Example> collection = getCollection();
 Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
 FutureTask<Boolean> saving = new FutureTask(save);
@@ -804,10 +803,6 @@ new Thread(saving).start();
 while (!saving.isDone())
     System.out.println("Waiting for operation 1 to complete");
 System.out.printf("Saved? %s\n", saving.get());
-
-//OLD APPROACH (DEPRECATED IN 1.170514)
-JdsSave.save(jdsDb, 1, collection);
-System.out.printf("Saved %s\n", collection);
 ```
 
 ### 1.2.5 Load
@@ -822,53 +817,41 @@ List<Example> sortedInstances;
 //ordering comparator
 Comparator<Example> comparator = Comparator.comparing(Example::getDateField);
 
-//NEW APPROACH (INTRODUCED IN 1.170514)
 
-    Callable<List<Example>> loadAllInstances = new JdsLoad(jdsDb, Example.class);
-    Callable<List<Example>> loadSpecificInstance = new JdsLoad(jdsDb, Example.class, "instance3");
-    Callable<List<Example>> loadSortedInstances = new JdsLoad(jdsDb, Example.class, comparator);
-    
-    FutureTask<List<Example>> loadingAllInstances = new FutureTask(loadAllInstances);
-    FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
-    FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
-    
-    new Thread(loadingAllInstances).start();
-    new Thread(loadingSpecificInstance).start();
-    new Thread(loadingSortedInstances).start();
-    
-    while (!loadingAllInstances.isDone())
-        System.out.println("Waiting for operation 1 to complete");
-    while (!loadingSpecificInstance.isDone())
-        System.out.println("Waiting for operation 2 to complete");
-    while (!loadingSortedInstances.isDone())
-        System.out.println("Waiting for operation 3 to complete");
-    
-    List<Example> allInstances = loadingAllInstances.get();
-    List<Example> specificInstance = loadingSpecificInstance.get();
-    List<Example> sortedInstances = loadingSortedInstances.get();
-    
-    System.out.println(allInstances);
-    System.out.println(specificInstance);
-    System.out.println(sortedInstances);
-    System.out.println("DONE");
+Callable<List<Example>> loadAllInstances = new JdsLoad(jdsDb, Example.class);
+Callable<List<Example>> loadSpecificInstance = new JdsLoad(jdsDb, Example.class, "instance3");
+Callable<List<Example>> loadSortedInstances = new JdsLoad(jdsDb, Example.class, comparator);
 
-//OLD APPROACH (DEPRECATED IN 1.170514)
+FutureTask<List<Example>> loadingAllInstances = new FutureTask(loadAllInstances);
+FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
+FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
 
-    allInstances = JdsLoad.load(jdsDb, Example.class);
-    specificInstance = JdsLoad.load(jdsDb, Example.class, "instance3");
-    specificAddressBook = JdsLoad.load(jdsDb, Example.class, comparator);
-    
-    System.out.println(allInstances);
-    System.out.println(specificInstance);
-    System.out.println(sortedInstances);
-    System.out.println("DONE");
+new Thread(loadingAllInstances).start();
+new Thread(loadingSpecificInstance).start();
+new Thread(loadingSortedInstances).start();
+
+while (!loadingAllInstances.isDone())
+System.out.println("Waiting for operation 1 to complete");
+while (!loadingSpecificInstance.isDone())
+System.out.println("Waiting for operation 2 to complete");
+while (!loadingSortedInstances.isDone())
+System.out.println("Waiting for operation 3 to complete");
+
+List<Example> allInstances = loadingAllInstances.get();
+List<Example> specificInstance = loadingSpecificInstance.get();
+List<Example> sortedInstances = loadingSortedInstances.get();
+
+System.out.println(allInstances);
+System.out.println(specificInstance);
+System.out.println(sortedInstances);
+System.out.println("DONE");
 ```
 
 ### 1.2.6 Load with Filter
 A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
 ```java
-    JdsFilter filter = new JdsFilter(jdsDb, Address.class).equals(AddressFields.AREA_NAME, "Riverdale").like(AddressFields.COUNTRY_NAME, "Zam").or().equals(AddressFields.PROVINCE_NAME, "Copperbelt");
-    List<Address> output = new FutureTask<List<Address>>(filter).get();
+JdsFilter filter = new JdsFilter(jdsDb, Address.class).equals(AddressFields.AREA_NAME, "Riverdale").like(AddressFields.COUNTRY_NAME, "Zam").or().equals(AddressFields.PROVINCE_NAME, "Copperbelt");
+List<Address> output = new FutureTask<List<Address>>(filter).get();
 ```
 
 ### 1.2.7 Delete
@@ -876,19 +859,12 @@ You can delete by providing one or more JdsEntities or via a collection of strin
 ```java
 List<Example> collection = getCollection();
     
-//NEW APPROACH (INTRODUCED IN 1.170514)
-    Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
-    FutureTask<Boolean> deleting = new FutureTask(delete);
-    new Thread(deleting).start();
-    while(!deleting.isDone())
-        System.out.println("Waiting for operation to complete");
-    System.out.println("Deleted? "+ deleting.get());
-
-//OLD APPROACH (DEPRECATED IN 1.170514)
-    //using strings representing entity guids
-    JdsDelete.delete(jdsDb, "instance2");
-    //using an object or an object ollection
-    JdsDelete.delete(jdsDb, collection);
+Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
+FutureTask<Boolean> deleting = new FutureTask(delete);
+new Thread(deleting).start();
+while(!deleting.isDone())
+    System.out.println("Waiting for operation to complete");
+System.out.println("Deleted? "+ deleting.get());
 ```
 
 ## 1.3 Backend Design
