@@ -607,7 +607,7 @@ abstract class JdsDb : IJdsDb {
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity: JdsEntity? = entity.newInstance()
                         determineParents(entity, parentEntities)
-                        mapClassName(connection, jdsEntity!!.overview.entityId, jdsEntity.entityName)
+                        mapClassName(connection, jdsEntity!!.overview.entityId, entityAnnotation.entityName)
                         jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
@@ -615,7 +615,7 @@ abstract class JdsDb : IJdsDb {
                         connection.commit()
                         jdsEntity = null
                         if (isPrintingOutput)
-                            System.out.printf("Mapped Entity [%s]\n", jdsEntity!!.entityName)
+                            System.out.printf("Mapped Entity [%s]\n", entityAnnotation.entityName)
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)

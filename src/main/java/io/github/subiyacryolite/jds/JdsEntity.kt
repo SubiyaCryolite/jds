@@ -34,12 +34,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * [JdsEntityBase] to store overview data
  */
 abstract class JdsEntity : IJdsEntity {
-
     override var overview: IJdsOverview = JdsOverview()
-
-    override var entityName: String = ""
-
-
     //fieldEntity and enum maps
     private val fields: MutableSet<JdsField> = HashSet()
     private val enums: MutableSet<JdsFieldEnum<*>> = HashSet()
@@ -80,7 +75,6 @@ abstract class JdsEntity : IJdsEntity {
     init {
         if (javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
-            entityName = entityAnnotation.entityName
             overview.entityId = entityAnnotation.entityId
             overview.version = entityAnnotation.version
         } else {
@@ -565,7 +559,6 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(overview)
         objectOutputStream.writeObject(fields)
         objectOutputStream.writeObject(enums)
-        objectOutputStream.writeUTF(entityName)
         //objects
         objectOutputStream.writeObject(serializeObject(objectProperties))
         //time constructs
@@ -678,7 +671,6 @@ abstract class JdsEntity : IJdsEntity {
         overview = objectInputStream.readObject() as JdsOverview
         fields.addAll(objectInputStream.readObject() as Set<JdsField>)
         enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
-        entityName = objectInputStream.readUTF()
         //objects
         putObject(objectProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
         //time constructs
