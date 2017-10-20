@@ -109,38 +109,38 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         batchEntities.add(ArrayList())
         saveContainer.overviews.add(HashSet<IJdsOverview>())
         //time constructs
-        saveContainer.localDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.zonedDateTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.localTimeProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.localDateProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.monthDayProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<MonthDay>>>())
-        saveContainer.yearMonthProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>())
-        saveContainer.periodProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Period>>>())
-        saveContainer.durationProperties.add(HashMap<String, HashMap<Long, SimpleObjectProperty<Duration>>>())
+        saveContainer.localDateTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
+        saveContainer.zonedDateTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
+        saveContainer.localTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
+        saveContainer.localDateProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
+        saveContainer.monthDayProperties.add(HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>())
+        saveContainer.yearMonthProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
+        saveContainer.periodProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Period>>>())
+        saveContainer.durationProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Duration>>>())
         //primitives
-        saveContainer.booleanProperties.add(HashMap<String, HashMap<Long, SimpleBooleanProperty>>())
-        saveContainer.floatProperties.add(HashMap<String, HashMap<Long, SimpleFloatProperty>>())
-        saveContainer.doubleProperties.add(HashMap<String, HashMap<Long, SimpleDoubleProperty>>())
-        saveContainer.longProperties.add(HashMap<String, HashMap<Long, SimpleLongProperty>>())
-        saveContainer.integerProperties.add(HashMap<String, HashMap<Long, SimpleIntegerProperty>>())
+        saveContainer.booleanProperties.add(HashMap<String, HashMap<Long, BooleanProperty>>())
+        saveContainer.floatProperties.add(HashMap<String, HashMap<Long, FloatProperty>>())
+        saveContainer.doubleProperties.add(HashMap<String, HashMap<Long, DoubleProperty>>())
+        saveContainer.longProperties.add(HashMap<String, HashMap<Long, LongProperty>>())
+        saveContainer.integerProperties.add(HashMap<String, HashMap<Long, IntegerProperty>>())
         //string
-        saveContainer.stringProperties.add(HashMap<String, HashMap<Long, SimpleStringProperty>>())
+        saveContainer.stringProperties.add(HashMap<String, HashMap<Long, StringProperty>>())
         //blob
-        saveContainer.blobProperties.add(HashMap<String, HashMap<Long, SimpleBlobProperty>>())
+        saveContainer.blobProperties.add(HashMap<String, HashMap<Long, BlobProperty>>())
         //arrays
-        saveContainer.stringCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<String>>>())
-        saveContainer.localDateTimeCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>())
-        saveContainer.floatCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Float>>>())
-        saveContainer.doubleCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Double>>>())
-        saveContainer.longCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Long>>>())
-        saveContainer.integerCollections.add(HashMap<String, HashMap<Long, SimpleListProperty<Int>>>())
+        saveContainer.stringCollections.add(HashMap<String, HashMap<Long, ListProperty<String>>>())
+        saveContainer.localDateTimeCollections.add(HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>())
+        saveContainer.floatCollections.add(HashMap<String, HashMap<Long, ListProperty<Float>>>())
+        saveContainer.doubleCollections.add(HashMap<String, HashMap<Long, ListProperty<Double>>>())
+        saveContainer.longCollections.add(HashMap<String, HashMap<Long, ListProperty<Long>>>())
+        saveContainer.integerCollections.add(HashMap<String, HashMap<Long, ListProperty<Int>>>())
         //enumProperties
-        saveContainer.enumProperties.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>())
-        saveContainer.enumCollections.add(HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>())
+        saveContainer.enumProperties.add(HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>())
+        saveContainer.enumCollections.add(HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>())
         //objects
-        saveContainer.objects.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>())
+        saveContainer.objects.add(HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>())
         //object arrays
-        saveContainer.objectCollections.add(HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>())
+        saveContainer.objectCollections.add(HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>())
     }
 
     /**
@@ -251,7 +251,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param blobProperties
      */
-    private fun saveBlobs(writeToPrimaryDataTables: Boolean, blobProperties: HashMap<String, HashMap<Long, SimpleBlobProperty>>) {
+    private fun saveBlobs(writeToPrimaryDataTables: Boolean, blobProperties: HashMap<String, HashMap<Long, BlobProperty>>) {
         var record = 0
         //log byte array as text???
         try {
@@ -289,7 +289,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param booleanProperties
      * @implNote Booleans are saved as integers behind the scenes
      */
-    private fun saveBooleans(writeToPrimaryDataTables: Boolean, booleanProperties: HashMap<String, HashMap<Long, SimpleBooleanProperty>>) {
+    private fun saveBooleans(writeToPrimaryDataTables: Boolean, booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
@@ -326,7 +326,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param integerProperties
      */
-    private fun saveIntegers(writeToPrimaryDataTables: Boolean, integerProperties: HashMap<String, HashMap<Long, SimpleIntegerProperty>>) {
+    private fun saveIntegers(writeToPrimaryDataTables: Boolean, integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
@@ -363,7 +363,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param floatProperties
      */
-    private fun saveFloats(writeToPrimaryDataTables: Boolean, floatProperties: HashMap<String, HashMap<Long, SimpleFloatProperty>>) {
+    private fun saveFloats(writeToPrimaryDataTables: Boolean, floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
@@ -400,7 +400,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param doubleProperties
      */
-    private fun saveDoubles(writeToPrimaryDataTables: Boolean, doubleProperties: HashMap<String, HashMap<Long, SimpleDoubleProperty>>) {
+    private fun saveDoubles(writeToPrimaryDataTables: Boolean, doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
@@ -437,7 +437,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param longProperties
      */
-    private fun saveLongs(writeToPrimaryDataTables: Boolean, longProperties: HashMap<String, HashMap<Long, SimpleLongProperty>>) {
+    private fun saveLongs(writeToPrimaryDataTables: Boolean, longProperties: HashMap<String, HashMap<Long, LongProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
@@ -474,7 +474,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param stringProperties
      */
-    private fun saveStrings(writeToPrimaryDataTables: Boolean, stringProperties: HashMap<String, HashMap<Long, SimpleStringProperty>>) {
+    private fun saveStrings(writeToPrimaryDataTables: Boolean, stringProperties: HashMap<String, HashMap<Long, StringProperty>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
@@ -509,10 +509,10 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     }
 
     private fun saveDateConstructs(writeToPrimaryDataTables: Boolean,
-                                   monthDayProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<MonthDay>>>,
-                                   yearMonthProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>,
-                                   periodProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Period>>>,
-                                   durationProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Duration>>>) {
+                                   monthDayProperties: HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>,
+                                   yearMonthProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>,
+                                   periodProperties: HashMap<String, HashMap<Long, ObjectProperty<Period>>>,
+                                   durationProperties: HashMap<String, HashMap<Long, ObjectProperty<Duration>>>) {
         var record = 0
         try {
             val upsertText = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
@@ -633,7 +633,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param localDateTimeProperties
      * @param localDateProperties
      */
-    private fun saveDatesAndDateTimes(writeToPrimaryDataTables: Boolean, localDateTimeProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>, localDateProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>) {
+    private fun saveDatesAndDateTimes(writeToPrimaryDataTables: Boolean, localDateTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>, localDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
@@ -692,7 +692,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param localTimeProperties
      */
-    private fun saveTimes(writeToPrimaryDataTables: Boolean, localTimeProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>) {
+    private fun saveTimes(writeToPrimaryDataTables: Boolean, localTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
@@ -730,7 +730,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param zonedDateProperties
      */
-    private fun saveZonedDateTimes(writeToPrimaryDataTables: Boolean, zonedDateProperties: HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>) {
+    private fun saveZonedDateTimes(writeToPrimaryDataTables: Boolean, zonedDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
@@ -767,7 +767,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param enums
      */
-    fun saveEnums(writeToPrimaryDataTables: Boolean, enums: HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>) {
+    fun saveEnums(writeToPrimaryDataTables: Boolean, enums: HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>) {
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
@@ -807,7 +807,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param dateTimeArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>) {
+    private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>) {
         val deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?"
         val insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)"
         try {
@@ -855,7 +855,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param floatArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<Float>>>) {
+    private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, ListProperty<Float>>>) {
         val deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?"
         val insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)"
         try {
@@ -904,7 +904,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param integerArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<Int>>>) {
+    private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, ListProperty<Int>>>) {
         val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
         val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
@@ -953,7 +953,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param doubleArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<Double>>>) {
+    private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, ListProperty<Double>>>) {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
         val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
@@ -1002,7 +1002,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param longArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<Long>>>) {
+    private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, ListProperty<Long>>>) {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?"
         val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)"
         try {
@@ -1050,7 +1050,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param stringArrayProperties
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, SimpleListProperty<String>>>) {
+    private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, ListProperty<String>>>) {
         val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
         val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
@@ -1100,7 +1100,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>) {
+    private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>) {
         var record = 0
         val recordTotal = enumStrings.size
         val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
@@ -1153,7 +1153,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>) {
+    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>) {
         if (objectArrayProperties.isEmpty()) return
         val jdsEntities = ArrayList<JdsEntity>()
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
@@ -1225,7 +1225,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(connection: Connection, objectProperties: HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>) {
+    private fun saveAndBindObjects(connection: Connection, objectProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>) {
         if (objectProperties.isEmpty()) return //prevent stack overflow :)
         val record = SimpleIntegerProperty(0)
         val changesMade = SimpleBooleanProperty(false)

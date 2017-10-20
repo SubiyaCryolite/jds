@@ -24,37 +24,37 @@ import java.util.*
  */
 internal class JdsSaveContainer {
     //time constructs
-    val localDateTimeProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>> = ArrayList()
-    val localDateProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>> = ArrayList()
-    val localTimeProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>> = ArrayList()
-    val zonedDateTimeProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>> = ArrayList()
-    val monthDayProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<MonthDay>>>> = ArrayList()
-    val yearMonthProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Temporal>>>> = ArrayList()
-    val periodProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Period>>>> = ArrayList()
-    val durationProperties: MutableList<HashMap<String, HashMap<Long, SimpleObjectProperty<Duration>>>> = ArrayList()
+    val localDateTimeProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
+    val localDateProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
+    val localTimeProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
+    val zonedDateTimeProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
+    val monthDayProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>> = ArrayList()
+    val yearMonthProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
+    val periodProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Period>>>> = ArrayList()
+    val durationProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Duration>>>> = ArrayList()
     //strings
-    val stringProperties: MutableList<HashMap<String, HashMap<Long, SimpleStringProperty>>> = ArrayList()
+    val stringProperties: MutableList<HashMap<String, HashMap<Long, StringProperty>>> = ArrayList()
     //primitives
-    val booleanProperties: MutableList<HashMap<String, HashMap<Long, SimpleBooleanProperty>>> = ArrayList()
-    val floatProperties: MutableList<HashMap<String, HashMap<Long, SimpleFloatProperty>>> = ArrayList()
-    val doubleProperties: MutableList<HashMap<String, HashMap<Long, SimpleDoubleProperty>>> = ArrayList()
-    val longProperties: MutableList<HashMap<String, HashMap<Long, SimpleLongProperty>>> = ArrayList()
-    val integerProperties: MutableList<HashMap<String, HashMap<Long, SimpleIntegerProperty>>> = ArrayList()
+    val booleanProperties: MutableList<HashMap<String, HashMap<Long, BooleanProperty>>> = ArrayList()
+    val floatProperties: MutableList<HashMap<String, HashMap<Long, FloatProperty>>> = ArrayList()
+    val doubleProperties: MutableList<HashMap<String, HashMap<Long, DoubleProperty>>> = ArrayList()
+    val longProperties: MutableList<HashMap<String, HashMap<Long, LongProperty>>> = ArrayList()
+    val integerProperties: MutableList<HashMap<String, HashMap<Long, IntegerProperty>>> = ArrayList()
     //blobs
-    val blobProperties: MutableList<HashMap<String, HashMap<Long, SimpleBlobProperty>>> = ArrayList()
+    val blobProperties: MutableList<HashMap<String, HashMap<Long, BlobProperty>>> = ArrayList()
     //arrays
-    val objectCollections: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, SimpleListProperty<JdsEntity>>>> = ArrayList()
-    val stringCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<String>>>> = ArrayList()
-    val localDateTimeCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<LocalDateTime>>>> = ArrayList()
-    val floatCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<Float>>>> = ArrayList()
-    val doubleCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<Double>>>> = ArrayList()
-    val longCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<Long>>>> = ArrayList()
-    val integerCollections: MutableList<HashMap<String, HashMap<Long, SimpleListProperty<Int>>>> = ArrayList()
+    val objectCollections: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>> = ArrayList()
+    val stringCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<String>>>> = ArrayList()
+    val localDateTimeCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>> = ArrayList()
+    val floatCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Float>>>> = ArrayList()
+    val doubleCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Double>>>> = ArrayList()
+    val longCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Long>>>> = ArrayList()
+    val integerCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Int>>>> = ArrayList()
     //enumProperties
-    val enumProperties: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, SimpleObjectProperty<Enum<*>>>>> = ArrayList()
-    val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, SimpleListProperty<Enum<*>>>>> = ArrayList()
+    val enumProperties: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>> = ArrayList()
+    val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>> = ArrayList()
     //objects
-    val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, SimpleObjectProperty<JdsEntity>>>> = ArrayList()
+    val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
     val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
 }
