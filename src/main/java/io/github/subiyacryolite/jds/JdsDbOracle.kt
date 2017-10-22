@@ -271,4 +271,47 @@ abstract class JdsDbOracle : JdsDb() {
             }
         }
     }
+
+    override fun getSqlAddColumn(): String {
+        return "ALTER TABLE %s ADD %s %s"
+    }
+
+    override fun getSqlTypeFloat(): String {
+        return "BINARY_FLOAT"
+    }
+
+    override fun getSqlTypeDouble(): String {
+        return "BINARY_DOUBLE"
+    }
+
+    override fun getSqlTypeZonedDateTime(): String {
+        return "NUMBER(19)"
+    }
+
+    override fun getSqlTypeTime(): String {
+        return "NUMBER(10)"
+    }
+
+    override fun getSqlTypeBlob(max: Int): String {
+        return "BLOB"
+    }
+
+    override fun getSqlTypeInteger(): String {
+        return "NUMBER(10)"
+    }
+
+    override fun getSqlTypeDateTime(): String {
+        return "DATE"
+    }
+
+    override fun getSqlTypeLong(): String {
+        return "NUMBER(19)"
+    }
+
+    override fun getSqlTypeText(max: Int): String {
+        return if (max == 0)
+            "NCLOB"
+        else
+            "NVARCHAR2($max)"
+    }
 }

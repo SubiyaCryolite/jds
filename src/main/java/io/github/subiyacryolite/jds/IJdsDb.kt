@@ -41,4 +41,28 @@ interface IJdsDb {
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
     fun getConnection(targetConnection: Int): Connection
+
+    fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean
+
+    fun doesTableExist(connection: Connection, tableName: String): Boolean
+
+    fun getSqlAddColumn(): String
+
+    fun getSqlTypeFloat(): String
+
+    fun getSqlTypeDouble(): String
+
+    fun getSqlTypeZonedDateTime(): String
+
+    fun getSqlTypeTime(): String
+
+    fun getSqlTypeBlob(max: Int): String
+
+    fun getSqlTypeInteger(): String
+
+    fun getSqlTypeDateTime(): String
+
+    fun getSqlTypeLong(): String
+
+    fun getSqlTypeText(max: Int): String
 }

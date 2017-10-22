@@ -21,11 +21,7 @@ abstract class BaseTestConfig {
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
 
-    protected //setting a custom Entity Guid
-            //setting a custom Entity Guid
-            //setting a custom Entity Guid
-            //setting a custom Entity Guid
-    val sampleAddressBook: AddressBook
+    protected  val sampleAddressBook: AddressBook
         get() {
             val primaryAddress = Address()
             primaryAddress.overview.entityGuid = "primaryAddress"

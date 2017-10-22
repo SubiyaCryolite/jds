@@ -95,7 +95,7 @@ class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Cal
          * @param entities
          * @throws Exception
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, entities).call()", "io.github.subiyacryolite.jds.JdsDelete"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, entityVersions).call()", "io.github.subiyacryolite.jds.JdsDelete"))
         @Throws(Exception::class)
         fun delete(jdsDb: JdsDb, entities: Collection<JdsEntity>) {
             JdsDelete(jdsDb, entities).call()
@@ -106,7 +106,7 @@ class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Cal
          * @param entities
          * @throws Exception
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("delete(jdsDb, Arrays.asList(*entities))", "io.github.subiyacryolite.jds.JdsDelete.Companion.delete", "java.util.Arrays"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("delete(jdsDb, Arrays.asList(*entityVersions))", "io.github.subiyacryolite.jds.JdsDelete.Companion.delete", "java.util.Arrays"))
         @Throws(Exception::class)
         fun delete(jdsDb: JdsDb, vararg entities: JdsEntity) {
             delete(jdsDb, Arrays.asList(*entities))

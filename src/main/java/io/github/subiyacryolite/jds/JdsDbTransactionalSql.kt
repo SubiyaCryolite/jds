@@ -274,4 +274,50 @@ abstract class JdsDbTransactionalSql protected constructor() : JdsDb() {
         sb.append(viewSql)
         return sb.toString()
     }
+
+    override fun getSqlAddColumn(): String {
+        return "ALTER TABLE %s ADD %s %s"
+    }
+
+    override fun getSqlTypeFloat(): String {
+        return "REAL"
+    }
+
+    override fun getSqlTypeDouble(): String {
+        return "FLOAT"
+    }
+
+    override fun getSqlTypeZonedDateTime(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeTime(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeBlob(max: Int): String {
+        return return if (max == 0)
+            "VARBINARY(MAX)"
+        else
+            "VARBINARY($max)"
+    }
+
+    override fun getSqlTypeInteger(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeDateTime(): String {
+        return "DATETIME"
+    }
+
+    override fun getSqlTypeLong(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeText(max: Int): String {
+        return if (max == 0)
+            "NVARCHAR(MAX)"
+        else
+            "NVARCHAR($max)"
+    }
 }

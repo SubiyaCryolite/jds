@@ -343,7 +343,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     /**
-     * Copy values from matching fields found in both objects
+     * Copy values from matching fieldIds found in both objects
      *
      * @param source The entity to copy values from
      * @param <T>    A valid JDSEntity
@@ -966,11 +966,11 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     /**
-     * Binds all the fields attached to an entity, updates the fields dictionary
+     * Binds all the fieldIds attached to an entity, updates the fieldIds dictionary
      *
      * @param connection the SQL connection to use for DB operations
      * @param entityId   the value representing the entity
-     * @param fields     the values representing the entity's fields
+     * @param fields     the values representing the entity's fieldIds
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         try {
@@ -1082,4 +1082,60 @@ abstract class JdsEntity : IJdsEntity {
         }
     }
 
+    fun getReportAtomicValue(id: Long, ordinal: Int): Any? {
+        //time constructs
+        if (localDateTimeProperties.containsKey(id))
+            return Timestamp.valueOf(localDateTimeProperties[id]!!.get() as LocalDateTime)
+        if (zonedDateTimeProperties.containsKey(id))
+            return (zonedDateTimeProperties[id]!!.get() as ZonedDateTime).toInstant().toEpochMilli()
+        if (localDateProperties.containsKey(id))
+            return Timestamp.valueOf((localDateProperties[id]!!.get() as LocalDate).atStartOfDay())
+        if (localTimeProperties.containsKey(id))
+            return (localTimeProperties[id]!!.get() as LocalTime).toSecondOfDay()
+        if (monthDayProperties.containsKey(id))
+            return monthDayProperties[id]!!.get().toString()
+        if (yearMonthProperties.containsKey(id))
+            return yearMonthProperties[id]!!.get().toString()
+        if (periodProperties.containsKey(id))
+            return periodProperties[id]!!.get().toString()
+        if (durationProperties.containsKey(id))
+            return (durationProperties[id]!!.get() as Duration).toNanos()
+        //string
+        if (stringProperties.containsKey(id))
+            return stringProperties[id]!!.get()
+        //primitives
+        if (floatProperties.containsKey(id))
+            return floatProperties[id]!!.get()
+        if (doubleProperties.containsKey(id))
+            return doubleProperties[id]!!.get()
+        if (booleanProperties.containsKey(id))
+            return booleanProperties[id]!!.get()
+        if (longProperties.containsKey(id))
+            return longProperties[id]!!.get()
+        if (integerProperties.containsKey(id))
+            return integerProperties[id]!!.get()
+        //enum
+        enumProperties.filter { it.key.field.id == id }.forEach {
+            return resolveEnumValue(it.value.get(), ordinal)
+        }
+        enumCollectionProperties.filter { it.key.field.id == id }.forEach {
+            it.value.get().forEach {
+                return resolveEnumValue(it, ordinal)
+            }
+        }
+        return null
+    }
+
+    private fun resolveEnumValue(it: Enum<*>, index: Int): Int {
+        return when (it.ordinal == index) {
+            true -> 1
+            false -> 0
+        }
+    }
+
+    override fun registerFields(jdsTable: JdsTable) {
+        fields.forEach {
+            jdsTable.registerField(it)
+        }
+    }
 }

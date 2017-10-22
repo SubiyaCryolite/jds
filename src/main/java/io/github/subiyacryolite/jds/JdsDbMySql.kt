@@ -261,4 +261,47 @@ abstract class JdsDbMySql protected constructor() : JdsDb() {
         sb.append(viewSql)
         return sb.toString()
     }
+
+    override fun getSqlAddColumn(): String {
+        return "ALTER TABLE %s ADD COLUMN %s %s"
+    }
+
+    override fun getSqlTypeFloat(): String {
+        return "FLOAT"
+    }
+
+    override fun getSqlTypeDouble(): String {
+        return "DOUBLE"
+    }
+
+    override fun getSqlTypeZonedDateTime(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeTime(): String {
+        return "INT"
+    }
+
+    override fun getSqlTypeBlob(max: Int): String {
+        return "BLOB"
+    }
+
+    override fun getSqlTypeInteger(): String {
+        return "INT"
+    }
+
+    override fun getSqlTypeDateTime(): String {
+        return "DATETIME"
+    }
+
+    override fun getSqlTypeLong(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeText(max: Int): String {
+        return if (max == 0)
+            "TEXT"
+        else
+            "VARCHAR($max)"
+    }
 }

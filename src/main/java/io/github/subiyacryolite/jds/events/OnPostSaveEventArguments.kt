@@ -121,7 +121,6 @@ class OnPostSaveEventArguments {
         connection.autoCommit = false
         for (preparedStatement in statements.values) {
             preparedStatement.executeBatch()
-            preparedStatement.close()
         }
         connection.commit()
         connection.autoCommit = true
@@ -138,8 +137,19 @@ class OnPostSaveEventArguments {
         alternateStatements.filter { it.key == targetConnection }.forEach {
             it.value.forEach {
                 it.value.executeBatch()
+            }
+        }
+    }
+
+    fun closeBatches() {
+        for (preparedStatement in statements.values) {
+            preparedStatement.close()
+        }
+        alternateStatements.forEach {
+            it.value.forEach {
                 it.value.close()
             }
         }
+        connection.autoCommit = true
     }
 }

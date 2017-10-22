@@ -20,10 +20,10 @@ class LegacyValidation : BaseTestConfig() {
         JdsSave.save(jdsDb, 1, memObjects)
         System.out.printf("Saved %s\n", memObjects)
 
-        val savObjects = JdsLoad.load(jdsDb, Example::class.java) //load all entities of type AddressBook
-        val specificObject = JdsLoad.load(jdsDb, Example::class.java, "instance4") //load all entities of type AddressBook with Entity Guids in range
-        System.out.printf("All entities [%s]\n", savObjects)
-        System.out.printf("Specific entities [%s]\n", specificObject)
+        val savObjects = JdsLoad.load(jdsDb, Example::class.java) //load all entityVersions of type AddressBook
+        val specificObject = JdsLoad.load(jdsDb, Example::class.java, "instance4") //load all entityVersions of type AddressBook with Entity Guids in range
+        System.out.printf("All entityVersions [%s]\n", savObjects)
+        System.out.printf("Specific entityVersions [%s]\n", specificObject)
 
         val srcA = savObjects.parallelStream().filter { it.overview.entityGuid == "instance1" }.findAny()
         val srcB = memObjects.parallelStream().filter { it.overview.entityGuid == "instance1" }.findAny()

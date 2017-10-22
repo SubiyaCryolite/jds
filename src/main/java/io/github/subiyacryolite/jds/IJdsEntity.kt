@@ -17,4 +17,5 @@ import java.io.Externalizable
 
 interface IJdsEntity : Externalizable {
     val overview: IJdsOverview
+    fun registerFields(jdsTable: JdsTable)
 }

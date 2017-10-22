@@ -7,7 +7,7 @@
 # Jenesis Data Store
 Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. The aim of JDS is to allow for the rapid creation and modification of java classes in order to facilitate rapid prototyping and quick development.
 
-The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
+The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fieldIds and their values. Fields, Objects and ArrayTypes can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
 
 Put simply, JDS is useful for any developer that requires a flexible schema running on top of a traditional Relational Database. Some use-cases include:
 - Rapid prototyping
@@ -18,7 +18,7 @@ Put simply, JDS is useful for any developer that requires a flexible schema runn
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
 # Design
-The concept behind JDS is quite simple. Extend a base “Entity” class, define “Fields” of a particular datatype and lastly “Map” the said fields to a JavaFX Bean.
+The concept behind JDS is quite simple. Extend a base “Entity” class, define “Fields” of a particular datatype and lastly “Map” the said fieldIds to a JavaFX Bean.
 
 ## Features
 - Transparent persistence
@@ -27,7 +27,7 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 - Easily integrates with new or existing databases
 - Save, Updates and Deletes cascade to child objects and collections
 - Eager Loading is applied to embedded objects as well as on collections
-- Generation of views representing entities as conventional tables
+- Generation of views representing entityVersions as conventional tables
 - Supports MySQL, T-SQL, PostgreSQL and SQLite
 - Underlying database implemented using the Star Schema
 
@@ -115,7 +115,7 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 |YEAR_MONTH|YearMonth|Object of type YearMonth|
 |ZONED_DATE_TIME|ZonedDateTime|Zoned DateTime instances|
 
-I recommend defining your fields as static constants
+I recommend defining your fieldIds as static constants
 
 ```java
 import io.github.subiyacryolite.jds.JdsField;
@@ -149,7 +149,7 @@ public class Fields {
 ```
 
 ### 1.1.3 Defining Enums
-JdsEnums are an extension of fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes, RadioButtons or Combo Boxes in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
+JdsEnums are an extension of fieldIds. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes, RadioButtons or Combo Boxes in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
 First of all we'd have to define a standard fieldEntity of type ENUM_TEXT.
 ```java
 public class Fields
@@ -500,7 +500,7 @@ Beyond saving numeric, string and date values JDS can also persist embedded obje
 
 All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped to a JdsField of type **CLASS**.
 
-This allows a single parent entity to have multiple child entities of the same entity type i.e transfer: AccountTransfer { source: Account , destination: Account, amount: double }
+This allows a single parent entity to have multiple child entityVersions of the same entity type i.e transfer: AccountTransfer { source: Account , destination: Account, amount: double }
 
 ```java
 public class Fields
@@ -792,7 +792,7 @@ private List<Example> getCollection() {
 ```
 
 ### 1.2.4 Save
-The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entities)** or **(Collection\<JdsEntity\> entities)**. The method also expects the user to supply a batch size.
+The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entityVersions)** or **(Collection\<JdsEntity\> entityVersions)**. The method also expects the user to supply a batch size.
 ```java
 List<Example> collection = getCollection();
 
@@ -808,11 +808,11 @@ System.out.printf("Saved? %s\n", saving.get());
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
 ```java
-//all entities of type AddressBook
+//all entityVersions of type AddressBook
 List<Example> allInstances;
-//all entities of type AddressBook with Entity Guids in range
+//all entityVersions of type AddressBook with Entity Guids in range
 List<Example> specificInstance;
-//all entities of type AddressBook with Entity Guids in range SORTED by creation date
+//all entityVersions of type AddressBook with Entity Guids in range SORTED by creation date
 List<Example> sortedInstances;
 //ordering comparator
 Comparator<Example> comparator = Comparator.comparing(Example::getDateField);

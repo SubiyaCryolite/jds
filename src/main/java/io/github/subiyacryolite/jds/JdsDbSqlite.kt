@@ -256,4 +256,44 @@ abstract class JdsDbSqlite protected constructor() : JdsDb() {
     override fun createOrAlterView(viewName: String, viewSql: String): String {
         return ""
     }
+
+    override fun getSqlAddColumn(): String {
+        return "ALTER TABLE %s ADD COLUMN %s %s"
+    }
+
+    override fun getSqlTypeFloat(): String {
+        return "REAL"
+    }
+
+    override fun getSqlTypeDouble(): String {
+        return "DOUBLE"
+    }
+
+    override fun getSqlTypeZonedDateTime(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeTime(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeBlob(max: Int): String {
+        return "BLOB"
+    }
+
+    override fun getSqlTypeInteger(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeDateTime(): String {
+        return "TIMESTAMP"
+    }
+
+    override fun getSqlTypeLong(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeText(max: Int): String {
+        return "TEXT"
+    }
 }

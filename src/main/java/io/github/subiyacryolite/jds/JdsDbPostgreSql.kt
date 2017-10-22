@@ -252,4 +252,47 @@ abstract class JdsDbPostgreSql : JdsDb() {
         sb.append(viewSql)
         return sb.toString()
     }
+
+    override fun getSqlAddColumn(): String {
+        return "ALTER TABLE %s ADD COLUMN %s %s"
+    }
+
+    override fun getSqlTypeFloat(): String {
+        return "REAL"
+    }
+
+    override fun getSqlTypeDouble(): String {
+        return "FLOAT"
+    }
+
+    override fun getSqlTypeZonedDateTime(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeTime(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeBlob(max: Int): String {
+        return "BYTEA"
+    }
+
+    override fun getSqlTypeInteger(): String {
+        return "INTEGER"
+    }
+
+    override fun getSqlTypeDateTime(): String {
+        return "TIMESTAMP"
+    }
+
+    override fun getSqlTypeLong(): String {
+        return "BIGINT"
+    }
+
+    override fun getSqlTypeText(max: Int): String {
+        return if (max == 0)
+            "TEXT"
+        else
+            "VARCHAR($max)"
+    }
 }

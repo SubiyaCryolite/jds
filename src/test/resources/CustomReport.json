@@ -1,0 +1,9 @@
+{
+  "name": "CrtJsonTest",
+  "uniqueEntries": false,
+  "fieldIds": [3,5,7,4],
+  "entityVersions": {
+    "1": [1],
+    "3": [1]
+  }
+}

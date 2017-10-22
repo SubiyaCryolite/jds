@@ -12,13 +12,13 @@ class TimeConstructs : BaseTestConfig() {
     override fun save() {
         val timeConstruct = timeConstruct;
         JdsSave(jdsDb, Arrays.asList(timeConstruct)).call()
-        println("saved entities [$timeConstruct]")
+        println("saved entityVersions [$timeConstruct]")
     }
 
     @Throws(Exception::class)
     override fun load() {
-        val list = JdsLoad(jdsDb, TimeConstruct::class.java, "timeConstruct").call() //load all entities of type AddressBook with Entity Guids in range
-        println("loaded entities [$list]")
+        val list = JdsLoad(jdsDb, TimeConstruct::class.java, "timeConstruct").call() //load all entityVersions of type AddressBook with Entity Guids in range
+        println("loaded entityVersions [$list]")
     }
 
 

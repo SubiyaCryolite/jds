@@ -33,6 +33,7 @@ import java.util.*
 abstract class JdsDb : IJdsDb {
 
     val classes = HashMap<Long, Class<out JdsEntity>>()
+    val tables = HashSet<JdsTable>()
 
     /**
      * A value indicating whether the underlying database implementation
@@ -204,7 +205,7 @@ abstract class JdsDb : IJdsDb {
      * @param tableName the table to look up
      * @return true if the specified table exists the the database
      */
-    private fun doesTableExist(connection: Connection, tableName: String): Boolean {
+    override fun doesTableExist(connection: Connection, tableName: String): Boolean {
         val answer = tableExists(connection, tableName)
         return answer == 1
     }
@@ -249,7 +250,7 @@ abstract class JdsDb : IJdsDb {
      * @param tableName  the table to inspect
      * @return true if the specified index exists the the database
      */
-    private fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
+    override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
         val answer = columnExists(connection, tableName, columnName)
         return answer == 1
     }
@@ -595,6 +596,19 @@ abstract class JdsDb : IJdsDb {
     }
 
     @Synchronized
+    fun mapTable(table: JdsTable) {
+        tables.add(table)
+    }
+
+    fun prepareTables() {
+        getConnection().use { connection ->
+            tables.forEach {
+                it.generateOrUpdateSchema(this, connection)
+            }
+        }
+    }
+
+    @Synchronized
     fun map(entity: Class<out JdsEntity>) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
@@ -620,7 +634,6 @@ abstract class JdsDb : IJdsDb {
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
                 }
-
             } else
                 throw RuntimeException("Duplicate service code for class [" + entity.canonicalName + "] - [" + entityAnnotation.entityId + "]")
         } else
@@ -793,7 +806,7 @@ abstract class JdsDb : IJdsDb {
     }
 
     /**
-     * SQL call to bind fields to entities
+     * SQL call to bind fieldIds to entityVersions
      *
      * @return the default or overridden SQL statement for this operation
      */
@@ -810,7 +823,7 @@ abstract class JdsDb : IJdsDb {
     }
 
     /**
-     * SQL call to bind enumProperties to entities
+     * SQL call to bind enumProperties to entityVersions
      *
      * @return the default or overridden SQL statement for this operation
      */
@@ -819,7 +832,7 @@ abstract class JdsDb : IJdsDb {
     }
 
     /**
-     * Map parents to child entities
+     * Map parents to child entityVersions
      *
      * @return
      */

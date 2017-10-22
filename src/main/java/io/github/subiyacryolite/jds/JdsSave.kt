@@ -204,6 +204,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
+            //crt point
+            entities.forEach { processCrt(jdsDb, it) }
+
             //respect execution sequence
             //respect JDS batches in each call
             onPreSaveEventArguments.executeBatches()
@@ -212,8 +215,16 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             throw ex
         } finally {
             if (finalStep) {
+                onPreSaveEventArguments.closeBatches()
+                onPostSaveEventArguments.closeBatches()
                 connection.close()
             }
+        }
+    }
+
+    private fun processCrt(jdsDb: JdsDb, jdsEntity: JdsEntity) {
+        jdsDb.tables.forEach {
+            it.executeSave(jdsEntity, onPostSaveEventArguments)
         }
     }
 
@@ -1305,7 +1316,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
          * @param batchSize
          * @param entities
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsSave(jdsDb, batchSize, entities).call()", "io.github.subiyacryolite.jds.JdsSave"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsSave(jdsDb, batchSize, entityVersions).call()", "io.github.subiyacryolite.jds.JdsSave"))
         @Throws(Exception::class)
         fun save(jdsDb: JdsDb, batchSize: Int, entities: Collection<JdsEntity>) {
             JdsSave(jdsDb, batchSize, entities).call()
@@ -1316,7 +1327,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
          * @param batchSize
          * @param entities
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("save(jdsDb, batchSize, Arrays.asList(*entities))", "io.github.subiyacryolite.jds.JdsSave.Companion.save", "java.util.Arrays"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("save(jdsDb, batchSize, Arrays.asList(*entityVersions))", "io.github.subiyacryolite.jds.JdsSave.Companion.save", "java.util.Arrays"))
         @Throws(Exception::class)
         fun save(jdsDb: JdsDb, batchSize: Int, vararg entities: JdsEntity) {
             save(jdsDb, batchSize, Arrays.asList(*entities))

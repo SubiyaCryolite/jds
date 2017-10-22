@@ -41,8 +41,8 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     private fun bind() {
-        if (!fieldEnums.containsKey(field.id))
-            fieldEnums.put(field.id, this)
+        if (!values.containsKey(field.id))
+            values.put(field.id, this)
     }
 
     override fun toString(): String {
@@ -73,18 +73,18 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
 
     companion object {
 
-        private val fieldEnums: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
+        private val values: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
 
         operator fun get(jdsField: JdsField): JdsFieldEnum<*>? {
-            return if (fieldEnums.containsKey(jdsField.id))
-                fieldEnums[jdsField.id]
+            return if (values.containsKey(jdsField.id))
+                values[jdsField.id]
             else
                 throw RuntimeException(String.format("This jdsField [%s] has not been bound to any enums", jdsField))
         }
 
         operator fun get(fieldId: Long): JdsFieldEnum<*>? {
-            return if (fieldEnums.containsKey(fieldId))
-                fieldEnums[fieldId]
+            return if (values.containsKey(fieldId))
+                values[fieldId]
             else
                 throw RuntimeException(String.format("This field [%s] has not been bound to any enums", fieldId))
         }

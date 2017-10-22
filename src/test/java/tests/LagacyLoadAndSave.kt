@@ -24,10 +24,10 @@ class LagacyLoadAndSave : BaseTestConfig() {
     @Throws(Exception::class)
     override fun load() {
         val comparator = Comparator.comparing<Address, String> { entry -> entry.provinceOrState }
-        val allAddressBooks = JdsLoad(jdsDb, Address::class.java, comparator).call() //load all entities of type AddressBook
-        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, comparator, "primaryAddress").call() //load all entities of type AddressBook with Entity Guids in range
-        System.out.printf("All entities [%s]\n", allAddressBooks)
-        System.out.printf("Specific entities [%s]\n", specificAddressBook)
+        val allAddressBooks = JdsLoad(jdsDb, Address::class.java, comparator).call() //load all entityVersions of type AddressBook
+        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, comparator, "primaryAddress").call() //load all entityVersions of type AddressBook with Entity Guids in range
+        System.out.printf("All entityVersions [%s]\n", allAddressBooks)
+        System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
     }
 
     @Test

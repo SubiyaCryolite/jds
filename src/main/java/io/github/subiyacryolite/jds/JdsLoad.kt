@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.stream.Stream
 
 /**
- * This class is responsible for loading an [entities][JdsEntity] [fields][JdsField]
+ * This class is responsible for loading an [entityVersions][JdsEntity] [fields][JdsField]
  */
 class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private val collections = ArrayList<T>()
@@ -123,7 +123,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                     var batchSequence = 1
                                                                                     for (entityGuid in entityGuids) {
                                                                                         if (referenceType != null && (initialisePrimitives || initialiseDatesAndTimes || initialiseObjects)) {
-                                                                                            //sometimes the entities would already have been instanciated, thus we only need to populate
+                                                                                            //sometimes the entityVersions would already have been instanciated, thus we only need to populate
                                                                                             val entity = referenceType.newInstance()
                                                                                             entity.overview.entityGuid = entityGuid
                                                                                             entities.add(entity)
@@ -604,7 +604,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 connection.prepareStatement(String.format(rawSql2, quote(filterGuids))).use { preparedStatement2 ->
                     if (filterGuids.size == 0) {
                         //if no ids supplied we are looking for all instances of the entity.
-                        //load ALL entities in the in heirarchy
+                        //load ALL entityVersions in the in heirarchy
                         preparedStatement1.executeQuery().use { rs ->
                             while (rs.next()) {
                                 if (batchContents == batchSize) {

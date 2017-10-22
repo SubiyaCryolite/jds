@@ -80,18 +80,20 @@ class JdsField() : Externalizable {
     }
 
     companion object {
-        private val fields = HashMap<Long, String>()
+        val values = HashMap<Long, JdsField>()
 
         /**
          * @param jdsField
          */
         private fun bind(jdsField: JdsField) {
-            if (!fields.containsKey(jdsField.id))
-                fields.put(jdsField.id, jdsField.name)
+            if (!values.containsKey(jdsField.id))
+                values.put(jdsField.id, jdsField)
             else
                 throw RuntimeException(String.format("This jdsField ID [${jdsField.id}] is already bound"))
         }
 
         val NULL = JdsField()
     }
+
+
 }
