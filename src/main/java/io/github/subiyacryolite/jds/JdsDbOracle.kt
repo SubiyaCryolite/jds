@@ -23,8 +23,8 @@ import java.sql.Connection
 /**
  * Created by ifunga on 14/07/2017.
  */
-abstract class JdsDbOracle : JdsDb() {
-    init {
+abstract class JdsDbOracle : JdsDb {
+    constructor() {
         supportsStatements = true
         implementation = JdsImplementation.ORACLE
     }

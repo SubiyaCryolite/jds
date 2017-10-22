@@ -43,23 +43,25 @@ abstract class JdsDb : IJdsDb {
     /**
      * The underlying database implementation
      */
-    var implementation: JdsImplementation? = null
+    var implementation: JdsImplementation = JdsImplementation.ORACLE
         protected set
+
     /**
      * A value indicating whether JDS should log every write in the system
      */
     var isLoggingEdits: Boolean = false
-        private set
     /**
      * A value indicating whether JDS should print internal log information
      */
     var isPrintingOutput: Boolean = false
-        private set
     /**
      * Indicate whether JDS is persisting to the primary data tables
      */
     var isWritingToPrimaryDataTables = true
-        private set
+    /**
+     * Indicate whether the log table will have unique entries or will append only
+     */
+    var isLoggingAppendOnly = false
 
     /**
      * Initialise JDS base tables
@@ -588,7 +590,7 @@ abstract class JdsDb : IJdsDb {
                 statement.setString(2, entityName)
                 statement.executeUpdate()
                 if (isPrintingOutput)
-                    System.out.printf("Mapped Entity [%S - %s]\n", entityName, entityId)
+                    println("Mapped Entity [$entityName - $entityId]")
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
@@ -627,17 +629,16 @@ abstract class JdsDb : IJdsDb {
                         jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
-                        jdsEntity = null
                         if (isPrintingOutput)
-                            System.out.printf("Mapped Entity [%s]\n", entityAnnotation.entityName)
+                            println("Mapped Entity [${entityAnnotation.entityName}]")
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
                 }
             } else
-                throw RuntimeException("Duplicate service code for class [" + entity.canonicalName + "] - [" + entityAnnotation.entityId + "]")
+                throw RuntimeException("Duplicate service code for class [${entity.canonicalName}] - [${entityAnnotation.entityId}]")
         } else
-            throw RuntimeException("You must annotate the class [" + entity.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("You must annotate the class [${entity.canonicalName}] with [${JdsEntityAnnotation::class.java}]")
     }
 
     val mappedClasses: Collection<Class<out JdsEntity>>
@@ -659,31 +660,6 @@ abstract class JdsDb : IJdsDb {
 
     fun getBoundClass(serviceCode: Long): Class<out JdsEntity>? {
         return classes[serviceCode]
-    }
-
-    /**
-     * @param value
-     */
-    fun isWritingToPrimaryDataTables(value: Boolean) {
-        this.isWritingToPrimaryDataTables = value
-    }
-
-    /**
-     * Determine whether JDS should log every write in the system
-     *
-     * @param value whether JDS should log every write in the system
-     */
-    fun isLoggingEdits(value: Boolean) {
-        this.isLoggingEdits = value
-    }
-
-    /**
-     * Determine whether JDS should print internal log information
-     *
-     * @param value whether JDS should print internal log information
-     */
-    fun isPrintingOutput(value: Boolean) {
-        this.isPrintingOutput = value
     }
 
     /**
@@ -860,34 +836,66 @@ abstract class JdsDb : IJdsDb {
 
     abstract fun createOrAlterView(viewName: String, viewSql: String): String
 
+    private val logSqlPrefix = when (isOracleDb) {
+        true -> "WITH src AS (?, ?, ?, ?)"
+        else -> ""
+    }
+
+    private val logSqlSource = when (isOracleDb) {
+        true -> "SELECT * FROM src"
+        else -> "SELECT (?, ?, ?, ?)"
+    }
+
     internal fun saveOldTextValues(): String {
-        //will indexes sped this up
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
-        //"WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = :entityGuid, FieldId = :fieldId, Sequence = :sequence, TextValue = :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND TextValue = ?)"
+        }
     }
 
     internal fun saveOldDoubleValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND DoubleValue = ?)"
+        }
     }
 
     internal fun saveOldLongValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND LongValue = ?)"
+        }
     }
 
     internal fun saveOldIntegerValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND IntegerValue = ?)"
+        }
     }
 
     internal fun saveOldFloatValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) $logSqlSource) " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND FloatValue = ?)"
+        }
     }
 
     internal fun saveOldDateTimeValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND DateTimeValue = ?)"
+        }
     }
 
     internal fun saveOldBlobValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(:entityGuid, :fieldId, :sequence, :value)"
+        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(?, ?, ?, ?)"
     }
 
     /**

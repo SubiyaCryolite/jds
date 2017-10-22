@@ -23,9 +23,9 @@ import java.sql.Connection
 /**
  * The MySQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbMySql protected constructor() : JdsDb() {
+abstract class JdsDbMySql : JdsDb {
 
-    init {
+    constructor() {
         supportsStatements = true
         implementation = JdsImplementation.MYSQL
     }

@@ -22,8 +22,8 @@ import java.sql.Connection
 /**
  * The PostgreSQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbPostgreSql : JdsDb() {
-    init {
+abstract class JdsDbPostgreSql : JdsDb {
+    constructor () {
         supportsStatements = true
         implementation = JdsImplementation.POSTGRES
     }

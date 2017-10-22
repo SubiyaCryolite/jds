@@ -21,7 +21,7 @@ abstract class BaseTestConfig {
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
 
-    protected  val sampleAddressBook: AddressBook
+    protected val sampleAddressBook: AddressBook
         get() {
             val primaryAddress = Address()
             primaryAddress.overview.entityGuid = "primaryAddress"
@@ -178,7 +178,8 @@ abstract class BaseTestConfig {
 
     private fun initJds() {
         jdsDb.init()
-        jdsDb.isLoggingEdits(true)
+        jdsDb.isLoggingEdits = true
+        jdsDb.isLoggingAppendOnly = false
         initialiseJdsClasses()
         System.out.printf("=========== %s ===========\n", jdsDb.implementation)
     }

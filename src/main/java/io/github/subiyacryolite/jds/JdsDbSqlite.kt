@@ -20,9 +20,9 @@ import java.sql.Connection
 /**
  * The SQLite implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbSqlite protected constructor() : JdsDb() {
+abstract class JdsDbSqlite : JdsDb {
 
-    init {
+    constructor() {
         implementation = JdsImplementation.SQLITE
         supportsStatements = false
     }

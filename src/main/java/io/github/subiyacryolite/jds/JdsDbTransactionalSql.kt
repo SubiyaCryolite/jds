@@ -22,9 +22,9 @@ import java.sql.Connection
 /**
  * The TSQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbTransactionalSql protected constructor() : JdsDb() {
+abstract class JdsDbTransactionalSql : JdsDb {
 
-    init {
+    constructor() {
         supportsStatements = true
         implementation = JdsImplementation.TSQL
     }

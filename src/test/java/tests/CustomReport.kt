@@ -24,10 +24,9 @@ class CustomReport : BaseTestConfig() {
         crtAddress.name = "CrtAddress"
         crtAddress.registerEntities(Address::class.java, true)
 
-        //jdsDb.mapTable(customTable)
+        jdsDb.mapTable(customTable)
         jdsDb.mapTable(crtAddress)
         jdsDb.prepareTables()
-
 
         val sav = JdsSave(jdsDb, Arrays.asList(sampleAddressBook))
         sav.call()
