@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds
 
 import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
+import io.github.subiyacryolite.jds.JdsExtensions.fromTsqlOffsetDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
@@ -28,7 +29,6 @@ import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import io.github.subiyacryolite.jds.JdsExtensions.fromIsoOffsetDateTime
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
@@ -920,10 +920,12 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.ARRAY_DATE_TIME -> dateTimeArrayProperties[fieldId]?.get()?.add((value as Timestamp).toLocalDateTime())
             JdsFieldType.BOOLEAN -> booleanProperties[fieldId]?.set((value as Int) == 1)
             JdsFieldType.ZONED_DATE_TIME -> {
-                if (value is Long)
-                    zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
-                else if (value is String)
-                    zonedDateTimeProperties[fieldId]?.set(value.fromIsoOffsetDateTime())
+                when (value) {
+                    is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
+                    is Timestamp -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault()))
+                    is String -> zonedDateTimeProperties[fieldId]?.set(value.fromTsqlOffsetDateTime())
+                    is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
+                }
             }
             JdsFieldType.DATE -> localDateProperties[fieldId]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
             JdsFieldType.TIME -> localTimeProperties[fieldId]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))

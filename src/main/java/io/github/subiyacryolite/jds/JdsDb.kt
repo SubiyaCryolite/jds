@@ -881,7 +881,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) $logSqlSource) " +
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND FloatValue = ?)"
         }
     }

@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.JdsExtensions.setTimestamp
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments
@@ -24,7 +25,6 @@ import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.Callable
-import io.github.subiyacryolite.jds.JdsExtensions.toIsoOffsetDateTime
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
@@ -835,10 +835,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     if (writeToPrimaryDataTables) {
                         upsert.setString("entityGuid", entityGuid)
                         upsert.setLong("fieldId", fieldId)
-                        if (jdsDb.isTransactionalSqlDb)
-                            upsert.setString("value", zonedDateTime.toIsoOffsetDateTime())
-                        else
-                            upsert.setTimestamp("value", Timestamp.from(zonedDateTime.toInstant()))
+                        upsert.setTimestamp("value", zonedDateTime, jdsDb)
                         upsert.addBatch()
                     }
                     if (jdsDb.isPrintingOutput)
@@ -847,18 +844,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                     log.setString(1, entityGuid)
                     log.setLong(2, fieldId)
                     log.setInt(3, 0)
-                    if (jdsDb.isTransactionalSqlDb)
-                        log.setString(4, zonedDateTime.toIsoOffsetDateTime())
-                    else
-                        log.setLong(4, zonedDateTime.toInstant().toEpochMilli())
+                    log.setTimestamp(4, zonedDateTime, jdsDb)
                     if (!jdsDb.isLoggingAppendOnly) {
                         log.setString(5, entityGuid)
                         log.setLong(6, fieldId)
                         log.setInt(7, 0)
-                        if (jdsDb.isTransactionalSqlDb)
-                            log.setString(8, zonedDateTime.toIsoOffsetDateTime())
-                        else
-                            log.setLong(8, zonedDateTime.toInstant().toEpochMilli())
+                        log.setTimestamp(8, zonedDateTime, jdsDb)
                     }
                     log.addBatch()
                 }

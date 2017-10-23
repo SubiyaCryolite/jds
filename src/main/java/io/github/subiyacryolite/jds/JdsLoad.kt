@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.JdsLoadListener
 import io.github.subiyacryolite.jds.events.OnPostLoadEventArguments
 import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments
@@ -352,7 +353,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @return
      */
     private fun <T : JdsEntity> optimalEntityLookup(jdsEntities: Collection<T>, entityGuid: String): Stream<T> {
-        return jdsEntities.parallelStream().filter { entryPredicate -> entryPredicate.overview.entityGuid == entityGuid }
+        return jdsEntities.parallelStream().filter { it.overview.entityGuid == entityGuid }
     }
 
     /**
@@ -539,9 +540,11 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val entityGuid = resultSet.getString("EntityGuid")
-                val value = when (jdsDb.isTransactionalSqlDb) {
-                    true -> resultSet.getString("Value")
-                    false -> resultSet.getLong("Value")
+                val value = when (jdsDb.implementation) {
+                    JdsImplementation.TSQL -> resultSet.getString("Value")
+                    JdsImplementation.POSTGRES -> resultSet.getObject("Value")
+                    JdsImplementation.MYSQL, JdsImplementation.ORACLE -> resultSet.getTimestamp("Value")
+                    else -> resultSet.getLong("Value")
                 }
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value) }

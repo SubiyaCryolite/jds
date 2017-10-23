@@ -62,6 +62,7 @@ class LagacyLoadAndSave : BaseTestConfig() {
     @Throws(Exception::class)
     fun oracleImplementation() {
         initialiseOracleBackend()
+        jdsDb.isLoggingEdits = false
         saveAndLoad()
     }
 

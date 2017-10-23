@@ -32,7 +32,7 @@ abstract class BaseTestConfig {
             primaryAddress.plotNumber = 23
             primaryAddress.provinceOrState = "Southern"
             primaryAddress.streetName = "East Street"
-            primaryAddress.timeOfEntry = ZonedDateTime.now().minusWeeks(1)
+            primaryAddress.timeOfEntry = ZonedDateTime.now()
             primaryAddress.primaryAddress = PrimaryAddress.YES
 
             val secondAddress = Address()
