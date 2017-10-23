@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreTime(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value INTEGER)
+CREATE PROCEDURE procStoreTime(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value TIME(7))
 AS
 BEGIN
 	MERGE JdsStoreTime AS dest

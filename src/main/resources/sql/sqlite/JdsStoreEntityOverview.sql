@@ -4,6 +4,6 @@ CREATE TABLE JdsStoreEntityOverview
     DateCreated         TIMESTAMP,
     DateModified        TIMESTAMP,
     Version             BIGINT,
-    Live                INTEGER,
+    Live                BOOLEAN,
     PRIMARY KEY         (EntityGuid)
 );

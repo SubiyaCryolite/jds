@@ -17,7 +17,7 @@ open class JdsTable : Serializable {
     var fieldIds = ArrayList<Long>()
     var entityVersions = HashMap<Long, MutableSet<Long>>()//EntityId.Versions
 
-    private val columnToFieldMap = LinkedHashMap<String,JdsField>()
+    private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val columnNames = LinkedList<String>()
     private val insertColumns = StringJoiner(",")
     private val insertParameters = StringJoiner(",")
@@ -59,38 +59,38 @@ open class JdsTable : Serializable {
      */
     @Throws(Exception::class)
     fun executeSave(jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
-        val satisfied = satisfiesCondition(jdsEntity)
+        val satisfied = satisfiesConditions(jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
-                //tricky, need to build UPSERT syntax for all
-                //do it the lazy way
-                //update else
-                //insert?
-            } else {
-                //so easy, just insert into
-                val query = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
+                //if unique delete old entries
+                val primaryKey = JdsSchema.getPrimaryKey();
+                val deleteSql = "DELETE FROM $$name WHERE $primaryKey = ?"
+                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(deleteSql)
+                deleteStatement.setString(1, jdsEntity.overview.entityGuid)
+                deleteStatement.addBatch()
+            }
 
-                val preparedStatement = onPostSaveEventArguments.getOrAddStatement(query)
-                preparedStatement.setObject(1, jdsEntity.overview.entityGuid)
+            val insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
+            val insertStatement = onPostSaveEventArguments.getOrAddStatement(insertSql)
+            insertStatement.setObject(1, jdsEntity.overview.entityGuid)
 
-                //order will be maintained by linked list
-                columnNames.forEachIndexed { dex, column ->
-                    val field = columnToFieldMap[column]!!
-                    when (field.type) {
-                        JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> {
-                            JdsFieldEnum[field.id]!!.sequenceValues.forEach {
-                                val value = jdsEntity.getReportAtomicValue(field.id, it!!.ordinal)
-                                preparedStatement.setObject(dex + 2, value ?: null)
-                            }
-                        }
-                        else -> {
-                            val value = jdsEntity.getReportAtomicValue(field.id, 0)
-                            preparedStatement.setObject(dex + 2, value ?: null)
+            //order will be maintained by linked list
+            columnNames.forEachIndexed { dex, column ->
+                val field = columnToFieldMap[column]!!
+                when (field.type) {
+                    JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> {
+                        JdsFieldEnum[field.id]!!.sequenceValues.forEach {
+                            val value = jdsEntity.getReportAtomicValue(field.id, it!!.ordinal)
+                            insertStatement.setObject(dex + 2, value ?: null)
                         }
                     }
+                    else -> {
+                        val value = jdsEntity.getReportAtomicValue(field.id, 0)
+                        insertStatement.setObject(dex + 2, value ?: null)
+                    }
                 }
-                preparedStatement.addBatch()
             }
+            insertStatement.addBatch()
         }
     }
 
@@ -134,7 +134,7 @@ open class JdsTable : Serializable {
      *
      * @param jdsEntity
      */
-    private fun satisfiesCondition(jdsEntity: JdsEntity): Boolean {
+    private fun satisfiesConditions(jdsEntity: JdsEntity): Boolean {
         val notLimitedToSpecificEntity = entityVersions.isEmpty()
         val matchesSpecificEntity = !notLimitedToSpecificEntity && entityVersions.containsKey(jdsEntity.overview.entityId)
         val matchesSpecificVersion = matchesSpecificEntity && entityVersions[jdsEntity.overview.entityId]!!.contains(jdsEntity.overview.version)

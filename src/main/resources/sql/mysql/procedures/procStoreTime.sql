@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreTime(IN pEntityGuid VARCHAR(48), IN pFieldId BIGINT, IN pValue INT)
+CREATE PROCEDURE procStoreTime(IN pEntityGuid VARCHAR(48), IN pFieldId BIGINT, IN pValue TIME)
 BEGIN
 	INSERT INTO JdsStoreTime(EntityGuid, FieldId, Value)
     VALUES (pEntityGuid, pFieldId, pValue)

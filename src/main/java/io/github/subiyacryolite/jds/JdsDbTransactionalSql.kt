@@ -288,11 +288,11 @@ abstract class JdsDbTransactionalSql : JdsDb {
     }
 
     override fun getSqlTypeZonedDateTime(): String {
-        return "BIGINT"
+        return "DATETIMEOFFSET(7)"
     }
 
     override fun getSqlTypeTime(): String {
-        return "INTEGER"
+        return "TIME(7)"
     }
 
     override fun getSqlTypeBlob(max: Int): String {
@@ -319,5 +319,9 @@ abstract class JdsDbTransactionalSql : JdsDb {
             "NVARCHAR(MAX)"
         else
             "NVARCHAR($max)"
+    }
+
+    override fun getSqlTypeBoolean(): String {
+        return "BIT"
     }
 }

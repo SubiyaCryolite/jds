@@ -65,4 +65,6 @@ interface IJdsDb {
     fun getSqlTypeLong(): String
 
     fun getSqlTypeText(max: Int): String
+
+    fun getSqlTypeBoolean(): String
 }

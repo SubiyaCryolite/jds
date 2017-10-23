@@ -1,7 +1,7 @@
-CREATE FUNCTION procStoreTime(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue TIME WITHOUT TIME ZONE)
+CREATE FUNCTION procStoreBoolean(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue BOOLEAN)
 RETURNS VOID AS $$
 BEGIN
-	INSERT INTO JdsStoreTime(EntityGuid, FieldId, Value)
+	INSERT INTO JdsStoreBoolean(EntityGuid, FieldId, Value)
     VALUES (pEntityGuid, pFieldId, pValue)
     ON CONFLICT (EntityGuid,FieldId) DO UPDATE SET Value = pValue;
 END;

@@ -202,11 +202,14 @@ abstract class JdsDbOracle : JdsDb {
         executeSqlFromFile(connection, "sql/oracle/JdsStoreOldFieldValues.sql")
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
         //oracle jdbc hates semi-colons
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
-        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BooleanValue)")
+        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue)")
         executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
     }
 
@@ -285,7 +288,7 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun getSqlTypeZonedDateTime(): String {
-        return "NUMBER(19)"
+        return "TIMESTAMP WITH TIME ZONE"
     }
 
     override fun getSqlTypeTime(): String {
@@ -313,5 +316,9 @@ abstract class JdsDbOracle : JdsDb {
             "NCLOB"
         else
             "NVARCHAR2($max)"
+    }
+
+    override fun getSqlTypeBoolean(): String {
+        return "SMALLINT"
     }
 }

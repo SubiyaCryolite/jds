@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreZonedDateTime(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue BIGINT)
+CREATE FUNCTION procStoreZonedDateTime(pEntityGuid VARCHAR(48), pFieldId BIGINT, pValue TIMESTAMP WITH TIME ZONE)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreZonedDateTime(EntityGuid, FieldId, Value)

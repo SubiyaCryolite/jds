@@ -539,7 +539,10 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val entityGuid = resultSet.getString("EntityGuid")
-                val value = resultSet.getLong("Value")
+                val value = when (jdsDb.isTransactionalSqlDb) {
+                    true -> resultSet.getString("Value")
+                    false -> resultSet.getLong("Value")
+                }
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value) }
             }

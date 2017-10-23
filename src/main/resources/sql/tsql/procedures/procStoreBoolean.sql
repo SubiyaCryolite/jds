@@ -1,7 +1,7 @@
-CREATE PROCEDURE procStoreZonedDateTime(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value DATETIMEOFFSET(7))
+CREATE PROCEDURE procStoreBoolean(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value BIT)
 AS
 BEGIN
-	MERGE JdsStoreZonedDateTime AS dest
+	MERGE JdsStoreBoolean AS dest
 	USING (VALUES (@EntityGuid,  @FieldId, @Value)) AS src([EntityGuid],  [FieldId], [Value])
 	ON (src.EntityGuid = dest.EntityGuid AND src.FieldId = dest.FieldId)
 	WHEN MATCHED THEN

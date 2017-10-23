@@ -184,12 +184,15 @@ abstract class JdsDbMySql : JdsDb {
     override fun createRefOldFieldValues(connection: Connection) {
         executeSqlFromFile(connection, "sql/mysql/JdsStoreOldFieldValues.sql")
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
-        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BooleanValue)")
+        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
@@ -275,11 +278,11 @@ abstract class JdsDbMySql : JdsDb {
     }
 
     override fun getSqlTypeZonedDateTime(): String {
-        return "BIGINT"
+        return "TIMESTAMP"
     }
 
     override fun getSqlTypeTime(): String {
-        return "INT"
+        return "TIME"
     }
 
     override fun getSqlTypeBlob(max: Int): String {
@@ -303,5 +306,9 @@ abstract class JdsDbMySql : JdsDb {
             "TEXT"
         else
             "VARCHAR($max)"
+    }
+
+    override fun getSqlTypeBoolean(): String {
+        return "BOOLEAN"
     }
 }

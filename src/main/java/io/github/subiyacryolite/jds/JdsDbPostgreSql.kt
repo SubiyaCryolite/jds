@@ -266,11 +266,11 @@ abstract class JdsDbPostgreSql : JdsDb {
     }
 
     override fun getSqlTypeZonedDateTime(): String {
-        return "BIGINT"
+        return "TIMESTAMP WITH TIME ZONE"
     }
 
     override fun getSqlTypeTime(): String {
-        return "INTEGER"
+        return "TIME WITHOUT TIME ZONE"
     }
 
     override fun getSqlTypeBlob(max: Int): String {
@@ -294,5 +294,9 @@ abstract class JdsDbPostgreSql : JdsDb {
             "TEXT"
         else
             "VARCHAR($max)"
+    }
+
+    override fun getSqlTypeBoolean(): String {
+        return "BOOLEAN"
     }
 }

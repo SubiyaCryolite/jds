@@ -9,5 +9,8 @@ CREATE TABLE JdsStoreOldFieldValues(
         DoubleValue			 DOUBLE,
         LongValue			 BIGINT,
         DateTimeValue		 TIMESTAMP,
+        TimeValue			 INTEGER,
+        BooleanValue	     BOOLEAN,
+        ZonedDateTimeValue	 BIGINT,
         BlobValue            BLOB
 );

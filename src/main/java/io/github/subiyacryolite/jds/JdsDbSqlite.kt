@@ -151,12 +151,15 @@ abstract class JdsDbSqlite : JdsDb {
 
     override fun createRefOldFieldValues(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValues.sql")
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue);")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues    ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue);")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues   ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue);")
-        executeSqlFromString(connection, "CREATE INDEX LongValues     ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue);")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue);")
-        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence);")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BooleanValue)")
+        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
@@ -295,5 +298,9 @@ abstract class JdsDbSqlite : JdsDb {
 
     override fun getSqlTypeText(max: Int): String {
         return "TEXT"
+    }
+
+    override fun getSqlTypeBoolean(): String {
+        return "BOOLEAN"
     }
 }

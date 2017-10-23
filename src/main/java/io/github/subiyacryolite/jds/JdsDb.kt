@@ -43,7 +43,7 @@ abstract class JdsDb : IJdsDb {
     /**
      * The underlying database implementation
      */
-    var implementation: JdsImplementation = JdsImplementation.ORACLE
+    var implementation: JdsImplementation = JdsImplementation.SQLITE
         protected set
 
     /**
@@ -843,7 +843,7 @@ abstract class JdsDb : IJdsDb {
 
     private val logSqlSource = when (isOracleDb) {
         true -> "SELECT * FROM src"
-        else -> "SELECT (?, ?, ?, ?)"
+        else -> "SELECT ?, ?, ?, ?"
     }
 
     internal fun saveOldTextValues(): String {
@@ -891,6 +891,14 @@ abstract class JdsDb : IJdsDb {
             true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
             false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND DateTimeValue = ?)"
+        }
+    }
+
+    internal fun saveOldZonedDateTimeValues(): String {
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND ZonedDateTimeValue = ?)"
         }
     }
 
