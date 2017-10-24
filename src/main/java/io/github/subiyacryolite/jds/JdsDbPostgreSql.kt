@@ -22,12 +22,7 @@ import java.sql.Connection
 /**
  * The PostgreSQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbPostgreSql : JdsDb {
-    constructor () {
-        supportsStatements = true
-        implementation = JdsImplementation.POSTGRES
-    }
-
+abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?"

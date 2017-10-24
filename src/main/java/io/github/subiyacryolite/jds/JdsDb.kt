@@ -29,22 +29,14 @@ import java.util.*
  * This class is responsible for the setup of SQL connections, default database
  * write statements, as well as the initialization of core and custom components
  * that will support JDS on the underlying Database implementation
+ * @param implementation
+ * @param supportsStatements
  */
-abstract class JdsDb : IJdsDb {
+abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb {
 
     val classes = HashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
 
-    /**
-     * A value indicating whether the underlying database implementation
-     * supports callable statements (Stored Procedures)
-     */
-    protected var supportsStatements: Boolean = false
-    /**
-     * The underlying database implementation
-     */
-    var implementation: JdsImplementation = JdsImplementation.SQLITE
-        protected set
 
     /**
      * A value indicating whether JDS should log every write in the system
@@ -567,7 +559,7 @@ abstract class JdsDb : IJdsDb {
     private fun mapParentEntities(connection: Connection, parentEntities: List<Long>, entityCode: Long) {
         if (parentEntities.isEmpty()) return
         try {
-            (if (supportsStatements()) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
+            (if (supportsStatements) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
                 for (parentEntitiy in parentEntities) {
                     statement.setLong(1, parentEntitiy)
                     statement.setLong(2, entityCode)
@@ -590,7 +582,7 @@ abstract class JdsDb : IJdsDb {
     @Synchronized
     fun mapClassName(connection: Connection, entityId: Long, entityName: String) {
         try {
-            (if (supportsStatements()) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
+            (if (supportsStatements) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
                 statement.setLong(1, entityId)
                 statement.setString(2, entityName)
                 statement.executeUpdate()
@@ -662,20 +654,8 @@ abstract class JdsDb : IJdsDb {
         }
     }
 
-
     fun getBoundClass(serviceCode: Long): Class<out JdsEntity>? {
         return classes[serviceCode]
-    }
-
-    /**
-     * A value indicating whether the underlying database implementation
-     * supports callable statements (Stored Procedures)
-     *
-     * @return true if the underlying database implementation supports callable
-     * statements (stored procedures)
-     */
-    fun supportsStatements(): Boolean {
-        return supportsStatements
     }
 
     /**
@@ -851,28 +831,28 @@ abstract class JdsDb : IJdsDb {
 
     abstract fun createOrAlterView(viewName: String, viewSql: String): String
 
-    private val logSqlPrefix = when (isOracleDb) {
-        true -> "WITH src AS (?, ?, ?, ?)"
-        else -> ""
-    }
-
     private val logSqlSource = when (isOracleDb) {
-        true -> "SELECT * FROM src"
+        true -> "SELECT ?, ?, ?, ? FROM DUAL"
         else -> "SELECT ?, ?, ?, ?"
     }
 
-    internal fun saveOldTextValues(): String {
+    private val oldStringValue = when (isOracleDb) {
+        true -> "dbms_lob.substr(StringValue, dbms_lob.getlength(StringValue), 1)"
+        else -> "StringValue"
+    }
+
+    internal fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TextValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TextValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND TextValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, StringValue) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, StringValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND $oldStringValue = ?)"
         }
     }
 
     internal fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND DoubleValue = ?)"
         }
     }
@@ -880,7 +860,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND LongValue = ?)"
         }
     }
@@ -888,7 +868,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND IntegerValue = ?)"
         }
     }
@@ -896,7 +876,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND FloatValue = ?)"
         }
     }
@@ -904,7 +884,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND DateTimeValue = ?)"
         }
     }
@@ -912,7 +892,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND ZonedDateTimeValue = ?)"
         }
     }
@@ -920,7 +900,7 @@ abstract class JdsDb : IJdsDb {
     internal fun saveOldTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) $logSqlSource " +
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND TimeValue = ?)"
         }
     }

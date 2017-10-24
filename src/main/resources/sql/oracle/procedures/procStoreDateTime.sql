@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreDateTime(pUuid IN NVARCHAR2, pFieldId IN NUMBER, pValue IN DATE)
+CREATE PROCEDURE procStoreDateTime(pUuid IN NVARCHAR2, pFieldId IN NUMBER, pValue IN TIMESTAMP)
 AS
 BEGIN
 	MERGE INTO JdsStoreDateTime dest

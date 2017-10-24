@@ -4,7 +4,7 @@ BEGIN;
         FieldId				    BIGINT,
         DateOfModification	    TIMESTAMP DEFAULT now(),
         Sequence                INTEGER,
-        TextValue			    TEXT,
+        StringValue			    TEXT,
         IntegerValue		    INTEGER,
         FloatValue			    REAL,
         DoubleValue			    FLOAT,

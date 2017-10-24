@@ -10,7 +10,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "4.0.0f-SNAPSHOT" //majorv.minorv.bugfixincrement
+version = "4.0.0.171024.1555-SNAPSHOT" //majorv.minorv.bugfixincrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -107,11 +107,11 @@ uploadArchives {
                 name "Jenesis Data Store"
                 packaging "jar"
                 description = project.description
-                url "https://github.com/SubiyaCryolite/Jenesis-Data-Store"
+                url "https://github.com/SubiyaCryolite/jds"
                 scm {
-                    connection "scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git"
-                    developerConnection "scm:git:git@github.com:SubiyaCryolite/Jenesis-Data-Store.git"
-                    url "https://github.com/SubiyaCryolite/Jenesis-Data-Store"
+                    connection "scm:git:git@github.com:SubiyaCryolite/jds.git"
+                    developerConnection "scm:git:git@github.com:SubiyaCryolite/jds.git"
+                    url "https://github.com/SubiyaCryolite/jds"
                 }
                 licenses {
                     license {

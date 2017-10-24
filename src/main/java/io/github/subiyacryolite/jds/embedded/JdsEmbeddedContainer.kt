@@ -24,7 +24,7 @@ class JdsBooleanValues(val id: Long, val v: Int?)
 class JdsDoubleValues(val id: Long, val v: Double?)
 class JdsIntegerValues(val id: Long, val v: Int?)
 class JdsLongValues(val id: Long, val v: Long?)
-class JdsTextValues(val id: Long, val v: String?)
+class JdsStringValues(val id: Long, val v: String?)
 class JdsFloatValues(val id: Long, val v: Float?)
 //time constructs
 class JdsLocalDateTimeValues(val id: Long, val v: Timestamp?)

@@ -22,12 +22,7 @@ import java.sql.Connection
 /**
  * The TSQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbTransactionalSql : JdsDb {
-
-    constructor() {
-        supportsStatements = true
-        implementation = JdsImplementation.TSQL
-    }
+abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0

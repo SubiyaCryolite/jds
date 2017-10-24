@@ -43,7 +43,7 @@ class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * String values
      */
-    val s: MutableList<JdsTextValues> = ArrayList()
+    val s: MutableList<JdsStringValues> = ArrayList()
     /**
      * Float values
      */

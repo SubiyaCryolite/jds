@@ -23,11 +23,7 @@ import java.sql.Connection
 /**
  * Created by ifunga on 14/07/2017.
  */
-abstract class JdsDbOracle : JdsDb {
-    constructor() {
-        supportsStatements = true
-        implementation = JdsImplementation.ORACLE
-    }
+abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0
@@ -310,7 +306,7 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun getSqlTypeDateTime(): String {
-        return "DATE"
+        return "TIMESTAMP"
     }
 
     override fun getSqlTypeLong(): String {

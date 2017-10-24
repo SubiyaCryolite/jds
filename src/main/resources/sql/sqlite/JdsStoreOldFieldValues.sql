@@ -3,7 +3,7 @@ CREATE TABLE JdsStoreOldFieldValues(
         FieldId				 BIGINT,
         DateOfModification	 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         Sequence             INTEGER,
-        TextValue			 TEXT,
+        StringValue			 TEXT,
         IntegerValue		 INTEGER,
         FloatValue			 REAL,
         DoubleValue			 DOUBLE,

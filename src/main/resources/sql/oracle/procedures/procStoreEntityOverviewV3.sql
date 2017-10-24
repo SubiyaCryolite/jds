@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreEntityOverviewV3(pUuid IN NVARCHAR2, pDateCreated IN DATE, pDateModified IN DATE, pLive IN NUMBER, pVersion IN NUMBER)
+CREATE PROCEDURE procStoreEntityOverviewV3(pUuid IN NVARCHAR2, pDateCreated IN TIMESTAMP, pDateModified IN TIMESTAMP, pLive IN NUMBER, pVersion IN NUMBER)
 AS
 BEGIN
 	MERGE INTO JdsEntityOverview dest

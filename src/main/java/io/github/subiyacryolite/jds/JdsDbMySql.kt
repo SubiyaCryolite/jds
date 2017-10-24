@@ -17,18 +17,12 @@ import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.enums.JdsComponent
 import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-
 import java.sql.Connection
 
 /**
  * The MySQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbMySql : JdsDb {
-
-    constructor() {
-        supportsStatements = true
-        implementation = JdsImplementation.MYSQL
-    }
+abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0

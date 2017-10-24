@@ -238,8 +238,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         var record = 0
         val recordTotal = overviews.size
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
-            val inheritance = if (jdsDb.supportsStatements()) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
+            val upsert = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
+            val inheritance = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
             for (overview in overviews) {
                 record++
                 //Entity Overview
@@ -267,7 +267,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveBlobs(writeToPrimaryDataTables: Boolean, blobProperties: HashMap<String, HashMap<Long, BlobProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBlobValues())
             for ((uuid, value) in blobProperties) {
                 record++
@@ -304,7 +304,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveBooleans(writeToPrimaryDataTables: Boolean, booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
             for ((uuid, value1) in booleanProperties) {
                 record++
@@ -347,7 +347,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveIntegers(writeToPrimaryDataTables: Boolean, integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
             for ((uuid, value1) in integerProperties) {
                 record++
@@ -390,7 +390,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveFloats(writeToPrimaryDataTables: Boolean, floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldFloatValues())
             for ((uuid, value1) in floatProperties) {
                 record++
@@ -433,7 +433,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveDoubles(writeToPrimaryDataTables: Boolean, doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDoubleValues())
             for ((uuid, value1) in doubleProperties) {
                 record++
@@ -476,7 +476,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveLongs(writeToPrimaryDataTables: Boolean, longProperties: HashMap<String, HashMap<Long, LongProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldLongValues())
             for ((uuid, value1) in longProperties) {
                 record++
@@ -519,8 +519,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveStrings(writeToPrimaryDataTables: Boolean, stringProperties: HashMap<String, HashMap<Long, StringProperty>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
+            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldStringValues())
             for ((uuid, value1) in stringProperties) {
                 record++
                 var innerRecord = 0
@@ -563,10 +563,10 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                                    durationProperties: HashMap<String, HashMap<Long, ObjectProperty<Duration>>>) {
         var record = 0
         try {
-            val upsertText = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
-            val upsertLong = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
+            val upsertText = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
+            val upsertLong = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
 
-            val logText = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues())
+            val logText = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldStringValues())
             val logLong = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldLongValues())
 
             for ((uuid, hashMap) in monthDayProperties) {
@@ -708,7 +708,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveDatesAndDateTimes(writeToPrimaryDataTables: Boolean, localDateTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>, localDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDateTimeValues())
             for ((uuid, value) in localDateTimeProperties) {
                 record++
@@ -779,7 +779,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveTimes(writeToPrimaryDataTables: Boolean, localTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTimeValues())
             for ((uuid, value) in localTimeProperties) {
                 record++
@@ -822,7 +822,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveZonedDateTimes(writeToPrimaryDataTables: Boolean, zonedDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldZonedDateTimeValues())
             for ((uuid, value) in zonedDateProperties) {
                 record++
@@ -865,7 +865,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     fun saveEnums(writeToPrimaryDataTables: Boolean, enums: HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>) {
         var record = 0
         try {
-            val upsert = if (jdsDb.supportsStatements()) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
+            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
             for ((uuid, value1) in enums) {
                 record++
@@ -1185,7 +1185,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND Uuid = :uuid"
         val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :uuid, :sequence, :value)"
         try {
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues())
+            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldStringValues())
             val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
             val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
             var record = 0

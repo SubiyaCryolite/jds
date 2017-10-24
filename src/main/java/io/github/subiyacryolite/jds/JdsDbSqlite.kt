@@ -20,12 +20,7 @@ import java.sql.Connection
 /**
  * The SQLite implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbSqlite : JdsDb {
-
-    constructor() {
-        implementation = JdsImplementation.SQLITE
-        supportsStatements = false
-    }
+abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0

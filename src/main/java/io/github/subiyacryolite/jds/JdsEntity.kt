@@ -849,7 +849,7 @@ abstract class JdsEntity : IJdsEntity {
             embeddedObject.b.add(JdsBooleanValues(it.key, when (it.value.value) {true -> 1;false -> 0
             }))
         }
-        stringProperties.entries.parallelStream().forEach { embeddedObject.s.add(JdsTextValues(it.key, it.value.value)) }
+        stringProperties.entries.parallelStream().forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value)) }
         floatProperties.entries.parallelStream().forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
         doubleProperties.entries.parallelStream().forEach { embeddedObject.d.add(JdsDoubleValues(it.key, it.value.value)) }
         longProperties.entries.parallelStream().forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value)) }
@@ -986,8 +986,8 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         try {
-            (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
-                (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
+            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
+                (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
                     fields.forEach {
                         //1. map this fieldEntity ID to the entity type
                         mapClassFields.setLong("entityId", entityId)
@@ -1031,7 +1031,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         try {
-            (if (jdsDb.supportsStatements()) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
+            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
                 fields.forEach {
                     mapFieldTypes.setLong("typeId", it.id)
                     mapFieldTypes.setString("typeName", it.type.toString())
@@ -1054,7 +1054,7 @@ abstract class JdsEntity : IJdsEntity {
     @Synchronized
     private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) {
         try {
-            (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use { statement ->
+            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use { statement ->
                 for (field in fields) {
                     for (index in 0 until field.sequenceValues.size) {
                         statement.setLong(1, entityId)
@@ -1078,7 +1078,7 @@ abstract class JdsEntity : IJdsEntity {
     @Synchronized
     private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) {
         try {
-            (if (jdsDb.supportsStatements()) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use { statement ->
+            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use { statement ->
                 for (field in fieldEnums) {
                     for (index in 0 until field.sequenceValues.size) {
                         statement.setLong(1, field.field.id)
