@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreDouble(
 	FieldId     BIGINT,
-	EntityGuid    VARCHAR(48),
+	Uuid    VARCHAR(48),
 	Value       FLOAT,
-	PRIMARY KEY (FieldId,EntityGuid),
-	FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+	PRIMARY KEY (FieldId,Uuid),
+	FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

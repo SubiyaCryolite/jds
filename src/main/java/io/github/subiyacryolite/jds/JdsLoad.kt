@@ -81,26 +81,26 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                               entityGuids: Collection<String>) {
         val questionsString = getQuestions(entityGuids.size)
         //primitives
-        val sqlTextValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreText WHERE EntityGuid IN (%s)", questionsString)
-        val sqlLongValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreLong WHERE EntityGuid IN (%s)", questionsString)
-        val sqlIntegerValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreInteger WHERE EntityGuid IN (%s)", questionsString)
-        val sqlFloatValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreFloat WHERE EntityGuid IN (%s)", questionsString)
-        val sqlDoubleValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDouble WHERE EntityGuid IN (%s)", questionsString)
-        val sqlDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreDateTime WHERE EntityGuid IN (%s)", questionsString)
-        val sqlTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreTime WHERE EntityGuid IN (%s)", questionsString)
-        val sqlZonedDateTimeValues = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE EntityGuid IN (%s)", questionsString)
+        val sqlTextValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreText WHERE Uuid IN (%s)", questionsString)
+        val sqlLongValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreLong WHERE Uuid IN (%s)", questionsString)
+        val sqlIntegerValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreInteger WHERE Uuid IN (%s)", questionsString)
+        val sqlFloatValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreFloat WHERE Uuid IN (%s)", questionsString)
+        val sqlDoubleValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreDouble WHERE Uuid IN (%s)", questionsString)
+        val sqlDateTimeValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreDateTime WHERE Uuid IN (%s)", questionsString)
+        val sqlTimeValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreTime WHERE Uuid IN (%s)", questionsString)
+        val sqlZonedDateTimeValues = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreZonedDateTime WHERE Uuid IN (%s)", questionsString)
         //blobs
-        val sqlBlobs = String.format("SELECT EntityGuid, Value, FieldId FROM JdsStoreBlob WHERE EntityGuid IN (%s)", questionsString)
+        val sqlBlobs = String.format("SELECT Uuid, Value, FieldId FROM JdsStoreBlob WHERE Uuid IN (%s)", questionsString)
         //array
-        val sqlTextArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlIntegerArrayAndEnumValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlLongArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlFloatArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlDoubleArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlDateTimeArrayValues = String.format("SELECT EntityGuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE EntityGuid IN (%s)", questionsString)
-        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildEntityGuid, ParentEntityGuid, ChildEntityId, FieldId FROM JdsStoreEntityBinding WHERE ParentEntityGuid IN (%s)", questionsString)
+        val sqlTextArrayValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreTextArray WHERE Uuid IN (%s)", questionsString)
+        val sqlIntegerArrayAndEnumValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreIntegerArray WHERE Uuid IN (%s)", questionsString)
+        val sqlLongArrayValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreLongArray WHERE Uuid IN (%s)", questionsString)
+        val sqlFloatArrayValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreFloatArray WHERE Uuid IN (%s)", questionsString)
+        val sqlDoubleArrayValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreDoubleArray WHERE Uuid IN (%s)", questionsString)
+        val sqlDateTimeArrayValues = String.format("SELECT Uuid, Value, FieldId, Sequence FROM JdsStoreDateTimeArray WHERE Uuid IN (%s)", questionsString)
+        val sqlEmbeddedAndArrayObjects = String.format("SELECT ChildUuid, ParentUuid, ChildEntityId, FieldId FROM JdsEntityBinding WHERE ParentUuid IN (%s)", questionsString)
         //overviews
-        val sqlOverviews = String.format("SELECT EntityGuid, DateCreated, DateModified, Live, Version FROM JdsStoreEntityOverview WHERE EntityGuid IN (%s)", questionsString)
+        val sqlOverviews = String.format("SELECT Uuid, DateCreated, DateModified, Live, Version FROM JdsEntityOverview WHERE Uuid IN (%s)", questionsString)
         try {
             jdsDb.getConnection().use { connection ->
                 connection.prepareStatement(sqlBlobs).use { blobs ->
@@ -231,11 +231,11 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val parentEntityGuid = resultSet.getString("ParentEntityGuid")
-                val entityGuid = resultSet.getString("ChildEntityGuid")
+                val parentUuid = resultSet.getString("ParentUuid")
+                val entityGuid = resultSet.getString("ChildUuid")
                 val fieldId = resultSet.getLong("FieldId")
                 val entityId = resultSet.getLong("ChildEntityId")
-                optimalEntityLookup(jdsEntities, parentEntityGuid).forEach { it.populateObjects(jdsDb, fieldId, entityId, entityGuid, innerObjects, entityGuids) }
+                optimalEntityLookup(jdsEntities, parentUuid).forEach { it.populateObjects(jdsDb, fieldId, entityId, entityGuid, innerObjects, entityGuids) }
             }
         }
         val batches = createProcessingBatches(entityGuids)
@@ -251,7 +251,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateFloatArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getFloat("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_FLOAT, fieldId, value) }
@@ -268,7 +268,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDoubleArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getDouble("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_DOUBLE, fieldId, value) }
@@ -285,7 +285,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateLongArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getLong("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_LONG, fieldId, value) }
@@ -302,7 +302,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDateTimeArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getTimestamp("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_DATE_TIME, fieldId, value) }
@@ -319,7 +319,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateStringArrays(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getString("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.ARRAY_TEXT, fieldId, value) }
@@ -336,7 +336,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateIntegerArraysAndEnums(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getInt("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach {
@@ -386,7 +386,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateOverviews(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val dateCreated = resultSet.getTimestamp("DateCreated")
                 val dateModified = resultSet.getTimestamp("DateModified")
                 val version = resultSet.getLong("Version")
@@ -410,7 +410,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDateTimeAndDate(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getTimestamp("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { entity ->
@@ -430,7 +430,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDouble(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getDouble("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.DOUBLE, fieldId, value) }
@@ -447,7 +447,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateBlobs(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getBytes("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.BLOB, fieldId, value) }
@@ -464,7 +464,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateIntegerEnumAndBoolean(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getInt("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { entity ->
@@ -485,7 +485,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateTimes(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getInt("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.TIME, fieldId, value) }
@@ -502,7 +502,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateFloat(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getFloat("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach { it.populateProperties(JdsFieldType.FLOAT, fieldId, value) }
@@ -519,7 +519,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateLongAndDuration(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getLong("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach {
@@ -539,7 +539,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateZonedDateTime(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = when (jdsDb.implementation) {
                     JdsImplementation.TSQL -> resultSet.getString("Value")
                     JdsImplementation.POSTGRES -> resultSet.getObject("Value")
@@ -561,7 +561,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateTextMonthDayYearMonthAndPeriod(jdsEntities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
-                val entityGuid = resultSet.getString("EntityGuid")
+                val entityGuid = resultSet.getString("Uuid")
                 val value = resultSet.getString("Value")
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(jdsEntities, entityGuid).forEach {
@@ -590,7 +590,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         entityAndChildren.add(entityId)
 
         jdsDataBase.getConnection().use { connection ->
-            connection.prepareStatement("SELECT ChildEntityCode FROM JdsRefEntityInheritance WHERE ParentEntityCode = ?").use { preparedStatement ->
+            connection.prepareStatement("SELECT ChildEntityCode FROM JdsEntityInheritance WHERE ParentEntityCode = ?").use { preparedStatement ->
                 preparedStatement.setLong(1, entityAndChildren[0])
                 preparedStatement.executeQuery().use { rs ->
                     while (rs.next()) {
@@ -604,8 +604,8 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 entityHeirarchy.add(id.toString() + "")
 
 
-            val rawSql = "SELECT DISTINCT EntityGuid FROM JdsStoreEntityInheritance WHERE EntityId IN (%s)"
-            val rawSql2 = "SELECT DISTINCT EntityGuid from JdsStoreEntityInheritance WHERE EntityGuid IN (%s)"
+            val rawSql = "SELECT DISTINCT Uuid FROM JdsEntityInstance WHERE EntityId IN (%s)"
+            val rawSql2 = "SELECT DISTINCT Uuid from JdsEntityInstance WHERE Uuid IN (%s)"
             connection.prepareStatement(String.format(rawSql, entityHeirarchy)).use { preparedStatement1 ->
                 connection.prepareStatement(String.format(rawSql2, quote(filterGuids))).use { preparedStatement2 ->
                     if (filterGuids.size == 0) {
@@ -619,7 +619,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(rs.getString("EntityGuid"))
+                                filterBatches[batchIndex].add(rs.getString("Uuid"))
                                 batchContents++
                             }
                         }
@@ -633,7 +633,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(rs.getString("EntityGuid"))
+                                filterBatches[batchIndex].add(rs.getString("Uuid"))
                                 batchContents++
                             }
                         }

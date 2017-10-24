@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreInteger(
     FieldId         BIGINT,
-    EntityGuid      NVARCHAR(48),
+    Uuid      NVARCHAR(48),
     Value           INTEGER,
-    PRIMARY KEY (FieldId,EntityGuid),
-    CONSTRAINT fk_JdsStoreInteger_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    PRIMARY KEY (FieldId,Uuid),
+    CONSTRAINT fk_JdsStoreInteger_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

@@ -1,6 +1,6 @@
-CREATE PROCEDURE procStoreTime(IN pEntityGuid VARCHAR(48), IN pFieldId BIGINT, IN pValue TIME)
+CREATE PROCEDURE procStoreTime(IN pUuid VARCHAR(48), IN pFieldId BIGINT, IN pValue TIME)
 BEGIN
-	INSERT INTO JdsStoreTime(EntityGuid, FieldId, Value)
-    VALUES (pEntityGuid, pFieldId, pValue)
+	INSERT INTO JdsStoreTime(Uuid, FieldId, Value)
+    VALUES (pUuid, pFieldId, pValue)
     ON DUPLICATE KEY UPDATE Value = pValue;
 END

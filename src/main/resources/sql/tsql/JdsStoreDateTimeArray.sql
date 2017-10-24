@@ -1,8 +1,8 @@
 CREATE TABLE JdsStoreDateTimeArray(
     FieldId         BIGINT,
-    EntityGuid      NVARCHAR(48) NOT NULL,
+    Uuid      NVARCHAR(48) NOT NULL,
     Sequence        INTEGER,
     Value           DATETIME,
-    PRIMARY KEY(FieldId,EntityGuid,Sequence),
-    CONSTRAINT fk_JdsStoreDateTimeArray_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    PRIMARY KEY(FieldId,Uuid,Sequence),
+    CONSTRAINT fk_JdsStoreDateTimeArray_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

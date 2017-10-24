@@ -88,7 +88,7 @@ class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Cal
 
 
     companion object {
-        private val DELETE_SQL = "DELETE FROM JdsStoreEntityOverview WHERE EntityGuid = ?"
+        private val DELETE_SQL = "DELETE FROM JdsEntityOverview WHERE Uuid = ?"
 
         /**
          * @param jdsDb

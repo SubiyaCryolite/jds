@@ -1,8 +1,8 @@
-CREATE PROCEDURE procStoreEntityInheritance(pEntityGuid IN NVARCHAR2, pEntityId IN NUMBER)
+CREATE PROCEDURE procStoreEntityInheritance(pUuid IN NVARCHAR2, pEntityId IN NUMBER)
 AS
 BEGIN
-	MERGE INTO JdsStoreEntityInheritance dest
-	USING DUAL ON (pEntityGuid = EntityGuid AND pEntityId = EntityId)
+	MERGE INTO JdsEntityInstance dest
+	USING DUAL ON (pUuid = Uuid AND pEntityId = EntityId)
 	WHEN NOT MATCHED THEN
-		INSERT(EntityGuid, EntityId) VALUES(pEntityGuid, pEntityId);
+		INSERT(Uuid, EntityId) VALUES(pUuid, pEntityId);
 END procStoreEntityInheritance;

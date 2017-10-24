@@ -116,7 +116,11 @@ abstract class JdsDbTransactionalSql : JdsDb {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityInstance.sql")
+    }
+
+    override fun createStoreBoolean(connection: Connection) {
+        executeSqlFromFile(connection, "sql/tsql/JdsStoreBoolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
@@ -172,31 +176,31 @@ abstract class JdsDbTransactionalSql : JdsDb {
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntities.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntities.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEnumValues.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEnums.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefFields.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsFields.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsFieldTypes.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsBindEntityFields.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityFields.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsBindEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityEnums.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
@@ -204,7 +208,7 @@ abstract class JdsDbTransactionalSql : JdsDb {
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityBinding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
@@ -216,10 +220,11 @@ abstract class JdsDbTransactionalSql : JdsDb {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BOOLEAN)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG)
@@ -247,6 +252,7 @@ abstract class JdsDbTransactionalSql : JdsDb {
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreEntityInheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindFieldNames.sql")
             JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindFieldTypes.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreBoolean.sql")
             JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreBlob.sql")
             JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreTime.sql")
             JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreText.sql")

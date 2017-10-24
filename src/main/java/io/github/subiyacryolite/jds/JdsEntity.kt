@@ -887,12 +887,12 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         objectArrayProperties.entries.parallelStream().forEach { itx ->
             itx.value.forEach {
-                embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId))
+                embeddedObject.eb.add(JdsEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId))
                 embeddedObject.eo.add(JdsEmbeddedObject(it))
             }
         }
         objectProperties.entries.parallelStream().forEach {
-            embeddedObject.eb.add(JdsStoreEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
+            embeddedObject.eb.add(JdsEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
             embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
         }
     }
@@ -1095,7 +1095,7 @@ abstract class JdsEntity : IJdsEntity {
         if (localDateTimeProperties.containsKey(id))
             return Timestamp.valueOf(localDateTimeProperties[id]!!.get() as LocalDateTime)
         if (zonedDateTimeProperties.containsKey(id))
-            return (zonedDateTimeProperties[id]!!.get() as ZonedDateTime).toInstant().toEpochMilli()
+            return (zonedDateTimeProperties[id]!!.get() as ZonedDateTime)
         if (localDateProperties.containsKey(id))
             return Timestamp.valueOf((localDateProperties[id]!!.get() as LocalDate).atStartOfDay())
         if (localTimeProperties.containsKey(id))

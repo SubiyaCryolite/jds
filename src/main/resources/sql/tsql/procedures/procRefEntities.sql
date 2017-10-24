@@ -1,7 +1,7 @@
 CREATE PROCEDURE procRefEntities(@EntityId BIGINT, @EntityName NVARCHAR(MAX))
 AS
 BEGIN
-    MERGE JdsRefEntities AS dest
+    MERGE JdsEntities AS dest
     USING (VALUES (@EntityId,@EntityName)) AS src([EntityId],[EntityName])
     ON (src.EntityId = dest.EntityId)
     WHEN NOT MATCHED THEN

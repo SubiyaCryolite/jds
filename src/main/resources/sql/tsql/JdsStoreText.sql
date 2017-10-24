@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreText(
 	FieldId     BIGINT,
-	EntityGuid  NVARCHAR(48),
+	Uuid  NVARCHAR(48),
 	Value       NVARCHAR(MAX),
-	PRIMARY KEY (FieldId,EntityGuid)
+	PRIMARY KEY (FieldId,Uuid)
 );
-ALTER TABLE JdsStoreText ADD CONSTRAINT fk_JdsStoreText_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE;
+ALTER TABLE JdsStoreText ADD CONSTRAINT fk_JdsStoreText_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE;

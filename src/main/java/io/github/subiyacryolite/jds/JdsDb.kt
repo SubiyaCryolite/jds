@@ -104,6 +104,7 @@ abstract class JdsDb : IJdsDb {
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
@@ -163,10 +164,8 @@ abstract class JdsDb : IJdsDb {
             JdsComponent.STORE_INTEGER_ARRAY -> createStoreIntegerArray(connection)
             JdsComponent.STORE_LONG_ARRAY -> createStoreLongArray(connection)
             JdsComponent.STORE_DOUBLE_ARRAY -> createStoreDoubleArray(connection)
-            JdsComponent.STORE_DATE_TIME_ARRAY -> {
-                createStoreDateTimeArray(connection)
-                createStoreBlob(connection)
-            }
+            JdsComponent.STORE_DATE_TIME_ARRAY -> createStoreDateTimeArray(connection)
+            JdsComponent.STORE_BOOLEAN -> createStoreBoolean(connection)
             JdsComponent.STORE_BLOB -> createStoreBlob(connection)
             JdsComponent.STORE_TEXT -> createStoreText(connection)
             JdsComponent.STORE_FLOAT -> createStoreFloat(connection)
@@ -404,6 +403,12 @@ abstract class JdsDb : IJdsDb {
         return 0
     }
 
+
+    /**
+     * Database specific SQL used to create the schema that stores text values
+     */
+    protected abstract fun createStoreBoolean(connection: Connection)
+
     /**
      * Database specific SQL used to create the schema that stores text values
      */
@@ -605,7 +610,7 @@ abstract class JdsDb : IJdsDb {
     fun prepareTables() {
         getConnection().use { connection ->
             tables.forEach {
-                it.generateOrUpdateSchema(this, connection)
+                it.forceGenerateOrUpdateSchema(this, connection)
             }
         }
     }
@@ -680,6 +685,15 @@ abstract class JdsDb : IJdsDb {
      */
     open fun saveString(): String {
         return "{call procStoreText(:entityGuid,:fieldId,:value)}"
+    }
+
+    /**
+     * SQL call to save boolean values
+     *
+     * @return the default or overridden SQL statement for this operation
+     */
+    open fun saveBoolean(): String {
+        return "{call procStoreBoolean(:entityGuid,:fieldId,:value)}"
     }
 
     /**
@@ -848,62 +862,62 @@ abstract class JdsDb : IJdsDb {
 
     internal fun saveOldTextValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TextValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND TextValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TextValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TextValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND TextValue = ?)"
         }
     }
 
     internal fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND DoubleValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND DoubleValue = ?)"
         }
     }
 
     internal fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND LongValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND LongValue = ?)"
         }
     }
 
     internal fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND IntegerValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND IntegerValue = ?)"
         }
     }
 
     internal fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND FloatValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND FloatValue = ?)"
         }
     }
 
     internal fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND DateTimeValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND DateTimeValue = ?)"
         }
     }
 
     internal fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
-            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE EntityGuid = ? AND FieldId = ? AND Sequence = ? AND ZonedDateTimeValue = ?)"
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND ZonedDateTimeValue = ?)"
         }
     }
 
     internal fun saveOldBlobValues(): String {
-        return "INSERT INTO JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BlobValue) VALUES(?, ?, ?, ?)"
+        return "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BlobValue) VALUES(?, ?, ?, ?)"
     }
 
     /**

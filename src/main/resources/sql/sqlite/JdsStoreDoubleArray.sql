@@ -1,8 +1,8 @@
 CREATE TABLE JdsStoreDoubleArray(
     FieldId         BIGINT,
-    EntityGuid      TEXT,
+    Uuid      TEXT,
     Sequence        INTEGER,
     Value           DOUBLE,
-    PRIMARY KEY (FieldId,EntityGuid,Sequence),
-    FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    PRIMARY KEY (FieldId,Uuid,Sequence),
+    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

@@ -1,10 +1,10 @@
-CREATE PROCEDURE procStoreZonedDateTime(pEntityGuid IN NVARCHAR2, pFieldId IN NUMBER, pValue IN TIMESTAMP WITH TIME ZONE)
+CREATE PROCEDURE procStoreZonedDateTime(pUuid IN NVARCHAR2, pFieldId IN NUMBER, pValue IN TIMESTAMP WITH TIME ZONE)
 AS
 BEGIN
 	MERGE INTO JdsStoreZonedDateTime dest
-	USING DUAL ON (pEntityGuid = EntityGuid AND pFieldId = FieldId)
+	USING DUAL ON (pUuid = Uuid AND pFieldId = FieldId)
 	WHEN MATCHED THEN
 		UPDATE SET Value = pValue
 	WHEN NOT MATCHED THEN
-		INSERT(EntityGuid,FieldId,Value)   VALUES(pEntityGuid,  pFieldId, pValue);
+		INSERT(Uuid,FieldId,Value)   VALUES(pUuid,  pFieldId, pValue);
 END procStoreZonedDateTime;

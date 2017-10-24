@@ -115,7 +115,11 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityInstance.sql")
+    }
+
+    override fun createStoreBoolean(connection: Connection) {
+        executeSqlFromFile(connection, "sql/oracle/JdsStoreBoolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
@@ -171,50 +175,50 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntities.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntities.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEnumValues.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEnums.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefFields.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsFields.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsFieldTypes.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsBindEntityFields.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityFields.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsBindEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityEnums.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/JdsStoreOldFieldValues.sql")
         //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
         //oracle jdbc hates semi-colons
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
-        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BooleanValue)")
-        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BooleanValue)")
+        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityBinding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
@@ -226,10 +230,11 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BOOLEAN)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG)
@@ -256,6 +261,7 @@ abstract class JdsDbOracle : JdsDb {
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreEntityInheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldNames.sql")
             JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/oracle/procedures/procBindFieldTypes.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreBoolean.sql")
             JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreBlob.sql")
             JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreTime.sql")
             JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/procStoreText.sql")

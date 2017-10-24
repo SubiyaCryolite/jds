@@ -1,17 +1,19 @@
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.JdsExtensions.setTimestamp
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import java.io.Serializable
 import java.sql.Connection
+import java.time.ZonedDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 
-open class JdsTable : Serializable {
+open class JdsTable() : Serializable {
     var name: String = ""
     var uniqueEntries = false
     var fieldIds = ArrayList<Long>()
@@ -22,6 +24,19 @@ open class JdsTable : Serializable {
     private val insertColumns = StringJoiner(",")
     private val insertParameters = StringJoiner(",")
     private val updates = StringJoiner(",")
+    private var deleteSql = ""
+    private var insertSql = ""
+    private var generatedOrUpdatedSchema = false
+
+    @JvmOverloads
+    constructor(entity: Class<out IJdsEntity>, uniqueEntries: Boolean = false) : this() {
+        if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            val annotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
+            name = annotation.entityName
+            this.uniqueEntries = uniqueEntries
+            registerEntities(entity, true)
+        }
+    }
 
     /**
      * If you are creating a JdsTable in memory
@@ -58,19 +73,17 @@ open class JdsTable : Serializable {
      * @throws Exception
      */
     @Throws(Exception::class)
-    fun executeSave(jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
+    fun executeSave(jdsDb: JdsDb, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
+        if(!generatedOrUpdatedSchema)
+            throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
                 //if unique delete old entries
-                val primaryKey = JdsSchema.getPrimaryKey();
-                val deleteSql = "DELETE FROM $$name WHERE $primaryKey = ?"
                 val deleteStatement = onPostSaveEventArguments.getOrAddStatement(deleteSql)
                 deleteStatement.setString(1, jdsEntity.overview.entityGuid)
                 deleteStatement.addBatch()
             }
-
-            val insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
             val insertStatement = onPostSaveEventArguments.getOrAddStatement(insertSql)
             insertStatement.setObject(1, jdsEntity.overview.entityGuid)
 
@@ -86,7 +99,10 @@ open class JdsTable : Serializable {
                     }
                     else -> {
                         val value = jdsEntity.getReportAtomicValue(field.id, 0)
-                        insertStatement.setObject(dex + 2, value ?: null)
+                        if (value is ZonedDateTime)
+                            insertStatement.setTimestamp(dex + 2, value, jdsDb)
+                        else
+                            insertStatement.setObject(dex + 2, value ?: null)
                     }
                 }
             }
@@ -98,11 +114,12 @@ open class JdsTable : Serializable {
      * @param jdsDb
      * @param connection
      */
-    internal fun generateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) {
+    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) {
         val tableFields = JdsField.values.filter { fieldIds.contains(it.value.id) }.map { it.value }
         val tableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap)
-        val primaryKey = JdsSchema.getPrimaryKey();
+        val primaryKey = JdsSchema.getPrimaryKey()
+
 
         if (!jdsDb.doesTableExist(connection, name)) {
             connection.prepareStatement(tableSql).use {
@@ -128,6 +145,12 @@ open class JdsTable : Serializable {
             insertParameters.add("?")
             updates.add("columnName = ?")
         }
+
+        deleteSql = "DELETE FROM $name WHERE $primaryKey = ?"
+        insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
+
+
+        generatedOrUpdatedSchema = true
     }
 
     /**

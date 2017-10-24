@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreTime(
     FieldId         BIGINT,
-    EntityGuid      TEXT,
+    Uuid      TEXT,
     Value           INTEGER,
-    PRIMARY KEY (FieldId,EntityGuid),
-    FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    PRIMARY KEY (FieldId,Uuid),
+    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

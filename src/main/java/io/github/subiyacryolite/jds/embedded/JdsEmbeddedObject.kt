@@ -115,7 +115,7 @@ class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * Entity bindings [parent to child]
      */
-    val eb: MutableList<JdsStoreEntityBinding> = ArrayList()
+    val eb: MutableList<JdsEntityBinding> = ArrayList()
     /**
      * Embedded objects
      */
@@ -123,7 +123,7 @@ class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * Object overview
      */
-    val o: JdsStoreEntityOverview = JdsStoreEntityOverview(source.overview.entityGuid, source.overview.entityId, source.overview.live, source.overview.version, source.overview.dateCreated, source.overview.dateModified)
+    val o: JdsEntityOverview = JdsEntityOverview(source.overview.entityGuid, source.overview.entityId, source.overview.live, source.overview.version, source.overview.dateCreated, source.overview.dateModified)
 
     init {
         source.assign(this);

@@ -1,11 +1,11 @@
 --Based on https://www.mssqltips.com/sqlservertip/2733/solving-the-sql-server-multiple-cascade-path-issue-with-a-trigger/
 CREATE TRIGGER [triggerEntityBindingCascade]
-	ON [JdsStoreEntityOverview]
+	ON [JdsEntityOverview]
 	INSTEAD OF DELETE
 AS
 BEGIN
  SET NOCOUNT ON;
- DELETE FROM [JdsStoreEntityBinding] WHERE [ChildEntityGuid] IN		(SELECT [EntityGuid] FROM DELETED)
- DELETE FROM [JdsStoreEntityBinding] WHERE [ParentEntityGuid] IN	(SELECT [EntityGuid] FROM DELETED)
- DELETE FROM [JdsStoreEntityOverview] WHERE [EntityGuid] IN			(SELECT [EntityGuid] FROM DELETED)
+ DELETE FROM [JdsEntityBinding] WHERE [ChildUuid] IN		(SELECT [Uuid] FROM DELETED)
+ DELETE FROM [JdsEntityBinding] WHERE [ParentUuid] IN	(SELECT [Uuid] FROM DELETED)
+ DELETE FROM [JdsEntityOverview] WHERE [Uuid] IN			(SELECT [Uuid] FROM DELETED)
 END

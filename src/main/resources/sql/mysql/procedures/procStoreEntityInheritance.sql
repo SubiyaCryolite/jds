@@ -1,5 +1,5 @@
-CREATE PROCEDURE procStoreEntityInheritance(IN pEntityGuid VARCHAR(48), IN pEntityId BIGINT)
+CREATE PROCEDURE procStoreEntityInheritance(IN pUuid VARCHAR(48), IN pEntityId BIGINT)
 BEGIN
-	INSERT IGNORE INTO JdsStoreEntityInheritance(EntityGuid, EntityId)
-    VALUES (pEntityGuid, pEntityId);
+	INSERT IGNORE INTO JdsEntityInstance(Uuid, EntityId)
+    VALUES (pUuid, pEntityId);
 END

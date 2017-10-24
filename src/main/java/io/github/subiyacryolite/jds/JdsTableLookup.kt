@@ -30,7 +30,7 @@ object JdsTableLookup {
      * @param fieldType the requested fieldEntity type
      * @return the table that stores the requested fieldEntity type
      */
-    fun getComponent(fieldType: JdsFieldType): JdsComponent {
+    fun getComponentForFieldType(fieldType: JdsFieldType): JdsComponent {
         when (fieldType) {
             JdsFieldType.FLOAT -> return STORE_FLOAT
             JdsFieldType.DOUBLE -> return STORE_DOUBLE
@@ -44,7 +44,8 @@ object JdsTableLookup {
             JdsFieldType.ZONED_DATE_TIME -> return STORE_ZONED_DATE_TIME
             JdsFieldType.TIME -> return STORE_TIME
             JdsFieldType.BLOB -> return STORE_BLOB
-            JdsFieldType.ENUM, JdsFieldType.INT, JdsFieldType.BOOLEAN -> return STORE_INTEGER
+            JdsFieldType.BOOLEAN-> return STORE_BOOLEAN
+            JdsFieldType.ENUM, JdsFieldType.INT -> return STORE_INTEGER
             JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
             JdsFieldType.LONG, JdsFieldType.DURATION -> return STORE_LONG
             JdsFieldType.PERIOD, JdsFieldType.TEXT, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return STORE_TEXT
@@ -58,8 +59,8 @@ object JdsTableLookup {
      * @param fieldType the requested fieldEntity type
      * @return the table that stores the requested fieldEntity type
      */
-    fun getComponentTable(fieldType: JdsFieldType): String {
-        return getComponent(fieldType).component
+    fun getTableForFieldType(fieldType: JdsFieldType): String {
+        return getComponentForFieldType(fieldType).component
     }
 
     /**
@@ -68,7 +69,7 @@ object JdsTableLookup {
      * @param jdsFieldType the requested fieldEntity type
      * @return the short version of the table that holds the requested fieldEntity type
      */
-    fun getComponentTablePrefix(fieldType: JdsFieldType): String {
-        return getComponent(fieldType).prefix
+    fun getTableAliasForFieldType(fieldType: JdsFieldType): String {
+        return getComponentForFieldType(fieldType).alias
     }
 }

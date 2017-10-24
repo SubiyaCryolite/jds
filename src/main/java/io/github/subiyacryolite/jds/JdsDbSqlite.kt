@@ -66,7 +66,11 @@ abstract class JdsDbSqlite : JdsDb {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityInstance.sql")
+    }
+
+    override fun createStoreBoolean(connection: Connection) {
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreBoolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
@@ -122,48 +126,48 @@ abstract class JdsDbSqlite : JdsDb {
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntities.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntities.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEnumValues.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEnums.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefFields.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsFields.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsFieldTypes.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsBindEntityFields.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityFields.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsBindEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityEnums.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValues.sql")
-        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, IntegerValue)")
-        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, FloatValue)")
-        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DoubleValue)")
-        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, LongValue)")
-        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, DateTimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, TimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, BooleanValue)")
-        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence, ZonedDateTimeValue)")
-        executeSqlFromString(connection, "CREATE INDEX TextBlobValues       ON JdsStoreOldFieldValues(EntityGuid, FieldId, Sequence)")
+        executeSqlFromString(connection, "CREATE INDEX IntegerValues        ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue)")
+        executeSqlFromString(connection, "CREATE INDEX FloatValues          ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue)")
+        executeSqlFromString(connection, "CREATE INDEX DoubleValues         ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue)")
+        executeSqlFromString(connection, "CREATE INDEX LongValues           ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue)")
+        executeSqlFromString(connection, "CREATE INDEX DateTimeValues       ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TimeValues           ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX BooleanValues        ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BooleanValue)")
+        executeSqlFromString(connection, "CREATE INDEX ZonedDateTimeValues  ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue)")
+        executeSqlFromString(connection, "CREATE INDEX TextBlobValues       ON JdsStoreOldFieldValues(Uuid, FieldId, Sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityBinding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
@@ -175,76 +179,79 @@ abstract class JdsDbSqlite : JdsDb {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsEntityInheritance.sql")
     }
 
-
     override fun saveString(): String {
-        return "INSERT OR REPLACE INTO JdsStoreText(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreText(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+    }
+
+    override fun saveBoolean(): String {
+        return "INSERT OR REPLACE INTO JdsStoreBoolean(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveLong(): String {
-        return "INSERT OR REPLACE INTO JdsStoreLong(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreLong(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveDouble(): String {
-        return "INSERT OR REPLACE INTO JdsStoreDouble(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreDouble(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveFloat(): String {
-        return "INSERT OR REPLACE INTO JdsStoreFloat(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreFloat(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveInteger(): String {
-        return "INSERT OR REPLACE INTO JdsStoreInteger(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreInteger(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveDateTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreDateTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreDateTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO JdsStoreBlob(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreBlob(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveZonedDateTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(EntityGuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value);"
+        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO JdsStoreEntityOverview(EntityGuid, DateCreated, DateModified, Live, Version) VALUES(:entityGuid, :dateCreated, :dateModified, :live, :version);"
+        return "INSERT OR REPLACE INTO JdsEntityOverview(Uuid, DateCreated, DateModified, Live, Version) VALUES(:entityGuid, :dateCreated, :dateModified, :live, :version)"
     }
 
     override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO JdsStoreEntityInheritance(EntityGuid, EntityId) VALUES(:entityGuid, :entityId);"
+        return "INSERT OR REPLACE INTO JdsEntityInstance(Uuid, EntityId) VALUES(:entityGuid, :entityId)"
     }
 
     override fun mapClassFields(): String {
-        return "INSERT OR REPLACE INTO JdsBindEntityFields(EntityId, FieldId) VALUES(:entityId, :fieldId);"
+        return "INSERT OR REPLACE INTO JdsEntityFields(EntityId, FieldId) VALUES(:entityId, :fieldId)"
     }
 
     override fun mapFieldNames(): String {
-        return "INSERT OR REPLACE INTO JdsRefFields(FieldId, FieldName, FieldDescription) VALUES(:fieldId, :fieldName, :fieldDescription);"
+        return "INSERT OR REPLACE INTO JdsFields(FieldId, FieldName, FieldDescription) VALUES(:fieldId, :fieldName, :fieldDescription)"
     }
 
     override fun mapFieldTypes(): String {
-        return "INSERT OR REPLACE INTO JdsRefFieldTypes(TypeId, TypeName) VALUES(:typeId, :typeName);"
+        return "INSERT OR REPLACE INTO JdsFieldTypes(TypeId, TypeName) VALUES(:typeId, :typeName)"
     }
 
     override fun mapClassEnumsImplementation(): String {
-        return "INSERT OR REPLACE INTO JdsBindEntityEnums(EntityId, FieldId) VALUES(?,?);"
+        return "INSERT OR REPLACE INTO JdsEntityEnums(EntityId, FieldId) VALUES(?,?)"
     }
 
     override fun mapClassName(): String {
-        return "INSERT OR REPLACE INTO JdsRefEntities(EntityId, EntityName) VALUES(?,?);"
+        return "INSERT OR REPLACE INTO JdsEntities(EntityId, EntityName) VALUES(?,?)"
     }
 
     override fun mapEnumValues(): String {
-        return "INSERT OR REPLACE INTO JdsRefEnumValues(FieldId, EnumSeq, EnumValue) VALUES(?,?,?);"
+        return "INSERT OR REPLACE INTO JdsEnums(FieldId, EnumSeq, EnumValue) VALUES(?,?,?)"
     }
 
     /**
@@ -253,7 +260,7 @@ abstract class JdsDbSqlite : JdsDb {
      * @return
      */
     override fun mapParentToChild(): String {
-        return "INSERT OR REPLACE INTO JdsRefEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?);"
+        return "INSERT OR REPLACE INTO JdsEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?)"
     }
 
     override fun createOrAlterView(viewName: String, viewSql: String): String {

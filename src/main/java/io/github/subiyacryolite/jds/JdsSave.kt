@@ -225,7 +225,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
     private fun processCrt(jdsDb: JdsDb, jdsEntity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsEntity, onPostSaveEventArguments)
+            it.executeSave(jdsDb, jdsEntity, onPostSaveEventArguments)
         }
     }
 
@@ -909,8 +909,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>) {
-        val deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND EntityGuid = ?"
-        val insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,EntityGuid) VALUES (?,?,?,?)"
+        val deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND Uuid = ?"
+        val insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,Uuid) VALUES (?,?,?,?)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDateTimeValues())
             val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
@@ -963,8 +963,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, ListProperty<Float>>>) {
-        val deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND EntityGuid = ?"
-        val insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,EntityGuid,Value,Sequence) VALUES (?,?,?,?)"
+        val deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND Uuid = ?"
+        val insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,Uuid,Value,Sequence) VALUES (?,?,?,?)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldFloatValues())
             val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
@@ -1018,8 +1018,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
     private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, ListProperty<Int>>>) {
-        val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
-        val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND Uuid = :entityGuid"
+        val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
             val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
@@ -1073,8 +1073,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, ListProperty<Double>>>) {
-        val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
-        val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND Uuid = :entityGuid"
+        val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDoubleValues())
             val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
@@ -1128,8 +1128,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, ListProperty<Long>>>) {
-        val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND EntityGuid = ?"
-        val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,EntityGuid,Sequence,Value) VALUES (?,?,?,?)"
+        val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND Uuid = ?"
+        val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,Uuid,Sequence,Value) VALUES (?,?,?,?)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldLongValues())
             val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
@@ -1182,8 +1182,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, ListProperty<String>>>) {
-        val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
-        val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND Uuid = :entityGuid"
+        val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldTextValues())
             val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
@@ -1240,8 +1240,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>) {
         var record = 0
         val recordTotal = enumStrings.size
-        val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND EntityGuid = :entityGuid"
-        val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,EntityGuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND Uuid = :entityGuid"
+        val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :entityGuid, :sequence, :value)"
         try {
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
             val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
@@ -1342,17 +1342,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid, ChildEntityGuid, FieldId, ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :fieldId, :childEntityId)")
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
-                clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid)
+                clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
                 clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
-                writeNewBindings.setString("childEntityGuid", jdsEntity.overview.entityGuid)
+                writeNewBindings.setString("parentUuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
+                writeNewBindings.setString("childUuid", jdsEntity.overview.entityGuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
                 writeNewBindings.setLong("fieldId", map[jdsEntity.overview.entityGuid]!!)
                 writeNewBindings.addBatch()
@@ -1411,17 +1411,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsStoreEntityBinding WHERE ParentEntityGuid = :parentEntityGuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsStoreEntityBinding(ParentEntityGuid, ChildEntityGuid, FieldId, ChildEntityId) Values(:parentEntityGuid, :childEntityGuid, :fieldId, :childEntityId)")
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
-                clearOldBindings.setString("parentEntityGuid", parentEntityBinding.parentGuid)
+                clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
                 clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
                 clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentEntityGuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
-                writeNewBindings.setString("childEntityGuid", jdsEntity.overview.entityGuid)
+                writeNewBindings.setString("parentUuid", getParent(parentChildBindings, jdsEntity.overview.entityGuid))
+                writeNewBindings.setString("childUuid", jdsEntity.overview.entityGuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
                 writeNewBindings.setLong("fieldId", map[jdsEntity.overview.entityGuid]!!)
                 writeNewBindings.addBatch()

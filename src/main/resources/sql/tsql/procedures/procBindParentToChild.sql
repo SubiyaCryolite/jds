@@ -1,7 +1,7 @@
 CREATE PROCEDURE procBindParentToChild(@ParentEntityCode BIGINT, @ChildEntityCode BIGINT)
 AS
 BEGIN
-    MERGE JdsRefEntityInheritance AS dest
+    MERGE JdsEntityInheritance AS dest
     USING (VALUES (@ParentEntityCode,@ChildEntityCode)) AS src([ParentEntityCode],[ChildEntityCode])
     ON (src.ParentEntityCode = dest.ParentEntityCode AND src.ChildEntityCode = dest.ChildEntityCode)
     WHEN NOT MATCHED THEN

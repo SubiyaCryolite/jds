@@ -3,6 +3,7 @@ package tests
 import common.BaseTestConfig
 import constants.Fields
 import entities.Address
+import entities.AddressBook
 import io.github.subiyacryolite.jds.JdsSave
 import io.github.subiyacryolite.jds.JdsTable
 import org.junit.jupiter.api.Test
@@ -19,13 +20,12 @@ class CustomReport : BaseTestConfig() {
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)
 
-        val crtAddress = JdsTable()
-        crtAddress.uniqueEntries = false
-        crtAddress.name = "CrtAddress"
-        crtAddress.registerEntities(Address::class.java, true)
+        val crtAddress = JdsTable(Address::class.java,true)
+        val crtAddressBook = JdsTable(AddressBook::class.java,true)
 
         jdsDb.mapTable(customTable)
         jdsDb.mapTable(crtAddress)
+        jdsDb.mapTable(crtAddressBook)
         jdsDb.prepareTables()
 
         val sav = JdsSave(jdsDb, Arrays.asList(sampleAddressBook))

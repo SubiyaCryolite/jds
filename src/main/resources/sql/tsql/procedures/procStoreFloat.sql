@@ -1,11 +1,11 @@
-CREATE PROCEDURE procStoreFloat(@EntityGuid NVARCHAR(48), @FieldId BIGINT, @Value REAL)
+CREATE PROCEDURE procStoreFloat(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value REAL)
 AS
 BEGIN
 	MERGE JdsStoreFloat AS dest
-	USING (VALUES (@EntityGuid,  @FieldId, @Value)) AS src([EntityGuid],  [FieldId], [Value])
-	ON (src.EntityGuid = dest.EntityGuid AND src.FieldId = dest.FieldId)
+	USING (VALUES (@Uuid,  @FieldId, @Value)) AS src([Uuid],  [FieldId], [Value])
+	ON (src.Uuid = dest.Uuid AND src.FieldId = dest.FieldId)
 	WHEN MATCHED THEN
 		UPDATE SET dest.[Value] = src.[Value]
 	WHEN NOT MATCHED THEN
-		INSERT([EntityGuid],[FieldId],[Value])   VALUES(src.EntityGuid,  src.FieldId, src.Value);
+		INSERT([Uuid],[FieldId],[Value])   VALUES(src.Uuid,  src.FieldId, src.Value);
 END

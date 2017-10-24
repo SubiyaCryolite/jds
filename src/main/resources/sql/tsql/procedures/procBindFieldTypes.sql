@@ -1,7 +1,7 @@
 CREATE PROCEDURE procBindFieldTypes(@TypeId BIGINT, @TypeName NVARCHAR(MAX))
 AS
 BEGIN
-    MERGE JdsRefFieldTypes AS dest
+    MERGE JdsFieldTypes AS dest
     USING (VALUES (@TypeId,@TypeName)) AS src([TypeId],[TypeName])
     ON (src.TypeId = dest.TypeId)
     WHEN NOT MATCHED THEN

@@ -50,8 +50,8 @@ class JdsTextCollections(val i: Long, val s: Int, val v: String?)
 class JdsFloatCollections(val i: Long, val s: Int, val v: Float?)
 class JdsEnumCollections(val i: Long, val s: Int, val v: Int?)
 
-class JdsStoreEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
-class JdsStoreEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
+class JdsEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
+class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
 class JdsEmbeddedContainer(sources: Collection<JdsEntity>) {
     /**

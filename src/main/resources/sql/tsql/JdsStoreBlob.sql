@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreBlob(
 	FieldId         BIGINT,
-	EntityGuid      NVARCHAR(48) NOT NULL,
+	Uuid      NVARCHAR(48) NOT NULL,
 	Value           VARBINARY(MAX),
-	PRIMARY KEY (FieldId,EntityGuid),
-	CONSTRAINT fk_JdsStoreBlob_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+	PRIMARY KEY (FieldId,Uuid),
+	CONSTRAINT fk_JdsStoreBlob_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );

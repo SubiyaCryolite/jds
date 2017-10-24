@@ -1,7 +1,7 @@
 CREATE TABLE JdsStoreBoolean(
     FieldId         BIGINT,
-    EntityGuid      NVARCHAR(48),
+    Uuid      NVARCHAR(48),
     Value           BIT,
-    PRIMARY KEY (FieldId,EntityGuid),
-    CONSTRAINT fk_JdsStoreBoolean_ParentEntityGuid FOREIGN KEY (EntityGuid) REFERENCES JdsStoreEntityOverview(EntityGuid) ON DELETE CASCADE
+    PRIMARY KEY (FieldId,Uuid),
+    CONSTRAINT fk_JdsStoreBoolean_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
 );
