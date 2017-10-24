@@ -150,7 +150,7 @@ class JdsFilter<T : JdsEntity>
     //========================================================CONDITIONS START HERE
 
     private fun isLob(jdsField: JdsField): Boolean {
-        return jdsField.type === JdsFieldType.TEXT || jdsField.type === JdsFieldType.BLOB
+        return jdsField.type === JdsFieldType.STRING || jdsField.type === JdsFieldType.BLOB
     }
 
     fun isNotNull(jdsField: JdsField): JdsFilter<*> {

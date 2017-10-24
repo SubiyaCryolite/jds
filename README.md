@@ -90,15 +90,16 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
-|ARRAY_DATE_TIME|List\<LocalDateTime\>|Lists of type LocalDateTime|
-|ARRAY_DOUBLE|List\<Double\>|Lists of type Double|
-|ARRAY_FLOAT|List\<Float\>|Lists of type Float|
-|ARRAY_INT|List\<Integer\>|Lists of type Integer|
-|ARRAY_LONG|List\<Long\>|Lists of type Long|
-|ARRAY_TEXT|List\<String\>|Lists of type String|
+|DATE_TIME_COLLECTION|List\<LocalDateTime\>|List of type LocalDateTime|
+|DOUBLE_COLLECTION|List\<Double\>|List of type Double|
+|ENTITY_COLLECTION|List\<Class\<? extends JdsEntity\>\>|List of type JdsEntity|
+|FLOAT_COLLECTION|List\<Float\>|List of type Float|
+|INT_COLLECTION|List\<Integer\>|List of type Integer|
+|LONG_COLLECTION|List\<Long\>|List of type Long|
+|STRING_COLLECTION|List\<String\>|List of type String|
 |BLOB|byte[] or InputStream|Blob values|
 |BOOLEAN|boolean|Boolean values|
-|CLASS|Class\<? extends JdsEntity\>|Object of type JdsEntity|
+|ENTITY|Class\<? extends JdsEntity\>|Object of type JdsEntity|
 |DATE_TIME|LocalDateTime|DateTime instances based on the host machines local timezone|
 |DATE|LocalDate|Local date instances|
 |DOUBLE|double|Numeric double values|
@@ -110,7 +111,7 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 |LONG|long|Numeric long values|
 |MONTH_DAY|MonthDay|Object of type MonthDay|
 |PERIOD|Period|Object of type Period|
-|TEXT|String|String values with no max limit|
+|STRING|String|String values with no max limit|
 |TIME|LocalTime|Local time instances|
 |YEAR_MONTH|YearMonth|Object of type YearMonth|
 |ZONED_DATE_TIME|ZonedDateTime|Zoned DateTime instances|
@@ -122,25 +123,25 @@ import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enumProperties.JdsFieldType;
 
 public class Fields {
-    public static final JdsField STRING_FIELD = new JdsField(1000, "STRING_FIELD", JdsFieldType.TEXT);
-    public static final JdsField TIME_FIELD = new JdsField(1009, "TIME_FIELD", JdsFieldType.TIME);
-    public static final JdsField DATE_FIELD = new JdsField(1001, "DATE_FIELD", JdsFieldType.DATE);
-    public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "DATE_TIME_FIELD", JdsFieldType.DATE_TIME);
-    public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "ZONED_DATE_TIME_FIELD", JdsFieldType.ZONED_DATE_TIME);
-    public static final JdsField LONG_FIELD = new JdsField(1004, "LONG_FIELD", JdsFieldType.LONG);
-    public static final JdsField INT_FIELD = new JdsField(1005, "INT_FIELD", JdsFieldType.INT);
-    public static final JdsField DOUBLE_FIELD = new JdsField(1006, "DOUBLE_FIELD", JdsFieldType.DOUBLE);
-    public static final JdsField FLOAT_FIELD = new JdsField(1007, "FLOAT_FIELD", JdsFieldType.FLOAT);
-    public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "BOOLEAN_FIELD", JdsFieldType.BOOLEAN);
-    public static final JdsField BLOB_FIELD = new JdsField(1010, "BLOB_FIELD", JdsFieldType.BLOB);
+    public static final JdsField STRING_FIELD = new JdsField(1000, "string_field", JdsFieldType.STRING);
+    public static final JdsField TIME_FIELD = new JdsField(1009, "time_field", JdsFieldType.TIME);
+    public static final JdsField DATE_FIELD = new JdsField(1001, "date_field", JdsFieldType.DATE);
+    public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "date_time_field", JdsFieldType.DATE_TIME);
+    public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "zoned_date_time_field", JdsFieldType.ZONED_DATE_TIME);
+    public static final JdsField LONG_FIELD = new JdsField(1004, "long_field", JdsFieldType.LONG);
+    public static final JdsField INT_FIELD = new JdsField(1005, "int_field", JdsFieldType.INT);
+    public static final JdsField DOUBLE_FIELD = new JdsField(1006, "double_field", JdsFieldType.DOUBLE);
+    public static final JdsField FLOAT_FIELD = new JdsField(1007, "float_field", JdsFieldType.FLOAT);
+    public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "boolean_field", JdsFieldType.BOOLEAN);
+    public static final JdsField BLOB_FIELD = new JdsField(1010, "blob_field", JdsFieldType.BLOB);
     //=============================================================================================
-    public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.TEXT);
+    public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.STRING);
     public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
-    public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.TEXT);
-    public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.TEXT);
-    public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.TEXT);
+    public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.STRING);
+    public static final JdsField PROVINCE_NAME = new JdsField(4, "province_name", JdsFieldType.STRING);
+    public static final JdsField CITY_NAME = new JdsField(5, "city_name", JdsFieldType.STRING);
     public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM);
-    public static final JdsField COUNTRY_NAME = new JdsField(7, "country_name", JdsFieldType.TEXT);
+    public static final JdsField COUNTRY_NAME = new JdsField(7, "country_name", JdsFieldType.STRING);
     public static final JdsField PRIMARY_ADDRESS_ENUM = new JdsField(8, "primary_address_enum", JdsFieldType.ENUM);
     public static final JdsField LOCAL_DATE_OF_REGISTRATION = new JdsField(9, "local_date_of_registration", JdsFieldType.DATE_TIME);
     public static final JdsField ZONED_DATE_OF_REGISTRATION = new JdsField(10, "zoned_date_of_registration", JdsFieldType.ZONED_DATE_TIME);        
@@ -150,7 +151,7 @@ public class Fields {
 
 ### 1.1.3 Defining Enums
 JdsEnums are an extension of fieldIds. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by CheckBoxes, RadioButtons or Combo Boxes in a UI. In this example we will define Sex as an enumerated value with the following options (Male, Female, Other).
-First of all we'd have to define a standard fieldEntity of type ENUM_TEXT.
+First of all we'd have to define a standard fieldEntity of type ENUM.
 ```java
 public class Fields
 {
@@ -181,15 +182,16 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 
 |JDS Field Type|Container|Mapping Call|
 |-----|-----|-----|
-|ARRAY_DATE_TIME|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDateTimes|
-|ARRAY_DOUBLE|[SimpleListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDoubles|
-|ARRAY_FLOAT|[SimpleListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapFloats|
-|ARRAY_INT|[SimpleListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapIntegers|
-|ARRAY_LONG|[SimpleListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapLongs|
-|ARRAY_TEXT|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapStrings|
+|DATE_TIME_COLLECTION|[SimpleListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDateTimes|
+|DOUBLE_COLLECTION|[SimpleListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapDoubles|
+|ENTITY_COLLECTION|[SimpleListProperty\<Class\<? extends JdsEntity\>\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
+|FLOAT_COLLECTION|[SimpleListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapFloats|
+|INT_COLLECTION|[SimpleListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapIntegers|
+|LONG_COLLECTION|[SimpleListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapLongs|
+|STRING_COLLECTION|[SimpleListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleListProperty.html)|mapStrings|
 |BOOLEAN|[SimpleBooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleBooleanProperty.html)|map|
 |BLOB|[SimpleBlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/SimpleBlobProperty.html)|map|
-|CLASS|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
+|ENTITY|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
 |DATE|[SimpleObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)|map|
 |DATE_TIME|[SimpleObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)|map|
 |DOUBLE|[SimpleDoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleDoubleProperty.html)|map|
@@ -201,7 +203,7 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |LONG|[SimpleLongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleLongProperty.html)|map|
 |MONTH_DAY|[SimpleObjectProperty\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)|mapMonthDay|
 |PERIOD|[SimpleObjectProperty\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)|mapPeriod|
-|TEXT|[SimpleStringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleStringProperty.html)|map|
+|STRING|[SimpleStringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/SimpleStringProperty.html)|map|
 |TIME|[SimpleObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)|map|
 |YEAR_MONTH|[SimpleObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map|
 |ZONED_DATE_TIME|[SimpleObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map|
@@ -498,15 +500,15 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 ### 1.1.5 Binding Objects and Object Arrays
 Beyond saving numeric, string and date values JDS can also persist embedded objects and object arrays.
 
-All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped to a JdsField of type **CLASS**.
+All that's required is a valid **JdsEntity** or **IJdsEntity** subclass to be mapped to a JdsField of type **ENTITY**.
 
 This allows a single parent entity to have multiple child entityVersions of the same entity type i.e transfer: AccountTransfer { source: Account , destination: Account, amount: double }
 
 ```java
 public class Fields
 {
-    //Create a field of type CLASS
-    public static final JdsField ADDRESS_FIELD = new JdsField(9000, "ADDRESS_FIELD", JdsFieldType.CLASS);
+    //Create a field of type ENTITY
+    public static final JdsField ADDRESSES = new JdsField(9000, "ADDRESSES", JdsFieldType.ENTITY_COLLECTION);
 }
 ```
 
@@ -514,7 +516,7 @@ public class Fields
 public class Entities
 {
     //Create the appropriate JdsFieldEntity entry
-    public static final JdsFieldEntity<Address> ADDRESS_FIELD = new JdsFieldEntity(Address.class, Fields.ADDRESS_FIELD);
+    public static final JdsFieldEntity<Address> ADDRESSES = new JdsFieldEntity(Address.class, Fields.ADDRESSES);
 }
 ```
 
@@ -532,7 +534,7 @@ public class AddressBook extends JdsEntity {
     private final SimpleListProperty<Address> addresses;
 
     public AddressBook() {
-        map(Entities.ADDRESS_FIELD, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
+        map(Entities.ADDRESSES, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
     }
 
     public List<Address> getAddresses() {
@@ -564,7 +566,7 @@ class AddressBook : JdsEntity() {
     private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
 
     init {
-        map(Entities.ADDRESS_FIELD, _addresses)
+        map(Entities.ADDRESSES, _addresses)
     }
 
     val addresses: MutableList<Address>

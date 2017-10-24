@@ -33,7 +33,7 @@ class JdsOverview : IJdsOverview, Externalizable {
 
     override var entityId: Long = 0
 
-    override var entityGuid: String = UUID.randomUUID().toString()
+    override var uuid: String = UUID.randomUUID().toString()
 
     override var version: Long = 1L
 
@@ -41,7 +41,7 @@ class JdsOverview : IJdsOverview, Externalizable {
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
-        objectOutputStream.writeUTF(entityGuid)
+        objectOutputStream.writeUTF(uuid)
         objectOutputStream.writeLong(entityId)
         objectOutputStream.writeObject(dateCreated)
         objectOutputStream.writeObject(dateModified)
@@ -51,7 +51,7 @@ class JdsOverview : IJdsOverview, Externalizable {
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
-        entityGuid = objectInputStream.readUTF()
+        uuid = objectInputStream.readUTF()
         entityId = objectInputStream.readLong()
         dateCreated = objectInputStream.readObject() as LocalDateTime
         dateModified = objectInputStream.readObject() as LocalDateTime
@@ -60,6 +60,6 @@ class JdsOverview : IJdsOverview, Externalizable {
     }
 
     override fun toString(): String {
-        return "{ entityId = $entityId, version = $version, entityGuid = $entityGuid, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
+        return "{ uuid = $uuid, entityId = $entityId, version = $version, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
     }
 }

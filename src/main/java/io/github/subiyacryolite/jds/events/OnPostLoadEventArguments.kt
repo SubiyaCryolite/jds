@@ -28,15 +28,15 @@ import java.util.*
  * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
 class OnPostLoadEventArguments {
-    val entityGuid: String
+    val uuid: String
     val jdsDb: IJdsDb
     val connection: Connection
     val alternateConnection: LinkedHashMap<Int, Connection>
     private val statements: LinkedHashMap<String, Statement>
     private val alternateStatements: LinkedHashMap<Int, LinkedHashMap<String, Statement>>
 
-    constructor(jdsDb: IJdsDb, connection: Connection, entityGuid: String) {
-        this.entityGuid = entityGuid
+    constructor(jdsDb: IJdsDb, connection: Connection, uuid: String) {
+        this.uuid = uuid
         this.jdsDb = jdsDb
         this.connection = connection
         this.alternateConnection = LinkedHashMap()

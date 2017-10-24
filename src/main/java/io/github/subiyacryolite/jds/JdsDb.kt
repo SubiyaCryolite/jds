@@ -684,7 +684,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveString(): String {
-        return "{call procStoreText(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreText(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -693,7 +693,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveBoolean(): String {
-        return "{call procStoreBoolean(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreBoolean(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -702,7 +702,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveLong(): String {
-        return "{call procStoreLong(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreLong(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -711,7 +711,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveDouble(): String {
-        return "{call procStoreDouble(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreDouble(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -720,8 +720,9 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveBlob(): String {
-        return "{call procStoreBlob(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreBlob(:uuid,:fieldId,:value)}"
     }
+
 
     /**
      * SQL call to save float values
@@ -729,7 +730,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveFloat(): String {
-        return "{call procStoreFloat(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreFloat(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -738,7 +739,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveInteger(): String {
-        return "{call procStoreInteger(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreInteger(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -747,7 +748,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveDateTime(): String {
-        return "{call procStoreDateTime(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreDateTime(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -756,7 +757,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveZonedDateTime(): String {
-        return "{call procStoreZonedDateTime(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreZonedDateTime(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -765,7 +766,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     fun saveDate(): String {
-        return "{call procStoreDate(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreDate(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -774,7 +775,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveTime(): String {
-        return "{call procStoreTime(:entityGuid,:fieldId,:value)}"
+        return "{call procStoreTime(:uuid,:fieldId,:value)}"
     }
 
     /**
@@ -783,7 +784,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveOverview(): String {
-        return "{call procStoreEntityOverviewV3(:entityGuid,:dateCreated,:dateModified,:live,:version)}"
+        return "{call procStoreEntityOverviewV3(:uuid,:dateCreated,:dateModified,:live,:version)}"
     }
 
     /**
@@ -792,7 +793,7 @@ abstract class JdsDb : IJdsDb {
      * @return the default or overridden SQL statement for this operation
      */
     open fun saveOverviewInheritance(): String {
-        return "{call procStoreEntityInheritance(:entityGuid, :entityId)}"
+        return "{call procStoreEntityInheritance(:uuid, :entityId)}"
     }
 
     /**
@@ -913,6 +914,14 @@ abstract class JdsDb : IJdsDb {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
             false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) $logSqlSource " +
                     "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND ZonedDateTimeValue = ?)"
+        }
+    }
+
+    internal fun saveOldTimeValues(): String {
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) VALUES(?, ?, ?, ?)"
+            false -> "$logSqlPrefix INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND TimeValue = ?)"
         }
     }
 

@@ -298,7 +298,7 @@ abstract class JdsDbOracle : JdsDb {
     }
 
     override fun getSqlTypeTime(): String {
-        return "NUMBER(10)"
+        return "NUMBER(19)"
     }
 
     override fun getSqlTypeBlob(max: Int): String {

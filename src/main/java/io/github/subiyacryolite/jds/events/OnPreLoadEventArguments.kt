@@ -27,7 +27,7 @@ import java.util.*
  * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
 class OnPreLoadEventArguments {
-    val entityGuid: String
+    val uuid: String
     val batchSequence: Int
     val batchSize: Int
     val jdsDb: IJdsDb
@@ -36,8 +36,8 @@ class OnPreLoadEventArguments {
     private val statements: LinkedHashMap<String, Statement>
     private val alternateStatements: LinkedHashMap<Int, LinkedHashMap<String, Statement>>
 
-    constructor(jdsDb: IJdsDb,connection: Connection, entityGuid: String, batchSequence: Int, batchSize: Int) {
-        this.entityGuid = entityGuid
+    constructor(jdsDb: IJdsDb,connection: Connection, uuid: String, batchSequence: Int, batchSize: Int) {
+        this.uuid = uuid
         this.batchSequence = batchSequence
         this.batchSize = batchSize
         this.jdsDb = jdsDb

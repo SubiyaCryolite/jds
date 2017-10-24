@@ -16,9 +16,6 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsEntity
 import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.time.MonthDay
-import java.time.Period
-import java.time.YearMonth
 
 //blobs
 class JdsBlobValues(val id: Long, val v: ByteArray?)
@@ -31,7 +28,7 @@ class JdsTextValues(val id: Long, val v: String?)
 class JdsFloatValues(val id: Long, val v: Float?)
 //time constructs
 class JdsLocalDateTimeValues(val id: Long, val v: Timestamp?)
-class JdsTimeValues(val id: Long, val v: Int?)
+class JdsTimeValues(val id: Long, val v: Long?)
 class JdsZonedDateTimeValues(val id: Long, val v: Long?)
 class JdsLocalDateValues(val id: Long, val v: Timestamp?)
 class JdsDurationValues(val id: Long, val v: Long?)

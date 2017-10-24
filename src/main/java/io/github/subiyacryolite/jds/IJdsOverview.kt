@@ -23,7 +23,7 @@ interface IJdsOverview {
 
     var entityId:Long
 
-    var entityGuid:String
+    var uuid:String
 
     var live:Boolean
 

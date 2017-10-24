@@ -15,7 +15,8 @@ package io.github.subiyacryolite.jds
 
 import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
-import io.github.subiyacryolite.jds.JdsExtensions.fromTsqlOffsetDateTime
+import io.github.subiyacryolite.jds.JdsExtensions.toLocalTimeSqlFormat
+import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
@@ -172,7 +173,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param property
      */
     protected fun map(jdsField: JdsField, property: StringProperty) {
-        if (jdsField.type != JdsFieldType.TEXT)
+        if (jdsField.type != JdsFieldType.STRING)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         stringProperties.put(jdsField.id, property)
@@ -229,7 +230,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapStrings(jdsField: JdsField, properties: ListProperty<String>) {
-        if (jdsField.type != JdsFieldType.ARRAY_TEXT)
+        if (jdsField.type != JdsFieldType.STRING_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         stringArrayProperties.put(jdsField.id, properties)
@@ -240,7 +241,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapDateTimes(jdsField: JdsField, properties: ListProperty<LocalDateTime>) {
-        if (jdsField.type != JdsFieldType.ARRAY_DATE_TIME)
+        if (jdsField.type != JdsFieldType.DATE_TIME_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         dateTimeArrayProperties.put(jdsField.id, properties)
@@ -251,7 +252,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapFloats(jdsField: JdsField, properties: ListProperty<Float>) {
-        if (jdsField.type != JdsFieldType.ARRAY_FLOAT)
+        if (jdsField.type != JdsFieldType.FLOAT_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         floatArrayProperties.put(jdsField.id, properties)
@@ -262,7 +263,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapIntegers(jdsField: JdsField, properties: ListProperty<Int>) {
-        if (jdsField.type != JdsFieldType.ARRAY_INT)
+        if (jdsField.type != JdsFieldType.INT_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         integerArrayProperties.put(jdsField.id, properties)
@@ -273,7 +274,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapDoubles(jdsField: JdsField, properties: ListProperty<Double>) {
-        if (jdsField.type != JdsFieldType.ARRAY_DOUBLE)
+        if (jdsField.type != JdsFieldType.DOUBLE_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         doubleArrayProperties.put(jdsField.id, properties)
@@ -284,7 +285,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun mapLongs(jdsField: JdsField, properties: ListProperty<Long>) {
-        if (jdsField.type != JdsFieldType.ARRAY_LONG)
+        if (jdsField.type != JdsFieldType.LONG_COLLECTION)
             throw RuntimeException("Please set jdsField [$jdsField] to the correct type")
         fields.add(jdsField)
         longArrayProperties.put(jdsField.id, properties)
@@ -320,7 +321,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param property
      */
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: ObjectProperty<T>) {
-        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
+        if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
             objectProperties.put(fieldEntity, property as ObjectProperty<JdsEntity>)
@@ -334,7 +335,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param properties
      */
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: ListProperty<T>) {
-        if (fieldEntity.fieldEntity.type != JdsFieldType.CLASS)
+        if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY_COLLECTION)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity)) {
             objectArrayProperties.put(fieldEntity, properties as ListProperty<JdsEntity>)
@@ -366,7 +367,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun <T : IJdsEntity> copyOverviewValues(source: T) {
         overview.dateCreated = source.overview.dateCreated
         overview.dateModified = source.overview.dateModified
-        overview.entityGuid = source.overview.entityGuid
+        overview.uuid = source.overview.uuid
         overview.live = source.overview.live
         overview.version = source.overview.version
     }
@@ -798,46 +799,46 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //PRIMITIVES
         //==============================================
-        saveContainer.booleanProperties[step].put(overview.entityGuid, booleanProperties)
-        saveContainer.stringProperties[step].put(overview.entityGuid, stringProperties)
-        saveContainer.floatProperties[step].put(overview.entityGuid, floatProperties)
-        saveContainer.doubleProperties[step].put(overview.entityGuid, doubleProperties)
-        saveContainer.longProperties[step].put(overview.entityGuid, longProperties)
-        saveContainer.integerProperties[step].put(overview.entityGuid, integerProperties)
+        saveContainer.booleanProperties[step].put(overview.uuid, booleanProperties)
+        saveContainer.stringProperties[step].put(overview.uuid, stringProperties)
+        saveContainer.floatProperties[step].put(overview.uuid, floatProperties)
+        saveContainer.doubleProperties[step].put(overview.uuid, doubleProperties)
+        saveContainer.longProperties[step].put(overview.uuid, longProperties)
+        saveContainer.integerProperties[step].put(overview.uuid, integerProperties)
         //==============================================
         //Dates & Time
         //==============================================
-        saveContainer.localDateTimeProperties[step].put(overview.entityGuid, localDateTimeProperties)
-        saveContainer.zonedDateTimeProperties[step].put(overview.entityGuid, zonedDateTimeProperties)
-        saveContainer.localTimeProperties[step].put(overview.entityGuid, localTimeProperties)
-        saveContainer.localDateProperties[step].put(overview.entityGuid, localDateProperties)
-        saveContainer.monthDayProperties[step].put(overview.entityGuid, monthDayProperties)
-        saveContainer.yearMonthProperties[step].put(overview.entityGuid, yearMonthProperties)
-        saveContainer.periodProperties[step].put(overview.entityGuid, periodProperties)
-        saveContainer.durationProperties[step].put(overview.entityGuid, durationProperties)
+        saveContainer.localDateTimeProperties[step].put(overview.uuid, localDateTimeProperties)
+        saveContainer.zonedDateTimeProperties[step].put(overview.uuid, zonedDateTimeProperties)
+        saveContainer.localTimeProperties[step].put(overview.uuid, localTimeProperties)
+        saveContainer.localDateProperties[step].put(overview.uuid, localDateProperties)
+        saveContainer.monthDayProperties[step].put(overview.uuid, monthDayProperties)
+        saveContainer.yearMonthProperties[step].put(overview.uuid, yearMonthProperties)
+        saveContainer.periodProperties[step].put(overview.uuid, periodProperties)
+        saveContainer.durationProperties[step].put(overview.uuid, durationProperties)
         //==============================================
         //BLOB
         //==============================================
-        saveContainer.blobProperties[step].put(overview.entityGuid, blobProperties)
+        saveContainer.blobProperties[step].put(overview.uuid, blobProperties)
         //==============================================
         //Enums
         //==============================================
-        saveContainer.enumProperties[step].put(overview.entityGuid, enumProperties)
-        saveContainer.enumCollections[step].put(overview.entityGuid, enumCollectionProperties)
+        saveContainer.enumProperties[step].put(overview.uuid, enumProperties)
+        saveContainer.enumCollections[step].put(overview.uuid, enumCollectionProperties)
         //==============================================
         //ARRAYS
         //==============================================
-        saveContainer.stringCollections[step].put(overview.entityGuid, stringArrayProperties)
-        saveContainer.localDateTimeCollections[step].put(overview.entityGuid, dateTimeArrayProperties)
-        saveContainer.floatCollections[step].put(overview.entityGuid, floatArrayProperties)
-        saveContainer.doubleCollections[step].put(overview.entityGuid, doubleArrayProperties)
-        saveContainer.longCollections[step].put(overview.entityGuid, longArrayProperties)
-        saveContainer.integerCollections[step].put(overview.entityGuid, integerArrayProperties)
+        saveContainer.stringCollections[step].put(overview.uuid, stringArrayProperties)
+        saveContainer.localDateTimeCollections[step].put(overview.uuid, dateTimeArrayProperties)
+        saveContainer.floatCollections[step].put(overview.uuid, floatArrayProperties)
+        saveContainer.doubleCollections[step].put(overview.uuid, doubleArrayProperties)
+        saveContainer.longCollections[step].put(overview.uuid, longArrayProperties)
+        saveContainer.integerCollections[step].put(overview.uuid, integerArrayProperties)
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        saveContainer.objectCollections[step].put(overview.entityGuid, objectArrayProperties)
-        saveContainer.objects[step].put(overview.entityGuid, objectProperties)
+        saveContainer.objectCollections[step].put(overview.uuid, objectArrayProperties)
+        saveContainer.objects[step].put(overview.uuid, objectProperties)
     }
 
     internal fun assign(embeddedObject: JdsEmbeddedObject) {
@@ -858,7 +859,7 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         localDateTimeProperties.entries.parallelStream().forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
         zonedDateTimeProperties.entries.parallelStream().forEach { embeddedObject.zdt.add(JdsZonedDateTimeValues(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.parallelStream().forEach { embeddedObject.t.add(JdsTimeValues(it.key, (it.value.value as LocalTime).toSecondOfDay())) }
+        localTimeProperties.entries.parallelStream().forEach { embeddedObject.t.add(JdsTimeValues(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
         localDateProperties.entries.parallelStream().forEach { embeddedObject.ld.add(JdsLocalDateValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
         durationProperties.entries.parallelStream().forEach { embeddedObject.du.add(JdsDurationValues(it.key, it.value.value.toNanos())) }
         monthDayProperties.entries.parallelStream().forEach { embeddedObject.md.add(JdsMonthDayValues(it.key, it.value.value.toString())) }
@@ -887,12 +888,12 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         objectArrayProperties.entries.parallelStream().forEach { itx ->
             itx.value.forEach {
-                embeddedObject.eb.add(JdsEntityBinding(overview.entityGuid, it.overview.entityGuid, itx.key.fieldEntity.id, it.overview.entityId))
+                embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.overview.uuid, itx.key.fieldEntity.id, it.overview.entityId))
                 embeddedObject.eo.add(JdsEmbeddedObject(it))
             }
         }
         objectProperties.entries.parallelStream().forEach {
-            embeddedObject.eb.add(JdsEntityBinding(overview.entityGuid, it.value.value.overview.entityGuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
+            embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.value.value.overview.uuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
             embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
         }
     }
@@ -910,52 +911,55 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.INT -> integerProperties[fieldId]?.set(value as Int)
             JdsFieldType.DOUBLE -> doubleProperties[fieldId]?.set(value as Double)
             JdsFieldType.LONG -> longProperties[fieldId]?.set(value as Long)
-            JdsFieldType.TEXT -> stringProperties[fieldId]?.set(value as String)
+            JdsFieldType.STRING -> stringProperties[fieldId]?.set(value as String)
             JdsFieldType.DATE_TIME -> localDateTimeProperties[fieldId]?.set((value as Timestamp).toLocalDateTime())
-            JdsFieldType.ARRAY_DOUBLE -> doubleArrayProperties[fieldId]?.get()?.add(value as Double)
-            JdsFieldType.ARRAY_FLOAT -> floatArrayProperties[fieldId]?.get()?.add(value as Float)
-            JdsFieldType.ARRAY_INT -> integerArrayProperties[fieldId]?.get()?.add(value as Int)
-            JdsFieldType.ARRAY_LONG -> longArrayProperties[fieldId]?.get()?.add(value as Long)
-            JdsFieldType.ARRAY_TEXT -> stringArrayProperties[fieldId]?.get()?.add(value as String)
-            JdsFieldType.ARRAY_DATE_TIME -> dateTimeArrayProperties[fieldId]?.get()?.add((value as Timestamp).toLocalDateTime())
-            JdsFieldType.BOOLEAN -> booleanProperties[fieldId]?.set((value as Int) == 1)
-            JdsFieldType.ZONED_DATE_TIME -> {
-                when (value) {
-                    is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
-                    is Timestamp -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault()))
-                    is String -> zonedDateTimeProperties[fieldId]?.set(value.fromTsqlOffsetDateTime())
-                    is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
-                }
+            JdsFieldType.DOUBLE_COLLECTION -> doubleArrayProperties[fieldId]?.get()?.add(value as Double)
+            JdsFieldType.FLOAT_COLLECTION -> floatArrayProperties[fieldId]?.get()?.add(value as Float)
+            JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.get()?.add(value as Int)
+            JdsFieldType.LONG_COLLECTION -> longArrayProperties[fieldId]?.get()?.add(value as Long)
+            JdsFieldType.STRING_COLLECTION -> stringArrayProperties[fieldId]?.get()?.add(value as String)
+            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeArrayProperties[fieldId]?.get()?.add((value as Timestamp).toLocalDateTime())
+            JdsFieldType.BOOLEAN -> when (value) {
+                is Int -> booleanProperties[fieldId]?.set(value == 1)
+                is Boolean -> booleanProperties[fieldId]?.set(value)
+            }
+            JdsFieldType.ZONED_DATE_TIME -> when (value) {
+                is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
+                is Timestamp -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault()))
+                is String -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
+                is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
             }
             JdsFieldType.DATE -> localDateProperties[fieldId]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
-            JdsFieldType.TIME -> localTimeProperties[fieldId]?.set(LocalTime.ofSecondOfDay((value as Int).toLong()))
+            JdsFieldType.TIME -> when (value) {
+                is Long -> localTimeProperties[fieldId]?.set(LocalTime.ofNanoOfDay(value))
+                is LocalTime -> localTimeProperties[fieldId]?.set(value)
+                is String -> localTimeProperties[fieldId]?.set(value.toLocalTimeSqlFormat())
+            }
             JdsFieldType.BLOB -> blobProperties[fieldId]?.set(value as ByteArray)
             JdsFieldType.DURATION -> durationProperties[fieldId]?.set(Duration.ofNanos(value as Long))
             JdsFieldType.MONTH_DAY -> monthDayProperties[fieldId]?.value = MonthDay.parse(value as String)
             JdsFieldType.YEAR_MONTH -> yearMonthProperties[fieldId]?.value = YearMonth.parse(value as String)
             JdsFieldType.PERIOD -> periodProperties[fieldId]?.value = Period.parse(value as String)
             JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == fieldId }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
-            JdsFieldType.ENUM_COLLECTION -> {
-                enumCollectionProperties.filter { it.key.field.id == fieldId }.forEach {
-                    val enumValues = it.key.enumType.enumConstants
-                    val index = value as Int
-                    if (index < enumValues.size) {
-                        it.value.get().add(enumValues[index] as Enum<*>)
-                    }
+            JdsFieldType.ENUM_COLLECTION -> enumCollectionProperties.filter { it.key.field.id == fieldId }.forEach {
+                val enumValues = it.key.enumType.enumConstants
+                val index = value as Int
+                if (index < enumValues.size) {
+                    it.value.get().add(enumValues[index] as Enum<*>)
                 }
             }
         }
     }
 
-    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, entityGuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, entityGuids: HashSet<String>) {
+    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
         try {
             val entityClass = jdsDb.getBoundClass(entityId)!!
             objectArrayProperties.filter {
                 it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
             }.forEach {
                 val entity = entityClass.newInstance()
-                entity.overview.entityGuid = entityGuid
-                entityGuids.add(entityGuid)
+                entity.overview.uuid = uuid
+                uuids.add(uuid)
                 it.value.get().add(entity)
                 innerObjects.add(entity)
             }
@@ -963,8 +967,8 @@ abstract class JdsEntity : IJdsEntity {
                 it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
             }.forEach {
                 val jdsEntity = entityClass.newInstance()
-                jdsEntity.overview.entityGuid = entityGuid
-                entityGuids.add(entityGuid)
+                jdsEntity.overview.uuid = uuid
+                uuids.add(uuid)
                 it.value.set(jdsEntity)
                 innerObjects.add(jdsEntity)
             }
@@ -1093,43 +1097,47 @@ abstract class JdsEntity : IJdsEntity {
     fun getReportAtomicValue(id: Long, ordinal: Int): Any? {
         //time constructs
         if (localDateTimeProperties.containsKey(id))
-            return Timestamp.valueOf(localDateTimeProperties[id]!!.get() as LocalDateTime)
+            return Timestamp.valueOf(localDateTimeProperties[id]!!.value as LocalDateTime)
         if (zonedDateTimeProperties.containsKey(id))
-            return (zonedDateTimeProperties[id]!!.get() as ZonedDateTime)
+            return (zonedDateTimeProperties[id]!!.value as ZonedDateTime)
         if (localDateProperties.containsKey(id))
-            return Timestamp.valueOf((localDateProperties[id]!!.get() as LocalDate).atStartOfDay())
+            return Timestamp.valueOf((localDateProperties[id]!!.value as LocalDate).atStartOfDay())
         if (localTimeProperties.containsKey(id))
-            return (localTimeProperties[id]!!.get() as LocalTime).toSecondOfDay()
+            return (localTimeProperties[id]!!.value as LocalTime)
         if (monthDayProperties.containsKey(id))
-            return monthDayProperties[id]!!.get().toString()
+            return monthDayProperties[id]!!.value.toString()
         if (yearMonthProperties.containsKey(id))
-            return yearMonthProperties[id]!!.get().toString()
+            return yearMonthProperties[id]!!.value.toString()
         if (periodProperties.containsKey(id))
-            return periodProperties[id]!!.get().toString()
+            return periodProperties[id]!!.value.toString()
         if (durationProperties.containsKey(id))
-            return (durationProperties[id]!!.get() as Duration).toNanos()
+            return durationProperties[id]!!.value.toNanos()
         //string
         if (stringProperties.containsKey(id))
-            return stringProperties[id]!!.get()
+            return stringProperties[id]!!.value
         //primitives
         if (floatProperties.containsKey(id))
-            return floatProperties[id]!!.get()
+            return floatProperties[id]!!.value
         if (doubleProperties.containsKey(id))
-            return doubleProperties[id]!!.get()
+            return doubleProperties[id]!!.value
         if (booleanProperties.containsKey(id))
-            return booleanProperties[id]!!.get()
+            return booleanProperties[id]!!.value
         if (longProperties.containsKey(id))
-            return longProperties[id]!!.get()
+            return longProperties[id]!!.value
         if (integerProperties.containsKey(id))
-            return integerProperties[id]!!.get()
+            return integerProperties[id]!!.value
         //enum
         enumProperties.filter { it.key.field.id == id }.forEach {
-            return resolveEnumValue(it.value.get(), ordinal)
+            return resolveEnumValue(it.value.value, ordinal)
         }
         enumCollectionProperties.filter { it.key.field.id == id }.forEach {
-            it.value.get().forEach {
+            it.value.value.forEach {
                 return resolveEnumValue(it, ordinal)
             }
+        }
+        //single object references
+        objectProperties.filter { it.key.fieldEntity.id == id }.forEach {
+            return it.value.value.overview.uuid
         }
         return null
     }

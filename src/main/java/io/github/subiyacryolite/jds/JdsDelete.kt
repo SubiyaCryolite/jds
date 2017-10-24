@@ -25,21 +25,21 @@ import kotlin.streams.toList
  */
 /**
  * @param jdsDb
- * @param entityGuids
+ * @param uuids
  */
-class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Callable<Boolean> {
+class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<Boolean> {
 
     private val entities: Collection<CharSequence>
 
     init {
-        this.entities = entityGuids
+        this.entities = uuids
     }
 
     /**
      * @param jdsDb
-     * @param entityGuids
+     * @param uuids
      */
-    constructor(jdsDb: JdsDb, vararg entityGuids: String) : this(jdsDb, Arrays.asList<String>(*entityGuids)) {}
+    constructor(jdsDb: JdsDb, vararg uuids: String) : this(jdsDb, Arrays.asList<String>(*uuids)) {}
 
     /**
      * @param jdsDb
@@ -48,11 +48,11 @@ class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Cal
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({it.overview.entityGuid}).toList()) {
+    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({it.overview.uuid}).toList()) {
         val connection = jdsDb.getConnection()
         entities.forEach { entity ->
             if (entity is JdsDeleteListener)
-                (entity as JdsDeleteListener).onDelete(OnDeleteEventArguments(this.jdsDb, connection, entity.overview.entityGuid))
+                (entity as JdsDeleteListener).onDelete(OnDeleteEventArguments(this.jdsDb, connection, entity.overview.uuid))
         }
     }
 
@@ -114,13 +114,13 @@ class JdsDelete(private val jdsDb: JdsDb, entityGuids: List<CharSequence>) : Cal
 
         /**
          * @param jdsDb
-         * @param entityGuids
+         * @param uuids
          * @throws Exception
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, *entityGuids).call()", "io.github.subiyacryolite.jds.JdsDelete"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, *uuids).call()", "io.github.subiyacryolite.jds.JdsDelete"))
         @Throws(Exception::class)
-        fun delete(jdsDb: JdsDb, vararg entityGuids: String) {
-            JdsDelete(jdsDb, *entityGuids).call()
+        fun delete(jdsDb: JdsDb, vararg uuids: String) {
+            JdsDelete(jdsDb, *uuids).call()
         }
     }
 }

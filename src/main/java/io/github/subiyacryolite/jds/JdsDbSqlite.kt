@@ -183,51 +183,51 @@ abstract class JdsDbSqlite : JdsDb {
     }
 
     override fun saveString(): String {
-        return "INSERT OR REPLACE INTO JdsStoreText(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreText(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveBoolean(): String {
-        return "INSERT OR REPLACE INTO JdsStoreBoolean(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreBoolean(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveLong(): String {
-        return "INSERT OR REPLACE INTO JdsStoreLong(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreLong(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveDouble(): String {
-        return "INSERT OR REPLACE INTO JdsStoreDouble(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreDouble(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveFloat(): String {
-        return "INSERT OR REPLACE INTO JdsStoreFloat(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreFloat(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveInteger(): String {
-        return "INSERT OR REPLACE INTO JdsStoreInteger(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreInteger(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveDateTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreDateTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreDateTime(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreTime(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO JdsStoreBlob(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreBlob(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveZonedDateTime(): String {
-        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(Uuid, FieldId, Value) VALUES(:entityGuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO JdsStoreZonedDateTime(Uuid, FieldId, Value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO JdsEntityOverview(Uuid, DateCreated, DateModified, Live, Version) VALUES(:entityGuid, :dateCreated, :dateModified, :live, :version)"
+        return "INSERT OR REPLACE INTO JdsEntityOverview(Uuid, DateCreated, DateModified, Live, Version) VALUES(:uuid, :dateCreated, :dateModified, :live, :version)"
     }
 
     override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO JdsEntityInstance(Uuid, EntityId) VALUES(:entityGuid, :entityId)"
+        return "INSERT OR REPLACE INTO JdsEntityInstance(Uuid, EntityId) VALUES(:uuid, :entityId)"
     }
 
     override fun mapClassFields(): String {

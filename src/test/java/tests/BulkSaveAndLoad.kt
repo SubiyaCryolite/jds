@@ -14,7 +14,7 @@ class BulkSaveAndLoad : BaseTestConfig() {
         val memObjects = ArrayList<EntityA>()
         for (i in 0..9999) {
             val entry = EntityA()
-            entry.overview.entityGuid = String.format("guidBulk%s", i)
+            entry.overview.uuid = String.format("guidBulk%s", i)
             memObjects.add(entry)
         }
         val jdsSave = JdsSave(jdsDb, 1024, memObjects)

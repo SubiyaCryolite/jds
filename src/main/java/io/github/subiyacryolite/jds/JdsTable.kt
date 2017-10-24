@@ -1,11 +1,13 @@
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.JdsExtensions.setTimestamp
+import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
+import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import java.io.Serializable
 import java.sql.Connection
+import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -81,11 +83,11 @@ open class JdsTable() : Serializable {
             if (uniqueEntries) {
                 //if unique delete old entries
                 val deleteStatement = onPostSaveEventArguments.getOrAddStatement(deleteSql)
-                deleteStatement.setString(1, jdsEntity.overview.entityGuid)
+                deleteStatement.setString(1, jdsEntity.overview.uuid)
                 deleteStatement.addBatch()
             }
             val insertStatement = onPostSaveEventArguments.getOrAddStatement(insertSql)
-            insertStatement.setObject(1, jdsEntity.overview.entityGuid)
+            insertStatement.setObject(1, jdsEntity.overview.uuid)
 
             //order will be maintained by linked list
             columnNames.forEachIndexed { dex, column ->
@@ -99,10 +101,11 @@ open class JdsTable() : Serializable {
                     }
                     else -> {
                         val value = jdsEntity.getReportAtomicValue(field.id, 0)
-                        if (value is ZonedDateTime)
-                            insertStatement.setTimestamp(dex + 2, value, jdsDb)
-                        else
-                            insertStatement.setObject(dex + 2, value ?: null)
+                        when (value) {
+                            is ZonedDateTime -> insertStatement.setZonedDateTime(dex + 2, value, jdsDb)
+                            is LocalTime -> insertStatement.setLocalTime(dex + 2, value, jdsDb)
+                            else -> insertStatement.setObject(dex + 2, value ?: null)
+                        }
                     }
                 }
             }
@@ -136,7 +139,7 @@ open class JdsTable() : Serializable {
             if (!jdsDb.doesColumnExist(connection, name, columnName)) {
                 connection.prepareStatement(sql).use {
                     it.executeUpdate()
-                    println("Created column $columnName")
+                    println("Created column $name.$columnName")
                 }
             }
             //regardless of column existing add to the query
@@ -148,7 +151,6 @@ open class JdsTable() : Serializable {
 
         deleteSql = "DELETE FROM $name WHERE $primaryKey = ?"
         insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
-
 
         generatedOrUpdatedSchema = true
     }

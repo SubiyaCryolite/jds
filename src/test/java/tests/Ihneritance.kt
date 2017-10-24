@@ -81,16 +81,16 @@ class Ihneritance : BaseTestConfig() {
             val collection = ArrayList<JdsEntity>()
 
             val entitya = EntityA()
-            entitya.overview.entityGuid = "entityA"
+            entitya.overview.uuid = "entityA"
             entitya.entityAValue = "entity A - ValueA"
 
             val entityb = EntityB()
-            entityb.overview.entityGuid = "entityB"
+            entityb.overview.uuid = "entityB"
             entityb.entityAValue = "entity B - Value A"
             entityb.entityBValue = "entity B - Value B"
 
             val entityc = EntityC()
-            entityc.overview.entityGuid = "entityC"
+            entityc.overview.uuid = "entityC"
             entityc.entityAValue = "entity C - Value A"
             entityc.entityBValue = "entity C - Value B"
             entityc.entityCValue = "entity C - Value C"

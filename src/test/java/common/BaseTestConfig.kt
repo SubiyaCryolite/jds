@@ -24,7 +24,7 @@ abstract class BaseTestConfig {
     protected val sampleAddressBook: AddressBook
         get() {
             val primaryAddress = Address()
-            primaryAddress.overview.entityGuid = "primaryAddress"
+            primaryAddress.overview.uuid = "primaryAddress"
             primaryAddress.overview.dateModified = LocalDateTime.of(2012, Month.APRIL, 12, 13, 49)
             primaryAddress.area = "Norte Broad"
             primaryAddress.city = "Livingstone"
@@ -33,10 +33,11 @@ abstract class BaseTestConfig {
             primaryAddress.provinceOrState = "Southern"
             primaryAddress.streetName = "East Street"
             primaryAddress.timeOfEntry = ZonedDateTime.now()
+            primaryAddress.time = primaryAddress.timeOfEntry.toLocalTime()
             primaryAddress.primaryAddress = PrimaryAddress.YES
 
             val secondAddress = Address()
-            secondAddress.overview.entityGuid = "secondAddress"
+            secondAddress.overview.uuid = "secondAddress"
             secondAddress.overview.dateModified = LocalDateTime.of(2009, Month.OCTOBER, 16, 3, 34)
             secondAddress.area = "Roma"
             secondAddress.city = "Lusaka"
@@ -45,10 +46,11 @@ abstract class BaseTestConfig {
             secondAddress.provinceOrState = "Lusaka"
             secondAddress.streetName = "West Street"
             secondAddress.timeOfEntry = ZonedDateTime.now().minusMonths(2)
+            secondAddress.time = secondAddress.timeOfEntry.toLocalTime()
             secondAddress.primaryAddress = PrimaryAddress.NO
 
             val thirdAddress = Address()
-            thirdAddress.overview.entityGuid = "thirdAddress"
+            thirdAddress.overview.uuid = "thirdAddress"
             thirdAddress.overview.dateModified = LocalDateTime.of(2007, Month.JULY, 4, 5, 10)
             thirdAddress.area = "Riverdale"
             thirdAddress.city = "Ndola"
@@ -57,10 +59,11 @@ abstract class BaseTestConfig {
             thirdAddress.provinceOrState = "Copperbelt"
             thirdAddress.streetName = "West Street"
             thirdAddress.timeOfEntry = ZonedDateTime.now().minusDays(3)
+            thirdAddress.time = thirdAddress.timeOfEntry.toLocalTime()
             thirdAddress.primaryAddress = PrimaryAddress.NO
 
             val addressBook = AddressBook()
-            addressBook.overview.entityGuid = "testGuid0001"
+            addressBook.overview.uuid = "testGuid0001"
             addressBook.addresses.add(primaryAddress)
             addressBook.addresses.add(secondAddress)
             addressBook.addresses.add(thirdAddress)
@@ -70,7 +73,7 @@ abstract class BaseTestConfig {
     protected val timeConstruct: TimeConstruct
         get() {
             val timeConstruct = TimeConstruct()
-            timeConstruct.overview.entityGuid = "timeConstruct"
+            timeConstruct.overview.uuid = "timeConstruct"
             timeConstruct.duration = Duration.ofDays(2).minusHours(4)
             timeConstruct.monthDay = MonthDay.of(Month.JULY, 1)
             timeConstruct.yearMonth = YearMonth.of(1991, Month.OCTOBER)
@@ -93,7 +96,7 @@ abstract class BaseTestConfig {
             instance1.doubleField = 777.666
             instance1.floatField = 5555.4444f
             instance1.booleanField = true
-            instance1.overview.entityGuid = "instance1"
+            instance1.overview.uuid = "instance1"
 
             val instance2 = Example()
             instance2.stringField = "tWO"
@@ -106,7 +109,7 @@ abstract class BaseTestConfig {
             instance2.doubleField = 444.333
             instance2.floatField = 2222.1111f
             instance2.booleanField = false
-            instance2.overview.entityGuid = "instance2"
+            instance2.overview.uuid = "instance2"
 
             val instance3 = Example()
             instance3.stringField = "Three"
@@ -119,7 +122,7 @@ abstract class BaseTestConfig {
             instance3.doubleField = 444.555
             instance3.floatField = 5555.6666f
             instance3.booleanField = true
-            instance3.overview.entityGuid = "instance3"
+            instance3.overview.uuid = "instance3"
 
             val instance4 = Example()
             instance4.stringField = "Four"
@@ -132,7 +135,7 @@ abstract class BaseTestConfig {
             instance4.doubleField = 100.22
             instance4.floatField = 1000.0f
             instance4.booleanField = false
-            instance4.overview.entityGuid = "instance4"
+            instance4.overview.uuid = "instance4"
 
             collection.add(instance1)
             collection.add(instance2)

@@ -34,12 +34,12 @@ object JdsTableLookup {
         when (fieldType) {
             JdsFieldType.FLOAT -> return STORE_FLOAT
             JdsFieldType.DOUBLE -> return STORE_DOUBLE
-            JdsFieldType.ARRAY_FLOAT -> return STORE_FLOAT_ARRAY
-            JdsFieldType.ARRAY_INT -> return STORE_INTEGER_ARRAY
-            JdsFieldType.ARRAY_DOUBLE -> return STORE_DOUBLE_ARRAY
-            JdsFieldType.ARRAY_LONG -> return STORE_LONG_ARRAY
-            JdsFieldType.ARRAY_TEXT -> return STORE_TEXT_ARRAY
-            JdsFieldType.ARRAY_DATE_TIME -> return STORE_DATE_TIME_ARRAY
+            JdsFieldType.FLOAT_COLLECTION -> return STORE_FLOAT_ARRAY
+            JdsFieldType.INT_COLLECTION -> return STORE_INTEGER_ARRAY
+            JdsFieldType.DOUBLE_COLLECTION -> return STORE_DOUBLE_ARRAY
+            JdsFieldType.LONG_COLLECTION -> return STORE_LONG_ARRAY
+            JdsFieldType.STRING_COLLECTION -> return STORE_TEXT_ARRAY
+            JdsFieldType.DATE_TIME_COLLECTION -> return STORE_DATE_TIME_ARRAY
             JdsFieldType.ENUM_COLLECTION -> return STORE_INTEGER_ARRAY
             JdsFieldType.ZONED_DATE_TIME -> return STORE_ZONED_DATE_TIME
             JdsFieldType.TIME -> return STORE_TIME
@@ -48,7 +48,7 @@ object JdsTableLookup {
             JdsFieldType.ENUM, JdsFieldType.INT -> return STORE_INTEGER
             JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
             JdsFieldType.LONG, JdsFieldType.DURATION -> return STORE_LONG
-            JdsFieldType.PERIOD, JdsFieldType.TEXT, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return STORE_TEXT
+            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return STORE_TEXT
             else -> return NULL
         }
     }

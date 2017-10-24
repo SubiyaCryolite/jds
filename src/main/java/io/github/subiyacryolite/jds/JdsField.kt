@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import io.github.subiyacryolite.jds.enums.JdsFieldType.TEXT
+import io.github.subiyacryolite.jds.enums.JdsFieldType.STRING
 import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
@@ -38,11 +38,11 @@ class JdsField() : Externalizable {
     /**
      * @param type
      */
-    var type: JdsFieldType = JdsFieldType.TEXT
+    var type: JdsFieldType = JdsFieldType.STRING
         private set
 
     init {
-        type = TEXT
+        type = STRING
     }
 
     /**

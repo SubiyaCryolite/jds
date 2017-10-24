@@ -4,7 +4,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 
 object JdsSchema {
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
-        val guidDataType = dataType(jdsDb, JdsFieldType.TEXT, 48)
+        val guidDataType = dataType(jdsDb, JdsFieldType.STRING, 48)
         val sb = StringBuilder()
         sb.append("CREATE TABLE ")
         sb.append(reportName)
@@ -19,13 +19,13 @@ object JdsSchema {
         val collection = LinkedHashMap<String, String>()
         fields.forEach { field ->
             when (field.type) {
-                JdsFieldType.CLASS,
-                JdsFieldType.ARRAY_FLOAT,
-                JdsFieldType.ARRAY_INT,
-                JdsFieldType.ARRAY_DOUBLE,
-                JdsFieldType.ARRAY_LONG,
-                JdsFieldType.ARRAY_TEXT,
-                JdsFieldType.ARRAY_DATE_TIME -> {
+                JdsFieldType.ENTITY_COLLECTION,
+                JdsFieldType.FLOAT_COLLECTION,
+                JdsFieldType.INT_COLLECTION,
+                JdsFieldType.DOUBLE_COLLECTION,
+                JdsFieldType.LONG_COLLECTION,
+                JdsFieldType.STRING_COLLECTION,
+                JdsFieldType.DATE_TIME_COLLECTION -> {
                 }
                 JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> JdsFieldEnum[field.id]!!.sequenceValues.forEach {
                     val columnName = "${field.name}_${it!!.ordinal}"
@@ -52,6 +52,7 @@ object JdsSchema {
     @JvmOverloads
     fun dataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
         when (fieldType) {
+            JdsFieldType.ENTITY -> return jdsDb.getSqlTypeText(48)//act as a fk if you will
             JdsFieldType.FLOAT -> return jdsDb.getSqlTypeFloat()
             JdsFieldType.DOUBLE -> return jdsDb.getSqlTypeDouble()
             JdsFieldType.ZONED_DATE_TIME -> return jdsDb.getSqlTypeZonedDateTime()
@@ -60,7 +61,7 @@ object JdsSchema {
             JdsFieldType.ENUM, JdsFieldType.INT, JdsFieldType.BOOLEAN -> return jdsDb.getSqlTypeInteger()
             JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return jdsDb.getSqlTypeDateTime()
             JdsFieldType.LONG, JdsFieldType.DURATION -> return jdsDb.getSqlTypeLong()
-            JdsFieldType.PERIOD, JdsFieldType.TEXT, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getSqlTypeText(max)
+            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getSqlTypeText(max)
         }
         return "invalid"
     }

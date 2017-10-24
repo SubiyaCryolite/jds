@@ -28,6 +28,6 @@ open class EntityB : EntityA() {
     }
 
     companion object {
-        private val ENTITY_B_FIELD = JdsField(5001, "entity_b_field", JdsFieldType.TEXT)
+        private val ENTITY_B_FIELD = JdsField(5001, "entity_b_field", JdsFieldType.STRING)
     }
 }

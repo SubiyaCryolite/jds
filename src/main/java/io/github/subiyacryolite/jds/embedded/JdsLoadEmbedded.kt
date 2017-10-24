@@ -46,13 +46,13 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         target.overview.dateCreated = source.o.dc
         target.overview.dateModified = source.o.dm
         target.overview.entityId = source.o.id
-        target.overview.entityGuid = source.o.uuid
+        target.overview.uuid = source.o.uuid
         target.overview.live = source.o.l
         target.overview.version = source.o.v
         //==============================================
         //PRIMITIVES
         //==============================================
-        source.s.forEach { target.populateProperties(JdsFieldType.TEXT, it.id, it.v) }
+        source.s.forEach { target.populateProperties(JdsFieldType.STRING, it.id, it.v) }
         source.l.forEach { target.populateProperties(JdsFieldType.LONG, it.id, it.v) }
         source.i.forEach { target.populateProperties(JdsFieldType.INT, it.id, it.v) }
         source.b.forEach { target.populateProperties(JdsFieldType.BOOLEAN, it.id, it.v) }
@@ -81,23 +81,23 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         //ARRAYS
         //==============================================
-        source.ia.forEach { target.populateProperties(JdsFieldType.ARRAY_INT, it.i, it.v) }
-        source.fa.forEach { target.populateProperties(JdsFieldType.ARRAY_FLOAT, it.i, it.v) }
-        source.la.forEach { target.populateProperties(JdsFieldType.ARRAY_LONG, it.i, it.v) }
-        source.sa.forEach { target.populateProperties(JdsFieldType.ARRAY_TEXT, it.i, it.v) }
-        source.da.forEach { target.populateProperties(JdsFieldType.ARRAY_DOUBLE, it.i, it.v) }
-        source.dta.forEach { target.populateProperties(JdsFieldType.ARRAY_DATE_TIME, it.i, it.v) }
+        source.ia.forEach { target.populateProperties(JdsFieldType.INT_COLLECTION, it.i, it.v) }
+        source.fa.forEach { target.populateProperties(JdsFieldType.FLOAT_COLLECTION, it.i, it.v) }
+        source.la.forEach { target.populateProperties(JdsFieldType.LONG_COLLECTION, it.i, it.v) }
+        source.sa.forEach { target.populateProperties(JdsFieldType.STRING_COLLECTION, it.i, it.v) }
+        source.da.forEach { target.populateProperties(JdsFieldType.DOUBLE_COLLECTION, it.i, it.v) }
+        source.dta.forEach { target.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, it.i, it.v) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        val entityGuids = HashSet<String>()//ids should be unique
+        val uuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
         source.eb.forEach {
-            target.populateObjects(jdsDb, it.f, it.i, it.c, innerObjects, entityGuids)
+            target.populateObjects(jdsDb, it.f, it.i, it.c, innerObjects, uuids)
         }
         innerObjects.forEach {
             //populate the inner objects
-            populate(outerIndex, innerIndex, it, source.eo.find { itx -> itx.o.uuid == it.overview.entityGuid }!!)
+            populate(outerIndex, innerIndex, it, source.eo.find { itx -> itx.o.uuid == it.overview.uuid }!!)
         }
     }
 }
