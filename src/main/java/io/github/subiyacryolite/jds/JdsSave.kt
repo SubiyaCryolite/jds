@@ -305,7 +305,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         var record = 0
         try {
             val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
+            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBooleanValues())
             for ((uuid, value1) in booleanProperties) {
                 record++
                 var innerRecord = 0

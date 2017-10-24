@@ -905,6 +905,14 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    internal fun saveOldBooleanValues(): String {
+        return when (isLoggingAppendOnly) {
+            true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BooleanValue) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BooleanValue) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM JdsStoreOldFieldValues WHERE Uuid = ? AND FieldId = ? AND Sequence = ? AND BooleanValue = ?)"
+        }
+    }
+
     internal fun saveOldBlobValues(): String {
         return "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BlobValue) VALUES(?, ?, ?, ?)"
     }
