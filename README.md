@@ -28,7 +28,7 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 - Save, Updates and Deletes cascade to child objects and collections
 - Eager Loading is applied to embedded objects as well as on collections
 - Generation of views representing entityVersions as conventional tables
-- Supports MySQL, T-SQL, PostgreSQL and SQLite
+- Supports MySQL, T-SQL, PostgreSQL, Oracle 11G and SQLite
 - Underlying database implemented using the Star Schema
 
 # Maven Central

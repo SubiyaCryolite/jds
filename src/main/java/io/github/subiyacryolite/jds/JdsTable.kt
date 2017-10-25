@@ -94,9 +94,9 @@ open class JdsTable() : Serializable {
                 val field = columnToFieldMap[column]!!
                 when (field.type) {
                     JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> {
-                        JdsFieldEnum[field.id]!!.sequenceValues.forEach {
-                            val value = jdsEntity.getReportAtomicValue(field.id, it!!.ordinal)
-                            insertStatement.setObject(dex + 2, value ?: null)
+                        JdsFieldEnum[field.id]!!.values.forEach {
+                            val isSelected = jdsEntity.getReportAtomicValue(field.id, it!!.ordinal)
+                            insertStatement.setObject(dex + 2, isSelected ?: null)
                         }
                     }
                     else -> {

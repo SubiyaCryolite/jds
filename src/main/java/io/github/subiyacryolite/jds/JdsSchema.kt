@@ -27,7 +27,7 @@ object JdsSchema {
                 JdsFieldType.STRING_COLLECTION,
                 JdsFieldType.DATE_TIME_COLLECTION -> {
                 }
-                JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> JdsFieldEnum[field.id]!!.sequenceValues.forEach {
+                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEach {
                     val columnName = "${field.name}_${it!!.ordinal}"
                     val columnDefinition = dataType(jdsDb, JdsFieldType.INT)
                     collection.put(columnName, String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition))

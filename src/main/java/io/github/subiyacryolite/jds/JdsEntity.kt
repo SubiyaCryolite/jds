@@ -325,6 +325,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
             objectProperties.put(fieldEntity, property as ObjectProperty<JdsEntity>)
+            fields.add(fieldEntity.fieldEntity)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
@@ -339,6 +340,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity)) {
             objectArrayProperties.put(fieldEntity, properties as ListProperty<JdsEntity>)
+            fields.add(fieldEntity.fieldEntity)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
@@ -1056,7 +1058,7 @@ abstract class JdsEntity : IJdsEntity {
         try {
             (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use { statement ->
                 for (field in fields) {
-                    for (index in 0 until field.sequenceValues.size) {
+                    for (index in 0 until field.values.size) {
                         statement.setLong(1, entityId)
                         statement.setLong(2, field.field.id)
                         statement.addBatch()
@@ -1080,10 +1082,10 @@ abstract class JdsEntity : IJdsEntity {
         try {
             (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use { statement ->
                 for (field in fieldEnums) {
-                    for (index in 0 until field.sequenceValues.size) {
+                    for (index in 0 until field.values.size) {
                         statement.setLong(1, field.field.id)
                         statement.setInt(2, index)
-                        statement.setString(3, field.sequenceValues[index].toString())
+                        statement.setString(3, field.values[index].toString())
                         statement.addBatch()
                     }
                 }
@@ -1126,15 +1128,10 @@ abstract class JdsEntity : IJdsEntity {
             return longProperties[id]!!.value
         if (integerProperties.containsKey(id))
             return integerProperties[id]!!.value
+
         //enum
-        enumProperties.filter { it.key.field.id == id }.forEach {
-            return resolveEnumValue(it.value.value, ordinal)
-        }
-        enumCollectionProperties.filter { it.key.field.id == id }.forEach {
-            it.value.value.forEach {
-                return resolveEnumValue(it, ordinal)
-            }
-        }
+        enumProperties.filter { it.key.field.id == id }.forEach { return resolveEnumValue(it.value.value, ordinal) }
+        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.value.forEach { return resolveEnumValue(it, ordinal) } }
         //single object references
         objectProperties.filter { it.key.fieldEntity.id == id }.forEach {
             return it.value.value.overview.uuid
