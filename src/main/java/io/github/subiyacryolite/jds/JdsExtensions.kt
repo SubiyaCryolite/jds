@@ -1,6 +1,7 @@
 package io.github.subiyacryolite.jds
 
 import com.javaworld.INamedStatement
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -80,6 +81,19 @@ object JdsExtensions {
             JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.getString(column)
             JdsImplementation.POSTGRES -> this.getObject(column)
             else -> this.getLong(column)
+        }
+    }
+
+    fun determineParents(entity: Class<out IJdsEntity>, parentEntities: MutableList<Long>) {
+        addAllToList(entity.superclass, parentEntities)
+    }
+
+    private fun addAllToList(superclass: Class<*>?, parentEntities: MutableList<Long>) {
+        if (superclass == null) return
+        if (superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            val annotation = superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            parentEntities.add(annotation.entityId)
+            addAllToList(superclass.superclass, parentEntities)
         }
     }
 }

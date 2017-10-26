@@ -619,7 +619,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity: JdsEntity? = entity.newInstance()
-                        determineParents(entity, parentEntities)
+                        JdsExtensions.determineParents(entity, parentEntities)
                         mapClassName(connection, jdsEntity!!.overview.entityId, entityAnnotation.entityName)
                         jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
@@ -640,19 +640,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     val mappedClasses: Collection<Class<out JdsEntity>>
         get() = classes.values
-
-    private fun determineParents(entity: Class<out JdsEntity>, parentEntities: MutableList<Long>) {
-        addAllToList(entity.superclass, parentEntities)
-    }
-
-    private fun addAllToList(superclass: Class<*>?, parentEntities: MutableList<Long>) {
-        if (superclass == null) return
-        if (superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val annotation = superclass.getAnnotation(JdsEntityAnnotation::class.java)
-            parentEntities.add(annotation.entityId)
-            addAllToList(superclass.superclass, parentEntities)
-        }
-    }
 
     fun getBoundClass(serviceCode: Long): Class<out JdsEntity>? {
         return classes[serviceCode]

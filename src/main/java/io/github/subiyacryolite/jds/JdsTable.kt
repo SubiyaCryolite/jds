@@ -52,6 +52,16 @@ open class JdsTable() : Serializable {
             val annotation = entityClass.getAnnotation(JdsEntityAnnotation::class.java)
             entityVersions.putIfAbsent(annotation.entityId, HashSet())
             entityVersions[annotation.entityId]!!.add(annotation.version)
+
+            //catch superclasses!!!
+            val parentEntities = ArrayList<Long>()
+            JdsExtensions.determineParents(entityClass, parentEntities)
+            parentEntities.forEach {
+                entityVersions.putIfAbsent(it, HashSet())
+                entityVersions[it]!!.add(-1)
+                //get any version of subclass. If fields don't exist they will be skipped(marked null)
+            }
+
             if (registerFields) {
                 val entity = entityClass.newInstance()
                 entity.registerFields(this)
@@ -78,7 +88,8 @@ open class JdsTable() : Serializable {
     fun executeSave(jdsDb: JdsDb, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
-        val satisfied = satisfiesConditions(jdsEntity)
+
+        val satisfied = satisfiesConditions(jdsDb,jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
                 //if unique delete old entries
@@ -151,10 +162,26 @@ open class JdsTable() : Serializable {
      *
      * @param jdsEntity
      */
-    private fun satisfiesConditions(jdsEntity: JdsEntity): Boolean {
+    private fun satisfiesConditions(jdsDb: JdsDb, jdsEntity: JdsEntity): Boolean {
+
         val notLimitedToSpecificEntity = entityVersions.isEmpty()
-        val matchesSpecificEntity = !notLimitedToSpecificEntity && entityVersions.containsKey(jdsEntity.overview.entityId)
-        val matchesSpecificVersion = matchesSpecificEntity && entityVersions[jdsEntity.overview.entityId]!!.contains(jdsEntity.overview.version)
-        return notLimitedToSpecificEntity || (matchesSpecificEntity && matchesSpecificVersion)
+        if(notLimitedToSpecificEntity)
+            return true
+
+//        entityVersions.forEach {
+//            //fire if instance or instance of target
+//            val targetOfSave = jdsDb.classes[it.key]
+//            if (targetOfSave != null) {
+//                var versionsOfTarget = entityVersions[it.key]!!
+//                if (jdsEntity is targetOfSave !!)
+//                {}
+//            }
+//        }
+
+        //val matchesSpecificEntity = !notLimitedToSpecificEntity && entityVersions.containsKey(jdsEntity.overview.entityId) && instanceOf()
+        //val matchesSpecificVersion = matchesSpecificEntity && entityVersions[jdsEntity.overview.entityId]!!.contains(jdsEntity.overview.version)
+        //return notLimitedToSpecificEntity || (matchesSpecificEntity && matchesSpecificVersion)
+
+        return false
     }
 }
