@@ -13,12 +13,10 @@
  */
 package io.github.subiyacryolite.jds.events
 
-import com.javaworld.INamedStatement
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.IJdsDb
-import java.sql.*
-import java.util.*
+import java.sql.Connection
+import java.sql.SQLException
+import java.util.concurrent.ConcurrentMap
 
 /**
  * Event arguments to handle this listener invocation.
@@ -26,141 +24,21 @@ import java.util.*
  * {@link #getOrAddStatement(String) getOrAddStatement}, {@link #getOrAddNamedCall(String) getOrAddNamedCall} and
  * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
-class OnPreSaveEventArguments {
-    val jdsDb: IJdsDb
-    val connection: Connection
-    val alternateConnection: LinkedHashMap<Int, Connection>
-    private val statements: LinkedHashMap<String, Statement>
-    private val alternateStatements: LinkedHashMap<Int, LinkedHashMap<String, Statement>>
-
-    constructor(jdsDb: IJdsDb, connection: Connection) {
-        this.jdsDb = jdsDb
-        this.connection = connection
-        this.alternateConnection = LinkedHashMap()
-        this.statements = LinkedHashMap()
-        this.alternateStatements = LinkedHashMap()
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddStatement(query: String): PreparedStatement {
-        if (!statements.containsKey(query))
-            statements.put(query, connection.prepareStatement(query))
-        return statements[query] as PreparedStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddCall(query: String): CallableStatement {
-        if (!statements.containsKey(query))
-            statements.put(query, connection.prepareCall(query))
-        return statements[query] as CallableStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedStatement(query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements.put(query, NamedPreparedStatement(connection, query))
-        return statements[query] as INamedStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedCall(query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements.put(query, NamedCallableStatement(connection, query))
-        return statements[query] as INamedStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddStatement(targetConnection: Int, query: String): PreparedStatement {
-        prepareConnection(targetConnection)
-        if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, alternateConnection(targetConnection).prepareStatement(query))
-        return alternateStatements[targetConnection]!![query] as PreparedStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddCall(targetConnection: Int, query: String): CallableStatement {
-        prepareConnection(targetConnection)
-        if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, alternateConnection(targetConnection).prepareCall(query))
-        return alternateStatements[targetConnection]!![query] as CallableStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
-        prepareConnection(targetConnection)
-        if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, NamedPreparedStatement(alternateConnection(targetConnection), query))
-        return alternateStatements[targetConnection]!![query] as INamedStatement
-    }
-
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
-        prepareConnection(targetConnection)
-        if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, NamedCallableStatement(alternateConnection(targetConnection), query))
-        return statements[query] as INamedStatement
-    }
-
-    private fun prepareConnection(targetConnection: Int) {
-        if (!alternateConnection.containsKey(targetConnection))
-            alternateConnection.put(targetConnection, jdsDb.getConnection(targetConnection))
-        if (!alternateStatements.containsKey(targetConnection))
-            alternateStatements.put(targetConnection, LinkedHashMap<String, Statement>())
-    }
+open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection) {
 
     @Throws(SQLException::class)
-    fun executeBatches() {
+    override fun executeBatches() {
         connection.autoCommit = false
         for (preparedStatement in statements.values) {
             preparedStatement.executeBatch()
         }
         connection.commit()
         connection.autoCommit = true
-
-        alternateConnection.forEach { targetConnection, con ->
-            con.autoCommit = false
-            executeStatementsOnConnection(targetConnection)
-            con.commit()
-            con.autoCommit = true
-        }
-    }
-
-    private fun executeStatementsOnConnection(targetConnection: Int) {
-        alternateStatements.filter { it.key == targetConnection }.forEach {
-            it.value.forEach {
-                it.value.executeBatch()
-            }
-        }
     }
 
     fun closeBatches() {
-        for (preparedStatement in statements.values) {
-            preparedStatement.close()
-        }
-        alternateStatements.forEach {
-            it.value.forEach {
-                it.value.close()
-            }
-        }
         connection.autoCommit = true
-
-        //close alternate connections too as they were created internally
-        alternateConnection.forEach {
-            it.value.close();
-        }
-    }
-
-    private fun alternateConnection(targetConnection: Int): Connection {
-        if (!alternateConnection.containsKey(targetConnection))
-            alternateConnection.put(targetConnection, jdsDb.getConnection(targetConnection))
-        return alternateConnection[targetConnection]!!
+        for (preparedStatement in statements.values)
+            preparedStatement.close()
     }
 }

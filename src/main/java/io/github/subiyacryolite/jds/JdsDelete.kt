@@ -15,9 +15,12 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.events.JdsDeleteListener
 import io.github.subiyacryolite.jds.events.OnDeleteEventArguments
+import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.Callable
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import kotlin.streams.toList
 
 /**
@@ -30,6 +33,7 @@ import kotlin.streams.toList
 class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<Boolean> {
 
     private val entities: Collection<CharSequence>
+    private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
 
     init {
         this.entities = uuids
@@ -48,12 +52,15 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({it.overview.uuid}).toList()) {
-        val connection = jdsDb.getConnection()
-        entities.forEach { entity ->
-            if (entity is JdsDeleteListener)
-                (entity as JdsDeleteListener).onDelete(OnDeleteEventArguments(this.jdsDb, connection, entity.overview.uuid))
+    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({ it.overview.uuid }).toList()) {
+        jdsDb.getConnection().use {
+            entities.forEach { entity ->
+                if (entity is JdsDeleteListener)
+                    (entity as JdsDeleteListener).onDelete(OnDeleteEventArguments(jdsDb, it, alternateConnections))
+            }
         }
+        //close alternate connections
+        alternateConnections.forEach { it.value.close() }
     }
 
     /**

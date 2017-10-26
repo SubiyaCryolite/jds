@@ -20,11 +20,14 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.events.JdsLoadListener
 import io.github.subiyacryolite.jds.events.OnPostLoadEventArguments
 import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments
+import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.Callable
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentMap
 import java.util.stream.Stream
 
 /**
@@ -36,6 +39,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private val referenceType: Class<T>
     private val searchGuids: Array<out String>
     private var comparator: Comparator<in T>? = null
+    private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
 
     /**
      * @param jdsDb
@@ -160,7 +164,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                         //catch embedded/pre-created objects objects as well
                                                                                         for (entity in entities)
                                                                                             if (entity is JdsLoadListener)
-                                                                                                (entity as JdsLoadListener).onPreLoad(OnPreLoadEventArguments(jdsDb, connection, entity.overview.uuid, batchSequence, uuids.size))
+                                                                                                (entity as JdsLoadListener).onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections))
 
                                                                                         if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
                                                                                             //primitives
@@ -192,8 +196,10 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                         //catch embedded/pre-created objects objects as well
                                                                                         for (entity in entities)
                                                                                             if (entity is JdsLoadListener)
-                                                                                                (entity as JdsLoadListener).onPostLoad(OnPostLoadEventArguments(jdsDb, connection, entity.overview.uuid))
+                                                                                                (entity as JdsLoadListener).onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections))
 
+                                                                                        //close alternate connections
+                                                                                        alternateConnections.forEach { it.value.close() }
                                                                                     }
                                                                                 }
                                                                             }

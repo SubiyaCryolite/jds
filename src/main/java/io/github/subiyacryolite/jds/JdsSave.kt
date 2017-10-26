@@ -26,18 +26,21 @@ import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.Callable
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+import kotlin.collections.HashMap
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Collection<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection)) : Callable<Boolean> {
+class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection>, private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Collection<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections)) : Callable<Boolean> {
 
     /**
      * @param jdsDb
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, jdsDb.getConnection(), 0, entities, false) {
+    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(ConcurrentHashMap(), jdsDb, jdsDb.getConnection(), 0, entities, false) {
     }
 
     /**
@@ -46,7 +49,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, batchSize: Int, entities: Collection<JdsEntity>) : this(jdsDb, jdsDb.getConnection(), batchSize, entities, false) {
+    constructor(jdsDb: JdsDb, batchSize: Int, entities: Collection<JdsEntity>) : this(ConcurrentHashMap(), jdsDb, jdsDb.getConnection(), batchSize, entities, false) {
     }
 
     /**
@@ -220,6 +223,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 onPreSaveEventArguments.closeBatches()
                 onPostSaveEventArguments.closeBatches()
                 connection.close()
+                alternateConnections.forEach {
+                    it.value.close()
+                }
             }
         }
     }
@@ -1338,7 +1344,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         }
 
         //save children first
-        JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
+        JdsSave(alternateConnections, jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
         //bind children below
         try {
@@ -1407,7 +1413,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         }
 
         //save children first
-        JdsSave(jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
+        JdsSave(alternateConnections, jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
         //bind children below
         try {
