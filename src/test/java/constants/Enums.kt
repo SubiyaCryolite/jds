@@ -9,4 +9,5 @@ object Enums {
 
     val PRIMARY_ADDRESS_ENUM = JdsFieldEnum(PrimaryAddress::class.java, Fields.PRIMARY_ADDRESS_ENUM, *PrimaryAddress.values())
     val SEX_ENUM = JdsFieldEnum(Sex::class.java, Fields.SEX_ENUM, *Sex.values())
+    val RIGHTS = JdsFieldEnum(Rights::class.java, Fields.RIGHTS, *Rights.values())
 }

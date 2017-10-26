@@ -1139,7 +1139,7 @@ abstract class JdsEntity : IJdsEntity {
                 }
             }
             enumCollectionProperties.filter { it.key.field.id == id }.forEach {
-                return when (it.value.value.any { it.ordinal == ordinal }) {
+                return when (it.value.value.any { enum -> enum.ordinal == ordinal }) {
                     true -> 1
                     false -> 0
                 }

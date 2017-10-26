@@ -22,10 +22,10 @@ open class JdsTable() : Serializable {
     var entityVersions = HashMap<Long, MutableSet<Long>>()//EntityId.Versions
 
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
+    private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
     private val insertColumns = StringJoiner(",")
     private val insertParameters = StringJoiner(",")
-    private val updates = StringJoiner(",")
     private var deleteSql = ""
     private var insertSql = ""
     private var generatedOrUpdatedSchema = false
@@ -76,7 +76,7 @@ open class JdsTable() : Serializable {
      */
     @Throws(Exception::class)
     fun executeSave(jdsDb: JdsDb, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
-        if(!generatedOrUpdatedSchema)
+        if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsEntity)
         if (satisfied) {
@@ -90,23 +90,16 @@ open class JdsTable() : Serializable {
             insertStatement.setObject(1, jdsEntity.overview.uuid)
 
             //order will be maintained by linked list
-            columnNames.forEachIndexed { dex, column ->
-                val field = columnToFieldMap[column]!!
-                when (field.type) {
-                    JdsFieldType.ENUM_COLLECTION, JdsFieldType.ENUM -> {
-                        JdsFieldEnum[field.id]!!.values.forEach {
-                            val isSelected = jdsEntity.getReportAtomicValue(field.id, it!!.ordinal)
-                            insertStatement.setObject(dex + 2, isSelected ?: null)
-                        }
-                    }
-                    else -> {
-                        val value = jdsEntity.getReportAtomicValue(field.id, 0)
-                        when (value) {
-                            is ZonedDateTime -> insertStatement.setZonedDateTime(dex + 2, value, jdsDb)
-                            is LocalTime -> insertStatement.setLocalTime(dex + 2, value, jdsDb)
-                            else -> insertStatement.setObject(dex + 2, value ?: null)
-                        }
-                    }
+            columnNames.forEachIndexed { columnIndex, columnName ->
+                val field = columnToFieldMap[columnName]!!
+                val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
+                    true -> jdsEntity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
+                    false -> jdsEntity.getReportAtomicValue(field.id, 0)
+                }
+                when (value) {
+                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 2, value, jdsDb)
+                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 2, value, jdsDb)
+                    else -> insertStatement.setObject(columnIndex + 2, value ?: null)
                 }
             }
             insertStatement.addBatch()
@@ -120,7 +113,7 @@ open class JdsTable() : Serializable {
     internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) {
         val tableFields = JdsField.values.filter { fieldIds.contains(it.value.id) }.map { it.value }
         val tableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
-        val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap)
+        val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
         val primaryKey = JdsSchema.getPrimaryKey()
 
 
@@ -146,7 +139,6 @@ open class JdsTable() : Serializable {
             columnNames.add(columnName)
             insertColumns.add(columnName)
             insertParameters.add("?")
-            updates.add("columnName = ?")
         }
 
         deleteSql = "DELETE FROM $name WHERE $primaryKey = ?"

@@ -169,7 +169,7 @@ abstract class BaseTestConfig {
     open fun load() {
     }
 
-    fun initialiseJdsClasses() {
+    private fun initialiseJdsClasses() {
         jdsDb.map(EntityA::class.java)
         jdsDb.map(EntityB::class.java)
         jdsDb.map(EntityC::class.java)
@@ -177,6 +177,7 @@ abstract class BaseTestConfig {
         jdsDb.map(Address::class.java)
         jdsDb.map(AddressBook::class.java)
         jdsDb.map(TimeConstruct::class.java)
+        jdsDb.map(Login::class.java)
     }
 
     private fun initJds() {
@@ -230,7 +231,6 @@ abstract class BaseTestConfig {
         } catch (ioException: IOException) {
             ioException.printStackTrace(System.err)
         }
-
     }
 
     protected fun <T> deserialize(fileToDeserialize: String?, classBeingDeserialized: Class<T>?): T? {
@@ -253,7 +253,6 @@ abstract class BaseTestConfig {
         } catch (exception: ClassNotFoundException) {
             exception.printStackTrace(System.err)
         }
-
         return objectOut
     }
 }

@@ -15,7 +15,7 @@ object JdsSchema {
         return sb.toString()
     }
 
-    fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>): LinkedHashMap<String, String> {
+    fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
         fields.forEach { field ->
             when (field.type) {
@@ -27,11 +27,13 @@ object JdsSchema {
                 JdsFieldType.STRING_COLLECTION,
                 JdsFieldType.DATE_TIME_COLLECTION -> {
                 }
-                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEach {
-                    val columnName = "${field.name}_${it!!.ordinal}"
+                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEachIndexed { index, enum ->
+                    val columnName = "${field.name}_${enum!!.ordinal}"
                     val columnDefinition = dataType(jdsDb, JdsFieldType.INT)
                     collection.put(columnName, String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition))
                     columnToFieldMap.put(columnName, field)
+
+                    enumOrdinals.put(columnName, enum!!.ordinal)
                 }
                 else -> {
                     collection.put(field.name, generateColumn(jdsDb, reportName, field))
@@ -59,7 +61,7 @@ object JdsSchema {
             JdsFieldType.TIME -> return jdsDb.getSqlTypeTime()
             JdsFieldType.BLOB -> return jdsDb.getSqlTypeBlob(max)
             JdsFieldType.BOOLEAN -> return jdsDb.getSqlTypeBoolean()
-            JdsFieldType.ENUM, JdsFieldType.INT-> return jdsDb.getSqlTypeInteger()
+            JdsFieldType.ENUM, JdsFieldType.INT -> return jdsDb.getSqlTypeInteger()
             JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return jdsDb.getSqlTypeDateTime()
             JdsFieldType.LONG, JdsFieldType.DURATION -> return jdsDb.getSqlTypeLong()
             JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getSqlTypeText(max)

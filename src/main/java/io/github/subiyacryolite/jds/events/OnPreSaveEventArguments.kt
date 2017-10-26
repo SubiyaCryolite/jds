@@ -78,7 +78,7 @@ class OnPreSaveEventArguments {
     fun getOrAddStatement(targetConnection: Int, query: String): PreparedStatement {
         prepareConnection(targetConnection)
         if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, alternateConnection[targetConnection]!!.prepareStatement(query))
+            alternateStatements[targetConnection]!!.put(query, alternateConnection(targetConnection).prepareStatement(query))
         return alternateStatements[targetConnection]!![query] as PreparedStatement
     }
 
@@ -87,7 +87,7 @@ class OnPreSaveEventArguments {
     fun getOrAddCall(targetConnection: Int, query: String): CallableStatement {
         prepareConnection(targetConnection)
         if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, alternateConnection[targetConnection]!!.prepareCall(query))
+            alternateStatements[targetConnection]!!.put(query, alternateConnection(targetConnection).prepareCall(query))
         return alternateStatements[targetConnection]!![query] as CallableStatement
     }
 
@@ -96,7 +96,7 @@ class OnPreSaveEventArguments {
     fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
         prepareConnection(targetConnection)
         if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, NamedPreparedStatement(alternateConnection[targetConnection]!!, query))
+            alternateStatements[targetConnection]!!.put(query, NamedPreparedStatement(alternateConnection(targetConnection), query))
         return alternateStatements[targetConnection]!![query] as INamedStatement
     }
 
@@ -105,7 +105,7 @@ class OnPreSaveEventArguments {
     fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
         prepareConnection(targetConnection)
         if (!alternateStatements[targetConnection]!!.containsKey(query))
-            alternateStatements[targetConnection]!!.put(query, NamedCallableStatement(alternateConnection[targetConnection]!!, query))
+            alternateStatements[targetConnection]!!.put(query, NamedCallableStatement(alternateConnection(targetConnection), query))
         return statements[query] as INamedStatement
     }
 
@@ -151,5 +151,16 @@ class OnPreSaveEventArguments {
             }
         }
         connection.autoCommit = true
+
+        //close alternate connections too as they were created internally
+        alternateConnection.forEach {
+            it.value.close();
+        }
+    }
+
+    private fun alternateConnection(targetConnection: Int): Connection {
+        if (!alternateConnection.containsKey(targetConnection))
+            alternateConnection.put(targetConnection, jdsDb.getConnection(targetConnection))
+        return alternateConnection[targetConnection]!!
     }
 }
