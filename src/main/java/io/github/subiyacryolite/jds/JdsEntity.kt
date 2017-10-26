@@ -1130,20 +1130,26 @@ abstract class JdsEntity : IJdsEntity {
             return integerProperties[id]!!.value
 
         //enum
-        enumProperties.filter { it.key.field.id == id }.forEach { return resolveEnumValue(it.value.value, ordinal) }
-        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.value.forEach { return resolveEnumValue(it, ordinal) } }
+        run {
+            //enum logic, is this ordinal present
+            enumProperties.filter { it.key.field.id == id }.forEach {
+                return when (it.value.value.ordinal == ordinal) {
+                    true -> 1
+                    false -> 0
+                }
+            }
+            enumCollectionProperties.filter { it.key.field.id == id }.forEach {
+                return when (it.value.value.any { it.ordinal == ordinal }) {
+                    true -> 1
+                    false -> 0
+                }
+            }
+        }
         //single object references
         objectProperties.filter { it.key.fieldEntity.id == id }.forEach {
             return it.value.value.overview.uuid
         }
         return null
-    }
-
-    private fun resolveEnumValue(it: Enum<*>, index: Int): Int {
-        return when (it.ordinal == index) {
-            true -> 1
-            false -> 0
-        }
     }
 
     override fun registerFields(jdsTable: JdsTable) {
