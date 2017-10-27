@@ -956,18 +956,14 @@ abstract class JdsEntity : IJdsEntity {
     internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
         try {
             val entityClass = jdsDb.getBoundClass(entityId)!!
-            objectArrayProperties.filter {
-                it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
-            }.forEach {
+            objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val entity = entityClass.newInstance()
                 entity.overview.uuid = uuid
                 uuids.add(uuid)
                 it.value.get().add(entity)
                 innerObjects.add(entity)
             }
-            objectProperties.filter {
-                it.key.fieldEntity.id == fieldId && it.key.entityType.isAnnotationPresent(JdsEntityAnnotation::class.java) && it.key.entityType.getAnnotation(JdsEntityAnnotation::class.java).entityId == entityId
-            }.forEach {
+            objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val jdsEntity = entityClass.newInstance()
                 jdsEntity.overview.uuid = uuid
                 uuids.add(uuid)

@@ -1383,7 +1383,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
         val parentChildBindings = ArrayList<JdsParentChildBinding>()
         val jdsEntities = ArrayList<JdsEntity>()
-        val map: MutableMap<String, Long> = HashMap<String, Long>()
+        val uuidToFieldMap: MutableMap<String, Long> = HashMap<String, Long>()
 
         for ((parentGuid, value) in objectProperties) {
             for ((key, value1) in value) {
@@ -1405,7 +1405,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     parentChildBinding.childGuid = jdsEntity.overview.uuid
 
                     parentChildBindings.add(parentChildBinding)
-                    map.put(value1.get().overview.uuid, key.fieldEntity.id)
+                    uuidToFieldMap.put(value1.get().overview.uuid, key.fieldEntity.id)
 
                     record.set(record.get() + 1)
                     if (jdsDb.isPrintingOutput)
@@ -1433,7 +1433,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
                 writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
-                writeNewBindings.setLong("fieldId", map[jdsEntity.overview.uuid]!!)
+                writeNewBindings.setLong("fieldId", uuidToFieldMap[jdsEntity.overview.uuid]!!)
                 writeNewBindings.addBatch()
             }
         } catch (ex: Exception) {
