@@ -41,7 +41,7 @@ class CustomReport : BaseTestConfig() {
         login.rights.add(Rights.CAN_LOGIN)
         login.rights.add(Rights.CAN_CREATE_USER)
 
-        val sav = JdsSave(jdsDb, inheritanceCollection)
+        val sav = JdsSave(jdsDb, Arrays.asList(sampleAddressBook))
         sav.call()
     }
 
