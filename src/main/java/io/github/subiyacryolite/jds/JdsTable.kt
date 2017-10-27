@@ -18,8 +18,8 @@ import kotlin.collections.HashSet
 open class JdsTable() : Serializable {
     var name: String = ""
     var uniqueEntries = false
-    var fieldIds = ArrayList<Long>()
-    var entityVersions = HashMap<Long, MutableSet<Long>>()//EntityId.Versions
+    var entities = HashSet<Long>()//EntityId.Versions
+    var fieldIds = HashSet<Long>()
 
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
@@ -50,16 +50,13 @@ open class JdsTable() : Serializable {
     fun registerEntities(entityClass: Class<out IJdsEntity>, registerFields: Boolean = false) {
         if (entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val annotation = entityClass.getAnnotation(JdsEntityAnnotation::class.java)
-            entityVersions.putIfAbsent(annotation.entityId, HashSet())
-            entityVersions[annotation.entityId]!!.add(annotation.version)
+            entities.add(annotation.entityId)
 
             //catch superclasses!!!
             val parentEntities = ArrayList<Long>()
             JdsExtensions.determineParents(entityClass, parentEntities)
             parentEntities.forEach {
-                entityVersions.putIfAbsent(it, HashSet())
-                entityVersions[it]!!.add(-1)
-                //get any version of subclass. If fields don't exist they will be skipped(marked null)
+                entities.add(it)
             }
 
             if (registerFields) {
@@ -164,23 +161,12 @@ open class JdsTable() : Serializable {
      */
     private fun satisfiesConditions(jdsDb: JdsDb, jdsEntity: JdsEntity): Boolean {
 
-        val notLimitedToSpecificEntity = entityVersions.isEmpty()
+        val notLimitedToSpecificEntity = entities.isEmpty()
         if(notLimitedToSpecificEntity)
             return true
 
-//        entityVersions.forEach {
-//            //fire if instance or instance of target
-//            val targetOfSave = jdsDb.classes[it.key]
-//            if (targetOfSave != null) {
-//                var versionsOfTarget = entityVersions[it.key]!!
-//                if (jdsEntity is targetOfSave !!)
-//                {}
-//            }
-//        }
-
-        //val matchesSpecificEntity = !notLimitedToSpecificEntity && entityVersions.containsKey(jdsEntity.overview.entityId) && instanceOf()
-        //val matchesSpecificVersion = matchesSpecificEntity && entityVersions[jdsEntity.overview.entityId]!!.contains(jdsEntity.overview.version)
-        //return notLimitedToSpecificEntity || (matchesSpecificEntity && matchesSpecificVersion)
+        val matchesSpecificEntity = !notLimitedToSpecificEntity && entities.contains(jdsEntity.overview.entityId)
+        return notLimitedToSpecificEntity || matchesSpecificEntity
 
         return false
     }
