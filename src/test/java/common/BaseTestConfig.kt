@@ -8,6 +8,7 @@ import connectivity.*
 import constants.PrimaryAddress
 import entities.*
 import io.github.subiyacryolite.jds.JdsDb
+import io.github.subiyacryolite.jds.JdsEntity
 import java.io.*
 import java.time.*
 import java.util.*
@@ -79,6 +80,32 @@ abstract class BaseTestConfig {
             timeConstruct.yearMonth = YearMonth.of(1991, Month.OCTOBER)
             timeConstruct.period = Period.ofYears(4).minusMonths(4).minusDays(12)
             return timeConstruct;
+        }
+
+    protected val inheritanceCollection: List<JdsEntity>
+        get() {
+            val collection = ArrayList<JdsEntity>()
+
+            val entitya = EntityA()
+            entitya.overview.uuid = "entityA"
+            entitya.entityAValue = "entity A - ValueA"
+
+            val entityb = EntityB()
+            entityb.overview.uuid = "entityB"
+            entityb.entityAValue = "entity B - Value A"
+            entityb.entityBValue = "entity B - Value B"
+
+            val entityc = EntityC()
+            entityc.overview.uuid = "entityC"
+            entityc.entityAValue = "entity C - Value A"
+            entityc.entityBValue = "entity C - Value B"
+            entityc.entityCValue = "entity C - Value C"
+
+            collection.add(entitya)
+            collection.add(entityb)
+            collection.add(entityc)
+
+            return collection
         }
 
     protected val collection: List<Example>

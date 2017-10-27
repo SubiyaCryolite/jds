@@ -3,9 +3,7 @@ package tests
 import common.BaseTestConfig
 import constants.Fields
 import constants.Rights
-import entities.Address
-import entities.AddressBook
-import entities.Login
+import entities.*
 import io.github.subiyacryolite.jds.JdsSave
 import io.github.subiyacryolite.jds.JdsTable
 import org.junit.jupiter.api.Test
@@ -26,17 +24,24 @@ class CustomReport : BaseTestConfig() {
         val crtAddressBook = JdsTable(AddressBook::class.java, true)
         val crtLogin = JdsTable(Login::class.java, true)
 
+        val crtA = JdsTable(EntityA::class.java, true)
+        val crtB = JdsTable(EntityB::class.java, true)
+        val crtC = JdsTable(EntityC::class.java, true)
+
         jdsDb.mapTable(customTable)
         jdsDb.mapTable(crtAddress)
         jdsDb.mapTable(crtAddressBook)
         jdsDb.mapTable(crtLogin)
+        jdsDb.mapTable(crtA)
+        jdsDb.mapTable(crtB)
+        jdsDb.mapTable(crtC)
         jdsDb.prepareTables()
 
         val login = Login()
         login.rights.add(Rights.CAN_LOGIN)
         login.rights.add(Rights.CAN_CREATE_USER)
 
-        val sav = JdsSave(jdsDb, Arrays.asList(login))
+        val sav = JdsSave(jdsDb, inheritanceCollection)
         sav.call()
     }
 

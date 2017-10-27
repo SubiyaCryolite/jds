@@ -10,7 +10,6 @@ import java.sql.Connection
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
@@ -18,7 +17,7 @@ import kotlin.collections.HashSet
 open class JdsTable() : Serializable {
     var name: String = ""
     var uniqueEntries = false
-    var entities = HashSet<Long>()//EntityId.Versions
+    var entities = HashSet<Long>()
     var fields = HashSet<Long>()
 
     private var targetConnection = -1
@@ -52,15 +51,6 @@ open class JdsTable() : Serializable {
         if (entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val annotation = entityClass.getAnnotation(JdsEntityAnnotation::class.java)
             entities.add(annotation.entityId)
-
-            //catch superclasses!!!
-            val parentEntities = ArrayList<Long>()
-            JdsExtensions.determineParents(entityClass, parentEntities)
-            parentEntities.forEach {
-                entities.add(it)
-                //get any version of subclass. If fields don't exist they will be skipped(marked null)
-            }
-
             if (registerFields) {
                 val entity = entityClass.newInstance()
                 entity.registerFields(this)
@@ -137,7 +127,8 @@ open class JdsTable() : Serializable {
         if (!jdsDb.doesTableExist(connection, name))
             connection.prepareStatement(tableSql).use {
                 it.executeUpdate()
-                println("Created table $name")
+                if (jdsDb.isPrintingOutput)
+                    println("Created $name")
             }
 
         //mandatory primary key
@@ -148,7 +139,8 @@ open class JdsTable() : Serializable {
             if (!jdsDb.doesColumnExist(connection, name, columnName)) {
                 connection.prepareStatement(sql).use {
                     it.executeUpdate()
-                    println("Created column $name.$columnName")
+                    if (jdsDb.isPrintingOutput)
+                        println("Created $name.$columnName")
                 }
             }
             //regardless of column existing add to the query

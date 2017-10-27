@@ -75,32 +75,4 @@ class Ihneritance : BaseTestConfig() {
         postgresSqlImplementation()
         oracleImplementation()
     }
-
-    private val inheritanceCollection: List<JdsEntity>
-        get() {
-            val collection = ArrayList<JdsEntity>()
-
-            val entitya = EntityA()
-            entitya.overview.uuid = "entityA"
-            entitya.entityAValue = "entity A - ValueA"
-
-            val entityb = EntityB()
-            entityb.overview.uuid = "entityB"
-            entityb.entityAValue = "entity B - Value A"
-            entityb.entityBValue = "entity B - Value B"
-
-            val entityc = EntityC()
-            entityc.overview.uuid = "entityC"
-            entityc.entityAValue = "entity C - Value A"
-            entityc.entityBValue = "entity C - Value B"
-            entityc.entityCValue = "entity C - Value C"
-
-            collection.add(entitya)
-            collection.add(entityb)
-            collection.add(entityc)
-
-            return collection
-        }
-
-
 }
