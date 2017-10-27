@@ -1348,16 +1348,18 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            //If a parent doesn't have this property everything will be fine, as it wont be loaded
+            //thus the delete call will not be executed
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
             val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
+                //delete all entries of this field
                 clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
-                clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
                 clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentUuid", getParent(parentChildBindings, jdsEntity.overview.uuid))
+                writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
                 writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
                 writeNewBindings.setLong("fieldId", map[jdsEntity.overview.uuid]!!)
@@ -1417,16 +1419,18 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
         //bind children below
         try {
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND ChildEntityId = :childEntityId AND FieldId = :fieldId")
+            //If a parent doesn't have this property everything will be fine, as it wont be loaded
+            //thus the delete call will not be executed
+            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
             val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
             for (parentEntityBinding in parentEntityBindings) {
+                //delete all entries of this field
                 clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
-                clearOldBindings.setLong("childEntityId", parentEntityBinding.entityId)
                 clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
                 clearOldBindings.addBatch()
             }
             for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentUuid", getParent(parentChildBindings, jdsEntity.overview.uuid))
+                writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
                 writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
                 writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
                 writeNewBindings.setLong("fieldId", map[jdsEntity.overview.uuid]!!)
@@ -1442,7 +1446,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param childGuid
      * @return
      */
-    private fun getParent(jdsParentChildBindings: Collection<JdsParentChildBinding>, childGuid: String): String {
+    private fun getParentUuid(jdsParentChildBindings: Collection<JdsParentChildBinding>, childGuid: String): String {
         val any = jdsParentChildBindings.stream().filter { parentChildBinding -> parentChildBinding.childGuid == childGuid }.findAny()
         return if (any.isPresent) any.get().parentGuid else ""
     }
