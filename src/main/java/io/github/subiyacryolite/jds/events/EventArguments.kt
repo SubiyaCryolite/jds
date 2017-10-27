@@ -5,10 +5,9 @@ import com.javaworld.NamedCallableStatement
 import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.IJdsDb
 import java.sql.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, private val alternateConnection: ConcurrentMap<Int, Connection>) {
+abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, protected val alternateConnections: ConcurrentMap<Int, Connection>) {
 
     protected val statements: LinkedHashMap<String, Statement> = LinkedHashMap()
 
@@ -81,25 +80,25 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pri
     }
 
     private fun prepareConnection(targetConnection: Int) {
-        if (!alternateConnection.containsKey(targetConnection)) {
+        if (!alternateConnections.containsKey(targetConnection)) {
             val connection = jdsDb.getConnection(targetConnection)
             connection.autoCommit = false
-            alternateConnection.put(targetConnection, connection)
+            alternateConnections.put(targetConnection, connection)
         }
     }
 
     @Throws(SQLException::class)
     open fun executeBatches() {
         connection.autoCommit = false
-        for (preparedStatement in statements.values) {
-            preparedStatement.executeBatch()
-            preparedStatement.close()
+        for (statement in statements.values) {
+            statement.executeBatch()
+            statement.close()
         }
         connection.commit()
         connection.autoCommit = true
     }
 
     private fun alternateConnection(targetConnection: Int): Connection {
-        return alternateConnection[targetConnection]!!
+        return alternateConnections[targetConnection]!!
     }
 }

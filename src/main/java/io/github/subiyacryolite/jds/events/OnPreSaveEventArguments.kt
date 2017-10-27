@@ -29,16 +29,24 @@ open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, altern
     @Throws(SQLException::class)
     override fun executeBatches() {
         connection.autoCommit = false
-        for (preparedStatement in statements.values) {
-            preparedStatement.executeBatch()
+        for (statement in statements.values) {
+            statement.executeBatch()
         }
         connection.commit()
         connection.autoCommit = true
+
+        alternateConnections.forEach { _, connection ->
+            connection.commit()
+        }
     }
 
     fun closeBatches() {
         connection.autoCommit = true
-        for (preparedStatement in statements.values)
-            preparedStatement.close()
+        for (statement in statements.values)
+            statement.close()
+
+        alternateConnections.forEach { _, connection ->
+            connection.close()
+        }
     }
 }
