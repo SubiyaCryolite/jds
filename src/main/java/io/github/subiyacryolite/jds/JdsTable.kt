@@ -19,8 +19,9 @@ open class JdsTable() : Serializable {
     var name: String = ""
     var uniqueEntries = false
     var entities = HashSet<Long>()//EntityId.Versions
-    var fieldIds = HashSet<Long>()
+    var fields = HashSet<Long>()
 
+    private var targetConnection = -1
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
@@ -57,6 +58,7 @@ open class JdsTable() : Serializable {
             JdsExtensions.determineParents(entityClass, parentEntities)
             parentEntities.forEach {
                 entities.add(it)
+                //get any version of subclass. If fields don't exist they will be skipped(marked null)
             }
 
             if (registerFields) {
@@ -72,29 +74,30 @@ open class JdsTable() : Serializable {
      * @param field
      */
     fun registerField(field: JdsField) {
-        fieldIds.add(field.id)
+        fields.add(field.id)
     }
 
     /**
      *
-     * @param jdsEntity
-     * @param onPostSaveEventArguments
-     * @throws Exception
+     * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
+     * @param jdsEntity an entity that may have properties of interest
+     * @param onPostSaveEventArguments event arguments that will hold batched SQL queries for execution
+     * @throws Exception General IO errors
      */
     @Throws(Exception::class)
     fun executeSave(jdsDb: JdsDb, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
 
-        val satisfied = satisfiesConditions(jdsDb,jdsEntity)
+        val satisfied = satisfiesConditions(jdsDb, jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
                 //if unique delete old entries
-                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(deleteSql)
+                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(targetConnection, deleteSql)
                 deleteStatement.setString(1, jdsEntity.overview.uuid)
                 deleteStatement.addBatch()
             }
-            val insertStatement = onPostSaveEventArguments.getOrAddStatement(insertSql)
+            val insertStatement = onPostSaveEventArguments.getOrAddStatement(targetConnection, insertSql)
             insertStatement.setObject(1, jdsEntity.overview.uuid)
 
             //order will be maintained by linked list
@@ -115,22 +118,27 @@ open class JdsTable() : Serializable {
     }
 
     /**
-     * @param jdsDb
-     * @param connection
+     * @param jdsDb an instance of JdsDb, used determine SQL types based on implementation
+     * @param pool a shared connection pool to quickly query the target schemas
      */
-    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) {
-        val tableFields = JdsField.values.filter { fieldIds.contains(it.value.id) }.map { it.value }
+    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) {
+
+        if (!pool.containsKey(targetConnection))
+            pool.put(targetConnection, jdsDb.getConnection(targetConnection))
+
+        val connection = pool[targetConnection]!!
+
+        val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val tableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
         val primaryKey = JdsSchema.getPrimaryKey()
 
 
-        if (!jdsDb.doesTableExist(connection, name)) {
+        if (!jdsDb.doesTableExist(connection, name))
             connection.prepareStatement(tableSql).use {
                 it.executeUpdate()
                 println("Created table $name")
             }
-        }
 
         //mandatory primary key
         insertColumns.add(primaryKey)
@@ -156,18 +164,22 @@ open class JdsTable() : Serializable {
     }
 
     /**
-     *
-     * @param jdsEntity
+     * Determine if this entity should have its properties persisted to this table
+     * @param jdsDb an instance of JdsDb, used to lookup mapped classes
+     * @param jdsEntity an entity that may have properties of interest
      */
     private fun satisfiesConditions(jdsDb: JdsDb, jdsEntity: JdsEntity): Boolean {
-
-        val notLimitedToSpecificEntity = entities.isEmpty()
-        if(notLimitedToSpecificEntity)
+        if (entities.isEmpty())
             return true
-
-        val matchesSpecificEntity = !notLimitedToSpecificEntity && entities.contains(jdsEntity.overview.entityId)
-        return notLimitedToSpecificEntity || matchesSpecificEntity
-
+        entities.forEach { entityCode ->
+            val entityType = jdsDb.classes[entityCode]!!
+            if (entityType.isInstance(jdsEntity))
+                return true
+        }
         return false
+    }
+
+    fun setTargetConnection(targetConnection: Int) {
+        this.targetConnection = targetConnection
     }
 }

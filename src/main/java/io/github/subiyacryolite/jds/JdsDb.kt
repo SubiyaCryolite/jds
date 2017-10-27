@@ -24,6 +24,7 @@ import java.io.InputStream
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * This class is responsible for the setup of SQL connections, default database
@@ -600,11 +601,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     fun prepareTables() {
-        getConnection().use { connection ->
-            tables.forEach {
-                it.forceGenerateOrUpdateSchema(this, connection)
-            }
-        }
+        //pool connections so that there's no wastage
+        val connectionPool = HashMap<Int, Connection>()
+        tables.forEach { it.forceGenerateOrUpdateSchema(this, connectionPool) }
+        connectionPool.forEach { it.value.close() }
     }
 
     @Synchronized
