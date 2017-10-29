@@ -171,6 +171,9 @@ open class JdsTable() : Serializable {
         return false
     }
 
+    /**
+     * @param targetConnection
+     */
     fun setTargetConnection(targetConnection: Int) {
         this.targetConnection = targetConnection
     }

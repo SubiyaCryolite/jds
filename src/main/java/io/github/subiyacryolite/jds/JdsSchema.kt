@@ -17,7 +17,7 @@ object JdsSchema {
 
     fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
-        fields.forEach { field ->
+        fields.sortedBy { it.name }.forEach { field ->
             when (field.type) {
                 JdsFieldType.ENTITY_COLLECTION,
                 JdsFieldType.FLOAT_COLLECTION,
