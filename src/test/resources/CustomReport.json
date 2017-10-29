@@ -1,6 +1,8 @@
 {
   "name": "CrtJsonTest",
   "uniqueEntries": false,
-  "entities": [1,3],
-  "fields": [3,5,7,4]
+  "onlyLiveRecords": false,
+  "onlyDeprecatedRecords": false,
+  "entities": [1, 3],
+  "fields": [3, 5, 7, 4]
 }

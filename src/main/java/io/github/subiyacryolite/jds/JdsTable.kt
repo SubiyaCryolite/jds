@@ -17,6 +17,8 @@ import kotlin.collections.HashSet
 open class JdsTable() : Serializable {
     var name: String = ""
     var uniqueEntries = false
+    var onlyLiveRecords = false
+    var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
 
@@ -161,8 +163,16 @@ open class JdsTable() : Serializable {
      * @param jdsEntity an entity that may have properties of interest
      */
     private fun satisfiesConditions(jdsDb: JdsDb, jdsEntity: JdsEntity): Boolean {
+
+        if (onlyLiveRecords && !jdsEntity.overview.live)
+            return false
+
+        if (onlyDeprecatedRecords && jdsEntity.overview.live)
+            return false
+
         if (entities.isEmpty())
             return true
+
         entities.forEach { entityCode ->
             val entityType = jdsDb.classes[entityCode]!!
             if (entityType.isInstance(jdsEntity))
