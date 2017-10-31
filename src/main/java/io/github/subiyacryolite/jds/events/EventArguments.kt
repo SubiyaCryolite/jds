@@ -7,10 +7,18 @@ import io.github.subiyacryolite.jds.IJdsDb
 import java.sql.*
 import java.util.concurrent.ConcurrentMap
 
+/**
+ * @property jdsDb
+ * @property connection
+ * @property alternateConnections
+ */
 abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, protected val alternateConnections: ConcurrentMap<Int, Connection>) {
 
     protected val statements: LinkedHashMap<String, Statement> = LinkedHashMap()
 
+    /**
+     * @param query
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddStatement(query: String): PreparedStatement {
@@ -19,6 +27,9 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as PreparedStatement
     }
 
+    /**
+     * @param query
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddCall(query: String): CallableStatement {
@@ -27,6 +38,9 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as CallableStatement
     }
 
+    /**
+     * @param query
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedStatement(query: String): INamedStatement {
@@ -35,6 +49,9 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedCall(query: String): INamedStatement {
@@ -43,6 +60,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     * @param targetConnection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddStatement(targetConnection: Int, query: String): PreparedStatement {
@@ -52,6 +73,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as PreparedStatement
     }
 
+    /**
+     * @param query
+     * @param targetConnection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddCall(targetConnection: Int, query: String): CallableStatement {
@@ -61,6 +86,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as CallableStatement
     }
 
+    /**
+     * @param query
+     * @param targetConnection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
@@ -70,6 +99,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     * @param targetConnection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
@@ -79,6 +112,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddStatement(connection: Connection, query: String): PreparedStatement {
@@ -87,6 +124,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as PreparedStatement
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddCall(connection: Connection, query: String): CallableStatement {
@@ -95,6 +136,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as CallableStatement
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedStatement(connection: Connection, query: String): INamedStatement {
@@ -103,6 +148,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     @Synchronized
     @Throws(SQLException::class)
     fun getOrAddNamedCall(connection: Connection, query: String): INamedStatement {
@@ -111,6 +160,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     private fun prepareConnection(targetConnection: Int) {
         if (!alternateConnections.containsKey(targetConnection)) {
             val connection = jdsDb.getConnection(targetConnection)
@@ -119,6 +172,10 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         }
     }
 
+    /**
+     * @param query
+     * @param connection
+     */
     @Throws(SQLException::class)
     open fun executeBatches() {
         connection.autoCommit = false
@@ -130,6 +187,9 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         connection.autoCommit = true
     }
 
+    /**
+     * @param targetConnection
+     */
     private fun alternateConnection(targetConnection: Int): Connection {
         return alternateConnections[targetConnection]!!
     }
