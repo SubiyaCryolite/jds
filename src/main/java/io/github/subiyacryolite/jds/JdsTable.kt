@@ -10,6 +10,7 @@ import java.sql.Connection
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
+import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
@@ -22,7 +23,7 @@ open class JdsTable() : Serializable {
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
 
-    private var targetConnection = -1
+    private var targetConnection = 0
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
@@ -77,19 +78,29 @@ open class JdsTable() : Serializable {
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
+    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
+
+        val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
+            true -> connection
+            else -> {
+                if (!alternateConnections.containsKey(targetConnection)) {
+                    alternateConnections.put(targetConnection, jdsDb.getConnection(targetConnection))
+                }
+                alternateConnections[targetConnection]!!
+            }
+        }
 
         val satisfied = satisfiesConditions(jdsDb, jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
                 //if unique delete old entries
-                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(targetConnection, deleteSql)
+                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(iConnection, deleteSql)
                 deleteStatement.setString(1, jdsEntity.overview.uuid)
                 deleteStatement.addBatch()
             }
-            val insertStatement = onPostSaveEventArguments.getOrAddStatement(targetConnection, insertSql)
+            val insertStatement = onPostSaveEventArguments.getOrAddStatement(iConnection, insertSql)
             insertStatement.setObject(1, jdsEntity.overview.uuid)
 
             //order will be maintained by linked list

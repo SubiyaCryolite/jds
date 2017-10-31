@@ -79,6 +79,38 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
         return statements[query] as INamedStatement
     }
 
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddStatement(connection: Connection, query: String): PreparedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, connection.prepareStatement(query))
+        return statements[query] as PreparedStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddCall(connection: Connection, query: String): CallableStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, connection.prepareCall(query))
+        return statements[query] as CallableStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddNamedStatement(connection: Connection, query: String): INamedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, NamedPreparedStatement(connection, query))
+        return statements[query] as INamedStatement
+    }
+
+    @Synchronized
+    @Throws(SQLException::class)
+    fun getOrAddNamedCall(connection: Connection, query: String): INamedStatement {
+        if (!statements.containsKey(query))
+            statements.put(query, NamedCallableStatement(connection, query))
+        return statements[query] as INamedStatement
+    }
+
     private fun prepareConnection(targetConnection: Int) {
         if (!alternateConnections.containsKey(targetConnection)) {
             val connection = jdsDb.getConnection(targetConnection)

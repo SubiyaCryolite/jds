@@ -210,7 +210,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //crt point
-            entities.forEach { processCrt(jdsDb, it) }
+            entities.forEach { processCrt(jdsDb, connection, alternateConnections, it) }
 
             //respect execution sequence
             //respect JDS batches in each call
@@ -223,16 +223,20 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 onPreSaveEventArguments.closeBatches()
                 onPostSaveEventArguments.closeBatches()
                 connection.close()
-                alternateConnections.forEach {
-                    it.value.close()
-                }
+                alternateConnections.forEach { it.value.close() }
             }
         }
     }
 
-    private fun processCrt(jdsDb: JdsDb, jdsEntity: JdsEntity) {
+    /**
+     * @param jdsDb
+     * @param connection
+     * @param alternateConnections
+     * @param jdsEntity
+     */
+    private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, jdsEntity, onPostSaveEventArguments)
+            it.executeSave(jdsDb, connection, alternateConnections, jdsEntity, onPostSaveEventArguments)
         }
     }
 
