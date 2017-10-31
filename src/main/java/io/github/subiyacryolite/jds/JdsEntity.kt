@@ -1125,9 +1125,9 @@ abstract class JdsEntity : IJdsEntity {
         if (integerProperties.containsKey(id))
             return integerProperties[id]!!.value
         enumProperties.filter { it.key.field.id == id && it.value.value.ordinal == ordinal }.forEach {
-            return true
+            return 1
         }
-        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.filter { it.ordinal == ordinal }.forEach { return 1 } }
+        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.filter { it.ordinal == ordinal }.forEach { return true } }
         //single object references
         objectProperties.filter { it.key.fieldEntity.id == id }.forEach {
             return it.value.value.overview.uuid

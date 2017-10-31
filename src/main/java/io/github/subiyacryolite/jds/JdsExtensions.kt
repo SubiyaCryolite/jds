@@ -17,6 +17,8 @@ object JdsExtensions {
 
     private val localTimeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSS")
 
+    private val localTimeFormatReadOnly = DateTimeFormatter.ofPattern("[HH:mm:ss.SSSSSSS][HH:mm:ss]")
+
     fun ZonedDateTime.toZonedDateTimeSqlFormat(): String {
         return this.format(tSqlDateTimeFormat)
     }
@@ -30,7 +32,7 @@ object JdsExtensions {
     }
 
     fun String.toLocalTimeSqlFormat(): LocalTime {
-        return LocalTime.parse(this, localTimeFormat)
+        return LocalTime.parse(this, localTimeFormatReadOnly)
     }
 
     fun INamedStatement.setZonedDateTime(value: String, input: ZonedDateTime, jdsDb: JdsDb) {

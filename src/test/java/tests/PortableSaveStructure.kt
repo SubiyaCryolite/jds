@@ -15,7 +15,7 @@ class PortableSaveStructure : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun addressBook() {
-        testPortableSave(Arrays.asList(sampleAddressBook), AddressBook::class.java)
+        testPortableSave(Arrays.asList(addressBook), AddressBook::class.java)
     }
 
     @Test

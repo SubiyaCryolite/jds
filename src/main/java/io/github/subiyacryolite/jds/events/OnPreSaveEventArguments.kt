@@ -42,8 +42,9 @@ open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, altern
 
     fun closeBatches() {
         connection.autoCommit = true
-        for (statement in statements.values)
-            statement.close()
+        if (!connection.isClosed)
+            for (statement in statements.values)
+                statement.close()
 
         alternateConnections.forEach { _, connection ->
             connection.close()

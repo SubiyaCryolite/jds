@@ -22,7 +22,7 @@ abstract class BaseTestConfig {
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
 
-    protected val sampleAddressBook: AddressBook
+    protected val addressBook: AddressBook
         get() {
             val primaryAddress = Address()
             primaryAddress.overview.uuid = "primaryAddress"

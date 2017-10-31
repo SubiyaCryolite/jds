@@ -17,7 +17,7 @@ class CustomReportJson : BaseTestConfig() {
         jdsDb.prepareTables()
 
 
-        val sav = JdsSave(jdsDb, Arrays.asList(sampleAddressBook))
+        val sav = JdsSave(jdsDb, Arrays.asList(addressBook))
         sav.call()
     }
 
@@ -62,8 +62,8 @@ class CustomReportJson : BaseTestConfig() {
         tSqlImplementation()
         postreSqlImplementation()
         mySqlImplementation()
-        sqliteImplementation()
         oracleImplementation()
+        sqliteImplementation()
     }
 
 }

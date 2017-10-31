@@ -29,7 +29,7 @@ object JdsSchema {
                 }
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEachIndexed { index, enum ->
                     val columnName = "${field.name}_${enum!!.ordinal}"
-                    val columnDefinition = dataType(jdsDb, JdsFieldType.INT)
+                    val columnDefinition = dataType(jdsDb, JdsFieldType.BOOLEAN)
                     collection.put(columnName, String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition))
                     columnToFieldMap.put(columnName, field)
 
