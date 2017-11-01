@@ -45,7 +45,7 @@ Maven
 ```
 Gradle
 ```groovy
-compile 'io.github.subiyacryolite:jds:3.43'
+compile 'io.github.subiyacryolite:jds:3.4.3'
 ```
 
 # Dependencies
@@ -893,7 +893,7 @@ System.out.println("Deleted? "+ deleting.get());
 ```
 
 ## 1.3 Schema Generation
-Starting with version 4 JDS can be set up to create schemas to store unique or append only line records. These “JdsTables” pull predefined fields from one or more registered entries. On save and/or delete these tables will be updated. Every JdsTable must be registered to an instance of JdsDb.
+Starting with version 4 JDS can be set up to create schemas to store unique or append only line records. These “JdsTables” pull predefined fields from one or more registered entities. On save and/or delete these tables will be updated. Every JdsTable must be registered to an instance of JdsDb.
 
 Below is an example of a JdsTable that will persist two specific fields from the Address entity type.
 ```kotlin

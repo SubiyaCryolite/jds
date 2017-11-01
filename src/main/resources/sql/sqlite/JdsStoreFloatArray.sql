@@ -4,5 +4,5 @@ CREATE TABLE JdsStoreFloatArray(
     Sequence    INTEGER,
     Value       REAL,
     PRIMARY KEY (FieldId,Uuid,Sequence),
-    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE NO ACTION --we use REPLACE INTO that is not an upsert :(
 );
