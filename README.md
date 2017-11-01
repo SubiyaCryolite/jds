@@ -18,7 +18,7 @@ Put simply, JDS is useful for any developer that requires a flexible schema runn
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
 # Design
-The concept behind JDS is quite simple. Extend a base “Entity” class, define “Fields” of a particular datatype and lastly “Map” the said fieldIds to a JavaFX Bean.
+The concept behind JDS is quite simple. Extend a base “Entity” class, define “Fields” of a particular data-type and lastly “Map” the said fieldIds to a JavaFX Bean.
 
 ## Features
 - Transparent persistence
@@ -26,8 +26,9 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 - Full support for generics and inheritance
 - Easily integrates with new or existing databases
 - Save, Updates and Deletes cascade to child objects and collections
+- All saves and deletes are ACID (transaction based)
 - Eager Loading is applied to embedded objects as well as on collections
-- Generation of views representing entityVersions as conventional tables
+- Supports the automatic generation of tables
 - Supports MySQL, T-SQL, PostgreSQL, Oracle 11G and SQLite
 - Underlying database implemented using the Star Schema
 
@@ -123,8 +124,8 @@ import io.github.subiyacryolite.jds.JdsField;
 import io.github.subiyacryolite.jds.enumProperties.JdsFieldType;
 
 public class Fields {
-    public static final JdsField STRING_FIELD = new JdsField(1000, "string_field", JdsFieldType.STRING);
-    public static final JdsField TIME_FIELD = new JdsField(1009, "time_field", JdsFieldType.TIME);
+    public static final JdsField STRING_FIELD = new JdsField(1000, "string_field", JdsFieldType.STRING, "Optional description");
+    public static final JdsField TIME_FIELD = new JdsField(1009, "time_field", JdsFieldType.TIME, "Optional description");
     public static final JdsField DATE_FIELD = new JdsField(1001, "date_field", JdsFieldType.DATE);
     public static final JdsField DATE_TIME_FIELD = new JdsField(1002, "date_time_field", JdsFieldType.DATE_TIME);
     public static final JdsField ZONED_DATE_TIME_FIELD = new JdsField(1003, "zoned_date_time_field", JdsFieldType.ZONED_DATE_TIME);
@@ -355,25 +356,33 @@ public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListen
     @Override
     public void onPreSave(OnPreSaveEventArguments eventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute") 
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds 
     }
 
     @Override
     public void onPostSave(OnPostSaveEventArguments eventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 
     @Override
     public void onPreLoad(OnPreLoadEventArguments eventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 
     @Override
     public void onPostLoad(OnPostLoadEventArguments eventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 }
 ```
@@ -478,22 +487,30 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 
     override fun onPreSave(eventArguments: OnPreSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 
     override fun onPostSave(eventArguments: OnPostSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 
     override fun onPreLoad(eventArguments: OnPreLoadEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 
     override fun onPostLoad(eventArguments: OnPostLoadEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
+        //Queries can be batched i.e
+        //eventArguments.getOrAddStatement("Batched SQL to execute")
+        //eventArguments.addBatch() -- this will be executed safely by jds
     }
 }
 ```
@@ -869,7 +886,49 @@ while(!deleting.isDone())
 System.out.println("Deleted? "+ deleting.get());
 ```
 
-## 1.3 Backend Design
+## 1.3 Schema Generation
+Starting with version 4 JDS can be set up to create schemas to store unique or append only line records. These “JdsTables” pull predefined fields from one or more registered entries. On save and/or delete these tables will be updated. Every JdsTable must be registered to an instance of JdsDb.
+
+Below is an example of a JdsTable that will persist two specific fields from the Address entity type.
+```kotlin
+val customTable = JdsTable()
+customTable.uniqueEntries = false
+customTable.name = "CrtAddressSpecific"
+customTable.registerEntities(Address::class.java)
+customTable.registerField(Fields.AREA_NAME)
+customTable.registerField(Fields.CITY_NAME)
+
+//register table
+jdsDb.mapTable(customTable)
+
+//after all tables have been mapped call this function
+jdsDb.prepareTables()
+```
+
+Below is an example of a JdsTable that will persist **all the fields** in the Address entity type
+```kotlin
+val crtAddress = JdsTable(Address::class.java, true)
+
+//register table
+jdsDb.mapTable(customTable)
+
+//after all tables have been mapped call this function
+jdsDb.prepareTables()
+```
+
+You can define your JdsTables in code or you may deserialize them in JSON format
+```json
+{
+  "name": "CrtJsonTest",
+  "uniqueEntries": false,
+  "onlyLiveRecords": false,
+  "onlyDeprecatedRecords": false,
+  "entities": [1, 3],
+  "fields": [3, 5, 7, 4]
+}
+```
+
+## 1.4 Backend Design
 The underlying database is based off of the star schema.
 
 Each **JdsStore[X]** table stores live data and are always up-to-date.
