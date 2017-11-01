@@ -16,7 +16,7 @@ class CustomReport : BaseTestConfig() {
         val customTable = JdsTable()
         customTable.uniqueEntries = false
         customTable.name = "CrtAddressSpecific"
-        customTable.registerEntities(Address::class.java)
+        customTable.registerEntity(Address::class.java)
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)
 

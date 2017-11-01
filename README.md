@@ -34,12 +34,18 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 
 # Maven Central
 You can search on The Central Repository with GroupId and ArtifactId Maven Search for [![Maven Search](https://img.shields.io/badge/io.github.subiyacryolite-jds-blue.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
+
+Maven
 ```xml
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>LATEST_VERSION</version>
+    <version>3.4.3</version>
 </dependency>
+```
+Gradle
+```groovy
+compile 'io.github.subiyacryolite:jds:3.43'
 ```
 
 # Dependencies
@@ -894,7 +900,7 @@ Below is an example of a JdsTable that will persist two specific fields from the
 val customTable = JdsTable()
 customTable.uniqueEntries = false
 customTable.name = "CrtAddressSpecific"
-customTable.registerEntities(Address::class.java)
+customTable.registerEntity(Address::class.java)
 customTable.registerField(Fields.AREA_NAME)
 customTable.registerField(Fields.CITY_NAME)
 
