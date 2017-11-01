@@ -3,5 +3,5 @@ CREATE TABLE JdsStoreInteger(
     Uuid      TEXT,
     Value           INTEGER,
     PRIMARY KEY (FieldId,Uuid),
-    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE NO ACTION --we use REPLACE INTO that is not an upsert :(
+    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) DEFERRABLE INITIALLY DEFERRED --we use REPLACE INTO, so hopefully this maintains integrity
 );
