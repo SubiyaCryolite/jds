@@ -14,27 +14,42 @@ import java.time.format.DateTimeFormatter
 object JdsExtensions {
 
     private val tSqlDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSS xxx")
-
     private val localTimeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSS")
-
     private val localTimeFormatReadOnly = DateTimeFormatter.ofPattern("[HH:mm:ss.SSSSSSS][HH:mm:ss]")
 
+    /**
+     * @return
+     */
     fun ZonedDateTime.toZonedDateTimeSqlFormat(): String {
         return this.format(tSqlDateTimeFormat)
     }
 
+    /**
+     * @return
+     */
     fun String.toZonedDateTime(): ZonedDateTime {
         return ZonedDateTime.parse(this, tSqlDateTimeFormat)
     }
 
+    /**
+     * @return
+     */
     fun LocalTime.localTimeFormat(): String {
         return this.format(localTimeFormat)
     }
 
+    /**
+     * @return
+     */
     fun String.toLocalTimeSqlFormat(): LocalTime {
         return LocalTime.parse(this, localTimeFormatReadOnly)
     }
 
+    /**
+     * @param value
+     * @param input
+     * @param jdsDb
+     */
     fun INamedStatement.setZonedDateTime(value: String, input: ZonedDateTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
@@ -44,6 +59,11 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param value
+     * @param input
+     * @param jdsDb
+     */
     fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
@@ -53,6 +73,11 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param column
+     * @param jdsDb
+     * @return
+     */
     fun ResultSet.getZonedDateTime(column: String, jdsDb: JdsDb): Any {
         return when (jdsDb.implementation) {
             JdsImplementation.TSQL -> this.getString(column)
@@ -62,6 +87,11 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param value
+     * @param input
+     * @param jdsDb
+     */
     fun INamedStatement.setLocalTime(value: String, input: LocalTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.setString(value, input.localTimeFormat())
@@ -70,6 +100,11 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param value
+     * @param input
+     * @param jdsDb
+     */
     fun PreparedStatement.setLocalTime(value: Int, input: LocalTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.setString(value, input.localTimeFormat())
@@ -78,6 +113,10 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param column
+     * @param jdsDb
+     */
     fun ResultSet.getTime(column: String, jdsDb: JdsDb): Any {
         return when (jdsDb.implementation) {
             JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.getString(column)
@@ -86,10 +125,18 @@ object JdsExtensions {
         }
     }
 
+    /**
+     * @param entity
+     * @param parentEntities
+     */
     fun determineParents(entity: Class<out IJdsEntity>, parentEntities: MutableList<Long>) {
         addAllToList(entity.superclass, parentEntities)
     }
 
+    /**
+     * @param superclass
+     * @param parentEntities
+     */
     private fun addAllToList(superclass: Class<*>?, parentEntities: MutableList<Long>) {
         if (superclass == null) return
         if (superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {

@@ -15,6 +15,8 @@ package io.github.subiyacryolite.jds.enums;
 
 /**
  * An enum containing the data-types supported by JDS
+ * @param type field id
+ * @param shortCode field alias
  */
 enum class JdsFieldType(val type: Int, val shortCode: String) {
     FLOAT(0, "f"),

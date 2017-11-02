@@ -24,17 +24,20 @@ class JdsFieldEntity<T : IJdsEntity>() : Externalizable {
     lateinit var fieldEntity: JdsField
         private set
 
+    /**
+     * @param type
+     */
     constructor(type: Class<T>) : this() {
         this.entityType = type
     }
 
-    constructor(entityType: Class<T>, jdsField: JdsField) : this(entityType) {
-        fieldEntity = jdsField
+    /**
+     * @param entityType
+     * @param jdsField
+     */
+    constructor(entityType: Class<T>, field: JdsField) : this(entityType) {
+        fieldEntity = field
         this.entityType = entityType
-    }
-
-    override fun toString(): String {
-        return "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
     }
 
     @Throws(IOException::class)
@@ -47,5 +50,9 @@ class JdsFieldEntity<T : IJdsEntity>() : Externalizable {
     override fun readExternal(input: ObjectInput) {
         entityType = input.readObject() as Class<T>
         fieldEntity = input.readObject() as JdsField
+    }
+
+    override fun toString(): String {
+        return "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
     }
 }

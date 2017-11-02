@@ -54,7 +54,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * Computes a result, or throws an exception if unable to do so.
-     *
      * @return computed result
      * @throws Exception if unable to compute a result
      */
@@ -112,46 +111,47 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
         batchEntities.add(ArrayList())
-        saveContainer.overviews.add(HashSet<IJdsOverview>())
+        saveContainer.overviews.add(HashSet())
         //time constructs
-        saveContainer.localDateTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
-        saveContainer.zonedDateTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
-        saveContainer.localTimeProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
-        saveContainer.localDateProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
-        saveContainer.monthDayProperties.add(HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>())
-        saveContainer.yearMonthProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>())
-        saveContainer.periodProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Period>>>())
-        saveContainer.durationProperties.add(HashMap<String, HashMap<Long, ObjectProperty<Duration>>>())
+        saveContainer.localDateTimeProperties.add(HashMap())
+        saveContainer.zonedDateTimeProperties.add(HashMap())
+        saveContainer.localTimeProperties.add(HashMap())
+        saveContainer.localDateProperties.add(HashMap())
+        saveContainer.monthDayProperties.add(HashMap())
+        saveContainer.yearMonthProperties.add(HashMap())
+        saveContainer.periodProperties.add(HashMap())
+        saveContainer.durationProperties.add(HashMap())
         //primitives
-        saveContainer.booleanProperties.add(HashMap<String, HashMap<Long, BooleanProperty>>())
-        saveContainer.floatProperties.add(HashMap<String, HashMap<Long, FloatProperty>>())
-        saveContainer.doubleProperties.add(HashMap<String, HashMap<Long, DoubleProperty>>())
-        saveContainer.longProperties.add(HashMap<String, HashMap<Long, LongProperty>>())
-        saveContainer.integerProperties.add(HashMap<String, HashMap<Long, IntegerProperty>>())
+        saveContainer.booleanProperties.add(HashMap())
+        saveContainer.floatProperties.add(HashMap())
+        saveContainer.doubleProperties.add(HashMap())
+        saveContainer.longProperties.add(HashMap())
+        saveContainer.integerProperties.add(HashMap())
         //string
-        saveContainer.stringProperties.add(HashMap<String, HashMap<Long, StringProperty>>())
+        saveContainer.stringProperties.add(HashMap())
         //blob
-        saveContainer.blobProperties.add(HashMap<String, HashMap<Long, BlobProperty>>())
+        saveContainer.blobProperties.add(HashMap())
         //arrays
-        saveContainer.stringCollections.add(HashMap<String, HashMap<Long, ListProperty<String>>>())
-        saveContainer.localDateTimeCollections.add(HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>())
-        saveContainer.floatCollections.add(HashMap<String, HashMap<Long, ListProperty<Float>>>())
-        saveContainer.doubleCollections.add(HashMap<String, HashMap<Long, ListProperty<Double>>>())
-        saveContainer.longCollections.add(HashMap<String, HashMap<Long, ListProperty<Long>>>())
-        saveContainer.integerCollections.add(HashMap<String, HashMap<Long, ListProperty<Int>>>())
+        saveContainer.stringCollections.add(HashMap())
+        saveContainer.localDateTimeCollections.add(HashMap())
+        saveContainer.floatCollections.add(HashMap())
+        saveContainer.doubleCollections.add(HashMap())
+        saveContainer.longCollections.add(HashMap())
+        saveContainer.integerCollections.add(HashMap())
         //enumProperties
-        saveContainer.enumProperties.add(HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>())
-        saveContainer.enumCollections.add(HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>())
+        saveContainer.enumProperties.add(HashMap())
+        saveContainer.enumCollections.add(HashMap())
         //objects
-        saveContainer.objects.add(HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>())
+        saveContainer.objects.add(HashMap())
         //object arrays
-        saveContainer.objectCollections.add(HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>())
+        saveContainer.objectCollections.add(HashMap())
     }
 
     /**
      * @param entities
      * @param saveContainer
      * @param step
+     * @param steps
      */
     @Throws(Exception::class)
     private fun saveInner(entities: Collection<JdsEntity>, saveContainer: JdsSaveContainer, step: Int, steps: Int) {
@@ -232,11 +232,11 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param jdsDb
      * @param connection
      * @param alternateConnections
-     * @param jdsEntity
+     * @param entity
      */
-    private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity) {
+    private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, jdsEntity, onPostSaveEventArguments)
+            it.executeSave(jdsDb, connection, alternateConnections, entity, onPostSaveEventArguments)
         }
     }
 
@@ -272,6 +272,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
+     * @param writeToPrimaryDataTables
      * @param blobProperties
      */
     private fun saveBlobs(writeToPrimaryDataTables: Boolean, blobProperties: HashMap<String, HashMap<Long, BlobProperty>>) {
@@ -309,7 +310,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param booleanProperties
-     * @implNote Booleans are saved as integers behind the scenes
+     * @param writeToPrimaryDataTables
      */
     private fun saveBooleans(writeToPrimaryDataTables: Boolean, booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) {
         var record = 0
@@ -353,6 +354,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param integerProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveIntegers(writeToPrimaryDataTables: Boolean, integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) {
         var record = 0
@@ -396,6 +398,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param floatProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveFloats(writeToPrimaryDataTables: Boolean, floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) {
         var record = 0
@@ -439,6 +442,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param doubleProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveDoubles(writeToPrimaryDataTables: Boolean, doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) {
         var record = 0
@@ -482,6 +486,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param longProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveLongs(writeToPrimaryDataTables: Boolean, longProperties: HashMap<String, HashMap<Long, LongProperty>>) {
         var record = 0
@@ -525,6 +530,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param stringProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveStrings(writeToPrimaryDataTables: Boolean, stringProperties: HashMap<String, HashMap<Long, StringProperty>>) {
         var record = 0
@@ -566,6 +572,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         }
     }
 
+    /**
+     * @param writeToPrimaryDataTables
+     * @param monthDayProperties
+     * @param yearMonthProperties
+     * @param periodProperties
+     * @param durationProperties
+     */
     private fun saveDateConstructs(writeToPrimaryDataTables: Boolean,
                                    monthDayProperties: HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>,
                                    yearMonthProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>,
@@ -714,6 +727,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param localDateTimeProperties
      * @param localDateProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveDatesAndDateTimes(writeToPrimaryDataTables: Boolean, localDateTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>, localDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
@@ -785,6 +799,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param localTimeProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveTimes(writeToPrimaryDataTables: Boolean, localTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
@@ -828,6 +843,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param zonedDateProperties
+     * @param writeToPrimaryDataTables
      */
     private fun saveZonedDateTimes(writeToPrimaryDataTables: Boolean, zonedDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) {
         var record = 0
@@ -871,6 +887,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param enums
+     * @param writeToPrimaryDataTables
      */
     fun saveEnums(writeToPrimaryDataTables: Boolean, enums: HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>) {
         var record = 0
@@ -916,6 +933,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * Save all dates in one go
      *
      * @param dateTimeArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>) {
@@ -970,6 +988,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param floatArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, ListProperty<Float>>>) {
@@ -1025,6 +1044,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param integerArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
     private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, ListProperty<Int>>>) {
@@ -1080,6 +1100,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param doubleArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, ListProperty<Double>>>) {
@@ -1135,6 +1156,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param longArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, ListProperty<Long>>>) {
@@ -1189,6 +1211,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param stringArrayProperties
+     * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
     private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, ListProperty<String>>>) {
@@ -1244,6 +1267,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * @param enumStrings
+     * @param writeToPrimaryDataTables
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
@@ -1308,14 +1332,14 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>) {
         if (objectArrayProperties.isEmpty()) return
-        val jdsEntities = ArrayList<JdsEntity>()
+        val entities = ArrayList<JdsEntity>()
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
         val parentChildBindings = ArrayList<JdsParentChildBinding>()
         val record = SimpleIntegerProperty(0)
         val changesMade = SimpleBooleanProperty(false)
         val map: MutableMap<String, Long> = HashMap<String, Long>()
 
-        for ((parentGuid, value) in objectArrayProperties) {
+        for ((parentUuid, value) in objectArrayProperties) {
             for ((key, value1) in value) {
                 record.set(0)
                 changesMade.set(false)
@@ -1325,7 +1349,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         changesMade.set(true)
 
                         val parentEntityBinding = JdsParentEntityBinding()
-                        parentEntityBinding.parentGuid = parentGuid
+                        parentEntityBinding.parentUuid = parentUuid
                         parentEntityBinding.entityId = jdsEntity.overview.entityId
                         parentEntityBinding.fieldId = key.fieldEntity.id
                         parentEntityBindings.add(parentEntityBinding)
@@ -1333,11 +1357,11 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
                     }
                     val parentChildBinding = JdsParentChildBinding()
-                    parentChildBinding.parentGuid = parentGuid
-                    parentChildBinding.childGuid = jdsEntity.overview.uuid
+                    parentChildBinding.parentUuid = parentUuid
+                    parentChildBinding.childUuid = jdsEntity.overview.uuid
                     parentChildBindings.add(parentChildBinding)
 
-                    jdsEntities.add(jdsEntity)
+                    entities.add(jdsEntity)
                     map.put(jdsEntity.overview.uuid, key.fieldEntity.id)
 
                     record.set(record.get() + 1)
@@ -1348,29 +1372,25 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         }
 
         //save children first
-        JdsSave(alternateConnections, jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
+        JdsSave(alternateConnections, jdsDb, connection, -1, entities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
         //bind children below
-        try {
-            //If a parent doesn't have this property everything will be fine, as it wont be loaded
-            //thus the delete call will not be executed
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
-            for (parentEntityBinding in parentEntityBindings) {
-                //delete all entries of this field
-                clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
-                clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
-                clearOldBindings.addBatch()
-            }
-            for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
-                writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
-                writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
-                writeNewBindings.setLong("fieldId", map[jdsEntity.overview.uuid]!!)
-                writeNewBindings.addBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+        //If a parent doesn't have this property everything will be fine, as it wont be loaded
+        //thus the delete call will not be executed
+        val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
+        val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
+        for (parentEntityBinding in parentEntityBindings) {
+            //delete all entries of this field
+            clearOldBindings.setString("parentUuid", parentEntityBinding.parentUuid)
+            clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
+            clearOldBindings.addBatch()
+        }
+        for (jdsEntity in entities) {
+            writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
+            writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
+            writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
+            writeNewBindings.setLong("fieldId", map[jdsEntity.overview.uuid]!!)
+            writeNewBindings.addBatch()
         }
     }
 
@@ -1389,7 +1409,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val jdsEntities = ArrayList<JdsEntity>()
         val uuidToFieldMap: MutableMap<String, Long> = HashMap<String, Long>()
 
-        for ((parentGuid, value) in objectProperties) {
+        for ((parentUuid, value) in objectProperties) {
             for ((key, value1) in value) {
                 record.set(0)
                 val jdsEntity = value1.get()
@@ -1398,15 +1418,15 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     if (!changesMade.get()) {
                         changesMade.set(true)
                         val parentEntityBinding = JdsParentEntityBinding()
-                        parentEntityBinding.parentGuid = parentGuid
+                        parentEntityBinding.parentUuid = parentUuid
                         parentEntityBinding.entityId = value1.get().overview.entityId
                         parentEntityBinding.fieldId = key.fieldEntity.id
                         parentEntityBindings.add(parentEntityBinding)
                     }
                     jdsEntities.add(jdsEntity)
                     val parentChildBinding = JdsParentChildBinding()
-                    parentChildBinding.parentGuid = parentGuid
-                    parentChildBinding.childGuid = jdsEntity.overview.uuid
+                    parentChildBinding.parentUuid = parentUuid
+                    parentChildBinding.childUuid = jdsEntity.overview.uuid
 
                     parentChildBindings.add(parentChildBinding)
                     uuidToFieldMap.put(value1.get().overview.uuid, key.fieldEntity.id)
@@ -1422,61 +1442,32 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         JdsSave(alternateConnections, jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
         //bind children below
-        try {
-            //If a parent doesn't have this property everything will be fine, as it wont be loaded
-            //thus the delete call will not be executed
-            val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
-            for (parentEntityBinding in parentEntityBindings) {
-                //delete all entries of this field
-                clearOldBindings.setString("parentUuid", parentEntityBinding.parentGuid)
-                clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
-                clearOldBindings.addBatch()
-            }
-            for (jdsEntity in jdsEntities) {
-                writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
-                writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
-                writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
-                writeNewBindings.setLong("fieldId", uuidToFieldMap[jdsEntity.overview.uuid]!!)
-                writeNewBindings.addBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+        //If a parent doesn't have this property everything will be fine, as it wont be loaded
+        //thus the delete call will not be executed
+        val clearOldBindings = onPostSaveEventArguments.getOrAddNamedStatement("DELETE FROM JdsEntityBinding WHERE ParentUuid = :parentUuid AND FieldId = :fieldId")
+        val writeNewBindings = onPostSaveEventArguments.getOrAddNamedStatement("INSERT INTO JdsEntityBinding(ParentUuid, ChildUuid, FieldId, ChildEntityId) Values(:parentUuid, :childUuid, :fieldId, :childEntityId)")
+        for (parentEntityBinding in parentEntityBindings) {
+            //delete all entries of this field
+            clearOldBindings.setString("parentUuid", parentEntityBinding.parentUuid)
+            clearOldBindings.setLong("fieldId", parentEntityBinding.fieldId)
+            clearOldBindings.addBatch()
+        }
+        for (jdsEntity in jdsEntities) {
+            writeNewBindings.setString("parentUuid", getParentUuid(parentChildBindings, jdsEntity.overview.uuid))
+            writeNewBindings.setString("childUuid", jdsEntity.overview.uuid)
+            writeNewBindings.setLong("childEntityId", jdsEntity.overview.entityId)
+            writeNewBindings.setLong("fieldId", uuidToFieldMap[jdsEntity.overview.uuid]!!)
+            writeNewBindings.addBatch()
         }
     }
 
     /**
-     * @param jdsParentChildBindings
-     * @param childGuid
+     * @param parentChildBindings
+     * @param childUuid
      * @return
      */
-    private fun getParentUuid(jdsParentChildBindings: Collection<JdsParentChildBinding>, childGuid: String): String {
-        val any = jdsParentChildBindings.stream().filter { parentChildBinding -> parentChildBinding.childGuid == childGuid }.findAny()
-        return if (any.isPresent) any.get().parentGuid else ""
-    }
-
-    companion object {
-
-        /**
-         * @param jdsDb
-         * @param batchSize
-         * @param entities
-         */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsSave(jdsDb, batchSize, entityVersions).call()", "io.github.subiyacryolite.jds.JdsSave"))
-        @Throws(Exception::class)
-        fun save(jdsDb: JdsDb, batchSize: Int, entities: Collection<JdsEntity>) {
-            JdsSave(jdsDb, batchSize, entities).call()
-        }
-
-        /**
-         * @param jdsDb
-         * @param batchSize
-         * @param entities
-         */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("save(jdsDb, batchSize, Arrays.asList(*entityVersions))", "io.github.subiyacryolite.jds.JdsSave.Companion.save", "java.util.Arrays"))
-        @Throws(Exception::class)
-        fun save(jdsDb: JdsDb, batchSize: Int, vararg entities: JdsEntity) {
-            save(jdsDb, batchSize, Arrays.asList(*entities))
-        }
+    private fun getParentUuid(parentChildBindings: Collection<JdsParentChildBinding>, childUuid: String): String {
+        val any = parentChildBindings.stream().filter { parentChildBinding -> parentChildBinding.childUuid == childUuid }.findAny()
+        return if (any.isPresent) any.get().parentUuid else ""
     }
 }

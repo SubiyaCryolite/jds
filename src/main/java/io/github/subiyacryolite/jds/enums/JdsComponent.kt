@@ -17,6 +17,8 @@ package io.github.subiyacryolite.jds.enums;
  * This enum contains all the components that make up the JDS framework on a target database.
  * Each enum contains the components name as well as an optional alias primarily used to create
  * joins that implement search {@link io.github.subiyacryolite.jds.JdsFilter filter's}.
+ * @param component the component name
+ * @param alias the component alias
  */
 enum class JdsComponent(val component: String, val alias: String) {
     NULL("Null", "null"),

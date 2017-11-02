@@ -17,6 +17,6 @@ package io.github.subiyacryolite.jds
  * Helper class used in saving and loading embedded [JdsEntities][JdsEntity]
  */
 internal class JdsParentChildBinding {
-    var parentGuid: String = ""
-    var childGuid: String = ""
+    var parentUuid: String = ""
+    var childUuid: String = ""
 }

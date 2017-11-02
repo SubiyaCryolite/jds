@@ -3,6 +3,13 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 
 object JdsSchema {
+
+    /**
+     * @param jdsDb
+     * @param reportName
+     * @param appendOnly
+     * @return
+     */
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
         val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 48)
         val sb = StringBuilder()
@@ -15,6 +22,14 @@ object JdsSchema {
         return sb.toString()
     }
 
+    /**
+     * @param jdsDb
+     * @param reportName
+     * @param fields
+     * @param columnToFieldMap
+     * @param enumOrdinals
+     * @return
+     */
     fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
         fields.sortedBy { it.name }.forEach { field ->
@@ -44,6 +59,13 @@ object JdsSchema {
         return collection
     }
 
+    /**
+     * @param jdsDb
+     * @param reportName
+     * @param field
+     * @param max
+     * @return
+     */
     @JvmOverloads
     private fun generateColumn(jdsDb: IJdsDb, reportName: String, field: JdsField, max: Int = 0): String {
         val columnName = field.name
@@ -51,6 +73,12 @@ object JdsSchema {
         return String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnType)
     }
 
+    /**
+     * @param jdsDb
+     * @param fieldType
+     * @param max
+     * @return
+     */
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
         when (fieldType) {
@@ -69,6 +97,9 @@ object JdsSchema {
         return "invalid"
     }
 
+    /**
+     * @return
+     */
     fun getPrimaryKey(): String {
         return "uuid"
     }

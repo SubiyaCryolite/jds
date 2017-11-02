@@ -31,13 +31,6 @@ class JdsField() : Externalizable {
         private set
     var description: String = ""
         private set
-
-    /**
-     * @return
-     */
-    /**
-     * @param type
-     */
     var type: JdsFieldType = JdsFieldType.STRING
         private set
 
@@ -48,6 +41,7 @@ class JdsField() : Externalizable {
     /**
      * @param id
      * @param name
+     * @param description
      * @param type
      */
     @JvmOverloads
@@ -83,17 +77,15 @@ class JdsField() : Externalizable {
         val values = HashMap<Long, JdsField>()
 
         /**
-         * @param jdsField
+         * @param field
          */
-        private fun bind(jdsField: JdsField) {
-            if (!values.containsKey(jdsField.id))
-                values.put(jdsField.id, jdsField)
+        private fun bind(field: JdsField) {
+            if (!values.containsKey(field.id))
+                values.put(field.id, field)
             else
-                throw RuntimeException(String.format("This jdsField ID [${jdsField.id}] is already bound"))
+                throw RuntimeException(String.format("This field ID [${field.id}] is already bound"))
         }
 
         val NULL = JdsField()
     }
-
-
 }

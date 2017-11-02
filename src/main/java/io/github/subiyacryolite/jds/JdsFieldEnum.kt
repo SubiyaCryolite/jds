@@ -29,17 +29,28 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     var values = arrayOfNulls<Enum<T>>(0)
         private set//keep order at all times
 
+    /**
+     * @param type
+     */
     constructor(type: Class<T>) : this() {
         this.enumType = type
     }
 
-    constructor(type: Class<T>, jdsField: JdsField, vararg values: T) : this(type) {
-        field = jdsField
+    /**
+     * @param type
+     * @param field
+     * @param values
+     */
+    constructor(type: Class<T>, field: JdsField, vararg values: T) : this(type) {
+        this.field = field
         this.values = arrayOfNulls(values.size)
         System.arraycopy(values, 0, this.values, 0, values.size)
         bind()
     }
 
+    /**
+     *
+     */
     private fun bind() {
         if (!enums.containsKey(field.id))
             enums.put(field.id, this)
@@ -49,14 +60,27 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
         return "JdsFieldEnum{ fieldEntity= $field , values=$values }"
     }
 
+    /**
+     * @param enumText
+     * @return
+     *
+     */
     fun indexOf(enumText: Enum<*>): Int {
         return values.indices.firstOrNull { values[it] === enumText } ?: -1
     }
 
+    /**
+     * @param index
+     * @return
+     */
     fun valueOf(index: Int): Enum<*>? {
         return if (index >= values.size) null else values[index]
     }
 
+    /**
+     * @param out
+     * @throws IOException
+     */
     @Throws(IOException::class)
     override fun writeExternal(out: ObjectOutput) {
         out.writeObject(enumType)
@@ -64,6 +88,11 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
         out.writeObject(values)
     }
 
+    /**
+     * @param input
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(input: ObjectInput) {
         enumType = input.readObject() as Class<T>
@@ -75,13 +104,21 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
 
         private val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
 
-        operator fun get(jdsField: JdsField): JdsFieldEnum<*>? {
-            return if (enums.containsKey(jdsField.id))
-                enums[jdsField.id]
+        /**
+         * @param field
+         * @return
+         */
+        operator fun get(field: JdsField): JdsFieldEnum<*>? {
+            return if (enums.containsKey(field.id))
+                enums[field.id]
             else
-                throw RuntimeException(String.format("This jdsField [%s] has not been bound to any enums", jdsField))
+                throw RuntimeException("This jdsField $field has not been bound to any enums")
         }
 
+        /**
+         * @param fieldId
+         * @return
+         */
         operator fun get(fieldId: Long): JdsFieldEnum<*>? {
             return if (enums.containsKey(fieldId))
                 enums[fieldId]

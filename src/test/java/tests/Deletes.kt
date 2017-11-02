@@ -10,8 +10,8 @@ class Deletes : BaseTestConfig() {
     @Throws(Exception::class)
     fun deleteUsingStrings() {
         initialiseSqlLiteBackend()
-        val result = JdsDelete(jdsDb, "primaryAddress1").call()
-        print("Completed " + result!!)
+        val result = JdsDelete(jdsDb, addressBook).call()
+        print("Completed $result")
     }
 
     @Test
