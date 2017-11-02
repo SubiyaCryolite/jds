@@ -29,12 +29,11 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, tableName.toUpperCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, tableName.toUpperCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -48,12 +47,11 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, viewName.toUpperCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, viewName.toUpperCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -67,12 +65,11 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, procedureName.toUpperCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, procedureName.toUpperCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -86,13 +83,12 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.setString("tableName", tableName.toUpperCase())
-                preparedStatement.setString("columnName", columnName.toUpperCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            NamedPreparedStatement(connection, sql).use {
+                it.setString("tableName", tableName.toUpperCase())
+                it.setString("columnName", columnName.toUpperCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -269,7 +265,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         }
     }
 
-    override fun getSqlAddColumn(): String {
+    override fun getDbAddColumnSyntax(): String {
         return "ALTER TABLE %s ADD %s %s"
     }
 

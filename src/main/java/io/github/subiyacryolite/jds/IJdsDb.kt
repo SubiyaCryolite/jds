@@ -88,25 +88,69 @@ interface IJdsDb {
      */
     fun doesIndexExist(connection: Connection, indexName: String): Boolean
 
-    fun getSqlAddColumn(): String
+    /**
+     * Gets the correct syntax needed to add a new column to the underlying database implementation
+     * @return the correct syntax needed to add a new column to the underlying database implementation
+     */
+    fun getDbAddColumnSyntax(): String
 
+    /**
+     * Gets the Float data-type of the current database implementation
+     * @return the Float data-type of the database implementation
+     */
     fun getDbFloatDataType(): String
 
+    /**
+     * Gets the Double data-type of the current database implementation
+     * @return the Double data-type of the database implementation
+     */
     fun getDbDoubleDataType(): String
 
+    /**
+     * Gets the ZonedDateTime data-type of the current database implementation
+     * @return the ZonedDataTime data-type of the database implementation
+     */
     fun getDbZonedDateTimeDataType(): String
 
+    /**
+     * Gets the Time data-type of the current database implementation
+     * @return the Time data-type of the database implementation
+     */
     fun getDbTimeDataType(): String
 
+    /**
+     * Gets the Blob data-type of the current database implementation
+     * @return the Blob data-type of the database implementation
+     */
     fun getDbBlobDataType(max: Int): String
 
+    /**
+     * Gets the Integer data-type of the current database implementation
+     * @return the Integer data-type of the database implementation
+     */
     fun getDbIntegerDataType(): String
 
+    /**
+     * Gets the DateTime data-type of the current database implementation
+     * @return the DateTime data-type of the database implementation
+     */
     fun getDbDateTimeDataType(): String
 
+    /**
+     * Gets the Long data-type of the current database implementation
+     * @return the Long data-type of the database implementation
+     */
     fun getDbLongDataType(): String
 
+    /**
+     * Gets the String data-type of the current database implementation
+     * @return the String data-type of the database implementation
+     */
     fun getDbStringDataType(max: Int): String
 
+    /**
+     * Gets the Boolean data-type of the current database implementation
+     * @return the Boolean data-type of the database implementation
+     */
     fun getDbBooleanDataType(): String
 }

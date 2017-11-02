@@ -27,13 +27,12 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, connection.catalog)
-                preparedStatement.setString(2, tableName.toLowerCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, connection.catalog)
+                it.setString(2, tableName.toLowerCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -47,13 +46,12 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         var toReturn = 0
         val sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? and routine_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, connection.catalog)
-                preparedStatement.setString(2, procedureName.toLowerCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, connection.catalog)
+                it.setString(2, procedureName.toLowerCase())
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -67,12 +65,12 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         var toReturn = 0
         val sql = "select COUNT(*) AS Result from information_schema.views where table_catalog = ? and table_name = ?"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, connection.catalog)
-                preparedStatement.setString(2, viewName.toLowerCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
+            connection.prepareStatement(sql).use {
+                it.setString(1, connection.catalog)
+                it.setString(2, viewName.toLowerCase())
+                it.executeQuery().use {
+                    while (it.next()) {
+                        toReturn = it.getInt("Result")
                     }
                 }
             }
@@ -246,7 +244,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         }
     }
 
-    override fun getSqlAddColumn(): String {
+    override fun getDbAddColumnSyntax(): String {
         return "ALTER TABLE %s ADD COLUMN %s %s"
     }
 

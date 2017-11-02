@@ -955,7 +955,7 @@ abstract class JdsEntity : IJdsEntity {
 
     internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
         try {
-            val entityClass = jdsDb.getBoundClass(entityId)!!
+            val entityClass = jdsDb.classes[entityId]!!
             objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val entity = entityClass.newInstance()
                 entity.overview.uuid = uuid

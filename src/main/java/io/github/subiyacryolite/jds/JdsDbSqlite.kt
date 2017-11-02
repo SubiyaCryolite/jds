@@ -26,12 +26,11 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         var toReturn = 0
         val sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;"
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, tableName)
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, tableName)
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -43,10 +42,10 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         val sql = "PRAGMA table_info('$tableName')"
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        val column = resultSet.getString("name")
+            NamedPreparedStatement(connection, sql).use {
+                it.executeQuery().use {
+                    while (it.next()) {
+                        val column = it.getString("name")
                         if (column.equals(columnName, ignoreCase = true))
                             return 1 //does exist
                     }
@@ -57,7 +56,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
             ex.printStackTrace(System.err)
             return 0//doesn't exist
         }
-
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
@@ -249,16 +247,11 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         return "INSERT OR REPLACE INTO JdsEnums(FieldId, EnumSeq, EnumValue) VALUES(?,?,?)"
     }
 
-    /**
-     * Map parents to child entities
-     *
-     * @return
-     */
     override fun mapParentToChild(): String {
         return "INSERT OR REPLACE INTO JdsEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?)"
     }
 
-    override fun getSqlAddColumn(): String {
+    override fun getDbAddColumnSyntax(): String {
         return "ALTER TABLE %s ADD COLUMN %s %s"
     }
 

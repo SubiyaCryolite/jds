@@ -28,13 +28,12 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = :tableName AND TABLE_SCHEMA = :tableSchema"
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.setString("tableName", tableName)
-                preparedStatement.setString("tableSchema", connection.catalog)
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            NamedPreparedStatement(connection, sql).use {
+                it.setString("tableName", tableName)
+                it.setString("tableSchema", connection.catalog)
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -48,13 +47,12 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName AND ROUTINE_SCHEMA = :procedureSchema"
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.setString("procedureName", procedureName)
-                preparedStatement.setString("procedureSchema", connection.catalog)
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            NamedPreparedStatement(connection, sql).use {
+                it.setString("procedureName", procedureName)
+                it.setString("procedureSchema", connection.catalog)
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -68,13 +66,12 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
         var toReturn = 0
         val sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = :viewName AND TABLE_SCHEMA = :viewSchema"
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.setString("viewName", viewName)
-                preparedStatement.setString("viewSchema", connection.catalog)
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            NamedPreparedStatement(connection, sql).use {
+                it.setString("viewName", viewName)
+                it.setString("viewSchema", connection.catalog)
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -257,7 +254,7 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
         }
     }
 
-    override fun getSqlAddColumn(): String {
+    override fun getDbAddColumnSyntax(): String {
         return "ALTER TABLE %s ADD COLUMN %s %s"
     }
 

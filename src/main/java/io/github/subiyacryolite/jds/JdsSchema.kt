@@ -30,7 +30,7 @@ object JdsSchema {
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEachIndexed { index, enum ->
                     val columnName = "${field.name}_${enum!!.ordinal}"
                     val columnDefinition = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
-                    collection.put(columnName, String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition))
+                    collection.put(columnName, String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnDefinition))
                     columnToFieldMap.put(columnName, field)
 
                     enumOrdinals.put(columnName, enum!!.ordinal)
@@ -48,7 +48,7 @@ object JdsSchema {
     private fun generateColumn(jdsDb: IJdsDb, reportName: String, field: JdsField, max: Int = 0): String {
         val columnName = field.name
         val columnType = getDbDataType(jdsDb, field.type, max)
-        return String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnType)
+        return String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnType)
     }
 
     @JvmOverloads

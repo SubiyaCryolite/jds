@@ -28,12 +28,11 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         var toReturn = 0
         val sql = "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, tableName)
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, tableName)
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -47,13 +46,12 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         var toReturn = 0
         val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, procedureName)
-                preparedStatement.setString(2, "P")
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, procedureName)
+                it.setString(2, "P")
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -67,13 +65,12 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         var toReturn = 0
         val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, triggerName)
-                preparedStatement.setString(2, "TR")
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, triggerName)
+                it.setString(2, "TR")
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -87,13 +84,12 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         var toReturn = 0
         val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
         try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, viewName)
-                preparedStatement.setString(2, "V")
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
-                    }
+            connection.prepareStatement(sql).use {
+                it.setString(1, viewName)
+                it.setString(2, "V")
+                it.executeQuery().use {
+                    while (it.next())
+                        toReturn = it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
@@ -268,7 +264,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         }
     }
 
-    override fun getSqlAddColumn(): String {
+    override fun getDbAddColumnSyntax(): String {
         return "ALTER TABLE %s ADD %s %s"
     }
 

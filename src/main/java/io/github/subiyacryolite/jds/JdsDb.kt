@@ -24,6 +24,8 @@ import java.io.InputStream
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
 import kotlin.collections.HashMap
 
 /**
@@ -35,8 +37,8 @@ import kotlin.collections.HashMap
  */
 abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb {
 
-    val classes = HashMap<Long, Class<out JdsEntity>>()
-    val tables = HashSet<JdsTable>()
+    val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
+    val tables = ConcurrentSkipListSet<JdsTable>()
 
 
     /**
@@ -301,18 +303,18 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected open fun prepareCustomDatabaseComponents(connection: Connection) {}
 
     /**
-     * Database specific check to see if the specified table exists in the
-     * database
+     * Internal checks to see if the specified table exists the the database
      *
+     * @param connection the connection to use
      * @param tableName the table to look up
-     * @return 1 if the specified table exists in the database
+     * @return 1 if the specified table exists the the database
      */
     abstract fun tableExists(connection: Connection, tableName: String): Int
 
     /**
-     * Database specific check to see if the specified procedure exists in the
-     * database
+     * Internal checks to see if the specified procedure exists in the database
      *
+     * @param connection the connection to use
      * @param procedureName the procedure to look up
      * @return 1 if the specified procedure exists in the database
      */
@@ -321,9 +323,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     /**
-     * Database specific check to see if the specified view exists in the
-     * database
+     * Internal checks to see if the specified view exists in the database
      *
+     * @param connection the connection to use
      * @param viewName the view to look up
      * @return 1 if the specified procedure exists in the database
      */
@@ -332,9 +334,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     /**
-     * Database specific check to see if the specified trigger exists in the
-     * database
+     * Internal checks to see if the specified trigger exists in the database
      *
+     * @param connection the connection to use
      * @param triggerName the trigger to look up
      * @return 1 if the specified trigger exists in the database
      */
@@ -343,9 +345,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     /**
-     * Database specific check to see if the specified index exists in the
-     * database
+     * Internal checks to see if the specified index exists in the database
      *
+     * @param connection the connection to use
      * @param indexName the trigger to look up
      * @return 1 if the specified index exists in the database
      */
@@ -354,17 +356,16 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     /**
-     * Database specific check to see if the specified column exists in the
-     * database
+     * Internal checks to see if the specified column exists in the database
      *
-     * @param tableName
-     * @param columnName
-     * @return
+     * @param connection the connection to use
+     * @param tableName the table to look-up
+     * @param columnName the column to look-up
+     * @return 1 if the specified column exists in the database
      */
     open fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         return 0
     }
-
 
     /**
      * Database specific SQL used to create the schema that stores text values
@@ -530,8 +531,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         if (parentEntities.isEmpty()) return
         try {
             (if (supportsStatements) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
-                for (parentEntitiy in parentEntities) {
-                    statement.setLong(1, parentEntitiy)
+                for (parentEntity in parentEntities) {
+                    statement.setLong(1, parentEntity)
                     statement.setLong(2, entityCode)
                     statement.addBatch()
                 }
@@ -549,8 +550,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param entityId   the entity's id
      * @param entityName the entity's name
      */
-    @Synchronized
-    fun mapClassName(connection: Connection, entityId: Long, entityName: String) {
+    private fun mapClassName(connection: Connection, entityId: Long, entityName: String) {
         try {
             (if (supportsStatements) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
                 statement.setLong(1, entityId)
@@ -564,7 +564,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
-    @Synchronized
     fun mapTable(table: JdsTable) {
         tables.add(table)
     }
@@ -576,7 +575,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         connectionPool.forEach { it.value.close() }
     }
 
-    @Synchronized
     fun map(entity: Class<out JdsEntity>) {
         if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val entityAnnotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
@@ -587,9 +585,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                     getConnection().use { connection ->
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
-                        var jdsEntity: JdsEntity? = entity.newInstance()
+                        var jdsEntity = entity.newInstance()
                         JdsExtensions.determineParents(entity, parentEntities)
-                        mapClassName(connection, jdsEntity!!.overview.entityId, entityAnnotation.entityName)
+                        mapClassName(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
                         jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
@@ -607,194 +605,187 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             throw RuntimeException("You must annotate the class [${entity.canonicalName}] with [${JdsEntityAnnotation::class.java}]")
     }
 
-    val mappedClasses: Collection<Class<out JdsEntity>>
-        get() = classes.values
-
-    fun getBoundClass(serviceCode: Long): Class<out JdsEntity>? {
-        return classes[serviceCode]
-    }
-
     /**
      * SQL call to save text values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveString(): String {
+    internal open fun saveString(): String {
         return "{call procStoreText(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save boolean values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveBoolean(): String {
+    internal open fun saveBoolean(): String {
         return "{call procStoreBoolean(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save long values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveLong(): String {
+    internal open fun saveLong(): String {
         return "{call procStoreLong(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save double values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveDouble(): String {
+    internal open fun saveDouble(): String {
         return "{call procStoreDouble(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save blob values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveBlob(): String {
+    internal open fun saveBlob(): String {
         return "{call procStoreBlob(:uuid,:fieldId,:value)}"
     }
 
 
     /**
      * SQL call to save float values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveFloat(): String {
+    internal open fun saveFloat(): String {
         return "{call procStoreFloat(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save integer values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveInteger(): String {
+    internal open fun saveInteger(): String {
         return "{call procStoreInteger(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save datetime values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveDateTime(): String {
+    internal open fun saveDateTime(): String {
         return "{call procStoreDateTime(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save datetime values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveZonedDateTime(): String {
+    internal open fun saveZonedDateTime(): String {
         return "{call procStoreZonedDateTime(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save date values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    fun saveDate(): String {
+    internal open fun saveDate(): String {
         return "{call procStoreDate(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save time values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveTime(): String {
+    internal open fun saveTime(): String {
         return "{call procStoreTime(:uuid,:fieldId,:value)}"
     }
 
     /**
      * SQL call to save entity overview values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveOverview(): String {
+    internal open fun saveOverview(): String {
         return "{call procStoreEntityOverviewV3(:uuid,:dateCreated,:dateModified,:live,:version)}"
     }
 
     /**
      * SQL call to save entity overview values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun saveOverviewInheritance(): String {
+    internal open fun saveOverviewInheritance(): String {
         return "{call procStoreEntityInheritance(:uuid, :entityId)}"
     }
 
     /**
      * SQL call to bind fieldIds to entityVersions
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun mapClassFields(): String {
+    internal open fun mapClassFields(): String {
         return "{call procBindEntityFields(:entityId, :fieldId)}"
     }
 
-    open fun mapFieldNames(): String {
+    /**
+     * SQL call to map field names and descriptions
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun mapFieldNames(): String {
         return "{call procBindFieldNames(:fieldId, :fieldName, :fieldDescription)}"
     }
 
-    open fun mapFieldTypes(): String {
+    /**
+     * SQL call to map field types
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun mapFieldTypes(): String {
         return "{call procBindFieldTypes(:typeId, :typeName)}"
     }
 
     /**
      * SQL call to bind enumProperties to entityVersions
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun mapClassEnumsImplementation(): String {
+    internal open fun mapClassEnumsImplementation(): String {
         return "{call procBindEntityEnums(?,?)}"
     }
 
     /**
-     * Map parents to child entityVersions
-     *
-     * @return
+     * SQL call to map parents to child entities
+     * @return the default or overridden SQL statement for this operation
      */
-    open fun mapParentToChild(): String {
+    internal open fun mapParentToChild(): String {
         return "{call procBindParentToChild(?,?)}"
     }
 
     /**
      * SQL call to map class names
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun mapClassName(): String {
+    internal open fun mapClassName(): String {
         return "{call procRefEntities(?,?)}"
     }
 
     /**
      * SQL call to save reference enum values
-     *
      * @return the default or overridden SQL statement for this operation
      */
-    open fun mapEnumValues(): String {
+    internal open fun mapEnumValues(): String {
         return "{call procRefEnumValues(?,?,?)}"
     }
 
+    /**
+     * Variable to facilitate in-line rows in Oracle
+     */
     private val logSqlSource = when (isOracleDb) {
         true -> "SELECT ?, ?, ?, ? FROM DUAL"
         else -> "SELECT ?, ?, ?, ?"
     }
 
+    /**
+     * Variable to facilitate lookups for strings in Oracle
+     */
     private val oldStringValue = when (isOracleDb) {
         true -> "dbms_lob.substr(StringValue, dbms_lob.getlength(StringValue), 1)"
         else -> "StringValue"
     }
 
+    /**
+     * SQL executed in order to log String values
+     * @return SQL executed in order to log String values
+     */
     internal fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, StringValue) VALUES(?, ?, ?, ?)"
@@ -803,6 +794,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Double values
+     * @return SQL executed in order to log Double values
+     */
     internal fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DoubleValue) VALUES(?, ?, ?, ?)"
@@ -811,6 +806,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Long values
+     * @return SQL executed in order to log Long values
+     */
     internal fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, LongValue) VALUES(?, ?, ?, ?)"
@@ -819,6 +818,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Integer values
+     * @return SQL executed in order to log Integer values
+     */
     internal fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, IntegerValue) VALUES(?, ?, ?, ?)"
@@ -827,6 +830,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Float values
+     * @return SQL executed in order to log Float values
+     */
     internal fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, FloatValue) VALUES(?, ?, ?, ?)"
@@ -835,6 +842,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log DateTime values
+     * @return SQL executed in order to log DateTime values
+     */
     internal fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, DateTimeValue) VALUES(?, ?, ?, ?)"
@@ -843,6 +854,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log ZonedDateTime values
+     * @return SQL executed in order to log ZonedDateTime values
+     */
     internal fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, ZonedDateTimeValue) VALUES(?, ?, ?, ?)"
@@ -851,6 +866,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Time values
+     * @return SQL executed in order to log Time values
+     */
     internal fun saveOldTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, TimeValue) VALUES(?, ?, ?, ?)"
@@ -859,6 +878,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Boolean values
+     * @return SQL executed in order to log Boolean values
+     */
     internal fun saveOldBooleanValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BooleanValue) VALUES(?, ?, ?, ?)"
@@ -867,17 +890,20 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
+    /**
+     * SQL executed in order to log Blob values
+     * @return SQL executed in order to log Blob values
+     */
     internal fun saveOldBlobValues(): String {
         return "INSERT INTO JdsStoreOldFieldValues(Uuid, FieldId, Sequence, BlobValue) VALUES(?, ?, ?, ?)"
     }
 
     /**
      * Acquire a custom connection to a database
-     * @param targetConnection a custom flag to access a custom database
-     *
-     * @return standard connection to the database
+     * @param targetConnection a custom flag to access a particular connection
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
      * @throws SQLException when a standard SQL Exception occurs
+     * @return a custom connection to a database
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(targetConnection: Int): Connection {
