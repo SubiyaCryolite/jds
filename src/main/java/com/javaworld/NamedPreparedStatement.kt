@@ -21,13 +21,12 @@ constructor(connection: Connection, query: String) : INamedStatement {
 
     private val preparedStatement: PreparedStatement
 
-    val indexMap: HashMap<String, Array<Int>> = HashMap()
+    val indexMap: HashMap<String, MutableList<Int>> = HashMap()
 
     init {
         val parsedQuery = parse(query, indexMap)
         preparedStatement = connection.prepareStatement(parsedQuery)
     }
-
 
     /**
      * Parses a query with named parameters.  The parameter-index mappings are
@@ -40,7 +39,7 @@ constructor(connection: Connection, query: String) : INamedStatement {
      * @param paramMap map to hold parameter-index mappings
      * @return the parsed query
      */
-    private fun parse(query: String, paramMap: MutableMap<String, Array<Int>>): String {
+    private fun parse(query: String, paramMap: MutableMap<String, MutableList<Int>>): String {
         // I was originally using regular expressions, but they didn't work well for ignoring
         // parameter-like strings inside quotes.
         val length = query.length
@@ -52,36 +51,34 @@ constructor(connection: Connection, query: String) : INamedStatement {
         var i = 0
         while (i < length) {
             var c = query[i]
-            if (inSingleQuote) {
-                if (c == '\'') {
+            when {
+                inSingleQuote -> if (c == '\'') {
                     inSingleQuote = false
                 }
-            } else if (inDoubleQuote) {
-                if (c == '"') {
-                    inDoubleQuote = false
+                inDoubleQuote -> when (c) {
+                    '"' -> inDoubleQuote = false
                 }
-            } else {
-                if (c == '\'') {
-                    inSingleQuote = true
-                } else if (c == '"') {
-                    inDoubleQuote = true
-                } else if (c == ':' && i + 1 < length &&
-                        Character.isJavaIdentifierStart(query[i + 1])) {
-                    var j = i + 2
-                    while (j < length && Character.isJavaIdentifierPart(query[j])) {
-                        j++
-                    }
-                    val name = query.substring(i + 1, j)
-                    c = '?' // replace the parameter with a question mark
-                    i += name.length // skip past the end if the parameter
+                else -> when {
+                    c == '\'' -> inSingleQuote = true
+                    c == '"' -> inDoubleQuote = true
+                    c == ':' && i + 1 < length &&
+                            Character.isJavaIdentifierStart(query[i + 1]) -> {
+                        var j = i + 2
+                        while (j < length && Character.isJavaIdentifierPart(query[j])) {
+                            j++
+                        }
+                        val name = query.substring(i + 1, j)
+                        c = '?' // replace the parameter with a question mark
+                        i += name.length // skip past the end if the parameter
 
-                    var indexList: Array<Int>? = paramMap[name]
-                    if (indexList == null) {
-                        indexList = arrayOf<Int>(1)
-                        paramMap.put(name, indexList)
+                        var indexList: MutableList<Int>? = paramMap[name]
+                        if (indexList == null) {
+                            indexList = LinkedList()
+                            paramMap.put(name, indexList)
+                        }
+                        indexList.add(index)
+                        index++
                     }
-                    indexList[0] = index
-                    index++
                 }
             }
             parsedQuery.append(c)
@@ -98,96 +95,63 @@ constructor(connection: Connection, query: String) : INamedStatement {
         return parsedQuery.toString()
     }
 
-    private fun getIndexes(name: String): Array<Int> {
+    private fun getIndexes(name: String): MutableList<Int> {
         return indexMap[name] ?: throw IllegalArgumentException("Parameter not found: " + name)
     }
 
     @Throws(SQLException::class)
     override fun setObject(name: String, value: Any) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setObject(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setObject(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setBoolean(name: String, value: Boolean) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setBoolean(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setBoolean(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setBytes(name: String, value: ByteArray) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setBytes(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setBytes(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setBlob(name: String, value: InputStream) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setBlob(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setBlob(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setNull(name: String, value: Int) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setNull(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setNull(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setString(name: String, value: String) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setString(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setString(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setInt(name: String, value: Int) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setInt(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setInt(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setLong(name: String, value: Long) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setLong(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setLong(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setFloat(name: String, value: Float) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setFloat(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setFloat(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setDouble(name: String, value: Double) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setDouble(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setDouble(it, value) }
     }
 
     @Throws(SQLException::class)
     override fun setTimestamp(name: String, value: Timestamp) {
-        val indexes = getIndexes(name)
-        for (i in indexes.indices) {
-            preparedStatement.setTimestamp(indexes[i], value)
-        }
+        getIndexes(name).forEach { preparedStatement.setTimestamp(it, value) }
     }
 
     override fun getStatement(): PreparedStatement {
@@ -208,6 +172,7 @@ constructor(connection: Connection, query: String) : INamedStatement {
     override fun executeUpdate(): Int {
         return preparedStatement.executeUpdate()
     }
+
 
     @Throws(SQLException::class)
     override fun executeQuery(sql: String): ResultSet {

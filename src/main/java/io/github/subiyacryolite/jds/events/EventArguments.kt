@@ -167,7 +167,6 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     private fun prepareConnection(targetConnection: Int) {
         if (!alternateConnections.containsKey(targetConnection)) {
             val connection = jdsDb.getConnection(targetConnection)
-            connection.autoCommit = false
             alternateConnections.put(targetConnection, connection)
         }
     }
