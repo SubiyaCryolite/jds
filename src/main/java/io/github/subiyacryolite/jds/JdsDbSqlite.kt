@@ -41,7 +41,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = String.format("PRAGMA table_info('%s')", tableName)
+        val sql = "PRAGMA table_info('$tableName')"
         try {
             NamedPreparedStatement(connection, sql).use { preparedStatement ->
                 preparedStatement.executeQuery().use { resultSet ->
@@ -258,51 +258,47 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         return "INSERT OR REPLACE INTO JdsEntityInheritance(ParentEntityCode,ChildEntityCode) VALUES(?,?)"
     }
 
-    override fun createOrAlterView(viewName: String, viewSql: String): String {
-        return ""
-    }
-
     override fun getSqlAddColumn(): String {
         return "ALTER TABLE %s ADD COLUMN %s %s"
     }
 
-    override fun getSqlTypeFloat(): String {
+    override fun getDbFloatDataType(): String {
         return "REAL"
     }
 
-    override fun getSqlTypeDouble(): String {
+    override fun getDbDoubleDataType(): String {
         return "DOUBLE"
     }
 
-    override fun getSqlTypeZonedDateTime(): String {
+    override fun getDbZonedDateTimeDataType(): String {
         return "BIGINT"
     }
 
-    override fun getSqlTypeTime(): String {
+    override fun getDbTimeDataType(): String {
         return "INTEGER"
     }
 
-    override fun getSqlTypeBlob(max: Int): String {
+    override fun getDbBlobDataType(max: Int): String {
         return "BLOB"
     }
 
-    override fun getSqlTypeInteger(): String {
+    override fun getDbIntegerDataType(): String {
         return "INTEGER"
     }
 
-    override fun getSqlTypeDateTime(): String {
+    override fun getDbDateTimeDataType(): String {
         return "TIMESTAMP"
     }
 
-    override fun getSqlTypeLong(): String {
+    override fun getDbLongDataType(): String {
         return "BIGINT"
     }
 
-    override fun getSqlTypeText(max: Int): String {
+    override fun getDbStringDataType(max: Int): String {
         return "TEXT"
     }
 
-    override fun getSqlTypeBoolean(): String {
+    override fun getDbBooleanDataType(): String {
         return "BOOLEAN"
     }
 }

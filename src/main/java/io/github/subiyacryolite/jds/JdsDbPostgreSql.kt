@@ -246,58 +246,50 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         }
     }
 
-    override fun createOrAlterView(viewName: String, viewSql: String): String {
-        val sb = StringBuilder("CREATE VIEW\t")
-        sb.append(viewName)
-        sb.append("\tAS\t")
-        sb.append(viewSql)
-        return sb.toString()
-    }
-
     override fun getSqlAddColumn(): String {
         return "ALTER TABLE %s ADD COLUMN %s %s"
     }
 
-    override fun getSqlTypeFloat(): String {
+    override fun getDbFloatDataType(): String {
         return "REAL"
     }
 
-    override fun getSqlTypeDouble(): String {
+    override fun getDbDoubleDataType(): String {
         return "FLOAT"
     }
 
-    override fun getSqlTypeZonedDateTime(): String {
+    override fun getDbZonedDateTimeDataType(): String {
         return "TIMESTAMP WITH TIME ZONE"
     }
 
-    override fun getSqlTypeTime(): String {
+    override fun getDbTimeDataType(): String {
         return "TIME WITHOUT TIME ZONE"
     }
 
-    override fun getSqlTypeBlob(max: Int): String {
+    override fun getDbBlobDataType(max: Int): String {
         return "BYTEA"
     }
 
-    override fun getSqlTypeInteger(): String {
+    override fun getDbIntegerDataType(): String {
         return "INTEGER"
     }
 
-    override fun getSqlTypeDateTime(): String {
+    override fun getDbDateTimeDataType(): String {
         return "TIMESTAMP"
     }
 
-    override fun getSqlTypeLong(): String {
+    override fun getDbLongDataType(): String {
         return "BIGINT"
     }
 
-    override fun getSqlTypeText(max: Int): String {
+    override fun getDbStringDataType(max: Int): String {
         return if (max == 0)
             "TEXT"
         else
             "VARCHAR($max)"
     }
 
-    override fun getSqlTypeBoolean(): String {
+    override fun getDbBooleanDataType(): String {
         return "BOOLEAN"
     }
 }

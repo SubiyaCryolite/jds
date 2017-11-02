@@ -102,14 +102,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         return toReturn
     }
 
-    override fun createOrAlterView(viewName: String, viewSql: String): String {
-        val sb = StringBuilder("CREATE VIEW\t")
-        sb.append(viewName)
-        sb.append("\tAS\t")
-        sb.append(viewSql)
-        return sb.toString()
-    }
-
     override fun createStoreEntityInheritance(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/JdsEntityInstance.sql")
     }
@@ -281,46 +273,46 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         return "ALTER TABLE %s ADD %s %s"
     }
 
-    override fun getSqlTypeFloat(): String {
+    override fun getDbFloatDataType(): String {
         return "BINARY_FLOAT"
     }
 
-    override fun getSqlTypeDouble(): String {
+    override fun getDbDoubleDataType(): String {
         return "BINARY_DOUBLE"
     }
 
-    override fun getSqlTypeZonedDateTime(): String {
+    override fun getDbZonedDateTimeDataType(): String {
         return "TIMESTAMP WITH TIME ZONE"
     }
 
-    override fun getSqlTypeTime(): String {
+    override fun getDbTimeDataType(): String {
         return "NUMBER(19)"
     }
 
-    override fun getSqlTypeBlob(max: Int): String {
+    override fun getDbBlobDataType(max: Int): String {
         return "BLOB"
     }
 
-    override fun getSqlTypeInteger(): String {
+    override fun getDbIntegerDataType(): String {
         return "NUMBER(10)"
     }
 
-    override fun getSqlTypeDateTime(): String {
+    override fun getDbDateTimeDataType(): String {
         return "TIMESTAMP"
     }
 
-    override fun getSqlTypeLong(): String {
+    override fun getDbLongDataType(): String {
         return "NUMBER(19)"
     }
 
-    override fun getSqlTypeText(max: Int): String {
+    override fun getDbStringDataType(max: Int): String {
         return if (max == 0)
             "NCLOB"
         else
             "NVARCHAR2($max)"
     }
 
-    override fun getSqlTypeBoolean(): String {
+    override fun getDbBooleanDataType(): String {
         return "SMALLINT"
     }
 }

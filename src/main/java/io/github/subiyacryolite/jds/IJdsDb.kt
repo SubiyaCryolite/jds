@@ -42,29 +42,71 @@ interface IJdsDb {
     @Throws(ClassNotFoundException::class, SQLException::class)
     fun getConnection(targetConnection: Int): Connection
 
+    /**
+     * Checks if the specified index exists the the database
+     *
+     * @param connection the connection to use
+     * @param columnName the column to look up
+     * @param tableName  the table to inspect
+     * @return true if the specified index exists the the database
+     */
     fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean
 
+    /**
+     * Checks if the specified table exists the the database
+     *
+     * @param connection the connection to use
+     * @param tableName the table to look up
+     * @return true if the specified table exists the the database
+     */
     fun doesTableExist(connection: Connection, tableName: String): Boolean
+
+    /**
+     * Checks if the specified procedure exists the the database
+     *
+     * @param connection the connection to use
+     * @param procedureName the procedure to look up
+     * @return true if the specified procedure exists the the database
+     */
+    fun doesProcedureExist(connection: Connection, procedureName: String): Boolean
+
+    /**
+     * Checks if the specified trigger exists the the database
+     *
+     * @param connection the connection to use
+     * @param triggerName the trigger to look up
+     * @return true if the specified trigger exists the the database
+     */
+    fun doesTriggerExist(connection: Connection, triggerName: String): Boolean
+
+    /**
+     * Checks if the specified index exists the the database
+     *
+     * @param connection the connection to use
+     * @param indexName the index to look up
+     * @return true if the specified index exists the the database
+     */
+    fun doesIndexExist(connection: Connection, indexName: String): Boolean
 
     fun getSqlAddColumn(): String
 
-    fun getSqlTypeFloat(): String
+    fun getDbFloatDataType(): String
 
-    fun getSqlTypeDouble(): String
+    fun getDbDoubleDataType(): String
 
-    fun getSqlTypeZonedDateTime(): String
+    fun getDbZonedDateTimeDataType(): String
 
-    fun getSqlTypeTime(): String
+    fun getDbTimeDataType(): String
 
-    fun getSqlTypeBlob(max: Int): String
+    fun getDbBlobDataType(max: Int): String
 
-    fun getSqlTypeInteger(): String
+    fun getDbIntegerDataType(): String
 
-    fun getSqlTypeDateTime(): String
+    fun getDbDateTimeDataType(): String
 
-    fun getSqlTypeLong(): String
+    fun getDbLongDataType(): String
 
-    fun getSqlTypeText(max: Int): String
+    fun getDbStringDataType(max: Int): String
 
-    fun getSqlTypeBoolean(): String
+    fun getDbBooleanDataType(): String
 }

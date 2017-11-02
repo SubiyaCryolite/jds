@@ -193,57 +193,26 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     protected open fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {}
 
-    /**
-     * Checks if the specified table exists the the database
-     *
-     * @param tableName the table to look up
-     * @return true if the specified table exists the the database
-     */
     override fun doesTableExist(connection: Connection, tableName: String): Boolean {
         val answer = tableExists(connection, tableName)
         return answer == 1
     }
 
-    /**
-     * Checks if the specified procedure exists the the database
-     *
-     * @param procedureName the procedure to look up
-     * @return true if the specified procedure exists the the database
-     */
-    private fun doesProcedureExist(connection: Connection, procedureName: String): Boolean {
+    override fun doesProcedureExist(connection: Connection, procedureName: String): Boolean {
         val answer = procedureExists(connection, procedureName)
         return answer == 1
     }
 
-    /**
-     * Checks if the specified trigger exists the the database
-     *
-     * @param triggerName the trigger to look up
-     * @return true if the specified trigger exists the the database
-     */
-    private fun doesTriggerExist(connection: Connection, triggerName: String): Boolean {
+    override fun doesTriggerExist(connection: Connection, triggerName: String): Boolean {
         val answer = triggerExists(connection, triggerName)
         return answer == 1
     }
 
-    /**
-     * Checks if the specified index exists the the database
-     *
-     * @param indexName the index to look up
-     * @return true if the specified index exists the the database
-     */
-    private fun doesIndexExist(connection: Connection, indexName: String): Boolean {
+    override fun doesIndexExist(connection: Connection, indexName: String): Boolean {
         val answer = indexExists(connection, indexName)
         return answer == 1
     }
 
-    /**
-     * Checks if the specified index exists the the database
-     *
-     * @param columnName the column to look up
-     * @param tableName  the table to inspect
-     * @return true if the specified index exists the the database
-     */
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
         val answer = columnExists(connection, tableName, columnName)
         return answer == 1
@@ -815,8 +784,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     open fun mapEnumValues(): String {
         return "{call procRefEnumValues(?,?,?)}"
     }
-
-    abstract fun createOrAlterView(viewName: String, viewSql: String): String
 
     private val logSqlSource = when (isOracleDb) {
         true -> "SELECT ?, ?, ?, ? FROM DUAL"

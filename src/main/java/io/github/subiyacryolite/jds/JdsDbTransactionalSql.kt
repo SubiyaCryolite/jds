@@ -268,61 +268,53 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         }
     }
 
-    override fun createOrAlterView(viewName: String, viewSql: String): String {
-        val sb = StringBuilder("CREATE VIEW\t")
-        sb.append(viewName)
-        sb.append("\tAS\t")
-        sb.append(viewSql)
-        return sb.toString()
-    }
-
     override fun getSqlAddColumn(): String {
         return "ALTER TABLE %s ADD %s %s"
     }
 
-    override fun getSqlTypeFloat(): String {
+    override fun getDbFloatDataType(): String {
         return "REAL"
     }
 
-    override fun getSqlTypeDouble(): String {
+    override fun getDbDoubleDataType(): String {
         return "FLOAT"
     }
 
-    override fun getSqlTypeZonedDateTime(): String {
+    override fun getDbZonedDateTimeDataType(): String {
         return "DATETIMEOFFSET(7)"
     }
 
-    override fun getSqlTypeTime(): String {
+    override fun getDbTimeDataType(): String {
         return "TIME(7)"
     }
 
-    override fun getSqlTypeBlob(max: Int): String {
+    override fun getDbBlobDataType(max: Int): String {
         return return if (max == 0)
             "VARBINARY(MAX)"
         else
             "VARBINARY($max)"
     }
 
-    override fun getSqlTypeInteger(): String {
+    override fun getDbIntegerDataType(): String {
         return "INTEGER"
     }
 
-    override fun getSqlTypeDateTime(): String {
+    override fun getDbDateTimeDataType(): String {
         return "DATETIME"
     }
 
-    override fun getSqlTypeLong(): String {
+    override fun getDbLongDataType(): String {
         return "BIGINT"
     }
 
-    override fun getSqlTypeText(max: Int): String {
+    override fun getDbStringDataType(max: Int): String {
         return if (max == 0)
             "NVARCHAR(MAX)"
         else
             "NVARCHAR($max)"
     }
 
-    override fun getSqlTypeBoolean(): String {
+    override fun getDbBooleanDataType(): String {
         return "BIT"
     }
 }

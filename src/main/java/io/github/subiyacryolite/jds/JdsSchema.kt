@@ -4,7 +4,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 
 object JdsSchema {
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
-        val guidDataType = dataType(jdsDb, JdsFieldType.STRING, 48)
+        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 48)
         val sb = StringBuilder()
         sb.append("CREATE TABLE ")
         sb.append(reportName)
@@ -29,7 +29,7 @@ object JdsSchema {
                 }
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEachIndexed { index, enum ->
                     val columnName = "${field.name}_${enum!!.ordinal}"
-                    val columnDefinition = dataType(jdsDb, JdsFieldType.BOOLEAN)
+                    val columnDefinition = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
                     collection.put(columnName, String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition))
                     columnToFieldMap.put(columnName, field)
 
@@ -47,24 +47,24 @@ object JdsSchema {
     @JvmOverloads
     private fun generateColumn(jdsDb: IJdsDb, reportName: String, field: JdsField, max: Int = 0): String {
         val columnName = field.name
-        val columnDefinition = dataType(jdsDb, field.type, max)
-        return String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnDefinition)
+        val columnType = getDbDataType(jdsDb, field.type, max)
+        return String.format(jdsDb.getSqlAddColumn(), reportName, columnName, columnType)
     }
 
     @JvmOverloads
-    fun dataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
+    fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
         when (fieldType) {
-            JdsFieldType.ENTITY -> return jdsDb.getSqlTypeText(48)//act as a fk if you will
-            JdsFieldType.FLOAT -> return jdsDb.getSqlTypeFloat()
-            JdsFieldType.DOUBLE -> return jdsDb.getSqlTypeDouble()
-            JdsFieldType.ZONED_DATE_TIME -> return jdsDb.getSqlTypeZonedDateTime()
-            JdsFieldType.TIME -> return jdsDb.getSqlTypeTime()
-            JdsFieldType.BLOB -> return jdsDb.getSqlTypeBlob(max)
-            JdsFieldType.BOOLEAN -> return jdsDb.getSqlTypeBoolean()
-            JdsFieldType.ENUM, JdsFieldType.INT -> return jdsDb.getSqlTypeInteger()
-            JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return jdsDb.getSqlTypeDateTime()
-            JdsFieldType.LONG, JdsFieldType.DURATION -> return jdsDb.getSqlTypeLong()
-            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getSqlTypeText(max)
+            JdsFieldType.ENTITY -> return jdsDb.getDbStringDataType(48)//act as a fk if you will
+            JdsFieldType.FLOAT -> return jdsDb.getDbFloatDataType()
+            JdsFieldType.DOUBLE -> return jdsDb.getDbDoubleDataType()
+            JdsFieldType.ZONED_DATE_TIME -> return jdsDb.getDbZonedDateTimeDataType()
+            JdsFieldType.TIME -> return jdsDb.getDbTimeDataType()
+            JdsFieldType.BLOB -> return jdsDb.getDbBlobDataType(max)
+            JdsFieldType.BOOLEAN -> return jdsDb.getDbBooleanDataType()
+            JdsFieldType.ENUM, JdsFieldType.INT -> return jdsDb.getDbIntegerDataType()
+            JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return jdsDb.getDbDateTimeDataType()
+            JdsFieldType.LONG, JdsFieldType.DURATION -> return jdsDb.getDbLongDataType()
+            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getDbStringDataType(max)
         }
         return "invalid"
     }

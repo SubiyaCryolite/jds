@@ -4,7 +4,7 @@ import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
+import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
 import java.time.LocalTime
@@ -74,11 +74,11 @@ open class JdsTable() : Serializable {
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
      * @param jdsEntity an entity that may have properties of interest
-     * @param onPostSaveEventArguments event arguments that will hold batched SQL queries for execution
+     * @param eventArguments event arguments that will hold batched SQL queries for execution
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity, onPostSaveEventArguments: OnPostSaveEventArguments) {
+    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity, eventArguments: EventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
 
@@ -95,12 +95,9 @@ open class JdsTable() : Serializable {
         val satisfied = satisfiesConditions(jdsDb, jdsEntity)
         if (satisfied) {
             if (uniqueEntries) {
-                //if unique delete old entries
-                val deleteStatement = onPostSaveEventArguments.getOrAddStatement(iConnection, deleteSql)
-                deleteStatement.setString(1, jdsEntity.overview.uuid)
-                deleteStatement.addBatch()
+                deleteRecordInternal(eventArguments, iConnection, jdsEntity.overview.uuid)
             }
-            val insertStatement = onPostSaveEventArguments.getOrAddStatement(iConnection, insertSql)
+            val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
             insertStatement.setObject(1, jdsEntity.overview.uuid)
 
             //order will be maintained by linked list
@@ -118,6 +115,19 @@ open class JdsTable() : Serializable {
             }
             insertStatement.addBatch()
         }
+    }
+
+    fun deleteRecord(jdsDb: JdsDb, eventArguments: EventArguments, iConnection: Connection, jdsEntity: JdsEntity) {
+        val satisfied = satisfiesConditions(jdsDb, jdsEntity)
+        if (satisfied)
+            deleteRecordInternal(eventArguments, iConnection, jdsEntity.overview.uuid)
+    }
+
+    private fun deleteRecordInternal(eventArguments: EventArguments, iConnection: Connection, uuid: String) {
+        //if unique delete old entries
+        val deleteStatement = eventArguments.getOrAddStatement(iConnection, deleteSql)
+        deleteStatement.setString(1, uuid)
+        deleteStatement.addBatch()
     }
 
     /**

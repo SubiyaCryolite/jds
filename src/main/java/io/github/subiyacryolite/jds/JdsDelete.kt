@@ -41,24 +41,22 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
 
     /**
      * @param jdsDb
-     * @param uuids
-     */
-    constructor(jdsDb: JdsDb, vararg uuids: String) : this(jdsDb, Arrays.asList<String>(*uuids)) {}
-
-    /**
-     * @param jdsDb
      * @param entities
      * @throws SQLException
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
     constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({ it.overview.uuid }).toList()) {
-        jdsDb.getConnection().use {
+
+        jdsDb.getConnection().use { connection ->
+            val args = OnDeleteEventArguments(jdsDb, connection, alternateConnections)
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
-                    (entity as JdsDeleteListener).onDelete(OnDeleteEventArguments(jdsDb, it, alternateConnections))
+                    entity.onDelete(args)
+                jdsDb.tables.forEach { it.deleteRecord(jdsDb, args, connection, entity) }
             }
         }
+
         //close alternate connections
         alternateConnections.forEach { it.value.close() }
     }
@@ -70,8 +68,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, vararg entities: JdsEntity) : this(jdsDb, Arrays.asList<JdsEntity>(*entities)) {
-    }
+    constructor(jdsDb: JdsDb, vararg entities: JdsEntity) : this(jdsDb, Arrays.asList<JdsEntity>(*entities))
 
     /**
      * @return
@@ -117,17 +114,6 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
         @Throws(Exception::class)
         fun delete(jdsDb: JdsDb, vararg entities: JdsEntity) {
             delete(jdsDb, Arrays.asList(*entities))
-        }
-
-        /**
-         * @param jdsDb
-         * @param uuids
-         * @throws Exception
-         */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, *uuids).call()", "io.github.subiyacryolite.jds.JdsDelete"))
-        @Throws(Exception::class)
-        fun delete(jdsDb: JdsDb, vararg uuids: String) {
-            JdsDelete(jdsDb, *uuids).call()
         }
     }
 }
