@@ -589,7 +589,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         JdsExtensions.determineParents(entity, parentEntities)
                         mapClassName(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
                         jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
-                        jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassFieldTypes(this, connection)
                         jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
