@@ -538,7 +538,7 @@ abstract class JdsEntity : IJdsEntity {
      * Copy over object enum values
      *
      * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity
+     * @param <T> A valid JDSEntity
     </T> */
     private fun <T : JdsEntity> copyEnumValues(source: T) {
         val dest = this
@@ -555,7 +555,6 @@ abstract class JdsEntity : IJdsEntity {
             }
         }
     }
-
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
@@ -601,70 +600,150 @@ abstract class JdsEntity : IJdsEntity {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
-    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
-
     private fun serializeBlobs(input: Map<Long, BlobProperty>): Map<Long, BlobProperty> {
         return input.entries.associateBy({ it.key }, { it.value })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
+    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> {
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    }
+
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeIntegers(input: Map<Long, ListProperty<Int>>): Map<Long, List<Int>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeLongs(input: Map<Long, ListProperty<Long>>): Map<Long, List<Long>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeDoubles(input: Map<Long, ListProperty<Double>>): Map<Long, List<Double>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeFloats(input: Map<Long, ListProperty<Float>>): Map<Long, List<Float>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeDateTimes(input: Map<Long, ListProperty<LocalDateTime>>): Map<Long, List<LocalDateTime>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeStrings(input: Map<Long, ListProperty<String>>): Map<Long, List<String>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeObjects(input: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> {
         return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeObject(input: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>): Map<JdsFieldEntity<*>, JdsEntity> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeFloat(input: Map<Long, FloatProperty>): Map<Long, Float> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeDouble(input: Map<Long, DoubleProperty>): Map<Long, Double> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeBoolean(input: Map<Long, BooleanProperty>): Map<Long, Boolean> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeLong(input: Map<Long, LongProperty>): Map<Long, Long> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeInteger(input: Map<Long, IntegerProperty>): Map<Long, Int> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializeTemporal(input: Map<Long, ObjectProperty<out Temporal>>): Map<Long, Temporal> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
 
+    /**
+     * Create a map that can be serialized
+     * @param input an unserializable map
+     * @return A serialisable map
+     */
     private fun serializableString(input: Map<Long, StringProperty>): Map<Long, String> {
         return input.entries.associateBy({ it.key }, { it.value.get() })
     }
