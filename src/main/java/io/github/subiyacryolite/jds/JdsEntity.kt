@@ -602,7 +602,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeBlobs(input: Map<Long, BlobProperty>): Map<Long, BlobProperty> {
@@ -610,31 +610,31 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     private fun serializeIntegers(input: Map<Long, ListProperty<Int>>): Map<Long, List<Int>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeLongs(input: Map<Long, ListProperty<Long>>): Map<Long, List<Long>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeDoubles(input: Map<Long, ListProperty<Double>>): Map<Long, List<Double>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeFloats(input: Map<Long, ListProperty<Float>>): Map<Long, List<Float>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeDateTimes(input: Map<Long, ListProperty<LocalDateTime>>): Map<Long, List<LocalDateTime>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeStrings(input: Map<Long, ListProperty<String>>): Map<Long, List<String>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeObjects(input: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
+        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
     }
 
     private fun serializeObject(input: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>): Map<JdsFieldEntity<*>, JdsEntity> {
