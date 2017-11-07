@@ -21,13 +21,10 @@ import java.util.concurrent.Callable
 
 /**
  * This class is used to perform basic searches based on defined parameters
- */
-class JdsFilter<T : JdsEntity>
-/**
  * @param jdsDb
  * @param referenceType
  */
-(private val jdsDb: JdsDb, private val referenceType: Class<T>) : AutoCloseable, Callable<List<T>> {
+class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>) : AutoCloseable, Callable<List<T>> {
 
 
     private val blockParameters: LinkedList<LinkedList<Any>> = LinkedList()
@@ -36,7 +33,7 @@ class JdsFilter<T : JdsEntity>
     private val tablesToJoin: HashSet<JdsFieldType> = HashSet()
     private var currentStrings: LinkedList<String> = LinkedList()
     private var currentValues: LinkedList<Any> = LinkedList()
-    private var entityId: Long = 0
+    private var entityId = 0L
 
     init {
         if (referenceType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
@@ -50,6 +47,9 @@ class JdsFilter<T : JdsEntity>
         blockSwitches.add("")
     }
 
+    /**
+     *
+     */
     fun or(): JdsFilter<*> {
         currentStrings = LinkedList()
         blockStrings.add(currentStrings)
@@ -59,6 +59,9 @@ class JdsFilter<T : JdsEntity>
         return this
     }
 
+    /**
+     *
+     */
     fun and(): JdsFilter<*> {
         currentStrings = LinkedList()
         blockStrings.add(currentStrings)
@@ -68,6 +71,9 @@ class JdsFilter<T : JdsEntity>
         return this
     }
 
+    /**
+     * @throws Exception
+     */
     @Throws(Exception::class)
     override fun close() {
         blockParameters.clear()
@@ -78,40 +84,45 @@ class JdsFilter<T : JdsEntity>
         currentValues.clear()
     }
 
+    /**
+     * @throws Exception
+     * @return
+     */
     @Throws(Exception::class)
     override fun call(): List<T> {
-        val matchingGuids = ArrayList<String>()
+        val matchingUuids = ArrayList<String>()
         val sql = this.toQuery()
         try {
-            jdsDb.getConnection().use { connection ->
-                connection.prepareStatement(sql).use { ps ->
+            jdsDb.getConnection().use {
+                it.prepareStatement(sql).use {
                     var parameterIndex = 1
-                    for (parameters in blockParameters) {
-                        for (paramter in parameters) {
-                            ps.setObject(parameterIndex, paramter)
+                    for (parameters in blockParameters)
+                        for (parameter in parameters) {
+                            it.setObject(parameterIndex, parameter)
                             parameterIndex++
                         }
+                    it.executeQuery().use {
+                        while (it.next())
+                            matchingUuids.add(it.getString("Uuid"))
                     }
-                    val rs = ps.executeQuery()
-                    while (rs.next()) {
-                        matchingGuids.add(rs.getString("Uuid"))
-                    }
-                    rs.close()
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
 
-        return if (matchingGuids.isEmpty()) {
+        return if (matchingUuids.isEmpty()) {
             //no results. return empty collection
             //if you pass empty collection to jds load it will assume load EVERYTHING
             ArrayList()
-        } else JdsLoad(jdsDb, referenceType, *matchingGuids.toTypedArray()).call()
+        } else JdsLoad(jdsDb, referenceType, *matchingUuids.toTypedArray()).call()
     }
 
 
-    fun toQuery(): String {
+    /**
+     *
+     */
+    private fun toQuery(): String {
         val main = StringBuilder()
         main.append("SELECT DISTINCT eo.Uuid FROM JdsEntityInstance eo\n")
         main.append("JOIN JdsEntities entity ON eo.EntityId = entity.EntityId")
@@ -135,6 +146,10 @@ class JdsFilter<T : JdsEntity>
         return main.toString()
     }
 
+    /**
+     * @param tablesToJoin
+     * @return
+     */
     private fun createLeftJoins(tablesToJoin: HashSet<JdsFieldType>): String {
         val tables = ArrayList<String>()
         for (ft in tablesToJoin) {
@@ -148,194 +163,265 @@ class JdsFilter<T : JdsEntity>
     }
 
     //========================================================CONDITIONS START HERE
-
-    private fun isLob(jdsField: JdsField): Boolean {
-        return jdsField.type === JdsFieldType.STRING || jdsField.type === JdsFieldType.BLOB
+    /**
+     * @param field
+     * @param value
+     */
+    private fun isLob(field: JdsField): Boolean {
+        return field.type === JdsFieldType.STRING || field.type === JdsFieldType.BLOB
     }
 
-    fun isNotNull(jdsField: JdsField): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun isNotNull(field: JdsField): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s IS NOT NULL)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add("")
         return this
     }
 
-    fun isNull(jdsField: JdsField): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun isNull(field: JdsField): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s IS NULL)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add("")
         return this
     }
 
-    fun between(jdsField: JdsField, value1: Any, value2: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun between(field: JdsField, value1: Any, value2: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND (%s BETWEEN ? AND ?) )",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value1)
         currentValues.add(value2)
         return this
     }
 
-    fun notLessThan(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun notLessThan(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s !< ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type), jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type), field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun lessThan(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun lessThan(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s < ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun lessThanOrEqualTo(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun lessThanOrEqualTo(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s < ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun notGreaterThan(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun notGreaterThan(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s !> ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun greaterThan(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun greaterThan(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s > ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun greaterThanOrEqualTo(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun greaterThanOrEqualTo(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s >= ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun equals(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun equals(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s = ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun notEquals(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun notEquals(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s <> ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun like(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun like(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s LIKE ?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun startsLike(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun startsLike(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s LIKE ?%)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun endsLike(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun endsLike(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s LIKE %?)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun notLike(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun notLike(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s NOT LIKE %)",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         return this
     }
 
-    fun `in`(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun `in`(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s IN (?))",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         currentValues.add(value)
         return this
     }
 
-    fun notIn(jdsField: JdsField, value: Any): JdsFilter<*> {
-        tablesToJoin.add(jdsField.type)
+    /**
+     * @param field
+     * @param value
+     */
+    fun notIn(field: JdsField, value: Any): JdsFilter<*> {
+        tablesToJoin.add(field.type)
         val builder = String.format("(%s.FieldId = %s AND %s NOT IN (?))",
-                JdsTableLookup.getTableAliasForFieldType(jdsField.type),
-                jdsField.id,
-                (if (jdsDb.isOracleDb && isLob(jdsField)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(jdsField.type)))
+                JdsTableLookup.getTableAliasForFieldType(field.type),
+                field.id,
+                (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
         currentValues.add(value)
         currentValues.add(value)

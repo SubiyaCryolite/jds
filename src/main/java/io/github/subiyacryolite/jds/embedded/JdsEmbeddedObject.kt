@@ -15,7 +15,11 @@ package io.github.subiyacryolite.jds.embedded
 
 import io.github.subiyacryolite.jds.JdsEntity
 
-class JdsEmbeddedObject(source: JdsEntity) {
+/**
+ *
+ * @param entity
+ */
+class JdsEmbeddedObject(entity: JdsEntity) {
     /**
      * Blob Values
      */
@@ -123,9 +127,9 @@ class JdsEmbeddedObject(source: JdsEntity) {
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(source.overview.uuid, source.overview.entityId, source.overview.live, source.overview.version, source.overview.dateCreated, source.overview.dateModified)
+    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.uuid, entity.overview.entityId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
 
     init {
-        source.assign(this);
+        entity.assign(this);
     }
 }

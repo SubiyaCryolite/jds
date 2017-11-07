@@ -35,7 +35,6 @@ class JdsDurationValues(val id: Long, val v: Long?)
 class JdsMonthDayValues(val id: Long, val v: String?)
 class JdsYearMonthValues(val id: Long, val v: String?)
 class JdsPeriodValues(val id: Long, val v: String?)
-
 //enums
 class JdsEnumValues(val i: Long, val v: Int?)
 //arrays
@@ -46,17 +45,20 @@ class JdsLongCollections(val i: Long, val s: Int, val v: Long?)
 class JdsTextCollections(val i: Long, val s: Int, val v: String?)
 class JdsFloatCollections(val i: Long, val s: Int, val v: Float?)
 class JdsEnumCollections(val i: Long, val s: Int, val v: Int?)
-
+//overviews
 class JdsEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
 class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
-class JdsEmbeddedContainer(sources: Collection<JdsEntity>) {
+/**
+ * @param entities
+ */
+class JdsEmbeddedContainer(entities: Collection<JdsEntity>) {
     /**
      * Embedded objects
      */
     val e: MutableList<JdsEmbeddedObject> = ArrayList()
     init {
-        sources.forEach {
+        entities.forEach {
             e.add(JdsEmbeddedObject(it))
         }
     }

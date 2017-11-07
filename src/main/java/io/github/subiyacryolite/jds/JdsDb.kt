@@ -25,7 +25,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 import kotlin.collections.HashMap
 
 /**
@@ -38,7 +37,7 @@ import kotlin.collections.HashMap
 abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb {
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
-    val tables = ConcurrentSkipListSet<JdsTable>()
+    val tables = HashSet<JdsTable>()
 
 
     /**
@@ -589,7 +588,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         JdsExtensions.determineParents(entity, parentEntities)
                         mapClassName(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
                         jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
-                        jdsEntity.mapClassFieldTypes(this, connection, jdsEntity.overview.entityId)
+                        jdsEntity.mapClassFieldTypes(this, connection)
                         jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()

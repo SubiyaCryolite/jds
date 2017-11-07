@@ -24,8 +24,8 @@ class BulkSaveAndLoad : BaseTestConfig() {
 
     @Throws(Exception::class)
     override fun load() {
-        val entityAs = JdsLoad.load(jdsDb, EntityA::class.java)
-        System.out.printf("All A s [%s]\n", entityAs)
+        val entityAs = JdsLoad(jdsDb, EntityA::class.java)
+        System.out.printf("All A s [%s]\n", entityAs.call())
     }
 
     @Test

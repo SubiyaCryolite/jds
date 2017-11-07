@@ -23,11 +23,11 @@ import kotlin.collections.ArrayList
 
 class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<List<T>> {
 
+    /**
+     *
+     * @return
+     */
     override fun call(): List<T> {
-        return implementation()
-    }
-
-    private fun implementation(): List<T> {
         val output: MutableList<T> = ArrayList()
         container.forEachIndexed { index, element ->
             element.e.forEachIndexed { innerIndex, innerElement ->
@@ -39,65 +39,72 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         return output
     }
 
-    private fun populate(outerIndex: Int, innerIndex: Int, target: JdsEntity, source: JdsEmbeddedObject) {
+    /**
+     *
+     * @param outerIndex
+     * @param innerIndex
+     * @param entity
+     * @param embeddedObject
+     */
+    private fun populate(outerIndex: Int, innerIndex: Int, entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
         //==============================================
         //Overviews
         //==============================================
-        target.overview.dateCreated = source.o.dc
-        target.overview.dateModified = source.o.dm
-        target.overview.entityId = source.o.id
-        target.overview.uuid = source.o.uuid
-        target.overview.live = source.o.l
-        target.overview.version = source.o.v
+        entity.overview.dateCreated = embeddedObject.o.dc
+        entity.overview.dateModified = embeddedObject.o.dm
+        entity.overview.entityId = embeddedObject.o.id
+        entity.overview.uuid = embeddedObject.o.uuid
+        entity.overview.live = embeddedObject.o.l
+        entity.overview.version = embeddedObject.o.v
         //==============================================
         //PRIMITIVES
         //==============================================
-        source.s.forEach { target.populateProperties(JdsFieldType.STRING, it.id, it.v) }
-        source.l.forEach { target.populateProperties(JdsFieldType.LONG, it.id, it.v) }
-        source.i.forEach { target.populateProperties(JdsFieldType.INT, it.id, it.v) }
-        source.b.forEach { target.populateProperties(JdsFieldType.BOOLEAN, it.id, it.v) }
-        source.f.forEach { target.populateProperties(JdsFieldType.FLOAT, it.id, it.v) }
-        source.d.forEach { target.populateProperties(JdsFieldType.DOUBLE, it.id, it.v) }
+        embeddedObject.s.forEach { entity.populateProperties(JdsFieldType.STRING, it.id, it.v) }
+        embeddedObject.l.forEach { entity.populateProperties(JdsFieldType.LONG, it.id, it.v) }
+        embeddedObject.i.forEach { entity.populateProperties(JdsFieldType.INT, it.id, it.v) }
+        embeddedObject.b.forEach { entity.populateProperties(JdsFieldType.BOOLEAN, it.id, it.v) }
+        embeddedObject.f.forEach { entity.populateProperties(JdsFieldType.FLOAT, it.id, it.v) }
+        embeddedObject.d.forEach { entity.populateProperties(JdsFieldType.DOUBLE, it.id, it.v) }
         //==============================================
         //Dates & Time
         //==============================================
-        source.ldt.forEach { target.populateProperties(JdsFieldType.DATE_TIME, it.id, it.v) }
-        source.ld.forEach { target.populateProperties(JdsFieldType.DATE, it.id, it.v) }
-        source.zdt.forEach { target.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.id, it.v) }
-        source.t.forEach { target.populateProperties(JdsFieldType.TIME, it.id, it.v) }
-        source.du.forEach { target.populateProperties(JdsFieldType.DURATION, it.id, it.v) }
-        source.md.forEach { target.populateProperties(JdsFieldType.MONTH_DAY, it.id, it.v) }
-        source.ym.forEach { target.populateProperties(JdsFieldType.YEAR_MONTH, it.id, it.v) }
-        source.p.forEach { target.populateProperties(JdsFieldType.PERIOD, it.id, it.v) }
+        embeddedObject.ldt.forEach { entity.populateProperties(JdsFieldType.DATE_TIME, it.id, it.v) }
+        embeddedObject.ld.forEach { entity.populateProperties(JdsFieldType.DATE, it.id, it.v) }
+        embeddedObject.zdt.forEach { entity.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.id, it.v) }
+        embeddedObject.t.forEach { entity.populateProperties(JdsFieldType.TIME, it.id, it.v) }
+        embeddedObject.du.forEach { entity.populateProperties(JdsFieldType.DURATION, it.id, it.v) }
+        embeddedObject.md.forEach { entity.populateProperties(JdsFieldType.MONTH_DAY, it.id, it.v) }
+        embeddedObject.ym.forEach { entity.populateProperties(JdsFieldType.YEAR_MONTH, it.id, it.v) }
+        embeddedObject.p.forEach { entity.populateProperties(JdsFieldType.PERIOD, it.id, it.v) }
         //==============================================
         //BLOB
         //==============================================
-        source.bl.forEach { target.populateProperties(JdsFieldType.BLOB, it.id, it.v) }
+        embeddedObject.bl.forEach { entity.populateProperties(JdsFieldType.BLOB, it.id, it.v) }
         //==============================================
         //Enums
         //==============================================
-        source.e.forEach { target.populateProperties(JdsFieldType.ENUM, it.i, it.v) }
-        source.ea.forEach { target.populateProperties(JdsFieldType.ENUM_COLLECTION, it.i, it.v) }
+        embeddedObject.e.forEach { entity.populateProperties(JdsFieldType.ENUM, it.i, it.v) }
+        embeddedObject.ea.forEach { entity.populateProperties(JdsFieldType.ENUM_COLLECTION, it.i, it.v) }
         //==============================================
         //ARRAYS
         //==============================================
-        source.ia.forEach { target.populateProperties(JdsFieldType.INT_COLLECTION, it.i, it.v) }
-        source.fa.forEach { target.populateProperties(JdsFieldType.FLOAT_COLLECTION, it.i, it.v) }
-        source.la.forEach { target.populateProperties(JdsFieldType.LONG_COLLECTION, it.i, it.v) }
-        source.sa.forEach { target.populateProperties(JdsFieldType.STRING_COLLECTION, it.i, it.v) }
-        source.da.forEach { target.populateProperties(JdsFieldType.DOUBLE_COLLECTION, it.i, it.v) }
-        source.dta.forEach { target.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, it.i, it.v) }
+        embeddedObject.ia.forEach { entity.populateProperties(JdsFieldType.INT_COLLECTION, it.i, it.v) }
+        embeddedObject.fa.forEach { entity.populateProperties(JdsFieldType.FLOAT_COLLECTION, it.i, it.v) }
+        embeddedObject.la.forEach { entity.populateProperties(JdsFieldType.LONG_COLLECTION, it.i, it.v) }
+        embeddedObject.sa.forEach { entity.populateProperties(JdsFieldType.STRING_COLLECTION, it.i, it.v) }
+        embeddedObject.da.forEach { entity.populateProperties(JdsFieldType.DOUBLE_COLLECTION, it.i, it.v) }
+        embeddedObject.dta.forEach { entity.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, it.i, it.v) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
         val uuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
-        source.eb.forEach {
-            target.populateObjects(jdsDb, it.f, it.i, it.c, innerObjects, uuids)
+        embeddedObject.eb.forEach {
+            entity.populateObjects(jdsDb, it.f, it.i, it.c, innerObjects, uuids)
         }
         innerObjects.forEach {
             //populate the inner objects
-            populate(outerIndex, innerIndex, it, source.eo.find { itx -> itx.o.uuid == it.overview.uuid }!!)
+            populate(outerIndex, innerIndex, it, embeddedObject.eo.find { itx -> itx.o.uuid == it.overview.uuid }!!)
         }
     }
 }

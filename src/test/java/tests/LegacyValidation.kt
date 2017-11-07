@@ -17,11 +17,11 @@ class LegacyValidation : BaseTestConfig() {
     @Throws(Exception::class)
     override fun saveAndLoad() {
         val memObjects = collection
-        JdsSave.save(jdsDb, 1, memObjects)
+        JdsSave(jdsDb, 1, memObjects).call()
         System.out.printf("Saved %s\n", memObjects)
 
-        val savObjects = JdsLoad.load(jdsDb, Example::class.java) //load all entityVersions of type AddressBook
-        val specificObject = JdsLoad.load(jdsDb, Example::class.java, "instance4") //load all entityVersions of type AddressBook with Entity Guids in range
+        val savObjects = JdsLoad(jdsDb, Example::class.java).call() //load all entityVersions of type AddressBook
+        val specificObject = JdsLoad(jdsDb, Example::class.java, "instance4").call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", savObjects)
         System.out.printf("Specific entityVersions [%s]\n", specificObject)
 

@@ -26,7 +26,6 @@ object JdsTableLookup {
 
     /**
      * Retrieve the table that stores the requested fieldEntity type
-     *
      * @param fieldType the requested fieldEntity type
      * @return the table that stores the requested fieldEntity type
      */
@@ -55,7 +54,6 @@ object JdsTableLookup {
 
     /**
      * Retrieve the table that stores the requested fieldEntity type
-     *
      * @param fieldType the requested fieldEntity type
      * @return the table that stores the requested fieldEntity type
      */
@@ -65,8 +63,7 @@ object JdsTableLookup {
 
     /**
      * Get the short version of the table that holds the requested fieldEntity type
-     *
-     * @param jdsFieldType the requested fieldEntity type
+     * @param fieldType the requested fieldEntity type
      * @return the short version of the table that holds the requested fieldEntity type
      */
     fun getTableAliasForFieldType(fieldType: JdsFieldType): String {

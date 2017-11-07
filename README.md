@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SubiyaCryolite/jds.svg?branch=master)](https://travis-ci.org/SubiyaCryolite/Jenesis-Data-Store)
+[![Build Status](https://travis-ci.org/SubiyaCryolite/jds.svg?branch=master)](https://travis-ci.org/SubiyaCryolite/jds)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
 [![Javadocs](https://javadoc.io/badge/io.github.subiyacryolite/jds.svg)](https://javadoc.io/doc/io.github.subiyacryolite/jds)
 [![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
@@ -40,12 +40,12 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
 </dependency>
 ```
 Gradle
 ```groovy
-compile 'io.github.subiyacryolite:jds:4.0.1'
+compile 'io.github.subiyacryolite:jds:4.0.2'
 ```
 
 # Dependencies

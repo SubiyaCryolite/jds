@@ -33,6 +33,10 @@ open class JdsTable() : Serializable {
     private var insertSql = ""
     private var generatedOrUpdatedSchema = false
 
+    /**
+     * @param entity
+     * @param uniqueEntries
+     */
     @JvmOverloads
     constructor(entity: Class<out IJdsEntity>, uniqueEntries: Boolean = false) : this() {
         if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
@@ -73,39 +77,39 @@ open class JdsTable() : Serializable {
     /**
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
-     * @param jdsEntity an entity that may have properties of interest
+     * @param alternateConnections
+     * @param entity an entity that may have properties of interest
      * @param eventArguments event arguments that will hold batched SQL queries for execution
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, jdsEntity: JdsEntity, eventArguments: EventArguments) {
+    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity, eventArguments: EventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
 
         val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
             true -> connection
             else -> {
-                if (!alternateConnections.containsKey(targetConnection)) {
+                if (!alternateConnections.containsKey(targetConnection))
                     alternateConnections.put(targetConnection, jdsDb.getConnection(targetConnection))
-                }
                 alternateConnections[targetConnection]!!
             }
         }
 
-        val satisfied = satisfiesConditions(jdsDb, jdsEntity)
+        val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            if (uniqueEntries) {
-                deleteRecordInternal(eventArguments, iConnection, jdsEntity.overview.uuid)
-            }
+            if (uniqueEntries)
+                deleteRecordInternal(eventArguments, iConnection, entity.overview.uuid)
+
             val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
-            insertStatement.setObject(1, jdsEntity.overview.uuid)
+            insertStatement.setObject(1, entity.overview.uuid)
 
             //order will be maintained by linked list
             columnNames.forEachIndexed { columnIndex, columnName ->
                 val field = columnToFieldMap[columnName]!!
                 val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
-                    true -> jdsEntity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
-                    false -> jdsEntity.getReportAtomicValue(field.id, 0)
+                    true -> entity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
+                    false -> entity.getReportAtomicValue(field.id, 0)
                 }
                 when (value) {
                     is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 2, value, jdsDb)
@@ -117,15 +121,26 @@ open class JdsTable() : Serializable {
         }
     }
 
-    fun deleteRecord(jdsDb: JdsDb, eventArguments: EventArguments, iConnection: Connection, jdsEntity: JdsEntity) {
-        val satisfied = satisfiesConditions(jdsDb, jdsEntity)
+    /**
+     * @param jdsDb
+     * @param eventArguments
+     * @param connection
+     * @param entity
+     */
+    fun deleteRecord(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
+        val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied)
-            deleteRecordInternal(eventArguments, iConnection, jdsEntity.overview.uuid)
+            deleteRecordInternal(eventArguments, connection, entity.overview.uuid)
     }
 
-    private fun deleteRecordInternal(eventArguments: EventArguments, iConnection: Connection, uuid: String) {
+    /**
+     * @param eventArguments
+     * @param connection
+     * @param uuid
+     */
+    private fun deleteRecordInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
         //if unique delete old entries
-        val deleteStatement = eventArguments.getOrAddStatement(iConnection, deleteSql)
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteSql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }
@@ -181,14 +196,14 @@ open class JdsTable() : Serializable {
     /**
      * Determine if this entity should have its properties persisted to this table
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes
-     * @param jdsEntity an entity that may have properties of interest
+     * @param entity an entity that may have properties of interest
      */
-    private fun satisfiesConditions(jdsDb: JdsDb, jdsEntity: JdsEntity): Boolean {
+    private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
 
-        if (onlyLiveRecords && !jdsEntity.overview.live)
+        if (onlyLiveRecords && !entity.overview.live)
             return false
 
-        if (onlyDeprecatedRecords && jdsEntity.overview.live)
+        if (onlyDeprecatedRecords && entity.overview.live)
             return false
 
         if (entities.isEmpty())
@@ -196,7 +211,7 @@ open class JdsTable() : Serializable {
 
         entities.forEach { entityCode ->
             val entityType = jdsDb.classes[entityCode]!!
-            if (entityType.isInstance(jdsEntity))
+            if (entityType.isInstance(entity))
                 return true
         }
         return false

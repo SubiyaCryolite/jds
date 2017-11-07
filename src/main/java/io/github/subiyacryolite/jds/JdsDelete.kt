@@ -21,7 +21,6 @@ import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.streams.toList
 
 /**
  * This class is responsible for deleting [JdsEntities][JdsEntity] in the [JdsDataBase][JdsDb]
@@ -46,7 +45,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.stream().map({ it.overview.uuid }).toList()) {
+    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.map({ it.overview.uuid })) {
 
         jdsDb.getConnection().use { connection ->
             val args = OnDeleteEventArguments(jdsDb, connection, alternateConnections)

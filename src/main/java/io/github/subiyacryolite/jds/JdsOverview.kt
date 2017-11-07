@@ -22,8 +22,7 @@ import java.util.*
 
 /**
  * A self contains a set of properties that form the overview of a
- * [JdsEntity]. Instances of this class are initialised in
- * [JdsEntityBase] and exposed via inheritance
+ * [JdsEntity]. Instances of this class are exposed via inheritance
  */
 class JdsOverview : IJdsOverview, Externalizable {
 
