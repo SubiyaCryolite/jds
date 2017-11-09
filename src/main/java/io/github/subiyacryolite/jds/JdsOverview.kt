@@ -61,4 +61,8 @@ class JdsOverview : IJdsOverview, Externalizable {
     override fun toString(): String {
         return "{ uuid = $uuid, entityId = $entityId, version = $version, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
     }
+
+    companion object {
+        private val serialVersionUID = 20171109_0853L
+    }
 }

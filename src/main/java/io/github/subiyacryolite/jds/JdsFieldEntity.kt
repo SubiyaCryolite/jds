@@ -55,4 +55,8 @@ class JdsFieldEntity<T : IJdsEntity>() : Externalizable {
     override fun toString(): String {
         return "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
     }
+
+    companion object {
+        private val serialVersionUID = 20171109_0853L
+    }
 }

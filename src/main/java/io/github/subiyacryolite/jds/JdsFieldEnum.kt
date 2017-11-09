@@ -102,6 +102,8 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
 
     companion object {
 
+        private val serialVersionUID = 20171109_0853L
+
         private val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
 
         /**

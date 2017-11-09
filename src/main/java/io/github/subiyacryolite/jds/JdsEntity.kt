@@ -1236,4 +1236,8 @@ abstract class JdsEntity : IJdsEntity {
     override fun registerFields(table: JdsTable) {
         fields.forEach { table.registerField(it) }
     }
+
+    companion object {
+        private val serialVersionUID = 20171109_0853L
+    }
 }

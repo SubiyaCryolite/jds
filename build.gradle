@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "4.0.3" //major.minor.bugFixIncrement
+version = "4.0.4-SNAPSHOT" //major.minor.bugFixIncrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -98,10 +98,10 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: hasProperty("ossrhUsername") ? ossrhUsername : "", password: hasProperty("ossrhPassword") ? ossrhPassword : "")
+                authentication(userName: ossrhUsername, password: hasProperty("ossrhPassword") ? ossrhPassword : "")
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: hasProperty("ossrhUsername") ? ossrhUsername : "", password: hasProperty("ossrhPassword") ? ossrhPassword : "")
+                authentication(userName: ossrhUsername, password: hasProperty("ossrhPassword") ? ossrhPassword : "")
             }
             pom.project {
                 name "Jenesis Data Store"
@@ -133,5 +133,5 @@ uploadArchives {
 
 nexusStaging {
     packageGroup = "io.github.subiyacryolite"
-    stagingProfileId = "57cb63f09e7fd5" //when not defined will be got from server using "packageGroup"
+    stagingProfileId = "57cb63f09e7fd5"
 }

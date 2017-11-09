@@ -74,6 +74,9 @@ class JdsField() : Externalizable {
     }
 
     companion object {
+
+        private val serialVersionUID = 20171109_0853L
+
         val values = HashMap<Long, JdsField>()
 
         /**

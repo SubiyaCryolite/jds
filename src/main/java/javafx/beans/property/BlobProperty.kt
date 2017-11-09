@@ -17,7 +17,7 @@ open class BlobProperty : Serializable {
      *
      * @param value byte array input
      */
-    constructor(value: ByteArray)  {
+    constructor(value: ByteArray) {
         set(value)
     }
 
@@ -28,7 +28,7 @@ open class BlobProperty : Serializable {
      * @throws IOException
      */
     @Throws(IOException::class)
-    constructor(value: InputStream){
+    constructor(value: InputStream) {
         set(value)
     }
 
@@ -75,5 +75,11 @@ open class BlobProperty : Serializable {
      * @return true if the blob is empty
      */
     val isEmpty: Boolean
-        get() = bytes == null || bytes!!.size == 0
+        get() = bytes == null || bytes!!.isEmpty()
+
+
+    companion object {
+
+        private val serialVersionUID = 20171109_0853L
+    }
 }

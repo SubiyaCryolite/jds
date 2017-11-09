@@ -223,4 +223,9 @@ open class JdsTable() : Serializable {
     fun setTargetConnection(targetConnection: Int) {
         this.targetConnection = targetConnection
     }
+
+    companion object {
+
+        private val serialVersionUID = 20171109_0853L
+    }
 }
