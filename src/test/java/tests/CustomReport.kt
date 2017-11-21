@@ -23,25 +23,19 @@ class CustomReport : BaseTestConfig() {
         val crtAddress = JdsTable(Address::class.java, true)
         val crtAddressBook = JdsTable(AddressBook::class.java, true)
         val crtLogin = JdsTable(Login::class.java, true)
-
         val crtA = JdsTable(EntityA::class.java, true)
         val crtB = JdsTable(EntityB::class.java, true)
         val crtC = JdsTable(EntityC::class.java, true)
+        val exampleType = JdsTable(Example::class.java, true)
 
-        jdsDb.mapTable(customTable)
-        jdsDb.mapTable(crtAddress)
-        jdsDb.mapTable(crtAddressBook)
-        jdsDb.mapTable(crtLogin)
-        jdsDb.mapTable(crtA)
-        jdsDb.mapTable(crtB)
-        jdsDb.mapTable(crtC)
+        jdsDb.mapTable(customTable, crtAddress, crtAddressBook, crtLogin, crtA, crtB, crtC, exampleType)
         jdsDb.prepareTables()
 
         val login = Login()
         login.rights.add(Rights.CAN_LOGIN)
         login.rights.add(Rights.CAN_CREATE_USER)
 
-        val sav = JdsSave(jdsDb, Arrays.asList(addressBook,login))
+        val sav = JdsSave(jdsDb, collection)
         sav.call()
     }
 

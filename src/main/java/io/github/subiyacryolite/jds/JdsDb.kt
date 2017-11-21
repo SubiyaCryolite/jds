@@ -563,8 +563,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
-    fun mapTable(table: JdsTable) {
-        tables.add(table)
+    fun mapTable(vararg table: JdsTable) {
+        tables.addAll(table)
     }
 
     fun prepareTables() {

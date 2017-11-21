@@ -16,7 +16,7 @@ class LagacyLoadAndSave : BaseTestConfig() {
     @Throws(Exception::class)
     override fun save() {
         val addressBook = addressBook
-        JdsSave(jdsDb, 1, Arrays.asList(addressBook)).call()
+        JdsSave(jdsDb, 1, addressBook).call()
         System.out.printf("Saved %s\n", addressBook)
     }
 

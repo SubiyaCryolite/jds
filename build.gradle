@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "4.0.4" //major.minor.bugFixIncrement
+version = "4.0.5.1-SNAPSHOT" //major.minor.bugFixIncrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -50,8 +50,8 @@ dependencies {
     testCompile 'org.postgresql:postgresql:42.0.0'
     testCompile 'mysql:mysql-connector-java:6.0.6'
     testCompile 'com.oracle:ojdbc6:12.1.0.1-atlassian-hosted'
-    testCompile('org.junit.jupiter:junit-jupiter-api:5.0.0')
-    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.0.0')
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.0.0'
 }
 
 jar {

@@ -13,7 +13,7 @@ import java.time.ZonedDateTime
 /**
  * Created by ifunga on 12/04/2017.
  */
-@JdsEntityAnnotation(entityId = 3, entityName = "Type Class")
+@JdsEntityAnnotation(entityId = 3, entityName = "TypeClass")
 class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     private val _stringField = SimpleStringProperty("")
     private val _timeField = SimpleObjectProperty(LocalTime.now())
@@ -43,43 +43,43 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
 
     var stringField: String
         get() = _stringField.get()
-        set(stringField) = this._stringField.set(stringField)
+        set(stringField) = _stringField.set(stringField)
 
     var timeField: LocalTime
         get() = _timeField.get()
-        set(dateField) = this._timeField.set(dateField)
+        set(dateField) = _timeField.set(dateField)
 
     var dateField: LocalDate
         get() = _dateField.get()
-        set(dateField) = this._dateField.set(dateField)
+        set(dateField) = _dateField.set(dateField)
 
     var dateTimeField: LocalDateTime
         get() = _dateTimeField.get()
-        set(dateTimeField) = this._dateTimeField.set(dateTimeField)
+        set(dateTimeField) = _dateTimeField.set(dateTimeField)
 
     var zonedDateTimeField: ZonedDateTime
         get() = _zonedDateTimeField.get()
-        set(zonedDateTimeField) = this._zonedDateTimeField.set(zonedDateTimeField)
+        set(zonedDateTimeField) = _zonedDateTimeField.set(zonedDateTimeField)
 
     var longField: Long
         get() = _longField.get()
-        set(longField) = this._longField.set(longField)
+        set(longField) = _longField.set(longField)
 
     var intField: Int
         get() = _intField.get()
-        set(intField) = this._intField.set(intField)
+        set(intField) = _intField.set(intField)
 
     var doubleField: Double
         get() = _doubleField.get()
-        set(doubleField) = this._doubleField.set(doubleField)
+        set(doubleField) = _doubleField.set(doubleField)
 
     var floatField: Float
         get() = _floatField.get()
-        set(floatField) = this._floatField.set(floatField)
+        set(floatField) = _floatField.set(floatField)
 
     var booleanField: Boolean
         get() = _booleanField.get()
-        set(booleanField) = this._booleanField.set(booleanField)
+        set(booleanField) = _booleanField.set(booleanField)
 
     override fun onPreSave(eventArguments: OnPreSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation

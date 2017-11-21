@@ -34,6 +34,7 @@ object JdsSchema {
         val collection = LinkedHashMap<String, String>()
         fields.sortedBy { it.name }.forEach { field ->
             when (field.type) {
+                JdsFieldType.BLOB,
                 JdsFieldType.ENTITY_COLLECTION,
                 JdsFieldType.FLOAT_COLLECTION,
                 JdsFieldType.INT_COLLECTION,
