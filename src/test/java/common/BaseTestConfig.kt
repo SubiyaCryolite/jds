@@ -181,20 +181,6 @@ abstract class BaseTestConfig {
             return _objectMapper;
         }
 
-    @Throws(Exception::class)
-    open fun saveAndLoad() {
-        save()
-        load()
-    }
-
-    @Throws(Exception::class)
-    open fun save() {
-    }
-
-    @Throws(Exception::class)
-    open fun load() {
-    }
-
     private fun initialiseJdsClasses() {
         jdsDb.map(EntityA::class.java)
         jdsDb.map(EntityB::class.java)

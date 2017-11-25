@@ -826,7 +826,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
-                    println("Updating record [$record]. LocalTime fieldEntity [$innerRecord of $innerRecordSize]\n")
+                    println("Updating record [$record]. LocalTime fieldEntity [$innerRecord of $innerRecordSize]")
                 if (!jdsDb.isLoggingEdits) continue
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)

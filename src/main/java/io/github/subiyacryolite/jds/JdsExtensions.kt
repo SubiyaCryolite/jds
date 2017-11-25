@@ -20,30 +20,22 @@ object JdsExtensions {
     /**
      * @return
      */
-    fun ZonedDateTime.toZonedDateTimeSqlFormat(): String {
-        return this.format(tSqlDateTimeFormat)
-    }
+    fun ZonedDateTime.toZonedDateTimeSqlFormat(): String = this.format(tSqlDateTimeFormat)
 
     /**
      * @return
      */
-    fun String.toZonedDateTime(): ZonedDateTime {
-        return ZonedDateTime.parse(this, tSqlDateTimeFormat)
-    }
+    fun String.toZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(this, tSqlDateTimeFormat)
 
     /**
      * @return
      */
-    fun LocalTime.localTimeFormat(): String {
-        return this.format(localTimeFormat)
-    }
+    fun LocalTime.localTimeFormat(): String = this.format(localTimeFormat)
 
     /**
      * @return
      */
-    fun String.toLocalTimeSqlFormat(): LocalTime {
-        return LocalTime.parse(this, localTimeFormatReadOnly)
-    }
+    fun String.toLocalTimeSqlFormat(): LocalTime = LocalTime.parse(this, localTimeFormatReadOnly)
 
     /**
      * @param value
@@ -78,13 +70,11 @@ object JdsExtensions {
      * @param jdsDb
      * @return
      */
-    fun ResultSet.getZonedDateTime(column: String, jdsDb: JdsDb): Any {
-        return when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> this.getString(column)
-            JdsImplementation.POSTGRES -> this.getObject(column)
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE -> this.getTimestamp(column)
-            else -> this.getLong(column)
-        }
+    fun ResultSet.getZonedDateTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
+        JdsImplementation.TSQL -> this.getString(column)
+        JdsImplementation.POSTGRES -> this.getObject(column, java.time.OffsetDateTime::class.java)
+        JdsImplementation.MYSQL, JdsImplementation.ORACLE -> this.getTimestamp(column)
+        else -> this.getLong(column)
     }
 
     /**
@@ -117,12 +107,10 @@ object JdsExtensions {
      * @param column
      * @param jdsDb
      */
-    fun ResultSet.getTime(column: String, jdsDb: JdsDb): Any {
-        return when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.getString(column)
-            JdsImplementation.POSTGRES -> this.getObject(column)
-            else -> this.getLong(column)
-        }
+    fun ResultSet.getLocalTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
+        JdsImplementation.TSQL, JdsImplementation.MYSQL -> this.getString(column)
+        JdsImplementation.POSTGRES -> this.getObject(column, LocalTime::class.java)
+        else -> this.getLong(column)
     }
 
     /**

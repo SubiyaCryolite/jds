@@ -13,7 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.JdsExtensions.getTime
+import io.github.subiyacryolite.jds.JdsExtensions.getLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.getZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
@@ -524,7 +524,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         preparedStatement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val uuid = resultSet.getString("Uuid")
-                val value = resultSet.getTime("Value", jdsDb)
+                val value = resultSet.getLocalTime("Value", jdsDb)
                 val fieldId = resultSet.getLong("FieldId")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.TIME, fieldId, value) }
             }

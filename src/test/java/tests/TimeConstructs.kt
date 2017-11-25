@@ -9,18 +9,23 @@ import java.util.*
 
 class TimeConstructs : BaseTestConfig() {
     @Throws(Exception::class)
-    override fun save() {
+    private fun save() {
         val timeConstruct = timeConstruct;
         JdsSave(jdsDb, Arrays.asList(timeConstruct)).call()
         println("saved entityVersions [$timeConstruct]")
     }
 
     @Throws(Exception::class)
-    override fun load() {
+    private fun load() {
         val list = JdsLoad(jdsDb, TimeConstruct::class.java, "timeConstruct").call() //load all entityVersions of type AddressBook with Entity Guids in range
         println("loaded entityVersions [$list]")
     }
 
+    @Throws(Exception::class)
+    private fun saveAndLoad() {
+        save()
+        load()
+    }
 
     @Test
     @Throws(Exception::class)

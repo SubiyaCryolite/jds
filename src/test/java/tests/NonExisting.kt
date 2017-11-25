@@ -4,20 +4,17 @@ import common.BaseTestConfig
 import entities.Example
 import io.github.subiyacryolite.jds.JdsLoad
 import org.junit.jupiter.api.Test
-import java.util.concurrent.FutureTask
+import java.util.concurrent.Executors
 
 class NonExisting : BaseTestConfig() {
 
     @Throws(Exception::class)
     fun loadNonExisting() {
-        val loadNonExistingCallable = JdsLoad(jdsDb, Example::class.java, "DOES_NOT_EXIST")
-        val loadNonExistingTask = FutureTask(loadNonExistingCallable)
-
-        Thread(loadNonExistingTask).start()
-        while (!loadNonExistingTask.isDone)
-            println("Loading...")
-        val loadNonExistingResult = loadNonExistingTask.get()
-        println(loadNonExistingResult)
+        val load = JdsLoad(jdsDb, Example::class.java, "DOES_NOT_EXIST")
+        val process = Executors.newSingleThreadExecutor().submit(load)
+        while (!process.isDone)
+            Thread.sleep(16)
+        println(process.get())
     }
 
     @Test

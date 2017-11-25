@@ -463,6 +463,7 @@ class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(): Connection {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
+        val properties = Properties()
         properties.put("user", "USER_NAME")
         properties.put("password", "PASSWORD")
         return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", properties)
@@ -489,6 +490,7 @@ class JdsDbOracleImplementation : JdsDbOracle() {
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(): Connection {
         Class.forName("oracle.jdbc.driver.OracleDriver")
+        val properties = Properties()
         properties.put("user", "USER_NAME")
         properties.put("password", "PASSWORD")
         return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", properties)
@@ -643,20 +645,20 @@ fun load() {
     val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
 
     val executorService = Executors.newFixedThreadPool(3)
-    val loadingAllInstances = executorService.submit(loadAllInstances)
-    val loadingSpecificInstance = executorService.submit(loadSpecificInstance)
-    val loadingSortedInstances = executorService.submit(loadSortedInstances)
+    val loadAllInstances = executorService.submit(loadAllInstances)
+    val loadSpecificInstance = executorService.submit(loadSpecificInstance)
+    val loadSortedInstances = executorService.submit(loadSortedInstances)
 
-    while (!loadingAllInstances.isDone)
+    while (!loadAllInstances.isDone)
         Thread.sleep(16)
-    while (!loadingSpecificInstance.isDone)
+    while (!loadSpecificInstance.isDone)
         Thread.sleep(16)
-    while (!loadingSortedInstances.isDone)
+    while (!loadSortedInstances.isDone)
         Thread.sleep(16)
 
-    val allInstances = loadingAllInstances.get()
-    val specificInstance = loadingSpecificInstance.get()
-    val sortedInstances = loadingSortedInstances.get()
+    val allInstances = loadAllInstances.get()
+    val specificInstance = loadSpecificInstance.get()
+    val sortedInstances = loadSortedInstances.get()
 
     println(allInstances)
     println(specificInstance)

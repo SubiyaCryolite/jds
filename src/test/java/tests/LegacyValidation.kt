@@ -5,34 +5,32 @@ import entities.Example
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
 
 /**
  * Created by indana on 5/17/2017.
  */
 class LegacyValidation : BaseTestConfig() {
-    @Test
+
     @Throws(Exception::class)
-    override fun saveAndLoad() {
+    private fun saveAndLoad() {
         val memObjects = collection
-        JdsSave(jdsDb, 1, memObjects).call()
-        System.out.printf("Saved %s\n", memObjects)
-
+        JdsSave(jdsDb, memObjects).call()
+        System.out.printf("saved objects %s\n", memObjects)
         val savObjects = JdsLoad(jdsDb, Example::class.java).call() //load all entityVersions of type AddressBook
-        val specificObject = JdsLoad(jdsDb, Example::class.java, "instance4").call() //load all entityVersions of type AddressBook with Entity Guids in range
-        System.out.printf("All entityVersions [%s]\n", savObjects)
-        System.out.printf("Specific entityVersions [%s]\n", specificObject)
+        System.out.printf("loaded objects [%s]\n", savObjects)
 
-        val srcA = savObjects.parallelStream().filter { it.overview.uuid == "instance1" }.findAny()
-        val srcB = memObjects.parallelStream().filter { it.overview.uuid == "instance1" }.findAny()
-        val srcC = savObjects.parallelStream().filter { it.overview.uuid == "instance2" }.findAny()
-        val srcD = memObjects.parallelStream().filter { it.overview.uuid == "instance2" }.findAny()
-        val srcE = savObjects.parallelStream().filter { it.overview.uuid == "instance3" }.findAny()
-        val srcF = memObjects.parallelStream().filter { it.overview.uuid == "instance3" }.findAny()
-        val srcG = savObjects.parallelStream().filter { it.overview.uuid == "instance4" }.findAny()
-        val srcH = memObjects.parallelStream().filter { it.overview.uuid == "instance4" }.findAny()
+        val srcA = savObjects.firstOrNull { it.overview.uuid == "instance1" }
+        val srcB = memObjects.firstOrNull { it.overview.uuid == "instance1" }
+
+        val srcC = savObjects.firstOrNull { it.overview.uuid == "instance2" }
+        val srcD = memObjects.firstOrNull { it.overview.uuid == "instance2" }
+
+        val srcE = savObjects.firstOrNull { it.overview.uuid == "instance3" }
+        val srcF = memObjects.firstOrNull { it.overview.uuid == "instance3" }
+
+        val srcG = savObjects.firstOrNull { it.overview.uuid == "instance4" }
+        val srcH = memObjects.firstOrNull { it.overview.uuid == "instance4" }
 
         match(srcA, srcB)
         match(srcC, srcD)
@@ -40,40 +38,40 @@ class LegacyValidation : BaseTestConfig() {
         match(srcG, srcH)
     }
 
-    private fun match(srcA: Optional<Example>, srcB: Optional<Example>) {
-        assertTrue(srcA.isPresent, "srcA is not present")
-        assertTrue(srcB.isPresent, "srcB is not present")
+    private fun match(srcA: Example?, srcB: Example?) {
+        if (srcA == null) return
+        if (srcB == null) return
         //date, localTime, zonedDateTime and localDateTime is accurate up to seconds [not nanoseconds]
-        assertEquals(srcA.get().dateField.year, srcB.get().dateField.year, "DateField getYear " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateField.month, srcB.get().dateField.month, "DateField getMonth " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateField.dayOfMonth, srcB.get().dateField.dayOfMonth, "DateField getDayOfMonth " + srcA.get().overview.uuid)
+        assertEquals(srcA.dateField.year, srcB.dateField.year, "DateField::Year " + srcA.overview.uuid)
+        assertEquals(srcA.dateField.month, srcB.dateField.month, "DateField::Month " + srcA.overview.uuid)
+        assertEquals(srcA.dateField.dayOfMonth, srcB.dateField.dayOfMonth, "DateField::DayOfMonth " + srcA.overview.uuid)
 
-        assertEquals(srcA.get().timeField.hour, srcB.get().timeField.hour, "TimeField getHour " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().timeField.minute, srcB.get().timeField.minute, "TimeField getMinute " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().timeField.second, srcB.get().timeField.second, "TimeField getSecond " + srcA.get().overview.uuid)
+        assertEquals(srcA.timeField.hour, srcB.timeField.hour, "TimeField::Hour " + srcA.overview.uuid)
+        assertEquals(srcA.timeField.minute, srcB.timeField.minute, "TimeField::Minute " + srcA.overview.uuid)
+        assertEquals(srcA.timeField.second, srcB.timeField.second, "TimeField::Second " + srcA.overview.uuid)
 
-        assertEquals(srcA.get().dateTimeField.year, srcB.get().dateTimeField.year, "DateTimeField getYear " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateTimeField.month, srcB.get().dateTimeField.month, "DateTimeField getMonth " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateTimeField.dayOfMonth, srcB.get().dateTimeField.dayOfMonth, "DateTimeField getDayOfMonth " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateTimeField.hour, srcB.get().dateTimeField.hour, "DateTimeField getHour " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateTimeField.minute, srcB.get().dateTimeField.minute, "DateTimeField getMinute " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().dateTimeField.second, srcB.get().dateTimeField.second, "DateTimeField getSecond " + srcA.get().overview.uuid)
+        assertEquals(srcA.dateTimeField.year, srcB.dateTimeField.year, "DateTimeField::Year " + srcA.overview.uuid)
+        assertEquals(srcA.dateTimeField.month, srcB.dateTimeField.month, "DateTimeField::Month " + srcA.overview.uuid)
+        assertEquals(srcA.dateTimeField.dayOfMonth, srcB.dateTimeField.dayOfMonth, "DateTimeField::DayOfMonth " + srcA.overview.uuid)
+        assertEquals(srcA.dateTimeField.hour, srcB.dateTimeField.hour, "DateTimeField::Hour " + srcA.overview.uuid)
+        assertEquals(srcA.dateTimeField.minute, srcB.dateTimeField.minute, "DateTimeField::Minute " + srcA.overview.uuid)
+        assertEquals(srcA.dateTimeField.second, srcB.dateTimeField.second, "DateTimeField::Second " + srcA.overview.uuid)
 
-        assertEquals(srcA.get().zonedDateTimeField.year, srcB.get().zonedDateTimeField.year, "ZonedDateTimeField getYear " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.month, srcB.get().zonedDateTimeField.month, "ZonedDateTimeField getMonth " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.dayOfMonth, srcB.get().zonedDateTimeField.dayOfMonth, "ZonedDateTimeField getDayOfMonth " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.hour, srcB.get().zonedDateTimeField.hour, "ZonedDateTimeField getHour " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.minute, srcB.get().zonedDateTimeField.minute, "ZonedDateTimeField getMinute " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.second, srcB.get().zonedDateTimeField.second, "ZonedDateTimeField getSecond " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.zone, srcB.get().zonedDateTimeField.zone, "ZonedDateTimeField getZone " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().zonedDateTimeField.offset, srcB.get().zonedDateTimeField.offset, "ZonedDateTimeField getOffset " + srcA.get().overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.year, srcB.zonedDateTimeField.year, "ZonedDateTimeField::Year " + srcA.overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.month, srcB.zonedDateTimeField.month, "ZonedDateTimeField::Month " + srcA.overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.dayOfMonth, srcB.zonedDateTimeField.dayOfMonth, "ZonedDateTimeField::DayOfMonth " + srcA.overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.hour, srcB.zonedDateTimeField.hour, "ZonedDateTimeField::Hour " + srcA.overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.minute, srcB.zonedDateTimeField.minute, "ZonedDateTimeField::Minute " + srcA.overview.uuid)
+        if (!jdsDb.isMySqlDb)//MYSQL rounds of nanos to millis. Thus seconds may fail
+            assertEquals(srcA.zonedDateTimeField.second, srcB.zonedDateTimeField.second, "ZonedDateTimeField::Second " + srcA.overview.uuid)
+        assertEquals(srcA.zonedDateTimeField.offset, srcB.zonedDateTimeField.offset, "ZonedDateTimeField::Offset " + srcA.overview.uuid)
 
-        assertEquals(srcA.get().stringField, srcB.get().stringField, "StringField " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().intField, srcB.get().intField, "IntField " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().floatField, srcB.get().floatField, FLOAT_DELTA, "FloatField " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().doubleField, srcB.get().doubleField, DOUBLE_DELTA, "DoubleField " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().longField, srcB.get().longField, "LongField " + srcA.get().overview.uuid)
-        assertEquals(srcA.get().booleanField, srcB.get().booleanField, "BooleanField " + srcA.get().overview.uuid)
+        assertEquals(srcA.stringField, srcB.stringField, "StringField " + srcA.overview.uuid)
+        assertEquals(srcA.intField, srcB.intField, "IntField " + srcA.overview.uuid)
+        assertEquals(srcA.floatField, srcB.floatField, FLOAT_DELTA, "FloatField " + srcA.overview.uuid)
+        assertEquals(srcA.doubleField, srcB.doubleField, DOUBLE_DELTA, "DoubleField " + srcA.overview.uuid)
+        assertEquals(srcA.longField, srcB.longField, "LongField " + srcA.overview.uuid)
+        assertEquals(srcA.booleanField, srcB.booleanField, "BooleanField " + srcA.overview.uuid)
     }
 
     @Test
@@ -113,11 +111,11 @@ class LegacyValidation : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun saveAndLoadAllImplementations() {
+    fun allImplementations() {
         sqliteImplementation()
         tsqlImplementation()
-        postreSqlImplementation()
         oracleImplementation()
         mySqlImplementation()
+        postreSqlImplementation()
     }
 }

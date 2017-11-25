@@ -10,24 +10,28 @@ import java.util.*
 /**
  * Created by ifunga on 18/02/2017.
  */
-class LagacyLoadAndSave : BaseTestConfig() {
+class LegacyLoadAndSave : BaseTestConfig() {
 
-    @Test
     @Throws(Exception::class)
-    override fun save() {
+    private fun save() {
         val addressBook = addressBook
         JdsSave(jdsDb, 1, addressBook).call()
         System.out.printf("Saved %s\n", addressBook)
     }
 
-    @Test
     @Throws(Exception::class)
-    override fun load() {
+    private fun load() {
         val comparator = Comparator.comparing<Address, String> { entry -> entry.provinceOrState }
         val allAddressBooks = JdsLoad(jdsDb, Address::class.java, comparator).call() //load all entityVersions of type AddressBook
         val specificAddressBook = JdsLoad(jdsDb, Address::class.java, comparator, "primaryAddress").call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
         System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
+    }
+
+    @Throws(Exception::class)
+    private fun saveAndLoad() {
+        save()
+        load()
     }
 
     @Test

@@ -14,19 +14,25 @@ import org.junit.jupiter.api.Test
 class Ihneritance : BaseTestConfig() {
 
     @Throws(Exception::class)
-    override fun save() {
+    private fun save() {
         val save = JdsSave(jdsDb, inheritanceCollection)
         save.call()
     }
 
     @Throws(Exception::class)
-    override fun load() {
+    private fun load() {
         val entityAs = JdsLoad(jdsDb, EntityA::class.java)
         val entityBs = JdsLoad(jdsDb, EntityB::class.java)
         val entityCs = JdsLoad(jdsDb, EntityC::class.java)
         System.out.printf("All A s [%s]\n", entityAs.call())
         System.out.printf("All B s [%s]\n", entityBs.call())
         System.out.printf("All C s [%s]\n", entityCs.call())
+    }
+
+    @Throws(Exception::class)
+    private fun saveAndLoad() {
+        save()
+        load()
     }
 
     @Test

@@ -9,15 +9,13 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
 
-
 /**
  * Created by ifunga on 12/04/2017.
  */
 class LoadAndSaveTests : BaseTestConfig() {
 
-    @Test
     @Throws(Exception::class)
-    override fun save() {
+    private fun save() {
         val save = JdsSave(jdsDb, collection)
         val process = Executors.newSingleThreadExecutor().submit(save)
         while (!process.isDone)
@@ -25,9 +23,8 @@ class LoadAndSaveTests : BaseTestConfig() {
         System.out.printf("Saved? %s\n", process.get())
     }
 
-    @Test
     @Throws(ExecutionException::class, InterruptedException::class)
-    override fun load() {
+    private fun load() {
         val loadAllInstances = JdsLoad(jdsDb, Example::class.java)
         val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, "instance3")
         val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
@@ -55,13 +52,18 @@ class LoadAndSaveTests : BaseTestConfig() {
         println("DONE")
     }
 
+    @Throws(ExecutionException::class, InterruptedException::class)
+    private fun saveAndLoad() {
+        save()
+        load()
+    }
+
     @Test
     @Throws(Exception::class)
     fun sqlLiteImplementation() {
         initialiseSqlLiteBackend()
         saveAndLoad()
     }
-
 
     @Test
     @Throws(Exception::class)

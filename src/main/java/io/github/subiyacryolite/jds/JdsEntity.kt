@@ -596,121 +596,107 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(serializeEnumCollections(enumCollectionProperties))
     }
 
-    private fun serializeEnums(input: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>): Map<JdsFieldEnum<*>, Enum<*>> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeEnums(input: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>): Map<JdsFieldEnum<*>, Enum<*>> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
-    private fun serializeBlobs(input: Map<Long, BlobProperty>): Map<Long, BlobProperty> {
-        return input.entries.associateBy({ it.key }, { it.value })
-    }
+    private fun serializeBlobs(input: Map<Long, BlobProperty>): Map<Long, BlobProperty> =
+            input.entries.associateBy({ it.key }, { it.value })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeIntegers(input: Map<Long, ListProperty<Int>>): Map<Long, List<Int>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeIntegers(input: Map<Long, ListProperty<Int>>): Map<Long, List<Int>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeLongs(input: Map<Long, ListProperty<Long>>): Map<Long, List<Long>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeLongs(input: Map<Long, ListProperty<Long>>): Map<Long, List<Long>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeDoubles(input: Map<Long, ListProperty<Double>>): Map<Long, List<Double>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeDoubles(input: Map<Long, ListProperty<Double>>): Map<Long, List<Double>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeFloats(input: Map<Long, ListProperty<Float>>): Map<Long, List<Float>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeFloats(input: Map<Long, ListProperty<Float>>): Map<Long, List<Float>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeDateTimes(input: Map<Long, ListProperty<LocalDateTime>>): Map<Long, List<LocalDateTime>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeDateTimes(input: Map<Long, ListProperty<LocalDateTime>>): Map<Long, List<LocalDateTime>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeStrings(input: Map<Long, ListProperty<String>>): Map<Long, List<String>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeStrings(input: Map<Long, ListProperty<String>>): Map<Long, List<String>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeObjects(input: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> {
-        return input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
-    }
+    private fun serializeObjects(input: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeObject(input: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>): Map<JdsFieldEntity<*>, JdsEntity> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeObject(input: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>): Map<JdsFieldEntity<*>, JdsEntity> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeFloat(input: Map<Long, FloatProperty>): Map<Long, Float> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeFloat(input: Map<Long, FloatProperty>): Map<Long, Float> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeDouble(input: Map<Long, DoubleProperty>): Map<Long, Double> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeDouble(input: Map<Long, DoubleProperty>): Map<Long, Double> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeBoolean(input: Map<Long, BooleanProperty>): Map<Long, Boolean> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeBoolean(input: Map<Long, BooleanProperty>): Map<Long, Boolean> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
@@ -726,27 +712,24 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeInteger(input: Map<Long, IntegerProperty>): Map<Long, Int> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeInteger(input: Map<Long, IntegerProperty>): Map<Long, Int> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeTemporal(input: Map<Long, ObjectProperty<out Temporal>>): Map<Long, Temporal> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializeTemporal(input: Map<Long, ObjectProperty<out Temporal>>): Map<Long, Temporal> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializableString(input: Map<Long, StringProperty>): Map<Long, String> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
+    private fun serializableString(input: Map<Long, StringProperty>): Map<Long, String> =
+            input.entries.associateBy({ it.key }, { it.value.get() })
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
@@ -789,91 +772,91 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     private fun putDurations(destination: HashMap<Long, ObjectProperty<Duration>>, source: Map<Long, Duration>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putPeriods(destination: HashMap<Long, ObjectProperty<Period>>, source: Map<Long, Period>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putYearMonths(destination: HashMap<Long, ObjectProperty<Temporal>>, source: Map<Long, Temporal>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putMonthDays(destination: HashMap<Long, ObjectProperty<MonthDay>>, source: Map<Long, MonthDay>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putEnums(destination: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>, source: Map<JdsFieldEnum<*>, List<Enum<*>>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putEnum(destination: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>, source: Map<JdsFieldEnum<*>, Enum<*>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putObjects(destination: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putStrings(destination: Map<Long, ListProperty<String>>, source: Map<Long, List<String>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putDateTimes(destination: Map<Long, ListProperty<LocalDateTime>>, source: Map<Long, List<LocalDateTime>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putFloats(destination: Map<Long, ListProperty<Float>>, source: Map<Long, List<Float>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putDoubles(destination: Map<Long, ListProperty<Double>>, source: Map<Long, List<Double>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putLongs(destination: Map<Long, ListProperty<Long>>, source: Map<Long, List<Long>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putIntegers(destination: Map<Long, ListProperty<Int>>, source: Map<Long, List<Int>>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.addAll(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
     private fun putInteger(destination: Map<Long, IntegerProperty>, source: Map<Long, Int>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putBlobs(destination: Map<Long, BlobProperty>, source: Map<Long, BlobProperty>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value.get()!!) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value.get()!!) }
     }
 
     private fun putLong(destination: Map<Long, LongProperty>, source: Map<Long, Long>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putBoolean(destination: Map<Long, BooleanProperty>, source: Map<Long, Boolean>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putDouble(destination: Map<Long, DoubleProperty>, source: Map<Long, Double>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putObject(destination: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, JdsEntity>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putFloat(destination: Map<Long, FloatProperty>, source: Map<Long, Float>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putTemporal(destination: Map<Long, ObjectProperty<Temporal>>, source: Map<Long, Temporal>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     private fun putString(destination: Map<Long, StringProperty>, source: Map<Long, String>) {
-        source.entries.stream().filter { entry -> destination.containsKey(entry.key) }.forEachOrdered { entry -> destination[entry.key]?.set(entry.value) }
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
     /**
@@ -1015,11 +998,11 @@ abstract class JdsEntity : IJdsEntity {
                 is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
                 is Timestamp -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault()))
                 is String -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
-                is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.toZonedDateTime())
+                is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.atZoneSameInstant(ZoneId.systemDefault()))
             }
             JdsFieldType.DATE -> localDateProperties[fieldId]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
             JdsFieldType.TIME -> when (value) {
-                is Long -> localTimeProperties[fieldId]?.set(LocalTime.ofNanoOfDay(value))
+                is Long -> localTimeProperties[fieldId]?.set(LocalTime.MIN.plusNanos(value))
                 is LocalTime -> localTimeProperties[fieldId]?.set(value)
                 is String -> localTimeProperties[fieldId]?.set(value.toLocalTimeSqlFormat())
             }
@@ -1047,56 +1030,52 @@ abstract class JdsEntity : IJdsEntity {
      * @param innerObjects
      * @param uuids
      */
-    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
-        try {
-            val entityClass = jdsDb.classes[entityId]!!
-            objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
-                val entity = entityClass.newInstance()
-                entity.overview.uuid = uuid
-                uuids.add(uuid)
-                it.value.get().add(entity)
-                innerObjects.add(entity)
-            }
-            objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
-                val jdsEntity = entityClass.newInstance()
-                jdsEntity.overview.uuid = uuid
-                uuids.add(uuid)
-                it.value.set(jdsEntity)
-                innerObjects.add(jdsEntity)
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) = try {
+        val entityClass = jdsDb.classes[entityId]!!
+        objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+            val entity = entityClass.newInstance()
+            entity.overview.uuid = uuid
+            uuids.add(uuid)
+            it.value.get().add(entity)
+            innerObjects.add(entity)
         }
+        objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+            val jdsEntity = entityClass.newInstance()
+            jdsEntity.overview.uuid = uuid
+            uuids.add(uuid)
+            it.value.set(jdsEntity)
+            innerObjects.add(jdsEntity)
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
+
 
     /**
      * Binds all the fieldIds attached to an entity, updates the fieldIds dictionary
      * @param connection the SQL connection to use for DB operations
      * @param entityId   the value representing the entity
-     * @param fields     the values representing the entity's fieldIds
      */
-    internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) {
-        try {
-            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
-                (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
-                    fields.forEach {
-                        //1. map this fieldEntity ID to the entity type
-                        mapClassFields.setLong("entityId", entityId)
-                        mapClassFields.setLong("fieldId", it.id)
-                        mapClassFields.addBatch()
-                        //2. map this fieldEntity to the fieldEntity dictionary
-                        mapFieldNames.setLong("fieldId", it.id)
-                        mapFieldNames.setString("fieldName", it.name)
-                        mapFieldNames.setString("fieldDescription", it.description)
-                        mapFieldNames.addBatch()
-                    }
-                    mapClassFields.executeBatch()
-                    mapFieldNames.executeBatch()
+    internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
+        (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
+            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
+                fields.forEach {
+                    //1. map this fieldEntity ID to the entity type
+                    mapClassFields.setLong("entityId", entityId)
+                    mapClassFields.setLong("fieldId", it.id)
+                    mapClassFields.addBatch()
+                    //2. map this fieldEntity to the fieldEntity dictionary
+                    mapFieldNames.setLong("fieldId", it.id)
+                    mapFieldNames.setString("fieldName", it.name)
+                    mapFieldNames.setString("fieldDescription", it.description)
+                    mapFieldNames.addBatch()
                 }
+                mapClassFields.executeBatch()
+                mapFieldNames.executeBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
@@ -1118,19 +1097,17 @@ abstract class JdsEntity : IJdsEntity {
      * @param jdsDb the current database implementation
      * @param connection the SQL connection to use for DB operations
      */
-    internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection) {
-        try {
-            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
-                fields.forEach {
-                    mapFieldTypes.setLong("typeId", it.id)
-                    mapFieldTypes.setString("typeName", it.type.toString())
-                    mapFieldTypes.addBatch()
-                }
-                mapFieldTypes.executeBatch()
+    internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection) = try {
+        (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
+            fields.forEach {
+                mapFieldTypes.setLong("typeId", it.id)
+                mapFieldTypes.setString("typeName", it.type.toString())
+                mapFieldTypes.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+            mapFieldTypes.executeBatch()
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
@@ -1141,21 +1118,19 @@ abstract class JdsEntity : IJdsEntity {
      * @param fields     the entity's enumProperties
      */
     @Synchronized
-    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) {
-        try {
-            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use {
-                for (field in fields) {
-                    for (index in 0 until field.values.size) {
-                        it.setLong(1, entityId)
-                        it.setLong(2, field.field.id)
-                        it.addBatch()
-                    }
+    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) = try {
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use {
+            for (field in fields) {
+                for (index in 0 until field.values.size) {
+                    it.setLong(1, entityId)
+                    it.setLong(2, field.field.id)
+                    it.addBatch()
                 }
-                it.executeBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+            it.executeBatch()
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
@@ -1165,21 +1140,19 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEnums the fieldEntity enum
      */
     @Synchronized
-    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) {
-        try {
-            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use {
-                for (field in fieldEnums)
-                    for (index in 0 until field.values.size) {
-                        it.setLong(1, field.field.id)
-                        it.setInt(2, index)
-                        it.setString(3, field.values[index].toString())
-                        it.addBatch()
-                    }
-                it.executeBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) = try {
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use {
+            for (field in fieldEnums)
+                for (index in 0 until field.values.size) {
+                    it.setLong(1, field.field.id)
+                    it.setInt(2, index)
+                    it.setString(3, field.values[index].toString())
+                    it.addBatch()
+                }
+            it.executeBatch()
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**

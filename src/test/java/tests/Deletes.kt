@@ -57,7 +57,7 @@ class Deletes : BaseTestConfig() {
         mysqlImplementation()
         oracleImplementation()
         postgreSqlImplementation()
-        sqLiteImplementation()
         tSqlImplementation()
+        sqLiteImplementation()
     }
 }
