@@ -40,12 +40,12 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>4.0.4</version>
+    <version>4.0.5</version>
 </dependency>
 ```
 Gradle
 ```groovy
-compile 'io.github.subiyacryolite:jds:4.0.4'
+compile 'io.github.subiyacryolite:jds:4.0.5'
 ```
 
 # Dependencies
