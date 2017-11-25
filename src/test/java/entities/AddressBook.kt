@@ -17,7 +17,5 @@ class AddressBook : JdsEntity() {
     val addresses: MutableList<Address>
         get() = _addresses.get()
 
-    override fun toString(): String {
-        return "{ addresses = $addresses }"
-    }
+    override fun toString(): String = "{ addresses = $addresses }"
 }

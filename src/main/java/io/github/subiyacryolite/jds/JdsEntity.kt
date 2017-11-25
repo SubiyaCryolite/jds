@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
- * [JdsEntityBase] to store overview data
+ * [IJdsOverview] to store overview data
  */
 abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
@@ -90,7 +90,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, integerProperty: BlobProperty) {
         if (field.type != JdsFieldType.BLOB)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         blobProperties.put(field.id, integerProperty)
     }
@@ -101,28 +101,28 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, integerProperty: IntegerProperty) {
         if (field.type != JdsFieldType.INT)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         integerProperties.put(field.id, integerProperty)
     }
 
     protected fun mapMonthDay(field: JdsField, property: ObjectProperty<MonthDay>) {
         if (field.type != JdsFieldType.MONTH_DAY)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         monthDayProperties.put(field.id, property)
     }
 
     protected fun mapPeriod(field: JdsField, property: ObjectProperty<Period>) {
         if (field.type != JdsFieldType.PERIOD)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         periodProperties.put(field.id, property)
     }
 
     protected fun mapDuration(field: JdsField, property: ObjectProperty<Duration>) {
         if (field.type != JdsFieldType.DURATION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         durationProperties.put(field.id, property)
     }
@@ -136,31 +136,31 @@ abstract class JdsEntity : IJdsEntity {
         when (temporal) {
             is LocalDateTime -> {
                 if (field.type != JdsFieldType.DATE_TIME)
-                    throw RuntimeException("Please set field [$field] to the correct type")
+                    throw RuntimeException("Please assign the correct type to field [$field]")
                 fields.add(field)
                 localDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is ZonedDateTime -> {
                 if (field.type != JdsFieldType.ZONED_DATE_TIME)
-                    throw RuntimeException("Please set field [$field] to the correct type")
+                    throw RuntimeException("Please assign the correct type to field [$field]")
                 fields.add(field)
                 zonedDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is LocalDate -> {
                 if (field.type != JdsFieldType.DATE)
-                    throw RuntimeException("Please set field [$field] to the correct type")
+                    throw RuntimeException("Please assign the correct type to field [$field]")
                 fields.add(field)
                 localDateProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is LocalTime -> {
                 if (field.type != JdsFieldType.TIME)
-                    throw RuntimeException("Please set field [$field] to the correct type")
+                    throw RuntimeException("Please assign the correct type to field [$field]")
                 fields.add(field)
                 localTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is YearMonth -> {
                 if (field.type != JdsFieldType.YEAR_MONTH)
-                    throw RuntimeException("Please set field [$field] to the correct type")
+                    throw RuntimeException("Please assign the correct type to field [$field]")
                 fields.add(field)
                 yearMonthProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
 
@@ -174,7 +174,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, property: StringProperty) {
         if (field.type != JdsFieldType.STRING)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         stringProperties.put(field.id, property)
 
@@ -186,7 +186,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, property: FloatProperty) {
         if (field.type != JdsFieldType.FLOAT)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         floatProperties.put(field.id, property)
     }
@@ -197,7 +197,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, property: LongProperty) {
         if (field.type != JdsFieldType.LONG)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         longProperties.put(field.id, property)
     }
@@ -208,7 +208,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, property: DoubleProperty) {
         if (field.type != JdsFieldType.DOUBLE)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         doubleProperties.put(field.id, property)
 
@@ -220,7 +220,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(field: JdsField, property: BooleanProperty) {
         if (field.type != JdsFieldType.BOOLEAN)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         booleanProperties.put(field.id, property)
     }
@@ -231,7 +231,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapStrings(field: JdsField, properties: ListProperty<String>) {
         if (field.type != JdsFieldType.STRING_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         stringArrayProperties.put(field.id, properties)
     }
@@ -242,7 +242,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapDateTimes(field: JdsField, properties: ListProperty<LocalDateTime>) {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         dateTimeArrayProperties.put(field.id, properties)
     }
@@ -253,7 +253,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapFloats(field: JdsField, properties: ListProperty<Float>) {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         floatArrayProperties.put(field.id, properties)
     }
@@ -264,7 +264,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapIntegers(field: JdsField, properties: ListProperty<Int>) {
         if (field.type != JdsFieldType.INT_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         integerArrayProperties.put(field.id, properties)
     }
@@ -275,7 +275,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapDoubles(field: JdsField, properties: ListProperty<Double>) {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         doubleArrayProperties.put(field.id, properties)
     }
@@ -286,7 +286,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapLongs(field: JdsField, properties: ListProperty<Long>) {
         if (field.type != JdsFieldType.LONG_COLLECTION)
-            throw RuntimeException("Please set field [$field] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
         longArrayProperties.put(field.id, properties)
     }
@@ -297,7 +297,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun map(fieldEnum: JdsFieldEnum<*>, property: ObjectProperty<out Enum<*>>) {
         if (fieldEnum.field.type != JdsFieldType.ENUM)
-            throw RuntimeException("Please set fieldEntity [$fieldEnum] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
         enums.add(fieldEnum)
         fields.add(fieldEnum.field)
         enumProperties.put(fieldEnum, property as ObjectProperty<Enum<*>>)
@@ -309,7 +309,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun mapEnums(fieldEnum: JdsFieldEnum<*>, properties: ListProperty<out Enum<*>>) {
         if (fieldEnum.field.type != JdsFieldType.ENUM_COLLECTION)
-            throw RuntimeException("Please set fieldEntity [$fieldEnum] to the correct type")
+            throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
         enums.add(fieldEnum)
         fields.add(fieldEnum.field)
         enumCollectionProperties.put(fieldEnum, properties as ListProperty<Enum<*>>)
@@ -322,7 +322,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: ObjectProperty<T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY)
-            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
+            throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
             objectProperties.put(fieldEntity, property as ObjectProperty<JdsEntity>)
             fields.add(fieldEntity.fieldEntity)

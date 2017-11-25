@@ -69,7 +69,7 @@ Classes that use JDS need to extend JdsEntity.
 ```java
 import io.github.subiyacryolite.jds.JdsEntity;
 
-public class Customer extends JdsEntity
+public class Customer extends JdsEntity{}
 ```
 
 However, if you plan on using interfaces they must extend IJdsEntity. Concrete classes can then extend JdsEntity
@@ -78,8 +78,8 @@ However, if you plan on using interfaces they must extend IJdsEntity. Concrete c
 import io.github.subiyacryolite.jds.JdsEntity;
 import io.github.subiyacryolite.jds.IJdsEntity;
 
-public interface ICustomer extends IJdsEntity
-public class Customer extends JdsEntity implements ICustomer
+public interface ICustomer extends IJdsEntity{}
+public class Customer extends JdsEntity implements ICustomer{}
 ```
 
 Following that the following steps need to be taken.
@@ -88,7 +88,7 @@ Following that the following steps need to be taken.
 Every class that extends JdsEntity must have its own unique Entity Id as well as Entity Name. This is done by annotating the class in the following manner
 ```java
 @JdsEntityAnnotation(entityId = 5, entityName = "Customer")
-public class Customer extends JdsEntity
+public class Customer extends JdsEntity{}
 ```
 Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
 
@@ -141,7 +141,6 @@ public class Fields {
     public static final JdsField FLOAT_FIELD = new JdsField(1007, "float_field", JdsFieldType.FLOAT);
     public static final JdsField BOOLEAN_FIELD = new JdsField(1008, "boolean_field", JdsFieldType.BOOLEAN);
     public static final JdsField BLOB_FIELD = new JdsField(1010, "blob_field", JdsFieldType.BLOB);
-    //=============================================================================================
     public static final JdsField STREET_NAME = new JdsField(1, "street_name", JdsFieldType.STRING);
     public static final JdsField PLOT_NUMBER = new JdsField(2, "plot_number", JdsFieldType.INT);
     public static final JdsField AREA_NAME = new JdsField(3, "area_name", JdsFieldType.STRING);
@@ -162,7 +161,6 @@ First of all we'd have to define a standard fieldEntity of type ENUM.
 ```java
 public class Fields
 {
-    //---
     public static final JdsField SEX_ENUM = new JdsField(6, "sex_enum", JdsFieldType.ENUM);
 }
 ```
@@ -215,184 +213,10 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |YEAR_MONTH|[ObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map|
 |ZONED_DATE_TIME|[ObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map|
 
- After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
+After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
  
- The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
+The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
-
-```java
-import io.github.subiyacryolite.jds.JdsEntity;
-import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
-import io.github.subiyacryolite.jds.events.*;
-import javafx.beans.property.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-
-import static constants.Fields.*;
-
-@JdsEntityAnnotation(entityId = 3, entityName = "example")
-public class Example extends JdsEntity implements JdsLoadListener, JdsSaveListener {
-    private final SimpleStringProperty _stringField;
-    private final SimpleObjectProperty<LocalTime> _timeField;
-    private final SimpleObjectProperty<LocalDate> _dateField;
-    private final SimpleObjectProperty<LocalDateTime> _dateTimeField;
-    private final SimpleObjectProperty<ZonedDateTime> _zonedDateTimeField;
-    private final SimpleLongProperty _longField;
-    private final SimpleIntegerProperty _intField;
-    private final SimpleDoubleProperty _doubleField;
-    private final SimpleFloatProperty _floatField;
-    private final SimpleBooleanProperty _booleanField;
-    private final SimpleBlobProperty _blobField;
-
-    public Example() {
-        map(STRING_FIELD, _stringField = new SimpleStringProperty(""));
-        map(DATE_FIELD, _dateField = new SimpleObjectProperty<>(LocalDate.now()));
-        map(TIME_FIELD, _timeField = new SimpleObjectProperty<>(LocalTime.now()));
-        map(DATE_TIME_FIELD, _dateTimeField = new SimpleObjectProperty<>(LocalDateTime.now()));
-        map(ZONED_DATE_TIME_FIELD, _zonedDateTimeField = new SimpleObjectProperty<>(ZonedDateTime.now()));
-        map(LONG_FIELD, _longField = new SimpleLongProperty(0));
-        map(INT_FIELD, _intField = new SimpleIntegerProperty(0));
-        map(DOUBLE_FIELD, _doubleField = new SimpleDoubleProperty(0));
-        map(FLOAT_FIELD, _floatField = new SimpleFloatProperty(0));
-        map(BOOLEAN_FIELD, _booleanField = new SimpleBooleanProperty(false));
-        map(BLOB_FIELD, _blobField = new SimpleBlobProperty(new byte[0]));
-    }
-
-    public String getStringField() {
-        return _stringField.get();
-    }
-
-    public void setStringField(String stringField) {
-        _stringField.set(stringField);
-    }
-
-    public LocalTime getTimeField() {
-        return _timeField.get();
-    }
-
-    public void setTimeField(LocalTime dateField) {
-        _timeField.set(dateField);
-    }
-
-    public LocalDate getDateField() {
-        return _dateField.get();
-    }
-
-    public void setDateField(LocalDate dateField) {
-        _dateField.set(dateField);
-    }
-
-    public LocalDateTime getDateTimeField() {
-        return _dateTimeField.get();
-    }
-
-    public void setDateTimeField(LocalDateTime dateTimeField) {
-        _dateTimeField.set(dateTimeField);
-    }
-
-    public ZonedDateTime getZonedDateTimeField() {
-        return _zonedDateTimeField.get();
-    }
-
-    public void setZonedDateTimeField(ZonedDateTime zonedDateTimeField) {
-        _zonedDateTimeField.set(zonedDateTimeField);
-    }
-
-    public long getLongField() {
-        return _longField.get();
-    }
-
-    public void setLongField(long longField) {
-        _longField.set(longField);
-    }
-
-    public int getIntField() {
-        return _intField.get();
-    }
-
-    public void setIntField(int intField) {
-        _intField.set(intField);
-    }
-
-    public double getDoubleField() {
-        return _doubleField.get();
-    }
-
-    public void setDoubleField(double doubleField) {
-        _doubleField.set(doubleField);
-    }
-
-    public float getFloatField() {
-        return _floatField.get();
-    }
-
-    public void setFloatField(float floatField) {
-        _floatField.set(floatField);
-    }
-
-    public boolean getBooleanField() {
-        return _booleanField.get();
-    }
-
-    public void setBooleanField(boolean booleanField) {
-        _booleanField.set(booleanField);
-    }
-
-    public byte[] getBlobAsByteArray() {
-        return _blobField.get();
-    }
-
-    public InputStream getBlobAsInputStream() {
-        return _blobField.getResourceAsStream();
-    }
-
-    public void setBlob(byte[] blob) {
-        _blobField.set(blob);
-    }
-
-    public void setBlob(InputStream blob) throws IOException {
-        _blobField.set(blob);
-    }
-
-    @Override
-    public void onPreSave(OnPreSaveEventArguments eventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds 
-    }
-
-    @Override
-    public void onPostSave(OnPostSaveEventArguments eventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
-    }
-
-    @Override
-    public void onPreLoad(OnPreLoadEventArguments eventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
-    }
-
-    @Override
-    public void onPostLoad(OnPostLoadEventArguments eventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
-    }
-}
-```
-Or in Kotlin
 ```kotlin
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -543,40 +367,6 @@ public class Entities
 }
 ```
 
-```java
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import io.github.subiyacryolite.jds.JdsEntity;
-import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation;
-
-import java.util.List;
-
-@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook", version = 1)
-public class AddressBook extends JdsEntity {
-    private final SimpleListProperty<Address> addresses;
-
-    public AddressBook() {
-        map(Entities.ADDRESSES, addresses = new SimpleListProperty<>(FXCollections.observableArrayList()));
-    }
-
-    public List<Address> getAddresses() {
-        return this.addresses.get();
-    }
-
-    public void setAddresses(List<Address> value) {
-        this.addresses.set((ObservableList<Address>) value);
-    }
-
-    @Override
-    public String toString() {
-        return "AddressBook{" +
-                "addresses = " + getAddresses() +
-                '}';
-    }
-}
-```
-Or in Kotlin
 ```kotlin
 import constants.Entities
 import io.github.subiyacryolite.jds.JdsEntity
@@ -584,20 +374,18 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 
-@JdsEntityAnnotation(entityId = 2, entityName = "AddressBook", version = 1)
+@JdsEntityAnnotation(entityId = 2, entityName = "address_book")
 class AddressBook : JdsEntity() {
     private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
 
     init {
-        map(Entities.ADDRESSES, _addresses)
+        map(Entities.ADDRESS_FIELD, _addresses)
     }
 
     val addresses: MutableList<Address>
         get() = _addresses.get()
 
-    override fun toString(): String {
-        return "AddressBook{ addresses = $addresses }"
-    }
+    override fun toString(): String = "{ addresses = $addresses }"
 }
 ```
 
@@ -606,290 +394,298 @@ class AddressBook : JdsEntity() {
 In order to use JDS you will need an instance of JdsDb. Your instance of JdsDb will have to extend one of the following classes and override the getConnection() method: JdsDbMySql, JdsDbPostgreSql, JdsDbSqlite or JdsDbTransactionalSql.
 Please note that your project must have the correct JDBC driver in its class path. The drivers that were used during development are listed under [Supported Databases](#supported-databases) above.
 #### Postgres example
-```java
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbPostgreSql
 
-public class JdsDbPostgreSqlmplementation extends JdsDbPostgreSql {
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.util.Properties
 
-    @Override
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.postgresql.Driver");
-        Properties properties = new Properties();
-        properties.put("user", "USER_NAME");
-        properties.put("password", "PASSWORD");
-        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DATABASE", properties);
+class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
+
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("org.postgresql.Driver")
+        val properties = Properties()
+        properties.put("user", "USER_NAME")
+        properties.put("password", "PASSWORD")
+        return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/DATABASE", properties)
     }
 }
 
-........
-
-JdsDb jdsDb = new JdsDbPostgreSqlmplementation();
-jdsDb.init();
+fun initJds(){
+    //jds declared in higher scope
+    jdsDb = JdsDbPostgreSqlmplementation()
+    jdsDb.init()
+}
 ```
 #### MySQL Example
-```java
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbMySql
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.util.*
 
-public class JdsDbMySqlImplementation extends JdsDbMySql {
+class JdsDbMySqlImplementation : JdsDbMySql() {
 
-    @Override
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Properties properties = new Properties();
-        properties.put("user", "USER_NAME");
-        properties.put("password", "PASSWORD");
-        properties.put("autoReconnect","true");
-        properties.put("useSSL","false");
-        properties.put("rewriteBatchedStatements","true");
-        properties.put("continueBatchOnError","true");
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/DATABASE", properties);
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("com.mysql.cj.jdbc.Driver")
+        val properties = Properties()
+        properties.put("user", "USER_NAME")
+        properties.put("password", "PASSWORD")
+        properties.put("autoReconnect","true")
+        properties.put("useSSL","false")
+        properties.put("rewriteBatchedStatements","true")
+        properties.put("continueBatchOnError","true")
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/DATABASE", properties)
     }
 }
 
-...
-
-JdsDb jdsDb = new JdsDbMySqlImplementation();
-jdsDb.init();
+fun initJds(){
+    //jds declared in higher scope
+    jdsDb = JdsDbMySqlImplementation()
+    jdsDb.init()
+}
 ```
 #### Microsoft SQL Server Example
-```java
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbTransactionalSql
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.util.*
 
-public class JdsDbTransactionalSqllmplementation extends JdsDbTransactionalSql {
+class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
 
-    @Override
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        Properties properties = new Properties();
-        properties.put("user", "USER_NAME");
-        properties.put("password", "PASSWORD");
-        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", properties);
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
+        properties.put("user", "USER_NAME")
+        properties.put("password", "PASSWORD")
+        return DriverManager.getConnection("jdbc:sqlserver://127.0.0.1\\DB_INSTANCE;databaseName=DATABASE", properties)
     }
 }
 
-....
-
-JdsDb jdsDb = new JdsDbTransactionalSqllmplementation();
-jdsDb.init();
+fun initJds(){
+    //jds declared in higher scope
+    jdsDb = JdsDbTransactionalSqllmplementation()
+    jdsDb.init()
+}
 ```
 #### Oracle Example
-```java
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbOracle
 
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.util.Properties
 
-public class JdsDbOracleImplementation extends JdsDbOracle {
+class JdsDbOracleImplementation : JdsDbOracle() {
 
-    @Override
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("oracle.jdbc.driver.OracleDriver");
-        Properties properties = new Properties();
-        properties.put("user", "USER_NAME");
-        properties.put("password", "PASSWORD");
-        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", properties);
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("oracle.jdbc.driver.OracleDriver")
+        properties.put("user", "USER_NAME")
+        properties.put("password", "PASSWORD")
+        return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:DATABASE", properties)
     }
 }
 
-....
-
-JdsDb jdsDb = new JdsDbOracleImplementation();
-jdsDb.init();
+fun initJds(){
+    //jds declared in higher scope
+    val jdsDb = JdsDbOracleImplementation()
+    jdsDb.init()
+}
 ```
 #### Sqlite Example
-```java
-import org.sqlite.SQLiteConfig;
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbSqlite
+import org.sqlite.SQLiteConfig
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.File
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
 
-public class JdsDbSqliteImplementation extends JdsDbSqlite {
+class JdsDbSqliteImplementation : JdsDbSqlite() {
 
-    @Override
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url = "jdbc:sqlite:" + getDatabaseFile();
-        SQLiteConfig sqLiteConfig = new SQLiteConfig();
-        sqLiteConfig.enforceForeignKeys(true); //You must enable foreign keys in SQLite
-        Class.forName("org.sqlite.JDBC");
-        return DriverManager.getConnection(url, sqLiteConfig.toProperties());
-    }
-
-    public String getDatabaseFile() {
-        File path = new File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db");
-        if (!path.exists()) {
-            File directory = path.getParentFile();
-            if (!directory.exists()) {
-                directory.mkdirs();
+    private val fileLocation: String
+        get() {
+            val path = File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db")
+            if (!path.exists()) {
+                val directory = path.parentFile
+                if (!directory.exists()) {
+                    directory.mkdirs()
+                }
             }
+            return path.absolutePath
         }
-        String absolutePath = path.getAbsolutePath();
-        return absolutePath;
+
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("org.sqlite.JDBC")
+        val url = "jdbc:sqlite:$fileLocation"
+        val sqLiteConfig = SQLiteConfig()
+        sqLiteConfig.enforceForeignKeys(true) //You must enable foreign keys in SQLite
+        return DriverManager.getConnection(url, sqLiteConfig.toProperties())
     }
 }
 
-...
-
-JdsDb jdsDb = new JdsDbSqliteImplementation();
-jdsDb.init();
+fun initJds(){
+    //jds declared in higher scope
+    jdsDb = JdsDbSqliteImplementation()
+    jdsDb.init()
+}
 ```
 With this you should have a valid connection to your database and JDS will setup its tables and procedures automatically. Furthermore, you can use the **getConnection()** method from your JdsDataBase instance in order to return a standard **java.sql.Connection** in your application. 
 
 ### 1.2.2 Initialising JDS
 Once you have initialised your database you can go ahead and initialise all your JDS classes. You can achieve this by mapping ALL your JDS classes in the following manner.
-```java
-public void initialiseJdsClasses()
+```kotlin
+fun initialiseJdsClasses()
 {
     //jdsDb is a reference to your instance of JdsDb.java
-    jdsDb.map(Example.class);
-    jdsDb.map(Address.class);
-    jdsDb.map(AddressBook.class);
+    jdsDb.map(Example::class.java);
+    jdsDb.map(Address::class.java);
+    jdsDb.map(AddressBook::class.java);
 }
 ```
 You only have to do this once at start-up but it is vital that you do so. Without this you will face problems when loading or saving records
 
 ### 1.2.3 Creating objects
 Once you have defined your class you can initialise them. A dynamic **Entity Guid** is created for every jdsEntity by default, this value is used to uniquely identify an object and it data in the database. You can set your own values if you wish.
-```java
-private List<Example> getCollection() {
-    List<Example> collection = new ArrayList<>();
-    
-    Example instance1 = new Example();
-    instance1.setEntityGuid("instance1");
-    instance1.setStringField("One");
-    
-    Example instance2 = new Example();
-    instance2.setStringField("Two");
-    instance2.setTimeField(LocalTime.of(15, 24));
-    instance2.setDateField(LocalDate.of(2012, 8, 26));
-    instance2.setDateTimeField(LocalDateTime.of(1991, 07, 01, 8, 33, 12));
-    instance2.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusMonths(3), ZoneId.systemDefault()));
-    instance2.setIntField(99);
-    instance2.setLongField(888);
-    instance2.setDoubleField(777.666);
-    instance2.setFloatField(5555.4444f);
-    instance2.setBooleanField(false);
-    instance2.setEntityGuid("instance2");
-    
-    Example instance3 = new Example();
-    instance3.setStringField("Three");
-    instance3.setTimeField(LocalTime.of(03, 14));
-    instance3.setDateField(LocalDate.of(2034, 6, 14));
-    instance3.setDateTimeField(LocalDateTime.of(1987, 07, 24, 13, 22, 45));
-    instance3.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().plusDays(3), ZoneId.systemDefault()));
-    instance3.setIntField(22);
-    instance3.setLongField(333);
-    instance3.setDoubleField(444.555);
-    instance3.setFloatField(5555.6666f);
-    instance3.setBooleanField(false);
-    instance3.setEntityGuid("instance3");
-    
-    Example instance4 = new Example();
-    instance4.setStringField("Four");
-    instance4.setTimeField(LocalTime.of(12, 44));
-    instance4.setDateField(LocalDate.of(3034, 12, 1));
-    instance4.setDateTimeField(LocalDateTime.of(1964, 10, 24, 2, 12, 14));
-    instance4.setZonedDateTimeField(ZonedDateTime.of(LocalDateTime.now().minusDays(3), ZoneId.systemDefault()));
-    instance4.setIntField(10);
-    instance4.setLongField(100);
-    instance4.setDoubleField(100.22);
-    instance4.setFloatField(1000.0f);
-    instance4.setBooleanField(false);
-    instance4.setEntityGuid("instance4");
-    
-    collection.add(instance1);
-    collection.add(instance2);
-    collection.add(instance3);
-    collection.add(instance4);
-    return collection;
-}
+```kotlin
+protected val collection: List<Example>
+    get() {
+        val instance1 = Example()
+        instance1.stringField = "One"
+        instance1.timeField = LocalTime.of(15, 24)
+        instance1.dateField = LocalDate.of(2012, 8, 26)
+        instance1.dateTimeField = LocalDateTime.of(1991, 7, 1, 8, 33, 12)
+        instance1.zonedDateTimeField = ZonedDateTime.of(LocalDateTime.now().minusMonths(3), ZoneId.systemDefault())
+        instance1.intField = 99
+        instance1.longField = 888
+        instance1.doubleField = 777.666
+        instance1.floatField = 5555.4444f
+        instance1.booleanField = true
+        instance1.overview.uuid = "instance1"
+
+        val instance2 = Example()
+        instance2.stringField = "Two"
+        instance2.timeField = LocalTime.of(19, 24)
+        instance2.dateField = LocalDate.of(2011, 4, 2)
+        instance2.dateTimeField = LocalDateTime.of(1999, 2, 21, 11, 13, 43)
+        instance2.zonedDateTimeField = ZonedDateTime.of(LocalDateTime.now().minusMonths(7), ZoneId.systemDefault())
+        instance2.intField = 66
+        instance2.longField = 555
+        instance2.doubleField = 444.333
+        instance2.floatField = 2222.1111f
+        instance2.booleanField = false
+        instance2.overview.uuid = "instance2"
+
+        val instance3 = Example()
+        instance3.stringField = "Three"
+        instance3.timeField = LocalTime.of(3, 14)
+        instance3.dateField = LocalDate.of(2034, 6, 14)
+        instance3.dateTimeField = LocalDateTime.of(1987, 7, 24, 13, 22, 45)
+        instance3.zonedDateTimeField = ZonedDateTime.of(LocalDateTime.now().plusDays(3), ZoneId.systemDefault())
+        instance3.intField = 22
+        instance3.longField = 333
+        instance3.doubleField = 444.555
+        instance3.floatField = 5555.6666f
+        instance3.booleanField = true
+        instance3.overview.uuid = "instance3"
+
+        val instance4 = Example()
+        instance4.stringField = "Four"
+        instance4.timeField = LocalTime.of(12, 44)
+        instance4.dateField = LocalDate.of(3034, 12, 1)
+        instance4.dateTimeField = LocalDateTime.of(1964, 10, 24, 2, 12, 14)
+        instance4.zonedDateTimeField = ZonedDateTime.of(LocalDateTime.now().minusDays(3), ZoneId.systemDefault())
+        instance4.intField = 10
+        instance4.longField = 100
+        instance4.doubleField = 100.22
+        instance4.floatField = 1000.0f
+        instance4.booleanField = false
+        instance4.overview.uuid = "instance4"
+
+        val allInstances = ArrayList<Example>()
+        allInstances.add(instance1)
+        allInstances.add(instance2)
+        allInstances.add(instance3)
+        allInstances.add(instance4)
+        return allInstances
+    }
 ```
 
 ### 1.2.4 Save
 The API has a single **save()** method within the class **JdsSave**. The method can takes either one of the following arguments **(JdsEntity... entityVersions)** or **(Collection\<JdsEntity\> entityVersions)**. The method also expects the user to supply a batch size.
-```java
-List<Example> collection = getCollection();
-
-List<Example> collection = getCollection();
-Callable<Boolean> save = new JdsSave(jdsDb, 0, collection);
-FutureTask<Boolean> saving = new FutureTask(save);
-new Thread(saving).start();
-while (!saving.isDone())
-    System.out.println("Waiting for operation 1 to complete");
-System.out.printf("Saved? %s\n", saving.get());
+```kotlin
+fun save() {
+    val save = JdsSave(jdsDb, collection)
+    val process = Executors.newSingleThreadExecutor().submit(save)
+    while (!process.isDone)
+        Thread.sleep(16)
+    System.out.printf("Saved? %s\n", process.get())
+}
 ```
 
 ### 1.2.5 Load
 The system currently has three variants of the **load()** method. The first variant loads ALL the instances of a JdsEntity class. The second variant loads ALL the instances of a JdsEntity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends JdsEntity>" which allows you to load a sorted collection
-```java
-//all entityVersions of type AddressBook
-List<Example> allInstances;
-//all entityVersions of type AddressBook with Entity Guids in range
-List<Example> specificInstance;
-//all entityVersions of type AddressBook with Entity Guids in range SORTED by creation date
-List<Example> sortedInstances;
-//ordering comparator
-Comparator<Example> comparator = Comparator.comparing(Example::getDateField);
+```kotlin
+fun load() {
+    val loadAllInstances = JdsLoad(jdsDb, Example::class.java)
+    val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, "instance3")
+    val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
 
+    val executorService = Executors.newFixedThreadPool(3)
+    val loadingAllInstances = executorService.submit(loadAllInstances)
+    val loadingSpecificInstance = executorService.submit(loadSpecificInstance)
+    val loadingSortedInstances = executorService.submit(loadSortedInstances)
 
-Callable<List<Example>> loadAllInstances = new JdsLoad(jdsDb, Example.class);
-Callable<List<Example>> loadSpecificInstance = new JdsLoad(jdsDb, Example.class, "instance3");
-Callable<List<Example>> loadSortedInstances = new JdsLoad(jdsDb, Example.class, comparator);
+    while (!loadingAllInstances.isDone)
+        Thread.sleep(16)
+    while (!loadingSpecificInstance.isDone)
+        Thread.sleep(16)
+    while (!loadingSortedInstances.isDone)
+        Thread.sleep(16)
 
-FutureTask<List<Example>> loadingAllInstances = new FutureTask(loadAllInstances);
-FutureTask<List<Example>> loadingSpecificInstance = new FutureTask(loadSpecificInstance);
-FutureTask<List<Example>> loadingSortedInstances = new FutureTask(loadSortedInstances);
+    val allInstances = loadingAllInstances.get()
+    val specificInstance = loadingSpecificInstance.get()
+    val sortedInstances = loadingSortedInstances.get()
 
-new Thread(loadingAllInstances).start();
-new Thread(loadingSpecificInstance).start();
-new Thread(loadingSortedInstances).start();
-
-while (!loadingAllInstances.isDone())
-System.out.println("Waiting for operation 1 to complete");
-while (!loadingSpecificInstance.isDone())
-System.out.println("Waiting for operation 2 to complete");
-while (!loadingSortedInstances.isDone())
-System.out.println("Waiting for operation 3 to complete");
-
-List<Example> allInstances = loadingAllInstances.get();
-List<Example> specificInstance = loadingSpecificInstance.get();
-List<Example> sortedInstances = loadingSortedInstances.get();
-
-System.out.println(allInstances);
-System.out.println(specificInstance);
-System.out.println(sortedInstances);
-System.out.println("DONE");
+    println(allInstances)
+    println(specificInstance)
+    println(sortedInstances)
+}
 ```
 
 ### 1.2.6 Load with Filter
-A filter mechanisim is present. It is failry basic and is still being refined. An example to sample usage is shown below.
-```java
-JdsFilter filter = new JdsFilter(jdsDb, Address.class).equals(AddressFields.AREA_NAME, "Riverdale").like(AddressFields.COUNTRY_NAME, "Zam").or().equals(AddressFields.PROVINCE_NAME, "Copperbelt");
-List<Address> output = new FutureTask<List<Address>>(filter).get();
+A filter mechanism is present. It is failry basic and is still being refined. An example to sample usage is shown below.
+```kotlin
+fun filter(){
+   val filter = JdsFilter(jdsDb, Address::class.java).between(Fields.PLOT_NUMBER, 1, 2).like(Fields.COUNTRY_NAME, "Zam").or().equals(Fields.PROVINCE_NAME, "Copperbelt")
+   val process = Executors.newSingleThreadExecutor().submit(filter)
+   while (!process.isDone)
+       Thread.sleep(16)
+   println(process.get())
+}
 ```
 
 ### 1.2.7 Delete
 You can delete by providing one or more JdsEntities or via a collection of strings representing JdsEntity UUIDS.
-```java
-List<Example> collection = getCollection();
-    
-Callable<Boolean> delete = new JdsDelete(jdsDb, "instance2");
-FutureTask<Boolean> deleting = new FutureTask(delete);
-new Thread(deleting).start();
-while(!deleting.isDone())
-    System.out.println("Waiting for operation to complete");
-System.out.println("Deleted? "+ deleting.get());
+```kotlin
+fun delete() {
+    val delete = JdsDelete(jdsDb, addressBook)
+    val process = Executors.newSingleThreadExecutor().submit(delete)
+    while (!process.isDone)
+        Thread.sleep(16)
+    println("Deleted successfully?  ${process.get()}")
+}
 ```
 
 ## 1.3 Schema Generation
@@ -897,29 +693,33 @@ Starting with version 4 JDS can be set up to create schemas to store unique or a
 
 Below is an example of a JdsTable that will persist two specific fields from the Address entity type.
 ```kotlin
-val customTable = JdsTable()
-customTable.uniqueEntries = false
-customTable.name = "CrtAddressSpecific"
-customTable.registerEntity(Address::class.java)
-customTable.registerField(Fields.AREA_NAME)
-customTable.registerField(Fields.CITY_NAME)
-
-//register table
-jdsDb.mapTable(customTable)
-
-//after all tables have been mapped call this function
-jdsDb.prepareTables()
+fun mapAndPrepareTablesWithSpecificFields(){
+    val customTable = JdsTable()
+    customTable.uniqueEntries = false
+    customTable.name = "CrtAddressSpecific"
+    customTable.registerEntity(Address::class.java)
+    customTable.registerField(Fields.AREA_NAME)
+    customTable.registerField(Fields.CITY_NAME)
+    
+    //register table
+    jdsDb.mapTable(customTable)
+    
+    //after all tables have been mapped call this function
+    jdsDb.prepareTables()
+}
 ```
 
 Below is an example of a JdsTable that will persist **all the fields** in the Address entity type
 ```kotlin
-val crtAddress = JdsTable(Address::class.java, true)
-
-//register table
-jdsDb.mapTable(customTable)
-
-//after all tables have been mapped call this function
-jdsDb.prepareTables()
+fun mapAndPrepareTablesWithAllFields(){
+    val crtAddress = JdsTable(Address::class.java, true)
+    
+    //register table
+    jdsDb.mapTable(customTable)
+    
+    //after all tables have been mapped call this function
+    jdsDb.prepareTables()
+}
 ```
 
 You can define your JdsTables in code or you may deserialize them in JSON format

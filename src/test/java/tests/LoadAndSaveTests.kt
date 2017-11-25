@@ -6,7 +6,9 @@ import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ExecutionException
-import java.util.concurrent.FutureTask
+import java.util.concurrent.Executors
+
+
 
 /**
  * Created by ifunga on 12/04/2017.
@@ -16,14 +18,11 @@ class LoadAndSaveTests : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     override fun save() {
-        val collection = collection
         val save = JdsSave(jdsDb, collection)
-        val saving = FutureTask(save)
-        val thread = Thread(saving)
-        thread.start()
-        while (!saving.isDone)
+        val process = Executors.newSingleThreadExecutor().submit(save)
+        while (!process.isDone)
             Thread.sleep(16)
-        System.out.printf("Saved? %s\n", saving.get())
+        System.out.printf("Saved? %s\n", process.get())
     }
 
     @Test
@@ -33,13 +32,10 @@ class LoadAndSaveTests : BaseTestConfig() {
         val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, "instance3")
         val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
 
-        val loadingAllInstances = FutureTask(loadAllInstances)
-        val loadingSpecificInstance = FutureTask(loadSpecificInstance)
-        val loadingSortedInstances = FutureTask(loadSortedInstances)
-
-        Thread(loadingAllInstances).start()
-        Thread(loadingSpecificInstance).start()
-        Thread(loadingSortedInstances).start()
+        val executorService = Executors.newFixedThreadPool(3)
+        val loadingAllInstances = executorService.submit(loadAllInstances)
+        val loadingSpecificInstance = executorService.submit(loadSpecificInstance)
+        val loadingSortedInstances = executorService.submit(loadSortedInstances)
 
         while (!loadingAllInstances.isDone)
             Thread.sleep(16)

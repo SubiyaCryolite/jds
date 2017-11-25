@@ -22,7 +22,7 @@ import java.util.*
 /**
  * Helper class used when performing [JdsEntity] saves
  */
-internal class JdsSaveContainer {
+class JdsSaveContainer {
     //time constructs
     val localDateTimeProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()
     val localDateProperties: MutableList<HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>> = ArrayList()

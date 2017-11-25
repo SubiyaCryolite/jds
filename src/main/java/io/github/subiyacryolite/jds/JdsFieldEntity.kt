@@ -18,27 +18,7 @@ import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
 
-class JdsFieldEntity<T : IJdsEntity>() : Externalizable {
-    lateinit var entityType: Class<out IJdsEntity>
-        private set
-    lateinit var fieldEntity: JdsField
-        private set
-
-    /**
-     * @param type
-     */
-    constructor(type: Class<T>) : this() {
-        this.entityType = type
-    }
-
-    /**
-     * @param entityType
-     * @param jdsField
-     */
-    constructor(entityType: Class<T>, field: JdsField) : this(entityType) {
-        fieldEntity = field
-        this.entityType = entityType
-    }
+class JdsFieldEntity<T : IJdsEntity>(var entityType: Class<out IJdsEntity>, var fieldEntity: JdsField) : Externalizable {
 
     @Throws(IOException::class)
     override fun writeExternal(out: ObjectOutput) {
@@ -52,9 +32,7 @@ class JdsFieldEntity<T : IJdsEntity>() : Externalizable {
         fieldEntity = input.readObject() as JdsField
     }
 
-    override fun toString(): String {
-        return "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
-    }
+    override fun toString(): String = "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
 
     companion object {
         private val serialVersionUID = 20171109_0853L

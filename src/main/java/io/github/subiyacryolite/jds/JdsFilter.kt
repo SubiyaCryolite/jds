@@ -24,7 +24,7 @@ import java.util.concurrent.Callable
  * @param jdsDb
  * @param referenceType
  */
-class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>) : AutoCloseable, Callable<List<T>> {
+class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>) : AutoCloseable, Callable<MutableList<T>> {
 
 
     private val blockParameters: LinkedList<LinkedList<Any>> = LinkedList()
@@ -89,7 +89,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      * @return
      */
     @Throws(Exception::class)
-    override fun call(): List<T> {
+    override fun call(): MutableList<T> {
         val matchingUuids = ArrayList<String>()
         val sql = this.toQuery()
         try {
@@ -115,7 +115,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
             //no results. return empty collection
             //if you pass empty collection to jds load it will assume load EVERYTHING
             ArrayList()
-        } else JdsLoad(jdsDb, referenceType, *matchingUuids.toTypedArray()).call()
+        } else JdsLoad(jdsDb, referenceType, matchingUuids).call()
     }
 
 

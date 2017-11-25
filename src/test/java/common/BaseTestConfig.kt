@@ -110,8 +110,6 @@ abstract class BaseTestConfig {
 
     protected val collection: List<Example>
         get() {
-            val collection = ArrayList<Example>()
-
             val instance1 = Example()
             instance1.stringField = "One"
             instance1.timeField = LocalTime.of(15, 24)
@@ -126,7 +124,7 @@ abstract class BaseTestConfig {
             instance1.overview.uuid = "instance1"
 
             val instance2 = Example()
-            instance2.stringField = "tWO"
+            instance2.stringField = "Two"
             instance2.timeField = LocalTime.of(19, 24)
             instance2.dateField = LocalDate.of(2011, 4, 2)
             instance2.dateTimeField = LocalDateTime.of(1999, 2, 21, 11, 13, 43)
@@ -164,11 +162,12 @@ abstract class BaseTestConfig {
             instance4.booleanField = false
             instance4.overview.uuid = "instance4"
 
-            collection.add(instance1)
-            collection.add(instance2)
-            collection.add(instance3)
-            collection.add(instance4)
-            return collection
+            val allInstances = ArrayList<Example>()
+            allInstances.add(instance1)
+            allInstances.add(instance2)
+            allInstances.add(instance3)
+            allInstances.add(instance4)
+            return allInstances
         }
 
     protected val objectMapper: ObjectMapper

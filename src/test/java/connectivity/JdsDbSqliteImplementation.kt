@@ -19,7 +19,7 @@ import java.sql.SQLException
  */
 class JdsDbSqliteImplementation : JdsDbSqlite() {
 
-    val databaseFile: String
+    private val fileLocation: String
         get() {
             val path = File(System.getProperty("user.home") + File.separator + ".jdstest" + File.separator + "jds.db")
             if (!path.exists()) {
@@ -33,7 +33,7 @@ class JdsDbSqliteImplementation : JdsDbSqlite() {
 
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(): Connection {
-        val url = "jdbc:sqlite:" + databaseFile
+        val url = "jdbc:sqlite:$fileLocation"
         val sqLiteConfig = SQLiteConfig()
         sqLiteConfig.enforceForeignKeys(true) //You must enable foreign keys in SQLite
         Class.forName("org.sqlite.JDBC")

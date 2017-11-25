@@ -37,7 +37,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private val collections = ArrayList<T>()
     private val jdsDb: JdsDb
     private val referenceType: Class<T>
-    private val searchUuids: Array<out String>
+    private val searchUuids: Iterable<out String>
     private var comparator: Comparator<in T>? = null
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
 
@@ -50,7 +50,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     constructor(jdsDb: JdsDb, referenceType: Class<T>, comparator: Comparator<T>, vararg searchUuids: String) {
         this.jdsDb = jdsDb
         this.referenceType = referenceType
-        this.searchUuids = searchUuids
+        this.searchUuids = searchUuids.asIterable()
         this.comparator = comparator
     }
 
@@ -60,6 +60,17 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @param searchUuids
      */
     constructor(jdsDb: JdsDb, referenceType: Class<T>, vararg searchUuids: String) {
+        this.jdsDb = jdsDb
+        this.referenceType = referenceType
+        this.searchUuids = searchUuids.asIterable()
+    }
+
+    /**
+     * @param jdsDb
+     * @param referenceType
+     * @param searchUuids
+     */
+    constructor(jdsDb: JdsDb, referenceType: Class<T>, searchUuids: Collection<String>) {
         this.jdsDb = jdsDb
         this.referenceType = referenceType
         this.searchUuids = searchUuids
@@ -604,7 +615,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @param filterUuids
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    private fun prepareActionBatches(jdsDataBase: JdsDb, batchSize: Int, entityId: Long, filterBatches: MutableList<MutableList<String>>, filterUuids: Array<out String>) {
+    private fun prepareActionBatches(jdsDataBase: JdsDb, batchSize: Int, entityId: Long, filterBatches: MutableList<MutableList<String>>, filterUuids: Iterable<out String>) {
         var batchIndex = 0
         var batchContents = 0
 
@@ -629,7 +640,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
             val rawSql2 = "SELECT DISTINCT Uuid from JdsEntityInstance WHERE Uuid IN (%s)"
             it.prepareStatement(String.format(rawSql, entityHeirarchy)).use { preparedStatement1 ->
                 it.prepareStatement(String.format(rawSql2, quote(filterUuids))).use { preparedStatement2 ->
-                    if (filterUuids.isEmpty()) {
+                    if (filterUuids.none()) {
                         //if no ids supplied we are looking for all instances of the entity.
                         //load ALL entityVersions in the in heirarchy
                         preparedStatement1.executeQuery().use { rs ->
@@ -664,7 +675,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         }
     }
 
-    private fun quote(filterGuids: Array<out String>): String {
+    private fun quote(filterGuids: Iterable<out String>): String {
         val list = filterGuids.map { String.format("'%s'", it) }
         return list.joinToString(",")
     }

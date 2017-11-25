@@ -3,50 +3,52 @@ package tests
 import common.BaseTestConfig
 import io.github.subiyacryolite.jds.JdsDelete
 import org.junit.jupiter.api.Test
+import java.util.concurrent.Executors
 
 class Deletes : BaseTestConfig() {
 
-    @Test
     @Throws(Exception::class)
-    fun deleteUsingStrings() {
-        initialiseSqlLiteBackend()
-        val result = JdsDelete(jdsDb, addressBook).call()
-        print("Completed $result")
+    private fun delete() {
+        val delete = JdsDelete(jdsDb, addressBook)
+        val process = Executors.newSingleThreadExecutor().submit(delete)
+        while (!process.isDone)
+            Thread.sleep(16)
+        println("Deleted successfully?  ${process.get()}")
     }
 
     @Test
     @Throws(Exception::class)
     fun sqLiteImplementation() {
         initialiseSqlLiteBackend()
-        deleteUsingStrings()
+        delete()
     }
 
     @Test
     @Throws(Exception::class)
     fun mysqlImplementation() {
         initialiseMysqlBackend()
-        deleteUsingStrings()
+        delete()
     }
 
     @Test
     @Throws(Exception::class)
     fun postgreSqlImplementation() {
         initialisePostgeSqlBackend()
-        deleteUsingStrings()
+        delete()
     }
 
     @Test
     @Throws(Exception::class)
     fun tSqlImplementation() {
         initialiseTSqlBackend()
-        deleteUsingStrings()
+        delete()
     }
 
     @Test
     @Throws(Exception::class)
     fun oracleImplementation() {
         initialiseOracleBackend()
-        deleteUsingStrings()
+        delete()
     }
 
     @Test
