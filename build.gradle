@@ -16,7 +16,7 @@ description = "A dynamic, cross platform, high performance, ORM data-mapper. Des
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 ext.jacksonVersion = '2.9.2'
-ext.kotlinVersion = '1.1.60'
+ext.kotlinVersion = '1.1.61'
 
 buildscript {
     repositories {
@@ -24,7 +24,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.51'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.61'
         classpath 'org.jetbrains.dokka:dokka-gradle-plugin:0.9.15'
         classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0'
     }
@@ -38,8 +38,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:1.1.60'
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.60'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:1.1.61'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jre8:1.1.61'
     testCompile 'org.jetbrains.kotlin:kotlin-test:1.1.60'
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
