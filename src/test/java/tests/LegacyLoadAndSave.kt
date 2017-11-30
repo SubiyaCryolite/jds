@@ -5,7 +5,6 @@ import entities.Address
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
-import java.util.*
 
 /**
  * Created by ifunga on 18/02/2017.
@@ -21,7 +20,7 @@ class LegacyLoadAndSave : BaseTestConfig() {
 
     @Throws(Exception::class)
     private fun load() {
-        val comparator = Comparator.comparing<Address, String> { entry -> entry.provinceOrState }
+        val comparator = kotlin.Comparator { o1: Address, o2: Address -> o1.provinceOrState.compareTo(o2.provinceOrState) }
         val allAddressBooks = JdsLoad(jdsDb, Address::class.java, comparator).call() //load all entityVersions of type AddressBook
         val specificAddressBook = JdsLoad(jdsDb, Address::class.java, comparator, "primaryAddress").call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
