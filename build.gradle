@@ -40,7 +40,7 @@ repositories {
 dependencies {
     compile 'org.jetbrains.kotlin:kotlin-stdlib:1.2.0'
     compile 'org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.0'
-    testCompile 'org.jetbrains.kotlin:kotlin-test:1.1.60'
+    testCompile 'org.jetbrains.kotlin:kotlin-test:1.2.0'
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
     testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.1'
