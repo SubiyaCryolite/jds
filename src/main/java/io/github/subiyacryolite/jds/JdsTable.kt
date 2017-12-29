@@ -206,6 +206,10 @@ open class JdsTable() : Serializable {
         if (onlyDeprecatedRecords && entity.overview.live)
             return false
 
+        if (entity is IJdsTableFilter)
+            if (!entity.satisfiesCondition(this))
+                return false
+
         if (entities.isEmpty())
             return true
 

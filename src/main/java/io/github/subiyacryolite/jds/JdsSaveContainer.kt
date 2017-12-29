@@ -43,16 +43,16 @@ class JdsSaveContainer {
     //blobs
     val blobProperties: MutableList<HashMap<String, HashMap<Long, BlobProperty>>> = ArrayList()
     //arrays
-    val objectCollections: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>> = ArrayList()
-    val stringCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<String>>>> = ArrayList()
-    val localDateTimeCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>> = ArrayList()
-    val floatCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Float>>>> = ArrayList()
-    val doubleCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Double>>>> = ArrayList()
-    val longCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Long>>>> = ArrayList()
-    val integerCollections: MutableList<HashMap<String, HashMap<Long, ListProperty<Int>>>> = ArrayList()
+    val objectCollections: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>>> = ArrayList()
+    val stringCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<String>>>> = ArrayList()
+    val localDateTimeCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<LocalDateTime>>>> = ArrayList()
+    val floatCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Float>>>> = ArrayList()
+    val doubleCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Double>>>> = ArrayList()
+    val longCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Long>>>> = ArrayList()
+    val integerCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Int>>>> = ArrayList()
     //enumProperties
     val enumProperties: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>> = ArrayList()
-    val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>> = ArrayList()
+    val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>>>> = ArrayList()
     //objects
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews

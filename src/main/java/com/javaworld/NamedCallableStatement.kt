@@ -7,17 +7,15 @@ import java.util.*
 /*
 * @author adam_crume
 */
-class NamedCallableStatement
 /**
- * Creates a NamedPreparedStatement.  Wraps a call to
- * c.[ prepareStatement][Connection.prepareStatement].
+ * Creates a NamedPreparedStatement.  Wraps calls to [Connection.prepareStatement].
  *
  * @param connection the database connection
  * @param query      the parameterized query
  * @throws SQLException if the statement could not be created
  */
-@Throws(SQLException::class)
-constructor(connection: Connection, query: String) : INamedStatement {
+
+class NamedCallableStatement(connection: Connection, query: String) : INamedStatement {
     private val callableStatement: CallableStatement
 
     private val indexMap: HashMap<String, MutableList<Int>> = HashMap()

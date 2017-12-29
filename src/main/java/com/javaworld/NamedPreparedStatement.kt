@@ -9,8 +9,7 @@ import java.util.*
 */
 class NamedPreparedStatement
 /**
- * Creates a NamedPreparedStatement.  Wraps a call to
- * c.[ prepareStatement][Connection.prepareStatement].
+ * Creates a NamedPreparedStatement.  Wraps calls to [Connection.prepareStatement].
  *
  * @param connection the database connection
  * @param query      the parameterized query

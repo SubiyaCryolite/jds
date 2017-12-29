@@ -936,7 +936,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, ListProperty<LocalDateTime>>>) = try {
+    private fun saveArrayDates(writeToPrimaryDataTables: Boolean, dateTimeArrayProperties: HashMap<String, HashMap<Long, MutableCollection<LocalDateTime>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreDateTimeArray WHERE FieldId = ? AND Uuid = ?"
         val insertSql = "INSERT INTO JdsStoreDateTimeArray (Sequence,Value,FieldId,Uuid) VALUES (?,?,?,?)"
 
@@ -949,8 +949,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -990,7 +990,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, ListProperty<Float>>>) = try {
+    private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Float>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND Uuid = ?"
         val insertSql = "INSERT INTO JdsStoreFloatArray (FieldId,Uuid,Value,Sequence) VALUES (?,?,?,?)"
 
@@ -1003,8 +1003,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -1045,7 +1045,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
      */
-    private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, ListProperty<Int>>>) = try {
+    private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Int>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND Uuid = :uuid"
         val insertSql = "INSERT INTO JdsStoreIntegerArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
@@ -1058,8 +1058,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -1100,7 +1100,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, ListProperty<Double>>>) = try {
+    private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Double>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND Uuid = :uuid"
         val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
@@ -1113,8 +1113,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -1155,7 +1155,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, ListProperty<Long>>>) = try {
+    private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, MutableCollection <Long>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND Uuid = ?"
         val insertSql = "INSERT INTO JdsStoreDoubleArray (FieldId,Uuid,Sequence,Value) VALUES (?,?,?,?)"
 
@@ -1168,8 +1168,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -1209,7 +1209,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param writeToPrimaryDataTables
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, ListProperty<String>>>) = try {
+    private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND Uuid = :uuid"
         val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
@@ -1222,8 +1222,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val index = SimpleIntegerProperty(0)
             for ((fieldId, value1) in value) {
                 val innerRecord = 0
-                val innerTotal = value1.get().size
-                for (value in value1.get()) {
+                val innerTotal = value1.size
+                for (value in value1) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
@@ -1265,7 +1265,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>>>) = try {
+    private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>>>) = try {
         var record = 0
         val recordTotal = enumStrings.size
         val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND Uuid = :uuid"
@@ -1277,10 +1277,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         for ((uuid, value) in enumStrings) {
             record++
             for ((jdsFieldEnum, value1) in value) {
-                var sequence = 0
-                val textValues = value1.get()
-                if (textValues.size == 0) continue
-                for (anEnum in textValues) {
+                if (value1.isEmpty()) continue
+                for ((sequence, anEnum) in value1.withIndex()) {
                     if (jdsDb.isLoggingEdits) {
                         log.setString(1, uuid)
                         log.setLong(2, jdsFieldEnum.field.id)
@@ -1308,7 +1306,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     }
                     if (jdsDb.isPrintingOutput)
                         println("Updating enum [$sequence]. Object fieldEntity [$record of $recordTotal]")
-                    sequence++
                 }
             }
         }
@@ -1323,7 +1320,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>>>) {
+    private fun saveAndBindObjectArrays(connection: Connection, objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>>) {
         if (objectArrayProperties.isEmpty()) return
         val entities = ArrayList<JdsEntity>()
         val parentEntityBindings = ArrayList<JdsParentEntityBinding>()
@@ -1336,7 +1333,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((key, value1) in value) {
                 record.set(0)
                 changesMade.set(false)
-                value1.stream().filter { jdsEntity -> jdsEntity != null }.forEach { jdsEntity ->
+                value1.filter { jdsEntity -> jdsEntity != null }.forEach { jdsEntity ->
                     if (!changesMade.get()) {
                         //only clear if changes are made. else you wipe out old bindings regardless
                         changesMade.set(true)

@@ -11,16 +11,15 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.github.subiyacryolite.jds.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package io.github.subiyacryolite.jds
 
 /**
- * The annotation used to decorate [JdsEntity]
+ * This interface allows additional checks to be run in order to determine if an Entity should have its contents written to a [JdsTable]
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-annotation class JdsEntityAnnotation(val entityName: String = "", val entityId: Long = 1, val version: Long = 1)
+interface IJdsTableFilter {
+    /**
+     * Determines if this entity should be persisted based on more criteria
+     * @param table the instance of JdsTable to check against
+     */
+    fun satisfiesCondition(table: JdsTable): Boolean
+}

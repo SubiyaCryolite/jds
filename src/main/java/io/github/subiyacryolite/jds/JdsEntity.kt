@@ -58,16 +58,16 @@ abstract class JdsEntity : IJdsEntity {
     private val longProperties: HashMap<Long, LongProperty> = HashMap()
     private val integerProperties: HashMap<Long, IntegerProperty> = HashMap()
     //arrays
-    private val objectArrayProperties: HashMap<JdsFieldEntity<*>, ListProperty<JdsEntity>> = HashMap()
-    private val stringArrayProperties: HashMap<Long, ListProperty<String>> = HashMap()
-    private val dateTimeArrayProperties: HashMap<Long, ListProperty<LocalDateTime>> = HashMap()
-    private val floatArrayProperties: HashMap<Long, ListProperty<Float>> = HashMap()
-    private val doubleArrayProperties: HashMap<Long, ListProperty<Double>> = HashMap()
-    private val longArrayProperties: HashMap<Long, ListProperty<Long>> = HashMap()
-    private val integerArrayProperties: HashMap<Long, ListProperty<Int>> = HashMap()
+    private val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
+    private val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
+    private val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
+    private val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
+    private val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
+    private val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
+    private val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
     //enumProperties
     private val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>> = HashMap()
-    private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, ListProperty<Enum<*>>> = HashMap()
+    private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>> = HashMap()
     //objects
     private val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
     //blobs
@@ -229,7 +229,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapStrings(field: JdsField, properties: ListProperty<String>) {
+    protected fun mapStrings(field: JdsField, properties: MutableCollection<String>) {
         if (field.type != JdsFieldType.STRING_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -240,7 +240,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapDateTimes(field: JdsField, properties: ListProperty<LocalDateTime>) {
+    protected fun mapDateTimes(field: JdsField, properties: MutableCollection<LocalDateTime>) {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -251,7 +251,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapFloats(field: JdsField, properties: ListProperty<Float>) {
+    protected fun mapFloats(field: JdsField, properties: MutableCollection<Float>) {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -262,7 +262,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapIntegers(field: JdsField, properties: ListProperty<Int>) {
+    protected fun mapIntegers(field: JdsField, properties: MutableCollection<Int>) {
         if (field.type != JdsFieldType.INT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -273,7 +273,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapDoubles(field: JdsField, properties: ListProperty<Double>) {
+    protected fun mapDoubles(field: JdsField, properties: MutableCollection<Double>) {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -284,7 +284,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param properties
      */
-    protected fun mapLongs(field: JdsField, properties: ListProperty<Long>) {
+    protected fun mapLongs(field: JdsField, properties: MutableCollection<Long>) {
         if (field.type != JdsFieldType.LONG_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         fields.add(field)
@@ -307,12 +307,12 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEnum
      * @param properties
      */
-    protected fun mapEnums(fieldEnum: JdsFieldEnum<*>, properties: ListProperty<out Enum<*>>) {
+    protected fun mapEnums(fieldEnum: JdsFieldEnum<*>, properties: MutableCollection<out Enum<*>>) {
         if (fieldEnum.field.type != JdsFieldType.ENUM_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
         enums.add(fieldEnum)
         fields.add(fieldEnum.field)
-        enumCollectionProperties.put(fieldEnum, properties as ListProperty<Enum<*>>)
+        enumCollectionProperties.put(fieldEnum, properties as MutableCollection<Enum<*>>)
 
     }
 
@@ -335,11 +335,11 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEntity
      * @param properties
      */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: ListProperty<T>) {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: MutableCollection<T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY_COLLECTION)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity)) {
-            objectArrayProperties.put(fieldEntity, properties as ListProperty<JdsEntity>)
+            objectArrayProperties.put(fieldEntity, properties as MutableCollection<JdsEntity>)
             fields.add(fieldEntity.fieldEntity)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
@@ -471,42 +471,42 @@ abstract class JdsEntity : IJdsEntity {
             if (dest.stringArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.stringArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
         source.dateTimeArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.dateTimeArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.dateTimeArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
         source.floatArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.floatArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.floatArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
         source.doubleArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.doubleArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.doubleArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
         source.longArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.longArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.longArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
         source.integerArrayProperties.entries.parallelStream().forEach { srcEntry ->
             if (dest.integerArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.integerArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
     }
@@ -529,7 +529,7 @@ abstract class JdsEntity : IJdsEntity {
             if (dest.objectArrayProperties.containsKey(srcEntry.key)) {
                 val entry = dest.objectArrayProperties[srcEntry.key]
                 entry?.clear()
-                entry?.set(srcEntry.value.get())
+                entry?.addAll(srcEntry.value)
             }
         }
     }
@@ -607,64 +607,64 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, Collection<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeIntegers(input: Map<Long, ListProperty<Int>>): Map<Long, List<Int>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeIntegers(input: Map<Long, Collection<Int>>): Map<Long, List<Int>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeLongs(input: Map<Long, ListProperty<Long>>): Map<Long, List<Long>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeLongs(input: Map<Long, Collection<Long>>): Map<Long, List<Long>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeDoubles(input: Map<Long, ListProperty<Double>>): Map<Long, List<Double>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeDoubles(input: Map<Long, Collection<Double>>): Map<Long, List<Double>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeFloats(input: Map<Long, ListProperty<Float>>): Map<Long, List<Float>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeFloats(input: Map<Long, Collection<Float>>): Map<Long, List<Float>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeDateTimes(input: Map<Long, ListProperty<LocalDateTime>>): Map<Long, List<LocalDateTime>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeDateTimes(input: Map<Long, Collection<LocalDateTime>>): Map<Long, List<LocalDateTime>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeStrings(input: Map<Long, ListProperty<String>>): Map<Long, List<String>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeStrings(input: Map<Long, Collection<String>>): Map<Long, List<String>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeObjects(input: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value.get()) })
+    private fun serializeObjects(input: Map<JdsFieldEntity<*>, Collection<JdsEntity>>): Map<JdsFieldEntity<*>, List<JdsEntity>> =
+            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
      * Create a map that can be serialized
@@ -787,7 +787,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putEnums(destination: Map<JdsFieldEnum<*>, ListProperty<Enum<*>>>, source: Map<JdsFieldEnum<*>, List<Enum<*>>>) {
+    private fun putEnums(destination: Map<JdsFieldEnum<*>, MutableCollection<Enum<*>>>, source: Map<JdsFieldEnum<*>, List<Enum<*>>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
@@ -795,31 +795,31 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putObjects(destination: Map<JdsFieldEntity<*>, ListProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) {
+    private fun putObjects(destination: Map<JdsFieldEntity<*>, MutableCollection<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putStrings(destination: Map<Long, ListProperty<String>>, source: Map<Long, List<String>>) {
+    private fun putStrings(destination: Map<Long, MutableCollection<String>>, source: Map<Long, List<String>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putDateTimes(destination: Map<Long, ListProperty<LocalDateTime>>, source: Map<Long, List<LocalDateTime>>) {
+    private fun putDateTimes(destination: Map<Long, MutableCollection<LocalDateTime>>, source: Map<Long, List<LocalDateTime>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putFloats(destination: Map<Long, ListProperty<Float>>, source: Map<Long, List<Float>>) {
+    private fun putFloats(destination: Map<Long, MutableCollection<Float>>, source: Map<Long, List<Float>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putDoubles(destination: Map<Long, ListProperty<Double>>, source: Map<Long, List<Double>>) {
+    private fun putDoubles(destination: Map<Long, MutableCollection<Double>>, source: Map<Long, List<Double>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putLongs(destination: Map<Long, ListProperty<Long>>, source: Map<Long, List<Long>>) {
+    private fun putLongs(destination: Map<Long, MutableCollection<Long>>, source: Map<Long, List<Long>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putIntegers(destination: Map<Long, ListProperty<Int>>, source: Map<Long, List<Int>>) {
+    private fun putIntegers(destination: Map<Long, MutableCollection<Int>>, source: Map<Long, List<Int>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
@@ -984,12 +984,12 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.LONG -> longProperties[fieldId]?.set(value as Long)
             JdsFieldType.STRING -> stringProperties[fieldId]?.set(value as String)
             JdsFieldType.DATE_TIME -> localDateTimeProperties[fieldId]?.set((value as Timestamp).toLocalDateTime())
-            JdsFieldType.DOUBLE_COLLECTION -> doubleArrayProperties[fieldId]?.get()?.add(value as Double)
-            JdsFieldType.FLOAT_COLLECTION -> floatArrayProperties[fieldId]?.get()?.add(value as Float)
-            JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.get()?.add(value as Int)
-            JdsFieldType.LONG_COLLECTION -> longArrayProperties[fieldId]?.get()?.add(value as Long)
-            JdsFieldType.STRING_COLLECTION -> stringArrayProperties[fieldId]?.get()?.add(value as String)
-            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeArrayProperties[fieldId]?.get()?.add((value as Timestamp).toLocalDateTime())
+            JdsFieldType.DOUBLE_COLLECTION -> doubleArrayProperties[fieldId]?.add(value as Double)
+            JdsFieldType.FLOAT_COLLECTION -> floatArrayProperties[fieldId]?.add(value as Float)
+            JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.add(value as Int)
+            JdsFieldType.LONG_COLLECTION -> longArrayProperties[fieldId]?.add(value as Long)
+            JdsFieldType.STRING_COLLECTION -> stringArrayProperties[fieldId]?.add(value as String)
+            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeArrayProperties[fieldId]?.add((value as Timestamp).toLocalDateTime())
             JdsFieldType.BOOLEAN -> when (value) {
                 is Int -> booleanProperties[fieldId]?.set(value == 1)
                 is Boolean -> booleanProperties[fieldId]?.set(value)
@@ -1016,7 +1016,7 @@ abstract class JdsEntity : IJdsEntity {
                 val enumValues = it.key.enumType.enumConstants
                 val index = value as Int
                 if (index < enumValues.size) {
-                    it.value.get().add(enumValues[index] as Enum<*>)
+                    it.value.add(enumValues[index] as Enum<*>)
                 }
             }
         }
@@ -1036,7 +1036,7 @@ abstract class JdsEntity : IJdsEntity {
             val entity = entityClass.newInstance()
             entity.overview.uuid = uuid
             uuids.add(uuid)
-            it.value.get().add(entity)
+            it.value.add(entity)
             innerObjects.add(entity)
         }
         objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {

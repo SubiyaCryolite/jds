@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/SubiyaCryolite/jds.svg?branch=master)](https://travis-ci.org/SubiyaCryolite/jds)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/io.github.subiyacryolite/jds.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/io/github/subiyacryolite/jds/)
 [![Javadocs](https://javadoc.io/badge/io.github.subiyacryolite/jds.svg)](https://javadoc.io/doc/io.github.subiyacryolite/jds)
 [![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
 ![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/jds)
@@ -187,13 +188,13 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 
 |JDS Field Type|Container|Mapping Call|
 |-----|-----|-----|
-|DATE_TIME_COLLECTION|[ListProperty\<LocalDateTime\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapDateTimes|
-|DOUBLE_COLLECTION|[ListProperty\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapDoubles|
-|ENTITY_COLLECTION|[ListProperty\<Class\<? extends JdsEntity\>\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
-|FLOAT_COLLECTION|[ListProperty\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapFloats|
-|INT_COLLECTION|[ListProperty\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapIntegers|
-|LONG_COLLECTION|[ListProperty\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapLongs|
-|STRING_COLLECTION|[ListProperty\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapStrings|
+|DATE_TIME_COLLECTION|[Collection\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapDateTimes|
+|DOUBLE_COLLECTION|[Collection\<Double\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapDoubles|
+|ENTITY_COLLECTION|[Collection\<Class\<? extends JdsEntity\>\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
+|FLOAT_COLLECTION|[Collection\<Float\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapFloats|
+|INT_COLLECTION|[Collection\<Integer\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapIntegers|
+|LONG_COLLECTION|[Collection\<Long\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapLongs|
+|STRING_COLLECTION|[Collection\<String\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapStrings|
 |BOOLEAN|[BooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/BooleanProperty.html)|map|
 |BLOB|[BlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/BlobProperty.html)|map|
 |ENTITY|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
@@ -202,7 +203,7 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |DOUBLE|[DoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/DoubleProperty.html)|map|
 |DURATION|[ObjectProperty\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)|mapDuration|
 |ENUM|[ObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|map|
-|ENUM_COLLECTION|[ListProperty\<Enum\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/ListProperty.html)|mapEnums|
+|ENUM_COLLECTION|[Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapEnums|
 |FLOAT|[FloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/FloatProperty.html)|map|
 |INT|[IntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/IntegerProperty.html)|map|
 |LONG|[LongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/LongProperty.html)|map|
