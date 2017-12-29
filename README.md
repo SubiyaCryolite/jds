@@ -98,13 +98,13 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 
 |JDS Field Type|Java Type|Description|
 |-----|-----|-----|
-|DATE_TIME_COLLECTION|List\<LocalDateTime\>|List of type LocalDateTime|
-|DOUBLE_COLLECTION|List\<Double\>|List of type Double|
-|ENTITY_COLLECTION|List\<Class\<? extends JdsEntity\>\>|List of type JdsEntity|
-|FLOAT_COLLECTION|List\<Float\>|List of type Float|
-|INT_COLLECTION|List\<Integer\>|List of type Integer|
-|LONG_COLLECTION|List\<Long\>|List of type Long|
-|STRING_COLLECTION|List\<String\>|List of type String|
+|DATE_TIME_COLLECTION|Collection\<LocalDateTime\>|Collection of type LocalDateTime|
+|DOUBLE_COLLECTION|Collection\<Double\>|Collection of type Double|
+|ENTITY_COLLECTION|Collection\<Class\<? extends JdsEntity\>\>|Collection of type JdsEntity|
+|FLOAT_COLLECTION|Collection\<Float\>|Collection of type Float|
+|INT_COLLECTION|Collection\<Integer\>|Collection of type Integer|
+|LONG_COLLECTION|Collection\<Long\>|Collection of type Long|
+|STRING_COLLECTION|Collection\<String\>|Collection of type String|
 |BLOB|byte[] or InputStream|Blob values|
 |BOOLEAN|boolean|Boolean values|
 |ENTITY|Class\<? extends JdsEntity\>|Object of type JdsEntity|
@@ -112,7 +112,7 @@ JdsFields are big part of the JDS framework. Each fieldEntity MUST have a unique
 |DATE|LocalDate|Local date instances|
 |DOUBLE|double|Numeric double values|
 |DURATION|Duration|Object of type Duration|
-|ENUM_COLLECTION|List\<Enum\>|Lists of type Enum|
+|ENUM_COLLECTION|Collection\<Enum\>|Collection of type Enum|
 |ENUM|Enum|Object of type Enum|
 |FLOAT|float|Numeric float values|
 |INT|int|Numeric integer values|
