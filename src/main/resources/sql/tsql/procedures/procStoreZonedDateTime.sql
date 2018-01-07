@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreZonedDateTime(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value DATETIMEOFFSET(7))
+CREATE PROCEDURE procStoreZonedDateTime(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value DATETIMEOFFSET(7))
 AS
 BEGIN
 	MERGE JdsStoreZonedDateTime AS dest

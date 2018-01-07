@@ -1,5 +1,5 @@
 CREATE TABLE JdsStoreOldFieldValues(
-        Uuid			VARCHAR(48),
+        Uuid			VARCHAR(96),
         FieldId				BIGINT,
         DateOfModification	DATETIME DEFAULT CURRENT_TIMESTAMP,
         Sequence            INT,

@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreFloatArray(
     FieldId     BIGINT,
-    Uuid  VARCHAR(48),
+    Uuid  VARCHAR(96),
     Sequence    INT,
     Value       FLOAT,
     PRIMARY KEY (FieldId,Uuid,Sequence),

@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreInteger(IN pUuid VARCHAR(48), IN pFieldId BIGINT, IN pValue INT)
+CREATE PROCEDURE procStoreInteger(IN pUuid VARCHAR(96), IN pFieldId BIGINT, IN pValue INT)
 BEGIN
 	INSERT INTO JdsStoreInteger(Uuid, FieldId, Value)
     VALUES (pUuid, pFieldId, pValue)

@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreBlob(pUuid VARCHAR(48), pFieldId BIGINT, pValue BYTEA)
+CREATE FUNCTION procStoreBlob(pUuid VARCHAR(96), pFieldId BIGINT, pValue BYTEA)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreBlob(Uuid, FieldId, Value)

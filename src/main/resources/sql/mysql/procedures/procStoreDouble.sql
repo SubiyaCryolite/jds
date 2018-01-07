@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreDouble(IN pUuid VARCHAR(48), IN pFieldId BIGINT, IN pValue DOUBLE)
+CREATE PROCEDURE procStoreDouble(IN pUuid VARCHAR(96), IN pFieldId BIGINT, IN pValue DOUBLE)
 BEGIN
 	INSERT INTO JdsStoreDouble(Uuid, FieldId, Value)
     VALUES (pUuid, pFieldId, pValue)

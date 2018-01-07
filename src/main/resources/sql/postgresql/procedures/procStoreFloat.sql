@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreFloat(pUuid VARCHAR(48), pFieldId BIGINT, pValue REAL)
+CREATE FUNCTION procStoreFloat(pUuid VARCHAR(96), pFieldId BIGINT, pValue REAL)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreFloat(Uuid, FieldId, Value)

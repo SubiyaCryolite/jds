@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreInteger(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value INTEGER)
+CREATE PROCEDURE procStoreInteger(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value INTEGER)
 AS
 BEGIN
 	MERGE JdsStoreInteger AS dest

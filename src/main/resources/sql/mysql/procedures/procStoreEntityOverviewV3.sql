@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreEntityOverviewV3(IN pUuid VARCHAR(48), IN pDateCreated DATETIME, IN pDateModified DATETIME, IN pLive BOOLEAN, IN pVersion BIGINT)
+CREATE PROCEDURE procStoreEntityOverviewV3(IN pUuid VARCHAR(96), IN pDateCreated DATETIME, IN pDateModified DATETIME, IN pLive BOOLEAN, IN pVersion BIGINT)
 BEGIN
 	INSERT INTO JdsEntityOverview(Uuid, DateCreated, DateModified, Live, Version)
     VALUES (pUuid, pDateCreated, pDateModified, pLive, pVersion)

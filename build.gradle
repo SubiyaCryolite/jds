@@ -9,14 +9,14 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "4.0.7-SNAPSHOT" //major.minor.bugFixIncrement
+version = "4.0.8-SNAPSHOT" //major.minor.bugFixIncrement
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-ext.jacksonVersion = "2.9.3"
-ext.kotlinVersion = "1.2.10"
+project.ext.jacksonVersion = "2.9.3"
+project.ext.kotlinVersion = "1.2.10"
 
 buildscript {
     repositories {
@@ -38,13 +38,13 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.2.10"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.10"
-    testCompile "org.jetbrains.kotlin:kotlin-test:1.2.10"
-    testCompile "com.fasterxml.jackson.core:jackson-databind:2.9.3"
-    testCompile "com.fasterxml.jackson.core:jackson-databind:2.9.3"
-    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.3"
-    testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.3"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
+    testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
     testCompile "com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
     testCompile "org.postgresql:postgresql:42.0.0"

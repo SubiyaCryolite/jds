@@ -1,7 +1,7 @@
 CREATE TABLE JdsEntityBinding
 (
-    ParentUuid    VARCHAR(48),
-    ChildUuid     VARCHAR(48),
+    ParentUuid    VARCHAR(96),
+    ChildUuid     VARCHAR(96),
     FieldId             BIGINT,
     ChildEntityId       BIGINT,
     FOREIGN KEY(ParentUuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE,

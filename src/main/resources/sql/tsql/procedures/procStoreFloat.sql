@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreFloat(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value REAL)
+CREATE PROCEDURE procStoreFloat(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value REAL)
 AS
 BEGIN
 	MERGE JdsStoreFloat AS dest

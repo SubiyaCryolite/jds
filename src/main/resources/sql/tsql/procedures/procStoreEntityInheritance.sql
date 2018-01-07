@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreEntityInheritance(@Uuid NVARCHAR(48), @EntityId BIGINT)
+CREATE PROCEDURE procStoreEntityInheritance(@Uuid NVARCHAR(96), @EntityId BIGINT)
 AS
 BEGIN
 	MERGE JdsEntityInstance AS dest

@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreEntityInheritance(pUuid VARCHAR(48), pEntityId BIGINT)
+CREATE FUNCTION procStoreEntityInheritance(pUuid VARCHAR(96), pEntityId BIGINT)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsEntityInstance(Uuid, EntityId)

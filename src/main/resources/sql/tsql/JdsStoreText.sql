@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreText(
 	FieldId     BIGINT,
-	Uuid  NVARCHAR(48),
+	Uuid  NVARCHAR(96),
 	Value       NVARCHAR(MAX),
 	PRIMARY KEY (FieldId,Uuid)
 );

@@ -320,7 +320,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param entity
      * @param property
      */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: ObjectProperty<T>) {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<out T>, property: ObjectProperty<out T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY)
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
@@ -335,7 +335,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEntity
      * @param properties
      */
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, properties: MutableCollection<T>) {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<out T>, properties: MutableCollection<out T>) {
         if (fieldEntity.fieldEntity.type != JdsFieldType.ENTITY_COLLECTION)
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity)) {
@@ -356,7 +356,7 @@ abstract class JdsEntity : IJdsEntity {
         copyArrayValues(source)
         copyPropertyValues(source)
         copyOverviewValues(source)
-        copyEnumValues(source)
+        copyEnumAndEnumArrayValues(source)
         copyObjectAndObjectArrayValues(source)
     }
 
@@ -382,79 +382,79 @@ abstract class JdsEntity : IJdsEntity {
     </T> */
     private fun <T : JdsEntity> copyPropertyValues(source: T) {
         val dest = this
-        source.booleanProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.booleanProperties.containsKey(srcEntry.key)) {
-                dest.booleanProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.booleanProperties.entries.forEach {
+            if (dest.booleanProperties.containsKey(it.key)) {
+                dest.booleanProperties[it.key]?.set(it.value.get())
             }
         }
-        source.localDateTimeProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.localDateTimeProperties.containsKey(srcEntry.key)) {
-                dest.localDateTimeProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.localDateTimeProperties.entries.forEach {
+            if (dest.localDateTimeProperties.containsKey(it.key)) {
+                dest.localDateTimeProperties[it.key]?.set(it.value.get())
             }
         }
-        source.zonedDateTimeProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.zonedDateTimeProperties.containsKey(srcEntry.key)) {
-                dest.zonedDateTimeProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.zonedDateTimeProperties.entries.forEach {
+            if (dest.zonedDateTimeProperties.containsKey(it.key)) {
+                dest.zonedDateTimeProperties[it.key]?.set(it.value.get())
             }
         }
-        source.localTimeProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.localTimeProperties.containsKey(srcEntry.key)) {
-                dest.localTimeProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.localTimeProperties.entries.forEach {
+            if (dest.localTimeProperties.containsKey(it.key)) {
+                dest.localTimeProperties[it.key]?.set(it.value.get())
             }
         }
-        source.localDateProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.localDateProperties.containsKey(srcEntry.key)) {
-                dest.localDateProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.localDateProperties.entries.forEach {
+            if (dest.localDateProperties.containsKey(it.key)) {
+                dest.localDateProperties[it.key]?.set(it.value.get())
             }
         }
-        source.stringProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.stringProperties.containsKey(srcEntry.key)) {
-                dest.stringProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.stringProperties.entries.forEach {
+            if (dest.stringProperties.containsKey(it.key)) {
+                dest.stringProperties[it.key]?.set(it.value.get())
             }
         }
-        source.floatProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.floatProperties.containsKey(srcEntry.key)) {
-                dest.floatProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.floatProperties.entries.forEach {
+            if (dest.floatProperties.containsKey(it.key)) {
+                dest.floatProperties[it.key]?.set(it.value.get())
             }
         }
-        source.doubleProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.doubleProperties.containsKey(srcEntry.key)) {
-                dest.doubleProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.doubleProperties.entries.forEach {
+            if (dest.doubleProperties.containsKey(it.key)) {
+                dest.doubleProperties[it.key]?.set(it.value.get())
             }
         }
-        source.longProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.longProperties.containsKey(srcEntry.key)) {
-                dest.longProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.longProperties.entries.forEach {
+            if (dest.longProperties.containsKey(it.key)) {
+                dest.longProperties[it.key]?.set(it.value.get())
             }
         }
-        source.integerProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.integerProperties.containsKey(srcEntry.key)) {
-                dest.integerProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.integerProperties.entries.forEach {
+            if (dest.integerProperties.containsKey(it.key)) {
+                dest.integerProperties[it.key]?.set(it.value.get())
             }
         }
-        source.blobProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.blobProperties.containsKey(srcEntry.key)) {
-                dest.blobProperties[srcEntry.key]?.set(srcEntry.value.get()!!)
+        source.blobProperties.entries.forEach {
+            if (dest.blobProperties.containsKey(it.key)) {
+                dest.blobProperties[it.key]?.set(it.value.get()!!)
             }
         }
-        source.durationProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.durationProperties.containsKey(srcEntry.key)) {
-                dest.durationProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.durationProperties.entries.forEach {
+            if (dest.durationProperties.containsKey(it.key)) {
+                dest.durationProperties[it.key]?.set(it.value.get())
             }
         }
-        source.periodProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.periodProperties.containsKey(srcEntry.key)) {
-                dest.periodProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.periodProperties.entries.forEach {
+            if (dest.periodProperties.containsKey(it.key)) {
+                dest.periodProperties[it.key]?.set(it.value.get())
             }
         }
-        source.yearMonthProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.yearMonthProperties.containsKey(srcEntry.key)) {
-                dest.yearMonthProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.yearMonthProperties.entries.forEach {
+            if (dest.yearMonthProperties.containsKey(it.key)) {
+                dest.yearMonthProperties[it.key]?.set(it.value.get())
             }
         }
-        source.monthDayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.monthDayProperties.containsKey(srcEntry.key)) {
-                dest.monthDayProperties[srcEntry.key]?.set(srcEntry.value.get()!!)
+        source.monthDayProperties.entries.forEach {
+            if (dest.monthDayProperties.containsKey(it.key)) {
+                dest.monthDayProperties[it.key]?.set(it.value.get()!!)
             }
         }
     }
@@ -467,46 +467,46 @@ abstract class JdsEntity : IJdsEntity {
     </T> */
     private fun <T : JdsEntity> copyArrayValues(source: T) {
         val dest = this
-        source.stringArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.stringArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.stringArrayProperties[srcEntry.key]
+        source.stringArrayProperties.entries.forEach {
+            if (dest.stringArrayProperties.containsKey(it.key)) {
+                val entry = dest.stringArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
-        source.dateTimeArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.dateTimeArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.dateTimeArrayProperties[srcEntry.key]
+        source.dateTimeArrayProperties.entries.forEach {
+            if (dest.dateTimeArrayProperties.containsKey(it.key)) {
+                val entry = dest.dateTimeArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
-        source.floatArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.floatArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.floatArrayProperties[srcEntry.key]
+        source.floatArrayProperties.entries.forEach {
+            if (dest.floatArrayProperties.containsKey(it.key)) {
+                val entry = dest.floatArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
-        source.doubleArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.doubleArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.doubleArrayProperties[srcEntry.key]
+        source.doubleArrayProperties.entries.forEach {
+            if (dest.doubleArrayProperties.containsKey(it.key)) {
+                val entry = dest.doubleArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
-        source.longArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.longArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.longArrayProperties[srcEntry.key]
+        source.longArrayProperties.entries.forEach {
+            if (dest.longArrayProperties.containsKey(it.key)) {
+                val entry = dest.longArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
-        source.integerArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.integerArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.integerArrayProperties[srcEntry.key]
+        source.integerArrayProperties.entries.forEach {
+            if (dest.integerArrayProperties.containsKey(it.key)) {
+                val entry = dest.integerArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
     }
@@ -519,17 +519,17 @@ abstract class JdsEntity : IJdsEntity {
     </T> */
     private fun <T : JdsEntity> copyObjectAndObjectArrayValues(source: T) {
         val dest = this
-        source.objectProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.objectProperties.containsKey(srcEntry.key)) {
-                dest.objectProperties[srcEntry.key]?.set(srcEntry.value.get())
+        source.objectProperties.entries.forEach {
+            if (dest.objectProperties.containsKey(it.key)) {
+                dest.objectProperties[it.key]?.set(it.value.get())
             }
         }
 
-        source.objectArrayProperties.entries.parallelStream().forEach { srcEntry ->
-            if (dest.objectArrayProperties.containsKey(srcEntry.key)) {
-                val entry = dest.objectArrayProperties[srcEntry.key]
+        source.objectArrayProperties.entries.forEach {
+            if (dest.objectArrayProperties.containsKey(it.key)) {
+                val entry = dest.objectArrayProperties[it.key]
                 entry?.clear()
-                entry?.addAll(srcEntry.value)
+                entry?.addAll(it.value)
             }
         }
     }
@@ -540,18 +540,23 @@ abstract class JdsEntity : IJdsEntity {
      * @param source The entity to copy values from
      * @param <T> A valid JDSEntity
     </T> */
-    private fun <T : JdsEntity> copyEnumValues(source: T) {
+    private fun <T : JdsEntity> copyEnumAndEnumArrayValues(source: T) {
         val dest = this
-        source.enumCollectionProperties.entries.parallelStream().forEach { srcEntry ->
-            val key = srcEntry.key
-            if (dest.enumCollectionProperties.containsKey(key)) {
-                val dstEntry = dest.enumCollectionProperties[srcEntry.key]
+        source.enumCollectionProperties.entries.forEach {
+            if (dest.enumCollectionProperties.containsKey(it.key)) {
+                val dstEntry = dest.enumCollectionProperties[it.key]
                 dstEntry?.clear()
-                val it = srcEntry.value.iterator()
+                val it = it.value.iterator()
                 while (it.hasNext()) {
                     val nxt = it.next()
                     dstEntry?.add(nxt)
                 }
+            }
+        }
+        source.enumProperties.entries.forEach {
+            if (dest.enumProperties.containsKey(it.key)) {
+                val dstEntry = dest.enumProperties[it.key]
+                dstEntry?.value = it.value.value
             }
         }
     }
@@ -594,6 +599,46 @@ abstract class JdsEntity : IJdsEntity {
         //enumProperties
         objectOutputStream.writeObject(serializeEnums(enumProperties))
         objectOutputStream.writeObject(serializeEnumCollections(enumCollectionProperties))
+    }
+
+    @Throws(IOException::class, ClassNotFoundException::class)
+    override fun readExternal(objectInputStream: ObjectInput) {
+        //fieldEntity and enum maps
+        overview = objectInputStream.readObject() as JdsOverview
+        fields.addAll(objectInputStream.readObject() as Set<JdsField>)
+        enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
+        //objects
+        putObject(objectProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
+        //time constructs
+        putTemporal(localDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
+        putTemporal(zonedDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
+        putTemporal(localDateProperties, objectInputStream.readObject() as Map<Long, Temporal>)
+        putTemporal(localTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
+        putMonthDays(monthDayProperties, objectInputStream.readObject() as Map<Long, MonthDay>)
+        putYearMonths(yearMonthProperties, objectInputStream.readObject() as Map<Long, Temporal>)
+        putPeriods(periodProperties, objectInputStream.readObject() as Map<Long, Period>)
+        putDurations(durationProperties, objectInputStream.readObject() as Map<Long, Duration>)
+        //string
+        putString(stringProperties, objectInputStream.readObject() as Map<Long, String>)
+        //numeric
+        putFloat(floatProperties, objectInputStream.readObject() as Map<Long, Float>)
+        putDouble(doubleProperties, objectInputStream.readObject() as Map<Long, Double>)
+        putBoolean(booleanProperties, objectInputStream.readObject() as Map<Long, Boolean>)
+        putLong(longProperties, objectInputStream.readObject() as Map<Long, Long>)
+        putInteger(integerProperties, objectInputStream.readObject() as Map<Long, Int>)
+        //blobs
+        putBlobs(blobProperties, objectInputStream.readObject() as Map<Long, BlobProperty>)
+        //arrays
+        putObjects(objectArrayProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
+        putStrings(stringArrayProperties, objectInputStream.readObject() as Map<Long, List<String>>)
+        putDateTimes(dateTimeArrayProperties, objectInputStream.readObject() as Map<Long, List<LocalDateTime>>)
+        putFloats(floatArrayProperties, objectInputStream.readObject() as Map<Long, List<Float>>)
+        putDoubles(doubleArrayProperties, objectInputStream.readObject() as Map<Long, List<Double>>)
+        putLongs(longArrayProperties, objectInputStream.readObject() as Map<Long, List<Long>>)
+        putIntegers(integerArrayProperties, objectInputStream.readObject() as Map<Long, List<Int>>)
+        //enumProperties
+        putEnum(enumProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, Enum<*>>)
+        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, List<Enum<*>>>)
     }
 
     private fun serializeEnums(input: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>): Map<JdsFieldEnum<*>, Enum<*>> =
@@ -730,46 +775,6 @@ abstract class JdsEntity : IJdsEntity {
      */
     private fun serializableString(input: Map<Long, StringProperty>): Map<Long, String> =
             input.entries.associateBy({ it.key }, { it.value.get() })
-
-    @Throws(IOException::class, ClassNotFoundException::class)
-    override fun readExternal(objectInputStream: ObjectInput) {
-        //fieldEntity and enum maps
-        overview = objectInputStream.readObject() as JdsOverview
-        fields.addAll(objectInputStream.readObject() as Set<JdsField>)
-        enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
-        //objects
-        putObject(objectProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
-        //time constructs
-        putTemporal(localDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
-        putTemporal(zonedDateTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
-        putTemporal(localDateProperties, objectInputStream.readObject() as Map<Long, Temporal>)
-        putTemporal(localTimeProperties, objectInputStream.readObject() as Map<Long, Temporal>)
-        putMonthDays(monthDayProperties, objectInputStream.readObject() as Map<Long, MonthDay>)
-        putYearMonths(yearMonthProperties, objectInputStream.readObject() as Map<Long, Temporal>)
-        putPeriods(periodProperties, objectInputStream.readObject() as Map<Long, Period>)
-        putDurations(durationProperties, objectInputStream.readObject() as Map<Long, Duration>)
-        //string
-        putString(stringProperties, objectInputStream.readObject() as Map<Long, String>)
-        //numeric
-        putFloat(floatProperties, objectInputStream.readObject() as Map<Long, Float>)
-        putDouble(doubleProperties, objectInputStream.readObject() as Map<Long, Double>)
-        putBoolean(booleanProperties, objectInputStream.readObject() as Map<Long, Boolean>)
-        putLong(longProperties, objectInputStream.readObject() as Map<Long, Long>)
-        putInteger(integerProperties, objectInputStream.readObject() as Map<Long, Int>)
-        //blobs
-        putBlobs(blobProperties, objectInputStream.readObject() as Map<Long, BlobProperty>)
-        //arrays
-        putObjects(objectArrayProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
-        putStrings(stringArrayProperties, objectInputStream.readObject() as Map<Long, List<String>>)
-        putDateTimes(dateTimeArrayProperties, objectInputStream.readObject() as Map<Long, List<LocalDateTime>>)
-        putFloats(floatArrayProperties, objectInputStream.readObject() as Map<Long, List<Float>>)
-        putDoubles(doubleArrayProperties, objectInputStream.readObject() as Map<Long, List<Double>>)
-        putLongs(longArrayProperties, objectInputStream.readObject() as Map<Long, List<Long>>)
-        putIntegers(integerArrayProperties, objectInputStream.readObject() as Map<Long, List<Int>>)
-        //enumProperties
-        putEnum(enumProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, Enum<*>>)
-        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, List<Enum<*>>>)
-    }
 
     private fun putDurations(destination: HashMap<Long, ObjectProperty<Duration>>, source: Map<Long, Duration>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
@@ -916,54 +921,54 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //PRIMITIVES
         //==============================================
-        booleanProperties.entries.parallelStream().forEach {
+        booleanProperties.entries.forEach {
             embeddedObject.b.add(JdsBooleanValues(it.key, when (it.value.value) {true -> 1;false -> 0
             }))
         }
-        stringProperties.entries.parallelStream().forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value)) }
-        floatProperties.entries.parallelStream().forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
-        doubleProperties.entries.parallelStream().forEach { embeddedObject.d.add(JdsDoubleValues(it.key, it.value.value)) }
-        longProperties.entries.parallelStream().forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value)) }
-        integerProperties.entries.parallelStream().forEach { embeddedObject.i.add(JdsIntegerValues(it.key, it.value.value)) }
+        stringProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value)) }
+        floatProperties.entries.forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
+        doubleProperties.entries.forEach { embeddedObject.d.add(JdsDoubleValues(it.key, it.value.value)) }
+        longProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value)) }
+        integerProperties.entries.forEach { embeddedObject.i.add(JdsIntegerValues(it.key, it.value.value)) }
         //==============================================
         //Dates & Time
         //==============================================
-        localDateTimeProperties.entries.parallelStream().forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        zonedDateTimeProperties.entries.parallelStream().forEach { embeddedObject.zdt.add(JdsZonedDateTimeValues(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.parallelStream().forEach { embeddedObject.t.add(JdsTimeValues(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
-        localDateProperties.entries.parallelStream().forEach { embeddedObject.ld.add(JdsLocalDateValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
-        durationProperties.entries.parallelStream().forEach { embeddedObject.du.add(JdsDurationValues(it.key, it.value.value.toNanos())) }
-        monthDayProperties.entries.parallelStream().forEach { embeddedObject.md.add(JdsMonthDayValues(it.key, it.value.value.toString())) }
-        yearMonthProperties.entries.parallelStream().forEach { embeddedObject.ym.add(JdsYearMonthValues(it.key, (it.value.value as YearMonth).toString())) }
-        periodProperties.entries.parallelStream().forEach { embeddedObject.p.add(JdsPeriodValues(it.key, it.value.value.toString())) }
+        localDateTimeProperties.entries.forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
+        zonedDateTimeProperties.entries.forEach { embeddedObject.zdt.add(JdsZonedDateTimeValues(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
+        localTimeProperties.entries.forEach { embeddedObject.t.add(JdsTimeValues(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
+        localDateProperties.entries.forEach { embeddedObject.ld.add(JdsLocalDateValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        durationProperties.entries.forEach { embeddedObject.du.add(JdsDurationValues(it.key, it.value.value.toNanos())) }
+        monthDayProperties.entries.forEach { embeddedObject.md.add(JdsMonthDayValues(it.key, it.value.value.toString())) }
+        yearMonthProperties.entries.forEach { embeddedObject.ym.add(JdsYearMonthValues(it.key, (it.value.value as YearMonth).toString())) }
+        periodProperties.entries.forEach { embeddedObject.p.add(JdsPeriodValues(it.key, it.value.value.toString())) }
         //==============================================
         //BLOB
         //==============================================
-        blobProperties.entries.parallelStream().forEach { embeddedObject.bl.add(JdsBlobValues(it.key, it.value.get() ?: ByteArray(0))) }
+        blobProperties.entries.forEach { embeddedObject.bl.add(JdsBlobValues(it.key, it.value.get() ?: ByteArray(0))) }
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.parallelStream().forEach { embeddedObject.e.add(JdsEnumValues(it.key.field.id, it.value.value.ordinal)) }
-        enumCollectionProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.ea.add(JdsEnumCollections(it.key.field.id, i, child.ordinal)) } }
+        enumProperties.entries.forEach { embeddedObject.e.add(JdsEnumValues(it.key.field.id, it.value.value.ordinal)) }
+        enumCollectionProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.ea.add(JdsEnumCollections(it.key.field.id, i, child.ordinal)) } }
         //==============================================
         //ARRAYS
         //==============================================
-        stringArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.sa.add(JdsTextCollections(it.key, i, child)) } }
-        dateTimeArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.dta.add(JdsDateCollections(it.key, i, Timestamp.valueOf(child))) } }
-        floatArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.fa.add(JdsFloatCollections(it.key, i, child)) } }
-        doubleArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.da.add(JdsDoubleCollections(it.key, i, child)) } }
-        longArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.la.add(JdsLongCollections(it.key, i, child)) } }
-        integerArrayProperties.entries.parallelStream().forEach { it.value.forEachIndexed { i, child -> embeddedObject.ia.add(JdsIntegerCollections(it.key, i, child)) } }
+        stringArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.sa.add(JdsTextCollections(it.key, i, child)) } }
+        dateTimeArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.dta.add(JdsDateCollections(it.key, i, Timestamp.valueOf(child))) } }
+        floatArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.fa.add(JdsFloatCollections(it.key, i, child)) } }
+        doubleArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.da.add(JdsDoubleCollections(it.key, i, child)) } }
+        longArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.la.add(JdsLongCollections(it.key, i, child)) } }
+        integerArrayProperties.entries.forEach { it.value.forEachIndexed { i, child -> embeddedObject.ia.add(JdsIntegerCollections(it.key, i, child)) } }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        objectArrayProperties.entries.parallelStream().forEach { itx ->
+        objectArrayProperties.entries.forEach { itx ->
             itx.value.forEach {
                 embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.overview.uuid, itx.key.fieldEntity.id, it.overview.entityId))
                 embeddedObject.eo.add(JdsEmbeddedObject(it))
             }
         }
-        objectProperties.entries.parallelStream().forEach {
+        objectProperties.entries.forEach {
             embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.value.value.overview.uuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
             embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
         }
@@ -1210,7 +1215,41 @@ abstract class JdsEntity : IJdsEntity {
         fields.forEach { table.registerField(it) }
     }
 
+    /**
+     * Ensures child entities have ids that link them to their parent.
+     * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
+     */
+    fun standardizeUuids() {
+        val parentUuid = overview.uuid
+        standardizeObjectUuids(parentUuid, objectProperties)
+        standardizeObjectCollectionUuids(parentUuid, objectArrayProperties)
+    }
+
+    private fun standardizeObjectCollectionUuids(parentUuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+        objectArrayProperties.entries.forEach {
+            //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
+            it.value.forEachIndexed { sequence, entry ->
+                val entityId = entry.overview.entityId
+                entry.overview.uuid = "$parentUuid.$entityId.$sequence"
+                //process children
+                standardizeObjectUuids(entry.overview.uuid, entry.objectProperties)
+                standardizeObjectCollectionUuids(entry.overview.uuid, entry.objectArrayProperties)
+            }
+        }
+    }
+
+    private fun standardizeObjectUuids(parentUuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
+        //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
+        objectProperties.entries.forEach { entry ->
+            val entityId = entry.value.value.overview.entityId
+            entry.value.value.overview.uuid = "$parentUuid.$entityId"
+            //process children
+            standardizeObjectUuids(entry.value.value.overview.uuid, entry.value.value.objectProperties)
+            standardizeObjectCollectionUuids(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
+        }
+    }
+
     companion object {
-        private val serialVersionUID = 20171109_0853L
+        private val serialVersionUID = 20180106_2125L
     }
 }

@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreDateTimeArray(
     FieldId     BIGINT,
-    Uuid    VARCHAR(48),
+    Uuid    VARCHAR(96),
     Sequence   INTEGER,
     Value       TIMESTAMP,
     PRIMARY KEY(FieldId,Uuid,Sequence),

@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreBlob(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value VARBINARY(MAX))
+CREATE PROCEDURE procStoreBlob(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value VARBINARY(MAX))
 AS
 BEGIN
 	MERGE JdsStoreBlob AS dest

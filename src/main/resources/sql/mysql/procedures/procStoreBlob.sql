@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreBlob(IN pUuid VARCHAR(48), IN pFieldId BIGINT, IN pValue BLOB)
+CREATE PROCEDURE procStoreBlob(IN pUuid VARCHAR(96), IN pFieldId BIGINT, IN pValue BLOB)
 BEGIN
 	INSERT INTO JdsStoreBlob(Uuid, FieldId, Value)
     VALUES (pUuid, pFieldId, pValue)

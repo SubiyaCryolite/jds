@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreDoubleArray(
     FieldId         BIGINT,
-    Uuid      NVARCHAR(48) NOT NULL,
+    Uuid      NVARCHAR(96) NOT NULL,
     Sequence        INTEGER,
     Value           FLOAT,
     PRIMARY KEY (FieldId,Uuid,Sequence),

@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreTextArray(
     FieldId     BIGINT,
-    Uuid    VARCHAR(48),
+    Uuid    VARCHAR(96),
     Sequence   INTEGER,
     Value       TEXT,
     PRIMARY KEY (FieldId,Uuid,Sequence),

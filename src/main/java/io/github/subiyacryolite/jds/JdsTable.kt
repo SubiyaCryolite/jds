@@ -122,6 +122,15 @@ open class JdsTable() : Serializable {
     }
 
     /**
+     * Empty an entire table
+     * @param connection
+     */
+    fun truncateTable(connection: Connection) {
+        val preparedStatement = connection.prepareStatement("TRUNCATE TABLE $name")
+        preparedStatement.executeUpdate()
+    }
+
+    /**
      * @param jdsDb
      * @param eventArguments
      * @param connection

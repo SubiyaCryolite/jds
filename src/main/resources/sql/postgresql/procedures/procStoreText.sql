@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreText(pUuid VARCHAR(48), pFieldId BIGINT, pValue TEXT)
+CREATE FUNCTION procStoreText(pUuid VARCHAR(96), pFieldId BIGINT, pValue TEXT)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreText(Uuid, FieldId, Value)

@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreTime(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value TIME(7))
+CREATE PROCEDURE procStoreTime(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value TIME(7))
 AS
 BEGIN
 	MERGE JdsStoreTime AS dest

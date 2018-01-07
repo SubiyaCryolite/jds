@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreDateTime(pUuid VARCHAR(48), pFieldId BIGINT, pValue TIMESTAMP)
+CREATE FUNCTION procStoreDateTime(pUuid VARCHAR(96), pFieldId BIGINT, pValue TIMESTAMP)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreDateTime(Uuid, FieldId, Value)

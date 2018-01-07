@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreBoolean(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value BIT)
+CREATE PROCEDURE procStoreBoolean(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value BIT)
 AS
 BEGIN
 	MERGE JdsStoreBoolean AS dest

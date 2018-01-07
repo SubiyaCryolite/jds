@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreText(@Uuid NVARCHAR(48), @FieldId BIGINT, @Value NVARCHAR(MAX))
+CREATE PROCEDURE procStoreText(@Uuid NVARCHAR(96), @FieldId BIGINT, @Value NVARCHAR(MAX))
 AS
 BEGIN
 	MERGE JdsStoreText AS dest

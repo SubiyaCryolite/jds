@@ -83,7 +83,7 @@ object JdsSchema {
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
         when (fieldType) {
-            JdsFieldType.ENTITY -> return jdsDb.getDbStringDataType(48)//act as a fk if you will
+            JdsFieldType.ENTITY -> return jdsDb.getDbStringDataType(96)//act as a fk if you will
             JdsFieldType.FLOAT -> return jdsDb.getDbFloatDataType()
             JdsFieldType.DOUBLE -> return jdsDb.getDbDoubleDataType()
             JdsFieldType.ZONED_DATE_TIME -> return jdsDb.getDbZonedDateTimeDataType()

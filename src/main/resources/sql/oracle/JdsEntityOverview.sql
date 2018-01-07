@@ -1,5 +1,5 @@
 CREATE TABLE JdsEntityOverview(
-    Uuid      NVARCHAR2(48),
+    Uuid      NVARCHAR2(96),
     DateCreated     TIMESTAMP,
     DateModified    TIMESTAMP,
     Version         NUMBER(19),

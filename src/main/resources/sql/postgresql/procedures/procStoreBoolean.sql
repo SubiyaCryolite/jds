@@ -1,4 +1,4 @@
-CREATE FUNCTION procStoreBoolean(pUuid VARCHAR(48), pFieldId BIGINT, pValue BOOLEAN)
+CREATE FUNCTION procStoreBoolean(pUuid VARCHAR(96), pFieldId BIGINT, pValue BOOLEAN)
 RETURNS VOID AS $$
 BEGIN
 	INSERT INTO JdsStoreBoolean(Uuid, FieldId, Value)

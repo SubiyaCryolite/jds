@@ -1,4 +1,4 @@
-CREATE PROCEDURE procStoreBoolean(IN pUuid VARCHAR(48), IN pFieldId BIGINT, IN pValue BOOLEAN)
+CREATE PROCEDURE procStoreBoolean(IN pUuid VARCHAR(96), IN pFieldId BIGINT, IN pValue BOOLEAN)
 BEGIN
 	INSERT INTO JdsStoreBoolean(Uuid, FieldId, Value)
     VALUES (pUuid, pFieldId, pValue)

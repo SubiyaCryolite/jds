@@ -1,6 +1,6 @@
 CREATE TABLE JdsStoreZonedDateTime(
 	FieldId     NUMBER(19),
-	Uuid  NVARCHAR2(48),
+	Uuid  NVARCHAR2(96),
 	Value       TIMESTAMP WITH TIME ZONE,
 	PRIMARY KEY (FieldId,Uuid),
 	FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
