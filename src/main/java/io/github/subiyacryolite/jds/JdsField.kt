@@ -85,8 +85,6 @@ class JdsField() : Externalizable {
         private fun bind(field: JdsField) {
             if (!values.containsKey(field.id))
                 values.put(field.id, field)
-            else
-                throw RuntimeException(String.format("This field ID [${field.id}] is already bound"))
         }
 
         val NULL = JdsField()
