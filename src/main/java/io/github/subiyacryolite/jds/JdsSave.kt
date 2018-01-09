@@ -79,6 +79,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val steps = batchEntities.size
         for (current in batchEntities) {
             saveInner(current, saveContainer, step, steps)
+            saveContainer.reset()//don't repersist the same files in batching
             step++
             if (jdsDb.isPrintingOutput)
                 println("Processed batch [$step of ${steps + 1}]")

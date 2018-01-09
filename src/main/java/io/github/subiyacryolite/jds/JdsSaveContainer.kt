@@ -57,4 +57,42 @@ class JdsSaveContainer {
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
     val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
+    
+    internal fun reset()
+    {
+        //time constructs
+        localDateTimeProperties.clear()
+        localDateProperties.clear()
+        localTimeProperties.clear()
+        zonedDateTimeProperties.clear()
+        monthDayProperties.clear()
+        yearMonthProperties.clear()
+        periodProperties.clear()
+        durationProperties.clear()
+        //strings
+        stringProperties.clear()
+        //primitives
+        booleanProperties.clear()
+        floatProperties.clear()
+        doubleProperties.clear()
+        longProperties.clear()
+        integerProperties.clear()
+        //blobs
+        blobProperties.clear()
+        //arrays
+        objectCollections.clear()
+        stringCollections.clear()
+        localDateTimeCollections.clear()
+        floatCollections.clear()
+        doubleCollections.clear()
+        longCollections.clear()
+        integerCollections.clear()
+        //enumProperties
+        enumProperties.clear()
+        enumCollections.clear()
+        //objects
+        objects.clear()
+        //overviews
+        overviews.clear()
+    }
 }
