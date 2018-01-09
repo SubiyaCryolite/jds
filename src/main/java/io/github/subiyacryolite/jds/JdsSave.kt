@@ -988,7 +988,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param floatArrayProperties
      * @param writeToPrimaryDataTables
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
     private fun saveArrayFloats(writeToPrimaryDataTables: Boolean, floatArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Float>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreFloatArray WHERE FieldId = ? AND Uuid = ?"
@@ -1043,7 +1043,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param integerArrayProperties
      * @param writeToPrimaryDataTables
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5] to [3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5] to [3,4]
      */
     private fun saveArrayIntegers(writeToPrimaryDataTables: Boolean, integerArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Int>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreIntegerArray WHERE FieldId = :fieldId AND Uuid = :uuid"
@@ -1098,7 +1098,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param doubleArrayProperties
      * @param writeToPrimaryDataTables
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
     private fun saveArrayDoubles(writeToPrimaryDataTables: Boolean, doubleArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Double>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = :fieldId AND Uuid = :uuid"
@@ -1153,7 +1153,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param longArrayProperties
      * @param writeToPrimaryDataTables
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
     private fun saveArrayLongs(writeToPrimaryDataTables: Boolean, longArrayProperties: HashMap<String, HashMap<Long, MutableCollection <Long>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreDoubleArray WHERE FieldId = ? AND Uuid = ?"
@@ -1207,7 +1207,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param stringArrayProperties
      * @param writeToPrimaryDataTables
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
     private fun saveArrayStrings(writeToPrimaryDataTables: Boolean, stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND Uuid = :uuid"
@@ -1263,7 +1263,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param enumStrings
      * @param writeToPrimaryDataTables
      * @apiNote Enums are actually saved as index based integer arrays
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
     private fun saveEnumCollections(writeToPrimaryDataTables: Boolean, enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>>>) = try {
         var record = 0
@@ -1316,7 +1316,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param connection
      * @param objectArrayProperties
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
+     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)

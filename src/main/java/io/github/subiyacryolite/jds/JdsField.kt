@@ -50,7 +50,7 @@ class JdsField() : Externalizable {
         this.name = name
         this.type = type
         this.description = description
-        bind(this)
+        bindForGlobalLookup(this)
     }
 
     override fun toString(): String {
@@ -82,7 +82,7 @@ class JdsField() : Externalizable {
         /**
          * @param field
          */
-        private fun bind(field: JdsField) {
+        private fun bindForGlobalLookup(field: JdsField) {
             if (!values.containsKey(field.id))
                 values.put(field.id, field)
         }

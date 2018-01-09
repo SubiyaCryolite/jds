@@ -36,8 +36,13 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
     private var entityId = 0L
 
     init {
-        if (referenceType.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val je = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
+        val classHasAnnotation = referenceType.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        val superclassHasAnnotation = referenceType.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        if (classHasAnnotation || superclassHasAnnotation) {
+            val je = when (classHasAnnotation) {
+                true -> referenceType.getAnnotation(JdsEntityAnnotation::class.java)
+                false -> referenceType.superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            }
             entityId = je.entityId
         } else
             throw IllegalArgumentException("You must annotate the class [" + referenceType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")

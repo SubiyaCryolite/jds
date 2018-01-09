@@ -575,8 +575,13 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     fun map(entity: Class<out JdsEntity>) {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val entityAnnotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
+        val classHasAnnotation = entity.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        val superclassHasAnnotation = entity.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        if (classHasAnnotation || superclassHasAnnotation) {
+            val entityAnnotation = when (classHasAnnotation) {
+                true -> entity.getAnnotation(JdsEntityAnnotation::class.java)
+                false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            }
             if (!classes.containsKey(entityAnnotation.entityId)) {
                 classes.put(entityAnnotation.entityId, entity)
                 //do the thing
@@ -598,8 +603,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
                 }
-            } else
-                throw RuntimeException("Duplicate service code for class [${entity.canonicalName}] - [${entityAnnotation.entityId}]")
+            }
         } else
             throw RuntimeException("You must annotate the class [${entity.canonicalName}] with [${JdsEntityAnnotation::class.java}]")
     }

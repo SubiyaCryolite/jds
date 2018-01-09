@@ -75,8 +75,13 @@ abstract class JdsEntity : IJdsEntity {
 
 
     init {
-        if (javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val entityAnnotation = javaClass.getAnnotation(JdsEntityAnnotation::class.java)
+        val classHasAnnotation = javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        val superclassHasAnnotation = javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        if (classHasAnnotation || superclassHasAnnotation) {
+            val entityAnnotation = when (classHasAnnotation) {
+                true -> javaClass.getAnnotation(JdsEntityAnnotation::class.java)
+                false -> javaClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            }
             overview.entityId = entityAnnotation.entityId
             overview.version = entityAnnotation.version
         } else {

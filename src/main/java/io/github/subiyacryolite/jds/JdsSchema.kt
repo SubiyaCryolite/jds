@@ -11,7 +11,7 @@ object JdsSchema {
      * @return
      */
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
-        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 48)
+        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 96)
         val sb = StringBuilder()
         sb.append("CREATE TABLE ")
         sb.append(reportName)
