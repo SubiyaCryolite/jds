@@ -58,6 +58,11 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     var isLoggingAppendOnly = false
 
     /**
+     * Indicate if we are writing data to overview fields
+     */
+    var isWritingOverviewFields = true
+
+    /**
      * Initialise JDS base tables
      */
     fun init() {

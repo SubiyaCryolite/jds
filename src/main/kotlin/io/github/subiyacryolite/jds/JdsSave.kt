@@ -185,13 +185,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
         try {
             //always save overviews first
-            saveOverviews(saveContainer.overviews[step])
+            saveOverviews(jdsDb.isWritingOverviewFields,saveContainer.overviews[step])
 
             //ensure that overviews are submitted before handing over to listeners
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
             //time constraints
-            saveDateConstructs(writeToPrimaryDataTables,
+            saveDateConstructs(
                     saveContainer.monthDayProperties[step],
                     saveContainer.yearMonthProperties[step],
                     saveContainer.periodProperties[step],
@@ -268,7 +268,9 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param overviews
      */
     @Throws(SQLException::class)
-    private fun saveOverviews(overviews: Iterable<IJdsOverview>) {
+    private fun saveOverviews(writeOverviewFDields: Boolean,overviews: Iterable<IJdsOverview>) {
+        if (!writeOverviewFDields)
+            return
         var record = 0
         var recordTotal = 1
         try {
@@ -302,8 +304,10 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param blobProperties
      */
     private fun saveBlobs(blobProperties: HashMap<String, HashMap<Long, BlobProperty>>) {
-        var record = 0
+        if (!writeToPrimaryDataTables)
+            return
         try {
+            var record = 0
             val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
             val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBlobValues())
             for ((uuid, value) in blobProperties) {
@@ -338,181 +342,169 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param booleanProperties
 
      */
-    private fun saveBooleans(booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) {
+    private fun saveBooleans(booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) = try {
         var record = 0
-        try {
-            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBooleanValues())
-            for ((uuid, value1) in booleanProperties) {
-                record++
-                var innerRecord = 0
-                val innerRecordSize = value1.size
-                if (innerRecordSize == 0) continue
-                for ((fieldId, value2) in value1) {
-                    innerRecord++
-                    val value = value2.get()
-                    if (writeToPrimaryDataTables) {
-                        upsert.setString("uuid", uuid)
-                        upsert.setLong("fieldId", fieldId)
-                        upsert.setBoolean("value", value)
-                        upsert.addBatch()
-                    }
-                    if (jdsDb.isPrintingOutput)
-                        println("Updating record [$record]. Boolean fieldEntity [$innerRecord of $innerRecordSize]")
-                    if (!jdsDb.isLoggingEdits) continue
-                    log.setString(1, uuid)
-                    log.setLong(2, fieldId)
-                    log.setInt(3, 0)
-                    log.setBoolean(4, value)
-                    if (!jdsDb.isLoggingAppendOnly) {
-                        log.setString(5, uuid)
-                        log.setLong(6, fieldId)
-                        log.setInt(7, 0)
-                        log.setBoolean(8, value)
-                    }
-                    log.addBatch()
+        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
+        val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBooleanValues())
+        for ((uuid, value1) in booleanProperties) {
+            record++
+            var innerRecord = 0
+            val innerRecordSize = value1.size
+            if (innerRecordSize == 0) continue
+            for ((fieldId, value2) in value1) {
+                innerRecord++
+                val value = value2.get()
+                if (writeToPrimaryDataTables) {
+                    upsert.setString("uuid", uuid)
+                    upsert.setLong("fieldId", fieldId)
+                    upsert.setBoolean("value", value)
+                    upsert.addBatch()
                 }
+                if (jdsDb.isPrintingOutput)
+                    println("Updating record [$record]. Boolean fieldEntity [$innerRecord of $innerRecordSize]")
+                if (!jdsDb.isLoggingEdits) continue
+                log.setString(1, uuid)
+                log.setLong(2, fieldId)
+                log.setInt(3, 0)
+                log.setBoolean(4, value)
+                if (!jdsDb.isLoggingAppendOnly) {
+                    log.setString(5, uuid)
+                    log.setLong(6, fieldId)
+                    log.setInt(7, 0)
+                    log.setBoolean(8, value)
+                }
+                log.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
      * @param integerProperties
-
      */
-    private fun saveIntegers(integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) {
+    private fun saveIntegers(integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) = try {
         var record = 0
-        try {
-            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
-            for ((uuid, value1) in integerProperties) {
-                record++
-                var innerRecord = 0
-                val innerRecordSize = value1.size
-                if (innerRecordSize == 0) continue
-                for ((fieldId, value2) in value1) {
-                    innerRecord++
-                    val value = value2.get()
-                    if (writeToPrimaryDataTables) {
-                        upsert.setString("uuid", uuid)
-                        upsert.setLong("fieldId", fieldId)
-                        upsert.setInt("value", value)
-                        upsert.addBatch()
-                    }
-                    if (jdsDb.isPrintingOutput)
-                        println("Updating record [$record]. Integer fieldEntity [$innerRecord of $innerRecordSize]")
-                    if (!jdsDb.isLoggingEdits) continue
-                    log.setString(1, uuid)
-                    log.setLong(2, fieldId)
-                    log.setInt(3, 0)
-                    log.setInt(4, value)
-                    if (!jdsDb.isLoggingAppendOnly) {
-                        log.setString(5, uuid)
-                        log.setLong(6, fieldId)
-                        log.setInt(7, 0)
-                        log.setInt(8, value)
-                    }
-                    log.addBatch()
+        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
+        val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
+        for ((uuid, value1) in integerProperties) {
+            record++
+            var innerRecord = 0
+            val innerRecordSize = value1.size
+            if (innerRecordSize == 0) continue
+            for ((fieldId, value2) in value1) {
+                innerRecord++
+                val value = value2.get()
+                if (writeToPrimaryDataTables) {
+                    upsert.setString("uuid", uuid)
+                    upsert.setLong("fieldId", fieldId)
+                    upsert.setInt("value", value)
+                    upsert.addBatch()
                 }
+                if (jdsDb.isPrintingOutput)
+                    println("Updating record [$record]. Integer fieldEntity [$innerRecord of $innerRecordSize]")
+                if (!jdsDb.isLoggingEdits) continue
+                log.setString(1, uuid)
+                log.setLong(2, fieldId)
+                log.setInt(3, 0)
+                log.setInt(4, value)
+                if (!jdsDb.isLoggingAppendOnly) {
+                    log.setString(5, uuid)
+                    log.setLong(6, fieldId)
+                    log.setInt(7, 0)
+                    log.setInt(8, value)
+                }
+                log.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
      * @param floatProperties
-
      */
-    private fun saveFloats(floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) {
+    private fun saveFloats(floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) = try {
         var record = 0
-        try {
-            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldFloatValues())
-            for ((uuid, value1) in floatProperties) {
-                record++
-                var innerRecord = 0
-                val innerRecordSize = value1.size
-                if (innerRecordSize == 0) continue
-                for ((fieldId, value2) in value1) {
-                    innerRecord++
-                    val value = value2.get()
-                    if (writeToPrimaryDataTables) {
-                        upsert.setString("uuid", uuid)
-                        upsert.setLong("fieldId", fieldId)
-                        upsert.setFloat("value", value)
-                        upsert.addBatch()
-                    }
-                    if (jdsDb.isPrintingOutput)
-                        System.out.printf("Updating record $record. Float fieldEntity [$innerRecord of $innerRecordSize]")
-                    if (!jdsDb.isLoggingEdits) continue
-                    log.setString(1, uuid)
-                    log.setLong(2, fieldId)
-                    log.setInt(3, 0)
-                    log.setFloat(4, value)
-                    if (!jdsDb.isLoggingAppendOnly) {
-                        log.setString(5, uuid)
-                        log.setLong(6, fieldId)
-                        log.setInt(7, 0)
-                        log.setFloat(8, value)
-                    }
-                    log.addBatch()
+        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
+        val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldFloatValues())
+        for ((uuid, value1) in floatProperties) {
+            record++
+            var innerRecord = 0
+            val innerRecordSize = value1.size
+            if (innerRecordSize == 0) continue
+            for ((fieldId, value2) in value1) {
+                innerRecord++
+                val value = value2.get()
+                if (writeToPrimaryDataTables) {
+                    upsert.setString("uuid", uuid)
+                    upsert.setLong("fieldId", fieldId)
+                    upsert.setFloat("value", value)
+                    upsert.addBatch()
                 }
+                if (jdsDb.isPrintingOutput)
+                    System.out.printf("Updating record $record. Float fieldEntity [$innerRecord of $innerRecordSize]")
+                if (!jdsDb.isLoggingEdits) continue
+                log.setString(1, uuid)
+                log.setLong(2, fieldId)
+                log.setInt(3, 0)
+                log.setFloat(4, value)
+                if (!jdsDb.isLoggingAppendOnly) {
+                    log.setString(5, uuid)
+                    log.setLong(6, fieldId)
+                    log.setInt(7, 0)
+                    log.setFloat(8, value)
+                }
+                log.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
      * @param doubleProperties
-
      */
-    private fun saveDoubles(doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) {
+    private fun saveDoubles(doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) = try {
         var record = 0
-        try {
-            val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
-            val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDoubleValues())
-            for ((uuid, value1) in doubleProperties) {
-                record++
-                var innerRecord = 0
-                val innerRecordSize = value1.size
-                if (innerRecordSize == 0) continue
-                for ((fieldId, value2) in value1) {
-                    innerRecord++
-                    val value = value2.get()
-                    if (writeToPrimaryDataTables) {
-                        upsert.setString("uuid", uuid)
-                        upsert.setLong("fieldId", fieldId)
-                        upsert.setDouble("value", value)
-                        upsert.addBatch()
-                    }
-                    if (jdsDb.isPrintingOutput)
-                        println("Updating record $record. Double fieldEntity [$innerRecord of $innerRecordSize]")
-                    if (!jdsDb.isLoggingEdits) continue
-                    log.setString(1, uuid)
-                    log.setLong(2, fieldId)
-                    log.setInt(3, 0)
-                    log.setDouble(4, value)
-                    if (!jdsDb.isLoggingAppendOnly) {
-                        log.setString(5, uuid)
-                        log.setLong(6, fieldId)
-                        log.setInt(7, 0)
-                        log.setDouble(8, value)
-                    }
-                    log.addBatch()
+        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
+        val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDoubleValues())
+        for ((uuid, value1) in doubleProperties) {
+            record++
+            var innerRecord = 0
+            val innerRecordSize = value1.size
+            if (innerRecordSize == 0) continue
+            for ((fieldId, value2) in value1) {
+                innerRecord++
+                val value = value2.get()
+                if (writeToPrimaryDataTables) {
+                    upsert.setString("uuid", uuid)
+                    upsert.setLong("fieldId", fieldId)
+                    upsert.setDouble("value", value)
+                    upsert.addBatch()
                 }
+                if (jdsDb.isPrintingOutput)
+                    println("Updating record $record. Double fieldEntity [$innerRecord of $innerRecordSize]")
+                if (!jdsDb.isLoggingEdits) continue
+                log.setString(1, uuid)
+                log.setLong(2, fieldId)
+                log.setInt(3, 0)
+                log.setDouble(4, value)
+                if (!jdsDb.isLoggingAppendOnly) {
+                    log.setString(5, uuid)
+                    log.setLong(6, fieldId)
+                    log.setInt(7, 0)
+                    log.setDouble(8, value)
+                }
+                log.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
      * @param longProperties
-
      */
     private fun saveLongs(longProperties: HashMap<String, HashMap<Long, LongProperty>>) = try {
         var record = 0
@@ -601,11 +593,11 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param periodProperties
      * @param durationProperties
      */
-    private fun saveDateConstructs(writeToPrimaryDataTables: Boolean,
-                                   monthDayProperties: HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>,
-                                   yearMonthProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>,
-                                   periodProperties: HashMap<String, HashMap<Long, ObjectProperty<Period>>>,
-                                   durationProperties: HashMap<String, HashMap<Long, ObjectProperty<Duration>>>) = try {
+    private fun saveDateConstructs(
+            monthDayProperties: HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>,
+            yearMonthProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>,
+            periodProperties: HashMap<String, HashMap<Long, ObjectProperty<Period>>>,
+            durationProperties: HashMap<String, HashMap<Long, ObjectProperty<Duration>>>) = try {
         var record = 0
         val upsertText = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
         val upsertLong = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
@@ -1496,6 +1488,9 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     fun getOrAddNamedCall(query: String) = onPostSaveEventArguments.getOrAddNamedCall(query)
 
+    /**
+     * Helper method allowing you to add custom logic preceding a normal JDS save event
+     */
     fun addCustomSaveEvent(jdsSaveEvent: JdsSaveEvent) {
         jdsSaveEvents.add(jdsSaveEvent)
     }
