@@ -17,15 +17,10 @@ import java.time.LocalDateTime;
 
 interface IJdsOverview {
 
-    var dateCreated:LocalDateTime
-
-    var dateModified:LocalDateTime
-
-    var entityId:Long
-
-    var uuid:String
-
-    var live:Boolean
-
-    var version:Long
+    var dateCreated: LocalDateTime
+    var dateModified: LocalDateTime
+    var entityId: Long
+    var uuid: String
+    var live: Boolean
+    var version: Long
 }

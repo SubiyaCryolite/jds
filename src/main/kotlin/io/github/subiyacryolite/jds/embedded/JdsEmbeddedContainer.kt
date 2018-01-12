@@ -52,7 +52,7 @@ class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 /**
  * @param entities
  */
-class JdsEmbeddedContainer(entities: Collection<JdsEntity>) {
+class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
     /**
      * Embedded objects
      */

@@ -27,15 +27,10 @@ import java.util.*
 class JdsOverview : IJdsOverview, Externalizable {
 
     override var dateCreated: LocalDateTime = LocalDateTime.now()
-
     override var dateModified: LocalDateTime = LocalDateTime.now()
-
     override var entityId: Long = 0
-
     override var uuid: String = UUID.randomUUID().toString()
-
     override var version: Long = 1L
-
     override var live: Boolean = true
 
     @Throws(IOException::class)

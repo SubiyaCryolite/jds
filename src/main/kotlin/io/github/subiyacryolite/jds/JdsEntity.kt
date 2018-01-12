@@ -33,6 +33,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.HashSet
+import kotlin.coroutines.experimental.SequenceBuilder
+import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
@@ -1253,6 +1255,12 @@ abstract class JdsEntity : IJdsEntity {
             standardizeObjectUuids(entry.value.value.overview.uuid, entry.value.value.objectProperties)
             standardizeObjectCollectionUuids(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
         }
+    }
+
+    internal fun yieldOverviews(): Sequence<IJdsOverview> = buildSequence{
+        yield(overview)
+        objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
+        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }
     }
 
     companion object : Externalizable {
