@@ -103,29 +103,6 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     companion object {
 
         private val serialVersionUID = 20171109_0853L
-
-        private val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap<Long, JdsFieldEnum<*>>()
-
-        /**
-         * @param field
-         * @return
-         */
-        operator fun get(field: JdsField): JdsFieldEnum<*>? {
-            return if (enums.containsKey(field.id))
-                enums[field.id]
-            else
-                throw RuntimeException("This jdsField $field has not been bound to any enums")
-        }
-
-        /**
-         * @param fieldId
-         * @return
-         */
-        operator fun get(fieldId: Long): JdsFieldEnum<*>? {
-            return if (enums.containsKey(fieldId))
-                enums[fieldId]
-            else
-                throw RuntimeException(String.format("This field [%s] has not been bound to any enums", fieldId))
-        }
+        val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap()
     }
 }

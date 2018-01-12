@@ -172,9 +172,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                             batchSequence++
                                                                                         }
                                                                                         //catch embedded/pre-created objects objects as well
-                                                                                        for (entity in entities)
-                                                                                            if (entity is JdsLoadListener)
-                                                                                                (entity as JdsLoadListener).onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections))
+                                                                                        entities.filterIsInstance<JdsLoadListener>().forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
 
                                                                                         if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
                                                                                             //primitives
@@ -204,9 +202,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                                                                         }
                                                                                         populateOverviews(entities, overviews)
                                                                                         //catch embedded/pre-created objects objects as well
-                                                                                        for (entity in entities)
-                                                                                            if (entity is JdsLoadListener)
-                                                                                                (entity as JdsLoadListener).onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections))
+                                                                                        entities.filterIsInstance<JdsLoadListener>().forEach { it.onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections)) }
 
                                                                                         //close alternate connections
                                                                                         alternateConnections.forEach { it.value.close() }

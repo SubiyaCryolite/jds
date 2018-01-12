@@ -68,10 +68,19 @@ open class JdsTable() : Serializable {
     /**
      * If you are creating a JdsTable in memory
      * Register fieldIds here
-     * @param field
+     * @param fieldId
      */
-    fun registerField(field: JdsField) {
-        fields.add(field.id)
+    fun registerField(fieldId: Long) {
+        fields.add(fieldId)
+    }
+
+    /**
+     * If you are creating a JdsTable in memory
+     * Register fieldIds here
+     * @param jdsField
+     */
+    fun registerField(jdsField: JdsField) {
+        registerField(jdsField.id)
     }
 
     /**

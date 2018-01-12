@@ -43,7 +43,7 @@ object JdsSchema {
                 JdsFieldType.STRING_COLLECTION,
                 JdsFieldType.DATE_TIME_COLLECTION -> {
                 }
-                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum[field.id]!!.values.forEachIndexed { index, enum ->
+                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[field.id]!!.values.forEachIndexed { _, enum ->
                     val columnName = "${field.name}_${enum!!.ordinal}"
                     val columnDefinition = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
                     collection.put(columnName, String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnDefinition))

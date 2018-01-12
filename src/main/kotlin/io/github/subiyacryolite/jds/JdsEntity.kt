@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
     //fieldEntity and enum maps
-    private val fields: MutableSet<JdsField> = HashSet()
-    private val enums: MutableSet<JdsFieldEnum<*>> = HashSet()
+    private val fields: MutableSet<Long> = HashSet()
+    private val enums: MutableSet<Long> = HashSet()
     //time constructs
     private val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
     private val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
@@ -96,7 +96,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, integerProperty: BlobProperty) {
         if (field.type != JdsFieldType.BLOB)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         blobProperties.put(field.id, integerProperty)
     }
 
@@ -107,28 +107,28 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, integerProperty: IntegerProperty) {
         if (field.type != JdsFieldType.INT)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         integerProperties.put(field.id, integerProperty)
     }
 
     protected fun mapMonthDay(field: JdsField, property: ObjectProperty<MonthDay>) {
         if (field.type != JdsFieldType.MONTH_DAY)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         monthDayProperties.put(field.id, property)
     }
 
     protected fun mapPeriod(field: JdsField, property: ObjectProperty<Period>) {
         if (field.type != JdsFieldType.PERIOD)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         periodProperties.put(field.id, property)
     }
 
     protected fun mapDuration(field: JdsField, property: ObjectProperty<Duration>) {
         if (field.type != JdsFieldType.DURATION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         durationProperties.put(field.id, property)
     }
 
@@ -142,31 +142,31 @@ abstract class JdsEntity : IJdsEntity {
             is LocalDateTime -> {
                 if (field.type != JdsFieldType.DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
-                fields.add(field)
+                fields.add(field.id)
                 localDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is ZonedDateTime -> {
                 if (field.type != JdsFieldType.ZONED_DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
-                fields.add(field)
+                fields.add(field.id)
                 zonedDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is LocalDate -> {
                 if (field.type != JdsFieldType.DATE)
                     throw RuntimeException("Please assign the correct type to field [$field]")
-                fields.add(field)
+                fields.add(field.id)
                 localDateProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is LocalTime -> {
                 if (field.type != JdsFieldType.TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
-                fields.add(field)
+                fields.add(field.id)
                 localTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
             }
             is YearMonth -> {
                 if (field.type != JdsFieldType.YEAR_MONTH)
                     throw RuntimeException("Please assign the correct type to field [$field]")
-                fields.add(field)
+                fields.add(field.id)
                 yearMonthProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
 
             }
@@ -180,7 +180,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: StringProperty) {
         if (field.type != JdsFieldType.STRING)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         stringProperties.put(field.id, property)
 
     }
@@ -192,7 +192,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: FloatProperty) {
         if (field.type != JdsFieldType.FLOAT)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         floatProperties.put(field.id, property)
     }
 
@@ -203,7 +203,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: LongProperty) {
         if (field.type != JdsFieldType.LONG)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         longProperties.put(field.id, property)
     }
 
@@ -214,7 +214,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: DoubleProperty) {
         if (field.type != JdsFieldType.DOUBLE)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         doubleProperties.put(field.id, property)
 
     }
@@ -226,7 +226,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: BooleanProperty) {
         if (field.type != JdsFieldType.BOOLEAN)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         booleanProperties.put(field.id, property)
     }
 
@@ -237,7 +237,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapStrings(field: JdsField, properties: MutableCollection<String>) {
         if (field.type != JdsFieldType.STRING_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         stringArrayProperties.put(field.id, properties)
     }
 
@@ -248,7 +248,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapDateTimes(field: JdsField, properties: MutableCollection<LocalDateTime>) {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         dateTimeArrayProperties.put(field.id, properties)
     }
 
@@ -259,7 +259,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapFloats(field: JdsField, properties: MutableCollection<Float>) {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         floatArrayProperties.put(field.id, properties)
     }
 
@@ -270,7 +270,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapIntegers(field: JdsField, properties: MutableCollection<Int>) {
         if (field.type != JdsFieldType.INT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         integerArrayProperties.put(field.id, properties)
     }
 
@@ -281,7 +281,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapDoubles(field: JdsField, properties: MutableCollection<Double>) {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         doubleArrayProperties.put(field.id, properties)
     }
 
@@ -292,7 +292,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapLongs(field: JdsField, properties: MutableCollection<Long>) {
         if (field.type != JdsFieldType.LONG_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
-        fields.add(field)
+        fields.add(field.id)
         longArrayProperties.put(field.id, properties)
     }
 
@@ -303,8 +303,8 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(fieldEnum: JdsFieldEnum<*>, property: ObjectProperty<out Enum<*>>) {
         if (fieldEnum.field.type != JdsFieldType.ENUM)
             throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
-        enums.add(fieldEnum)
-        fields.add(fieldEnum.field)
+        enums.add(fieldEnum.field.id)
+        fields.add(fieldEnum.field.id)
         enumProperties.put(fieldEnum, property as ObjectProperty<Enum<*>>)
     }
 
@@ -315,8 +315,8 @@ abstract class JdsEntity : IJdsEntity {
     protected fun mapEnums(fieldEnum: JdsFieldEnum<*>, properties: MutableCollection<out Enum<*>>) {
         if (fieldEnum.field.type != JdsFieldType.ENUM_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
-        enums.add(fieldEnum)
-        fields.add(fieldEnum.field)
+        enums.add(fieldEnum.field.id)
+        fields.add(fieldEnum.field.id)
         enumCollectionProperties.put(fieldEnum, properties as MutableCollection<Enum<*>>)
 
     }
@@ -330,7 +330,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         if (!objectArrayProperties.containsKey(fieldEntity) && !objectProperties.containsKey(fieldEntity)) {
             objectProperties.put(fieldEntity, property as ObjectProperty<JdsEntity>)
-            fields.add(fieldEntity.fieldEntity)
+            fields.add(fieldEntity.fieldEntity.id)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
@@ -345,7 +345,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         if (!objectArrayProperties.containsKey(fieldEntity)) {
             objectArrayProperties.put(fieldEntity, properties as MutableCollection<JdsEntity>)
-            fields.add(fieldEntity.fieldEntity)
+            fields.add(fieldEntity.fieldEntity.id)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
@@ -610,8 +610,8 @@ abstract class JdsEntity : IJdsEntity {
     override fun readExternal(objectInputStream: ObjectInput) {
         //fieldEntity and enum maps
         overview = objectInputStream.readObject() as JdsOverview
-        fields.addAll(objectInputStream.readObject() as Set<JdsField>)
-        enums.addAll(objectInputStream.readObject() as Set<JdsFieldEnum<*>>)
+        fields.addAll(objectInputStream.readObject() as Set<Long>)
+        enums.addAll(objectInputStream.readObject() as Set<Long>)
         //objects
         putObject(objectProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
         //time constructs
@@ -1070,14 +1070,15 @@ abstract class JdsEntity : IJdsEntity {
         (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
             (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
                 fields.forEach {
+                    val lookup = JdsField.values[it]!!
                     //1. map this fieldEntity ID to the entity type
                     mapClassFields.setLong("entityId", entityId)
-                    mapClassFields.setLong("fieldId", it.id)
+                    mapClassFields.setLong("fieldId", lookup.id)
                     mapClassFields.addBatch()
                     //2. map this fieldEntity to the fieldEntity dictionary
-                    mapFieldNames.setLong("fieldId", it.id)
-                    mapFieldNames.setString("fieldName", it.name)
-                    mapFieldNames.setString("fieldDescription", it.description)
+                    mapFieldNames.setLong("fieldId", lookup.id)
+                    mapFieldNames.setString("fieldName", lookup.name)
+                    mapFieldNames.setString("fieldDescription", lookup.description)
                     mapFieldNames.addBatch()
                 }
                 mapClassFields.executeBatch()
@@ -1110,8 +1111,9 @@ abstract class JdsEntity : IJdsEntity {
     internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection) = try {
         (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
             fields.forEach {
-                mapFieldTypes.setLong("typeId", it.id)
-                mapFieldTypes.setString("typeName", it.type.toString())
+                val jdsField = JdsField.values[it]!!
+                mapFieldTypes.setLong("typeId", jdsField.id)
+                mapFieldTypes.setString("typeName", jdsField.type.toString())
                 mapFieldTypes.addBatch()
             }
             mapFieldTypes.executeBatch()
@@ -1125,15 +1127,16 @@ abstract class JdsEntity : IJdsEntity {
      * @param jdsDb
      * @param connection the SQL connection to use for DB operations
      * @param entityId   the value representing the entity
-     * @param fields     the entity's enumProperties
+     * @param fieldIds     the entity's enumProperties
      */
     @Synchronized
-    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fields: Set<JdsFieldEnum<*>>) = try {
+    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fieldIds: Set<Long>) = try {
         (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use {
-            for (field in fields) {
-                for (index in 0 until field.values.size) {
+            for (fieldIds in fieldIds) {
+                val jdsFieldEnum = JdsFieldEnum.enums[fieldIds]!!
+                for (index in 0 until jdsFieldEnum.values.size) {
                     it.setLong(1, entityId)
-                    it.setLong(2, field.field.id)
+                    it.setLong(2, jdsFieldEnum.field.id)
                     it.addBatch()
                 }
             }
@@ -1147,18 +1150,20 @@ abstract class JdsEntity : IJdsEntity {
      * Binds all the values attached to an enum
      * @param jdsDb
      * @param connection the SQL connection to use for DB operations
-     * @param fieldEnums the fieldEntity enum
+     * @param fieldIds the fieldEntity enum
      */
     @Synchronized
-    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldEnums: Set<JdsFieldEnum<*>>) = try {
+    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldIds: Set<Long>) = try {
         (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use {
-            for (field in fieldEnums)
-                for (index in 0 until field.values.size) {
-                    it.setLong(1, field.field.id)
+            for (fieldId in fieldIds) {
+                val jdsFieldEnum = JdsFieldEnum.enums[fieldId]!!
+                for (index in 0 until jdsFieldEnum.values.size) {
+                    it.setLong(1, jdsFieldEnum.field.id)
                     it.setInt(2, index)
-                    it.setString(3, field.values[index].toString())
+                    it.setString(3, jdsFieldEnum.values[index].toString())
                     it.addBatch()
                 }
+            }
             it.executeBatch()
         }
     } catch (ex: Exception) {
