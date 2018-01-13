@@ -39,8 +39,13 @@ open class JdsTable() : Serializable {
      */
     @JvmOverloads
     constructor(entity: Class<out IJdsEntity>, uniqueEntries: Boolean = false) : this() {
-        if (entity.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val annotation = entity.getAnnotation(JdsEntityAnnotation::class.java)
+        val annotatedClass = entity.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        val annotatedParent = entity.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        if (annotatedClass || annotatedParent) {
+            val annotation = when (annotatedClass) {
+                true -> entity.getAnnotation(JdsEntityAnnotation::class.java)
+                false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            }
             name = annotation.entityName
             this.uniqueEntries = uniqueEntries
             registerEntity(entity, true)
@@ -55,8 +60,13 @@ open class JdsTable() : Serializable {
      */
     @JvmOverloads
     fun registerEntity(entityClass: Class<out IJdsEntity>, registerFields: Boolean = false) {
-        if (entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-            val annotation = entityClass.getAnnotation(JdsEntityAnnotation::class.java)
+        val annotatedClass = entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        val annotatedParent = entityClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+        if (annotatedClass || annotatedParent) {
+            val annotation = when (annotatedClass) {
+                true -> entityClass.getAnnotation(JdsEntityAnnotation::class.java)
+                false -> entityClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
+            }
             entities.add(annotation.entityId)
             if (registerFields) {
                 val entity = entityClass.newInstance()
