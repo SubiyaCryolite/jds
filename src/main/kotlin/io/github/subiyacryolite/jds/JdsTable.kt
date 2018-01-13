@@ -121,8 +121,8 @@ open class JdsTable() : Serializable {
                 deleteRecordInternal(eventArguments, iConnection, entity.overview.uuid)
 
             val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
-            insertStatement.setObject(1, entity.overview.uuid)
-
+            insertStatement.setString(1, entity.overview.uuid)
+            insertStatement.setLong(2, entity.overview.entityId)
             //order will be maintained by linked list
             columnNames.forEachIndexed { columnIndex, columnName ->
                 val field = columnToFieldMap[columnName]!!
@@ -131,9 +131,9 @@ open class JdsTable() : Serializable {
                     false -> entity.getReportAtomicValue(field.id, 0)
                 }
                 when (value) {
-                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 2, value, jdsDb)
-                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 2, value, jdsDb)
-                    else -> insertStatement.setObject(columnIndex + 2, value ?: null)
+                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 3, value, jdsDb)
+                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 3, value, jdsDb)
+                    else -> insertStatement.setObject(columnIndex + 3, value ?: null)
                 }
             }
             insertStatement.addBatch()
@@ -187,8 +187,8 @@ open class JdsTable() : Serializable {
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val tableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
-        val primaryKey = JdsSchema.getPrimaryKey()
-
+        val primaryKeyColumn = JdsSchema.getPrimaryKeyColumn()
+        val entityIdColumn = JdsSchema.getEntityIdColumn()
 
         if (!jdsDb.doesTableExist(connection, name))
             connection.prepareStatement(tableSql).use {
@@ -198,7 +198,9 @@ open class JdsTable() : Serializable {
             }
 
         //mandatory primary key
-        insertColumns.add(primaryKey)
+        insertColumns.add(primaryKeyColumn)
+        insertColumns.add(entityIdColumn)
+        insertParameters.add("?")
         insertParameters.add("?")
 
         columnSql.forEach { columnName, sql ->
@@ -215,7 +217,7 @@ open class JdsTable() : Serializable {
             insertParameters.add("?")
         }
 
-        deleteSql = "DELETE FROM $name WHERE $primaryKey = ?"
+        deleteSql = "DELETE FROM $name WHERE $primaryKeyColumn = ?"
         insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
 
         generatedOrUpdatedSchema = true

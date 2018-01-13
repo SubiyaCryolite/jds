@@ -15,10 +15,10 @@ object JdsSchema {
         val sb = StringBuilder()
         sb.append("CREATE TABLE ")
         sb.append(reportName)
-        sb.append("( ${getPrimaryKey()} $guidDataType ${when (appendOnly) {
+        sb.append("( ${getPrimaryKeyColumn()} $guidDataType ${when (appendOnly) {
             true -> "PRIMARY KEY"
             else -> ""
-        }})")
+        }}, ${getEntityIdColumn()} ${jdsDb.getDbLongDataType()})")
         return sb.toString()
     }
 
@@ -101,7 +101,14 @@ object JdsSchema {
     /**
      * @return
      */
-    fun getPrimaryKey(): String {
-        return "uuid"
+    fun getPrimaryKeyColumn(): String {
+        return "Uuid"
+    }
+
+    /**
+     * @return
+     */
+    fun getEntityIdColumn(): String {
+        return "EntityId"
     }
 }
