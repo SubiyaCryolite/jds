@@ -39,35 +39,35 @@ class BulkSaveAndLoad : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun postgreSqlImplementation() {
+    fun testPostgreSql() {
         initialisePostgeSqlBackend()//13s 175ms
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun oracleImplementation() {
+    fun testOracle() {
         initialiseOracleBackend()//11s 79ms
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun tSqlImplementation() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()//8s 326ms
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun sqLiteImplementation() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()//12s 501ms
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun mySqlImplementation() {
+    fun testMySql() {
         initialiseMysqlBackend()
         saveAndLoad()//8s 126ms
     }
@@ -75,10 +75,10 @@ class BulkSaveAndLoad : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun allImplementations() {
-        sqLiteImplementation()
-        tSqlImplementation()
-        postgreSqlImplementation()
-        mySqlImplementation()
-        oracleImplementation()
+        testSqLite()
+        testTransactionalSql()
+        testPostgreSql()
+        testMySql()
+        testOracle()
     }
 }

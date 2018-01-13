@@ -1,8 +1,9 @@
-CREATE TABLE JdsStoreFloatArray(
-    FieldId     BIGINT,
-    Uuid  VARCHAR(96),
-    Sequence    INT,
-    Value       FLOAT,
-    PRIMARY KEY (FieldId,Uuid,Sequence),
-    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_float_array (
+  field_id BIGINT,
+  uuid     VARCHAR(96),
+  sequence INT,
+  value    FLOAT,
+  PRIMARY KEY (field_id, uuid, sequence),
+  FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid)
+    ON DELETE CASCADE
 );

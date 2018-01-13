@@ -1,16 +1,16 @@
-CREATE TABLE JdsStoreOldFieldValues(
-    Uuid			NVARCHAR2(96),
-    FieldId				NUMBER(19),
-    DateOfModification	TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    Sequence            NUMBER(10),
-    StringValue			NCLOB,
-    IntegerValue		NUMBER(10),
-    FloatValue			BINARY_FLOAT,
-    DoubleValue			BINARY_DOUBLE,
-    LongValue			NUMBER(19),
-    DateTimeValue		TIMESTAMP,
-    TimeValue			NUMBER(19),
-    BooleanValue		NUMBER(3),
-    ZonedDateTimeValue	TIMESTAMP WITH TIME ZONE,
-    BlobValue           BLOB
+CREATE TABLE jds_store_old_field_values (
+  uuid                  NVARCHAR2(96),
+  field_id              NUMBER(19),
+  date_of_modification  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  sequence              NUMBER(10),
+  string_value          NCLOB,
+  integer_value         NUMBER(10),
+  float_value           BINARY_FLOAT,
+  double_value          BINARY_DOUBLE,
+  long_value            NUMBER(19),
+  date_time_value       TIMESTAMP,
+  time_value            NUMBER(19),
+  boolean_value         NUMBER(3),
+  zoned_date_time_value TIMESTAMP WITH TIME ZONE,
+  blob_value            BLOB
 )

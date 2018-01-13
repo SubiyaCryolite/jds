@@ -9,10 +9,10 @@ import java.sql.*
 interface INamedStatement : Statement {
 
     @Throws(SQLException::class)
-    fun setObject(name: String, value: Any)
+    fun setObject(name: String, value: Any?)
 
     @Throws(SQLException::class)
-    fun setString(name: String, value: String)
+    fun setString(name: String, value: String?)
 
     @Throws(SQLException::class)
     fun setInt(name: String, value: Int)
@@ -24,10 +24,10 @@ interface INamedStatement : Statement {
     fun setBoolean(name: String, value: Boolean)
 
     @Throws(SQLException::class)
-    fun setBytes(name: String, value: ByteArray)
+    fun setBytes(name: String, value: ByteArray?)
 
     @Throws(SQLException::class)
-    fun setBlob(name: String, value: InputStream)
+    fun setBlob(name: String, value: InputStream?)
 
     @Throws(SQLException::class)
     fun setFloat(name: String, value: Float)
@@ -39,7 +39,7 @@ interface INamedStatement : Statement {
     fun setDouble(name: String, value: Double)
 
     @Throws(SQLException::class)
-    fun setTimestamp(name: String, value: Timestamp)
+    fun setTimestamp(name: String, value: Timestamp?)
 
     fun getStatement(): PreparedStatement
 

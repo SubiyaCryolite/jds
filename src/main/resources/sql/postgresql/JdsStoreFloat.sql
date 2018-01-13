@@ -1,7 +1,7 @@
-CREATE TABLE JdsStoreFloat(
-	FieldId     BIGINT,
-	Uuid    VARCHAR(96),
-	Value       REAL,
-	PRIMARY KEY (FieldId,Uuid),
-	FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_float (
+  field_id BIGINT,
+  uuid     VARCHAR(96),
+  value    REAL,
+  PRIMARY KEY (field_id, uuid),
+  FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE
 );

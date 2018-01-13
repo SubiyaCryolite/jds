@@ -102,13 +102,13 @@ object JdsSchema {
      * @return
      */
     fun getPrimaryKeyColumn(): String {
-        return "Uuid"
+        return "uuid"
     }
 
     /**
      * @return
      */
     fun getEntityIdColumn(): String {
-        return "EntityId"
+        return "entity_id"
     }
 }

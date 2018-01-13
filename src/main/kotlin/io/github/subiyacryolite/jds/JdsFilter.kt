@@ -95,7 +95,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     @Throws(Exception::class)
     override fun call(): MutableList<T> {
-        val matchingUuids = ArrayList<String>()
+        val matchingUUIDs = ArrayList<String>()
         val sql = this.toQuery()
         try {
             jdsDb.getConnection().use {
@@ -108,7 +108,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
                         }
                     it.executeQuery().use {
                         while (it.next())
-                            matchingUuids.add(it.getString("Uuid"))
+                            matchingUUIDs.add(it.getString("UUID"))
                     }
                 }
             }
@@ -116,11 +116,11 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
             ex.printStackTrace(System.err)
         }
 
-        return if (matchingUuids.isEmpty()) {
+        return if (matchingUUIDs.isEmpty()) {
             //no results. return empty collection
             //if you pass empty collection to jds load it will assume load EVERYTHING
             ArrayList()
-        } else JdsLoad(jdsDb, referenceType, matchingUuids).call()
+        } else JdsLoad(jdsDb, referenceType, matchingUUIDs).call()
     }
 
 
@@ -129,13 +129,13 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     private fun toQuery(): String {
         val main = StringBuilder()
-        main.append("SELECT DISTINCT eo.Uuid FROM JdsEntityInstance eo\n")
-        main.append("JOIN JdsEntities entity ON eo.EntityId = entity.EntityId")
+        main.append("SELECT DISTINCT eo.uuid FROM JdsEntityInstance eo\n")
+        main.append("JOIN JdsEntities entity ON eo.entity_id = entity.entity_id")
         if (tablesToJoin.size > 0) {
             main.append(" JOIN ")
             main.append(createLeftJoins(tablesToJoin))
         }
-        main.append("\nWHERE entity.EntityId = ")
+        main.append("\nWHERE entity.entity_id = ")
         main.append(entityId)
         if (blockStrings.size > 0) {
             main.append(" AND ")
@@ -158,7 +158,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
     private fun createLeftJoins(tablesToJoin: HashSet<JdsFieldType>): String {
         val tables = ArrayList<String>()
         for (ft in tablesToJoin) {
-            tables.add(String.format("%s %s on %s.Uuid = eo.Uuid", JdsTableLookup.getTableForFieldType(ft), JdsTableLookup.getTableAliasForFieldType(ft), JdsTableLookup.getTableAliasForFieldType(ft)))
+            tables.add(String.format("%s %s on %s.uuid = eo.uuid", JdsTableLookup.getTableForFieldType(ft), JdsTableLookup.getTableAliasForFieldType(ft), JdsTableLookup.getTableAliasForFieldType(ft)))
         }
         return tables.joinToString(" JOIN\n")
     }
@@ -182,7 +182,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun isNotNull(field: JdsField): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s IS NOT NULL)",
+        val builder = String.format("(%s.field_id = %s AND %s IS NOT NULL)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -197,7 +197,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun isNull(field: JdsField): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s IS NULL)",
+        val builder = String.format("(%s.field_id = %s AND %s IS NULL)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -212,7 +212,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun between(field: JdsField, value1: Any, value2: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND (%s BETWEEN ? AND ?) )",
+        val builder = String.format("(%s.field_id = %s AND (%s BETWEEN ? AND ?) )",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -228,7 +228,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun notLessThan(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s !< ?)",
+        val builder = String.format("(%s.field_id = %s AND %s !< ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type), field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
         currentStrings.add(builder)
@@ -242,7 +242,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun lessThan(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s < ?)",
+        val builder = String.format("(%s.field_id = %s AND %s < ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -257,7 +257,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun lessThanOrEqualTo(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s < ?)",
+        val builder = String.format("(%s.field_id = %s AND %s < ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -272,7 +272,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun notGreaterThan(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s !> ?)",
+        val builder = String.format("(%s.field_id = %s AND %s !> ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -287,7 +287,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun greaterThan(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s > ?)",
+        val builder = String.format("(%s.field_id = %s AND %s > ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -302,7 +302,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun greaterThanOrEqualTo(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s >= ?)",
+        val builder = String.format("(%s.field_id = %s AND %s >= ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -317,7 +317,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun equals(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s = ?)",
+        val builder = String.format("(%s.field_id = %s AND %s = ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -332,7 +332,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun notEquals(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s <> ?)",
+        val builder = String.format("(%s.field_id = %s AND %s <> ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -347,7 +347,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun like(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s LIKE ?)",
+        val builder = String.format("(%s.field_id = %s AND %s LIKE ?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -362,7 +362,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun startsLike(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s LIKE ?%)",
+        val builder = String.format("(%s.field_id = %s AND %s LIKE ?%)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -377,7 +377,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun endsLike(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s LIKE %?)",
+        val builder = String.format("(%s.field_id = %s AND %s LIKE %?)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -392,7 +392,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun notLike(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s NOT LIKE %)",
+        val builder = String.format("(%s.field_id = %s AND %s NOT LIKE %)",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -407,7 +407,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun `in`(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s IN (?))",
+        val builder = String.format("(%s.field_id = %s AND %s IN (?))",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))
@@ -423,7 +423,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     fun notIn(field: JdsField, value: Any): JdsFilter<*> {
         tablesToJoin.add(field.type)
-        val builder = String.format("(%s.FieldId = %s AND %s NOT IN (?))",
+        val builder = String.format("(%s.field_id = %s AND %s NOT IN (?))",
                 JdsTableLookup.getTableAliasForFieldType(field.type),
                 field.id,
                 (if (jdsDb.isOracleDb && isLob(field)) "dbms_lob.substr(PLACE_HOLD.Value, dbms_lob.getlength(PLACE_HOLD.Value), 1)" else "PLACE_HOLD.Value").replace("PLACE_HOLD".toRegex(), JdsTableLookup.getTableAliasForFieldType(field.type)))

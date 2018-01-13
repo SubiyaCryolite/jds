@@ -29,21 +29,21 @@ class TimeConstructs : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun testSqlite() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun testTsql() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun testMysSql() {
+    fun testMySql() {
         initialiseMysqlBackend()
         saveAndLoad()
     }
@@ -65,10 +65,10 @@ class TimeConstructs : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testAllInitialilization() {
-        testMysSql()
+        testMySql()
         testOracle()
         testPostgreSql()
-        testSqlite()
-        testTsql()
+        testSqLite()
+        testTransactionalSql()
     }
 }

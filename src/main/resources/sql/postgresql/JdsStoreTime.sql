@@ -1,7 +1,7 @@
-CREATE TABLE JdsStoreTime(
-    FieldId     BIGINT,
-    Uuid        VARCHAR(96),
-    Value       TIME WITHOUT TIME ZONE,
-    PRIMARY KEY (FieldId,Uuid),
-    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_time (
+  field_id BIGINT,
+  uuid     VARCHAR(96),
+  value    TIME WITHOUT TIME ZONE,
+  PRIMARY KEY (field_id, uuid),
+  FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE
 );

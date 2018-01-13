@@ -46,7 +46,7 @@ class JdsTextCollections(val k: Long, val s: Int, val v: String?)
 class JdsFloatCollections(val k: Long, val s: Int, val v: Float?)
 class JdsEnumCollections(val k: Long, val s: Int, val v: Int?)
 //overviews
-class JdsEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
+class jds_entity_overview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
 class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
 /**

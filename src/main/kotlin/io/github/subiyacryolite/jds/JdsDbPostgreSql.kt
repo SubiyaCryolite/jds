@@ -149,23 +149,23 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEntities.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefEntity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEnums.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefEnum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsFields.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefField.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefFieldType.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEntityFields.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefEntityField.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
@@ -173,7 +173,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/postgresql/jdsEntityOverview.sql")
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
@@ -213,32 +213,30 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE)
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreEntityOverviewV3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreEntityInheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindFieldNames.sql")
-            JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindFieldTypes.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreBoolean.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreBlob.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreTime.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreText.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreLong.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreInteger.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreFloat.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreDouble.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreDateTime.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/procStoreZonedDateTime.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindEntityFields.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindEntityEnums.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/postgresql/procedures/procRefEntities.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/postgresql/procedures/procRefEnumValues.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/procBindParentToChild.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreEntityOverviewV3.sql")
+            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreEntityInheritance.sql")
+            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefField.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreBoolean.sql")
+            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreBlob.sql")
+            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreTime.sql")
+            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreText.sql")
+            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreLong.sql")
+            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreInteger.sql")
+            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreFloat.sql")
+            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreDouble.sql")
+            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreDateTime.sql")
+            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcStoreZonedDateTime.sql")
+            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefEntityField.sql")
+            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefEntityEnum.sql")
+            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefEntity.sql")
+            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefEnum.sql")
+            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/ProcRefEntityInheritance.sql")
             else -> {
             }
         }

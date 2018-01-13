@@ -1,9 +1,9 @@
-CREATE TABLE JdsEntityOverview
+CREATE TABLE jds_entity_overview
 (
-    Uuid          VARCHAR(96),
-    DateCreated         TIMESTAMP,
-    DateModified        TIMESTAMP,
-    Version             BIGINT,
-    Live                BOOLEAN,
-    PRIMARY KEY         (Uuid)
+  uuid          VARCHAR(96),
+  date_created  TIMESTAMP,
+  date_modified TIMESTAMP,
+  version       BIGINT,
+  live          BOOLEAN,
+  PRIMARY KEY (uuid)
 );

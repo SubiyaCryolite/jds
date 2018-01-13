@@ -33,7 +33,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.HashSet
-import kotlin.coroutines.experimental.SequenceBuilder
 import kotlin.coroutines.experimental.buildSequence
 
 /**
@@ -1066,7 +1065,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
         (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
-            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldNames()) else NamedPreparedStatement(connection, jdsDb.mapFieldNames())).use { mapFieldNames ->
+            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldName()) else NamedPreparedStatement(connection, jdsDb.mapFieldName())).use { mapFieldName ->
                 getFields(overview.entityId).forEach {
                     val lookup = JdsField.values[it]!!
                     //1. map this fieldEntity ID to the entity type
@@ -1074,13 +1073,14 @@ abstract class JdsEntity : IJdsEntity {
                     mapClassFields.setLong("fieldId", lookup.id)
                     mapClassFields.addBatch()
                     //2. map this fieldEntity to the fieldEntity dictionary
-                    mapFieldNames.setLong("fieldId", lookup.id)
-                    mapFieldNames.setString("fieldName", lookup.name)
-                    mapFieldNames.setString("fieldDescription", lookup.description)
-                    mapFieldNames.addBatch()
+                    mapFieldName.setLong("fieldId", lookup.id)
+                    mapFieldName.setString("fieldName", lookup.name)
+                    mapFieldName.setString("fieldDescription", lookup.description)
+                    mapFieldName.setInt("typeOrdinal", lookup.type.ordinal)
+                    mapFieldName.addBatch()
                 }
                 mapClassFields.executeBatch()
-                mapFieldNames.executeBatch()
+                mapFieldName.executeBatch()
             }
         }
     } catch (ex: Exception) {
@@ -1099,25 +1099,6 @@ abstract class JdsEntity : IJdsEntity {
         mapClassEnumsImplementation(jdsDb, connection, entityId, getEnums(overview.entityId))
         if (jdsDb.isPrintingOutput)
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
-    }
-
-    /**
-     * Binds all the fieldEntity types and updates reference tables
-     * @param jdsDb the current database implementation
-     * @param connection the SQL connection to use for DB operations
-     */
-    internal fun mapClassFieldTypes(jdsDb: JdsDb, connection: Connection) = try {
-        (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldTypes()) else NamedPreparedStatement(connection, jdsDb.mapFieldTypes())).use { mapFieldTypes ->
-            getFields(overview.entityId).forEach {
-                val jdsField = JdsField.values[it]!!
-                mapFieldTypes.setLong("typeId", jdsField.id)
-                mapFieldTypes.setString("typeName", jdsField.type.toString())
-                mapFieldTypes.addBatch()
-            }
-            mapFieldTypes.executeBatch()
-        }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
     }
 
     /**
@@ -1227,37 +1208,37 @@ abstract class JdsEntity : IJdsEntity {
      * Ensures child entities have ids that link them to their parent.
      * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
      */
-    fun standardizeUuids() {
-        val parentUuid = overview.uuid
-        standardizeObjectUuids(parentUuid, objectProperties)
-        standardizeObjectCollectionUuids(parentUuid, objectArrayProperties)
+    fun standardizeUUIDs() {
+        val parentUUID = overview.uuid
+        standardizeObjectUUIDs(parentUUID, objectProperties)
+        standardizeObjectCollectionUUIDs(parentUUID, objectArrayProperties)
     }
 
-    private fun standardizeObjectCollectionUuids(parentUuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+    private fun standardizeObjectCollectionUUIDs(parentUUID: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
         objectArrayProperties.entries.forEach {
             //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
             it.value.forEachIndexed { sequence, entry ->
                 val entityId = entry.overview.entityId
-                entry.overview.uuid = "$parentUuid.$entityId.$sequence"
+                entry.overview.uuid = "$parentUUID.$entityId.$sequence"
                 //process children
-                standardizeObjectUuids(entry.overview.uuid, entry.objectProperties)
-                standardizeObjectCollectionUuids(entry.overview.uuid, entry.objectArrayProperties)
+                standardizeObjectUUIDs(entry.overview.uuid, entry.objectProperties)
+                standardizeObjectCollectionUUIDs(entry.overview.uuid, entry.objectArrayProperties)
             }
         }
     }
 
-    private fun standardizeObjectUuids(parentUuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
+    private fun standardizeObjectUUIDs(parentUUID: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
         //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
         objectProperties.entries.forEach { entry ->
             val entityId = entry.value.value.overview.entityId
-            entry.value.value.overview.uuid = "$parentUuid.$entityId"
+            entry.value.value.overview.uuid = "$parentUUID.$entityId"
             //process children
-            standardizeObjectUuids(entry.value.value.overview.uuid, entry.value.value.objectProperties)
-            standardizeObjectCollectionUuids(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
+            standardizeObjectUUIDs(entry.value.value.overview.uuid, entry.value.value.objectProperties)
+            standardizeObjectCollectionUUIDs(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
         }
     }
 
-    internal fun yieldOverviews(): Sequence<IJdsOverview> = buildSequence{
+    internal fun yieldOverviews(): Sequence<IJdsOverview> = buildSequence {
         yield(overview)
         objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
         objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }

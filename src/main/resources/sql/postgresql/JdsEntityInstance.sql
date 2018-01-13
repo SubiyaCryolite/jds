@@ -1,6 +1,6 @@
-CREATE TABLE JdsEntityInstance
+CREATE TABLE jds_entity_instance
 (
-    Uuid       VARCHAR(96),
-    EntityId   BIGINT,
-    CONSTRAINT unique_entity_instance UNIQUE (Uuid,EntityId)
+  uuid      VARCHAR(96),
+  entity_id BIGINT,
+  CONSTRAINT unique_entity_instance UNIQUE (uuid, entity_id)
 );

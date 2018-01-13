@@ -1,8 +1,8 @@
-CREATE TABLE JdsStoreTextArray(
-    FieldId     NUMBER(19),
-    Uuid  NVARCHAR2(96),
-    Sequence    NUMBER(10),
-    Value       NCLOB,
-    PRIMARY KEY (FieldId,Uuid,Sequence),
-    FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_text_array (
+  field_id NUMBER(19),
+  uuid     NVARCHAR2(96),
+  sequence NUMBER(10),
+  value    NCLOB,
+  PRIMARY KEY (field_id, uuid, sequence),
+  FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE
 )

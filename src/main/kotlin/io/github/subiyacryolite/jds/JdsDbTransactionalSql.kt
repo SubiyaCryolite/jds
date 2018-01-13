@@ -26,7 +26,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0
-        val sql = "IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
+        val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, tableName)
@@ -39,12 +39,15 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
             toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return when (toReturn >= 1) {
+            true -> 1
+            false -> 0
+        }
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         var toReturn = 0
-        val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
+        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, procedureName)
@@ -58,12 +61,15 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
             toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return when (toReturn >= 1) {
+            true -> 1
+            false -> 0
+        }
     }
 
     override fun triggerExists(connection: Connection, triggerName: String): Int {
         var toReturn = 0
-        val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
+        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, triggerName)
@@ -77,12 +83,15 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
             toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return when (toReturn >= 1) {
+            true -> 1
+            false -> 0
+        }
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
         var toReturn = 0
-        val sql = "IF (EXISTS (SELECT * FROM sysobjects WHERE NAME = ? and XTYPE = ?)) SELECT 1 AS Result ELSE SELECT 0 AS Result "
+        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, viewName)
@@ -96,7 +105,10 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
             toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return when (toReturn >= 1) {
+            true -> 1
+            false -> 0
+        }
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
@@ -167,23 +179,23 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntities.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefEntity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEnums.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefEnum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsFields.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefField.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsFieldTypes.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefFieldType.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityFields.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityField.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
@@ -232,33 +244,31 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.TRIGGER, JdsComponent.TSQL_CASCADE_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_TYPES)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE)
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreEntityOverviewV3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreEntityInheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindFieldNames.sql")
-            JdsComponent.MAP_FIELD_TYPES -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindFieldTypes.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreBoolean.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreBlob.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreTime.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreText.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreLong.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreInteger.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreFloat.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreDouble.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreDateTime.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/procStoreZonedDateTime.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindEntityFields.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindEntityEnums.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/tsql/procedures/procRefEntities.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/tsql/procedures/procRefEnumValues.sql")
-            JdsComponent.TSQL_CASCADE_ENTITY_BINDING -> executeSqlFromFile(connection, "sql/tsql/triggers/createEntityBindingCascade.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/procBindParentToChild.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreEntityOverviewV3.sql")
+            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreEntityInheritance.sql")
+            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefField.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreBoolean.sql")
+            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreBlob.sql")
+            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreTime.sql")
+            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreText.sql")
+            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreLong.sql")
+            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreInteger.sql")
+            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreFloat.sql")
+            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreDouble.sql")
+            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreDateTime.sql")
+            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreZonedDateTime.sql")
+            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityField.sql")
+            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityEnum.sql")
+            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntity.sql")
+            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEnum.sql")
+            JdsComponent.TSQL_CASCADE_ENTITY_BINDING -> executeSqlFromFile(connection, "sql/tsql/triggers/TriggerEntityBindingCascade.sql")
+            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityInheritance.sql")
             else -> {
             }
         }

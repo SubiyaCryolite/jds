@@ -97,7 +97,7 @@ class NamedCallableStatement(connection: Connection, query: String) : INamedStat
     }
 
     @Throws(SQLException::class)
-    override fun setObject(name: String, value: Any) {
+    override fun setObject(name: String, value: Any?) {
         getIndexes(name).forEach { callableStatement.setObject(it, value) }
     }
 
@@ -107,12 +107,12 @@ class NamedCallableStatement(connection: Connection, query: String) : INamedStat
     }
 
     @Throws(SQLException::class)
-    override fun setBytes(name: String, value: ByteArray) {
+    override fun setBytes(name: String, value: ByteArray?) {
         getIndexes(name).forEach { callableStatement.setBytes(it, value) }
     }
 
     @Throws(SQLException::class)
-    override fun setBlob(name: String, value: InputStream) {
+    override fun setBlob(name: String, value: InputStream?) {
         getIndexes(name).forEach { callableStatement.setBlob(it, value) }
     }
 
@@ -122,7 +122,7 @@ class NamedCallableStatement(connection: Connection, query: String) : INamedStat
     }
 
     @Throws(SQLException::class)
-    override fun setString(name: String, value: String) {
+    override fun setString(name: String, value: String?) {
         getIndexes(name).forEach { callableStatement.setString(it, value) }
     }
 
@@ -147,7 +147,7 @@ class NamedCallableStatement(connection: Connection, query: String) : INamedStat
     }
 
     @Throws(SQLException::class)
-    override fun setTimestamp(name: String, value: Timestamp) {
+    override fun setTimestamp(name: String, value: Timestamp?) {
         getIndexes(name).forEach { callableStatement.setTimestamp(it, value) }
     }
 

@@ -1,7 +1,7 @@
-CREATE TABLE JdsStoreDouble(
-	FieldId     NUMBER(19),
-	Uuid  NVARCHAR2(96),
-	Value       BINARY_DOUBLE,
-	PRIMARY KEY (FieldId,Uuid),
-	FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_double (
+  field_id NUMBER(19),
+  uuid     NVARCHAR2(96),
+  value    BINARY_DOUBLE,
+  PRIMARY KEY (field_id, uuid),
+  FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE
 )

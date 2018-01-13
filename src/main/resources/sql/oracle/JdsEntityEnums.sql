@@ -1,5 +1,5 @@
-CREATE TABLE JdsEntityEnums(
-    EntityId    NUMBER(19),
-    FieldId     NUMBER(19),
-    PRIMARY KEY (EntityId,FieldId)
+CREATE TABLE jds_ref_entity_enum (
+  entity_id NUMBER(19),
+  field_id  NUMBER(19),
+  PRIMARY KEY (entity_id, field_id)
 )

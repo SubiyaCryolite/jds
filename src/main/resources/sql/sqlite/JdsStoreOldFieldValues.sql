@@ -1,16 +1,16 @@
-CREATE TABLE JdsStoreOldFieldValues(
-        Uuid			     TEXT,
-        FieldId				 BIGINT,
-        DateOfModification	 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        Sequence             INTEGER,
-        StringValue			 TEXT,
-        IntegerValue		 INTEGER,
-        FloatValue			 REAL,
-        DoubleValue			 DOUBLE,
-        LongValue			 BIGINT,
-        DateTimeValue		 TIMESTAMP,
-        TimeValue			 INTEGER,
-        BooleanValue	     BOOLEAN,
-        ZonedDateTimeValue	 BIGINT,
-        BlobValue            BLOB
+CREATE TABLE jds_store_old_field_values (
+  uuid                  TEXT,
+  field_id              BIGINT,
+  date_of_modification  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sequence              INTEGER,
+  string_value          TEXT,
+  integer_value         INTEGER,
+  float_value           REAL,
+  double_value          DOUBLE,
+  long_value            BIGINT,
+  date_time_value       TIMESTAMP,
+  time_value            INTEGER,
+  boolean_value         BOOLEAN,
+  zoned_date_time_value BIGINT,
+  blob_value            BLOB
 );

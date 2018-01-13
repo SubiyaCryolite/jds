@@ -127,7 +127,7 @@ class JdsEmbeddedObject(entity: JdsEntity) {
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.uuid, entity.overview.entityId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
+    val o: jds_entity_overview = jds_entity_overview(entity.overview.uuid, entity.overview.entityId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
 
     init {
         entity.assign(this);

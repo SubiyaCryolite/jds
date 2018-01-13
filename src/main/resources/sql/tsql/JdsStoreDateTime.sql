@@ -1,7 +1,8 @@
-CREATE TABLE JdsStoreDateTime(
-	FieldId         BIGINT,
-	Uuid      NVARCHAR(96) NOT NULL,
-	Value           DATETIME,
-	PRIMARY KEY (FieldId,Uuid),
-	CONSTRAINT fk_JdsStoreDateTime_ParentUuid FOREIGN KEY (Uuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+CREATE TABLE jds_store_date_time (
+  field_id BIGINT,
+  uuid     NVARCHAR(96) NOT NULL,
+  value    DATETIME,
+  PRIMARY KEY (field_id, uuid),
+  CONSTRAINT fk_jds_store_date_time_parent_uuid FOREIGN KEY (uuid) REFERENCES jds_entity_overview (uuid)
+    ON DELETE CASCADE
 );

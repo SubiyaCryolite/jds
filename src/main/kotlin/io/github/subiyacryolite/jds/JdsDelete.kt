@@ -91,7 +91,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
 
 
     companion object {
-        private val DELETE_SQL = "DELETE FROM JdsEntityOverview WHERE Uuid = ?"
+        private val DELETE_SQL = "DELETE FROM jds_entity_overview WHERE UUID = ?"
 
         /**
          * @param jdsDb

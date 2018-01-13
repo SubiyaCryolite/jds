@@ -174,7 +174,7 @@ abstract class BaseTestConfig {
         get() {
             val _objectMapper = ObjectMapper()
             _objectMapper.registerModule(JavaTimeModule())
-            _objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            _objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             _objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
             _objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
             _objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)

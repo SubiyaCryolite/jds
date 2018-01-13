@@ -1,9 +1,9 @@
-CREATE TABLE JdsEntityBinding
+CREATE TABLE jds_entity_binding
 (
-    ParentUuid    VARCHAR(96),
-    ChildUuid     VARCHAR(96),
-    FieldId             BIGINT,
-    ChildEntityId       BIGINT,
-    FOREIGN KEY(ParentUuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE,
-    FOREIGN KEY(ChildUuid) REFERENCES JdsEntityOverview(Uuid) ON DELETE CASCADE
+  parent_uuid     VARCHAR(96),
+  child_uuid      VARCHAR(96),
+  field_id        BIGINT,
+  child_entity_id BIGINT,
+  FOREIGN KEY (parent_uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE,
+  FOREIGN KEY (child_uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE
 );
