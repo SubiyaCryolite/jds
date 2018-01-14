@@ -169,7 +169,7 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityEnum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
@@ -203,7 +203,7 @@ abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {

@@ -755,7 +755,7 @@ where EntityGuid = 'record_of_interest' and FieldId = 1001
 group by (EntityGuid, FieldId, IntegerValue)
 ```
 
-![Database design](database_design.png?raw=true)
+![Database design](database_design.svg?raw=true)
 
 # Development
 I highly recommend the use of the [IntelliJ IDE](https://www.jetbrains.com/idea/download/) for development.

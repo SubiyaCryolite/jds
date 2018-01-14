@@ -199,7 +199,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityEnum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
@@ -223,7 +223,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {

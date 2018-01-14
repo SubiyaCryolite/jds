@@ -139,7 +139,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityEnum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
@@ -172,7 +172,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityInheritance.sql")
     }
 
     override fun saveString(): String {

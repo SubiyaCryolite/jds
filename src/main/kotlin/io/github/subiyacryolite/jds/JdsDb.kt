@@ -91,12 +91,15 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     private fun prepareDatabaseComponents(connection: Connection) {
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENTITIES)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELD_TYPES)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELDS)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELDS)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELD_TYPES)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_ARRAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_ARRAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_ARRAY)
@@ -114,9 +117,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE)
     }
 
     val isOracleDb: Boolean
@@ -183,14 +183,14 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.STORE_DATE_TIME -> createStoreDateTime(connection)
             JdsComponent.STORE_ZONED_DATE_TIME -> createStoreZonedDateTime(connection)
             JdsComponent.STORE_TIME -> createStoreTime(connection)
-            JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
-            JdsComponent.REF_ENUM_VALUES -> createRefEnumValues(connection)
-            JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
-            JdsComponent.REF_FIELDS -> createRefFields(connection)
             JdsComponent.REF_FIELD_TYPES -> {
                 createRefFieldTypes(connection)
                 populateFieldTypes(connection)
             }
+            JdsComponent.REF_FIELDS -> createRefFields(connection)
+            JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
+            JdsComponent.REF_ENUM_VALUES -> createRefEnumValues(connection)
+            JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
             JdsComponent.BIND_ENTITY_FIELDS -> createBindEntityFields(connection)
             JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
             JdsComponent.STORE_ENTITY_OVERVIEW -> createRefEntityOverview(connection)

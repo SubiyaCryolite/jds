@@ -169,7 +169,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefEntityEnum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
@@ -193,7 +193,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsRefEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {

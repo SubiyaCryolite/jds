@@ -632,8 +632,8 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 entityHeirarchy.add(id.toString() + "")
 
 
-            val rawSql = "SELECT DISTINCT uuid FROM jds_entity_instance  WHERE entity_id IN (%s)"
-            val rawSql2 = "SELECT DISTINCT uuid FROM jds_entity_instance  WHERE uuid IN (%s)"
+            val rawSql = "SELECT DISTINCT entity_uuid FROM jds_entity_instance WHERE entity_id IN (%s)"
+            val rawSql2 = "SELECT DISTINCT entity_uuid FROM jds_entity_instance WHERE entity_uuid IN (%s)"
             it.prepareStatement(String.format(rawSql, entityHeirarchy)).use { preparedStatement1 ->
                 it.prepareStatement(String.format(rawSql2, quote(filterUUIDs))).use { preparedStatement2 ->
                     if (filterUUIDs.none()) {
@@ -647,7 +647,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(rs.getString("uuid"))
+                                filterBatches[batchIndex].add(rs.getString("entity_uuid"))
                                 batchContents++
                             }
                         }
@@ -661,7 +661,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(rs.getString("uuid"))
+                                filterBatches[batchIndex].add(rs.getString("entity_uuid"))
                                 batchContents++
                             }
                         }

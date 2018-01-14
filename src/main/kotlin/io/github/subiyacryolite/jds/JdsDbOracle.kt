@@ -179,7 +179,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsEntityEnums.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityEnum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
@@ -214,7 +214,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityInheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
