@@ -1,6 +1,9 @@
 package tests
 
 import org.junit.jupiter.api.Test
+import java.sql.Timestamp
+import java.time.*
+import java.util.*
 
 class AllTests {
 
@@ -86,5 +89,17 @@ class AllTests {
         nonExisting.testSqLite()
         timeConstructs.testSqLite()
         loadAndSaveTests.testSqLite()
+    }
+
+    @Test
+    fun javaTime() {
+        //1969-04-04 00:00:00.000
+        val rs = 621120960000000000L//date of birth
+
+
+        val llastLogonAdjust = 1164447360000000L  // adjust factor for converting it to java
+        val ints = Instant.ofEpochMilli((rs/1000000) - llastLogonAdjust)
+        val ldt = LocalDateTime.ofInstant(ints, ZoneId.systemDefault())
+        println(ldt)
     }
 }

@@ -230,9 +230,10 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //crt point
-            val nestedEntities = overviewsSequence(entities)
-            nestedEntities.forEach {
-                processCrt(jdsDb, connection, alternateConnections, it)
+            if (jdsDb.tables.isNotEmpty()) {
+                overviewsSequence(entities).forEach {
+                    processCrt(jdsDb, connection, alternateConnections, it)
+                }
             }
 
             //respect execution sequence
