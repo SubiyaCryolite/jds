@@ -44,7 +44,7 @@ class JdsSaveContainer {
     val blobProperties: MutableList<HashMap<String, HashMap<Long, BlobProperty>>> = ArrayList()
     //arrays
     val objectCollections: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>>> = ArrayList()
-    val stringCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<String>>>> = ArrayList()
+    val stringCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<String?>>>> = ArrayList()
     val localDateTimeCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<LocalDateTime>>>> = ArrayList()
     val floatCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Float>>>> = ArrayList()
     val doubleCollections: MutableList<HashMap<String, HashMap<Long, MutableCollection<Double>>>> = ArrayList()
@@ -57,7 +57,7 @@ class JdsSaveContainer {
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
     val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
-    
+
     internal fun reset()
     {
         //time constructs

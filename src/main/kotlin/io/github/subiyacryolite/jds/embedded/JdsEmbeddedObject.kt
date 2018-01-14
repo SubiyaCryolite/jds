@@ -39,7 +39,7 @@ class JdsEmbeddedObject(entity: JdsEntity) {
     /**
      * Integer values
      */
-    val i: MutableList<JdsIntegerValues> = ArrayList()
+    val i: MutableList<JdsIntegerEnumValues> = ArrayList()
     /**
      * Long values
      */
@@ -53,69 +53,9 @@ class JdsEmbeddedObject(entity: JdsEntity) {
      */
     val f: MutableList<JdsFloatValues> = ArrayList()
     /**
-     * Local Time values
-     */
-    val t: MutableList<JdsTimeValues> = ArrayList()
-    /**
-     * Month day values
-     */
-    val mdv: MutableList<JdsMonthDayValues> = ArrayList()
-    /**
-     * Zoned Date Time values
-     */
-    val zdt: MutableList<JdsZonedDateTimeValues> = ArrayList()
-    /**
      * Local Date values
      */
     val ld: MutableList<JdsLocalDateValues> = ArrayList()
-    /**
-     * Date-Time collection values
-     */
-    val dta: MutableList<JdsDateCollections> = ArrayList()
-    /**
-     * Double collection values
-     */
-    val da: MutableList<JdsDoubleCollections> = ArrayList()
-    /**
-     * Integer collection values
-     */
-    val ia: MutableList<JdsIntegerCollections> = ArrayList()
-    /**
-     * Long collection tavles
-     */
-    val la: MutableList<JdsLongCollections> = ArrayList()
-    /**
-     * String collection values
-     */
-    val sa: MutableList<JdsTextCollections> = ArrayList()
-    /**
-     * Float collection values
-     */
-    val fa: MutableList<JdsFloatCollections> = ArrayList()
-    /**
-     * Enum values
-     */
-    val e: MutableList<JdsEnumValues> = ArrayList()
-    /**
-     * Enum collection values
-     */
-    val ea: MutableList<JdsEnumCollections> = ArrayList()
-    /**
-     * Duration values
-     */
-    val du: MutableList<JdsDurationValues> = ArrayList()
-    /**
-     * Month Day values
-     */
-    val md: MutableList<JdsMonthDayValues> = ArrayList()
-    /**
-     * Year Month values
-     */
-    val ym: MutableList<JdsYearMonthValues> = ArrayList()
-    /**
-     * Period values
-     */
-    val p: MutableList<JdsPeriodValues> = ArrayList()
     /**
      * Entity bindings [parent to child]
      */

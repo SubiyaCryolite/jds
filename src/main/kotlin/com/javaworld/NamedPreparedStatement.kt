@@ -99,7 +99,7 @@ constructor(connection: Connection, query: String) : INamedStatement {
     }
 
     @Throws(SQLException::class)
-    override fun setObject(name: String, value: Any) {
+    override fun setObject(name: String, value: Any?) {
         getIndexes(name).forEach { preparedStatement.setObject(it, value) }
     }
 
@@ -109,12 +109,12 @@ constructor(connection: Connection, query: String) : INamedStatement {
     }
 
     @Throws(SQLException::class)
-    override fun setBytes(name: String, value: ByteArray) {
+    override fun setBytes(name: String, value: ByteArray?) {
         getIndexes(name).forEach { preparedStatement.setBytes(it, value) }
     }
 
     @Throws(SQLException::class)
-    override fun setBlob(name: String, value: InputStream) {
+    override fun setBlob(name: String, value: InputStream?) {
         getIndexes(name).forEach { preparedStatement.setBlob(it, value) }
     }
 
@@ -124,7 +124,7 @@ constructor(connection: Connection, query: String) : INamedStatement {
     }
 
     @Throws(SQLException::class)
-    override fun setString(name: String, value: String) {
+    override fun setString(name: String, value: String?) {
         getIndexes(name).forEach { preparedStatement.setString(it, value) }
     }
 
@@ -149,7 +149,7 @@ constructor(connection: Connection, query: String) : INamedStatement {
     }
 
     @Throws(SQLException::class)
-    override fun setTimestamp(name: String, value: Timestamp) {
+    override fun setTimestamp(name: String, value: Timestamp?) {
         getIndexes(name).forEach { preparedStatement.setTimestamp(it, value) }
     }
 

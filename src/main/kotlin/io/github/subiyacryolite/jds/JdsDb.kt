@@ -17,6 +17,7 @@ import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsComponent
 import io.github.subiyacryolite.jds.enums.JdsComponentType
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
@@ -916,5 +917,13 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(targetConnection: Int): Connection {
         return getConnection()
+    }
+
+    /**
+     * @param fieldId
+     */
+    internal fun typeOfField(fieldId: Long): JdsFieldType = when (JdsField.values.containsKey(fieldId)) {
+        true -> JdsField.values[fieldId]!!.type
+        false -> JdsFieldType.UNKNOWN
     }
 }

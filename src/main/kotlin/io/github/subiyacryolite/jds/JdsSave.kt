@@ -545,25 +545,24 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param stringProperties
+     * @param allStringProperties
 
      */
-    private fun saveStrings(stringProperties: HashMap<String, HashMap<Long, StringProperty>>) = try {
+    private fun saveStrings(allStringProperties: HashMap<String, HashMap<Long, StringProperty>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldStringValues())
-        for ((uuid, value1) in stringProperties) {
+        for ((uuid, stringProperties) in allStringProperties) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = stringProperties.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
+            for ((fieldId, stringProperty) in stringProperties) {
                 innerRecord++
-                val value = value2.get()
                 if (writeToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setString("value", value)
+                    upsert.setString("value", stringProperty.value)
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -572,12 +571,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setString(4, value)
+                log.setString(4, stringProperty.value)
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setString(8, value)
+                    log.setString(8, stringProperty.value)
                 }
                 log.addBatch()
             }
@@ -1212,7 +1211,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
+    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String?>>>) = try {
         val deleteSql = "DELETE FROM JdsStoreTextArray WHERE FieldId = :fieldId AND Uuid = :uuid"
         val insertSql = "INSERT INTO JdsStoreTextArray (FieldId,Uuid,Sequence,Value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
