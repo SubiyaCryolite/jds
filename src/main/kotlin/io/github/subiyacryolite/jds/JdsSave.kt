@@ -1203,7 +1203,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
+    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String?>>>) = try {
         val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND uuid = :uuid"
         val insertSql = "INSERT INTO jds_store_text_array (field_id, uuid, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
 

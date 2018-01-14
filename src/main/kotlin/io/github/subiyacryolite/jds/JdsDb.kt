@@ -931,4 +931,12 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     override fun getConnection(targetConnection: Int): Connection {
         return getConnection()
     }
+
+    /**
+     * @param fieldId
+     */
+    internal fun typeOfField(fieldId: Long): JdsFieldType = when (JdsField.values.containsKey(fieldId)) {
+        true -> JdsField.values[fieldId]!!.type
+        false -> JdsFieldType.UNKNOWN
+    }
 }

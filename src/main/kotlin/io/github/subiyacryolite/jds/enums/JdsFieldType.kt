@@ -43,5 +43,6 @@ enum class JdsFieldType(val type: Int, val shortCode: String) {
     YEAR_MONTH(21, "ym"),
     PERIOD(22, "p"),
     DURATION(23, "dr"),
-    ENTITY_COLLECTION(24, "ec"),;
+    ENTITY_COLLECTION(24, "ec"),
+    UNKNOWN(25,"un");
 }
