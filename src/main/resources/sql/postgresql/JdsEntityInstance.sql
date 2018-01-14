@@ -1,6 +1,8 @@
 CREATE TABLE jds_entity_instance
 (
-  uuid      VARCHAR(96),
-  entity_id BIGINT,
-  CONSTRAINT unique_entity_instance UNIQUE (uuid, entity_id)
+  entity_uuid VARCHAR(96),
+  entity_id   BIGINT,
+  CONSTRAINT unique_entity_instance UNIQUE (entity_uuid, entity_id),
+  FOREIGN KEY (entity_uuid) REFERENCES jds_entity_overview (uuid) ON DELETE CASCADE,
+  FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id) ON DELETE CASCADE
 );
