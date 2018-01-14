@@ -23,35 +23,35 @@ class CustomReportJson : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun postreSqlImplementation() {
+    fun testPostgreSql() {
         initialisePostgeSqlBackend()
         test()
     }
 
     @Test
     @Throws(Exception::class)
-    fun tSqlImplementation() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()
         test()
     }
 
     @Test
     @Throws(Exception::class)
-    fun sqliteImplementation() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()
         test()
     }
 
     @Test
     @Throws(Exception::class)
-    fun mySqlImplementation() {
+    fun testMySql() {
         initialiseMysqlBackend()
         test()
     }
 
     @Test
     @Throws(Exception::class)
-    fun oracleImplementation() {
+    fun testOracle() {
         initialiseOracleBackend()
         test()
     }
@@ -59,11 +59,11 @@ class CustomReportJson : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun allImplementations() {
-        tSqlImplementation()
-        postreSqlImplementation()
-        mySqlImplementation()
-        oracleImplementation()
-        sqliteImplementation()
+        testTransactionalSql()
+        testPostgreSql()
+        testMySql()
+        testOracle()
+        testSqLite()
     }
 
 }

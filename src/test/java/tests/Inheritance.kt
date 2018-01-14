@@ -1,37 +1,38 @@
 package tests
 
 import common.BaseTestConfig
-import entities.TimeConstruct
+import entities.EntityA
+import entities.EntityB
+import entities.EntityC
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
 import org.junit.jupiter.api.Test
-import java.util.*
 
-class TimeConstructs : BaseTestConfig() {
+/**
+ * Created by ifunga on 01/07/2017.
+ */
+class Inheritance : BaseTestConfig() {
+
     @Throws(Exception::class)
     private fun save() {
-        val timeConstruct = timeConstruct;
-        JdsSave(jdsDb, Arrays.asList(timeConstruct)).call()
-        println("saved entityVersions [$timeConstruct]")
+        val save = JdsSave(jdsDb, inheritanceCollection)
+        save.call()
     }
 
     @Throws(Exception::class)
     private fun load() {
-        val list = JdsLoad(jdsDb, TimeConstruct::class.java, "timeConstruct").call() //load all entityVersions of type AddressBook with Entity Guids in range
-        println("loaded entityVersions [$list]")
+        val entityAs = JdsLoad(jdsDb, EntityA::class.java)
+        val entityBs = JdsLoad(jdsDb, EntityB::class.java)
+        val entityCs = JdsLoad(jdsDb, EntityC::class.java)
+        System.out.printf("All A s [%s]\n", entityAs.call())
+        System.out.printf("All B s [%s]\n", entityBs.call())
+        System.out.printf("All C s [%s]\n", entityCs.call())
     }
 
     @Throws(Exception::class)
     private fun saveAndLoad() {
         save()
         load()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun testSqLite() {
-        initialiseSqlLiteBackend()
-        saveAndLoad()
     }
 
     @Test
@@ -57,6 +58,13 @@ class TimeConstructs : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testSqLite() {
+        initialiseSqlLiteBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testOracle() {
         initialiseOracleBackend()
         saveAndLoad()
@@ -64,11 +72,11 @@ class TimeConstructs : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun testAllInitialilization() {
-        testMySql()
-        testOracle()
-        testPostgreSql()
-        testSqLite()
+    fun allImplementations() {
         testTransactionalSql()
+        testSqLite()
+        testMySql()
+        testPostgreSql()
+        testOracle()
     }
 }

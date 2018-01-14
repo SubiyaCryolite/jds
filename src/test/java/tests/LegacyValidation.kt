@@ -76,35 +76,35 @@ class LegacyValidation : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun postreSqlImplementation() {
+    fun testPostgreSql() {
         initialisePostgeSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun tsqlImplementation() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun sqliteImplementation() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun mySqlImplementation() {
+    fun testMySql() {
         initialiseMysqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun oracleImplementation() {
+    fun testOracle() {
         initialiseOracleBackend()
         saveAndLoad()
     }
@@ -112,10 +112,10 @@ class LegacyValidation : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun allImplementations() {
-        sqliteImplementation()
-        tsqlImplementation()
-        oracleImplementation()
-        mySqlImplementation()
-        postreSqlImplementation()
+        testSqLite()
+        testTransactionalSql()
+        testOracle()
+        testMySql()
+        testPostgreSql()
     }
 }

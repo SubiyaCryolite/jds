@@ -19,7 +19,7 @@ class NonExisting : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun sqlLiteImplementation() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()
         loadNonExisting()
     }
@@ -27,28 +27,28 @@ class NonExisting : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun mysqlImplementation() {
+    fun testMySql() {
         initialiseMysqlBackend()
         loadNonExisting()
     }
 
     @Test
     @Throws(Exception::class)
-    fun postgeSqlImplementation() {
+    fun testPostgreSql() {
         initialisePostgeSqlBackend()
         loadNonExisting()
     }
 
     @Test
     @Throws(Exception::class)
-    fun tSqlImplementation() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()
         loadNonExisting()
     }
 
     @Test
     @Throws(Exception::class)
-    fun oracleImplementation() {
+    fun testOracle() {
         initialiseOracleBackend()
         loadNonExisting()
     }
@@ -56,10 +56,10 @@ class NonExisting : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun allImplementations() {
-        sqlLiteImplementation()
-        mysqlImplementation()
-        postgeSqlImplementation()
-        tSqlImplementation()
-        oracleImplementation()
+        testSqLite()
+        testMySql()
+        testPostgreSql()
+        testTransactionalSql()
+        testOracle()
     }
 }

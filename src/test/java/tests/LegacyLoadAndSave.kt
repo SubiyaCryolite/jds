@@ -35,35 +35,35 @@ class LegacyLoadAndSave : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
-    fun postreSqlImplementation() {
+    fun testPostgreSql() {
         initialisePostgeSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun tSqlImplementation() {
+    fun testTransactionalSql() {
         initialiseTSqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun sqliteImplementation() {
+    fun testSqLite() {
         initialiseSqlLiteBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun mySqlImplementation() {
+    fun testMySql() {
         initialiseMysqlBackend()
         saveAndLoad()
     }
 
     @Test
     @Throws(Exception::class)
-    fun oracleImplementation() {
+    fun testOracle() {
         initialiseOracleBackend()
         saveAndLoad()
     }
@@ -71,10 +71,10 @@ class LegacyLoadAndSave : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun allImplementations() {
-        tSqlImplementation()
-        postreSqlImplementation()
-        mySqlImplementation()
-        sqliteImplementation()
-        oracleImplementation()
+        testTransactionalSql()
+        testPostgreSql()
+        testMySql()
+        testSqLite()
+        testOracle()
     }
 }
