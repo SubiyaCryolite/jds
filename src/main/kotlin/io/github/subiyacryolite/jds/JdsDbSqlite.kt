@@ -147,16 +147,16 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValues.sql")
-        executeSqlFromString(connection, "CREATE INDEX integer_values          ON jds_store_old_field_values(uuid, field_id, sequence, integer_value)")
-        executeSqlFromString(connection, "CREATE INDEX float_values            ON jds_store_old_field_values(uuid, field_id, sequence, float_value)")
-        executeSqlFromString(connection, "CREATE INDEX double_values           ON jds_store_old_field_values(uuid, field_id, sequence, double_value)")
-        executeSqlFromString(connection, "CREATE INDEX long_values             ON jds_store_old_field_values(uuid, field_id, sequence, long_value)")
-        executeSqlFromString(connection, "CREATE INDEX dateTime_values         ON jds_store_old_field_values(uuid, field_id, sequence, date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX time_values             ON jds_store_old_field_values(uuid, field_id, sequence, time_value)")
-        executeSqlFromString(connection, "CREATE INDEX boolean_values          ON jds_store_old_field_values(uuid, field_id, sequence, boolean_value)")
-        executeSqlFromString(connection, "CREATE INDEX zoned_date_time_values  ON jds_store_old_field_values(uuid, field_id, sequence, zoned_date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX text_blob_values        ON jds_store_old_field_values(uuid, field_id, sequence)")
+        executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValue.sql")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_integer          ON jds_store_old_field_value (uuid, field_id, sequence, integer_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_float            ON jds_store_old_field_value (uuid, field_id, sequence, float_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_double           ON jds_store_old_field_value (uuid, field_id, sequence, double_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_long             ON jds_store_old_field_value (uuid, field_id, sequence, long_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_date_time_value        ON jds_store_old_field_value (uuid, field_id, sequence, date_time_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_time             ON jds_store_old_field_value (uuid, field_id, sequence, time_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_boolean          ON jds_store_old_field_value (uuid, field_id, sequence, boolean_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_zoned_date_time  ON jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value)")
+        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_blob_text        ON jds_store_old_field_value (uuid, field_id, sequence)")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
@@ -216,7 +216,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO jds_entity_overview(uuid, date_created, date_modified, Live, version) VALUES(:uuid, :dateCreated, :dateModified, :live, :version)"
+        return "INSERT OR REPLACE INTO jds_entity_overview(uuid, date_created, date_modified, live, version) VALUES(:uuid, :dateCreated, :dateModified, :live, :version)"
     }
 
     override fun saveOverviewInheritance(): String {
@@ -228,7 +228,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun mapFieldName(): String {
-        return "INSERT OR REPLACE INTO jds_ref_field(id, field_name, field_description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
+        return "INSERT OR REPLACE INTO jds_ref_field(id, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
     }
 
     override fun mapClassEnumsImplementation(): String {

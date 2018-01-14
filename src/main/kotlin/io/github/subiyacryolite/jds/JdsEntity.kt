@@ -1065,7 +1065,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
         (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
-            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapFieldName()) else connection.prepareCall(jdsDb.mapFieldName())).use { mapFieldName ->
+            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapFieldName()) else connection.prepareStatement(jdsDb.mapFieldName())).use { mapFieldName ->
                 getFields(overview.entityId).forEach {
                     val lookup = JdsField.values[it]!!
                     //1. map this fieldEntity to the fieldEntity dictionary

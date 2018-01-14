@@ -177,7 +177,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/JdsStoreOldFieldValues.sql")
+        executeSqlFromFile(connection, "sql/postgresql/JdsStoreOldFieldValue.sql")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {

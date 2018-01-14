@@ -1,4 +1,4 @@
-CREATE TABLE jds_store_old_field_values (
+CREATE TABLE jds_store_old_field_value (
   uuid                  TEXT,
   field_id              BIGINT,
   date_of_modification  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

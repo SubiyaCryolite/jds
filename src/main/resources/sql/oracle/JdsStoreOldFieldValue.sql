@@ -1,4 +1,4 @@
-CREATE TABLE jds_store_old_field_values (
+CREATE TABLE jds_store_old_field_value (
   uuid                  NVARCHAR2(96),
   field_id              NUMBER(19),
   date_of_modification  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -810,9 +810,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, string_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, string_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND $oldStringValue = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND $oldStringValue = ?)"
         }
     }
 
@@ -822,9 +822,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, double_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, double_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND double_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND double_value = ?)"
         }
     }
 
@@ -834,9 +834,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, long_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, long_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND long_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND long_value = ?)"
         }
     }
 
@@ -846,9 +846,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, integer_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, integer_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND integer_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND integer_value = ?)"
         }
     }
 
@@ -858,9 +858,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, float_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, float_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND float_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND float_value = ?)"
         }
     }
 
@@ -870,9 +870,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, date_time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, date_time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND date_time_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND date_time_value = ?)"
         }
     }
 
@@ -882,9 +882,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, zoned_date_time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, zoned_date_time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND zoned_date_time_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND zoned_date_time_value = ?)"
         }
     }
 
@@ -894,9 +894,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldTimeValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND time_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND time_value = ?)"
         }
     }
 
@@ -906,9 +906,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun saveOldBooleanValues(): String {
         return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, boolean_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, boolean_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_values WHERE uuid = ? AND field_id = ? AND sequence = ? AND boolean_value = ?)"
+            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) VALUES(?, ?, ?, ?)"
+            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) $logSqlSource " +
+                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND boolean_value = ?)"
         }
     }
 
@@ -917,7 +917,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return SQL executed in order to log Blob values
      */
     internal fun saveOldBlobValues(): String {
-        return "INSERT INTO jds_store_old_field_values(uuid, field_id, sequence, blob_value) VALUES(?, ?, ?, ?)"
+        return "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, blob_value) VALUES(?, ?, ?, ?)"
     }
 
     /**
