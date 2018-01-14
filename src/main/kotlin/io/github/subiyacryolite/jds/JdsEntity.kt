@@ -1065,22 +1065,22 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
         (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
-            (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapFieldName()) else NamedPreparedStatement(connection, jdsDb.mapFieldName())).use { mapFieldName ->
+            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapFieldName()) else connection.prepareCall(jdsDb.mapFieldName())).use { mapFieldName ->
                 getFields(overview.entityId).forEach {
                     val lookup = JdsField.values[it]!!
-                    //1. map this fieldEntity ID to the entity type
+                    //1. map this fieldEntity to the fieldEntity dictionary
+                    mapFieldName.setLong(1, lookup.id)
+                    mapFieldName.setString(2, lookup.name)
+                    mapFieldName.setString(3, lookup.description)
+                    mapFieldName.setInt(4, lookup.type.ordinal)
+                    mapFieldName.addBatch()
+                    //2. map this fieldEntity ID to the entity type
                     mapClassFields.setLong("entityId", entityId)
                     mapClassFields.setLong("fieldId", lookup.id)
                     mapClassFields.addBatch()
-                    //2. map this fieldEntity to the fieldEntity dictionary
-                    mapFieldName.setLong("fieldId", lookup.id)
-                    mapFieldName.setString("fieldName", lookup.name)
-                    mapFieldName.setString("fieldDescription", lookup.description)
-                    mapFieldName.setInt("typeOrdinal", lookup.type.ordinal)
-                    mapFieldName.addBatch()
                 }
-                mapClassFields.executeBatch()
                 mapFieldName.executeBatch()
+                mapClassFields.executeBatch()
             }
         }
     } catch (ex: Exception) {

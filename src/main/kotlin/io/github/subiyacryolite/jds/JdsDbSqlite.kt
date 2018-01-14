@@ -220,7 +220,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO jds_entity_instance(uuid, entity_id) VALUES(:uuid, :entityId)"
+        return "INSERT OR REPLACE INTO jds_entity_instance(entity_uuid, entity_id) VALUES(:uuid, :entityId)"
     }
 
     override fun mapClassFields(): String {

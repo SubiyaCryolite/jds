@@ -753,7 +753,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun mapFieldName(): String {
-        return "{call proc_ref_field(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)}"
+        return "{call proc_ref_field(?, ?, ?, ?)}"
     }
 
     /**
