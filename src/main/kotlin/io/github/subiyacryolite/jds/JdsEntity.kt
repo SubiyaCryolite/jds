@@ -1239,8 +1239,8 @@ abstract class JdsEntity : IJdsEntity {
         }
     }
 
-    internal fun yieldOverviews(): Sequence<IJdsOverview> = buildSequence {
-        yield(overview)
+    internal fun yieldOverviews(): Sequence<JdsEntity> = buildSequence {
+        yield(this@JdsEntity)
         objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
         objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }
     }

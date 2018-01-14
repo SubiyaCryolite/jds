@@ -230,7 +230,10 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //crt point
-            entities.forEach { processCrt(jdsDb, connection, alternateConnections, it) }
+            val nestedEntities = overviewsSequence(entities)
+            nestedEntities.forEach {
+                processCrt(jdsDb, connection, alternateConnections, it)
+            }
 
             //respect execution sequence
             //respect JDS batches in each call
@@ -249,7 +252,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         }
     }
 
-    private fun overviewsSequence(hashSet: Collection<JdsEntity>): Sequence<IJdsOverview> = buildSequence {
+    private fun overviewsSequence(hashSet: Iterable<JdsEntity>): Sequence<JdsEntity> = buildSequence {
         hashSet.forEach {
             yieldAll(it.yieldOverviews())
         }
