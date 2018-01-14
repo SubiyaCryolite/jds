@@ -73,20 +73,29 @@ class JdsField() : Externalizable {
         type = input.readObject() as JdsFieldType
     }
 
-    companion object {
-
+    companion object : Externalizable {
         private val serialVersionUID = 20171109_0853L
 
         val values = HashMap<Long, JdsField>()
+        val NULL = JdsField()
 
-        /**
-         * @param field
-         */
-        private fun bindForGlobalLookup(field: JdsField) {
-            if (!values.containsKey(field.id))
-                values.put(field.id, field)
+        @Throws(IOException::class, ClassNotFoundException::class)
+        override fun readExternal(objectInput: ObjectInput) {
+            values.clear()
+            values.putAll(objectInput.readObject() as Map<Long, JdsField>)
         }
 
-        val NULL = JdsField()
+        @Throws(IOException::class)
+        override fun writeExternal(objectOutput: ObjectOutput) {
+            objectOutput.writeObject(values)
+        }
+
+        /**
+         * @param jdsField
+         */
+        private fun bindForGlobalLookup(jdsField: JdsField) {
+            if (!values.containsKey(jdsField.id))
+                values.put(jdsField.id, jdsField)
+        }
     }
 }

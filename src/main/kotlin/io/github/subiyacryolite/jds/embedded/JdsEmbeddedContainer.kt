@@ -19,8 +19,10 @@ import java.time.LocalDateTime
 
 //blobs
 class JdsBlobValues(val id: Long, val v: ByteArray?)
+
 //primitives
 class JdsBooleanValues(val k: Long, val v: Int?)
+
 class JdsDoubleValues(val k: Long, val v: Double?)
 class JdsIntegerEnumValues(val k: Long, val v: Int?)
 class JdsLongValues(val k: Long, val v: Long?)
@@ -28,9 +30,11 @@ class JdsStringValues(val k: Long, val v: String?)
 class JdsFloatValues(val k: Long, val v: Float?)
 //time constructs
 class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
+
 class JdsLocalDateValues(val k: Long, val v: Timestamp?)
 //overviews
 class JdsEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
+
 class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
 /**
@@ -41,6 +45,7 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
      * Embedded objects
      */
     val e: MutableList<JdsEmbeddedObject> = ArrayList()
+
     init {
         entities.forEach {
             e.add(JdsEmbeddedObject(it))

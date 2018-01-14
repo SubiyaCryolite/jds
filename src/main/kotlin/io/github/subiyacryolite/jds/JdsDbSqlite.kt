@@ -224,7 +224,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun mapClassFields(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity_field(entity_id, field_id) VALUES(:entityId, :fieldId)"
+        return "INSERT OR REPLACE INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?)"
     }
 
     override fun mapFieldName(): String {

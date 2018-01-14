@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.events
 /**
  * This listener can be invoked when saving a jds entity. It can be used for logging operations or overriding field persistence
  */
- interface JdsSaveListener {
+interface JdsSaveListener {
 
     /**
      * This method is called before saving preliminary overview information and before saving any {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity} field values

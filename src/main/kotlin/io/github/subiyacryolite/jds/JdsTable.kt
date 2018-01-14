@@ -42,11 +42,11 @@ open class JdsTable() : Serializable {
         val annotatedClass = entity.isAnnotationPresent(JdsEntityAnnotation::class.java)
         val annotatedParent = entity.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         if (annotatedClass || annotatedParent) {
-            val annotation = when (annotatedClass) {
+            val entityAnnotation = when (annotatedClass) {
                 true -> entity.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            name = annotation.entityName
+            name = entityAnnotation.entityName
             this.uniqueEntries = uniqueEntries
             registerEntity(entity, true)
         }
@@ -63,11 +63,11 @@ open class JdsTable() : Serializable {
         val annotatedClass = entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         val annotatedParent = entityClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         if (annotatedClass || annotatedParent) {
-            val annotation = when (annotatedClass) {
+            val entityAnnotation = when (annotatedClass) {
                 true -> entityClass.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> entityClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            entities.add(annotation.entityId)
+            entities.add(entityAnnotation.entityId)
             if (registerFields) {
                 val entity = entityClass.newInstance()
                 entity.registerFields(this)
@@ -243,10 +243,13 @@ open class JdsTable() : Serializable {
         if (entities.isEmpty())
             return true
 
-        entities.forEach { entityCode ->
-            val entityType = jdsDb.classes[entityCode]!!
-            if (entityType.isInstance(entity))
-                return true
+        entities.forEach {
+            val entityType = jdsDb.classes[it]
+            if (entityType != null) {
+                if (entityType.isInstance(entity))
+                    return true
+            } else
+                println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
         }
         return false
     }

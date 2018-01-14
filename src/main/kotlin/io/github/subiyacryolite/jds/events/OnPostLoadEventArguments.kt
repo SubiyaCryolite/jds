@@ -13,13 +13,8 @@
  */
 package io.github.subiyacryolite.jds.events
 
-import com.javaworld.INamedStatement
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.IJdsDb
-import io.github.subiyacryolite.jds.JdsDb
-import java.sql.*
-import java.util.*
+import java.sql.Connection
 import java.util.concurrent.ConcurrentMap
 
 /**
@@ -28,4 +23,4 @@ import java.util.concurrent.ConcurrentMap
  * {@link #getOrAddStatement(String) getOrAddStatement}, {@link #getOrAddNamedCall(String) getOrAddNamedCall} and
  * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
-class OnPostLoadEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>):EventArguments(jdsDb, connection,alternateConnection)
+class OnPostLoadEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection)

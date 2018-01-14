@@ -43,7 +43,7 @@ object JdsTableLookup {
             JdsFieldType.ZONED_DATE_TIME -> return STORE_ZONED_DATE_TIME
             JdsFieldType.TIME -> return STORE_TIME
             JdsFieldType.BLOB -> return STORE_BLOB
-            JdsFieldType.BOOLEAN-> return STORE_BOOLEAN
+            JdsFieldType.BOOLEAN -> return STORE_BOOLEAN
             JdsFieldType.ENUM, JdsFieldType.INT -> return STORE_INTEGER
             JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
             JdsFieldType.LONG, JdsFieldType.DURATION -> return STORE_LONG

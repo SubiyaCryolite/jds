@@ -49,7 +49,7 @@ enum class JdsComponent(val component: String, val alias: String) {
     REF_INHERITANCE("jds_ref_entity_inheritance", "ri"),
     BIND_ENTITY_FIELDS("jds_ref_entity_field", "bef"),
     BIND_ENTITY_ENUMS("jds_ref_entity_enum", "bee"),
-    SAVE_BOOLEAN("proc_store_boolean",""),
+    SAVE_BOOLEAN("proc_store_boolean", ""),
     SAVE_TEXT("proc_store_text", ""),
     SAVE_FLOAT("proc_store_float", ""),
     SAVE_INTEGER("proc_store_integer", ""),

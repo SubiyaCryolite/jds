@@ -14,8 +14,10 @@
 package io.github.subiyacryolite.jds
 
 import javafx.beans.property.*
-import java.time.*
-
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.MonthDay
+import java.time.Period
 import java.time.temporal.Temporal
 import java.util.*
 
@@ -57,9 +59,8 @@ class JdsSaveContainer {
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
     //overviews
     val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
-    
-    internal fun reset()
-    {
+
+    internal fun reset() {
         //time constructs
         localDateTimeProperties.clear()
         localDateProperties.clear()

@@ -100,9 +100,19 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
         values = input.readObject() as Array<Enum<T>?>
     }
 
-    companion object {
+    companion object : Externalizable {
 
         private val serialVersionUID = 20171109_0853L
+
         val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap()
+
+        override fun readExternal(objectInput: ObjectInput) {
+            enums.clear()
+            enums.putAll(objectInput.readObject() as Map<Long, JdsFieldEnum<*>>)
+        }
+
+        override fun writeExternal(objectOutput: ObjectOutput) {
+            objectOutput.writeObject(enums)
+        }
     }
 }

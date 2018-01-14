@@ -13,8 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalTimeSqlFormat
 import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -997,9 +995,9 @@ abstract class JdsEntity : IJdsEntity {
             }
             JdsFieldType.ZONED_DATE_TIME -> when (value) {
                 is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
-                is Timestamp -> zonedDateTimeProperties[fieldId]?.set(value.let { ZonedDateTime.ofInstant(it.toInstant(), ZoneOffset.systemDefault())})
-                is String -> zonedDateTimeProperties[fieldId]?.set(value.let { it.toZonedDateTime()})
-                is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.let { it.atZoneSameInstant(ZoneId.systemDefault())})
+                is Timestamp -> zonedDateTimeProperties[fieldId]?.set(value.let { ZonedDateTime.ofInstant(it.toInstant(), ZoneOffset.systemDefault()) })
+                is String -> zonedDateTimeProperties[fieldId]?.set(value.let { it.toZonedDateTime() })
+                is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.let { it.atZoneSameInstant(ZoneId.systemDefault()) })
             }
             JdsFieldType.DATE -> localDateProperties[fieldId]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
             JdsFieldType.TIME -> when (value) {
@@ -1067,7 +1065,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param entityId   the value representing the entity
      */
     internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
-        (if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.mapClassFields()) else NamedPreparedStatement(connection, jdsDb.mapClassFields())).use { mapClassFields ->
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassFields()) else connection.prepareStatement(jdsDb.mapClassFields())).use { mapClassFields ->
             (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapFieldName()) else connection.prepareStatement(jdsDb.mapFieldName())).use { mapFieldName ->
                 getFields(overview.entityId).forEach {
                     val lookup = JdsField.values[it]!!
@@ -1078,8 +1076,8 @@ abstract class JdsEntity : IJdsEntity {
                     mapFieldName.setInt(4, lookup.type.ordinal)
                     mapFieldName.addBatch()
                     //2. map this fieldEntity ID to the entity type
-                    mapClassFields.setLong("entityId", entityId)
-                    mapClassFields.setLong("fieldId", lookup.id)
+                    mapClassFields.setLong(1, entityId)
+                    mapClassFields.setLong(2, lookup.id)
                     mapClassFields.addBatch()
                 }
                 mapFieldName.executeBatch()

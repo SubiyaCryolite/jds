@@ -13,12 +13,8 @@
  */
 package io.github.subiyacryolite.jds.events
 
-import com.javaworld.INamedStatement
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.IJdsDb
-import java.sql.*
-import java.util.*
+import java.sql.Connection
 import java.util.concurrent.ConcurrentMap
 
 /**

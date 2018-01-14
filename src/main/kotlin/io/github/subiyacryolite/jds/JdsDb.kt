@@ -22,6 +22,7 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.io.Serializable
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -35,7 +36,7 @@ import kotlin.collections.HashMap
  * @param implementation
  * @param supportsStatements
  */
-abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb {
+abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb, Serializable {
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
@@ -566,18 +567,16 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param entityId   the entity's id
      * @param entityName the entity's name
      */
-    private fun mapClassName(connection: Connection, entityId: Long, entityName: String) {
-        try {
-            (if (supportsStatements) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
-                statement.setLong(1, entityId)
-                statement.setString(2, entityName)
-                statement.executeUpdate()
-                if (isPrintingOutput)
-                    println("Mapped Entity [$entityName - $entityId]")
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+    private fun mapClassName(connection: Connection, entityId: Long, entityName: String) = try {
+        (if (supportsStatements) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
+            statement.setLong(1, entityId)
+            statement.setString(2, entityName)
+            statement.executeUpdate()
+            if (isPrintingOutput)
+                println("Mapped Entity [$entityName - $entityId]")
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     fun mapTable(vararg table: JdsTable) {
@@ -745,7 +744,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun mapClassFields(): String {
-        return "{call proc_ref_entity_field(:entityId, :fieldId)}"
+        return "{call proc_ref_entity_field(?, ?)}"
     }
 
     /**
