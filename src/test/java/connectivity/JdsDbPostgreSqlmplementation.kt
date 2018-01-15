@@ -17,7 +17,7 @@ class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
         Class.forName("org.postgresql.Driver")
         val properties = Properties()
         properties.put("user", "postgres")
-        properties.put("password", "")
+        properties.put("password", "postgres")
         return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/jds", properties)
     }
 }

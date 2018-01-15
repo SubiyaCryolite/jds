@@ -1,9 +1,10 @@
 package tests
 
 import org.junit.jupiter.api.Test
-import java.sql.Timestamp
-import java.time.*
-import java.util.*
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+
 
 class AllTests {
 
@@ -94,12 +95,17 @@ class AllTests {
     @Test
     fun javaTime() {
         //1969-04-04 00:00:00.000
-        val rs = 621120960000000000L//date of birth
+        val ticks = 621120960000000000L//date of birth
+        println(LocalDateTime.ofInstant(DateHelper.getDate(ticks), ZoneId.of("UTC")))
+    }
 
 
-        val llastLogonAdjust = 1164447360000000L  // adjust factor for converting it to java
-        val ints = Instant.ofEpochMilli((rs/1000000) - llastLogonAdjust)
-        val ldt = LocalDateTime.ofInstant(ints, ZoneId.systemDefault())
-        println(ldt)
+    internal object DateHelper {
+
+        private val TICKS_AT_EPOCH = 621355968000000000L
+        private val TICKS_PER_MILLISECOND: Long = 10000
+
+        fun getDate(UTCTicks: Long): Instant = Instant.ofEpochMilli((UTCTicks - TICKS_AT_EPOCH) / TICKS_PER_MILLISECOND)
+
     }
 }
