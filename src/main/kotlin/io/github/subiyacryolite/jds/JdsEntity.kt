@@ -31,7 +31,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.HashSet
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
@@ -1239,10 +1238,10 @@ abstract class JdsEntity : IJdsEntity {
         }
     }
 
-    internal fun yieldOverviews(): Sequence<JdsEntity> = buildSequence {
-        yield(this@JdsEntity)
-        objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
-        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }
+    internal fun yieldOverviews(bucket: MutableList<JdsEntity>) {
+        bucket.add(this)
+        objectProperties.values.forEach { it.value.yieldOverviews(bucket) }
+        objectArrayProperties.values.forEach { it.forEach { it.yieldOverviews(bucket) } }
     }
 
     companion object : Externalizable {

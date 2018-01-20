@@ -30,7 +30,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
@@ -76,17 +75,19 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     override fun call(): Boolean {
         val saveContainer = JdsSaveContainer()
-        val batchEntities = ArrayList<MutableCollection<JdsEntity>>()
-        setupBatches(batchSize, entities, saveContainer, batchEntities)
-        var step = 0
+        val batchEntities = LinkedList<MutableCollection<JdsEntity>>()
+
+        val allEntities = LinkedList<JdsEntity>()
+        entities.forEach { it.yieldOverviews(allEntities) }
+
+        setupBatches(batchSize, allEntities, saveContainer, batchEntities)
         val steps = batchEntities.size
-        for (current in batchEntities) {
+        batchEntities.forEachIndexed { step, current ->
             saveInner(current, saveContainer, step, steps)
-            saveContainer.reset()//don't repersist the same files in batching
-            step++
             if (jdsDb.isPrintingOutput)
-                println("Processed batch [$step of ${steps + 1}]")
+                println("Processed batch [$step of $steps]")
         }
+        saveContainer.reset()//don't repersist the same files in batching
         return true
     }
 
@@ -97,26 +98,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param batchEntities
      */
     private fun setupBatches(batchSize: Int, entities: Iterable<JdsEntity>, container: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
-        //create batches
-        var currentBatch = 0
         //default bach is 0 or -1 which means one large chunk. Anything above is a single batch
-        var iteration = 0
-        if (batchSize > 0) {
-            entities.forEach {
-                if (iteration == batchSize) {
-                    currentBatch++
-                    iteration = 0
-                }
-                if (iteration == 0) {
-                    createBatchCollection(container, batchEntities)
-                }
-                batchEntities[currentBatch].add(it)
-                iteration++
-            }
-        } else {
-            //single large batch, good luck
-            createBatchCollection(container, batchEntities)
-            entities.forEach { batchEntities[0].add(it) }
+        entities.forEachIndexed { iteration, it ->
+            if (batchSize > 0 && iteration % batchSize == 0) {
+                createBatchCollection(container, batchEntities)
+            } else if (batchSize <= 0 && iteration == 0)
+                createBatchCollection(container, batchEntities)
+            batchEntities[batchEntities.size - 1].add(it)
         }
     }
 
@@ -125,7 +113,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param batchEntities
      */
     private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
-        batchEntities.add(ArrayList())
+        batchEntities.add(LinkedList())
         saveContainer.overviews.add(HashSet())
         //time constructs
         saveContainer.localDateTimeProperties.add(HashMap())
@@ -165,26 +153,29 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     /**
      * @param entities
      * @param saveContainer
-     * @param step
-     * @param steps
+     * @param currentStep
+     * @param totalSteps
      */
     @Throws(Exception::class)
-    private fun saveInner(entities: Iterable<JdsEntity>, saveContainer: JdsSaveContainer, step: Int, steps: Int) {
+    private fun saveInner(entities: Iterable<JdsEntity>, saveContainer: JdsSaveContainer, currentStep: Int, totalSteps: Int) {
+
         //fire
         entities.forEach {
             //update the modified date to time of commit
             it.overview.dateModified = LocalDateTime.now()
-            saveContainer.overviews[step].add(it.overview)
-            //assign properties
-            it.assign(step, saveContainer)
         }
-        //share one connection for raw saves, helps with performance
-        val finalStep = !recursiveInnerCall && step == steps - 1
 
+        //share one connection for raw saves, helps with performance
+        val finalStep = !recursiveInnerCall && currentStep == totalSteps - 1
         try {
             //always save overviews first
-            if (jdsDb.isWritingOverviewFields)
-                saveOverviews(saveContainer.overviews[step])
+            if (jdsDb.isWritingOverviewFields) {
+                entities.forEach {
+                    saveContainer.overviews[currentStep].add(it.overview)
+                    it.assign(currentStep, saveContainer)
+                }
+                saveOverviews(saveContainer.overviews[currentStep])
+            }
 
             //ensure that overviews are submitted before handing over to listeners
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
@@ -192,46 +183,46 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (jdsDb.isLoggingEdits || jdsDb.isWritingToPrimaryDataTables) {
                 //time constraints
                 saveDateConstructs(
-                        saveContainer.monthDayProperties[step],
-                        saveContainer.yearMonthProperties[step],
-                        saveContainer.periodProperties[step],
-                        saveContainer.durationProperties[step])
-                saveDatesAndDateTimes(saveContainer.localDateTimeProperties[step], saveContainer.localDateProperties[step])
-                saveZonedDateTimes(saveContainer.zonedDateTimeProperties[step])
-                saveTimes(saveContainer.localTimeProperties[step])
+                        saveContainer.monthDayProperties[currentStep],
+                        saveContainer.yearMonthProperties[currentStep],
+                        saveContainer.periodProperties[currentStep],
+                        saveContainer.durationProperties[currentStep])
+                saveDatesAndDateTimes(saveContainer.localDateTimeProperties[currentStep], saveContainer.localDateProperties[currentStep])
+                saveZonedDateTimes(saveContainer.zonedDateTimeProperties[currentStep])
+                saveTimes(saveContainer.localTimeProperties[currentStep])
                 //primitives
-                saveBooleans(saveContainer.booleanProperties[step])
-                saveLongs(saveContainer.longProperties[step])
-                saveDoubles(saveContainer.doubleProperties[step])
-                saveIntegers(saveContainer.integerProperties[step])
-                saveFloats(saveContainer.floatProperties[step])
+                saveBooleans(saveContainer.booleanProperties[currentStep])
+                saveLongs(saveContainer.longProperties[currentStep])
+                saveDoubles(saveContainer.doubleProperties[currentStep])
+                saveIntegers(saveContainer.integerProperties[currentStep])
+                saveFloats(saveContainer.floatProperties[currentStep])
                 //strings
-                saveStrings(saveContainer.stringProperties[step])
+                saveStrings(saveContainer.stringProperties[currentStep])
                 //blobs
-                saveBlobs(saveContainer.blobProperties[step])
+                saveBlobs(saveContainer.blobProperties[currentStep])
                 //enumProperties
-                saveEnums(saveContainer.enumProperties[step])
+                saveEnums(saveContainer.enumProperties[currentStep])
             }
             if (jdsDb.isLoggingEdits || jdsDb.isWritingArrayValues) {
                 //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-                saveArrayDates(saveContainer.localDateTimeCollections[step])
-                saveArrayStrings(saveContainer.stringCollections[step])
-                saveArrayLongs(saveContainer.longCollections[step])
-                saveArrayDoubles(saveContainer.doubleCollections[step])
-                saveArrayIntegers(saveContainer.integerCollections[step])
-                saveArrayFloats(saveContainer.floatCollections[step])
-                saveEnumCollections(saveContainer.enumCollections[step])
+                saveArrayDates(saveContainer.localDateTimeCollections[currentStep])
+                saveArrayStrings(saveContainer.stringCollections[currentStep])
+                saveArrayLongs(saveContainer.longCollections[currentStep])
+                saveArrayDoubles(saveContainer.doubleCollections[currentStep])
+                saveArrayIntegers(saveContainer.integerCollections[currentStep])
+                saveArrayFloats(saveContainer.floatCollections[currentStep])
+                saveEnumCollections(saveContainer.enumCollections[currentStep])
             }
             //objects and object arrays
             //object entity overviews and entity bindings are ALWAYS persisted
-            saveAndBindObjects(connection, saveContainer.objects[step])
-            saveAndBindObjectArrays(connection, saveContainer.objectCollections[step])
+            saveAndBindObjects(connection, saveContainer.objects[currentStep])
+            saveAndBindObjectArrays(connection, saveContainer.objectCollections[currentStep])
 
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //crt point
             if (jdsDb.tables.isNotEmpty()) {
-                overviewsSequence(entities).forEach {
+                entities.forEach {
                     processCrt(jdsDb, connection, alternateConnections, it)
                 }
             }
@@ -250,12 +241,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 connection.close()
                 alternateConnections.forEach { it.value.close() }
             }
-        }
-    }
-
-    private fun overviewsSequence(hashSet: Iterable<JdsEntity>): Sequence<JdsEntity> = buildSequence {
-        hashSet.forEach {
-            yieldAll(it.yieldOverviews())
         }
     }
 
@@ -1325,7 +1310,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val parentChildBindings = ArrayList<JdsParentChildBinding>()
         val record = SimpleIntegerProperty(0)
         val changesMade = SimpleBooleanProperty(false)
-        val map: MutableMap<String, Long> = HashMap<String, Long>()
+        val map: MutableMap<String, Long> = HashMap()
 
         if (jdsDb.isWritingToPrimaryDataTables) {
             for ((parentuuid, value) in objectArrayProperties) {
@@ -1360,9 +1345,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 }
             }
         }
-
-        //save ALL children first
-        JdsSave(alternateConnections, jdsDb, connection, -1, entities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
 
         //bind children below
         //If a parent doesn't have this property everything will be fine, as it wont be loaded
@@ -1432,9 +1414,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             }
         }
 
-        //save ALL children first
-        JdsSave(alternateConnections, jdsDb, connection, -1, jdsEntities, true, onPreSaveEventArguments, onPostSaveEventArguments).call()
-
         //bind children below
         //If a parent doesn't have this property everything will be fine, as it wont be loaded
         //thus the delete call will not be executed
@@ -1463,7 +1442,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @return
      */
     private fun getParentuuid(parentChildBindings: Collection<JdsParentChildBinding>, childuuid: String): String {
-        return parentChildBindings.firstOrNull { parentChildBinding -> parentChildBinding.childUuid == childuuid }?.parentUuid ?: ""
+        return parentChildBindings.firstOrNull { parentChildBinding -> parentChildBinding.childUuid == childuuid }?.parentUuid
+                ?: ""
     }
 
     /**

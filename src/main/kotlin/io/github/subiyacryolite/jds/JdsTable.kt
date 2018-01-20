@@ -16,19 +16,19 @@ import kotlin.collections.HashSet
 
 
 open class JdsTable() : Serializable {
-    var name: String = ""
+
+    var name = ""
     var uniqueEntries = false
     var onlyLiveRecords = false
     var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
-
-    private var targetConnection = 0
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
     private val insertColumns = StringJoiner(",")
     private val insertParameters = StringJoiner(",")
+    private var targetConnection = 0
     private var deleteSql = ""
     private var insertSql = ""
     private var generatedOrUpdatedSchema = false
@@ -180,7 +180,7 @@ open class JdsTable() : Serializable {
     internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) {
 
         if (!pool.containsKey(targetConnection))
-            pool.put(targetConnection, jdsDb.getConnection(targetConnection))
+            pool[targetConnection] = jdsDb.getConnection(targetConnection)
 
         val connection = pool[targetConnection]!!
 
@@ -263,6 +263,6 @@ open class JdsTable() : Serializable {
 
     companion object {
 
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
     }
 }
