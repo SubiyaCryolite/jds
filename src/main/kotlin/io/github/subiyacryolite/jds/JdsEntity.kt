@@ -58,7 +58,7 @@ abstract class JdsEntity : IJdsEntity {
     private val integerProperties: HashMap<Long, IntegerProperty> = HashMap()
     //arrays
     private val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
-    private val stringArrayProperties: HashMap<Long, MutableCollection<String?>> = HashMap()
+    private val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
     private val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
     private val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
     private val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
@@ -114,21 +114,21 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.MONTH_DAY)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        monthDayProperties.put(field.id, property)
+        monthDayProperties[field.id] = property
     }
 
     protected fun mapPeriod(field: JdsField, property: ObjectProperty<Period>) {
         if (field.type != JdsFieldType.PERIOD)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        periodProperties.put(field.id, property)
+        periodProperties[field.id] = property
     }
 
     protected fun mapDuration(field: JdsField, property: ObjectProperty<Duration>) {
         if (field.type != JdsFieldType.DURATION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        durationProperties.put(field.id, property)
+        durationProperties[field.id] = property
     }
 
     /**
@@ -180,7 +180,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.STRING)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        stringProperties.put(field.id, property)
+        stringProperties[field.id] = property
 
     }
 
@@ -192,7 +192,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.FLOAT)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        floatProperties.put(field.id, property)
+        floatProperties[field.id] = property
     }
 
     /**
@@ -203,7 +203,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.LONG)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        longProperties.put(field.id, property)
+        longProperties[field.id] = property
     }
 
     /**
@@ -214,7 +214,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.DOUBLE)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        doubleProperties.put(field.id, property)
+        doubleProperties[field.id] = property
 
     }
 
@@ -226,18 +226,18 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.BOOLEAN)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        booleanProperties.put(field.id, property)
+        booleanProperties[field.id] = property
     }
 
     /**
      * @param field
      * @param properties
      */
-    protected fun mapStrings(field: JdsField, properties: MutableCollection<String?>) {
+    protected fun mapStrings(field: JdsField, properties: MutableCollection<String>) {
         if (field.type != JdsFieldType.STRING_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        stringArrayProperties.put(field.id, properties)
+        stringArrayProperties[field.id] = properties
     }
 
     /**
@@ -248,7 +248,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        dateTimeArrayProperties.put(field.id, properties)
+        dateTimeArrayProperties[field.id] = properties
     }
 
     /**
@@ -259,7 +259,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        floatArrayProperties.put(field.id, properties)
+        floatArrayProperties[field.id] = properties
     }
 
     /**
@@ -270,7 +270,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.INT_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        integerArrayProperties.put(field.id, properties)
+        integerArrayProperties[field.id] = properties
     }
 
     /**
@@ -281,7 +281,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        doubleArrayProperties.put(field.id, properties)
+        doubleArrayProperties[field.id] = properties
     }
 
     /**
@@ -292,7 +292,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.LONG_COLLECTION)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        longArrayProperties.put(field.id, properties)
+        longArrayProperties[field.id] = properties
     }
 
     /**
@@ -630,7 +630,7 @@ abstract class JdsEntity : IJdsEntity {
         putBlobs(blobProperties, objectInputStream.readObject() as Map<Long, BlobProperty>)
         //arrays
         putObjects(objectArrayProperties, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
-        putStrings(stringArrayProperties, objectInputStream.readObject() as Map<Long, List<String?>>)
+        putStrings(stringArrayProperties, objectInputStream.readObject() as Map<Long, List<String>>)
         putDateTimes(dateTimeArrayProperties, objectInputStream.readObject() as Map<Long, List<LocalDateTime>>)
         putFloats(floatArrayProperties, objectInputStream.readObject() as Map<Long, List<Float>>)
         putDoubles(doubleArrayProperties, objectInputStream.readObject() as Map<Long, List<Double>>)
@@ -804,7 +804,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putStrings(destination: Map<Long, MutableCollection<String?>>, source: Map<Long, List<String?>>) {
+    private fun putStrings(destination: Map<Long, MutableCollection<String>>, source: Map<Long, List<String>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
@@ -983,16 +983,33 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun populateProperties(fieldType: JdsFieldType, fieldId: Long, value: Any?) {
         when (fieldType) {
-            JdsFieldType.FLOAT -> floatProperties[fieldId]?.set(value as Float)
-            JdsFieldType.DOUBLE -> doubleProperties[fieldId]?.set(value as Double)
-            JdsFieldType.LONG -> longProperties[fieldId]?.set(value as Long)
+        //========================= primitives (can be null)
+            JdsFieldType.FLOAT -> floatProperties[fieldId]?.value = value as Float?
+            JdsFieldType.DOUBLE -> doubleProperties[fieldId]?.value = value as Double?
+            JdsFieldType.LONG -> longProperties[fieldId]?.value = value as Long?
+            JdsFieldType.INT -> integerProperties[fieldId]?.value = value as Int?
+            JdsFieldType.BOOLEAN -> when (value) {
+                is Int -> booleanProperties[fieldId]?.value = value == 1
+                else -> booleanProperties[fieldId]?.value = value as Boolean?
+            }
+        //========================= collections (assumed cannot be null)
             JdsFieldType.DOUBLE_COLLECTION -> doubleArrayProperties[fieldId]?.add(value as Double)
             JdsFieldType.FLOAT_COLLECTION -> floatArrayProperties[fieldId]?.add(value as Float)
             JdsFieldType.LONG_COLLECTION -> longArrayProperties[fieldId]?.add(value as Long)
-            JdsFieldType.BOOLEAN -> when (value) {
-                is Int -> booleanProperties[fieldId]?.set(value == 1)
-                is Boolean -> booleanProperties[fieldId]?.set(value)
+            JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.add(value as Int)
+        //========================= enums
+            JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == fieldId }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
+            JdsFieldType.ENUM_COLLECTION -> enumCollectionProperties.filter { it.key.field.id == fieldId }.forEach {
+                val enumValues = it.key.enumType.enumConstants
+                val index = value as Int
+                if (index < enumValues.size) {
+                    it.value.add(enumValues[index] as Enum<*>)
+                }
             }
+        //========================= strings
+            JdsFieldType.STRING -> stringProperties[fieldId]?.set(value as String?)
+            JdsFieldType.STRING_COLLECTION -> stringArrayProperties[fieldId]?.add(value as String)
+        //========================= dates and times
             JdsFieldType.ZONED_DATE_TIME -> when (value) {
                 is Long -> zonedDateTimeProperties[fieldId]?.set(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
                 is Timestamp -> zonedDateTimeProperties[fieldId]?.set(value.let { ZonedDateTime.ofInstant(it.toInstant(), ZoneOffset.systemDefault()) })
@@ -1005,28 +1022,14 @@ abstract class JdsEntity : IJdsEntity {
                 is LocalTime -> localTimeProperties[fieldId]?.set(value)
                 is String -> localTimeProperties[fieldId]?.set(value.toLocalTimeSqlFormat())
             }
-            JdsFieldType.BLOB -> blobProperties[fieldId]?.set(value as ByteArray)
             JdsFieldType.DURATION -> durationProperties[fieldId]?.set(Duration.ofNanos(value as Long))
-        //====================  from strings ====================
-            JdsFieldType.STRING -> stringProperties[fieldId]?.set(value as String?)
-            JdsFieldType.STRING_COLLECTION -> stringArrayProperties[fieldId]?.add(value as String?)
             JdsFieldType.MONTH_DAY -> monthDayProperties[fieldId]?.value = (value as String).let { MonthDay.parse(it) }
             JdsFieldType.YEAR_MONTH -> yearMonthProperties[fieldId]?.value = (value as String).let { YearMonth.parse(it) }
             JdsFieldType.PERIOD -> periodProperties[fieldId]?.value = (value as String).let { Period.parse(it) }
-        //==================== from ints ====================
-            JdsFieldType.INT -> integerProperties[fieldId]?.set(value as Int)
-            JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.add(value as Int)
-            JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == fieldId }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
-            JdsFieldType.ENUM_COLLECTION -> enumCollectionProperties.filter { it.key.field.id == fieldId }.forEach {
-                val enumValues = it.key.enumType.enumConstants
-                val index = value as Int
-                if (index < enumValues.size) {
-                    it.value.add(enumValues[index] as Enum<*>)
-                }
-            }
-        //====================  from timestamps ====================
             JdsFieldType.DATE_TIME -> localDateTimeProperties[fieldId]?.value = (value as Timestamp).let { it.toLocalDateTime() }
             JdsFieldType.DATE_TIME_COLLECTION -> dateTimeArrayProperties[fieldId]?.add((value as Timestamp).let { it.toLocalDateTime() })
+        //========================= blob
+            JdsFieldType.BLOB -> blobProperties[fieldId]?.set(value as ByteArray)
         }
     }
 
@@ -1247,15 +1250,15 @@ abstract class JdsEntity : IJdsEntity {
 
     companion object : Externalizable {
 
-        private val serialVersionUID = 20180106_2125L
-        private val allFields: ConcurrentHashMap<Long, MutableSet<Long>> = ConcurrentHashMap()
-        private val allEnums: ConcurrentHashMap<Long, MutableSet<Long>> = ConcurrentHashMap()
+        private const val serialVersionUID = 20180106_2125L
+        private val allFields = ConcurrentHashMap<Long, MutableSet<Long>>()
+        private val allEnums = ConcurrentHashMap<Long, MutableSet<Long>>()
 
         override fun readExternal(objectInput: ObjectInput) {
             allFields.clear()
-            allFields.putAll(objectInput.readObject() as Map<out Long, MutableSet<Long>>)
+            allFields.putAll(objectInput.readObject() as Map<Long, MutableSet<Long>>)
             allEnums.clear()
-            allEnums.putAll(objectInput.readObject() as Map<out Long, MutableSet<Long>>)
+            allEnums.putAll(objectInput.readObject() as Map<Long, MutableSet<Long>>)
         }
 
         override fun writeExternal(objectOutput: ObjectOutput) {

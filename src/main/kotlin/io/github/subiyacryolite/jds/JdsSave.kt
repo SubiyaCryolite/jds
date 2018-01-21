@@ -174,7 +174,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     saveContainer.overviews[currentStep].add(it.overview)
                     it.assign(currentStep, saveContainer)
                 }
-                if (currentStep == 0) //if first save capture ALL overviews beforehand so that bindings work
+                if (currentStep == 0) //if first save capture ALL overviews beforehand so that bindings work flawlessly
                     saveOverviews(allEntities)
             }
 
@@ -191,13 +191,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 saveDatesAndDateTimes(saveContainer.localDateTimeProperties[currentStep], saveContainer.localDateProperties[currentStep])
                 saveZonedDateTimes(saveContainer.zonedDateTimeProperties[currentStep])
                 saveTimes(saveContainer.localTimeProperties[currentStep])
-                //primitives
+                //primitives, can be null
                 saveBooleans(saveContainer.booleanProperties[currentStep])
                 saveLongs(saveContainer.longProperties[currentStep])
                 saveDoubles(saveContainer.doubleProperties[currentStep])
                 saveIntegers(saveContainer.integerProperties[currentStep])
                 saveFloats(saveContainer.floatProperties[currentStep])
-                //strings
+                //strings never null
                 saveStrings(saveContainer.stringProperties[currentStep])
                 //blobs
                 saveBlobs(saveContainer.blobProperties[currentStep])
@@ -339,7 +339,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setBoolean("value", value)
+                    upsert.setObject("value", value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -348,12 +348,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setBoolean(4, value)
+                log.setObject(4, value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setBoolean(8, value)
+                    log.setObject(8, value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -380,7 +380,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setInt("value", value)
+                    upsert.setObject("value", value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -389,12 +389,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setInt(4, value)
+                log.setObject(4, value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setInt(8, value)
+                    log.setObject(8, value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -421,7 +421,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setFloat("value", value)
+                    upsert.setObject("value", value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -430,12 +430,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setFloat(4, value)
+                log.setObject(4, value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setFloat(8, value)
+                    log.setObject(8, value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -462,7 +462,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setDouble("value", value)
+                    upsert.setObject("value", value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -471,12 +471,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setDouble(4, value)
+                log.setObject(4, value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setDouble(8, value)
+                    log.setObject(8, value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -503,7 +503,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setLong("value", value)
+                    upsert.setObject("value", value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -512,12 +512,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setLong(4, value)
+                log.setObject(4, value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setLong(8, value)
+                    log.setObject(8, value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -992,12 +992,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
                         log.setInt(3, index.get())
-                        log.setFloat(4, value)
+                        log.setObject(4, value) //primitives could be null, default value has meaning
                         if (!jdsDb.isLoggingAppendOnly) {
                             log.setString(5, uuid)
                             log.setLong(6, fieldId)
                             log.setInt(7, index.get())
-                            log.setFloat(8, value)
+                            log.setObject(8, value) //primitives could be null, default value has meaning
                         }
                         log.addBatch()
                     }
@@ -1007,7 +1007,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         delete.addBatch()
                         //insert
                         insert.setInt(1, index.get())
-                        insert.setFloat(2, value)
+                        insert.setObject(2, value) //primitives could be null, default value has meaning
                         insert.setLong(3, fieldId)
                         insert.setString(4, uuid)
                         insert.addBatch()
@@ -1047,12 +1047,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
                         log.setInt(3, index.get())
-                        log.setInt(4, value)
+                        log.setObject(4, value) //primitives could be null, default value has meaning
                         if (!jdsDb.isLoggingAppendOnly) {
                             log.setString(5, uuid)
                             log.setLong(6, fieldId)
                             log.setInt(7, index.get())
-                            log.setInt(8, value)
+                            log.setObject(8, value) //primitives could be null, default value has meaning
                         }
                         log.addBatch()
                     }
@@ -1063,7 +1063,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         delete.addBatch()
                         //insert
                         insert.setInt("sequence", index.get())
-                        insert.setInt("value", value)
+                        insert.setObject("value", value) //primitives could be null, default value has meaning
                         insert.setLong("fieldId", fieldId)
                         insert.setString("uuid", uuid)
                         insert.addBatch()
@@ -1101,12 +1101,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
                         log.setInt(3, index.get())
-                        log.setDouble(4, value)
+                        log.setObject(4, value) //primitives could be null, default value has meaning
                         if (!jdsDb.isLoggingAppendOnly) {
                             log.setString(5, uuid)
                             log.setLong(6, fieldId)
                             log.setInt(7, index.get())
-                            log.setDouble(8, value)
+                            log.setObject(8, value) //primitives could be null, default value has meaning
                         }
                         log.addBatch()
                     }
@@ -1117,7 +1117,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         delete.addBatch()
                         //insert
                         insert.setInt("fieldId", index.get())
-                        insert.setDouble("uuid", value)
+                        insert.setObject("uuid", value) //primitives could be null, default value has meaning
                         insert.setLong("sequence", fieldId)
                         insert.setString("value", uuid)
                         insert.addBatch()
@@ -1156,12 +1156,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         log.setString(1, uuid)
                         log.setLong(2, fieldId)
                         log.setInt(3, index.get())
-                        log.setLong(4, value)
+                        log.setObject(4, value) //primitives could be null, default value has meaning
                         if (!jdsDb.isLoggingAppendOnly) {
                             log.setString(5, uuid)
                             log.setLong(6, fieldId)
                             log.setInt(7, index.get())
-                            log.setLong(8, value)
+                            log.setObject(8, value) //primitives could be null, default value has meaning
                         }
                         log.addBatch()
                     }
@@ -1171,7 +1171,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         delete.addBatch()
                         //insert
                         insert.setInt(1, index.get())
-                        insert.setLong(2, value)
+                        insert.setObject(2, value) //primitives could be null, default value has meaning
                         insert.setLong(3, fieldId)
                         insert.setString(4, uuid)
                         insert.addBatch()
@@ -1191,7 +1191,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String?>>>) = try {
+    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
         val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND uuid = :uuid"
         val insertSql = "INSERT INTO jds_store_text_array (field_id, uuid, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
 

@@ -12,14 +12,14 @@ object JdsSchema {
      */
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
         val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 96)
-        val sb = StringBuilder()
-        sb.append("CREATE TABLE ")
-        sb.append(reportName)
-        sb.append("( ${getPrimaryKeyColumn()} $guidDataType ${when (appendOnly) {
-            true -> "PRIMARY KEY"
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("CREATE TABLE ")
+        stringBuilder.append(reportName)
+        stringBuilder.append("( ${getPrimaryKeyColumn()} $guidDataType, ${getEntityIdColumn()} ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
+            true -> ", PRIMARY KEY (${getPrimaryKeyColumn()},${getEntityIdColumn()})"
             else -> ""
-        }}, ${getEntityIdColumn()} ${jdsDb.getDbLongDataType()})")
-        return sb.toString()
+        }})")
+        return stringBuilder.toString()
     }
 
     /**
@@ -32,8 +32,8 @@ object JdsSchema {
      */
     fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
-        fields.sortedBy { it.name }.forEach { field ->
-            when (field.type) {
+        fields.sortedBy { it.name }.forEach {
+            when (it.type) {
                 JdsFieldType.BLOB,
                 JdsFieldType.ENTITY_COLLECTION,
                 JdsFieldType.FLOAT_COLLECTION,
@@ -43,17 +43,16 @@ object JdsSchema {
                 JdsFieldType.STRING_COLLECTION,
                 JdsFieldType.DATE_TIME_COLLECTION -> {
                 }
-                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[field.id]!!.values.forEachIndexed { _, enum ->
-                    val columnName = "${field.name}_${enum!!.ordinal}"
+                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
+                    val columnName = "${it.name}_${enum!!.ordinal}"
                     val columnDefinition = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
-                    collection.put(columnName, String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnDefinition))
-                    columnToFieldMap.put(columnName, field)
-
-                    enumOrdinals.put(columnName, enum!!.ordinal)
+                    collection[columnName] = String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnDefinition)
+                    columnToFieldMap[columnName] = it
+                    enumOrdinals[columnName] = enum!!.ordinal
                 }
                 else -> {
-                    collection.put(field.name, generateColumn(jdsDb, reportName, field))
-                    columnToFieldMap.put(field.name, field)
+                    collection[it.name] = generateColumn(jdsDb, reportName, it)
+                    columnToFieldMap[it.name] = it
                 }
             }
         }
@@ -81,34 +80,29 @@ object JdsSchema {
      * @return
      */
     @JvmOverloads
-    fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String {
-        when (fieldType) {
-            JdsFieldType.ENTITY -> return jdsDb.getDbStringDataType(96)//act as a fk if you will
-            JdsFieldType.FLOAT -> return jdsDb.getDbFloatDataType()
-            JdsFieldType.DOUBLE -> return jdsDb.getDbDoubleDataType()
-            JdsFieldType.ZONED_DATE_TIME -> return jdsDb.getDbZonedDateTimeDataType()
-            JdsFieldType.TIME -> return jdsDb.getDbTimeDataType()
-            JdsFieldType.BLOB -> return jdsDb.getDbBlobDataType(max)
-            JdsFieldType.BOOLEAN -> return jdsDb.getDbBooleanDataType()
-            JdsFieldType.ENUM, JdsFieldType.INT -> return jdsDb.getDbIntegerDataType()
-            JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return jdsDb.getDbDateTimeDataType()
-            JdsFieldType.LONG, JdsFieldType.DURATION -> return jdsDb.getDbLongDataType()
-            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return jdsDb.getDbStringDataType(max)
-        }
-        return "invalid"
+    fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String = when (fieldType) {
+        JdsFieldType.ENTITY -> jdsDb.getDbStringDataType(96)//act as a FK if you will
+        JdsFieldType.FLOAT -> jdsDb.getDbFloatDataType()
+        JdsFieldType.DOUBLE -> jdsDb.getDbDoubleDataType()
+        JdsFieldType.ZONED_DATE_TIME -> jdsDb.getDbZonedDateTimeDataType()
+        JdsFieldType.TIME -> jdsDb.getDbTimeDataType()
+        JdsFieldType.BLOB -> jdsDb.getDbBlobDataType(max)
+        JdsFieldType.BOOLEAN -> jdsDb.getDbBooleanDataType()
+        JdsFieldType.ENUM, JdsFieldType.INT -> jdsDb.getDbIntegerDataType()
+        JdsFieldType.DATE, JdsFieldType.DATE_TIME -> jdsDb.getDbDateTimeDataType()
+        JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getDbLongDataType()
+        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> jdsDb.getDbStringDataType(max)
+        else -> "invalid"
     }
 
     /**
      * @return
      */
-    fun getPrimaryKeyColumn(): String {
-        return "uuid"
-    }
+    fun getPrimaryKeyColumn() = "uuid"
 
     /**
      * @return
      */
-    fun getEntityIdColumn(): String {
-        return "entity_id"
-    }
+    fun getEntityIdColumn() = "entity_id"
+
 }
