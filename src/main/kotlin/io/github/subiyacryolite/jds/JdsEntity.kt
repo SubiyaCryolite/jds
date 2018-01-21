@@ -18,7 +18,10 @@ import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import javafx.beans.property.*
+import javafx.beans.property.BlobProperty
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.StringProperty
+import javafx.beans.value.WritableValue
 import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
@@ -51,11 +54,11 @@ abstract class JdsEntity : IJdsEntity {
     //strings
     private val stringProperties: HashMap<Long, StringProperty> = HashMap()
     //numeric
-    private val floatProperties: HashMap<Long, FloatProperty> = HashMap()
-    private val doubleProperties: HashMap<Long, DoubleProperty> = HashMap()
-    private val booleanProperties: HashMap<Long, BooleanProperty> = HashMap()
-    private val longProperties: HashMap<Long, LongProperty> = HashMap()
-    private val integerProperties: HashMap<Long, IntegerProperty> = HashMap()
+    private val floatProperties: HashMap<Long, WritableValue<Float>> = HashMap()
+    private val doubleProperties: HashMap<Long, WritableValue<Double>> = HashMap()
+    private val booleanProperties: HashMap<Long, WritableValue<Boolean>> = HashMap()
+    private val longProperties: HashMap<Long, WritableValue<Long>> = HashMap()
+    private val integerProperties: HashMap<Long, WritableValue<Int>> = HashMap()
     //arrays
     private val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
     private val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
@@ -90,24 +93,13 @@ abstract class JdsEntity : IJdsEntity {
 
     /**
      * @param field
-     * @param integerProperty
+     * @param property
      */
-    protected fun map(field: JdsField, integerProperty: BlobProperty) {
+    protected fun map(field: JdsField, property: BlobProperty) {
         if (field.type != JdsFieldType.BLOB)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        blobProperties.put(field.id, integerProperty)
-    }
-
-    /**
-     * @param field
-     * @param integerProperty
-     */
-    protected fun map(field: JdsField, integerProperty: IntegerProperty) {
-        if (field.type != JdsFieldType.INT)
-            throw RuntimeException("Please assign the correct type to field [$field]")
-        mapField(overview.entityId, field.id)
-        integerProperties.put(field.id, integerProperty)
+        blobProperties[field.id] = property
     }
 
     protected fun mapMonthDay(field: JdsField, property: ObjectProperty<MonthDay>) {
@@ -188,46 +180,19 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param property
      */
-    protected fun map(field: JdsField, property: FloatProperty) {
-        if (field.type != JdsFieldType.FLOAT)
+    protected fun map(field: JdsField, property: WritableValue<*>) {
+        if (field.type != JdsFieldType.DOUBLE && field.type != JdsFieldType.LONG && field.type != JdsFieldType.INT && field.type != JdsFieldType.FLOAT && field.type != JdsFieldType.BOOLEAN)
             throw RuntimeException("Please assign the correct type to field [$field]")
         mapField(overview.entityId, field.id)
-        floatProperties[field.id] = property
+        when (field.type) {
+            JdsFieldType.DOUBLE -> doubleProperties[field.id] = property as WritableValue<Double>
+            JdsFieldType.LONG -> longProperties[field.id] = property as WritableValue<Long>
+            JdsFieldType.INT -> integerProperties[field.id] = property as WritableValue<Int>
+            JdsFieldType.FLOAT -> floatProperties[field.id] = property as WritableValue<Float>
+            JdsFieldType.BOOLEAN -> booleanProperties[field.id] = property as WritableValue<Boolean>
+        }
     }
 
-    /**
-     * @param field
-     * @param property
-     */
-    protected fun map(field: JdsField, property: LongProperty) {
-        if (field.type != JdsFieldType.LONG)
-            throw RuntimeException("Please assign the correct type to field [$field]")
-        mapField(overview.entityId, field.id)
-        longProperties[field.id] = property
-    }
-
-    /**
-     * @param field
-     * @param property
-     */
-    protected fun map(field: JdsField, property: DoubleProperty) {
-        if (field.type != JdsFieldType.DOUBLE)
-            throw RuntimeException("Please assign the correct type to field [$field]")
-        mapField(overview.entityId, field.id)
-        doubleProperties[field.id] = property
-
-    }
-
-    /**
-     * @param field
-     * @param property
-     */
-    protected fun map(field: JdsField, property: BooleanProperty) {
-        if (field.type != JdsFieldType.BOOLEAN)
-            throw RuntimeException("Please assign the correct type to field [$field]")
-        mapField(overview.entityId, field.id)
-        booleanProperties[field.id] = property
-    }
 
     /**
      * @param field
@@ -388,7 +353,7 @@ abstract class JdsEntity : IJdsEntity {
         val dest = this
         source.booleanProperties.entries.forEach {
             if (dest.booleanProperties.containsKey(it.key)) {
-                dest.booleanProperties[it.key]?.set(it.value.get())
+                dest.booleanProperties[it.key] = it.value
             }
         }
         source.localDateTimeProperties.entries.forEach {
@@ -418,22 +383,22 @@ abstract class JdsEntity : IJdsEntity {
         }
         source.floatProperties.entries.forEach {
             if (dest.floatProperties.containsKey(it.key)) {
-                dest.floatProperties[it.key]?.set(it.value.get())
+                dest.floatProperties[it.key] = it.value
             }
         }
         source.doubleProperties.entries.forEach {
             if (dest.doubleProperties.containsKey(it.key)) {
-                dest.doubleProperties[it.key]?.set(it.value.get())
+                dest.doubleProperties[it.key] = it.value
             }
         }
         source.longProperties.entries.forEach {
             if (dest.longProperties.containsKey(it.key)) {
-                dest.longProperties[it.key]?.set(it.value.get())
+                dest.longProperties[it.key] = it.value
             }
         }
         source.integerProperties.entries.forEach {
             if (dest.integerProperties.containsKey(it.key)) {
-                dest.integerProperties[it.key]?.set(it.value.get())
+                dest.integerProperties[it.key] = it.value
             }
         }
         source.blobProperties.entries.forEach {
@@ -583,11 +548,11 @@ abstract class JdsEntity : IJdsEntity {
         //strings
         objectOutputStream.writeObject(serializableString(stringProperties))
         //numeric
-        objectOutputStream.writeObject(serializeFloat(floatProperties))
-        objectOutputStream.writeObject(serializeDouble(doubleProperties))
-        objectOutputStream.writeObject(serializeBoolean(booleanProperties))
-        objectOutputStream.writeObject(serializeLong(longProperties))
-        objectOutputStream.writeObject(serializeInteger(integerProperties))
+        objectOutputStream.writeObject(floatProperties)
+        objectOutputStream.writeObject(doubleProperties)
+        objectOutputStream.writeObject(booleanProperties)
+        objectOutputStream.writeObject(longProperties)
+        objectOutputStream.writeObject(integerProperties)
         //blobs
         objectOutputStream.writeObject(serializeBlobs(blobProperties))
         //arrays
@@ -621,11 +586,11 @@ abstract class JdsEntity : IJdsEntity {
         //string
         putString(stringProperties, objectInputStream.readObject() as Map<Long, String>)
         //numeric
-        putFloat(floatProperties, objectInputStream.readObject() as Map<Long, Float>)
-        putDouble(doubleProperties, objectInputStream.readObject() as Map<Long, Double>)
-        putBoolean(booleanProperties, objectInputStream.readObject() as Map<Long, Boolean>)
-        putLong(longProperties, objectInputStream.readObject() as Map<Long, Long>)
-        putInteger(integerProperties, objectInputStream.readObject() as Map<Long, Int>)
+        putFloat(floatProperties, objectInputStream.readObject() as Map<Long, WritableValue<Float>>)
+        putDouble(doubleProperties, objectInputStream.readObject() as Map<Long, WritableValue<Double>>)
+        putBoolean(booleanProperties, objectInputStream.readObject() as Map<Long, WritableValue<Boolean>>)
+        putLong(longProperties, objectInputStream.readObject() as Map<Long, WritableValue<Long>>)
+        putInteger(integerProperties, objectInputStream.readObject() as Map<Long, WritableValue<Int>>)
         //blobs
         putBlobs(blobProperties, objectInputStream.readObject() as Map<Long, BlobProperty>)
         //arrays
@@ -724,47 +689,6 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeFloat(input: Map<Long, FloatProperty>): Map<Long, Float> =
-            input.entries.associateBy({ it.key }, { it.value.get() })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeDouble(input: Map<Long, DoubleProperty>): Map<Long, Double> =
-            input.entries.associateBy({ it.key }, { it.value.get() })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeBoolean(input: Map<Long, BooleanProperty>): Map<Long, Boolean> =
-            input.entries.associateBy({ it.key }, { it.value.get() })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeLong(input: Map<Long, LongProperty>): Map<Long, Long> {
-        return input.entries.associateBy({ it.key }, { it.value.get() })
-    }
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeInteger(input: Map<Long, IntegerProperty>): Map<Long, Int> =
-            input.entries.associateBy({ it.key }, { it.value.get() })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
     private fun serializeTemporal(input: Map<Long, ObjectProperty<out Temporal>>): Map<Long, Temporal> =
             input.entries.associateBy({ it.key }, { it.value.get() })
 
@@ -828,32 +752,32 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putInteger(destination: Map<Long, IntegerProperty>, source: Map<Long, Int>) {
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
+    private fun putInteger(destination: MutableMap<Long, WritableValue<Int>>, source: Map<Long, WritableValue<Int>>) {
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
-    private fun putBlobs(destination: Map<Long, BlobProperty>, source: Map<Long, BlobProperty>) {
+    private fun putBlobs(destination: MutableMap<Long, BlobProperty>, source: Map<Long, BlobProperty>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value.get()!!) }
     }
 
-    private fun putLong(destination: Map<Long, LongProperty>, source: Map<Long, Long>) {
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
+    private fun putLong(destination: MutableMap<Long, WritableValue<Long>>, source: Map<Long, WritableValue<Long>>) {
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
-    private fun putBoolean(destination: Map<Long, BooleanProperty>, source: Map<Long, Boolean>) {
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
+    private fun putBoolean(destination: MutableMap<Long, WritableValue<Boolean>>, source: Map<Long, WritableValue<Boolean>>) {
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
-    private fun putDouble(destination: Map<Long, DoubleProperty>, source: Map<Long, Double>) {
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
+    private fun putDouble(destination: MutableMap<Long, WritableValue<Double>>, source: Map<Long, WritableValue<Double>>) {
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
     private fun putObject(destination: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, JdsEntity>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putFloat(destination: Map<Long, FloatProperty>, source: Map<Long, Float>) {
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
+    private fun putFloat(destination: MutableMap<Long, WritableValue<Float>>, source: Map<Long, WritableValue<Float>>) {
+        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
     private fun putTemporal(destination: Map<Long, ObjectProperty<Temporal>>, source: Map<Long, Temporal>) {
@@ -872,46 +796,46 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //PRIMITIVES
         //==============================================
-        saveContainer.booleanProperties[step].put(overview.uuid, booleanProperties)
-        saveContainer.stringProperties[step].put(overview.uuid, stringProperties)
-        saveContainer.floatProperties[step].put(overview.uuid, floatProperties)
-        saveContainer.doubleProperties[step].put(overview.uuid, doubleProperties)
-        saveContainer.longProperties[step].put(overview.uuid, longProperties)
-        saveContainer.integerProperties[step].put(overview.uuid, integerProperties)
+        saveContainer.booleanProperties[step][overview.uuid] = booleanProperties
+        saveContainer.stringProperties[step][overview.uuid] = stringProperties
+        saveContainer.floatProperties[step][overview.uuid] = floatProperties
+        saveContainer.doubleProperties[step][overview.uuid] = doubleProperties
+        saveContainer.longProperties[step][overview.uuid] = longProperties
+        saveContainer.integerProperties[step][overview.uuid] = integerProperties
         //==============================================
         //Dates & Time
         //==============================================
-        saveContainer.localDateTimeProperties[step].put(overview.uuid, localDateTimeProperties)
-        saveContainer.zonedDateTimeProperties[step].put(overview.uuid, zonedDateTimeProperties)
-        saveContainer.localTimeProperties[step].put(overview.uuid, localTimeProperties)
-        saveContainer.localDateProperties[step].put(overview.uuid, localDateProperties)
-        saveContainer.monthDayProperties[step].put(overview.uuid, monthDayProperties)
-        saveContainer.yearMonthProperties[step].put(overview.uuid, yearMonthProperties)
-        saveContainer.periodProperties[step].put(overview.uuid, periodProperties)
-        saveContainer.durationProperties[step].put(overview.uuid, durationProperties)
+        saveContainer.localDateTimeProperties[step][overview.uuid] = localDateTimeProperties
+        saveContainer.zonedDateTimeProperties[step][overview.uuid] = zonedDateTimeProperties
+        saveContainer.localTimeProperties[step][overview.uuid] = localTimeProperties
+        saveContainer.localDateProperties[step][overview.uuid] = localDateProperties
+        saveContainer.monthDayProperties[step][overview.uuid] = monthDayProperties
+        saveContainer.yearMonthProperties[step][overview.uuid] = yearMonthProperties
+        saveContainer.periodProperties[step][overview.uuid] = periodProperties
+        saveContainer.durationProperties[step][overview.uuid] = durationProperties
         //==============================================
         //BLOB
         //==============================================
-        saveContainer.blobProperties[step].put(overview.uuid, blobProperties)
+        saveContainer.blobProperties[step][overview.uuid] = blobProperties
         //==============================================
         //Enums
         //==============================================
-        saveContainer.enumProperties[step].put(overview.uuid, enumProperties)
-        saveContainer.enumCollections[step].put(overview.uuid, enumCollectionProperties)
+        saveContainer.enumProperties[step][overview.uuid] = enumProperties
+        saveContainer.enumCollections[step][overview.uuid] = enumCollectionProperties
         //==============================================
         //ARRAYS
         //==============================================
-        saveContainer.stringCollections[step].put(overview.uuid, stringArrayProperties)
-        saveContainer.localDateTimeCollections[step].put(overview.uuid, dateTimeArrayProperties)
-        saveContainer.floatCollections[step].put(overview.uuid, floatArrayProperties)
-        saveContainer.doubleCollections[step].put(overview.uuid, doubleArrayProperties)
-        saveContainer.longCollections[step].put(overview.uuid, longArrayProperties)
-        saveContainer.integerCollections[step].put(overview.uuid, integerArrayProperties)
+        saveContainer.stringCollections[step][overview.uuid] = stringArrayProperties
+        saveContainer.localDateTimeCollections[step][overview.uuid] = dateTimeArrayProperties
+        saveContainer.floatCollections[step][overview.uuid] = floatArrayProperties
+        saveContainer.doubleCollections[step][overview.uuid] = doubleArrayProperties
+        saveContainer.longCollections[step][overview.uuid] = longArrayProperties
+        saveContainer.integerCollections[step][overview.uuid] = integerArrayProperties
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        saveContainer.objectCollections[step].put(overview.uuid, objectArrayProperties)
-        saveContainer.objects[step].put(overview.uuid, objectProperties)
+        saveContainer.objectCollections[step][overview.uuid] = objectArrayProperties
+        saveContainer.objects[step][overview.uuid] = objectProperties
     }
 
     /**
@@ -922,10 +846,12 @@ abstract class JdsEntity : IJdsEntity {
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
         booleanProperties.entries.forEach {
-            embeddedObject.b.add(JdsBooleanValues(it.key, when (it.value.value) {
+            val input = when (it.value.value) {
                 true -> 1
                 false -> 0
-            }))
+                else -> null
+            }
+            embeddedObject.b.add(JdsBooleanValues(it.key, input))
         }
         stringProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value)) }
         floatProperties.entries.forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
@@ -1181,15 +1107,15 @@ abstract class JdsEntity : IJdsEntity {
             return stringProperties[id]!!.value
         //primitives
         if (floatProperties.containsKey(id))
-            return floatProperties[id]!!.value
+            return floatProperties[id]
         if (doubleProperties.containsKey(id))
-            return doubleProperties[id]!!.value
+            return doubleProperties[id]
         if (booleanProperties.containsKey(id))
-            return booleanProperties[id]!!.value
+            return booleanProperties[id]
         if (longProperties.containsKey(id))
-            return longProperties[id]!!.value
+            return longProperties[id]
         if (integerProperties.containsKey(id))
-            return integerProperties[id]!!.value
+            return integerProperties[id]
         enumProperties.filter { it.key.field.id == id && it.value.value.ordinal == ordinal }.forEach {
             return 1
         }

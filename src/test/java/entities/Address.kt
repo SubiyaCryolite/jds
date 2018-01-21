@@ -5,7 +5,7 @@ import constants.Fields
 import constants.PrimaryAddress
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
-import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.NullableIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.LocalTime
@@ -14,7 +14,7 @@ import java.time.ZonedDateTime
 @JdsEntityAnnotation(entityId = 1, entityName = "address", version = 1)
 class Address : JdsEntity() {
     private val _streetName = SimpleStringProperty("")
-    private val _plotNumber = SimpleIntegerProperty(0)
+    private val _plotNumber = NullableIntegerProperty()
     private val _area = SimpleStringProperty("")
     private val _city = SimpleStringProperty("")
     private val _provinceOrState = SimpleStringProperty("")
@@ -43,9 +43,11 @@ class Address : JdsEntity() {
         get() = _streetName.get()
         set(value) = _streetName.set(value)
 
-    var plotNumber: Int
-        get() = _plotNumber.get()
-        set(value) = _plotNumber.set(value)
+    var plotNumber: Int?
+        get() = _plotNumber.value
+        set(value) {
+            _plotNumber.value = value
+        }
 
     var area: String
         get() = _area.get()
@@ -82,7 +84,7 @@ class Address : JdsEntity() {
                 ", provinceOrState = $provinceOrState " +
                 ", country = $country " +
                 ", timeOfEntry = $timeOfEntry " +
-                ", time = $time"+
+                ", time = $time" +
                 '}'
     }
 }

@@ -21,7 +21,7 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     private val _dateTimeField = SimpleObjectProperty(LocalDateTime.now())
     private val _zonedDateTimeField = SimpleObjectProperty(ZonedDateTime.now())
     private val _longField = SimpleLongProperty(0)
-    private val _intField = SimpleIntegerProperty(0)
+    private val _intField = NullableIntegerProperty()
     private val _doubleField = SimpleDoubleProperty(0.0)
     private val _floatField = SimpleFloatProperty(0f)
     private val _booleanField = SimpleBooleanProperty(false)
@@ -65,9 +65,9 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
         get() = _longField.get()
         set(longField) = _longField.set(longField)
 
-    var intField: Int
-        get() = _intField.get()
-        set(intField) = _intField.set(intField)
+    var intField: Int?
+        get() = _intField.value
+        set(intField) { _intField.value=intField }
 
     var doubleField: Double
         get() = _doubleField.get()

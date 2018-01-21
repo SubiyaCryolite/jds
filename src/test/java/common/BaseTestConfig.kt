@@ -30,7 +30,7 @@ abstract class BaseTestConfig {
             primaryAddress.area = "Norte Broad"
             primaryAddress.city = "Livingstone"
             primaryAddress.country = "Zambia"
-            primaryAddress.plotNumber = 23
+            primaryAddress.plotNumber = null
             primaryAddress.provinceOrState = "Southern"
             primaryAddress.streetName = "East Street"
             primaryAddress.timeOfEntry = ZonedDateTime.now()

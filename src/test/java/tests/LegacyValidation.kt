@@ -68,8 +68,8 @@ class LegacyValidation : BaseTestConfig() {
 
         assertEquals(srcA.stringField, srcB.stringField, "StringField " + srcA.overview.uuid)
         assertEquals(srcA.intField, srcB.intField, "IntField " + srcA.overview.uuid)
-        assertEquals(srcA.floatField, srcB.floatField, FLOAT_DELTA, "FloatField " + srcA.overview.uuid)
-        assertEquals(srcA.doubleField, srcB.doubleField, DOUBLE_DELTA, "DoubleField " + srcA.overview.uuid)
+        assertEquals(srcA.floatField!!, srcB.floatField!!, FLOAT_DELTA, "FloatField " + srcA.overview.uuid)
+        assertEquals(srcA.doubleField!!, srcB.doubleField!!, DOUBLE_DELTA, "DoubleField " + srcA.overview.uuid)
         assertEquals(srcA.longField, srcB.longField, "LongField " + srcA.overview.uuid)
         assertEquals(srcA.booleanField, srcB.booleanField, "BooleanField " + srcA.overview.uuid)
     }

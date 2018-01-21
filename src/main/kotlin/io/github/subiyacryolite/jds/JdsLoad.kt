@@ -308,7 +308,8 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                 val uuid = it.getString("uuid")
                 val value = it.getLong("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value) }
+                optimalEntityLookup(entities, uuid).forEach {
+                    it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value) }
             }
         }
     }

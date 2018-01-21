@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments
 import javafx.beans.property.*
+import javafx.beans.value.WritableValue
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
@@ -322,24 +323,23 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param booleanProperties
+     * @param batch
      */
-    private fun saveBooleans(booleanProperties: HashMap<String, HashMap<Long, BooleanProperty>>) = try {
+    private fun saveBooleans(batch: HashMap<String, HashMap<Long, WritableValue<Boolean>>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldBooleanValues())
-        for ((uuid, value1) in booleanProperties) {
+        for ((uuid, batchEntries) in batch) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
+            for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                val value = value2.get()
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", value) //primitives could be null, default value has meaning
+                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -348,12 +348,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setObject(4, value) //primitives could be null, default value has meaning
+                log.setObject(4, entry.value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setObject(8, value) //primitives could be null, default value has meaning
+                    log.setObject(8, entry.value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -363,24 +363,23 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param integerProperties
+     * @param batch
      */
-    private fun saveIntegers(integerProperties: HashMap<String, HashMap<Long, IntegerProperty>>) = try {
+    private fun saveIntegers(batch: HashMap<String, HashMap<Long, WritableValue<Int>>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldIntegerValues())
-        for ((uuid, value1) in integerProperties) {
+        for ((uuid, batchEntries) in batch) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
+            for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                val value = value2.get()
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", value) //primitives could be null, default value has meaning
+                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -389,12 +388,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setObject(4, value) //primitives could be null, default value has meaning
+                log.setObject(4, entry.value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setObject(8, value) //primitives could be null, default value has meaning
+                    log.setObject(8, entry.value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -404,24 +403,23 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param floatProperties
+     * @param batch
      */
-    private fun saveFloats(floatProperties: HashMap<String, HashMap<Long, FloatProperty>>) = try {
+    private fun saveFloats(batch: HashMap<String, HashMap<Long, WritableValue<Float>>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldFloatValues())
-        for ((uuid, value1) in floatProperties) {
+        for ((uuid, batchEntries) in batch) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
+            for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                val value = value2.get()
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", value) //primitives could be null, default value has meaning
+                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -430,12 +428,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setObject(4, value) //primitives could be null, default value has meaning
+                log.setObject(4, entry.value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setObject(8, value) //primitives could be null, default value has meaning
+                    log.setObject(8, entry.value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -445,24 +443,22 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param doubleProperties
+     * @param batch
      */
-    private fun saveDoubles(doubleProperties: HashMap<String, HashMap<Long, DoubleProperty>>) = try {
+    private fun saveDoubles(batch: HashMap<String, HashMap<Long, WritableValue<Double>>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldDoubleValues())
-        for ((uuid, value1) in doubleProperties) {
+        for ((uuid, batchEntries) in batch) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
-                innerRecord++
-                val value = value2.get()
+            for ((fieldId, entry) in batchEntries) {
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", value) //primitives could be null, default value has meaning
+                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -471,12 +467,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setObject(4, value) //primitives could be null, default value has meaning
+                log.setObject(4, entry.value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setObject(8, value) //primitives could be null, default value has meaning
+                    log.setObject(8, entry.value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }
@@ -486,24 +482,23 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param longProperties
+     * @param batch
      */
-    private fun saveLongs(longProperties: HashMap<String, HashMap<Long, LongProperty>>) = try {
+    private fun saveLongs(batch: HashMap<String, HashMap<Long, WritableValue<Long>>>) = try {
         var record = 0
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
         val log = onPostSaveEventArguments.getOrAddStatement(jdsDb.saveOldLongValues())
-        for ((uuid, value1) in longProperties) {
+        for ((uuid, batchEntries) in batch) {
             record++
             var innerRecord = 0
-            val innerRecordSize = value1.size
+            val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
+            for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                val value = value2.get()
                 if (jdsDb.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", value) //primitives could be null, default value has meaning
+                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
                 if (jdsDb.isPrintingOutput)
@@ -512,12 +507,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 log.setString(1, uuid)
                 log.setLong(2, fieldId)
                 log.setInt(3, 0)
-                log.setObject(4, value) //primitives could be null, default value has meaning
+                log.setObject(4, entry.value) //primitives could be null, default value has meaning
                 if (!jdsDb.isLoggingAppendOnly) {
                     log.setString(5, uuid)
                     log.setLong(6, fieldId)
                     log.setInt(7, 0)
-                    log.setObject(8, value) //primitives could be null, default value has meaning
+                    log.setObject(8, entry.value) //primitives could be null, default value has meaning
                 }
                 log.addBatch()
             }

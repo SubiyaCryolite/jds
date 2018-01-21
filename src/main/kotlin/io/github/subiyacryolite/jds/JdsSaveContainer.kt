@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds
 
 import javafx.beans.property.*
+import javafx.beans.value.WritableValue
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.MonthDay
@@ -37,11 +38,11 @@ class JdsSaveContainer {
     //strings
     val stringProperties: MutableList<HashMap<String, HashMap<Long, StringProperty>>> = ArrayList()
     //primitives
-    val booleanProperties: MutableList<HashMap<String, HashMap<Long, BooleanProperty>>> = ArrayList()
-    val floatProperties: MutableList<HashMap<String, HashMap<Long, FloatProperty>>> = ArrayList()
-    val doubleProperties: MutableList<HashMap<String, HashMap<Long, DoubleProperty>>> = ArrayList()
-    val longProperties: MutableList<HashMap<String, HashMap<Long, LongProperty>>> = ArrayList()
-    val integerProperties: MutableList<HashMap<String, HashMap<Long, IntegerProperty>>> = ArrayList()
+    val booleanProperties: MutableList<HashMap<String, HashMap<Long, WritableValue<Boolean>>>> = ArrayList()
+    val floatProperties: MutableList<HashMap<String, HashMap<Long, WritableValue<Float>>>> = ArrayList()
+    val doubleProperties: MutableList<HashMap<String, HashMap<Long, WritableValue<Double>>>> = ArrayList()
+    val longProperties: MutableList<HashMap<String, HashMap<Long, WritableValue<Long>>>> = ArrayList()
+    val integerProperties: MutableList<HashMap<String, HashMap<Long, WritableValue<Int>>>> = ArrayList()
     //blobs
     val blobProperties: MutableList<HashMap<String, HashMap<Long, BlobProperty>>> = ArrayList()
     //arrays
