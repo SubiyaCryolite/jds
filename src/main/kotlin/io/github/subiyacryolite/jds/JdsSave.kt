@@ -30,6 +30,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
+import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
@@ -75,19 +76,18 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     override fun call(): Boolean {
         val saveContainer = JdsSaveContainer()
-        val batchEntities = LinkedList<MutableCollection<JdsEntity>>()
+        val batches = LinkedList<LinkedList<JdsEntity>>()
+        val allEntities = buildSequence { entities.forEach { yieldAll(it.yieldOverviews()) } }
 
-        val allEntities = LinkedList<JdsEntity>()
-        entities.forEach { it.yieldOverviews(allEntities) }
-
-        setupBatches(batchSize, allEntities, saveContainer, batchEntities)
-        val steps = batchEntities.size
-        batchEntities.forEachIndexed { step, current ->
-            saveInner(current, saveContainer, step, steps)
+        setupBatches(batchSize, allEntities, saveContainer, batches)
+        val steps = batches.size
+        batches.forEachIndexed { step, batch ->
+            saveInner(batch, saveContainer, step, steps, allEntities)
+            saveContainer.reset(step)//free mem
             if (jdsDb.isPrintingOutput)
                 println("Processed batch [$step of $steps]")
         }
-        saveContainer.reset()//don't repersist the same files in batching
+        saveContainer.reset()//free mem
         return true
     }
 
@@ -97,7 +97,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param container
      * @param batchEntities
      */
-    private fun setupBatches(batchSize: Int, entities: Iterable<JdsEntity>, container: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
+    private fun setupBatches(batchSize: Int, entities: Sequence<JdsEntity>, container: JdsSaveContainer, batchEntities: MutableList<LinkedList<JdsEntity>>) {
         //default bach is 0 or -1 which means one large chunk. Anything above is a single batch
         entities.forEachIndexed { iteration, it ->
             if (batchSize > 0 && iteration % batchSize == 0) {
@@ -112,7 +112,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param saveContainer
      * @param batchEntities
      */
-    private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<MutableCollection<JdsEntity>>) {
+    private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<LinkedList<JdsEntity>>) {
         batchEntities.add(LinkedList())
         saveContainer.overviews.add(HashSet())
         //time constructs
@@ -151,16 +151,16 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param entities
+     * @param batch
      * @param saveContainer
      * @param currentStep
      * @param totalSteps
      */
     @Throws(Exception::class)
-    private fun saveInner(entities: Iterable<JdsEntity>, saveContainer: JdsSaveContainer, currentStep: Int, totalSteps: Int) {
+    private fun saveInner(batch: Iterable<JdsEntity>, saveContainer: JdsSaveContainer, currentStep: Int, totalSteps: Int, allEntities: Sequence<JdsEntity>) {
 
         //fire
-        entities.forEach {
+        batch.forEach {
             //update the modified date to time of commit
             it.overview.dateModified = LocalDateTime.now()
         }
@@ -170,15 +170,16 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         try {
             //always save overviews first
             if (jdsDb.isWritingOverviewFields) {
-                entities.forEach {
+                batch.forEach {
                     saveContainer.overviews[currentStep].add(it.overview)
                     it.assign(currentStep, saveContainer)
                 }
-                saveOverviews(saveContainer.overviews[currentStep])
+                if (currentStep == 0) //if first save capture ALL overviews beforehand so that bindings work
+                    saveOverviews(allEntities)
             }
 
             //ensure that overviews are submitted before handing over to listeners
-            entities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
+            batch.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
             if (jdsDb.isLoggingEdits || jdsDb.isWritingToPrimaryDataTables) {
                 //time constraints
@@ -218,11 +219,11 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             saveAndBindObjects(connection, saveContainer.objects[currentStep])
             saveAndBindObjectArrays(connection, saveContainer.objectCollections[currentStep])
 
-            entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
+            batch.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
             //crt point
             if (jdsDb.tables.isNotEmpty()) {
-                entities.forEach {
+                batch.forEach {
                     processCrt(jdsDb, connection, alternateConnections, it)
                 }
             }
@@ -235,7 +236,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             throw ex
         } finally {
             if (finalStep) {
-                jdsSaveEvents.forEach { it.onSave(entities, connection) }
+                jdsSaveEvents.forEach { it.onSave(batch, connection) }
                 onPreSaveEventArguments.closeBatches()
                 onPostSaveEventArguments.closeBatches()
                 connection.close()
@@ -260,23 +261,21 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param overviews
      */
     @Throws(SQLException::class)
-    private fun saveOverviews(overviews: Iterable<IJdsOverview>) = try {
-        var record = 0
+    private fun saveOverviews(overviews: Sequence<JdsEntity>) = try {
         var recordTotal = 1
         val upsert = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
         val inheritance = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
-        for (overview in overviews) {
-            record++
+        overviews.forEachIndexed { record, it ->
             //Entity Overview
-            upsert.setString("uuid", overview.uuid)
-            upsert.setTimestamp("dateCreated", Timestamp.valueOf(overview.dateCreated))
+            upsert.setString("uuid", it.overview.uuid)
+            upsert.setTimestamp("dateCreated", Timestamp.valueOf(it.overview.dateCreated))
             upsert.setTimestamp("dateModified", Timestamp.valueOf(LocalDateTime.now())) //always update date modified!!!
-            upsert.setBoolean("live", overview.live)
-            upsert.setLong("version", overview.version) //always update date modified!!!
+            upsert.setBoolean("live", it.overview.live)
+            upsert.setLong("version", it.overview.version) //always update date modified!!!
             upsert.addBatch()
             //Entity Inheritance
-            inheritance.setString("uuid", overview.uuid)
-            inheritance.setLong("entityId", overview.entityId)
+            inheritance.setString("uuid", it.overview.uuid)
+            inheritance.setLong("entityId", it.overview.entityId)
             inheritance.addBatch()
             if (jdsDb.isPrintingOutput) {
                 println("Saving Overview [$record of $recordTotal]")

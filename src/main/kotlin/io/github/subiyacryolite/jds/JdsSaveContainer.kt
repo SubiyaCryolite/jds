@@ -96,4 +96,41 @@ class JdsSaveContainer {
         //overviews
         overviews.clear()
     }
+
+    internal fun reset(step: Int) {
+        //time constructs
+        localDateTimeProperties[step].clear()
+        localDateProperties[step].clear()
+        localTimeProperties[step].clear()
+        zonedDateTimeProperties[step].clear()
+        monthDayProperties[step].clear()
+        yearMonthProperties[step].clear()
+        periodProperties[step].clear()
+        durationProperties[step].clear()
+        //strings
+        stringProperties[step].clear()
+        //primitives
+        booleanProperties[step].clear()
+        floatProperties[step].clear()
+        doubleProperties[step].clear()
+        longProperties[step].clear()
+        integerProperties[step].clear()
+        //blobs
+        blobProperties[step].clear()
+        //arrays
+        objectCollections[step].clear()
+        stringCollections[step].clear()
+        localDateTimeCollections[step].clear()
+        floatCollections[step].clear()
+        doubleCollections[step].clear()
+        longCollections[step].clear()
+        integerCollections[step].clear()
+        //enumProperties
+        enumProperties[step].clear()
+        enumCollections[step].clear()
+        //objects
+        objects[step].clear()
+        //overviews
+        overviews[step].clear()
+    }
 }
