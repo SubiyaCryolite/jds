@@ -1107,15 +1107,15 @@ abstract class JdsEntity : IJdsEntity {
             return stringProperties[id]!!.value
         //primitives
         if (floatProperties.containsKey(id))
-            return floatProperties[id]
+            return floatProperties[id]?.value
         if (doubleProperties.containsKey(id))
-            return doubleProperties[id]
+            return doubleProperties[id]?.value
         if (booleanProperties.containsKey(id))
-            return booleanProperties[id]
+            return booleanProperties[id]?.value
         if (longProperties.containsKey(id))
-            return longProperties[id]
+            return longProperties[id]?.value
         if (integerProperties.containsKey(id))
-            return integerProperties[id]
+            return integerProperties[id]?.value
         enumProperties.filter { it.key.field.id == id && it.value.value.ordinal == ordinal }.forEach {
             return 1
         }
