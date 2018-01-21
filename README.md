@@ -24,6 +24,7 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 ## Features
 - Transparent persistence
 - Serialization of JavaFX bean *values*
+- Supports the persistence of NULL values for JVM primitive types
 - Full support for generics and inheritance
 - Easily integrates with new or existing databases
 - Save, Updates and Deletes cascade to child objects and collections
@@ -214,7 +215,9 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |YEAR_MONTH|[ObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map|
 |ZONED_DATE_TIME|[ObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map|
 
-**Note:** All primitive types (Float,Double,Boolean,Int,Long) can be persisted as nulls by providing your own implementation of WritableValue<Number> or using the helper classes: NullableBooleanProperty, NullableDoubleProperty, NullableFloatProperty, NullableIntegerProperty, NullableLongProperty and NullableNumberProperty.
+**Note:** All supported primitive types (Boolean, Double, Float, Int, Long) can be persisted as nulls by providing your own implementation of WritableValue\<Number\> or using the helper classes: NullableBooleanProperty, NullableDoubleProperty, NullableFloatProperty, NullableIntegerProperty, NullableLongProperty and NullableNumberProperty.
+
+**Note:** JDS assumes that all primitive collection types will not contain null entries.
 
 After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
  
