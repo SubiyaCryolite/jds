@@ -195,24 +195,26 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 |INT_COLLECTION|[Collection\<Integer\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapIntegers|
 |LONG_COLLECTION|[Collection\<Long\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapLongs|
 |STRING_COLLECTION|[Collection\<String\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapStrings|
-|BOOLEAN|[BooleanProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/BooleanProperty.html)|map|
+|BOOLEAN|[WritableValue\<Boolean\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)|map|
 |BLOB|[BlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/BlobProperty.html)|map|
 |ENTITY|[Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)|map|
 |DATE|[ObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)|map|
 |DATE_TIME|[ObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)|map|
-|DOUBLE|[DoubleProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/DoubleProperty.html)|map|
+|DOUBLE|[WritableValue\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)|map|
 |DURATION|[ObjectProperty\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)|mapDuration|
 |ENUM|[ObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)|map|
 |ENUM_COLLECTION|[Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)|mapEnums|
-|FLOAT|[FloatProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/FloatProperty.html)|map|
-|INT|[IntegerProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/IntegerProperty.html)|map|
-|LONG|[LongProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/LongProperty.html)|map|
+|FLOAT|[WritableValue\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)|map|
+|INT|[WritableValue\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)|map|
+|LONG|[WritableValue\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)|map|
 |MONTH_DAY|[ObjectProperty\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)|mapMonthDay|
 |PERIOD|[ObjectProperty\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)|mapPeriod|
 |STRING|[StringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/StringProperty.html)|map|
 |TIME|[ObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)|map|
 |YEAR_MONTH|[ObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)|map|
 |ZONED_DATE_TIME|[ObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)|map|
+
+**Note:** All primitive types (Float,Double,Boolean,Int,Long) can be persisted as nulls by providing your own implementation of WritableValue<Number> or using the helper classes: NullableBooleanProperty, NullableDoubleProperty, NullableFloatProperty, NullableIntegerProperty, NullableLongProperty and NullableNumberProperty.
 
 After your class and its properties have been defined you must map the property to its corresponding fieldEntity using the **map()** method. I recommend doing this in your constructor. 
  
