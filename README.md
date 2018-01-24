@@ -31,7 +31,7 @@ The concept behind JDS is quite simple. Extend a base “Entity” class, define
 - All saves and deletes are ACID (transaction based)
 - Eager Loading is applied to embedded objects as well as on collections
 - Supports the automatic generation of tables
-- Supports MySQL, T-SQL, PostgreSQL, Oracle 11G and SQLite
+- Supports MySQL, T-SQL, PostgreSQL, Oracle 11G, MariaDB and SQLite
 - Underlying database implemented using the Star Schema
 
 # Maven Central
@@ -60,6 +60,7 @@ The API currently supports the following Relational Databases, each of which has
 |-------|-----------|-----------|-----------|
 | PostgreSQL            | 9.5         | [Official Site](https://www.postgresql.org/)        | [org.postgresql](https://mvnrepository.com/artifact/org.postgresql/postgresql)|
 | MySQL            |5.7.14         | [Official Site](https://www.mysql.com/downloads/)        | [com.mysql.cj.jdbc.Driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java)|
+| MariaDb            |10.2.12         | [Official Site](http://mariadb.org//download/)        | [org.mariadb.jdbc.Driver](https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client)|
 | Microsoft SQL Server | 2008 R2     | [Official Site](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)        | [com.microsoft.sqlserver](https://mvnrepository.com/artifact/com.microsoft.sqlserver/sqljdbc4)|
 | SQLite            | 3.16.1   | [Official Site](https://www.sqlite.org/)    | [org.sqlite.JDBC](https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc)|
 | Oracle            | 11g Release 2   | [Official Site](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html)    | [oracle.jdbc.driver.OracleDriver](https://mvnrepository.com/artifact/com.oracle/ojdbc6/12.1.0.1-atlassian-hosted)|
@@ -453,6 +454,36 @@ class JdsDbMySqlImplementation : JdsDbMySql() {
 fun initJds(){
     //jds declared in higher scope
     jdsDb = JdsDbMySqlImplementation()
+    jdsDb.init()
+}
+```
+#### MariaDb Example
+```kotlin
+import io.github.subiyacryolite.jds.JdsDbMaria
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.util.*
+
+class JdsDbMariaImplementation : JdsDbMaria() {
+
+    @Throws(ClassNotFoundException::class, SQLException::class)
+    override fun getConnection(): Connection {
+        Class.forName("org.mariadb.jdbc.Driver")
+        val properties = Properties()
+        properties.put("user", "USER_NAME")
+        properties.put("password", "PASSWORD")
+        properties.put("autoReconnect","true")
+        properties.put("useSSL","false")
+        properties.put("rewriteBatchedStatements","true")
+        properties.put("continueBatchOnError","true")
+        return DriverManager.getConnection("jdbc:mariadb://localhost:3307/DATABASE", properties)
+    }
+}
+
+fun initJds(){
+    //jds declared in higher scope
+    jdsDb = JdsDbMariaImplementation()
     jdsDb.init()
 }
 ```

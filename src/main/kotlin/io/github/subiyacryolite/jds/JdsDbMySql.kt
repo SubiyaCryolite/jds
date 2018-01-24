@@ -22,7 +22,11 @@ import java.sql.Connection
 /**
  * The MySQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbMySql : JdsDb(JdsImplementation.MYSQL, true) {
+abstract class JdsDbMySql : JdsDb {
+
+    constructor(implementation: JdsImplementation, supportsStatements: Boolean) : super(implementation, supportsStatements)
+
+    constructor() : this(JdsImplementation.MYSQL, true)
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0

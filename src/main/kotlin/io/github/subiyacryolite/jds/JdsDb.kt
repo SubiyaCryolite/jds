@@ -210,7 +210,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param jdsComponent an enum that maps to the components concrete
      * implementation details
      */
-    protected open fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {}
+    internal open fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {}
 
     override fun doesTableExist(connection: Connection, tableName: String): Boolean {
         val answer = tableExists(connection, tableName)
@@ -317,7 +317,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      *
      * @param connection the SQL connection to use
      */
-    protected open fun prepareCustomDatabaseComponents(connection: Connection) {}
+    internal open fun prepareCustomDatabaseComponents(connection: Connection) {}
 
     /**
      * Internal checks to see if the specified table exists the the database
@@ -790,7 +790,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     /**
      * Variable to facilitate in-line rows in Oracle
      */
-    private val logSqlSource = when (isOracleDb) {
+    protected val logSqlSource = when (isOracleDb) {
         true -> "SELECT ?, ?, ?, ? FROM DUAL"
         else -> "SELECT ?, ?, ?, ?"
     }
@@ -798,7 +798,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     /**
      * Variable to facilitate lookups for strings in Oracle
      */
-    private val oldStringValue = when (isOracleDb) {
+    protected val oldStringValue = when (isOracleDb) {
         true -> "dbms_lob.substr(string_value, dbms_lob.getlength(string_value), 1)"
         else -> "string_value"
     }
@@ -807,7 +807,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log String values
      * @return SQL executed in order to log String values
      */
-    internal fun saveOldStringValues(): String {
+    internal open fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) $logSqlSource " +
@@ -819,7 +819,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Double values
      * @return SQL executed in order to log Double values
      */
-    internal fun saveOldDoubleValues(): String {
+    internal open fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) $logSqlSource " +
@@ -831,7 +831,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Long values
      * @return SQL executed in order to log Long values
      */
-    internal fun saveOldLongValues(): String {
+    internal open fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) $logSqlSource " +
@@ -843,7 +843,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Integer values
      * @return SQL executed in order to log Integer values
      */
-    internal fun saveOldIntegerValues(): String {
+    internal open fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) $logSqlSource " +
@@ -855,7 +855,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Float values
      * @return SQL executed in order to log Float values
      */
-    internal fun saveOldFloatValues(): String {
+    internal open fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) $logSqlSource " +
@@ -867,7 +867,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log DateTime values
      * @return SQL executed in order to log DateTime values
      */
-    internal fun saveOldDateTimeValues(): String {
+    internal open fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) $logSqlSource " +
@@ -879,7 +879,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log ZonedDateTime values
      * @return SQL executed in order to log ZonedDateTime values
      */
-    internal fun saveOldZonedDateTimeValues(): String {
+    internal open fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) $logSqlSource " +
@@ -891,7 +891,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Time values
      * @return SQL executed in order to log Time values
      */
-    internal fun saveOldTimeValues(): String {
+    internal open fun saveOldTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) $logSqlSource " +
@@ -903,7 +903,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Boolean values
      * @return SQL executed in order to log Boolean values
      */
-    internal fun saveOldBooleanValues(): String {
+    internal open fun saveOldBooleanValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) VALUES(?, ?, ?, ?)"
             false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) $logSqlSource " +
@@ -915,7 +915,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL executed in order to log Blob values
      * @return SQL executed in order to log Blob values
      */
-    internal fun saveOldBlobValues(): String {
+    internal open fun saveOldBlobValues(): String {
         return "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, blob_value) VALUES(?, ?, ?, ?)"
     }
 
