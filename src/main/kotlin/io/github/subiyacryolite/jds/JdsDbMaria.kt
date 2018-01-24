@@ -20,10 +20,6 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation
  */
 abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
 
-    /**
-     * SQL executed in order to log String values
-     * @return SQL executed in order to log String values
-     */
     override fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) VALUES(?, ?, ?, ?)"
@@ -32,10 +28,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Double values
-     * @return SQL executed in order to log Double values
-     */
     override fun saveOldDoubleValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) VALUES(?, ?, ?, ?)"
@@ -44,10 +36,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Long values
-     * @return SQL executed in order to log Long values
-     */
     override fun saveOldLongValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) VALUES(?, ?, ?, ?)"
@@ -56,10 +44,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Integer values
-     * @return SQL executed in order to log Integer values
-     */
     override fun saveOldIntegerValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) VALUES(?, ?, ?, ?)"
@@ -68,10 +52,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Float values
-     * @return SQL executed in order to log Float values
-     */
     override fun saveOldFloatValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) VALUES(?, ?, ?, ?)"
@@ -80,10 +60,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log DateTime values
-     * @return SQL executed in order to log DateTime values
-     */
     override fun saveOldDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) VALUES(?, ?, ?, ?)"
@@ -92,10 +68,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log ZonedDateTime values
-     * @return SQL executed in order to log ZonedDateTime values
-     */
     override fun saveOldZonedDateTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) VALUES(?, ?, ?, ?)"
@@ -104,10 +76,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Time values
-     * @return SQL executed in order to log Time values
-     */
     override fun saveOldTimeValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) VALUES(?, ?, ?, ?)"
@@ -116,10 +84,6 @@ abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
         }
     }
 
-    /**
-     * SQL executed in order to log Boolean values
-     * @return SQL executed in order to log Boolean values
-     */
     override fun saveOldBooleanValues(): String {
         return when (isLoggingAppendOnly) {
             true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) VALUES(?, ?, ?, ?)"

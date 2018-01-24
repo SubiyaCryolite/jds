@@ -216,7 +216,7 @@ abstract class BaseTestConfig {
     }
 
     fun initialiseMysqlBackend() {
-        jdsDb = JdsDbMariaImplementation()
+        jdsDb = JdsDbMySqlImplementation()
         initJds()
     }
 
