@@ -45,7 +45,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this(jdsDb, entities, 0, jdsDb.getConnection())
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this(jdsDb, entities, 0)
 
     /**
      * @param jdsDb
@@ -53,7 +53,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, batchSize: Int) : this(jdsDb, entities, batchSize, jdsDb.getConnection())
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, batchSize: Int) : this(jdsDb, entities, jdsDb.getConnection(), batchSize)
 
     /**
      * @param jdsDb
@@ -61,7 +61,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection) : this(ConcurrentHashMap(), jdsDb, connection, 0, entities, false)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection) : this(jdsDb, entities, connection, 0)
 
     /**
      * @param jdsDb
@@ -70,7 +70,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, batchSize: Int, connection: Connection) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities, false)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, batchSize: Int) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities, false)
 
     /**
      * Computes a result, or throws an exception if unable to do so.
