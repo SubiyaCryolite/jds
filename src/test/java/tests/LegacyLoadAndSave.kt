@@ -14,7 +14,11 @@ class LegacyLoadAndSave : BaseTestConfig() {
     @Throws(Exception::class)
     private fun save() {
         val addressBook = addressBook
-        JdsSave(jdsDb, 1, addressBook).call()
+        jdsDb.getConnection().use {
+            val jds = JdsSave(jdsDb, setOf(addressBook),it)
+            jds.closeConnection = false
+            jds.call()
+        }
         System.out.printf("Saved %s\n", addressBook)
     }
 

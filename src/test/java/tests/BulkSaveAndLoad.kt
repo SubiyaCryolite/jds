@@ -18,7 +18,7 @@ class BulkSaveAndLoad : BaseTestConfig() {
             entry.overview.uuid = String.format("guidBulk%s", i)
             memObjects.add(entry)
         }
-        val save = JdsSave(jdsDb, 1024, memObjects)
+        val save = JdsSave(jdsDb, memObjects,1024)
         val process= Executors.newSingleThreadExecutor().submit(save)
         if(!process.isDone)
             Thread.sleep(16)

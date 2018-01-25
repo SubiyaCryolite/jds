@@ -7,6 +7,7 @@ import entities.*
 import io.github.subiyacryolite.jds.JdsSave
 import io.github.subiyacryolite.jds.JdsTable
 import org.junit.jupiter.api.Test
+import kotlin.coroutines.experimental.buildIterator
 
 class CustomReport : BaseTestConfig() {
 
@@ -43,10 +44,10 @@ class CustomReport : BaseTestConfig() {
         val jdsSave1 = JdsSave(jdsDb, collection)
         jdsSave1.call()
 
-        val jdsSave2 = JdsSave(jdsDb, sequenceOf(login1, login2).asIterable())
+        val jdsSave2 = JdsSave(jdsDb, setOf(login1, login2))
         jdsSave2.call()
 
-        val jdsSave3 = JdsSave(jdsDb, addressBook)
+        val jdsSave3 = JdsSave(jdsDb, setOf(addressBook))
         jdsSave3.call()
 
         val jdsSave4 = JdsSave(jdsDb, inheritanceCollection)

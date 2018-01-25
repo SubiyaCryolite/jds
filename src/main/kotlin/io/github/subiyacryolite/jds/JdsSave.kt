@@ -36,7 +36,7 @@ import kotlin.coroutines.experimental.buildSequence
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection>, private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
+class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
 
     private val jdsSaveEvents = LinkedList<JdsSaveEvent>()
 
@@ -45,7 +45,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, vararg entities: JdsEntity) : this(jdsDb, entities.asIterable())
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this(jdsDb, entities, 0, jdsDb.getConnection())
 
     /**
      * @param jdsDb
@@ -53,39 +53,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, batchSize: Int, vararg entities: JdsEntity) : this(jdsDb, batchSize, entities.asIterable())
-
-    /**
-     * @param jdsDb
-     * @param entities
-     */
-    @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this(ConcurrentHashMap(), jdsDb, jdsDb.getConnection(), 0, entities, false)
-
-    /**
-     * @param jdsDb
-     * @param batchSize
-     * @param entities
-     */
-    @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, batchSize: Int, entities: Iterable<JdsEntity>) : this(ConcurrentHashMap(), jdsDb, jdsDb.getConnection(), batchSize, entities, false)
-
-
-    /**
-     * @param jdsDb
-     * @param connection
-     * @param entities
-     */
-    @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, connection: Connection, vararg entities: JdsEntity) : this(jdsDb, entities.asIterable(), connection)
-
-    /**
-     * @param jdsDb
-     * @param connection
-     * @param entities
-     */
-    @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, batchSize: Int, connection: Connection, vararg entities: JdsEntity) : this(jdsDb, batchSize, entities.asIterable(), connection)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, batchSize: Int) : this(jdsDb, entities, batchSize, jdsDb.getConnection())
 
     /**
      * @param jdsDb
@@ -102,7 +70,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, batchSize: Int, entities: Iterable<JdsEntity>, connection: Connection) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities, false)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, batchSize: Int, connection: Connection) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities, false)
 
     /**
      * Computes a result, or throws an exception if unable to do so.
