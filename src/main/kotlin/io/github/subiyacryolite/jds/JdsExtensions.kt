@@ -59,7 +59,7 @@ object JdsExtensions {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input.toOffsetDateTime())
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MariaDb -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
+            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
             else -> this.setLong(value, input.toInstant().toEpochMilli())
         }
     }
@@ -73,7 +73,7 @@ object JdsExtensions {
         when (jdsDb.implementation) {
             JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input.toOffsetDateTime())
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MariaDb -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
+            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
             else -> this.setLong(value, input.toInstant().toEpochMilli())
         }
     }
@@ -86,7 +86,7 @@ object JdsExtensions {
     fun ResultSet.getZonedDateTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
         JdsImplementation.TSQL -> this.getString(column)
         JdsImplementation.POSTGRES -> this.getObject(column, java.time.OffsetDateTime::class.java)
-        JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MariaDb -> this.getTimestamp(column)
+        JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.getTimestamp(column)
         else -> this.getLong(column)
     }
 
@@ -97,7 +97,7 @@ object JdsExtensions {
      */
     fun INamedStatement.setLocalTime(value: String, input: LocalTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MariaDb -> this.setString(value, input.localTimeFormat())
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.localTimeFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input)
             else -> this.setLong(value, input.toNanoOfDay())
         }
@@ -110,7 +110,7 @@ object JdsExtensions {
      */
     fun PreparedStatement.setLocalTime(value: Int, input: LocalTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MariaDb -> this.setString(value, input.localTimeFormat())
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.localTimeFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input)
             else -> this.setLong(value, input.toNanoOfDay())
         }
@@ -121,7 +121,7 @@ object JdsExtensions {
      * @param jdsDb
      */
     fun ResultSet.getLocalTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
-        JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MariaDb -> this.getString(column)
+        JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.getString(column)
         JdsImplementation.POSTGRES -> this.getObject(column, LocalTime::class.java)
         else -> this.getLong(column)
     }

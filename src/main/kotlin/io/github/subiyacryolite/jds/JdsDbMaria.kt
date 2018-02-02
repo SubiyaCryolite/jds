@@ -18,7 +18,7 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation
 /**
  * The MySQL implementation of [JdsDataBase][JdsDb]
  */
-abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true) {
+abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MARIADB, true) {
 
     override fun saveOldStringValues(): String {
         return when (isLoggingAppendOnly) {

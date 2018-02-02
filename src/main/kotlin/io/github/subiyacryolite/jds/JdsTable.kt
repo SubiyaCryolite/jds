@@ -20,12 +20,14 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashMap
 
 
 open class JdsTable() : Serializable {
@@ -123,7 +125,7 @@ open class JdsTable() : Serializable {
             true -> connection
             else -> {
                 if (!alternateConnections.containsKey(targetConnection))
-                    alternateConnections.put(targetConnection, jdsDb.getConnection(targetConnection))
+                    alternateConnections[targetConnection] = jdsDb.getConnection(targetConnection)
                 alternateConnections[targetConnection]!!
             }
         }
@@ -198,13 +200,13 @@ open class JdsTable() : Serializable {
         val connection = pool[targetConnection]!!
 
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
-        val tableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
-        val columnSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
+        val createTableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
+        val createColumnsSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
         val primaryKeyColumn = JdsSchema.getPrimaryKeyColumn()
         val entityIdColumn = JdsSchema.getEntityIdColumn()
 
         if (!jdsDb.doesTableExist(connection, name))
-            connection.prepareStatement(tableSql).use {
+            connection.prepareStatement(createTableSql).use {
                 it.executeUpdate()
                 if (jdsDb.isPrintingOutput)
                     println("Created $name")
@@ -216,18 +218,22 @@ open class JdsTable() : Serializable {
         insertParameters.add("?")
         insertParameters.add("?")
 
-        columnSql.forEach { columnName, sql ->
+        val createColumnsStatements = LinkedHashMap<String, PreparedStatement>()
+
+        createColumnsSql.forEach { columnName, createColumnSql ->
             if (!jdsDb.doesColumnExist(connection, name, columnName)) {
-                connection.prepareStatement(sql).use {
-                    it.executeUpdate()
-                    if (jdsDb.isPrintingOutput)
-                        println("Created $name.$columnName")
-                }
+                createColumnsStatements[columnName] = connection.prepareStatement(createColumnSql)
             }
             //regardless of column existing add to the query
             columnNames.add(columnName)
             insertColumns.add(columnName)
             insertParameters.add("?")
+        }
+        createColumnsStatements.forEach { key, value ->
+            value.executeUpdate()
+            value.close()
+            if (jdsDb.isPrintingOutput)
+                println("Created $name.$key")
         }
 
         deleteSql = "DELETE FROM $name WHERE $primaryKeyColumn = ?"

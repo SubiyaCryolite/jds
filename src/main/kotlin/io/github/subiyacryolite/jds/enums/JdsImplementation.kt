@@ -22,5 +22,5 @@ enum class JdsImplementation {
     POSTGRES,
     SQLITE,
     ORACLE,
-    MariaDb
+    MARIADB
 }

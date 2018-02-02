@@ -240,15 +240,15 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     internal fun columnExistsCommonImpl(connection: Connection, tableName: String, columnName: String, toReturn: Int, sql: String): Int {
         var toReturn = toReturn
         try {
-            NamedPreparedStatement(connection, sql).use { preparedStatement ->
-                preparedStatement.setString("tableName", tableName)
-                preparedStatement.setString("columnName", columnName)
-                preparedStatement.setString("tableCatalog", connection.catalog)
-                preparedStatement.executeQuery().use({ resultSet ->
-                    while (resultSet.next()) {
-                        toReturn = resultSet.getInt("Result")
+            NamedPreparedStatement(connection, sql).use {
+                it.setString("tableName", tableName)
+                it.setString("columnName", columnName)
+                it.setString("tableCatalog", connection.catalog)
+                it.executeQuery().use {
+                    while (it.next()) {
+                        toReturn = it.getInt("Result")
                     }
-                })
+                }
             }
         } catch (ex: Exception) {
             toReturn = 0
@@ -265,8 +265,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal fun executeSqlFromFile(connection: Connection, fileName: String) {
         try {
-            Thread.currentThread().contextClassLoader.getResourceAsStream(fileName).use { rs ->
-                val innerSql = fileToString(rs)
+            Thread.currentThread().contextClassLoader.getResourceAsStream(fileName).use {
+                val innerSql = fileToString(it)
                 executeSqlFromString(connection, innerSql)
             }
         } catch (ex: Exception) {
