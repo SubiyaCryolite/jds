@@ -19,7 +19,7 @@ class Deletes : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun sqLiteImplementation() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         delete()
     }
 

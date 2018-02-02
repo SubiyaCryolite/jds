@@ -20,7 +20,7 @@ class NonExisting : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         loadNonExisting()
     }
 

@@ -17,10 +17,10 @@ import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
-import java.sql.PreparedStatement
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
@@ -201,7 +201,7 @@ open class JdsTable() : Serializable {
 
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val createTableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
-        val createColumnsSql = JdsSchema.generateColumns(jdsDb, name, tableFields, columnToFieldMap, enumOrdinals)
+        val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
         val primaryKeyColumn = JdsSchema.getPrimaryKeyColumn()
         val entityIdColumn = JdsSchema.getEntityIdColumn()
 
@@ -218,23 +218,50 @@ open class JdsTable() : Serializable {
         insertParameters.add("?")
         insertParameters.add("?")
 
-        val createColumnsStatements = LinkedHashMap<String, PreparedStatement>()
+        val delimiter = when (jdsDb.implementation) {
+            JdsImplementation.TSQL, JdsImplementation.ORACLE -> " "
+            else -> "ADD COLUMN "
+        }
+        val prefix = when (jdsDb.implementation) {
+            JdsImplementation.TSQL -> "ADD "
+            JdsImplementation.ORACLE -> "ADD ("
+            else -> "ADD COLUMN ";
+        }
+        val suffix = when (jdsDb.implementation) {
+            JdsImplementation.ORACLE -> ")"
+            else -> ""
+        }
 
+        var foundChanges = false
+        val stringJoiner = StringJoiner(", $delimiter", prefix, suffix)
+        val sqliteJoiner = LinkedList<String>()
         createColumnsSql.forEach { columnName, createColumnSql ->
             if (!jdsDb.doesColumnExist(connection, name, columnName)) {
-                createColumnsStatements[columnName] = connection.prepareStatement(createColumnSql)
+                if (!jdsDb.isSqLiteDb)
+                    stringJoiner.add(createColumnSql)
+                else
+                    sqliteJoiner.add(createColumnSql)
+                foundChanges = true
             }
             //regardless of column existing add to the query
             columnNames.add(columnName)
             insertColumns.add(columnName)
             insertParameters.add("?")
         }
-        createColumnsStatements.forEach { key, value ->
-            value.executeUpdate()
-            value.close()
-            if (jdsDb.isPrintingOutput)
-                println("Created $name.$key")
+
+        if (foundChanges) {
+            if (!jdsDb.isSqLiteDb) {
+                val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
+                connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+            } else {
+                //sqlite must alter columns once per entry
+                sqliteJoiner.forEach {
+                    val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")
+                    connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                }
+            }
         }
+
 
         deleteSql = "DELETE FROM $name WHERE $primaryKeyColumn = ?"
         insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"

@@ -263,10 +263,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         }
     }
 
-    override fun getDbAddColumnSyntax(): String {
-        return "ALTER TABLE %s ADD %s %s"
-    }
-
     override fun getDbFloatDataType(): String {
         return "BINARY_FLOAT"
     }

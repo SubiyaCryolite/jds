@@ -59,7 +59,7 @@ class Inheritance : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         saveAndLoad()
     }
 

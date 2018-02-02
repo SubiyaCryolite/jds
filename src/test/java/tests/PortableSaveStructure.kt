@@ -33,7 +33,7 @@ class PortableSaveStructure : BaseTestConfig() {
     @Throws(Exception::class)
     private fun testPortableSave(entity: Collection<JdsEntity>, clazz: Class<out JdsEntity>) {
         //fire-up JDS
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
 
         val saveEmbedded = JdsSaveEmbedded(entity)
         val embeddedObject = saveEmbedded.call()

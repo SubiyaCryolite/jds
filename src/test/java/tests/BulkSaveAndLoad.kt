@@ -61,7 +61,7 @@ class BulkSaveAndLoad : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()//12s 501ms
+        initialiseSqLiteBackend()//12s 501ms
         saveAndLoad()
     }
 

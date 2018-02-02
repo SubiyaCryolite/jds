@@ -61,7 +61,7 @@ class LoadAndSaveTests : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         saveAndLoad()
     }
 

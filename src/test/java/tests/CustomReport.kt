@@ -7,7 +7,6 @@ import entities.*
 import io.github.subiyacryolite.jds.JdsSave
 import io.github.subiyacryolite.jds.JdsTable
 import org.junit.jupiter.api.Test
-import kotlin.coroutines.experimental.buildIterator
 
 class CustomReport : BaseTestConfig() {
 
@@ -71,7 +70,7 @@ class CustomReport : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         test()
     }
 

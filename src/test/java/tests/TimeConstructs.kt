@@ -30,7 +30,7 @@ class TimeConstructs : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         saveAndLoad()
     }
 

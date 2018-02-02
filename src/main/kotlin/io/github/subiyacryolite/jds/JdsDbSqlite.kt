@@ -247,10 +247,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         return "INSERT OR REPLACE INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?,?)"
     }
 
-    override fun getDbAddColumnSyntax(): String {
-        return "ALTER TABLE %s ADD COLUMN %s %s"
-    }
-
     override fun getDbFloatDataType(): String {
         return "REAL"
     }

@@ -30,7 +30,7 @@ object JdsSchema {
      * @param enumOrdinals
      * @return
      */
-    fun generateColumns(jdsDb: IJdsDb, reportName: String, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
+    fun generateColumns(jdsDb: IJdsDb, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
         fields.sortedBy { it.name }.forEach {
             when (it.type) {
@@ -45,13 +45,13 @@ object JdsSchema {
                 }
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
                     val columnName = "${it.name}_${enum!!.ordinal}"
-                    val columnDefinition = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
-                    collection[columnName] = String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnDefinition)
+                    val columnDataType = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
+                    collection[columnName] = "$columnName $columnDataType"
                     columnToFieldMap[columnName] = it
                     enumOrdinals[columnName] = enum!!.ordinal
                 }
                 else -> {
-                    collection[it.name] = generateColumn(jdsDb, reportName, it)
+                    collection[it.name] = generateColumn(jdsDb, it)
                     columnToFieldMap[it.name] = it
                 }
             }
@@ -67,10 +67,10 @@ object JdsSchema {
      * @return
      */
     @JvmOverloads
-    private fun generateColumn(jdsDb: IJdsDb, reportName: String, field: JdsField, max: Int = 0): String {
+    private fun generateColumn(jdsDb: IJdsDb, field: JdsField, max: Int = 0): String {
         val columnName = field.name
         val columnType = getDbDataType(jdsDb, field.type, max)
-        return String.format(jdsDb.getDbAddColumnSyntax(), reportName, columnName, columnType)
+        return "$columnName $columnType"
     }
 
     /**

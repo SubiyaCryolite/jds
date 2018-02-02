@@ -274,10 +274,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         }
     }
 
-    override fun getDbAddColumnSyntax(): String {
-        return "ALTER TABLE %s ADD %s %s"
-    }
-
     override fun getDbFloatDataType(): String {
         return "REAL"
     }

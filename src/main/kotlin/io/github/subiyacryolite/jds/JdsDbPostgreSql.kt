@@ -242,10 +242,6 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         }
     }
 
-    override fun getDbAddColumnSyntax(): String {
-        return "ALTER TABLE %s ADD COLUMN %s %s"
-    }
-
     override fun getDbFloatDataType(): String {
         return "REAL"
     }

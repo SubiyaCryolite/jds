@@ -24,7 +24,7 @@ class Filters : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun sqLiteImplementation() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         filter()
     }
 

@@ -200,7 +200,7 @@ abstract class BaseTestConfig {
         System.out.printf("=========== %s ===========\n", jdsDb.implementation)
     }
 
-    fun initialiseSqlLiteBackend() {
+    fun initialiseSqLiteBackend() {
         jdsDb = JdsDbSqliteImplementation()
         initJds()
     }

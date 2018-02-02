@@ -91,7 +91,7 @@ class LegacyValidation : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testSqLite() {
-        initialiseSqlLiteBackend()
+        initialiseSqLiteBackend()
         saveAndLoad()
     }
 

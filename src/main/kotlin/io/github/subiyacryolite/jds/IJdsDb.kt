@@ -92,7 +92,7 @@ interface IJdsDb {
      * Gets the correct syntax needed to add a new column to the underlying database implementation
      * @return the correct syntax needed to add a new column to the underlying database implementation
      */
-    fun getDbAddColumnSyntax(): String
+    open fun getDbAddColumnSyntax()="ALTER TABLE %s %s"
 
     /**
      * Gets the Float data-type of the current database implementation

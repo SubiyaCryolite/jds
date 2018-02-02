@@ -14,7 +14,7 @@ public class Serialization extends BaseTestConfig {
 
     @Test
     public void testSerialization() {
-        initialiseSqlLiteBackend();
+        initialiseSqLiteBackend();
         for (Class<? extends JdsEntity> jdsEntity : getJdsDb().getClasses().values()) {
             String canonicalName = jdsEntity.getCanonicalName();
             serialize(jdsEntity, canonicalName);

@@ -256,10 +256,6 @@ abstract class JdsDbMySql : JdsDb {
         }
     }
 
-    override fun getDbAddColumnSyntax(): String {
-        return "ALTER TABLE %s ADD COLUMN %s %s"
-    }
-
     override fun getDbFloatDataType(): String {
         return "FLOAT"
     }
