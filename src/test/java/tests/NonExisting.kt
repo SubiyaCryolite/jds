@@ -24,11 +24,17 @@ class NonExisting : BaseTestConfig() {
         loadNonExisting()
     }
 
-
     @Test
     @Throws(Exception::class)
     fun testMySql() {
         initialiseMysqlBackend()
+        loadNonExisting()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
         loadNonExisting()
     }
 
@@ -61,5 +67,6 @@ class NonExisting : BaseTestConfig() {
         testPostgreSql()
         testTransactionalSql()
         testOracle()
+        testMariaDb()
     }
 }

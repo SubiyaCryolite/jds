@@ -37,6 +37,13 @@ class Filters : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun mariaDbImplementation() {
+        initialiseMariaDbBackend()
+        filter()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun postgreSqlImplementation() {
         initialisePostgeSqlBackend()
         filter()
@@ -64,5 +71,6 @@ class Filters : BaseTestConfig() {
         postgreSqlImplementation()
         sqLiteImplementation()
         tSqlImplementation()
+        mariaDbImplementation()
     }
 }

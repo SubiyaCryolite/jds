@@ -220,6 +220,11 @@ abstract class BaseTestConfig {
         initJds()
     }
 
+    fun initialiseMariaDbBackend() {
+        jdsDb = JdsDbMariaImplementation()
+        initJds()
+    }
+
     fun initialiseOracleBackend() {
         jdsDb = JdsDbOracleImplementation()
         initJds()

@@ -83,6 +83,13 @@ class CustomReport : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        test()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testOracle() {
         initialiseOracleBackend()
         test()
@@ -96,6 +103,6 @@ class CustomReport : BaseTestConfig() {
         testMySql()
         testOracle()
         testSqLite()
+        testMariaDb()
     }
-
 }

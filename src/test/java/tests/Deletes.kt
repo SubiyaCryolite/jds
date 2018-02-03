@@ -32,6 +32,13 @@ class Deletes : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun mariaDbImplementation() {
+        initialiseMariaDbBackend()
+        delete()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun postgreSqlImplementation() {
         initialisePostgeSqlBackend()
         delete()
@@ -59,5 +66,6 @@ class Deletes : BaseTestConfig() {
         postgreSqlImplementation()
         tSqlImplementation()
         sqLiteImplementation()
+        mariaDbImplementation()
     }
 }

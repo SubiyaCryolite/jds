@@ -74,6 +74,13 @@ class LoadAndSaveTests : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testPostgreSql() {
         initialisePostgeSqlBackend()
         saveAndLoad()
@@ -98,6 +105,7 @@ class LoadAndSaveTests : BaseTestConfig() {
     fun allImplementations() {
         testSqLite()
         testMySql()
+        testMariaDb()
         testPostgreSql()
         testTransactionalSql()
         testOracle()

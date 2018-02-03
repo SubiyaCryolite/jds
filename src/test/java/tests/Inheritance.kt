@@ -51,6 +51,13 @@ class Inheritance : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testPostgreSql() {
         initialisePostgeSqlBackend()
         saveAndLoad()
@@ -78,5 +85,6 @@ class Inheritance : BaseTestConfig() {
         testMySql()
         testPostgreSql()
         testOracle()
+        testMariaDb()
     }
 }

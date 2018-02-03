@@ -104,6 +104,13 @@ class LegacyValidation : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testOracle() {
         initialiseOracleBackend()
         saveAndLoad()
@@ -117,5 +124,6 @@ class LegacyValidation : BaseTestConfig() {
         testOracle()
         testMySql()
         testPostgreSql()
+        testMariaDb()
     }
 }

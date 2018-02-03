@@ -74,11 +74,19 @@ class BulkSaveAndLoad : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        saveAndLoad()//8s 126ms
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun allImplementations() {
         testSqLite()
         testTransactionalSql()
         testPostgreSql()
         testMySql()
         testOracle()
+        testMariaDb()
     }
 }

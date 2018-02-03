@@ -51,6 +51,13 @@ class CustomReportJson : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        test()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testOracle() {
         initialiseOracleBackend()
         test()
@@ -64,6 +71,7 @@ class CustomReportJson : BaseTestConfig() {
         testMySql()
         testOracle()
         testSqLite()
+        testMariaDb()
     }
 
 }

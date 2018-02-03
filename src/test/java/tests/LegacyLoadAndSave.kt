@@ -67,6 +67,13 @@ class LegacyLoadAndSave : BaseTestConfig() {
 
     @Test
     @Throws(Exception::class)
+    fun testMariaDb() {
+        initialiseMariaDbBackend()
+        saveAndLoad()
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testOracle() {
         initialiseOracleBackend()
         saveAndLoad()
@@ -80,5 +87,6 @@ class LegacyLoadAndSave : BaseTestConfig() {
         testMySql()
         testSqLite()
         testOracle()
+        testMariaDb()
     }
 }

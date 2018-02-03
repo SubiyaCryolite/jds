@@ -8,15 +8,15 @@ import java.time.ZoneId
 
 class AllTests {
 
-    val bulkSaveAndLoad = BulkSaveAndLoad()
-    val customReport = CustomReport()
-    val customReportJson = CustomReportJson()
-    val inheritance = Inheritance()
-    val legacyValidation = LegacyValidation()
-    val legacyLoadAndSave = LegacyLoadAndSave()
-    val nonExisting = NonExisting()
-    val timeConstructs = TimeConstructs()
-    val loadAndSaveTests = LoadAndSaveTests()
+    private val bulkSaveAndLoad = BulkSaveAndLoad()
+    private val customReport = CustomReport()
+    private val customReportJson = CustomReportJson()
+    private val inheritance = Inheritance()
+    private val legacyValidation = LegacyValidation()
+    private val legacyLoadAndSave = LegacyLoadAndSave()
+    private val nonExisting = NonExisting()
+    private val timeConstructs = TimeConstructs()
+    private val loadAndSaveTests = LoadAndSaveTests()
 
     @Test
     fun testAll() {
@@ -25,6 +25,7 @@ class AllTests {
         testOracle()
         testPostgreSql()
         testSqLite()
+        testMariaDb()
     }
 
     @Test
@@ -51,6 +52,19 @@ class AllTests {
         nonExisting.testMySql()
         timeConstructs.testMySql()
         loadAndSaveTests.testMySql()
+    }
+
+    @Test
+    fun testMariaDb() {
+        bulkSaveAndLoad.testMariaDb()
+        customReport.testMariaDb()
+        customReportJson.testMariaDb()
+        inheritance.testMariaDb()
+        legacyValidation.testMariaDb()
+        legacyLoadAndSave.testMariaDb()
+        nonExisting.testMariaDb()
+        timeConstructs.testMariaDb()
+        loadAndSaveTests.testMariaDb()
     }
 
     @Test
