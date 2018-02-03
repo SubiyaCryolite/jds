@@ -19,7 +19,7 @@ import io.github.subiyacryolite.jds.JdsEntity
  *
  * @param entity
  */
-class JdsEmbeddedObject(entity: JdsEntity) {
+class JdsEmbeddedObject(entity: JdsEntity, fieldId: Long?) {
     /**
      * Blob Values
      */
@@ -57,17 +57,13 @@ class JdsEmbeddedObject(entity: JdsEntity) {
      */
     val ld: MutableList<JdsLocalDateValues> = ArrayList()
     /**
-     * Entity bindings [parent to child]
-     */
-    val eb: MutableList<JdsEntityBinding> = ArrayList()
-    /**
      * Embedded objects
      */
     val eo: MutableList<JdsEmbeddedObject> = ArrayList()
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.uuid, entity.overview.entityId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
+    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.uuid, entity.overview.entityId, fieldId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
 
     init {
         entity.assign(this);

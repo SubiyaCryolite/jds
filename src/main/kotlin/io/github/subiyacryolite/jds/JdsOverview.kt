@@ -31,7 +31,7 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var entityId: Long = 0
     override var uuid: String = UUID.randomUUID().toString()
     override var version: Long = 1L
-    override var live: Boolean = true
+    override var live: Boolean = false
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {

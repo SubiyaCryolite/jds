@@ -39,9 +39,12 @@ class PortableSaveStructure : BaseTestConfig() {
         val embeddedObject = saveEmbedded.call()
 
 
-        val output = objectMapper.writeValueAsString(embeddedObject)
-        println("================ Object JSON ================")
-        println("$output")
+        val outputJds = objectMapper.writeValueAsString(embeddedObject)
+        val outputReg = objectMapper.writeValueAsString(entity)
+        println("================ Object Reg JSON ================")
+        println("$outputReg")
+        println("================ Object JDS JSON ================")
+        println("$outputJds")
 
         val loadEmbedded = JdsLoadEmbedded(jdsDb, clazz, embeddedObject)
         val loadedEntity = loadEmbedded.call()

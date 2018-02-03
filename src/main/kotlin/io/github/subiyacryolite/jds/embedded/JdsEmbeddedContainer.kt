@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds.embedded
 
 import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
@@ -33,7 +34,7 @@ class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
 
 class JdsLocalDateValues(val k: Long, val v: Timestamp?)
 //overviews
-class JdsEntityOverview(val uuid: String, val id: Long, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
+class JdsEntityOverview(val uuid: String, val id: Long, val fid: Long?, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
 
 class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
@@ -48,7 +49,11 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
 
     init {
         entities.forEach {
-            e.add(JdsEmbeddedObject(it))
+            if (it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+                e.add(JdsEmbeddedObject(it,null))
+            } else {
+                throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            }
         }
     }
 }

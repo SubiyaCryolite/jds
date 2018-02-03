@@ -890,15 +890,11 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        objectArrayProperties.entries.forEach { itx ->
-            itx.value.forEach {
-                embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.overview.uuid, itx.key.fieldEntity.id, it.overview.entityId))
-                embeddedObject.eo.add(JdsEmbeddedObject(it))
-            }
+        objectArrayProperties.forEach { key, itx ->
+            itx.forEach { embeddedObject.eo.add(JdsEmbeddedObject(it, key.fieldEntity.id)) }
         }
-        objectProperties.entries.forEach {
-            embeddedObject.eb.add(JdsEntityBinding(overview.uuid, it.value.value.overview.uuid, it.key.fieldEntity.id, it.value.value.overview.entityId))
-            embeddedObject.eo.add(JdsEmbeddedObject(it.value.value))
+        objectProperties.forEach { key, it ->
+            embeddedObject.eo.add(JdsEmbeddedObject(it.value, key.fieldEntity.id))
         }
     }
 
@@ -967,24 +963,26 @@ abstract class JdsEntity : IJdsEntity {
      * @param innerObjects
      * @param uuids
      */
-    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) = try {
-        val entityClass = jdsDb.classes[entityId]!!
-        objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
-            val entity = entityClass.newInstance()
-            entity.overview.uuid = uuid
-            uuids.add(uuid)
-            it.value.add(entity)
-            innerObjects.add(entity)
+    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
+        try {
+            if (fieldId != null) return
+            objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+                val entity = jdsDb.classes[entityId]!!.newInstance()
+                entity.overview.uuid = uuid
+                uuids.add(uuid)
+                it.value.add(entity)
+                innerObjects.add(entity)
+            }
+            objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+                val jdsEntity = jdsDb.classes[entityId]!!.newInstance()
+                jdsEntity.overview.uuid = uuid
+                uuids.add(uuid)
+                it.value.set(jdsEntity)
+                innerObjects.add(jdsEntity)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
         }
-        objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
-            val jdsEntity = entityClass.newInstance()
-            jdsEntity.overview.uuid = uuid
-            uuids.add(uuid)
-            it.value.set(jdsEntity)
-            innerObjects.add(jdsEntity)
-        }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
     }
 
 
@@ -1137,41 +1135,64 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * Ensures child entities have ids that link them to their parent.
      * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
+     * @param uuid
      */
-    fun standardizeUUIDs() {
-        val parentUUID = overview.uuid
-        standardizeObjectUUIDs(parentUUID, objectProperties)
-        standardizeObjectCollectionUUIDs(parentUUID, objectArrayProperties)
+    @JvmOverloads
+    fun standardizeUUIDs(uuid: String = overview.uuid) {
+        standardizeObjectUUIDs(uuid, objectProperties)
+        standardizeObjectCollectionUUIDs(uuid, objectArrayProperties)
     }
 
-    private fun standardizeObjectCollectionUUIDs(parentUUID: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+    /**
+     * Ensures child entities have ids that link them to their parent.
+     * @param uuid
+     * @param objectArrayProperties
+     */
+    private fun standardizeObjectCollectionUUIDs(uuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
         objectArrayProperties.entries.forEach {
             //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
             it.value.forEachIndexed { sequence, entry ->
                 val entityId = entry.overview.entityId
-                entry.overview.uuid = "$parentUUID.$entityId.$sequence"
+                val newUUID = "$uuid.$entityId.$sequence"
+                entry.overview.uuid = newUUID
                 //process children
-                standardizeObjectUUIDs(entry.overview.uuid, entry.objectProperties)
-                standardizeObjectCollectionUUIDs(entry.overview.uuid, entry.objectArrayProperties)
+                standardizeObjectUUIDs(newUUID, entry.objectProperties)
+                standardizeObjectCollectionUUIDs(newUUID, entry.objectArrayProperties)
             }
         }
     }
 
-    private fun standardizeObjectUUIDs(parentUUID: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
+    /**
+     * Ensures child entities have ids that link them to their parent.
+     * @param uuid
+     * @param objectProperties
+     */
+    private fun standardizeObjectUUIDs(uuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
         //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
         objectProperties.entries.forEach { entry ->
             val entityId = entry.value.value.overview.entityId
-            entry.value.value.overview.uuid = "$parentUUID.$entityId"
+            val newUUID = "$uuid.$entityId"
+            entry.value.value.overview.uuid = newUUID
             //process children
-            standardizeObjectUUIDs(entry.value.value.overview.uuid, entry.value.value.objectProperties)
-            standardizeObjectCollectionUUIDs(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
+            standardizeObjectUUIDs(newUUID, entry.value.value.objectProperties)
+            standardizeObjectCollectionUUIDs(newUUID, entry.value.value.objectArrayProperties)
         }
     }
 
+    /**
+     * Internal helper function that works with all nested objects
+     */
     internal fun yieldOverviews(): Sequence<JdsEntity> = buildSequence {
         yield(this@JdsEntity)
         objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
         objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }
+    }
+
+    /**
+     * Set this jds entity and all of its children as live?
+     */
+    fun setAllLive(live: Boolean) {
+        yieldOverviews().forEach { it.overview.live = live }
     }
 
     companion object : Externalizable {

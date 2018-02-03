@@ -123,12 +123,12 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         val uuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
-        embeddedObject.eb.forEach {
-            entity.populateObjects(jdsDb, it.f, it.i, it.c, innerObjects, uuids)
-        }
-        innerObjects.forEach {
+        innerObjects.forEach { jdsEntity ->
             //populate the inner objects
-            populate(outerIndex, innerIndex, it, embeddedObject.eo.find { itx -> itx.o.uuid == it.overview.uuid }!!)
+            embeddedObject.eo.filter { it.o.uuid == jdsEntity.overview.uuid }.forEach {
+                entity.populateObjects(jdsDb, it.o.fid, it.o.id, it.o.uuid, innerObjects, uuids)
+                populate(outerIndex, innerIndex, jdsEntity, it)
+            }
         }
     }
 }
