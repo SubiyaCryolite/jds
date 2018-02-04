@@ -11,12 +11,12 @@ object JdsSchema {
      * @return
      */
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
-        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 96)
+        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 195)
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(reportName)
-        stringBuilder.append("( ${getPrimaryKeyColumn()} $guidDataType, ${getEntityIdColumn()} ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
-            true -> ", PRIMARY KEY (${getPrimaryKeyColumn()},${getEntityIdColumn()})"
+        stringBuilder.append("( $compositeKeyColumn $guidDataType, $uuidColumn $guidDataType, $parentUuidColumn $guidDataType, $uuidLocationColumn $guidDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
+            true -> ", PRIMARY KEY ($uuidColumn, $uuidLocationColumn, $uuidLocationVersionColumn)"
             else -> ""
         }})")
         return stringBuilder.toString()
@@ -81,7 +81,7 @@ object JdsSchema {
      */
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String = when (fieldType) {
-        JdsFieldType.ENTITY -> jdsDb.getDbStringDataType(96)//act as a FK if you will
+        JdsFieldType.ENTITY -> jdsDb.getDbStringDataType(195)//act as a FK if you will
         JdsFieldType.FLOAT -> jdsDb.getDbFloatDataType()
         JdsFieldType.DOUBLE -> jdsDb.getDbDoubleDataType()
         JdsFieldType.ZONED_DATE_TIME -> jdsDb.getDbZonedDateTimeDataType()
@@ -95,14 +95,34 @@ object JdsSchema {
         else -> "invalid"
     }
 
-    /**
-     * @return
-     */
-    fun getPrimaryKeyColumn() = "uuid"
 
     /**
      * @return
      */
-    fun getEntityIdColumn() = "entity_id"
+    val compositeKeyColumn = "composite_key"
 
+    /**
+     * @return
+     */
+    val uuidColumn = "uuid"
+
+    /**
+     * @return
+     */
+    val uuidLocationColumn = "uuid_location"
+
+    /**
+     * @return
+     */
+    val uuidLocationVersionColumn = "uuid_location_version"
+
+    /**
+     * @return
+     */
+    val entityIdColumn = "entity_id"
+
+    /**
+     *
+     */
+    val parentUuidColumn = "parent_uuid"
 }

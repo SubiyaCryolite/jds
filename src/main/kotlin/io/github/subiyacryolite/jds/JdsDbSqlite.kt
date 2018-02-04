@@ -146,19 +146,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/JdsEntityoverview.sql")
     }
 
-    override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreOldFieldValue.sql")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_integer          ON jds_store_old_field_value (uuid, field_id, sequence, integer_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_float            ON jds_store_old_field_value (uuid, field_id, sequence, float_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_double           ON jds_store_old_field_value (uuid, field_id, sequence, double_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_long             ON jds_store_old_field_value (uuid, field_id, sequence, long_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_date_time_value        ON jds_store_old_field_value (uuid, field_id, sequence, date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_time             ON jds_store_old_field_value (uuid, field_id, sequence, time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_boolean          ON jds_store_old_field_value (uuid, field_id, sequence, boolean_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_zoned_date_time  ON jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_blob_text        ON jds_store_old_field_value (uuid, field_id, sequence)")
-    }
-
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/JdsEntityBinding.sql")
     }
@@ -216,30 +203,30 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO jds_entity_overview(uuid, date_created, date_modified, live, version) VALUES(:uuid, :dateCreated, :dateModified, :live, :version)"
+        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_location_version, entity_id, live, version) VALUES(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :version)"
     }
 
     override fun saveOverviewInheritance(): String {
         return "INSERT OR REPLACE INTO jds_entity_instance(entity_uuid, entity_id) VALUES(:uuid, :entityId)"
     }
 
-    override fun mapClassFields(): String {
+    override fun populateRefEntityField(): String {
         return "INSERT OR REPLACE INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?)"
     }
 
-    override fun mapFieldName(): String {
-        return "INSERT OR REPLACE INTO jds_ref_field(id, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
+    override fun populateRefField(): String {
+        return "INSERT OR REPLACE INTO jds_ref_field(entityId, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
     }
 
-    override fun mapClassEnumsImplementation(): String {
+    override fun populateRefEntityEnum(): String {
         return "INSERT OR REPLACE INTO jds_ref_entity_enum(entity_id, field_id) VALUES(?,?)"
     }
 
-    override fun mapClassName(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity(id, caption) VALUES(?,?)"
+    override fun populateRefEntity(): String {
+        return "INSERT OR REPLACE INTO jds_ref_entity(entityId, caption) VALUES(?,?)"
     }
 
-    override fun mapEnumValues(): String {
+    override fun populateRefEnum(): String {
         return "INSERT OR REPLACE INTO jds_ref_enum(field_id, seq, caption) VALUES(?,?,?)"
     }
 

@@ -26,6 +26,7 @@ import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
+import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
@@ -336,11 +337,10 @@ abstract class JdsEntity : IJdsEntity {
      * @param <T>    A valid JDSEntity
     </T> */
     private fun <T : IJdsEntity> copyOverviewValues(source: T) {
-        overview.dateCreated = source.overview.dateCreated
-        overview.dateModified = source.overview.dateModified
         overview.uuid = source.overview.uuid
         overview.live = source.overview.live
         overview.version = source.overview.version
+        overview.parentUuid = source.overview.parentUuid
     }
 
     /**
@@ -796,46 +796,56 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //PRIMITIVES
         //==============================================
-        saveContainer.booleanProperties[step][overview.uuid] = booleanProperties
-        saveContainer.stringProperties[step][overview.uuid] = stringProperties
-        saveContainer.floatProperties[step][overview.uuid] = floatProperties
-        saveContainer.doubleProperties[step][overview.uuid] = doubleProperties
-        saveContainer.longProperties[step][overview.uuid] = longProperties
-        saveContainer.integerProperties[step][overview.uuid] = integerProperties
+        saveContainer.booleanProperties[step][overview.compositeKey] = booleanProperties
+        saveContainer.stringProperties[step][overview.compositeKey] = stringProperties
+        saveContainer.floatProperties[step][overview.compositeKey] = floatProperties
+        saveContainer.doubleProperties[step][overview.compositeKey] = doubleProperties
+        saveContainer.longProperties[step][overview.compositeKey] = longProperties
+        saveContainer.integerProperties[step][overview.compositeKey] = integerProperties
         //==============================================
         //Dates & Time
         //==============================================
-        saveContainer.localDateTimeProperties[step][overview.uuid] = localDateTimeProperties
-        saveContainer.zonedDateTimeProperties[step][overview.uuid] = zonedDateTimeProperties
-        saveContainer.localTimeProperties[step][overview.uuid] = localTimeProperties
-        saveContainer.localDateProperties[step][overview.uuid] = localDateProperties
-        saveContainer.monthDayProperties[step][overview.uuid] = monthDayProperties
-        saveContainer.yearMonthProperties[step][overview.uuid] = yearMonthProperties
-        saveContainer.periodProperties[step][overview.uuid] = periodProperties
-        saveContainer.durationProperties[step][overview.uuid] = durationProperties
+        saveContainer.localDateTimeProperties[step][overview.compositeKey] = localDateTimeProperties
+        saveContainer.zonedDateTimeProperties[step][overview.compositeKey] = zonedDateTimeProperties
+        saveContainer.localTimeProperties[step][overview.compositeKey] = localTimeProperties
+        saveContainer.localDateProperties[step][overview.compositeKey] = localDateProperties
+        saveContainer.monthDayProperties[step][overview.compositeKey] = monthDayProperties
+        saveContainer.yearMonthProperties[step][overview.compositeKey] = yearMonthProperties
+        saveContainer.periodProperties[step][overview.compositeKey] = periodProperties
+        saveContainer.durationProperties[step][overview.compositeKey] = durationProperties
         //==============================================
         //BLOB
         //==============================================
-        saveContainer.blobProperties[step][overview.uuid] = blobProperties
+        saveContainer.blobProperties[step][overview.compositeKey] = blobProperties
         //==============================================
         //Enums
         //==============================================
-        saveContainer.enumProperties[step][overview.uuid] = enumProperties
-        saveContainer.enumCollections[step][overview.uuid] = enumCollectionProperties
+        saveContainer.enumProperties[step][overview.compositeKey] = enumProperties
+        saveContainer.enumCollections[step][overview.compositeKey] = enumCollectionProperties
         //==============================================
         //ARRAYS
         //==============================================
-        saveContainer.stringCollections[step][overview.uuid] = stringArrayProperties
-        saveContainer.localDateTimeCollections[step][overview.uuid] = dateTimeArrayProperties
-        saveContainer.floatCollections[step][overview.uuid] = floatArrayProperties
-        saveContainer.doubleCollections[step][overview.uuid] = doubleArrayProperties
-        saveContainer.longCollections[step][overview.uuid] = longArrayProperties
-        saveContainer.integerCollections[step][overview.uuid] = integerArrayProperties
+        saveContainer.stringCollections[step][overview.compositeKey] = stringArrayProperties
+        saveContainer.localDateTimeCollections[step][overview.compositeKey] = dateTimeArrayProperties
+        saveContainer.floatCollections[step][overview.compositeKey] = floatArrayProperties
+        saveContainer.doubleCollections[step][overview.compositeKey] = doubleArrayProperties
+        saveContainer.longCollections[step][overview.compositeKey] = longArrayProperties
+        saveContainer.integerCollections[step][overview.compositeKey] = integerArrayProperties
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        saveContainer.objectCollections[step][overview.uuid] = objectArrayProperties
-        saveContainer.objects[step][overview.uuid] = objectProperties
+        objectArrayProperties.forEach { _, value ->
+            value.forEach {
+                it.overview.parentCompositeKey = overview.compositeKey
+                it.overview.parentUuid = overview.uuid
+            }
+        }
+        objectProperties.forEach { _, value ->
+            value.value.overview.parentCompositeKey = overview.compositeKey
+            value.value.overview.parentUuid = overview.uuid
+        }
+        saveContainer.objectCollections[step][overview.compositeKey] = objectArrayProperties
+        saveContainer.objects[step][overview.compositeKey] = objectProperties
     }
 
     /**
@@ -865,7 +875,7 @@ abstract class JdsEntity : IJdsEntity {
         localTimeProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
         durationProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value.toNanos())) }
         localDateTimeProperties.entries.forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        localDateProperties.entries.forEach { embeddedObject.ld.add(JdsLocalDateValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        localDateProperties.entries.forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
         monthDayProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value?.toString())) }
         yearMonthProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, (it.value.value as YearMonth?)?.toString())) }
         periodProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value?.toString())) }
@@ -906,13 +916,27 @@ abstract class JdsEntity : IJdsEntity {
     internal fun populateProperties(fieldType: JdsFieldType, fieldId: Long, value: Any?) {
         when (fieldType) {
         //========================= primitives (can be null)
-            JdsFieldType.FLOAT -> floatProperties[fieldId]?.value = value as Float?
+            JdsFieldType.FLOAT -> floatProperties[fieldId]?.value = when (value) {
+                is Double -> value.toFloat()
+                else -> value as Float?
+            }
             JdsFieldType.DOUBLE -> doubleProperties[fieldId]?.value = value as Double?
-            JdsFieldType.LONG -> longProperties[fieldId]?.value = value as Long?
-            JdsFieldType.INT -> integerProperties[fieldId]?.value = value as Int?
-            JdsFieldType.BOOLEAN -> when (value) {
-                is Int -> booleanProperties[fieldId]?.value = value == 1
-                else -> booleanProperties[fieldId]?.value = value as Boolean?
+            JdsFieldType.LONG -> longProperties[fieldId]?.value = when (value) {
+                is Long? -> value
+                is BigDecimal -> value.toLong() //Oracle
+                is Integer -> value.toLong()
+                else -> null
+            }
+            JdsFieldType.INT -> integerProperties[fieldId]?.value = when (value) {
+                is Int? -> value
+                is BigDecimal -> value.toInt() //Oracle
+                else -> null
+            }
+            JdsFieldType.BOOLEAN -> booleanProperties[fieldId]?.value = when (value) {
+                is Int -> value == 1
+                is Boolean? -> value
+                is BigDecimal -> value.intValueExact() == 1 //Oracle
+                else -> null
             }
         //========================= collections (assumed cannot be null)
             JdsFieldType.DOUBLE_COLLECTION -> doubleArrayProperties[fieldId]?.add(value as Double)
@@ -920,10 +944,15 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.LONG_COLLECTION -> longArrayProperties[fieldId]?.add(value as Long)
             JdsFieldType.INT_COLLECTION -> integerArrayProperties[fieldId]?.add(value as Int)
         //========================= enums
-            JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == fieldId }.forEach { it.value?.set(it.key.valueOf(value as Int)) }
+            JdsFieldType.ENUM -> enumProperties.filter { it.key.field.id == fieldId }.forEach {
+                it.value?.set(when (value) {
+                    is BigDecimal -> it.key.valueOf(value.intValueExact())
+                    else -> it.key.valueOf(value as Int)
+                })
+            }
             JdsFieldType.ENUM_COLLECTION -> enumCollectionProperties.filter { it.key.field.id == fieldId }.forEach {
                 val enumValues = it.key.enumType.enumConstants
-                val index = value as Int
+                val index = when (value) { is Int -> value; is BigDecimal -> value.intValueExact(); else -> enumValues.size; }
                 if (index < enumValues.size) {
                     it.value.add(enumValues[index] as Enum<*>)
                 }
@@ -944,14 +973,20 @@ abstract class JdsEntity : IJdsEntity {
                 is LocalTime -> localTimeProperties[fieldId]?.set(value)
                 is String -> localTimeProperties[fieldId]?.set(value.toLocalTimeSqlFormat())
             }
-            JdsFieldType.DURATION -> durationProperties[fieldId]?.set(Duration.ofNanos(value as Long))
+            JdsFieldType.DURATION -> durationProperties[fieldId]?.set(when (value) {
+                is BigDecimal -> Duration.ofNanos(value.longValueExact())//Oracle
+                else -> Duration.ofNanos(value as Long)
+            })
             JdsFieldType.MONTH_DAY -> monthDayProperties[fieldId]?.value = (value as String).let { MonthDay.parse(it) }
             JdsFieldType.YEAR_MONTH -> yearMonthProperties[fieldId]?.value = (value as String).let { YearMonth.parse(it) }
             JdsFieldType.PERIOD -> periodProperties[fieldId]?.value = (value as String).let { Period.parse(it) }
             JdsFieldType.DATE_TIME -> localDateTimeProperties[fieldId]?.value = (value as Timestamp).let { it.toLocalDateTime() }
             JdsFieldType.DATE_TIME_COLLECTION -> dateTimeArrayProperties[fieldId]?.add((value as Timestamp).let { it.toLocalDateTime() })
         //========================= blob
-            JdsFieldType.BLOB -> blobProperties[fieldId]?.set(value as ByteArray)
+            JdsFieldType.BLOB -> when (value) {
+                is ByteArray -> blobProperties[fieldId]?.set(value)
+                null -> blobProperties[fieldId]?.set(ByteArray(0))//Oracle
+            }
         }
     }
 
@@ -963,12 +998,15 @@ abstract class JdsEntity : IJdsEntity {
      * @param innerObjects
      * @param uuids
      */
-    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
+    internal fun populateObjects(jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, uuidLocation: String, uuidLocationVersion: Int, parentUuid: String?, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
         try {
             if (fieldId != null) return
             objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val entity = jdsDb.classes[entityId]!!.newInstance()
                 entity.overview.uuid = uuid
+                entity.overview.uuidLocation = uuidLocation
+                entity.overview.uuidLocationVersion = uuidLocationVersion
+                entity.overview.parentUuid = parentUuid
                 uuids.add(uuid)
                 it.value.add(entity)
                 innerObjects.add(entity)
@@ -976,6 +1014,9 @@ abstract class JdsEntity : IJdsEntity {
             objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val jdsEntity = jdsDb.classes[entityId]!!.newInstance()
                 jdsEntity.overview.uuid = uuid
+                jdsEntity.overview.uuidLocation = uuidLocation
+                jdsEntity.overview.uuidLocationVersion = uuidLocationVersion
+                jdsEntity.overview.parentUuid = parentUuid
                 uuids.add(uuid)
                 it.value.set(jdsEntity)
                 innerObjects.add(jdsEntity)
@@ -991,24 +1032,24 @@ abstract class JdsEntity : IJdsEntity {
      * @param connection the SQL connection to use for DB operations
      * @param entityId   the value representing the entity
      */
-    internal fun mapClassFields(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
-        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassFields()) else connection.prepareStatement(jdsDb.mapClassFields())).use { mapClassFields ->
-            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapFieldName()) else connection.prepareStatement(jdsDb.mapFieldName())).use { mapFieldName ->
+    internal fun populateRefFieldRefEntityField(jdsDb: JdsDb, connection: Connection, entityId: Long) = try {
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.populateRefField()) else connection.prepareStatement(jdsDb.populateRefField())).use { populateRefField ->
+            (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.populateRefEntityField()) else connection.prepareStatement(jdsDb.populateRefEntityField())).use { populateRefEntityField ->
                 getFields(overview.entityId).forEach {
                     val lookup = JdsField.values[it]!!
                     //1. map this fieldEntity to the fieldEntity dictionary
-                    mapFieldName.setLong(1, lookup.id)
-                    mapFieldName.setString(2, lookup.name)
-                    mapFieldName.setString(3, lookup.description)
-                    mapFieldName.setInt(4, lookup.type.ordinal)
-                    mapFieldName.addBatch()
+                    populateRefField.setLong(1, lookup.id)
+                    populateRefField.setString(2, lookup.name)
+                    populateRefField.setString(3, lookup.description)
+                    populateRefField.setInt(4, lookup.type.ordinal)
+                    populateRefField.addBatch()
                     //2. map this fieldEntity ID to the entity type
-                    mapClassFields.setLong(1, entityId)
-                    mapClassFields.setLong(2, lookup.id)
-                    mapClassFields.addBatch()
+                    populateRefEntityField.setLong(1, entityId)
+                    populateRefEntityField.setLong(2, lookup.id)
+                    populateRefEntityField.addBatch()
                 }
-                mapFieldName.executeBatch()
-                mapClassFields.executeBatch()
+                populateRefField.executeBatch()
+                populateRefEntityField.executeBatch()
             }
         }
     } catch (ex: Exception) {
@@ -1022,9 +1063,9 @@ abstract class JdsEntity : IJdsEntity {
      * @param jdsDb
      */
     @Synchronized
-    internal fun mapClassEnums(jdsDb: JdsDb, connection: Connection, entityId: Long) {
-        mapEnumValues(jdsDb, connection, getEnums(overview.entityId))
-        mapClassEnumsImplementation(jdsDb, connection, entityId, getEnums(overview.entityId))
+    internal fun populateRefEnumRefEntityEnum(jdsDb: JdsDb, connection: Connection, entityId: Long) {
+        populateRefEnum(jdsDb, connection, getEnums(overview.entityId))
+        populateRefEntityEnum(jdsDb, connection, entityId, getEnums(overview.entityId))
         if (jdsDb.isPrintingOutput)
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
     }
@@ -1037,8 +1078,8 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldIds     the entity's enumProperties
      */
     @Synchronized
-    private fun mapClassEnumsImplementation(jdsDb: JdsDb, connection: Connection, entityId: Long, fieldIds: Set<Long>) = try {
-        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapClassEnumsImplementation()) else connection.prepareStatement(jdsDb.mapClassEnumsImplementation())).use {
+    private fun populateRefEntityEnum(jdsDb: JdsDb, connection: Connection, entityId: Long, fieldIds: Set<Long>) = try {
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.populateRefEntityEnum()) else connection.prepareStatement(jdsDb.populateRefEntityEnum())).use {
             for (fieldIds in fieldIds) {
                 val jdsFieldEnum = JdsFieldEnum.enums[fieldIds]!!
                 for (index in 0 until jdsFieldEnum.values.size) {
@@ -1060,8 +1101,8 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldIds the fieldEntity enum
      */
     @Synchronized
-    private fun mapEnumValues(jdsDb: JdsDb, connection: Connection, fieldIds: Set<Long>) = try {
-        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.mapEnumValues()) else connection.prepareStatement(jdsDb.mapEnumValues())).use {
+    private fun populateRefEnum(jdsDb: JdsDb, connection: Connection, fieldIds: Set<Long>) = try {
+        (if (jdsDb.supportsStatements) connection.prepareCall(jdsDb.populateRefEnum()) else connection.prepareStatement(jdsDb.populateRefEnum())).use {
             for (fieldId in fieldIds) {
                 val jdsFieldEnum = JdsFieldEnum.enums[fieldId]!!
                 for (index in 0 until jdsFieldEnum.values.size) {
@@ -1182,17 +1223,18 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * Internal helper function that works with all nested objects
      */
-    internal fun yieldOverviews(): Sequence<JdsEntity> = buildSequence {
-        yield(this@JdsEntity)
-        objectProperties.values.forEach { yieldAll(it.value.yieldOverviews()) }
-        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.yieldOverviews()) } }
+    fun getAllEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity> = buildSequence {
+        if (includeThisEntity)
+            yield(this@JdsEntity)
+        objectProperties.values.forEach { yieldAll(it.value.getAllEntities()) }
+        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.getAllEntities()) } }
     }
 
     /**
      * Set this jds entity and all of its children as live?
      */
     fun setAllLive(live: Boolean) {
-        yieldOverviews().forEach { it.overview.live = live }
+        getAllEntities().forEach { it.overview.live = live }
     }
 
     companion object : Externalizable {

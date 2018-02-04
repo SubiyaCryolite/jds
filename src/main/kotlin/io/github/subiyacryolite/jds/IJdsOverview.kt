@@ -17,10 +17,45 @@ import java.time.LocalDateTime;
 
 interface IJdsOverview {
 
-    var dateCreated: LocalDateTime
-    var dateModified: LocalDateTime
     var entityId: Long
+
+    /**
+     * The unique identifier of this record
+     */
     var uuid: String
+
+    /**
+     * A unique flag to identify where this record was modified e.g ip address, terminal identifier, any other id
+     */
+    var uuidLocation: String
+
+    /**
+     * A value indicating the version (number of edits) of this record at a location
+     */
+    var uuidLocationVersion: Int
+
+    /**
+     * A composite key for this unique record at different locations and for each version
+     */
+    val compositeKey: String
+
+    /**
+     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated at Save and at Load.
+     */
+    var parentUuid: String?
+
+    /**
+     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated at Save and at Load.
+     */
+    var parentCompositeKey: String?
+
+    /**
+     * A flag indicating if this record is live or deprecated
+     */
     var live: Boolean
+
+    /**
+     * A flag indicating the version of this [JdsEntity]
+     */
     var version: Long
 }

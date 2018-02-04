@@ -28,7 +28,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
-import java.util.stream.Stream
+import kotlin.collections.ArrayList
 
 /**
  * This class is responsible for loading an [entity's][JdsEntity] [fields][JdsField]
@@ -36,44 +36,20 @@ import java.util.stream.Stream
 class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private val collections = ArrayList<T>()
     private val jdsDb: JdsDb
-    private val referenceType: Class<T>
     private val searchUUIDs: Iterable<out String>
-    private var comparator: Comparator<in T>? = null
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
-
-    /**
-     * @param jdsDb
-     * @param referenceType
-     * @param comparator
-     * @param searchUUIDs
-     */
-    constructor(jdsDb: JdsDb, referenceType: Class<T>, comparator: Comparator<T>, vararg searchUUIDs: String) {
-        this.jdsDb = jdsDb
-        this.referenceType = referenceType
-        this.searchUUIDs = searchUUIDs.asIterable()
-        this.comparator = comparator
-    }
+    private val referenceType: Class<T>
 
     /**
      * @param jdsDb
      * @param referenceType
      * @param searchUUIDs
      */
-    constructor(jdsDb: JdsDb, referenceType: Class<T>, vararg searchUUIDs: String) {
+    @JvmOverloads
+    constructor(jdsDb: JdsDb, referenceEntity: Class<T>, searchUUIDs: Collection<String> = emptyList()) {
         this.jdsDb = jdsDb
-        this.referenceType = referenceType
-        this.searchUUIDs = searchUUIDs.asIterable()
-    }
-
-    /**
-     * @param jdsDb
-     * @param referenceType
-     * @param searchUUIDs
-     */
-    constructor(jdsDb: JdsDb, referenceType: Class<T>, searchUUIDs: Collection<String>) {
-        this.jdsDb = jdsDb
-        this.referenceType = referenceType
         this.searchUUIDs = searchUUIDs
+        this.referenceType = referenceEntity
     }
 
 
@@ -88,126 +64,127 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @param <T>
      */
     private fun <T : JdsEntity> populateInner(jdsDb: JdsDb,
-                                              referenceType: Class<T>?,
                                               entities: MutableCollection<T>,
                                               initialisePrimitives: Boolean,
                                               initialiseDatesAndTimes: Boolean,
                                               initialiseObjects: Boolean,
                                               uuids: Collection<String>) {
         val questionsString = prepareParamaterSequence(uuids.size)
+        //val entity information
+        val sqlEntities = "SELECT uuid, uuid_location, uuid_location_version, entity_id FROM jds_entity_overview WHERE composite_key IN ($questionsString)"
         //primitives
-        val sqlBooleans = "SELECT uuid, value, field_id FROM jds_store_boolean WHERE uuid IN ($questionsString)"
-        val sqlStrings = "SELECT uuid, value, field_id FROM jds_store_text WHERE uuid IN ($questionsString)"
-        val sqlLongs = "SELECT uuid, value, field_id FROM jds_store_long WHERE uuid IN ($questionsString)"
-        val sqlIntegers = "SELECT uuid, value, field_id FROM jds_store_integer WHERE uuid IN ($questionsString)"
-        val sqlFloats = "SELECT uuid, value, field_id FROM jds_store_float WHERE uuid IN ($questionsString)"
-        val sqlDoubles = "SELECT uuid, value, field_id FROM jds_store_double WHERE uuid IN ($questionsString)"
-        val sqlDateTimes = "SELECT uuid, value, field_id FROM jds_store_date_time WHERE uuid IN ($questionsString)"
-        val sqlTimes = "SELECT uuid, value, field_id FROM jds_store_time WHERE uuid IN ($questionsString)"
-        val sqlZonedDateTimes = "SELECT uuid, value, field_id FROM jds_store_zoned_date_time WHERE uuid IN ($questionsString)"
+        val sqlBooleans = "SELECT composite_key, value, field_id FROM jds_store_boolean WHERE composite_key IN ($questionsString)"
+        val sqlStrings = "SELECT composite_key, value, field_id FROM jds_store_text WHERE composite_key IN ($questionsString)"
+        val sqlLongs = "SELECT composite_key, value, field_id FROM jds_store_long WHERE composite_key IN ($questionsString)"
+        val sqlIntegers = "SELECT composite_key, value, field_id FROM jds_store_integer WHERE composite_key IN ($questionsString)"
+        val sqlFloats = "SELECT composite_key, value, field_id FROM jds_store_float WHERE composite_key IN ($questionsString)"
+        val sqlDoubles = "SELECT composite_key, value, field_id FROM jds_store_double WHERE composite_key IN ($questionsString)"
+        val sqlDateTimes = "SELECT composite_key, value, field_id FROM jds_store_date_time WHERE composite_key IN ($questionsString)"
+        val sqlTimes = "SELECT composite_key, value, field_id FROM jds_store_time WHERE composite_key IN ($questionsString)"
+        val sqlZonedDateTimes = "SELECT composite_key, value, field_id FROM jds_store_zoned_date_time WHERE composite_key IN ($questionsString)"
         //blobs
-        val sqlBlobs = "SELECT uuid, value, field_id FROM jds_store_blob WHERE uuid IN ($questionsString)"
+        val sqlBlobs = "SELECT composite_key, value, field_id FROM jds_store_blob WHERE composite_key IN ($questionsString)"
         //array
-        val sqlStringCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_text_array WHERE uuid IN ($questionsString)"
-        val sqlIntegerAndEnumCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_integer_array WHERE uuid IN ($questionsString)"
-        val sqlLongCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_long_array WHERE uuid IN ($questionsString)"
-        val sqlFloatCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_float_array WHERE uuid IN ($questionsString)"
-        val sqlDoubleCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_double_array WHERE uuid IN ($questionsString)"
-        val sqlDateTimeCollections = "SELECT uuid, value, field_id, sequence FROM jds_store_date_time_array WHERE uuid IN ($questionsString)"
-        val sqlEmbeddedAndArrayObjects = "SELECT child_uuid, parent_uuid, child_entity_id, field_id FROM jds_entity_binding WHERE parent_uuid IN ($questionsString)"
+        val sqlStringCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_text_array WHERE composite_key IN ($questionsString)"
+        val sqlIntegerAndEnumCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_integer_array WHERE composite_key IN ($questionsString)"
+        val sqlLongCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_long_array WHERE composite_key IN ($questionsString)"
+        val sqlFloatCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_float_array WHERE composite_key IN ($questionsString)"
+        val sqlDoubleCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_double_array WHERE composite_key IN ($questionsString)"
+        val sqlDateTimeCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_date_time_array WHERE composite_key IN ($questionsString)"
+        val sqlEmbeddedAndArrayObjects = "SELECT eb.child_composite_key, eb.parent_composite_key, eb.child_entity_id, eb.field_id, eo.uuid_location, eo.uuid_location_version FROM jds_entity_binding eb JOIN jds_entity_overview eo ON eo.composite_key = eb.child_composite_key AND eb.parent_composite_key IN ($questionsString)"
         //overviews
-        val sqlOverviews = "SELECT uuid, date_created, date_modified, live, version FROM jds_entity_overview WHERE uuid IN ($questionsString)"
+        val sqlOverviews = "SELECT uuid, live, version FROM jds_entity_overview WHERE uuid IN ($questionsString)"
         try {
+
             jdsDb.getConnection().use { connection ->
-                connection.prepareStatement(sqlBooleans).use { booleans ->
-                    connection.prepareStatement(sqlBlobs).use { blobs ->
-                        connection.prepareStatement(sqlStrings).use { strings ->
-                            connection.prepareStatement(sqlLongs).use { longs ->
-                                connection.prepareStatement(sqlIntegers).use { integers ->
-                                    connection.prepareStatement(sqlFloats).use { floats ->
-                                        connection.prepareStatement(sqlDoubles).use { doubles ->
-                                            connection.prepareStatement(sqlDateTimes).use { dateTimes ->
-                                                connection.prepareStatement(sqlTimes).use { times ->
-                                                    connection.prepareStatement(sqlZonedDateTimes).use { zonedDateTimes ->
-                                                        connection.prepareStatement(sqlStringCollections).use { textArrays ->
-                                                            connection.prepareStatement(sqlIntegerAndEnumCollections).use { integerArraysAndEnums ->
-                                                                connection.prepareStatement(sqlLongCollections).use { longArrays ->
-                                                                    connection.prepareStatement(sqlFloatCollections).use { floatArrays ->
-                                                                        connection.prepareStatement(sqlDoubleCollections).use { doubleArrays ->
-                                                                            connection.prepareStatement(sqlDateTimeCollections).use { dateTimeArrays ->
-                                                                                connection.prepareStatement(sqlEmbeddedAndArrayObjects).use { embeddedAndArrayObjects ->
-                                                                                    connection.prepareStatement(sqlOverviews).use { overviews ->
-                                                                                        //work in batches to not break prepared statement
-                                                                                        var batchSequence = 1
-                                                                                        for (uuid in uuids) {
-                                                                                            if (referenceType != null && (initialisePrimitives || initialiseDatesAndTimes || initialiseObjects)) {
-                                                                                                //sometimes the entityVersions would already have been instanciated, thus we only need to populate
-                                                                                                val entity = referenceType.newInstance()
-                                                                                                entity.overview.uuid = uuid
-                                                                                                entities.add(entity)
+                connection.prepareStatement(sqlEntities).use { entityLookUp ->
+                    connection.prepareStatement(sqlBooleans).use { booleans ->
+                        connection.prepareStatement(sqlBlobs).use { blobs ->
+                            connection.prepareStatement(sqlStrings).use { strings ->
+                                connection.prepareStatement(sqlLongs).use { longs ->
+                                    connection.prepareStatement(sqlIntegers).use { integers ->
+                                        connection.prepareStatement(sqlFloats).use { floats ->
+                                            connection.prepareStatement(sqlDoubles).use { doubles ->
+                                                connection.prepareStatement(sqlDateTimes).use { dateTimes ->
+                                                    connection.prepareStatement(sqlTimes).use { times ->
+                                                        connection.prepareStatement(sqlZonedDateTimes).use { zonedDateTimes ->
+                                                            connection.prepareStatement(sqlStringCollections).use { textArrays ->
+                                                                connection.prepareStatement(sqlIntegerAndEnumCollections).use { integerArraysAndEnums ->
+                                                                    connection.prepareStatement(sqlLongCollections).use { longArrays ->
+                                                                        connection.prepareStatement(sqlFloatCollections).use { floatArrays ->
+                                                                            connection.prepareStatement(sqlDoubleCollections).use { doubleArrays ->
+                                                                                connection.prepareStatement(sqlDateTimeCollections).use { dateTimeArrays ->
+                                                                                    connection.prepareStatement(sqlEmbeddedAndArrayObjects).use { embeddedAndArrayObjects ->
+                                                                                        connection.prepareStatement(sqlOverviews).use { overviews ->
+                                                                                            //work in batches to not break prepared statement
+                                                                                            var batchSequence = 1
+                                                                                            for (uuid in uuids) {
+                                                                                                setParameterForStatement(batchSequence, uuid, entityLookUp)
+                                                                                                //primitives
+                                                                                                setParameterForStatement(batchSequence, uuid, booleans)
+                                                                                                setParameterForStatement(batchSequence, uuid, strings)
+                                                                                                setParameterForStatement(batchSequence, uuid, integers)
+                                                                                                setParameterForStatement(batchSequence, uuid, longs)
+                                                                                                setParameterForStatement(batchSequence, uuid, floats)
+                                                                                                setParameterForStatement(batchSequence, uuid, doubles)
+                                                                                                setParameterForStatement(batchSequence, uuid, dateTimes)
+                                                                                                setParameterForStatement(batchSequence, uuid, times)
+                                                                                                setParameterForStatement(batchSequence, uuid, zonedDateTimes)
+                                                                                                //blobs
+                                                                                                setParameterForStatement(batchSequence, uuid, blobs)
+                                                                                                //array
+                                                                                                setParameterForStatement(batchSequence, uuid, textArrays)
+                                                                                                setParameterForStatement(batchSequence, uuid, longArrays)
+                                                                                                setParameterForStatement(batchSequence, uuid, floatArrays)
+                                                                                                setParameterForStatement(batchSequence, uuid, doubleArrays)
+                                                                                                setParameterForStatement(batchSequence, uuid, dateTimeArrays)
+                                                                                                setParameterForStatement(batchSequence, uuid, integerArraysAndEnums)
+                                                                                                //object and object arrays
+                                                                                                setParameterForStatement(batchSequence, uuid, embeddedAndArrayObjects)
+                                                                                                //overview
+                                                                                                setParameterForStatement(batchSequence, uuid, overviews)
+                                                                                                batchSequence++
                                                                                             }
-                                                                                            //primitives
-                                                                                            setParameterForStatement(batchSequence, uuid, booleans)
-                                                                                            setParameterForStatement(batchSequence, uuid, strings)
-                                                                                            setParameterForStatement(batchSequence, uuid, integers)
-                                                                                            setParameterForStatement(batchSequence, uuid, longs)
-                                                                                            setParameterForStatement(batchSequence, uuid, floats)
-                                                                                            setParameterForStatement(batchSequence, uuid, doubles)
-                                                                                            setParameterForStatement(batchSequence, uuid, dateTimes)
-                                                                                            setParameterForStatement(batchSequence, uuid, times)
-                                                                                            setParameterForStatement(batchSequence, uuid, zonedDateTimes)
-                                                                                            //blobs
-                                                                                            setParameterForStatement(batchSequence, uuid, blobs)
-                                                                                            //array
-                                                                                            setParameterForStatement(batchSequence, uuid, textArrays)
-                                                                                            setParameterForStatement(batchSequence, uuid, longArrays)
-                                                                                            setParameterForStatement(batchSequence, uuid, floatArrays)
-                                                                                            setParameterForStatement(batchSequence, uuid, doubleArrays)
-                                                                                            setParameterForStatement(batchSequence, uuid, dateTimeArrays)
-                                                                                            setParameterForStatement(batchSequence, uuid, integerArraysAndEnums)
-                                                                                            //object and object arrays
-                                                                                            setParameterForStatement(batchSequence, uuid, embeddedAndArrayObjects)
-                                                                                            //overview
-                                                                                            setParameterForStatement(batchSequence, uuid, overviews)
-                                                                                            batchSequence++
-                                                                                        }
-                                                                                        //catch embedded/pre-created objects objects as well
-                                                                                        entities.filterIsInstance<JdsLoadListener>().forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
+                                                                                            //catch embedded/pre-created objects objects as well
+                                                                                            if (initialisePrimitives || initialiseDatesAndTimes || initialiseObjects) {
+                                                                                                createEntities(entities, entityLookUp)
+                                                                                            }
+                                                                                            entities.filterIsInstance<JdsLoadListener>().forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
+                                                                                            populateOverviews(entities, overviews)
+                                                                                            if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
+                                                                                                //strings, derived from strings and string arrays
+                                                                                                populateTextMonthDayYearMonthAndPeriod(entities, strings)
+                                                                                                populateStringArrays(entities, textArrays)
+                                                                                                //primitives
+                                                                                                populateLongAndDuration(entities, longs)
+                                                                                                populateBoolean(entities, booleans)
+                                                                                                populateIntegerAndEnum(entities, integers)
+                                                                                                populateFloat(entities, floats)
+                                                                                                populateDouble(entities, doubles)
+                                                                                                //primitive arrays
+                                                                                                //despite being primitives, array types are assumed to not contain null elements
+                                                                                                populateIntegerArraysAndEnums(entities, integerArraysAndEnums)
+                                                                                                populateFloatArrays(entities, floatArrays)
+                                                                                                populateLongArrays(entities, longArrays)
+                                                                                                populateDoubleArrays(entities, doubleArrays)
+                                                                                            }
+                                                                                            if (jdsDb.isWritingToPrimaryDataTables && initialiseDatesAndTimes) {
+                                                                                                populateZonedDateTime(entities, zonedDateTimes)
+                                                                                                populateDateTimeAndDate(entities, dateTimes)
+                                                                                                populateTimes(entities, times)
+                                                                                                populateDateTimeArrays(entities, dateTimeArrays)
+                                                                                            }
+                                                                                            if (initialiseObjects) {
+                                                                                                if (jdsDb.isWritingToPrimaryDataTables)
+                                                                                                    populateBlobs(entities, blobs)
+                                                                                                populateObjectEntriesAndObjectArrays(jdsDb, entities, embeddedAndArrayObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects)
+                                                                                            }
+                                                                                            //catch embedded/pre-created objects objects as well
+                                                                                            entities.filterIsInstance<JdsLoadListener>().forEach { it.onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections)) }
 
-                                                                                        if (jdsDb.isWritingToPrimaryDataTables && initialisePrimitives) {
-                                                                                            //strings, derived from strings and string arrays
-                                                                                            populateTextMonthDayYearMonthAndPeriod(entities, strings)
-                                                                                            populateStringArrays(entities, textArrays)
-                                                                                            //primitives
-                                                                                            populateLongAndDuration(entities, longs)
-                                                                                            populateBoolean(entities, booleans)
-                                                                                            populateIntegerAndEnum(entities, integers)
-                                                                                            populateFloat(entities, floats)
-                                                                                            populateDouble(entities, doubles)
-                                                                                            //primitive arrays
-                                                                                            //despite being primitives, array types are assumed to not contain null elements
-                                                                                            populateIntegerArraysAndEnums(entities, integerArraysAndEnums)
-                                                                                            populateFloatArrays(entities, floatArrays)
-                                                                                            populateLongArrays(entities, longArrays)
-                                                                                            populateDoubleArrays(entities, doubleArrays)
+                                                                                            //close alternate connections
+                                                                                            alternateConnections.forEach { it.value.close() }
                                                                                         }
-                                                                                        if (jdsDb.isWritingToPrimaryDataTables && initialiseDatesAndTimes) {
-                                                                                            populateZonedDateTime(entities, zonedDateTimes)
-                                                                                            populateDateTimeAndDate(entities, dateTimes)
-                                                                                            populateTimes(entities, times)
-                                                                                            populateDateTimeArrays(entities, dateTimeArrays)
-                                                                                        }
-                                                                                        if (initialiseObjects) {
-                                                                                            if (jdsDb.isWritingToPrimaryDataTables)
-                                                                                                populateBlobs(entities, blobs)
-                                                                                            populateObjectEntriesAndObjectArrays(jdsDb, entities, embeddedAndArrayObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects)
-                                                                                        }
-                                                                                        populateOverviews(entities, overviews)
-                                                                                        //catch embedded/pre-created objects objects as well
-                                                                                        entities.filterIsInstance<JdsLoadListener>().forEach { it.onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections)) }
-
-                                                                                        //close alternate connections
-                                                                                        alternateConnections.forEach { it.value.close() }
                                                                                     }
                                                                                 }
                                                                             }
@@ -232,6 +209,25 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         }
     }
 
+    private fun <T : JdsEntity> createEntities(entities: MutableCollection<in T>, entityLookUp: PreparedStatement) {
+        entityLookUp.executeQuery().use {
+            while (it.next()) {
+                val entityId = it.getLong("entity_id")
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_location_version")
+                if (jdsDb.classes.containsKey(entityId)) {
+                    val refType = jdsDb.classes[entityId]!!
+                    val entity = refType.newInstance()
+                    entity.overview.uuid = uuid
+                    entity.overview.uuidLocation = uuidLocation
+                    entity.overview.uuidLocationVersion = uuidLocationVersion
+                    entities.add(entity as T)
+                }
+            }
+        }
+    }
+
     /**
      * @param jdsDb
      * @param entities
@@ -251,15 +247,17 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val parentUUID = it.getString("parent_uuid")
-                val uuid = it.getString("child_uuid")
+                val parentUUID = it.getString("parent_composite_key")
+                val uuid = it.getString("child_composite_key")
                 val fieldId = it.getLong("field_id")
                 val entityId = it.getLong("child_entity_id")
-                optimalEntityLookup(entities, parentUUID).forEach { it.populateObjects(jdsDb, fieldId, entityId, uuid, innerObjects, uuids) }
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_location_version")
+                optimalEntityLookup(entities, parentUUID).forEach { it.populateObjects(jdsDb, fieldId, entityId, uuid, uuidLocation, uuidLocationVersion, parentUUID, innerObjects, uuids) }
             }
         }
         val batches = createProcessingBatches(uuids)
-        batches.forEach { populateInner(jdsDb, null, innerObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, it) }
+        batches.forEach { populateInner(jdsDb, innerObjects, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, it) }
     }
 
     /**
@@ -271,7 +269,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateFloatArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getFloat("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value) }
@@ -288,7 +286,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDoubleArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getDouble("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value) }
@@ -305,11 +303,12 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateLongArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getLong("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach {
-                    it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value) }
+                    it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
+                }
             }
         }
     }
@@ -323,7 +322,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDateTimeArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value) }
@@ -340,7 +339,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateStringArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value) }
@@ -357,7 +356,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateIntegerArraysAndEnums(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getInt("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach {
@@ -373,8 +372,8 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @param uuid
      * @return
      */
-    private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String): Stream<T> {
-        return entities.parallelStream().filter { it.overview.uuid == uuid }
+    private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String): List<T> {
+        return entities.filter { it.overview.compositeKey == uuid }
     }
 
     /**
@@ -407,14 +406,10 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateOverviews(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
-                val dateCreated = it.getTimestamp("date_created")
-                val dateModified = it.getTimestamp("date_modified")
+                val uuid = it.getString("composite_key")
                 val version = it.getLong("version")
                 val live = it.getBoolean("live")
                 optimalEntityLookup(entities, uuid).forEach {
-                    it.overview.dateModified = dateModified.toLocalDateTime()
-                    it.overview.dateCreated = dateCreated.toLocalDateTime()
                     it.overview.version = version
                     it.overview.live = live
                 }
@@ -431,7 +426,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDateTimeAndDate(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach {
@@ -451,7 +446,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateDouble(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.DOUBLE, fieldId, value) }
@@ -468,7 +463,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateBlobs(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getBytes("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.BLOB, fieldId, value) }
@@ -485,7 +480,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateIntegerAndEnum(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach {
@@ -505,7 +500,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateBoolean(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.BOOLEAN, fieldId, value) }
@@ -522,7 +517,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateTimes(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getLocalTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.TIME, fieldId, value) }
@@ -539,7 +534,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateFloat(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.FLOAT, fieldId, value) }
@@ -556,7 +551,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateLongAndDuration(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val fieldId = it.getLong("field_id")
                 val value = it.getObject("value") //primitives can be null
                 optimalEntityLookup(entities, uuid).forEach {
@@ -576,7 +571,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateZonedDateTime(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getZonedDateTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach { it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value) }
@@ -593,7 +588,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     private fun <T : JdsEntity> populateTextMonthDayYearMonthAndPeriod(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
-                val uuid = it.getString("uuid")
+                val uuid = it.getString("composite_key")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid).forEach {
@@ -632,13 +627,13 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
 
             val entityHeirarchy = StringJoiner(",")
             for (id in entityAndChildren)
-                entityHeirarchy.add(id.toString() + "")
+                entityHeirarchy.add(id.toString())
 
 
-            val rawSql = "SELECT DISTINCT entity_uuid FROM jds_entity_instance WHERE entity_id IN (%s)"
-            val rawSql2 = "SELECT DISTINCT entity_uuid FROM jds_entity_instance WHERE entity_uuid IN (%s)"
-            it.prepareStatement(String.format(rawSql, entityHeirarchy)).use { preparedStatement1 ->
-                it.prepareStatement(String.format(rawSql2, quote(filterUUIDs))).use { preparedStatement2 ->
+            val rawSql = "SELECT DISTINCT entity_composite_key FROM jds_entity_instance WHERE entity_id IN ($entityHeirarchy)"
+            val rawSql2 = "SELECT DISTINCT composite_key FROM jds_entity_overview WHERE uuid IN (${quote(filterUUIDs)})"
+            it.prepareStatement(rawSql).use { preparedStatement1 ->
+                it.prepareStatement(rawSql2).use { preparedStatement2 ->
                     if (filterUUIDs.none()) {
                         //if no ids supplied we are looking for all instances of the entity.
                         //load ALL entityVersions in the in heirarchy
@@ -650,7 +645,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(it.getString("entity_uuid"))
+                                filterBatches[batchIndex].add(it.getString("entity_composite_key"))
                                 batchContents++
                             }
                         }
@@ -664,7 +659,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
                                 }
                                 if (batchContents == 0)
                                     filterBatches.add(ArrayList())
-                                filterBatches[batchIndex].add(it.getString("entity_uuid"))
+                                filterBatches[batchIndex].add(it.getString("composite_key"))
                                 batchContents++
                             }
                         }
@@ -675,7 +670,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
     }
 
     private fun quote(filterGuids: Iterable<out String>): String {
-        val list = filterGuids.map { String.format("'%s'", it) }
+        val list = filterGuids.map { "'$it'" }
         return list.joinToString(",")
     }
 
@@ -684,11 +679,10 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
      * @return
      */
     private fun prepareParamaterSequence(size: Int): String {
-        val questionArray = arrayOfNulls<String>(size)
-        for (index in 0 until size) {
-            questionArray[index] = "?"
-        }
-        return questionArray.joinToString(",")
+        val questionArray = StringJoiner(",")
+        for (index in 0 until size)
+            questionArray.add("?")
+        return questionArray.toString()
     }
 
     /**
@@ -704,19 +698,18 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
 
     @Throws(Exception::class)
     override fun call(): MutableList<T> {
-        val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
-        val entityId = annotation.entityId
         val filterBatches = ArrayList(ArrayList<MutableList<String>>())
-        val castCollection = collections
-        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, filterBatches, searchUUIDs)
+        if (referenceType != null) {
+            val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
+            val entityId = annotation.entityId
+            prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, filterBatches, searchUUIDs)
+        }
         val initialisePrimitives = true
         val initialiseDatesAndTimes = true
         val initialiseObjects = true
         filterBatches.forEach {
-            populateInner(jdsDb, referenceType, castCollection, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, it)
+            populateInner(jdsDb, collections, initialisePrimitives, initialiseDatesAndTimes, initialiseObjects, it)
         }
-        if (comparator != null)
-            collections.sortWith(comparator!!)
         return collections
     }
 

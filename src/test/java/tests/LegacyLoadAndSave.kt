@@ -15,7 +15,7 @@ class LegacyLoadAndSave : BaseTestConfig() {
     private fun save() {
         val addressBook = addressBook
         jdsDb.getConnection().use {
-            val jds = JdsSave(jdsDb, setOf(addressBook),it)
+            val jds = JdsSave(jdsDb, setOf(addressBook), it)
             jds.closeConnection = false
             jds.call()
         }
@@ -24,9 +24,8 @@ class LegacyLoadAndSave : BaseTestConfig() {
 
     @Throws(Exception::class)
     private fun load() {
-        val comparator = kotlin.Comparator { o1: Address, o2: Address -> o1.provinceOrState.compareTo(o2.provinceOrState) }
-        val allAddressBooks = JdsLoad(jdsDb, Address::class.java, comparator).call() //load all entityVersions of type AddressBook
-        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, comparator, "primaryAddress").call() //load all entityVersions of type AddressBook with Entity Guids in range
+        val allAddressBooks = JdsLoad(jdsDb, Address::class.java).call() //load all entityVersions of type AddressBook
+        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
         System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
     }

@@ -206,10 +206,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         executeSqlFromFile(connection, "sql/tsql/JdsEntityOverview.sql")
     }
 
-    override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreOldFieldValue.sql")
-    }
-
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/tsql/JdsEntityBinding.sql")
     }

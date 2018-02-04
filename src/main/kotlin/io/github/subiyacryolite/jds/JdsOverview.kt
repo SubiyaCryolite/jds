@@ -17,7 +17,6 @@ import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -26,19 +25,24 @@ import java.util.*
  */
 class JdsOverview : IJdsOverview, Externalizable {
 
-    override var dateCreated: LocalDateTime = LocalDateTime.now()
-    override var dateModified: LocalDateTime = LocalDateTime.now()
     override var entityId: Long = 0
     override var uuid: String = UUID.randomUUID().toString()
+    override var uuidLocation: String = ""
+    override var uuidLocationVersion: Int = 0
+    override var parentUuid: String? = null
+    override var parentCompositeKey: String? = null
     override var version: Long = 1L
     override var live: Boolean = false
+    override val compositeKey: String get() = "$uuid.$uuidLocation.$uuidLocationVersion"
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
         objectOutputStream.writeUTF(uuid)
+        objectOutputStream.writeUTF(uuidLocation)
+        objectOutputStream.writeInt(uuidLocationVersion)
+        objectOutputStream.writeUTF(parentUuid)
+        objectOutputStream.writeUTF(parentCompositeKey)
         objectOutputStream.writeLong(entityId)
-        objectOutputStream.writeObject(dateCreated)
-        objectOutputStream.writeObject(dateModified)
         objectOutputStream.writeBoolean(live)
         objectOutputStream.writeLong(version)
     }
@@ -46,15 +50,17 @@ class JdsOverview : IJdsOverview, Externalizable {
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
         uuid = objectInputStream.readUTF()
+        uuidLocation = objectInputStream.readUTF()
+        uuidLocationVersion = objectInputStream.readInt()
+        parentUuid = objectInputStream.readUTF()
+        parentCompositeKey = objectInputStream.readUTF()
         entityId = objectInputStream.readLong()
-        dateCreated = objectInputStream.readObject() as LocalDateTime
-        dateModified = objectInputStream.readObject() as LocalDateTime
         live = objectInputStream.readBoolean()
         version = objectInputStream.readLong()
     }
 
     override fun toString(): String {
-        return "{ uuid = $uuid, entityId = $entityId, version = $version, live = $live, dateCreated = $dateCreated, dateModified = $dateModified }"
+        return "{ uuid = $uuid, entityId = $entityId, version = $version, live = $live }"
     }
 
     companion object {

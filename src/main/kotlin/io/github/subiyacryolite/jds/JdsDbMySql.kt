@@ -93,121 +93,107 @@ abstract class JdsDbMySql : JdsDb {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsEntityInstance.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_entity_instance.sql")
     }
 
     override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreBoolean.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_boolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreText.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_text.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_date_time.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_zoned_date_time.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_integer.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_float.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_double.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreLong.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_long.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_text_array.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_date_time_array.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_integer_array.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_float_array.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_double_array.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_long_array.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefEntity.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_entity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefEnum.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_enum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefField.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_field.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefFieldType.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_field_type.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityField.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_entity_field.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityEnum.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_entity_enum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsEntityOverview.sql")
-    }
-
-    override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreOldFieldValue.sql")
-        //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_integer          ON jds_store_old_field_value (uuid, field_id, sequence, integer_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_float            ON jds_store_old_field_value (uuid, field_id, sequence, float_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_double           ON jds_store_old_field_value (uuid, field_id, sequence, double_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_long             ON jds_store_old_field_value (uuid, field_id, sequence, long_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_date_time_value        ON jds_store_old_field_value (uuid, field_id, sequence, date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_time             ON jds_store_old_field_value (uuid, field_id, sequence, time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_boolean          ON jds_store_old_field_value (uuid, field_id, sequence, boolean_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_zoned_date_time  ON jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_blob_text        ON jds_store_old_field_value (uuid, field_id, sequence)")
+        executeSqlFromFile(connection, "sql/mysql/jds_entity_overview.sql")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_entity_binding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreTime.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_time.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_store_blob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/mysql/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/mysql/jds_ref_entity_inheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
@@ -233,24 +219,24 @@ abstract class JdsDbMySql : JdsDb {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreEntityOverviewV3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreEntityInheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefField.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreBlob.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreBoolean.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreTime.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreText.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreLong.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreInteger.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreFloat.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreDouble.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreDateTime.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcStoreZonedDateTime.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefEntityField.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefEntityEnum.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefEntity.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefEnum.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/ProcRefEntityInheritance.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_entity_inheritance.sql")
+            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_field.sql")
+            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_blob.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_boolean.sql")
+            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_time.sql")
+            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_text.sql")
+            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_long.sql")
+            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_integer.sql")
+            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_float.sql")
+            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_double.sql")
+            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_date_time.sql")
+            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_zoned_date_time.sql")
+            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_entity_field.sql")
+            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_entity_enum.sql")
+            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_entity.sql")
+            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_enum.sql")
+            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_bind_parent_to_child.sql")
             else -> {
             }
         }

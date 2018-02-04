@@ -1,9 +1,10 @@
 CREATE TABLE jds_entity_overview
 (
-  uuid          TEXT,
-  date_created  TIMESTAMP,
-  date_modified TIMESTAMP,
-  version       BIGINT,
-  live          BOOLEAN,
-  PRIMARY KEY (uuid)
+  composite_key         TEXT,
+  uuid                  TEXT,
+  uuid_location         TEXT,
+  uuid_location_version INTEGER,
+  version               BIGINT,
+  live                  BOOLEAN,
+  PRIMARY KEY (composite_key)
 );

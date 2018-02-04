@@ -186,21 +186,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/JdsEntityOverview.sql")
     }
 
-    override fun createRefOldFieldValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreOldFieldValue.sql")
-        //allow multiple leaves you open to SLQ injection. Thus manually add these indexes here unless you want to add more files
-        //oracle jdbc hates semi-colons
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_integer          ON jds_store_old_field_value (uuid, field_id, sequence, integer_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_float            ON jds_store_old_field_value (uuid, field_id, sequence, float_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_double           ON jds_store_old_field_value (uuid, field_id, sequence, double_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_long             ON jds_store_old_field_value (uuid, field_id, sequence, long_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_date_time_value  ON jds_store_old_field_value (uuid, field_id, sequence, date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_time             ON jds_store_old_field_value (uuid, field_id, sequence, time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_boolean          ON jds_store_old_field_value (uuid, field_id, sequence, boolean_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_zoned_date_time  ON jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value)")
-        executeSqlFromString(connection, "CREATE INDEX indx_jds_old_blob_text        ON jds_store_old_field_value (uuid, field_id, sequence)")
-    }
-
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/JdsEntityBinding.sql")
     }

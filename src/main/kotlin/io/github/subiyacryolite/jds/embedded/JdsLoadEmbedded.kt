@@ -50,18 +50,15 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         //Overviews
         //==============================================
-        entity.overview.dateCreated = embeddedObject.o.dc
-        entity.overview.dateModified = embeddedObject.o.dm
-        entity.overview.entityId = embeddedObject.o.id
+        entity.overview.entityId = embeddedObject.o.entityId
         entity.overview.uuid = embeddedObject.o.uuid
-        entity.overview.live = embeddedObject.o.l
-        entity.overview.version = embeddedObject.o.v
+        entity.overview.live = embeddedObject.o.live
+        entity.overview.version = embeddedObject.o.version
         //==============================================
         //PRIMITIVES :: Key-Value
         //==============================================
         embeddedObject.i.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
                 JdsFieldType.INT -> entity.populateProperties(JdsFieldType.INT, it.k, it.v)
                 JdsFieldType.ENUM -> entity.populateProperties(JdsFieldType.ENUM, it.k, it.v)
                 JdsFieldType.ENUM_COLLECTION -> entity.populateProperties(JdsFieldType.ENUM_COLLECTION, it.k, it.v)
@@ -69,8 +66,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             }
         }
         embeddedObject.s.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
                 JdsFieldType.STRING -> entity.populateProperties(JdsFieldType.STRING, it.k, it.v)
                 JdsFieldType.STRING_COLLECTION -> entity.populateProperties(JdsFieldType.STRING_COLLECTION, it.k, it.v)
                 JdsFieldType.MONTH_DAY -> entity.populateProperties(JdsFieldType.MONTH_DAY, it.k, it.v)
@@ -79,22 +75,19 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             }
         }
         embeddedObject.f.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
                 JdsFieldType.FLOAT -> entity.populateProperties(JdsFieldType.FLOAT, it.k, it.v)
                 JdsFieldType.FLOAT_COLLECTION -> entity.populateProperties(JdsFieldType.FLOAT_COLLECTION, it.k, it.v)
             }
         }
         embeddedObject.d.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
                 JdsFieldType.DOUBLE -> entity.populateProperties(JdsFieldType.DOUBLE, it.k, it.v)
                 JdsFieldType.DOUBLE_COLLECTION -> entity.populateProperties(JdsFieldType.DOUBLE_COLLECTION, it.k, it.v)
             }
         }
         embeddedObject.l.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
                 JdsFieldType.LONG -> entity.populateProperties(JdsFieldType.LONG, it.k, it.v)
                 JdsFieldType.LONG_COLLECTION -> entity.populateProperties(JdsFieldType.LONG_COLLECTION, it.k, it.v)
                 JdsFieldType.ZONED_DATE_TIME -> entity.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.k, it.v)
@@ -107,13 +100,12 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //Dates & Time :: Key-Value
         //==============================================
         embeddedObject.ldt.forEach {
-            val fieldType = jdsDb.typeOfField(it.k)
-            when (fieldType) {
+            when (jdsDb.typeOfField(it.k)) {
+                JdsFieldType.DATE -> entity.populateProperties(JdsFieldType.DATE, it.k, it.v)
                 JdsFieldType.DATE_TIME -> entity.populateProperties(JdsFieldType.DATE_TIME, it.k, it.v)
                 JdsFieldType.DATE_TIME_COLLECTION -> entity.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, it.k, it.v)
             }
         }
-        embeddedObject.ld.forEach { entity.populateProperties(JdsFieldType.DATE, it.k, it.v) }
         //==============================================
         //BLOB :: Key-Value
         //==============================================
@@ -125,8 +117,8 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
         innerObjects.forEach { jdsEntity ->
             //populate the inner objects
-            embeddedObject.eo.filter { it.o.uuid == jdsEntity.overview.uuid }.forEach {
-                entity.populateObjects(jdsDb, it.o.fid, it.o.id, it.o.uuid, innerObjects, uuids)
+            embeddedObject.eo.filter { it.o.compositeKey == jdsEntity.overview.compositeKey }.forEach {
+                entity.populateObjects(jdsDb, it.o.fieldId, it.o.entityId, it.o.uuid, it.o.uuidLocation, it.o.uuidLocationVersion, entity.overview.uuid, innerObjects, uuids)
                 populate(outerIndex, innerIndex, jdsEntity, it)
             }
         }

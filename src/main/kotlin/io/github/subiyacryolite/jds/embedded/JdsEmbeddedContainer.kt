@@ -16,30 +16,62 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import java.sql.Timestamp
-import java.time.LocalDateTime
-
-//blobs
-class JdsBlobValues(val id: Long, val v: ByteArray?)
-
-//primitives
-class JdsBooleanValues(val k: Long, val v: Int?)
-
-class JdsDoubleValues(val k: Long, val v: Double?)
-class JdsIntegerEnumValues(val k: Long, val v: Int?)
-class JdsLongValues(val k: Long, val v: Long?)
-class JdsStringValues(val k: Long, val v: String?)
-class JdsFloatValues(val k: Long, val v: Float?)
-//time constructs
-class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
-
-class JdsLocalDateValues(val k: Long, val v: Timestamp?)
-//overviews
-class JdsEntityOverview(val uuid: String, val id: Long, val fid: Long?, val l: Boolean, val v: Long, val dc: LocalDateTime, val dm: LocalDateTime)
-
-class JdsEntityBinding(val p: String, val c: String, val f: Long, val i: Long)
 
 /**
- * @param entities
+ * Class used to store blob values in a portable manner
+ */
+class JdsBlobValues(val id: Long, val v: ByteArray?)
+
+/**
+ * Class used to store [java.lang.Boolean] values in a portable manner
+ */
+class JdsBooleanValues(val k: Long, val v: Int?)
+
+/**
+ * Class used to store [java.lang.Double] in a portable manner
+ */
+class JdsDoubleValues(val k: Long, val v: Double?)
+
+/**
+ * Class used to store [java.lang.Integer] and [java.lang.Enum] values in a portable manner
+ */
+class JdsIntegerEnumValues(val k: Long, val v: Int?)
+
+/**
+ * Class used to store [java.lang.Long], [java.time.ZonedDateTime],[java.time.LocalTime] and [java.time.Duration] values in a portable manner
+ */
+class JdsLongValues(val k: Long, val v: Long?)
+
+/**
+ * Class used to store [java.lang.String], [java.time.YearMonth],[java.time.MonthDay] and [java.time.Period] values in a portable manner
+ */
+class JdsStringValues(val k: Long, val v: String?)
+
+/**
+ * Class used to store [java.lang.Float] values in a portable manner
+ */
+class JdsFloatValues(val k: Long, val v: Float?)
+
+/**
+ * Class used to store [java.time.LocalDate] and [java.time.LocalDateTime] values in a portable manner based on [java.sql.Timestamp]s
+ */
+class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
+
+/**
+ *
+ * @param compositeKey composite key
+ * @param uuid uuid
+ * @param uuidLocation uuid location
+ * @param uuidLocationVersion uuid location version
+ * @param entityId entity id
+ * @param fieldId field id
+ * @param live live
+ * @param version version
+ */
+class JdsEntityOverview(val compositeKey: String, val uuid: String, val uuidLocation: String, val uuidLocationVersion: Int, val entityId: Long, val fieldId: Long?, val live: Boolean, val version: Long)
+
+/**
+ * @param entities a collection of [JdsEntity] objects to store in a portable manner
  */
 class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
     /**
@@ -50,7 +82,7 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
     init {
         entities.forEach {
             if (it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-                e.add(JdsEmbeddedObject(it,null))
+                e.add(JdsEmbeddedObject(it, null))
             } else {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
             }

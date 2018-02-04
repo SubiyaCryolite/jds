@@ -41,12 +41,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
 
-
-    /**
-     * A value indicating whether JDS should log every write in the system
-     */
-    var isLoggingEdits: Boolean = false
-
     /**
      * A value indicating whether JDS should print internal log information
      */
@@ -56,11 +50,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * Indicate whether JDS is persisting to the primary data tables
      */
     var isWritingToPrimaryDataTables = true
-
-    /**
-     * Indicate whether the log table will have unique entries or will be append only
-     */
-    var isLoggingAppendOnly = false
 
     /**
      * Indicate if JDS should write data to overview fields
@@ -117,7 +106,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_OLD_FIELD_VALUES)
     }
 
     val isOracleDb: Boolean
@@ -195,7 +183,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.BIND_ENTITY_FIELDS -> createBindEntityFields(connection)
             JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
             JdsComponent.STORE_ENTITY_OVERVIEW -> createRefEntityOverview(connection)
-            JdsComponent.STORE_OLD_FIELD_VALUES -> createRefOldFieldValues(connection)
             JdsComponent.STORE_ENTITY_BINDING -> createStoreEntityBinding(connection)
             else -> {
             }
@@ -522,12 +509,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected abstract fun createRefEntityOverview(connection: Connection)
 
     /**
-     * Database specific SQL used to create the schema that stores old field
-     * values of every type
-     */
-    protected abstract fun createRefOldFieldValues(connection: Connection)
-
-    /**
      * Database specific SQL used to create the schema that stores entity to
      * entity bindings
      */
@@ -544,20 +525,17 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param parentEntities a collection of parent classes
      * @param entityCode     the value representing the entity
      */
-    private fun mapParentEntities(connection: Connection, parentEntities: List<Long>, entityCode: Long) {
-        if (parentEntities.isEmpty()) return
-        try {
-            (if (supportsStatements) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
-                for (parentEntity in parentEntities) {
-                    statement.setLong(1, parentEntity)
-                    statement.setLong(2, entityCode)
-                    statement.addBatch()
-                }
-                statement.executeBatch()
+    private fun mapParentEntities(connection: Connection, parentEntities: List<Long>, entityCode: Long) = try {
+        (if (supportsStatements) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
+            for (parentEntity in parentEntities) {
+                statement.setLong(1, parentEntity)
+                statement.setLong(2, entityCode)
+                statement.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+            statement.executeBatch()
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
@@ -567,8 +545,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param entityId   the entity's id
      * @param entityName the entity's name
      */
-    private fun mapClassName(connection: Connection, entityId: Long, entityName: String) = try {
-        (if (supportsStatements) connection.prepareCall(mapClassName()) else connection.prepareStatement(mapClassName())).use { statement ->
+    private fun populateRefEntity(connection: Connection, entityId: Long, entityName: String) = try {
+        (if (supportsStatements) connection.prepareCall(populateRefEntity()) else connection.prepareStatement(populateRefEntity())).use { statement ->
             statement.setLong(1, entityId)
             statement.setString(2, entityName)
             statement.executeUpdate()
@@ -599,7 +577,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                 false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
             if (!classes.containsKey(entityAnnotation.entityId)) {
-                classes.put(entityAnnotation.entityId, entity)
+                classes[entityAnnotation.entityId] = entity
                 //do the thing
                 try {
                     getConnection().use { connection ->
@@ -607,9 +585,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity = entity.newInstance()
                         JdsExtensions.determineParents(entity, parentEntities)
-                        mapClassName(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
-                        jdsEntity.mapClassFields(this, connection, jdsEntity.overview.entityId)
-                        jdsEntity.mapClassEnums(this, connection, jdsEntity.overview.entityId)
+                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
+                        jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
+                        jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         if (isPrintingOutput)
@@ -728,7 +706,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveOverview(): String {
-        return "{call proc_store_entity_overview_v3(:uuid,:dateCreated,:dateModified,:live,:version)}"
+        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :version)}"
     }
 
     /**
@@ -743,7 +721,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to bind fieldIds to entityVersions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapClassFields(): String {
+    internal open fun populateRefEntityField(): String {
         return "{call proc_ref_entity_field(?, ?)}"
     }
 
@@ -751,7 +729,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to map field names and descriptions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapFieldName(): String {
+    internal open fun populateRefField(): String {
         return "{call proc_ref_field(?, ?, ?, ?)}"
     }
 
@@ -759,7 +737,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to bind enumProperties to entityVersions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapClassEnumsImplementation(): String {
+    internal open fun populateRefEntityEnum(): String {
         return "{call proc_ref_entity_enum(?,?)}"
     }
 
@@ -775,7 +753,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to map class names
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapClassName(): String {
+    internal open fun populateRefEntity(): String {
         return "{call proc_ref_entity(?,?)}"
     }
 
@@ -783,7 +761,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to save reference enum values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapEnumValues(): String {
+    internal open fun populateRefEnum(): String {
         return "{call proc_ref_enum(?,?,?)}"
     }
 
@@ -801,122 +779,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected val oldStringValue = when (isOracleDb) {
         true -> "dbms_lob.substr(string_value, dbms_lob.getlength(string_value), 1)"
         else -> "string_value"
-    }
-
-    /**
-     * SQL executed in order to log String values
-     * @return SQL executed in order to log String values
-     */
-    internal open fun saveOldStringValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, string_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND $oldStringValue = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Double values
-     * @return SQL executed in order to log Double values
-     */
-    internal open fun saveOldDoubleValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, double_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND double_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Long values
-     * @return SQL executed in order to log Long values
-     */
-    internal open fun saveOldLongValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, long_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND long_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Integer values
-     * @return SQL executed in order to log Integer values
-     */
-    internal open fun saveOldIntegerValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, integer_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND integer_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Float values
-     * @return SQL executed in order to log Float values
-     */
-    internal open fun saveOldFloatValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, float_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND float_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log DateTime values
-     * @return SQL executed in order to log DateTime values
-     */
-    internal open fun saveOldDateTimeValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, date_time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND date_time_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log ZonedDateTime values
-     * @return SQL executed in order to log ZonedDateTime values
-     */
-    internal open fun saveOldZonedDateTimeValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, zoned_date_time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND zoned_date_time_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Time values
-     * @return SQL executed in order to log Time values
-     */
-    internal open fun saveOldTimeValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, time_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND time_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Boolean values
-     * @return SQL executed in order to log Boolean values
-     */
-    internal open fun saveOldBooleanValues(): String {
-        return when (isLoggingAppendOnly) {
-            true -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) VALUES(?, ?, ?, ?)"
-            false -> "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, boolean_value) $logSqlSource " +
-                    "WHERE NOT EXISTS(SELECT 1 FROM jds_store_old_field_value WHERE uuid = ? AND field_id = ? AND sequence = ? AND boolean_value = ?)"
-        }
-    }
-
-    /**
-     * SQL executed in order to log Blob values
-     * @return SQL executed in order to log Blob values
-     */
-    internal open fun saveOldBlobValues(): String {
-        return "INSERT INTO jds_store_old_field_value (uuid, field_id, sequence, blob_value) VALUES(?, ?, ?, ?)"
     }
 
     /**

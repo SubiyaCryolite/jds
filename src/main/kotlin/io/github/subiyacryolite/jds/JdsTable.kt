@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
+import io.github.subiyacryolite.jds.enums.JdsTableUniqueFlag
 import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
@@ -38,13 +39,15 @@ open class JdsTable() : Serializable {
     var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
+    var uniqueBy = JdsTableUniqueFlag.COMPOSITE_KEY
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
-    private val insertColumns = StringJoiner(",")
-    private val insertParameters = StringJoiner(",")
     private var targetConnection = 0
-    private var deleteSql = ""
+    private var deleteByCompositeKeySql = ""
+    private var deleteByUuidSql = ""
+    private var deleteByUuidLocationSql = ""
+    private var deleteByParentUuidSql = ""
     private var insertSql = ""
     private var generatedOrUpdatedSchema = false
 
@@ -91,18 +94,16 @@ open class JdsTable() : Serializable {
     }
 
     /**
-     * If you are creating a JdsTable in memory
-     * Register fieldIds here
-     * @param fieldId
+     * Method used to register [JdsField]s that shall be persisted to [JdsTable]s
+     * @param fieldId a numeric value corresponding to a [JdsField] which's value shall be persisted to this[JdsTable]
      */
     fun registerField(fieldId: Long) {
         fields.add(fieldId)
     }
 
     /**
-     * If you are creating a JdsTable in memory
-     * Register fieldIds here
-     * @param jdsField
+     * Method used to register [JdsField]s that shall be persisted to [JdsTable]s
+     * @param jdsField a [JdsField] which's value shall be persisted to this[JdsTable]
      */
     fun registerField(jdsField: JdsField) {
         registerField(jdsField.id)
@@ -111,33 +112,42 @@ open class JdsTable() : Serializable {
     /**
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
-     * @param alternateConnections
-     * @param entity an entity that may have properties of interest
-     * @param eventArguments event arguments that will hold batched SQL queries for execution
+     * @param alternateConnections a [ConcurrentMap] of holding a pool of alternate [Connections] to write to
+     * @param entity a [JdsEntity] that may have [JdsField]s persisted to this [JdsTable]
+     * @param eventArguments [EventArguments] that will hold batched SQL queries for execution
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
     fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity, eventArguments: EventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
-
-        val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
-            true -> connection
-            else -> {
-                if (!alternateConnections.containsKey(targetConnection))
-                    alternateConnections[targetConnection] = jdsDb.getConnection(targetConnection)
-                alternateConnections[targetConnection]!!
-            }
-        }
-
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            if (uniqueEntries)
-                deleteRecordInternal(eventArguments, iConnection, entity.overview.uuid)
+            val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
+                true -> connection
+                else -> {
+                    if (!alternateConnections.containsKey(targetConnection))
+                        alternateConnections[targetConnection] = jdsDb.getConnection(targetConnection)
+                    alternateConnections[targetConnection]!!
+                }
+            }
+
+            if (uniqueEntries) {
+                when (uniqueBy) {
+                    JdsTableUniqueFlag.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
+                    JdsTableUniqueFlag.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
+                    JdsTableUniqueFlag.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
+                    JdsTableUniqueFlag.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
+                }
+            }
 
             val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
-            insertStatement.setString(1, entity.overview.uuid)
-            insertStatement.setLong(2, entity.overview.entityId)
+            insertStatement.setString(1, entity.overview.compositeKey)
+            insertStatement.setString(2, entity.overview.uuid)
+            insertStatement.setString(3, entity.overview.uuidLocation)
+            insertStatement.setInt(4, entity.overview.uuidLocationVersion)
+            insertStatement.setString(5, entity.overview.parentUuid)
+            insertStatement.setLong(6, entity.overview.entityId)
             //order will be maintained by linked list
             columnNames.forEachIndexed { columnIndex, columnName ->
                 val field = columnToFieldMap[columnName]!!
@@ -146,9 +156,9 @@ open class JdsTable() : Serializable {
                     false -> entity.getReportAtomicValue(field.id, 0)
                 }
                 when (value) {
-                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 3, value, jdsDb)
-                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 3, value, jdsDb)
-                    else -> insertStatement.setObject(columnIndex + 3, value ?: null)
+                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 7, value, jdsDb)
+                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 7, value, jdsDb)
+                    else -> insertStatement.setObject(columnIndex + 7, value ?: null)
                 }
             }
             insertStatement.addBatch()
@@ -157,7 +167,7 @@ open class JdsTable() : Serializable {
 
     /**
      * Empty an entire table
-     * @param connection
+     * @param connection the [Connection] to use for this operation
      */
     fun truncateTable(connection: Connection) {
         val preparedStatement = connection.prepareStatement("TRUNCATE TABLE $name")
@@ -165,31 +175,110 @@ open class JdsTable() : Serializable {
     }
 
     /**
-     * @param jdsDb
-     * @param eventArguments
-     * @param connection
-     * @param entity
+     * @param jdsDb The [JdsDb] instance to use for this operation
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param entity the uuid to target for record deletion
      */
-    fun deleteRecord(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
+    fun deleteRecordById(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied)
-            deleteRecordInternal(eventArguments, connection, entity.overview.uuid)
+            deleteRecordByIdInternal(eventArguments, connection, entity.overview.uuid)
     }
 
     /**
-     * @param eventArguments
-     * @param connection
-     * @param uuid
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        //if unique delete old entries
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteSql)
+    private fun deleteRecordByIdInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByCompositeKeySql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }
 
     /**
-     * @param jdsDb an instance of JdsDb, used determine SQL types based on implementation
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param parentId the uuid to target for record deletion
+     */
+    fun deleteRecordByParentId(eventArguments: EventArguments, connection: Connection, parentId: String) {
+        deleteRecordByParentUuidInternal(eventArguments, connection, parentId)
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param uuid the uuid to target for record deletion
+     */
+    private fun deleteRecordByParentUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByParentUuidSql)
+        deleteStatement.setString(1, uuid)
+        deleteStatement.addBatch()
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param parentId the uuid to target for record deletion
+     */
+    fun deleteRecordByUuidLocation(eventArguments: EventArguments, connection: Connection, parentId: String) {
+        deleteRecordByUuidLocationInternal(eventArguments, connection, parentId)
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param uuid the uuid to target for record deletion
+     */
+    private fun deleteRecordByUuidLocationInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidLocationSql)
+        deleteStatement.setString(1, uuid)
+        deleteStatement.addBatch()
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param parentId the uuid to target for record deletion
+     */
+    fun deleteRecordByCompositeKey(eventArguments: EventArguments, connection: Connection, parentId: String) {
+        deleteRecordByCompositeKeyInternal(eventArguments, connection, parentId)
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param uuid the uuid to target for record deletion
+     */
+    private fun deleteRecordByCompositeKeyInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByCompositeKeySql)
+        deleteStatement.setString(1, uuid)
+        deleteStatement.addBatch()
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param parentId the uuid to target for record deletion
+     */
+    fun deleteRecordByUuid(eventArguments: EventArguments, connection: Connection, parentId: String) {
+        deleteRecordByUuidInternal(eventArguments, connection, parentId)
+    }
+
+    /**
+     * @param eventArguments the [EventArguments] to use for this operation
+     * @param connection the [Connection] to use for this operation
+     * @param uuid the uuid to target for record deletion
+     */
+    private fun deleteRecordByUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidSql)
+        deleteStatement.setString(1, uuid)
+        deleteStatement.addBatch()
+    }
+
+    /**
+     * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
      * @param pool a shared connection pool to quickly query the target schemas
      */
     internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) {
@@ -202,8 +291,6 @@ open class JdsTable() : Serializable {
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val createTableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
-        val primaryKeyColumn = JdsSchema.getPrimaryKeyColumn()
-        val entityIdColumn = JdsSchema.getEntityIdColumn()
 
         if (!jdsDb.doesTableExist(connection, name))
             connection.prepareStatement(createTableSql).use {
@@ -212,9 +299,20 @@ open class JdsTable() : Serializable {
                     println("Created $name")
             }
 
+        val insertColumns = StringJoiner(",")
+        val insertParameters = StringJoiner(",")
+
         //mandatory primary key
-        insertColumns.add(primaryKeyColumn)
-        insertColumns.add(entityIdColumn)
+        insertColumns.add(JdsSchema.compositeKeyColumn)
+        insertColumns.add(JdsSchema.uuidColumn)
+        insertColumns.add(JdsSchema.uuidLocationColumn)
+        insertColumns.add(JdsSchema.uuidLocationVersionColumn)
+        insertColumns.add(JdsSchema.parentUuidColumn)
+        insertColumns.add(JdsSchema.entityIdColumn)
+        insertParameters.add("?")
+        insertParameters.add("?")
+        insertParameters.add("?")
+        insertParameters.add("?")
         insertParameters.add("?")
         insertParameters.add("?")
 
@@ -262,8 +360,12 @@ open class JdsTable() : Serializable {
             }
         }
 
+        deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} = ?"
+        deleteByParentUuidSql = "DELETE FROM $name WHERE ${JdsSchema.parentUuidColumn} = ?"
+        deleteByUuidSql = "DELETE FROM $name WHERE ${JdsSchema.uuidColumn} = ?"
+        deleteByUuidLocationSql = "DELETE FROM $name WHERE ${JdsSchema.uuidLocationColumn} = ?"
 
-        deleteSql = "DELETE FROM $name WHERE $primaryKeyColumn = ?"
+
         insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
 
         generatedOrUpdatedSchema = true
@@ -271,8 +373,8 @@ open class JdsTable() : Serializable {
 
     /**
      * Determine if this entity should have its properties persisted to this table
-     * @param jdsDb an instance of JdsDb, used to lookup mapped classes
-     * @param entity an entity that may have properties of interest
+     * @param jdsDb an instance of [JdsDb], used to lookup mapped classes
+     * @param entity a [JdsEntity] that may have [JdsField]s written to this table
      */
     private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
 

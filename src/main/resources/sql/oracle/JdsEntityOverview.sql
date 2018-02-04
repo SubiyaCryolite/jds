@@ -1,8 +1,9 @@
 CREATE TABLE jds_entity_overview (
-  uuid          NVARCHAR2(96),
-  date_created  TIMESTAMP,
-  date_modified TIMESTAMP,
-  version       NUMBER(19),
-  live          NUMBER(3),
-  PRIMARY KEY (uuid)
+  composite_key          NVARCHAR2(195),
+  uuid                   NVARCHAR2(96),
+  uuid_location          NVARCHAR2(56),
+  uuid_location_version NUMBER(10),
+  version                NUMBER(19),
+  live                   NUMBER(3),
+  PRIMARY KEY (composite_key)
 )

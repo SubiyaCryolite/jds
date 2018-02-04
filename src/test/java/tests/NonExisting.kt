@@ -10,7 +10,7 @@ class NonExisting : BaseTestConfig() {
 
     @Throws(Exception::class)
     fun loadNonExisting() {
-        val load = JdsLoad(jdsDb, Example::class.java, "DOES_NOT_EXIST")
+        val load = JdsLoad(jdsDb, Example::class.java, setOf("DOES_NOT_EXIST"))
         val process = Executors.newSingleThreadExecutor().submit(load)
         while (!process.isDone)
             Thread.sleep(16)

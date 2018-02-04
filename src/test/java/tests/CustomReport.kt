@@ -43,10 +43,10 @@ class CustomReport : BaseTestConfig() {
         val jdsSave1 = JdsSave(jdsDb, collection)
         jdsSave1.call()
 
-        val jdsSave2 = JdsSave(jdsDb, setOf(login1, login2))
+        val jdsSave2 = JdsSave(jdsDb, listOf(login1, login2))
         jdsSave2.call()
 
-        val jdsSave3 = JdsSave(jdsDb, setOf(addressBook))
+        val jdsSave3 = JdsSave(jdsDb, listOf(addressBook))
         jdsSave3.call()
 
         val jdsSave4 = JdsSave(jdsDb, inheritanceCollection)

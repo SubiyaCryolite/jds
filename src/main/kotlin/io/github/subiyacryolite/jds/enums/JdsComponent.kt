@@ -37,7 +37,6 @@ enum class JdsComponent(val component: String, val alias: String) {
     STORE_DATE_TIME("jds_store_date_time", "sdt"),
     STORE_ZONED_DATE_TIME("jds_store_zoned_date_time", "szdt"),
     STORE_TIME("jds_store_time", "stt"),
-    STORE_OLD_FIELD_VALUES("jds_store_old_field_value", "sof"),
     STORE_ENTITY_OVERVIEW("jds_entity_overview", "eo"),
     STORE_ENTITY_BINDING("jds_entity_binding", "eb"),
     STORE_BLOB("jds_store_blob", "sb"),

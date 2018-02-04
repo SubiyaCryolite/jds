@@ -26,7 +26,6 @@ abstract class BaseTestConfig {
         get() {
             val primaryAddress = Address()
             primaryAddress.overview.uuid = "primaryAddress"
-            primaryAddress.overview.dateModified = LocalDateTime.of(2012, Month.APRIL, 12, 13, 49)
             primaryAddress.area = "Norte Broad"
             primaryAddress.city = "Livingstone"
             primaryAddress.country = "Zambia"
@@ -39,7 +38,6 @@ abstract class BaseTestConfig {
 
             val secondAddress = Address()
             secondAddress.overview.uuid = "secondAddress"
-            secondAddress.overview.dateModified = LocalDateTime.of(2009, Month.OCTOBER, 16, 3, 34)
             secondAddress.area = "Roma"
             secondAddress.city = "Lusaka"
             secondAddress.country = "Zambia"
@@ -52,7 +50,6 @@ abstract class BaseTestConfig {
 
             val thirdAddress = Address()
             thirdAddress.overview.uuid = "thirdAddress"
-            thirdAddress.overview.dateModified = LocalDateTime.of(2007, Month.JULY, 4, 5, 10)
             thirdAddress.area = "Riverdale"
             thirdAddress.city = "Ndola"
             thirdAddress.country = "Zambia"
@@ -172,13 +169,13 @@ abstract class BaseTestConfig {
 
     protected val objectMapper: ObjectMapper
         get() {
-            val _objectMapper = ObjectMapper()
-            _objectMapper.registerModule(JavaTimeModule())
-            _objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            _objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
-            _objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
-            _objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-            return _objectMapper;
+            val objectMapper = ObjectMapper()
+            objectMapper.registerModule(JavaTimeModule())
+            objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
+            objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            return objectMapper;
         }
 
     private fun initialiseJdsClasses() {
@@ -194,10 +191,8 @@ abstract class BaseTestConfig {
 
     private fun initJds() {
         jdsDb.init()
-        jdsDb.isLoggingEdits = true
-        jdsDb.isLoggingAppendOnly = false
         initialiseJdsClasses()
-        System.out.printf("=========== %s ===========\n", jdsDb.implementation)
+        println("=========== ${jdsDb.implementation} ===========\n")
     }
 
     fun initialiseSqLiteBackend() {

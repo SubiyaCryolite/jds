@@ -16,54 +16,60 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsEntity
 
 /**
- *
+ * Class used to represent [JdsEntity] objects in a portable manner
  * @param entity
  */
 class JdsEmbeddedObject(entity: JdsEntity, fieldId: Long?) {
+
     /**
-     * Blob Values
+     * Used to store Byte[] values in a portable manner
      */
     val bl: MutableList<JdsBlobValues> = ArrayList()
+
     /**
-     * Boolean values
+     * Used to store [java.lang.Boolean] values in a portable manner
      */
     val b: MutableList<JdsBooleanValues> = ArrayList()
+
     /**
-     * Local Date Time Values
+     * Used to store [java.time.LocalDate] and [java.time.LocalDateTime] values in a portable manner based on [java.sql.Timestamp]s
      */
     val ldt: MutableList<JdsLocalDateTimeValues> = ArrayList()
+
     /**
-     * Double values
+     * Used to store [java.lang.Double] in a portable manner
      */
     val d: MutableList<JdsDoubleValues> = ArrayList()
+
     /**
-     * Integer values
+     *  Used to store [java.lang.Integer] and [java.lang.Enum] values in a portable manner
      */
     val i: MutableList<JdsIntegerEnumValues> = ArrayList()
+
     /**
-     * Long values
+     *  Class used to store long, [java.time.ZonedDateTime],[java.time.LocalTime] and [java.time.Duration] values in a portable manner
      */
     val l: MutableList<JdsLongValues> = ArrayList()
+
     /**
-     * String values
+     * Used to store [java.lang.String], [java.time.YearMonth],[java.time.MonthDay] and [java.time.Period] values in a portable manner
      */
     val s: MutableList<JdsStringValues> = ArrayList()
+
     /**
-     * Float values
+     * Used to store [java.lang.Float] values in a portable manner
      */
     val f: MutableList<JdsFloatValues> = ArrayList()
-    /**
-     * Local Date values
-     */
-    val ld: MutableList<JdsLocalDateValues> = ArrayList()
+
     /**
      * Embedded objects
      */
     val eo: MutableList<JdsEmbeddedObject> = ArrayList()
+
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.uuid, entity.overview.entityId, fieldId, entity.overview.live, entity.overview.version, entity.overview.dateCreated, entity.overview.dateModified)
+    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.compositeKey, entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion, entity.overview.entityId, fieldId, entity.overview.live, entity.overview.version)
 
     init {
         entity.assign(this);
