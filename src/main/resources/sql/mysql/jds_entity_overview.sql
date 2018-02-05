@@ -5,8 +5,10 @@ CREATE TABLE jds_entity_overview
   uuid_location         VARCHAR(56),
   uuid_location_version INTEGER,
   entity_id             BIGINT,
-  version               BIGINT,
+  entity_version        BIGINT,
   live                  BOOLEAN,
-  FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id) ON DELETE CASCADE,
+  last_edit        DATETIME,
+  FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
+    ON DELETE CASCADE,
   PRIMARY KEY (composite_key)
 );
