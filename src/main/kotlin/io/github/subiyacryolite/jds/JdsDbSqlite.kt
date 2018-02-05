@@ -203,7 +203,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveOverview(): String {
-        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_location_version, entity_id, live, version) VALUES(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :version)"
+        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_location_version, entity_id, live, entity_version, last_edit) VALUES(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :entityVersion, :lastEdit)"
     }
 
     override fun saveOverviewInheritance(): String {

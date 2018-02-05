@@ -274,7 +274,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             saveOverview.setInt("uuidLocationVersion", it.overview.uuidLocationVersion)
             saveOverview.setLong("entityId", it.overview.entityId)
             saveOverview.setBoolean("live", it.overview.live)
-            saveOverview.setLong("version", it.overview.version) //always update date modified!!!
+            saveOverview.setTimestamp("lastEdit", Timestamp.valueOf(it.overview.lastEditDate))
+            saveOverview.setLong("entityVersion", it.overview.version) //always update date modified!!!
             saveOverview.addBatch()
             //Entity Inheritance
             saveOverviewInheritance.setString("uuid", it.overview.compositeKey)

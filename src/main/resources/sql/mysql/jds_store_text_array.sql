@@ -1,6 +1,6 @@
 CREATE TABLE jds_store_text_array (
-  field_id      BIGINT,
   composite_key VARCHAR(195),
+  field_id      BIGINT,
   sequence      INT,
   value         TEXT,
   PRIMARY KEY (field_id, composite_key, sequence),

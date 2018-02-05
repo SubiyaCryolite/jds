@@ -52,8 +52,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
                     entity.onDelete(args)
-                jdsDb.tables.forEach { it.deleteRecordById(jdsDb, args, connection, entity) }
-                jdsDb.tables.forEach { it.deleteRecordByParentId(jdsDb, args, connection, entity.overview.uuid) }
+                jdsDb.tables.forEach { it.deleteExistingRecords(args, connection, entity) }
             }
         }
 

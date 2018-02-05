@@ -706,7 +706,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveOverview(): String {
-        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :version)}"
+        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :entityVersion, :lastEdit)}"
     }
 
     /**

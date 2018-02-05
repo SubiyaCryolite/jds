@@ -93,7 +93,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         val sqlDateTimeCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_date_time_array WHERE composite_key IN ($questionsString)"
         val sqlEmbeddedAndArrayObjects = "SELECT eb.child_composite_key, eb.parent_composite_key, eb.child_entity_id, eb.field_id, eo.uuid_location, eo.uuid_location_version FROM jds_entity_binding eb JOIN jds_entity_overview eo ON eo.composite_key = eb.child_composite_key AND eb.parent_composite_key IN ($questionsString)"
         //overviews
-        val sqlOverviews = "SELECT uuid, live, version FROM jds_entity_overview WHERE uuid IN ($questionsString)"
+        val sqlOverviews = "SELECT uuid, live, entity_version FROM jds_entity_overview WHERE uuid IN ($questionsString)"
         try {
 
             jdsDb.getConnection().use { connection ->
@@ -407,7 +407,7 @@ class JdsLoad<T : JdsEntity> : Callable<MutableList<T>> {
         preparedStatement.executeQuery().use {
             while (it.next()) {
                 val uuid = it.getString("composite_key")
-                val version = it.getLong("version")
+                val version = it.getLong("entity_version")
                 val live = it.getBoolean("live")
                 optimalEntityLookup(entities, uuid).forEach {
                     it.overview.version = version

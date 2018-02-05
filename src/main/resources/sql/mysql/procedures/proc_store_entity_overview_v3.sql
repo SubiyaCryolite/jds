@@ -1,5 +1,5 @@
 CREATE PROCEDURE proc_store_entity_overview_v3(IN p_composite_key         VARCHAR(195),
-                                               IN p_uuid                  VARCHAR(195),
+                                               IN p_uuid                  VARCHAR(96),
                                                IN p_uuid_location         VARCHAR(56),
                                                IN p_uuid_location_version INTEGER,
                                                IN p_entity_id             BIGINT,

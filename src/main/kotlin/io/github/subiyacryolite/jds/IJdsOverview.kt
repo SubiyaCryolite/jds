@@ -58,4 +58,9 @@ interface IJdsOverview {
      * A flag indicating the version of this [JdsEntity]
      */
     var version: Long
+
+    /**
+     * Indicates when this record was last edited
+     */
+    var lastEditDate: LocalDateTime
 }

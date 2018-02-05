@@ -16,9 +16,10 @@ class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
     override fun getConnection(): Connection {
         Class.forName("org.postgresql.Driver")
         val properties = Properties()
-        properties.put("user", "postgres")
-        properties.put("password", "postgres")
-        properties.put("rewriteBatchedStatements","true")
+        properties["user"] = "postgres"
+        properties["password"] = "postgres"
+        //properties["password"] = "m7r@n$4mAz"
+        properties["rewriteBatchedStatements"] = "true"
         return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/jds", properties)
     }
 }

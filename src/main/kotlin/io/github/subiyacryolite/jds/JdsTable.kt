@@ -39,7 +39,7 @@ open class JdsTable() : Serializable {
     var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
-    var uniqueBy = JdsTableUniqueFlag.COMPOSITE_KEY
+    var uniqueBy = JdsTableUniqueFlag.UUID
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
@@ -133,12 +133,7 @@ open class JdsTable() : Serializable {
             }
 
             if (uniqueEntries) {
-                when (uniqueBy) {
-                    JdsTableUniqueFlag.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
-                    JdsTableUniqueFlag.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
-                    JdsTableUniqueFlag.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
-                    JdsTableUniqueFlag.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
-                }
+                deleteExistingRecords(eventArguments, iConnection, entity)
             }
 
             val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
@@ -165,6 +160,15 @@ open class JdsTable() : Serializable {
         }
     }
 
+    fun deleteExistingRecords(eventArguments: EventArguments, iConnection: Connection, entity: JdsEntity) {
+        when (uniqueBy) {
+            JdsTableUniqueFlag.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsTableUniqueFlag.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsTableUniqueFlag.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsTableUniqueFlag.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
+        }
+    }
+
     /**
      * Empty an entire table
      * @param connection the [Connection] to use for this operation
@@ -183,19 +187,9 @@ open class JdsTable() : Serializable {
     fun deleteRecordById(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied)
-            deleteRecordByIdInternal(eventArguments, connection, entity.overview.uuid)
+            deleteRecordByUuidInternal(eventArguments, connection, entity.overview.uuid)
     }
 
-    /**
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param uuid the uuid to target for record deletion
-     */
-    private fun deleteRecordByIdInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByCompositeKeySql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
-    }
 
     /**
      * @param eventArguments the [EventArguments] to use for this operation
