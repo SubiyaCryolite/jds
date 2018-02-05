@@ -1,5 +1,5 @@
 CREATE TABLE jds_store_double (
-  composite_key VARCHAR(195),
+  composite_key VARCHAR(128),
   field_id      BIGINT,
   value         DOUBLE,
   PRIMARY KEY (field_id, composite_key),

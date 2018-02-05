@@ -1,5 +1,5 @@
 CREATE TABLE jds_store_float (
-  composite_key VARCHAR(195),
+  composite_key VARCHAR(128),
   field_id      BIGINT,
   value         REAL,
   PRIMARY KEY (field_id, composite_key),

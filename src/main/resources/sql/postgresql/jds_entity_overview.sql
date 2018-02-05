@@ -1,8 +1,8 @@
 CREATE TABLE jds_entity_overview
 (
-  composite_key         VARCHAR(195),
-  uuid                  VARCHAR(96),
-  uuid_location         VARCHAR(56),
+  composite_key         VARCHAR(128),
+  uuid                  VARCHAR(64),
+  uuid_location         VARCHAR(45),
   uuid_location_version INTEGER,
   entity_id             BIGINT,
   entity_version        BIGINT,

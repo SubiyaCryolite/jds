@@ -1,5 +1,5 @@
 CREATE TABLE jds_store_blob (
-  composite_key VARCHAR(195),
+  composite_key VARCHAR(128),
   field_id      BIGINT,
   value         BYTEA,
   PRIMARY KEY (field_id, composite_key),

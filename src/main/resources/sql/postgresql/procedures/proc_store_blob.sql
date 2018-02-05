@@ -1,4 +1,4 @@
-CREATE FUNCTION proc_store_blob(p_composite_key VARCHAR(195), p_field_id BIGINT, p_value BYTEA)
+CREATE FUNCTION proc_store_blob(p_composite_key VARCHAR(128), p_field_id BIGINT, p_value BYTEA)
   RETURNS VOID AS $$
 BEGIN
   INSERT INTO jds_store_blob (composite_key, field_id, value)

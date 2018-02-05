@@ -12,6 +12,8 @@ import io.github.subiyacryolite.jds.JdsEntity
 import java.io.*
 import java.time.*
 import java.util.*
+import org.junit.jupiter.api.BeforeAll
+
 
 /**
  * Created by ifunga on 08/04/2017.
@@ -21,6 +23,15 @@ abstract class BaseTestConfig {
     protected val DOUBLE_DELTA = 1e-15
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
+
+    @BeforeAll
+    fun initializeDatabaseConnections() {
+        val configFile = File("dbsettings.properties")
+        if (configFile.exists()) {
+            val file = File("dbsettings.properties")
+            configFile.writeText(file.readText())
+        }
+    }
 
     protected val addressBook: AddressBook
         get() {

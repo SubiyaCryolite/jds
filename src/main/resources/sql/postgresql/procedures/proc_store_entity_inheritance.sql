@@ -1,4 +1,4 @@
-CREATE FUNCTION proc_store_entity_inheritance(p_entity_composite_key VARCHAR(195),
+CREATE FUNCTION proc_store_entity_inheritance(p_entity_composite_key VARCHAR(128),
                                               p_entity_id            BIGINT)
   RETURNS VOID AS $$
 BEGIN

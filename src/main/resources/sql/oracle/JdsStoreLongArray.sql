@@ -1,6 +1,6 @@
 CREATE TABLE jds_store_long_array (
   field_id NUMBER(19),
-  uuid     NVARCHAR2(96),
+  uuid     NVARCHAR2(64),
   sequence NUMBER(10),
   value    NUMBER(19),
   PRIMARY KEY (field_id, uuid, sequence),

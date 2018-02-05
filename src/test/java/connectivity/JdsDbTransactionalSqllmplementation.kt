@@ -6,6 +6,8 @@
 package connectivity
 
 import io.github.subiyacryolite.jds.JdsDbTransactionalSql
+import java.io.File
+import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -20,9 +22,8 @@ class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
     override fun getConnection(): Connection {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
         val properties = Properties()
-        properties.put("user", "sa")
-        properties.put("password", "p@nkP#55W0rd")
-        //return DriverManager.getConnection("jdbc:sqlserver://ICT-INDANA\\JDSINSTANCE;databaseName=jds", properties)
-        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
+        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
+        return DriverManager.getConnection("jdbc:sqlserver://BROADREACH4\\SMARTCARE40;databaseName=jds", properties)
+        //return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
     }
 }

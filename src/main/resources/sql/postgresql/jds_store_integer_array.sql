@@ -1,5 +1,5 @@
 CREATE TABLE jds_store_integer_array (
-  composite_key VARCHAR(195),
+  composite_key VARCHAR(128),
   field_id      BIGINT,
   sequence      INTEGER,
   value         INTEGER,

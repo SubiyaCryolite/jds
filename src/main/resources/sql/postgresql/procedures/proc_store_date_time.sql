@@ -1,4 +1,4 @@
-CREATE FUNCTION proc_store_date_time(p_composite_key VARCHAR(195),
+CREATE FUNCTION proc_store_date_time(p_composite_key VARCHAR(128),
                                      p_field_id      BIGINT,
                                      p_value         TIMESTAMP)
   RETURNS VOID AS $$

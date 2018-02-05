@@ -1,4 +1,4 @@
-CREATE FUNCTION proc_store_boolean(p_composite_key VARCHAR(195),
+CREATE FUNCTION proc_store_boolean(p_composite_key VARCHAR(128),
                                    p_field_id      BIGINT,
                                    p_value         BOOLEAN)
   RETURNS VOID AS $$

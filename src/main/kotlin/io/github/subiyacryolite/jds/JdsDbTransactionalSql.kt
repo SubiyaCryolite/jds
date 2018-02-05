@@ -119,107 +119,107 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityInstance.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_entity_instance.sql")
     }
 
     override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreBoolean.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_boolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreText.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_text.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_date_time.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_zoned_date_time.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_integer.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_float.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_double.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreLong.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_long.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_text_array.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_date_time_array.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_integer_array.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_float_array.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_double_array.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_long_array.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntity.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_entity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEnum.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_enum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefField.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_field.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefFieldType.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_field_type.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityField.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_entity_field.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityEnum.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_entity_enum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_entity_overview.sql")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_entity_binding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreTime.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_time.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_store_blob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/tsql/jds_ref_entity_inheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
@@ -246,25 +246,25 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreEntityOverviewV3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreEntityInheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefField.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreBoolean.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreBlob.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreTime.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreText.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreLong.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreInteger.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreFloat.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreDouble.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreDateTime.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcStoreZonedDateTime.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityField.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityEnum.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntity.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEnum.sql")
-            JdsComponent.TSQL_CASCADE_ENTITY_BINDING -> executeSqlFromFile(connection, "sql/tsql/triggers/TriggerEntityBindingCascade.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/ProcRefEntityInheritance.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_entity_inheritance.sql")
+            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_field.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_boolean.sql")
+            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_blob.sql")
+            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_time.sql")
+            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_text.sql")
+            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_long.sql")
+            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_integer.sql")
+            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_float.sql")
+            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_double.sql")
+            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_date_time.sql")
+            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_zoned_date_time.sql")
+            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity_field.sql")
+            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity_enum.sql")
+            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity.sql")
+            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_enum.sql")
+            JdsComponent.TSQL_CASCADE_ENTITY_BINDING -> executeSqlFromFile(connection, "sql/tsql/triggers/trigger_entity_binding_cascade.sql")
+            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_bind_parent_to_child.sql")
             else -> {
             }
         }

@@ -1,4 +1,4 @@
-CREATE FUNCTION proc_store_time(p_composite_key VARCHAR(195),
+CREATE FUNCTION proc_store_time(p_composite_key VARCHAR(128),
                                 p_field_id      BIGINT,
                                 p_value         TIME WITHOUT TIME ZONE)
   RETURNS VOID AS $$

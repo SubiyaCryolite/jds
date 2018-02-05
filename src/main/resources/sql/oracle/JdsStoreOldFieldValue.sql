@@ -1,5 +1,5 @@
 CREATE TABLE jds_store_old_field_value (
-  uuid                  NVARCHAR2(96),
+  uuid                  NVARCHAR2(64),
   field_id              NUMBER(19),
   date_of_modification  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   sequence              NUMBER(10),
