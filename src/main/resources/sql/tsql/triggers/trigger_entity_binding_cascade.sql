@@ -6,12 +6,12 @@ AS
   BEGIN
     SET NOCOUNT ON;
     DELETE FROM jds_entity_binding
-    WHERE child_uuid IN (SELECT uuid
-                         FROM DELETED)
+    WHERE child_composite_key IN (SELECT composite_key
+                                  FROM DELETED)
     DELETE FROM jds_entity_binding
-    WHERE parent_uuid IN (SELECT uuid
-                          FROM DELETED)
+    WHERE parent_composite_key IN (SELECT composite_key
+                                   FROM DELETED)
     DELETE FROM jds_entity_overview
-    WHERE uuid IN (SELECT uuid
-                   FROM DELETED)
+    WHERE composite_key IN (SELECT composite_key
+                            FROM DELETED)
   END

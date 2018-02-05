@@ -6,6 +6,8 @@
 package connectivity
 
 import io.github.subiyacryolite.jds.JdsDbMySql
+import java.io.File
+import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -20,14 +22,7 @@ class JdsDbMySqlImplementation : JdsDbMySql() {
     override fun getConnection(): Connection {
         Class.forName("com.mysql.cj.jdbc.Driver")
         val properties = Properties()
-        properties.put("user", "root")
-        //properties.put("password", "p@nkP#55W0rd");
-        properties.put("password", "")
-        properties.put("autoReconnect", "true")
-        properties.put("allowMultiQueries", "false")
-        properties.put("useSSL", "false")
-        properties.put("rewriteBatchedStatements", "true")
-        properties.put("continueBatchOnError", "true")
+        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties)
     }
 }

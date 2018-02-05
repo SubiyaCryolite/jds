@@ -99,107 +99,107 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsEntityInstance.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_entity_instance.sql")
     }
 
     override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreBoolean.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_boolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreText.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_text.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_date_time.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_zoned_date_time.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_integer.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_float.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_double.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreLong.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_long.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_text_array.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_date_time_array.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_integer_array.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_float_array.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_double_array.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_long_array.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntity.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEnum.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_enum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefField.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_field.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefFieldType.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_field_type.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityField.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_field.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityEnum.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_enum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsEntityOverview.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_entity_overview.sql")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_entity_binding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreTime.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_time.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_store_blob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_inheritance.sql")
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
@@ -225,24 +225,24 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreEntityOverviewV3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreEntityInheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefField.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreBoolean.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreBlob.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreTime.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreText.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreLong.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreInteger.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreFloat.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreDouble.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreDateTime.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcStoreZonedDateTime.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefEntityField.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefEntityEnum.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefEntity.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefEnum.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/ProcRefEntityInheritance.sql")
+            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_inheritance.sql")
+            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")
+            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_boolean.sql")
+            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_blob.sql")
+            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_time.sql")
+            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_text.sql")
+            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_long.sql")
+            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_integer.sql")
+            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_float.sql")
+            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_double.sql")
+            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_date_time.sql")
+            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_zoned_date_time.sql")
+            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_field.sql")
+            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_enum.sql")
+            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity.sql")
+            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_enum.sql")
+            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_bind_parent_to_child.sql")
             else -> {
             }
         }

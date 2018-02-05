@@ -59,147 +59,147 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsEntityInstance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_entity_instance.sql")
     }
 
     override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreBoolean.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_boolean.sql")
     }
 
     override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreText.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_text.sql")
     }
 
     override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDateTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_date_time.sql")
     }
 
     override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreZonedDateTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_zoned_date_time.sql")
     }
 
     override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreInteger.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_integer.sql")
     }
 
     override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreFloat.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_float.sql")
     }
 
     override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDouble.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_double.sql")
     }
 
     override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreLong.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_long.sql")
     }
 
     override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreTextArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_text_array.sql")
     }
 
     override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDateTimeArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_date_time_array.sql")
     }
 
     override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreIntegerArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_integer_array.sql")
     }
 
     override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreFloatArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_float_array.sql")
     }
 
     override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreDoubleArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_double_array.sql")
     }
 
     override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreLongArray.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_long_array.sql")
     }
 
     override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntity.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity.sql")
     }
 
     override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEnum.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_enum.sql")
     }
 
     override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefField.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_field.sql")
     }
 
     override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefFieldType.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_field_type.sql")
     }
 
     override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityField.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_field.sql")
     }
 
     override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityEnum.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_enum.sql")
     }
 
     override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsEntityoverview.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview.sql")
     }
 
     override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsEntityBinding.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_entity_binding.sql")
     }
 
     override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreTime.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_time.sql")
     }
 
     override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsStoreBlob.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_store_blob.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/JdsRefEntityInheritance.sql")
+        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_inheritance.sql")
     }
 
     override fun saveString(): String {
-        return "INSERT OR REPLACE INTO jds_store_text(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_text(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveBoolean(): String {
-        return "INSERT OR REPLACE INTO jds_store_boolean(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_boolean(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveLong(): String {
-        return "INSERT OR REPLACE INTO jds_store_long(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_long(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveDouble(): String {
-        return "INSERT OR REPLACE INTO jds_store_double(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_double(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveFloat(): String {
-        return "INSERT OR REPLACE INTO jds_store_float(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_float(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveInteger(): String {
-        return "INSERT OR REPLACE INTO jds_store_integer(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_integer(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_date_time(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_date_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_time(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO jds_store_blob(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_blob(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveZonedDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_zoned_date_time(uuid, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_zoned_date_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
     }
 
     override fun saveOverview(): String {
@@ -207,7 +207,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO jds_entity_instance(entity_uuid, entity_id) VALUES(:uuid, :entityId)"
+        return "INSERT OR REPLACE INTO jds_entity_instance(entity_composite_key, entity_id) VALUES(:uuid, :entityId)"
     }
 
     override fun populateRefEntityField(): String {
@@ -215,7 +215,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun populateRefField(): String {
-        return "INSERT OR REPLACE INTO jds_ref_field(entityId, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
+        return "INSERT OR REPLACE INTO jds_ref_field(id, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
     }
 
     override fun populateRefEntityEnum(): String {
@@ -223,7 +223,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun populateRefEntity(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity(entityId, caption) VALUES(?,?)"
+        return "INSERT OR REPLACE INTO jds_ref_entity(id, caption) VALUES(?,?)"
     }
 
     override fun populateRefEnum(): String {

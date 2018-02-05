@@ -1,6 +1,8 @@
 package connectivity
 
 import io.github.subiyacryolite.jds.JdsDbOracle
+import java.io.File
+import java.io.FileInputStream
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -16,8 +18,7 @@ class JdsDbOracleImplementation : JdsDbOracle() {
     override fun getConnection(): Connection {
         Class.forName("oracle.jdbc.driver.OracleDriver")
         val properties = Properties()
-        properties.put("user", "jdsx")
-        properties.put("password", "jdsx")
+        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", properties)
     }
 }

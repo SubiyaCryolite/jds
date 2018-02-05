@@ -1,6 +1,8 @@
 package connectivity
 
 import io.github.subiyacryolite.jds.JdsDbPostgreSql
+import java.io.File
+import java.io.FileInputStream
 
 import java.sql.Connection
 import java.sql.DriverManager
@@ -16,9 +18,7 @@ class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
     override fun getConnection(): Connection {
         Class.forName("org.postgresql.Driver")
         val properties = Properties()
-        properties["user"] = "postgres"
-        properties["password"] = "postgres"
-        properties["rewriteBatchedStatements"] = "true"
+        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/jds", properties)
     }
 }
