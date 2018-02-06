@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentMap
 
 /**
  * Event arguments to handle this listener invocation.
- * This class supports batching via the use of the {@link #getOrAddCall(String) getOrAddCall},
- * {@link #getOrAddStatement(String) getOrAddStatement}, {@link #getOrAddNamedCall(String) getOrAddNamedCall} and
- * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
+ * This class supports batching via the use of the [getOrAddCall(String)][getOrAddCall],
+ * [getOrAddStatement(String)][getOrAddStatement], [getOrAddNamedCall(String)][getOrAddNamedCall] and
+ * [getOrAddNamedStatement(String)][getOrAddNamedStatement] methods.
  */
 open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection) {
 

@@ -29,6 +29,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
+import java.util.stream.Stream
 import kotlin.collections.ArrayList
 
 /**
@@ -79,12 +80,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
         val entityId = annotation.entityId
         prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, filterBatches, filterIds)
-        val initialisePrimitives = true
-        val initialiseDatesAndTimes = true
-        val initialiseObjects = true
-        filterBatches.forEach {
-            populateInner(jdsDb, collections, it)
-        }
+        filterBatches.forEach { populateInner(jdsDb, collections, it) }
         return collections
     }
 
@@ -104,17 +100,17 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         try {
 
             jdsDb.getConnection().use { connection ->
-                connection.prepareStatement(sqlEntities).use { entityLookUp ->
+                connection.prepareStatement(sqlEntities).use {
                     //work in batches to not break prepared statement
                     var batchSequence = 1
                     for (uuid in uuids) {
-                        setParameterForStatement(batchSequence, uuid, entityLookUp)
+                        setParameterForStatement(batchSequence, uuid, it)
                         batchSequence++
                     }
                     //catch embedded/pre-created objects objects as well
                     if (jdsDb.options.initialisePrimitives || jdsDb.options.initialiseDatesAndTimes || jdsDb.options.initialiseObjects) {
                         val compositeKeys = HashSet<String>()
-                        createEntities(entities, entityLookUp, compositeKeys)
+                        createEntities(entities, it, compositeKeys)
 
                         entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
 
@@ -281,8 +277,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val entityId = it.getLong("child_entity_id")
                 val uuidLocation = it.getString("uuid_location")
                 val uuidLocationVersion = it.getInt("uuid_location_version")
-                optimalEntityLookup(entities, parentCompositeKey).forEach { entity ->
-                    entity.populateObjects(jdsDb, fieldId, entityId, uuid, uuidLocation, uuidLocationVersion, entity.overview.uuid, innerObjects, uuids)
+                optimalEntityLookup(entities, parentCompositeKey).forEach {
+                    it.populateObjects(jdsDb, fieldId, entityId, uuid, uuidLocation, uuidLocationVersion, it.overview.uuid, innerObjects, uuids)
                 }
             }
         }
@@ -302,8 +298,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getFloat("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -321,8 +317,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getDouble("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -340,8 +336,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getLong("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -359,8 +355,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -378,8 +374,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -397,9 +393,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getInt("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
-                    entity.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
+                    it.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -410,8 +406,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @param uuid
      * @return
      */
-    private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String): List<T> {
-        return entities.filter { it.overview.compositeKey == uuid }
+    private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String): Stream<T> {
+        return entities.parallelStream().filter { it.overview.compositeKey == uuid }
     }
 
     /**
@@ -447,9 +443,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
-                    entity.populateProperties(JdsFieldType.DATE, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
+                    it.populateProperties(JdsFieldType.DATE, fieldId, value)
                 }
             }
         }
@@ -467,8 +463,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.DOUBLE, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.DOUBLE, fieldId, value)
                 }
             }
         }
@@ -486,8 +482,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getBytes("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.BLOB, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.BLOB, fieldId, value)
                 }
             }
         }
@@ -505,9 +501,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.INT, fieldId, value)
-                    entity.populateProperties(JdsFieldType.ENUM, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.INT, fieldId, value)
+                    it.populateProperties(JdsFieldType.ENUM, fieldId, value)
                 }
             }
         }
@@ -525,8 +521,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.BOOLEAN, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.BOOLEAN, fieldId, value)
                 }
             }
         }
@@ -544,8 +540,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getLocalTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.TIME, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.TIME, fieldId, value)
                 }
             }
         }
@@ -563,8 +559,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.FLOAT, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.FLOAT, fieldId, value)
                 }
             }
         }
@@ -582,9 +578,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val fieldId = it.getLong("field_id")
                 val value = it.getObject("value") //primitives can be null
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.LONG, fieldId, value)
-                    entity.populateProperties(JdsFieldType.DURATION, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.LONG, fieldId, value)
+                    it.populateProperties(JdsFieldType.DURATION, fieldId, value)
                 }
             }
         }
@@ -602,8 +598,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getZonedDateTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value)
                 }
             }
         }
@@ -621,11 +617,11 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val compositeKey = it.getString("composite_key")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, compositeKey).forEach { entity ->
-                    entity.populateProperties(JdsFieldType.STRING, fieldId, value)
-                    entity.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
-                    entity.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
-                    entity.populateProperties(JdsFieldType.PERIOD, fieldId, value)
+                optimalEntityLookup(entities, compositeKey).forEach {
+                    it.populateProperties(JdsFieldType.STRING, fieldId, value)
+                    it.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
+                    it.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
+                    it.populateProperties(JdsFieldType.PERIOD, fieldId, value)
                 }
             }
         }

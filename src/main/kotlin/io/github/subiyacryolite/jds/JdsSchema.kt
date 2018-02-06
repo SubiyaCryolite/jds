@@ -44,6 +44,7 @@ object JdsSchema {
                 JdsFieldType.LONG_COLLECTION,
                 JdsFieldType.STRING_COLLECTION,
                 JdsFieldType.DATE_TIME_COLLECTION -> {
+                    //necessary
                 }
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
                     val columnName = "${it.name}_${enum!!.ordinal}"
