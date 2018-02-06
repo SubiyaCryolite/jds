@@ -86,7 +86,7 @@ abstract class JdsEntity : IJdsEntity {
                 false -> javaClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
             overview.entityId = entityAnnotation.entityId
-            overview.version = entityAnnotation.version
+            overview.entityVersion = entityAnnotation.version
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         }
@@ -339,7 +339,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun <T : IJdsEntity> copyOverviewValues(source: T) {
         overview.uuid = source.overview.uuid
         overview.live = source.overview.live
-        overview.version = source.overview.version
+        overview.entityVersion = source.overview.entityVersion
         overview.parentUuid = source.overview.parentUuid
     }
 

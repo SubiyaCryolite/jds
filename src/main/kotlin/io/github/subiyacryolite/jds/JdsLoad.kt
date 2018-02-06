@@ -239,10 +239,10 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                     val refType = jdsDb.classes[entityId]!!
                     val entity = refType.newInstance()
                     entity.overview.uuid = uuid
-                    entity.overview.uuidLocation = uuidLocation
+                    entity.overview.uuidLocation = uuidLocation?:"" //oracle treats empty strings as null
                     entity.overview.uuidLocationVersion = uuidLocationVersion
                     entity.overview.lastEdit = lastEdit.toLocalDateTime()
-                    entity.overview.version = version
+                    entity.overview.entityVersion = version
                     entity.overview.live = live
                     entity.overview.parentUuid = parentUuid
                     entities.add(entity as T)

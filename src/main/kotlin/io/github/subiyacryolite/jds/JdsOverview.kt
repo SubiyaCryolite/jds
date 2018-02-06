@@ -32,9 +32,9 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var uuidLocationVersion: Int = 0
     override var parentUuid: String? = null
     override var parentCompositeKey: String? = null
-    override var version: Long = 1L
+    override var entityVersion: Long = 1L
     override var live: Boolean = false
-    override var lastEdit:LocalDateTime = LocalDateTime.now()
+    override var lastEdit: LocalDateTime = LocalDateTime.now()
     override val compositeKey: String get() = "$uuid.$uuidLocation.$uuidLocationVersion"
 
     @Throws(IOException::class)
@@ -46,7 +46,8 @@ class JdsOverview : IJdsOverview, Externalizable {
         objectOutputStream.writeUTF(parentCompositeKey)
         objectOutputStream.writeLong(entityId)
         objectOutputStream.writeBoolean(live)
-        objectOutputStream.writeLong(version)
+        objectOutputStream.writeLong(entityVersion)
+        objectOutputStream.writeObject(lastEdit)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
@@ -58,11 +59,12 @@ class JdsOverview : IJdsOverview, Externalizable {
         parentCompositeKey = objectInputStream.readUTF()
         entityId = objectInputStream.readLong()
         live = objectInputStream.readBoolean()
-        version = objectInputStream.readLong()
+        entityVersion = objectInputStream.readLong()
+        lastEdit = objectInputStream.readObject() as LocalDateTime
     }
 
     override fun toString(): String {
-        return "{ uuid = $uuid, entityId = $entityId, version = $version, live = $live }"
+        return "{ uuid = $uuid, entityId = $entityId, version = $entityVersion, live = $live }"
     }
 
     companion object {

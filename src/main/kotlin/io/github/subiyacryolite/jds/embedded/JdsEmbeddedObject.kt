@@ -69,7 +69,16 @@ class JdsEmbeddedObject(entity: JdsEntity, fieldId: Long?) {
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.compositeKey, entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion, entity.overview.entityId, fieldId, entity.overview.live, entity.overview.version)
+    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.compositeKey,
+            entity.overview.uuid,
+            entity.overview.uuidLocation,
+            entity.overview.uuidLocationVersion,
+            entity.overview.entityId,
+            fieldId,
+            entity.overview.live,
+            entity.overview.entityVersion,
+            entity.overview.lastEdit,
+            entity.overview.parentUuid)
 
     init {
         entity.assign(this);

@@ -6,6 +6,7 @@ import constants.Rights
 import entities.*
 import io.github.subiyacryolite.jds.JdsSave
 import io.github.subiyacryolite.jds.JdsTable
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 
 class CustomReport : BaseTestConfig() {
@@ -13,11 +14,12 @@ class CustomReport : BaseTestConfig() {
     @Throws(Exception::class)
     private fun test() {
         val customTable = JdsTable()
-        customTable.uniqueEntries = false
+        customTable.uniqueEntries = true
         customTable.name = "CrtAddressSpecific"
         customTable.registerEntity(Address::class.java)
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)
+        customTable.uniqueBy = JdsFilterBy.UUID
 
         val crtAddress = JdsTable(Address::class.java, true)
         val crtAddressBook = JdsTable(AddressBook::class.java, true)

@@ -281,10 +281,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun getDbStringDataType(max: Int): String {
-        return if (max == 0)
-            "NCLOB"
-        else
-            "NVARCHAR2($max)"
+        return if (max == 0) "NCLOB" else "NVARCHAR2($max)"
     }
 
     override fun getDbBooleanDataType(): String {

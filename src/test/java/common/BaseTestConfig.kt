@@ -26,7 +26,7 @@ abstract class BaseTestConfig {
     init {
         val configFile = File("dbsettings.properties")
         if (!configFile.exists()) {
-            Thread.currentThread().contextClassLoader.getResourceAsStream("dbsettings.properties").use {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("dbsettings.properties.src").use {
                 it.reader().use {
                     configFile.writeText(it.readText())
                 }

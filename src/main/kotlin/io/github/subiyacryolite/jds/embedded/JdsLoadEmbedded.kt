@@ -53,7 +53,11 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         entity.overview.entityId = embeddedObject.o.entityId
         entity.overview.uuid = embeddedObject.o.uuid
         entity.overview.live = embeddedObject.o.live
-        entity.overview.version = embeddedObject.o.version
+        entity.overview.entityVersion = embeddedObject.o.version
+        entity.overview.uuidLocation = embeddedObject.o.uuidLocation
+        entity.overview.uuidLocationVersion = embeddedObject.o.uuidLocationVersion
+        entity.overview.lastEdit = embeddedObject.o.lastEdit
+        entity.overview.parentUuid = embeddedObject.o.parentUuid
         //==============================================
         //PRIMITIVES :: Key-Value
         //==============================================

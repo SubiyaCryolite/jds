@@ -1,6 +1,7 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.enums.JdsImplementation
 
 object JdsSchema {
 
@@ -10,15 +11,22 @@ object JdsSchema {
      * @param appendOnly
      * @return
      */
-    fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
+    fun generateTable(jdsDb: JdsDb, reportName: String, appendOnly: Boolean): String {
         val compositeKeyDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 128)
         val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 64)
-        val uuidLocationDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 45)
+        val parentUuidDataType = when (jdsDb.implementation) {
+            JdsImplementation.ORACLE -> getDbDataType(jdsDb, JdsFieldType.STRING, 0)//trigger nclob to prevent null, empty string is null in oracle
+            else -> getDbDataType(jdsDb, JdsFieldType.STRING, 64)
+        }
+        val uuidLocationDataType = when (jdsDb.implementation) {
+            JdsImplementation.ORACLE -> getDbDataType(jdsDb, JdsFieldType.STRING, 0)//trigger nclob to prevent null, empty string is null in oracle
+            else -> getDbDataType(jdsDb, JdsFieldType.STRING, 45)
+        }
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(reportName)
-        stringBuilder.append("( $compositeKeyColumn $compositeKeyDataType, $uuidColumn $uuidDataType, $parentUuidColumn $uuidDataType, $uuidLocationColumn $uuidLocationDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
-            true -> ", PRIMARY KEY ($uuidColumn, $uuidLocationColumn, $uuidLocationVersionColumn)"
+        stringBuilder.append("( $compositeKeyColumn $compositeKeyDataType, $uuidColumn $uuidDataType, $parentUuidColumn $parentUuidDataType, $uuidLocationColumn $uuidLocationDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
+            true -> ", PRIMARY KEY ($compositeKeyColumn)"
             else -> ""
         }})")
         return stringBuilder.toString()

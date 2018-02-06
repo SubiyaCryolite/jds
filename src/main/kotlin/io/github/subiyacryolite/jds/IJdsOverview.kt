@@ -40,12 +40,12 @@ interface IJdsOverview {
     val compositeKey: String
 
     /**
-     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated at Save and at Load.
+     * A value that indicates the parent of this JdsEntity. Its value is determined on Save and at Load.
      */
     var parentUuid: String?
 
     /**
-     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated at Save and at Load.
+     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated on Save and at Load.
      */
     var parentCompositeKey: String?
 
@@ -57,7 +57,7 @@ interface IJdsOverview {
     /**
      * A flag indicating the version of this [JdsEntity]
      */
-    var version: Long
+    var entityVersion: Long
 
     /**
      * Indicates when this record was last edited
