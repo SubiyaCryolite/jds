@@ -1066,7 +1066,7 @@ abstract class JdsEntity : IJdsEntity {
     internal fun populateRefEnumRefEntityEnum(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         populateRefEnum(jdsDb, connection, getEnums(overview.entityId))
         populateRefEntityEnum(jdsDb, connection, entityId, getEnums(overview.entityId))
-        if (jdsDb.isPrintingOutput)
+        if (jdsDb.options.isPrintingOutput)
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
     }
 

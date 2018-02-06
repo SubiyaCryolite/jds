@@ -34,7 +34,7 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var parentCompositeKey: String? = null
     override var version: Long = 1L
     override var live: Boolean = false
-    override var lastEditDate:LocalDateTime = LocalDateTime.now()
+    override var lastEdit:LocalDateTime = LocalDateTime.now()
     override val compositeKey: String get() = "$uuid.$uuidLocation.$uuidLocationVersion"
 
     @Throws(IOException::class)

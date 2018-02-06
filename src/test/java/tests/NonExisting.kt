@@ -3,6 +3,7 @@ package tests
 import common.BaseTestConfig
 import entities.Example
 import io.github.subiyacryolite.jds.JdsLoad
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
@@ -10,7 +11,7 @@ class NonExisting : BaseTestConfig() {
 
     @Throws(Exception::class)
     fun loadNonExisting() {
-        val load = JdsLoad(jdsDb, Example::class.java, setOf("DOES_NOT_EXIST"))
+        val load = JdsLoad(jdsDb, Example::class.java, JdsFilterBy.UUID, setOf("DOES_NOT_EXIST"))
         val process = Executors.newSingleThreadExecutor().submit(load)
         while (!process.isDone)
             Thread.sleep(16)

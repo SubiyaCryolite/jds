@@ -18,7 +18,7 @@ import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-import io.github.subiyacryolite.jds.enums.JdsTableUniqueFlag
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
@@ -39,7 +39,7 @@ open class JdsTable() : Serializable {
     var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
-    var uniqueBy = JdsTableUniqueFlag.UUID
+    var uniqueBy = JdsFilterBy.UUID
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
@@ -162,10 +162,10 @@ open class JdsTable() : Serializable {
 
     fun deleteExistingRecords(eventArguments: EventArguments, iConnection: Connection, entity: JdsEntity) {
         when (uniqueBy) {
-            JdsTableUniqueFlag.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsTableUniqueFlag.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsTableUniqueFlag.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsTableUniqueFlag.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
+            JdsFilterBy.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsFilterBy.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsFilterBy.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
+            JdsFilterBy.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
         }
     }
 
@@ -289,7 +289,7 @@ open class JdsTable() : Serializable {
         if (!jdsDb.doesTableExist(connection, name))
             connection.prepareStatement(createTableSql).use {
                 it.executeUpdate()
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Created $name")
             }
 

@@ -4,6 +4,7 @@ import common.BaseTestConfig
 import entities.Address
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 
 /**
@@ -25,7 +26,7 @@ class LegacyLoadAndSave : BaseTestConfig() {
     @Throws(Exception::class)
     private fun load() {
         val allAddressBooks = JdsLoad(jdsDb, Address::class.java).call() //load all entityVersions of type AddressBook
-        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
+        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, JdsFilterBy.UUID, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
         System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
     }

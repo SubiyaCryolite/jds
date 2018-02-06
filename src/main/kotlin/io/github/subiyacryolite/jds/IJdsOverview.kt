@@ -62,5 +62,5 @@ interface IJdsOverview {
     /**
      * Indicates when this record was last edited
      */
-    var lastEditDate: LocalDateTime
+    var lastEdit: LocalDateTime
 }

@@ -4,6 +4,7 @@ import common.BaseTestConfig
 import entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -17,7 +18,7 @@ class TimeConstructs : BaseTestConfig() {
 
     @Throws(Exception::class)
     private fun load() {
-        val list = JdsLoad(jdsDb, TimeConstruct::class.java, setOf("timeConstruct")).call() //load all entityVersions of type AddressBook with Entity Guids in range
+        val list = JdsLoad(jdsDb, TimeConstruct::class.java, JdsFilterBy.UUID, setOf("timeConstruct")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         println("loaded entityVersions [$list]")
     }
 

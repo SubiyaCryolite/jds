@@ -4,6 +4,7 @@ import common.BaseTestConfig
 import entities.Example
 import io.github.subiyacryolite.jds.JdsLoad
 import io.github.subiyacryolite.jds.JdsSave
+import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -26,7 +27,7 @@ class LoadAndSaveTests : BaseTestConfig() {
     @Throws(ExecutionException::class, InterruptedException::class)
     private fun load() {
         val loadAllInstances = JdsLoad(jdsDb, Example::class.java)
-        val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, setOf("instance3"))
+        val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, JdsFilterBy.UUID, setOf("instance3"))
         val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
 
         val executorService = Executors.newFixedThreadPool(3)

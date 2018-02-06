@@ -91,7 +91,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         batches.forEachIndexed { step, batch ->
             saveInner(batch, saveContainer, step, steps, allEntities)
             saveContainer.reset(step)//free mem
-            if (jdsDb.isPrintingOutput)
+            if (jdsDb.options.isPrintingOutput)
                 println("Processed batch [$step of $steps]")
         }
         saveContainer.reset()//free mem
@@ -170,7 +170,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val finalStep = !recursiveInnerCall && currentStep == totalSteps - 1
         try {
             //always save overviews first
-            if (jdsDb.isWritingOverviewFields) {
+            if (jdsDb.options.isWritingOverviewFields) {
                 batchEntities.forEach {
                     saveContainer.overviews[currentStep].add(it.overview)
                     it.assign(currentStep, saveContainer)
@@ -182,7 +182,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             //ensure that overviews are submitted before handing over to listeners
             batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
-            if (jdsDb.isWritingToPrimaryDataTables) {
+            if (jdsDb.options.isWritingToPrimaryDataTables) {
                 //time constraints
                 saveDateConstructs(
                         saveContainer.monthDayProperties[currentStep],
@@ -205,7 +205,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 //enumProperties
                 saveEnums(saveContainer.enumProperties[currentStep])
             }
-            if (jdsDb.isWritingArrayValues) {
+            if (jdsDb.options.isWritingArrayValues) {
                 //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
                 saveArrayDates(saveContainer.localDateTimeCollections[currentStep])
                 saveArrayStrings(saveContainer.stringCollections[currentStep])
@@ -274,14 +274,15 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             saveOverview.setInt("uuidLocationVersion", it.overview.uuidLocationVersion)
             saveOverview.setLong("entityId", it.overview.entityId)
             saveOverview.setBoolean("live", it.overview.live)
-            saveOverview.setTimestamp("lastEdit", Timestamp.valueOf(it.overview.lastEditDate))
+            saveOverview.setString("parentUuid", it.overview.parentUuid)
+            saveOverview.setTimestamp("lastEdit", Timestamp.valueOf(it.overview.lastEdit))
             saveOverview.setLong("entityVersion", it.overview.version) //always update date modified!!!
             saveOverview.addBatch()
             //Entity Inheritance
             saveOverviewInheritance.setString("uuid", it.overview.compositeKey)
             saveOverviewInheritance.setLong("entityId", it.overview.entityId)
             saveOverviewInheritance.addBatch()
-            if (jdsDb.isPrintingOutput) {
+            if (jdsDb.options.isPrintingOutput) {
                 println("Saving Overview [record $record]")
             }
         }
@@ -303,13 +304,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (innerRecordSize == 0) continue
             for ((fieldId, blobProperty) in value) {
                 innerRecord++
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setBytes("value", blobProperty.get()!!)
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Blob field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -330,13 +331,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (innerRecordSize == 0) continue
             for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Boolean field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -357,13 +358,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (innerRecordSize == 0) continue
             for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Integer field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -384,13 +385,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (innerRecordSize == 0) continue
             for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     System.out.printf("Updating record $record. Float field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -410,13 +411,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             val innerRecordSize = batchEntries.size
             if (innerRecordSize == 0) continue
             for ((fieldId, entry) in batchEntries) {
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record $record. Double field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -437,13 +438,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             if (innerRecordSize == 0) continue
             for ((fieldId, entry) in batchEntries) {
                 innerRecord++
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     System.out.printf("Updating record [$record]. Long field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -465,13 +466,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((fieldId, value2) in value1) {
                 innerRecord++
                 val value = value2.get()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setString("value", value)
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Text field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -502,13 +503,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 innerRecord++
                 val monthDay = monthDayProperty.get()
                 val value = monthDay.toString()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsertText.setString("uuid", uuid)
                     upsertText.setLong("fieldId", fieldId)
                     upsertText.setString("value", value)
                     upsertText.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. MonthDay field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -522,13 +523,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 innerRecord++
                 val yearMonth = yearMonthProperty.get() as YearMonth
                 val value = yearMonth.toString()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsertText.setString("uuid", uuid)
                     upsertText.setLong("fieldId", fieldId)
                     upsertText.setString("value", value)
                     upsertText.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. YearMonth field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -542,13 +543,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 innerRecord++
                 val period = periodProperty.get()
                 val value = period.toString()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsertText.setString("uuid", uuid)
                     upsertText.setLong("fieldId", fieldId)
                     upsertText.setString("value", value)
                     upsertText.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Period field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -562,13 +563,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 innerRecord++
                 val duration = durationProperty.get()
                 val value = duration.toNanos()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsertLong.setString("uuid", uuid)
                     upsertLong.setLong("fieldId", fieldId)
                     upsertLong.setLong("value", value)
                     upsertLong.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Duration field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -592,13 +593,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((fieldId, value1) in value) {
                 innerRecord++
                 val localDateTime = value1.get() as LocalDateTime
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setTimestamp("value", Timestamp.valueOf(localDateTime))
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. LocalDateTime field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -614,7 +615,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 upsert.setLong("fieldId", fieldId)
                 upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()))
                 upsert.addBatch()
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. LocalDate field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -637,13 +638,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((fieldId, value1) in value) {
                 innerRecord++
                 val localTime = value1.get() as LocalTime
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setLocalTime("value", localTime, jdsDb)
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. LocalTime field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -665,13 +666,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((fieldId, value1) in value) {
                 innerRecord++
                 val zonedDateTime = value1.get() as ZonedDateTime
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", fieldId)
                     upsert.setZonedDateTime("value", zonedDateTime, jdsDb)
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     System.out.printf("Updating record [$record]. ZonedDateTime field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -694,13 +695,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((jdsFieldEnum, value2) in value1) {
                 innerRecord++
                 val value = value2.get()
-                if (jdsDb.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
                     upsert.setString("uuid", uuid)
                     upsert.setLong("fieldId", jdsFieldEnum.field.id)
                     upsert.setInt("value", jdsFieldEnum.indexOf(value))
                     upsert.addBatch()
                 }
-                if (jdsDb.isPrintingOutput)
+                if (jdsDb.options.isPrintingOutput)
                     println("Updating record [$record]. Enum field [$innerRecord of $innerRecordSize]")
             }
         }
@@ -729,7 +730,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {
                         delete.setLong(1, fieldId)
                         delete.setString(2, uuid)
                         delete.addBatch()
@@ -741,7 +742,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. DateTime field [$innerRecord of $innerTotal]")
                 }
             }
@@ -769,7 +770,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {//delete
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {//delete
                         delete.setLong(1, fieldId)
                         delete.setString(2, uuid)
                         delete.addBatch()
@@ -781,7 +782,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. Float field [$innerRecord of $innerTotal]")
                 }
             }
@@ -809,7 +810,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {
                         //delete
                         delete.setLong("fieldId", fieldId)
                         delete.setString("uuid", uuid)
@@ -822,7 +823,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. Integer field [$innerRecord of $innerTotal]")
                 }
             }
@@ -849,7 +850,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {
                         //delete
                         delete.setLong("fieldId", fieldId)
                         delete.setString("uuid", uuid)
@@ -862,7 +863,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. Double field [$innerRecord of $innerTotal]")
                 }
             }
@@ -890,7 +891,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {//delete
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {//delete
                         delete.setLong(1, fieldId)
                         delete.setString(2, uuid)
                         delete.addBatch()
@@ -902,7 +903,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. Long field [$innerRecord of $innerTotal]")
                 }
             }
@@ -929,7 +930,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 val innerRecord = 0
                 val innerTotal = value1.size
                 for (value in value1) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {
                         //delete
                         delete.setLong("fieldId", fieldId)
                         delete.setString("uuid", uuid)
@@ -942,7 +943,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.addBatch()
                     }
                     index.set(index.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Inserting array record [$record]. String field [$innerRecord of $innerTotal]")
                 }
             }
@@ -969,7 +970,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             for ((jdsFieldEnum, value1) in value) {
                 if (value1.isEmpty()) continue
                 for ((sequence, anEnum) in value1.withIndex()) {
-                    if (jdsDb.isWritingToPrimaryDataTables) {
+                    if (jdsDb.options.isWritingToPrimaryDataTables) {
                         //delete
                         delete.setLong("fieldId", jdsFieldEnum.field.id)
                         delete.setString("uuid", uuid)
@@ -981,7 +982,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         insert.setInt("value", jdsFieldEnum.indexOf(anEnum))
                         insert.addBatch()
                     }
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Updating enum [$sequence]. Object field [$record of $recordTotal]")
                 }
             }
@@ -1002,7 +1003,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val entities = ArrayList<JdsEntity>()
         val record = SimpleIntegerProperty(0)
         val uuidToFieldMap = HashMap<String, Long>()
-        if (jdsDb.isWritingToPrimaryDataTables || jdsDb.isWritingOverviewFields) {
+        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields) {
             for ((parentCompositeKey, entityCollections) in objectArrayProperties) {
                 for ((key, entityCollection) in entityCollections) {
                     record.set(0)
@@ -1010,7 +1011,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                         uuidToFieldMap[jdsEntity.overview.uuid] = key.fieldEntity.id
                         entities.add(jdsEntity)
                         record.set(record.get() + 1)
-                        if (jdsDb.isPrintingOutput)
+                        if (jdsDb.options.isPrintingOutput)
                             println("Binding array object ${record.get()}")
                     }
                 }
@@ -1020,7 +1021,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         //bind children below
         //If a parent doesn't have this property everything will be fine, as it wont be loaded
         //thus the delete call will not be executed
-        if (jdsDb.isWritingToPrimaryDataTables || jdsDb.isWritingOverviewFields) {
+        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields) {
             val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
             val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
             for (jdsEntity in entities) {
@@ -1050,7 +1051,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val jdsEntities = ArrayList<JdsEntity>()
         val uuidToFieldMap = HashMap<String, Long>()
 
-        if (jdsDb.isWritingToPrimaryDataTables) {
+        if (jdsDb.options.isWritingToPrimaryDataTables) {
             for ((parentuuid, value) in objectProperties) {
                 for ((key, value1) in value) {
                     record.set(0)
@@ -1058,7 +1059,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                     jdsEntities.add(jdsEntity)
                     uuidToFieldMap[value1.get().overview.uuid] = key.fieldEntity.id
                     record.set(record.get() + 1)
-                    if (jdsDb.isPrintingOutput)
+                    if (jdsDb.options.isPrintingOutput)
                         println("Binding object ${record.get()}")
                 }
             }
@@ -1067,7 +1068,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         //bind children below
         //If a parent doesn't have this property everything will be fine, as it wont be loaded
         //thus the delete call will not be executed
-        if (jdsDb.isWritingToPrimaryDataTables) {
+        if (jdsDb.options.isWritingToPrimaryDataTables) {
             val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
             val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
             for (jdsEntity in jdsEntities) {

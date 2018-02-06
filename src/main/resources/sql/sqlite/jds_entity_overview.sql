@@ -4,6 +4,7 @@ CREATE TABLE jds_entity_overview
   uuid                  TEXT,
   uuid_location         TEXT,
   uuid_location_version INTEGER,
+  parent_uuid           TEXT,
   entity_id             BIGINT,
   entity_version        BIGINT,
   live                  BOOLEAN,

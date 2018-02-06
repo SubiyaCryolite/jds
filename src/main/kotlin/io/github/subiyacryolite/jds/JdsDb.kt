@@ -40,26 +40,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
-
-    /**
-     * A value indicating whether JDS should print internal log information
-     */
-    var isPrintingOutput: Boolean = false
-
-    /**
-     * Indicate whether JDS is persisting to the primary data tables
-     */
-    var isWritingToPrimaryDataTables = true
-
-    /**
-     * Indicate if JDS should write data to overview fields
-     */
-    var isWritingOverviewFields = true
-
-    /**
-     * Indicate if JDS should write array types to the DB
-     */
-    var isWritingArrayValues = true
+val options = JdsOptions()
 
     /**
      * Initialise JDS base tables
@@ -550,7 +531,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             statement.setLong(1, entityId)
             statement.setString(2, entityName)
             statement.executeUpdate()
-            if (isPrintingOutput)
+            if (options.isPrintingOutput)
                 println("Mapped Entity [$entityName - $entityId]")
         }
     } catch (ex: Exception) {
@@ -590,7 +571,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
-                        if (isPrintingOutput)
+                        if (options.isPrintingOutput)
                             println("Mapped Entity [${entityAnnotation.entityName}]")
                     }
                 } catch (ex: Exception) {
@@ -706,7 +687,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveOverview(): String {
-        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :entityId, :live, :entityVersion, :lastEdit)}"
+        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :parentUuid, :entityId, :live, :entityVersion, :lastEdit)}"
     }
 
     /**

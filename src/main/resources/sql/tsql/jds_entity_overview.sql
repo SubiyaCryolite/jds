@@ -3,6 +3,7 @@ CREATE TABLE jds_entity_overview (
   uuid                  NVARCHAR(64),
   uuid_location         NVARCHAR(45),
   uuid_location_version INTEGER,
+  parent_uuid           NVARCHAR(64),
   entity_id             BIGINT,
   entity_version        BIGINT,
   live                  BIT,
