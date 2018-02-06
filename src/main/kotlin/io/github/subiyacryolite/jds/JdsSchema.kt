@@ -11,11 +11,13 @@ object JdsSchema {
      * @return
      */
     fun generateTable(jdsDb: IJdsDb, reportName: String, appendOnly: Boolean): String {
-        val guidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 195)
+        val compositeKeyDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 128)
+        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 64)
+        val uuidLocationDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 45)
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(reportName)
-        stringBuilder.append("( $compositeKeyColumn $guidDataType, $uuidColumn $guidDataType, $parentUuidColumn $guidDataType, $uuidLocationColumn $guidDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
+        stringBuilder.append("( $compositeKeyColumn $compositeKeyDataType, $uuidColumn $uuidDataType, $parentUuidColumn $uuidDataType, $uuidLocationColumn $uuidLocationDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
             true -> ", PRIMARY KEY ($uuidColumn, $uuidLocationColumn, $uuidLocationVersionColumn)"
             else -> ""
         }})")
