@@ -32,6 +32,7 @@ import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 import kotlin.coroutines.experimental.buildSequence
@@ -170,7 +171,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val finalStep = !recursiveInnerCall && currentStep == totalSteps - 1
         try {
             //always save overviews first
-            if (jdsDb.options.isWritingOverviewFields) {
+            if (jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues || jdsDb.options.isWritingToPrimaryDataTables) {
                 batchEntities.forEach {
                     saveContainer.overviews[currentStep].add(it.overview)
                     it.assign(currentStep, saveContainer)
@@ -184,8 +185,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
             if (jdsDb.options.isWritingToPrimaryDataTables) {
                 //time constraints
-                saveDateConstructs(
-                        saveContainer.monthDayProperties[currentStep],
+                saveDateConstructs(saveContainer.monthDayProperties[currentStep],
                         saveContainer.yearMonthProperties[currentStep],
                         saveContainer.periodProperties[currentStep],
                         saveContainer.durationProperties[currentStep])
@@ -1000,28 +1000,22 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     private fun saveAndBindObjectArrays(objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>>) {
         if (objectArrayProperties.isEmpty()) return
-        val entities = ArrayList<JdsEntity>()
-        val record = SimpleIntegerProperty(0)
+        val entities = ConcurrentLinkedQueue<JdsEntity>()
+        var record = 0
         val uuidToFieldMap = HashMap<String, Long>()
-        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields) {
-            for ((parentCompositeKey, entityCollections) in objectArrayProperties) {
-                for ((key, entityCollection) in entityCollections) {
-                    record.set(0)
+        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
+            objectArrayProperties.values.parallelStream().forEach {
+                it.forEach { key, entityCollection ->
                     entityCollection.forEach { jdsEntity ->
                         uuidToFieldMap[jdsEntity.overview.uuid] = key.fieldEntity.id
                         entities.add(jdsEntity)
-                        record.set(record.get() + 1)
+                        record++
                         if (jdsDb.options.isPrintingOutput)
-                            println("Binding array object ${record.get()}")
+                            println("Binding array object $record")
                     }
                 }
             }
-        }
 
-        //bind children below
-        //If a parent doesn't have this property everything will be fine, as it wont be loaded
-        //thus the delete call will not be executed
-        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields) {
             val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
             val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
             for (jdsEntity in entities) {
@@ -1047,28 +1041,22 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     private fun saveAndBindObjects(objectProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>) {
         if (objectProperties.isEmpty()) return //prevent stack overflow :)
-        val record = SimpleIntegerProperty(0)
-        val jdsEntities = ArrayList<JdsEntity>()
+        var record = 0
+        val jdsEntities = ConcurrentLinkedQueue<JdsEntity>()
         val uuidToFieldMap = HashMap<String, Long>()
 
-        if (jdsDb.options.isWritingToPrimaryDataTables) {
-            for ((parentuuid, value) in objectProperties) {
-                for ((key, value1) in value) {
-                    record.set(0)
-                    val jdsEntity = value1.get()
+        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
+            objectProperties.values.parallelStream().forEach {
+                it.forEach { key, objectProperty ->
+                    val jdsEntity = objectProperty.get()
                     jdsEntities.add(jdsEntity)
-                    uuidToFieldMap[value1.get().overview.uuid] = key.fieldEntity.id
-                    record.set(record.get() + 1)
+                    uuidToFieldMap[objectProperty.get().overview.uuid] = key.fieldEntity.id
+                    record++
                     if (jdsDb.options.isPrintingOutput)
-                        println("Binding object ${record.get()}")
+                        println("Binding object $record")
                 }
             }
-        }
 
-        //bind children below
-        //If a parent doesn't have this property everything will be fine, as it wont be loaded
-        //thus the delete call will not be executed
-        if (jdsDb.options.isWritingToPrimaryDataTables) {
             val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
             val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
             for (jdsEntity in jdsEntities) {

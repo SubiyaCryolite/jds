@@ -12,7 +12,7 @@ AS
     MERGE jds_entity_overview AS dest
     USING (VALUES
       (@composite_key, @uuid, @uuid_location, @uuid_location_version, @parent_uuid, @entity_id, @entity_version, @live,
-       @last_edit)) AS src(composite_key, uuid, uuid_location, uuid_location_version, p_parent_uuid, entity_id,
+       @last_edit)) AS src(composite_key, uuid, uuid_location, uuid_location_version, parent_uuid, entity_id,
           entity_version, live, last_edit)
     ON (src.composite_key = dest.composite_key)
     WHEN MATCHED THEN
