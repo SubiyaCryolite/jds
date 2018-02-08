@@ -792,16 +792,19 @@ abstract class JdsEntity : IJdsEntity {
      * @param step
      * @param saveContainer
      */
-    internal fun bindChildren() {
+    internal fun bindChildrenAndUpdateLastEdit() {
+        overview.lastEdit = LocalDateTime.now()
         objectArrayProperties.forEach { _, value ->
             value.forEach {
                 it.overview.parentCompositeKey = overview.compositeKey
                 it.overview.parentUuid = overview.uuid
+                it.overview.lastEdit = overview.lastEdit
             }
         }
         objectProperties.forEach { _, value ->
             value.value.overview.parentCompositeKey = overview.compositeKey
             value.value.overview.parentUuid = overview.uuid
+            value.value.overview.lastEdit = overview.lastEdit
         }
     }
 

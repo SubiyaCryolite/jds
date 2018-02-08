@@ -31,7 +31,10 @@ open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, altern
         connection.autoCommit = false
         alternateConnections.forEach { it.value.autoCommit = false }
 
-        statements.values.forEach { it.executeBatch() }
+        statements.values.forEach {
+            it.executeBatch()
+            it.clearBatch()
+        }
 
         connection.commit()
         alternateConnections.forEach { it.value.commit() }

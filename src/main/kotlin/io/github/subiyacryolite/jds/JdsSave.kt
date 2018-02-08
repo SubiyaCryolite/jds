@@ -13,8 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
@@ -78,7 +76,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     override fun call(): Boolean {
         val allEntities = buildSequence { entities.forEach { yieldAll(it.getAllEntities()) } }
-        saveOverviews(allEntities)
         try {
             val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
             allEntities.chunked(actualBatchSize).forEachIndexed { step, it ->
@@ -110,7 +107,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
             batchEntities.forEach {
-                it.bindChildren()
+                it.bindChildrenAndUpdateLastEdit()
+                saveOverview(it)
                 if (jdsDb.options.isWritingToPrimaryDataTables) {
                     //time constraints
                     saveDateConstructs(it)
@@ -182,39 +180,24 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param overviews
      */
     @Throws(SQLException::class)
-    private fun saveOverviews(overviews: Sequence<JdsEntity>) = try {
-        val saveOverview = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverview()) else NamedPreparedStatement(connection, jdsDb.saveOverview())
-        val saveOverviewInheritance = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverviewInheritance()) else NamedPreparedStatement(connection, jdsDb.saveOverviewInheritance())
-        var total = 0
-        overviews.forEach {
-            //Entity Overview
-            saveOverview.setString("compositeKey", it.overview.compositeKey)
-            saveOverview.setString("uuid", it.overview.uuid)
-            saveOverview.setString("uuidLocation", it.overview.uuidLocation)
-            saveOverview.setInt("uuidLocationVersion", it.overview.uuidLocationVersion)
-            saveOverview.setLong("entityId", it.overview.entityId)
-            saveOverview.setBoolean("live", it.overview.live)
-            saveOverview.setString("parentUuid", it.overview.parentUuid)
-            saveOverview.setTimestamp("lastEdit", Timestamp.valueOf(it.overview.lastEdit))
-            saveOverview.setLong("entityVersion", it.overview.entityVersion) //always update date modified!!!
-            saveOverview.addBatch()
-            //Entity Inheritance
-            saveOverviewInheritance.setString("uuid", it.overview.compositeKey)
-            saveOverviewInheritance.setLong("entityId", it.overview.entityId)
-            saveOverviewInheritance.addBatch()
-            total++
-        }
-
-        saveOverview.executeBatch()
-        saveOverviewInheritance.executeBatch()
-
-        saveOverview.close()
-        saveOverviewInheritance.close()
-
-        if (jdsDb.options.isPrintingOutput) {
-            println("Saving $total overview record(s)")
-        } else {
-        }
+    private fun saveOverview(entity: JdsEntity) = try {
+        val saveOverview = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
+        val saveOverviewInheritance = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
+        //Entity Overview
+        saveOverview.setString("compositeKey", entity.overview.compositeKey)
+        saveOverview.setString("uuid", entity.overview.uuid)
+        saveOverview.setString("uuidLocation", entity.overview.uuidLocation)
+        saveOverview.setInt("uuidLocationVersion", entity.overview.uuidLocationVersion)
+        saveOverview.setLong("entityId", entity.overview.entityId)
+        saveOverview.setBoolean("live", entity.overview.live)
+        saveOverview.setString("parentUuid", entity.overview.parentUuid)
+        saveOverview.setTimestamp("lastEdit", Timestamp.valueOf(entity.overview.lastEdit))
+        saveOverview.setLong("entityVersion", entity.overview.entityVersion) //always update date modified!!!
+        saveOverview.addBatch()
+        //Entity Inheritance
+        saveOverviewInheritance.setString("uuid", entity.overview.compositeKey)
+        saveOverviewInheritance.setLong("entityId", entity.overview.entityId)
+        saveOverviewInheritance.addBatch()
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
@@ -647,11 +630,13 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
         entity.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
             jdseEntityCollection.forEach {
+                //ensure overview exists beforehand
+                saveOverview(it)
                 //delete all entries of this field
                 clearOldBindings.setString(1, it.overview.parentCompositeKey)
                 clearOldBindings.setLong(2, jdsFieldEnum.fieldEntity.id)
                 clearOldBindings.addBatch()
-                //
+                //add new binding
                 writeNewBindings.setString(1, it.overview.parentCompositeKey)
                 writeNewBindings.setString(2, it.overview.compositeKey)
                 writeNewBindings.setLong(3, jdsFieldEnum.fieldEntity.id)
@@ -672,6 +657,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
         entity.objectProperties.forEach { key, objectProperty ->
             val jdsEntity = objectProperty.get()
+            //overview first
+            saveOverview(jdsEntity)
             //delete all entries of this field
             clearOldBindings.setString(1, jdsEntity.overview.parentCompositeKey)
             clearOldBindings.setLong(2, key.fieldEntity.id)
