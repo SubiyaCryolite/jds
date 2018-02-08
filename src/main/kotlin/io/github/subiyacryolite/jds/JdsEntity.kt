@@ -808,7 +808,7 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * @param embeddedObject
      */
-    internal fun bindChildren(embeddedObject: JdsEmbeddedObject) {
+    internal fun assign(embeddedObject: JdsEmbeddedObject) {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
