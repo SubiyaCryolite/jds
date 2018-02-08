@@ -58,8 +58,6 @@ class JdsSaveContainer {
     val enumCollections: MutableList<HashMap<String, HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>>>> = ArrayList()
     //objects
     val objects: MutableList<HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>> = ArrayList()
-    //overviews
-    val overviews: MutableList<HashSet<IJdsOverview>> = LinkedList()
 
     internal fun reset() {
         //time constructs
@@ -94,8 +92,6 @@ class JdsSaveContainer {
         enumCollections.clear()
         //objects
         objects.clear()
-        //overviews
-        overviews.clear()
     }
 
     internal fun reset(step: Int) {
@@ -131,7 +127,5 @@ class JdsSaveContainer {
         enumCollections[step].clear()
         //objects
         objects[step].clear()
-        //overviews
-        overviews[step].clear()
     }
 }

@@ -44,37 +44,37 @@ import kotlin.coroutines.experimental.buildSequence
 abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
-    private val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
-    private val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
-    private val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
-    private val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
-    private val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = HashMap()
-    private val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
-    private val periodProperties: HashMap<Long, ObjectProperty<Period>> = HashMap()
-    private val durationProperties: HashMap<Long, ObjectProperty<Duration>> = HashMap()
+    internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = HashMap()
+    internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val periodProperties: HashMap<Long, ObjectProperty<Period>> = HashMap()
+    internal val durationProperties: HashMap<Long, ObjectProperty<Duration>> = HashMap()
     //strings
-    private val stringProperties: HashMap<Long, StringProperty> = HashMap()
+    internal val stringProperties: HashMap<Long, StringProperty> = HashMap()
     //numeric
-    private val floatProperties: HashMap<Long, WritableValue<Float>> = HashMap()
-    private val doubleProperties: HashMap<Long, WritableValue<Double>> = HashMap()
-    private val booleanProperties: HashMap<Long, WritableValue<Boolean>> = HashMap()
-    private val longProperties: HashMap<Long, WritableValue<Long>> = HashMap()
-    private val integerProperties: HashMap<Long, WritableValue<Int>> = HashMap()
+    internal val floatProperties: HashMap<Long, WritableValue<Float>> = HashMap()
+    internal val doubleProperties: HashMap<Long, WritableValue<Double>> = HashMap()
+    internal val booleanProperties: HashMap<Long, WritableValue<Boolean>> = HashMap()
+    internal val longProperties: HashMap<Long, WritableValue<Long>> = HashMap()
+    internal val integerProperties: HashMap<Long, WritableValue<Int>> = HashMap()
     //arrays
-    private val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
-    private val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
-    private val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
-    private val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
-    private val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
-    private val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
-    private val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
+    internal val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
+    internal val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
+    internal val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
+    internal val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
+    internal val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
+    internal val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
+    internal val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
     //enumProperties
-    private val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>> = HashMap()
-    private val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>> = HashMap()
+    internal val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>> = HashMap()
+    internal val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>> = HashMap()
     //objects
-    private val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
+    internal val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
     //blobs
-    private val blobProperties: HashMap<Long, BlobProperty> = HashMap()
+    internal val blobProperties: HashMap<Long, BlobProperty> = HashMap()
 
 
     init {
@@ -792,48 +792,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param step
      * @param saveContainer
      */
-    internal fun assign(step: Int, saveContainer: JdsSaveContainer) {
-        //==============================================
-        //PRIMITIVES
-        //==============================================
-        saveContainer.booleanProperties[step][overview.compositeKey] = booleanProperties
-        saveContainer.stringProperties[step][overview.compositeKey] = stringProperties
-        saveContainer.floatProperties[step][overview.compositeKey] = floatProperties
-        saveContainer.doubleProperties[step][overview.compositeKey] = doubleProperties
-        saveContainer.longProperties[step][overview.compositeKey] = longProperties
-        saveContainer.integerProperties[step][overview.compositeKey] = integerProperties
-        //==============================================
-        //Dates & Time
-        //==============================================
-        saveContainer.localDateTimeProperties[step][overview.compositeKey] = localDateTimeProperties
-        saveContainer.zonedDateTimeProperties[step][overview.compositeKey] = zonedDateTimeProperties
-        saveContainer.localTimeProperties[step][overview.compositeKey] = localTimeProperties
-        saveContainer.localDateProperties[step][overview.compositeKey] = localDateProperties
-        saveContainer.monthDayProperties[step][overview.compositeKey] = monthDayProperties
-        saveContainer.yearMonthProperties[step][overview.compositeKey] = yearMonthProperties
-        saveContainer.periodProperties[step][overview.compositeKey] = periodProperties
-        saveContainer.durationProperties[step][overview.compositeKey] = durationProperties
-        //==============================================
-        //BLOB
-        //==============================================
-        saveContainer.blobProperties[step][overview.compositeKey] = blobProperties
-        //==============================================
-        //Enums
-        //==============================================
-        saveContainer.enumProperties[step][overview.compositeKey] = enumProperties
-        saveContainer.enumCollections[step][overview.compositeKey] = enumCollectionProperties
-        //==============================================
-        //ARRAYS
-        //==============================================
-        saveContainer.stringCollections[step][overview.compositeKey] = stringArrayProperties
-        saveContainer.localDateTimeCollections[step][overview.compositeKey] = dateTimeArrayProperties
-        saveContainer.floatCollections[step][overview.compositeKey] = floatArrayProperties
-        saveContainer.doubleCollections[step][overview.compositeKey] = doubleArrayProperties
-        saveContainer.longCollections[step][overview.compositeKey] = longArrayProperties
-        saveContainer.integerCollections[step][overview.compositeKey] = integerArrayProperties
-        //==============================================
-        //EMBEDDED OBJECTS
-        //==============================================
+    internal fun bindChildren() {
         objectArrayProperties.forEach { _, value ->
             value.forEach {
                 it.overview.parentCompositeKey = overview.compositeKey
@@ -844,14 +803,12 @@ abstract class JdsEntity : IJdsEntity {
             value.value.overview.parentCompositeKey = overview.compositeKey
             value.value.overview.parentUuid = overview.uuid
         }
-        saveContainer.objectCollections[step][overview.compositeKey] = objectArrayProperties
-        saveContainer.objects[step][overview.compositeKey] = objectProperties
     }
 
     /**
      * @param embeddedObject
      */
-    internal fun assign(embeddedObject: JdsEmbeddedObject) {
+    internal fun bindChildren(embeddedObject: JdsEmbeddedObject) {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================

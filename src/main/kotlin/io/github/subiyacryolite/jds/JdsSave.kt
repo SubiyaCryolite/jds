@@ -19,20 +19,13 @@ import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments
-import javafx.beans.property.BlobProperty
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.StringProperty
-import javafx.beans.value.WritableValue
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.*
-import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 import kotlin.coroutines.experimental.buildSequence
@@ -40,7 +33,7 @@ import kotlin.coroutines.experimental.buildSequence
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val recursiveInnerCall: Boolean, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
+class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
 
     private val jdsSaveEvents = LinkedList<JdsSaveEvent>()
 
@@ -74,7 +67,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, batchSize: Int) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities, false)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, batchSize: Int) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities)
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -83,142 +76,76 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     @Throws(Exception::class)
     override fun call(): Boolean {
-        val saveContainer = JdsSaveContainer()
-        val batches = LinkedList<LinkedList<JdsEntity>>()
         val allEntities = buildSequence { entities.forEach { yieldAll(it.getAllEntities()) } }
-
-        setupBatches(batchSize, allEntities, saveContainer, batches)
-        val steps = batches.size
-        batches.forEachIndexed { step, batch ->
-            saveInner(batch, saveContainer, step, steps, allEntities)
-            saveContainer.reset(step)//free mem
-            if (jdsDb.options.isPrintingOutput)
-                println("Processed batch [$step of $steps]")
+        saveOverviews(allEntities)
+        try {
+            val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
+            allEntities.chunked(actualBatchSize).forEach {
+                saveInner(it)
+                if (jdsDb.options.isPrintingOutput)
+                    println("Processing saves. Step $")
+            }
+        } catch (ex: Exception) {
+            throw ex
+        } finally {
+            jdsSaveEvents.forEach { it.onSave(allEntities.asIterable(), connection) }
+            onPreSaveEventArguments.closeBatches()
+            onPostSaveEventArguments.closeBatches()
+            alternateConnections.forEach { it.value.close() }
+            if (closeConnection)
+                connection.close()
         }
-        saveContainer.reset()//free mem
         return true
     }
 
     /**
-     * @param batchSize
-     * @param entities
-     * @param container
      * @param batchEntities
-     */
-    private fun setupBatches(batchSize: Int, entities: Sequence<JdsEntity>, container: JdsSaveContainer, batchEntities: MutableList<LinkedList<JdsEntity>>) {
-        //default bach is 0 or -1 which means one large chunk. Anything above is a single batch
-        entities.forEachIndexed { iteration, it ->
-            if (batchSize > 0 && iteration % batchSize == 0) {
-                createBatchCollection(container, batchEntities)
-            } else if (batchSize <= 0 && iteration == 0)
-                createBatchCollection(container, batchEntities)
-            batchEntities[batchEntities.size - 1].add(it)
-        }
-    }
-
-    /**
-     * @param saveContainer
-     * @param batchEntities
-     */
-    private fun createBatchCollection(saveContainer: JdsSaveContainer, batchEntities: MutableList<LinkedList<JdsEntity>>) {
-        batchEntities.add(LinkedList())
-        saveContainer.overviews.add(HashSet())
-        //time constructs
-        saveContainer.localDateTimeProperties.add(HashMap())
-        saveContainer.zonedDateTimeProperties.add(HashMap())
-        saveContainer.localTimeProperties.add(HashMap())
-        saveContainer.localDateProperties.add(HashMap())
-        saveContainer.monthDayProperties.add(HashMap())
-        saveContainer.yearMonthProperties.add(HashMap())
-        saveContainer.periodProperties.add(HashMap())
-        saveContainer.durationProperties.add(HashMap())
-        //primitives
-        saveContainer.booleanProperties.add(HashMap())
-        saveContainer.floatProperties.add(HashMap())
-        saveContainer.doubleProperties.add(HashMap())
-        saveContainer.longProperties.add(HashMap())
-        saveContainer.integerProperties.add(HashMap())
-        //string
-        saveContainer.stringProperties.add(HashMap())
-        //blob
-        saveContainer.blobProperties.add(HashMap())
-        //arrays
-        saveContainer.stringCollections.add(HashMap())
-        saveContainer.localDateTimeCollections.add(HashMap())
-        saveContainer.floatCollections.add(HashMap())
-        saveContainer.doubleCollections.add(HashMap())
-        saveContainer.longCollections.add(HashMap())
-        saveContainer.integerCollections.add(HashMap())
-        //enumProperties
-        saveContainer.enumProperties.add(HashMap())
-        saveContainer.enumCollections.add(HashMap())
-        //objects
-        saveContainer.objects.add(HashMap())
-        //object arrays
-        saveContainer.objectCollections.add(HashMap())
-    }
-
-    /**
-     * @param batchEntities
-     * @param saveContainer
-     * @param currentStep
-     * @param totalSteps
+     * @throws Exception
      */
     @Throws(Exception::class)
-    private fun saveInner(batchEntities: Iterable<JdsEntity>, saveContainer: JdsSaveContainer, currentStep: Int, totalSteps: Int, allEntities: Sequence<JdsEntity>) {
-
-        //share one connection for raw saves, helps with performance
-        val finalStep = !recursiveInnerCall && currentStep == totalSteps - 1
+    private fun saveInner(batchEntities: Iterable<JdsEntity>) {
         try {
-            //always save overviews first
-            if (jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues || jdsDb.options.isWritingToPrimaryDataTables) {
-                batchEntities.forEach {
-                    saveContainer.overviews[currentStep].add(it.overview)
-                    it.assign(currentStep, saveContainer)
-                }
-                if (currentStep == 0) //if first save capture ALL overviews beforehand so that bindings work flawlessly
-                    saveOverviews(allEntities)
-            }
-
             //ensure that overviews are submitted before handing over to listeners
             batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
 
-            if (jdsDb.options.isWritingToPrimaryDataTables) {
-                //time constraints
-                saveDateConstructs(saveContainer.monthDayProperties[currentStep],
-                        saveContainer.yearMonthProperties[currentStep],
-                        saveContainer.periodProperties[currentStep],
-                        saveContainer.durationProperties[currentStep])
-                saveDatesAndDateTimes(saveContainer.localDateTimeProperties[currentStep], saveContainer.localDateProperties[currentStep])
-                saveZonedDateTimes(saveContainer.zonedDateTimeProperties[currentStep])
-                saveTimes(saveContainer.localTimeProperties[currentStep])
-                //primitives, can be null
-                saveBooleans(saveContainer.booleanProperties[currentStep])
-                saveLongs(saveContainer.longProperties[currentStep])
-                saveDoubles(saveContainer.doubleProperties[currentStep])
-                saveIntegers(saveContainer.integerProperties[currentStep])
-                saveFloats(saveContainer.floatProperties[currentStep])
-                //strings never null
-                saveStrings(saveContainer.stringProperties[currentStep])
-                //blobs
-                saveBlobs(saveContainer.blobProperties[currentStep])
-                //enumProperties
-                saveEnums(saveContainer.enumProperties[currentStep])
+            batchEntities.forEach {
+                it.bindChildren()
+                if (jdsDb.options.isWritingToPrimaryDataTables) {
+                    //time constraints
+                    saveDateConstructs(it)
+                    saveDatesAndDateTimes(it)
+                    saveZonedDateTimes(it)
+                    saveTimes(it)
+                    //primitives, can be null
+                    saveBooleans(it)
+                    saveLongs(it)
+                    saveDoubles(it)
+                    saveIntegers(it)
+                    saveFloats(it)
+                    //strings never null
+                    saveStrings(it)
+                    //blobs
+                    saveBlobs(it)
+                    //enumProperties
+                    saveEnums(it)
+                }
+                if (jdsDb.options.isWritingArrayValues) {
+                    //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
+                    saveArrayDates(it)
+                    saveArrayStrings(it)
+                    saveArrayLongs(it)
+                    saveArrayDoubles(it)
+                    saveArrayIntegers(it)
+                    saveArrayFloats(it)
+                    saveEnumCollections(it)
+                }
+                //objects and object arrays
+                //object entity overviews and entity bindings are ALWAYS persisted
+                if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
+                    saveAndBindObjects(it)
+                    saveAndBindObjectArrays(it)
+                }
             }
-            if (jdsDb.options.isWritingArrayValues) {
-                //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
-                saveArrayDates(saveContainer.localDateTimeCollections[currentStep])
-                saveArrayStrings(saveContainer.stringCollections[currentStep])
-                saveArrayLongs(saveContainer.longCollections[currentStep])
-                saveArrayDoubles(saveContainer.doubleCollections[currentStep])
-                saveArrayIntegers(saveContainer.integerCollections[currentStep])
-                saveArrayFloats(saveContainer.floatCollections[currentStep])
-                saveEnumCollections(saveContainer.enumCollections[currentStep])
-            }
-            //objects and object arrays
-            //object entity overviews and entity bindings are ALWAYS persisted
-            saveAndBindObjects(saveContainer.objects[currentStep])
-            saveAndBindObjectArrays(saveContainer.objectCollections[currentStep])
 
             batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
 
@@ -235,15 +162,6 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             onPostSaveEventArguments.executeBatches()
         } catch (ex: Exception) {
             throw ex
-        } finally {
-            if (finalStep) {
-                jdsSaveEvents.forEach { it.onSave(batchEntities, connection) }
-                onPreSaveEventArguments.closeBatches()
-                onPostSaveEventArguments.closeBatches()
-                if (closeConnection)
-                    connection.close()
-                alternateConnections.forEach { it.value.close() }
-            }
         }
     }
 
@@ -291,361 +209,188 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-
-     * @param blobProperties
+     * @param entity
      */
-    private fun saveBlobs(blobProperties: HashMap<String, HashMap<Long, BlobProperty>>) = try {
-        var record = 0
+    private fun saveBlobs(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
-        for ((uuid, value) in blobProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, blobProperty) in value) {
-                innerRecord++
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setBytes("value", blobProperty.get()!!)
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Blob field [$innerRecord of $innerRecordSize]")
-            }
+        entity.blobProperties.forEach { fieldId, blobProperty ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setBytes("value", blobProperty.get()!!)
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param batch
+     * @param entity
      */
-    private fun saveBooleans(batch: HashMap<String, HashMap<Long, WritableValue<Boolean>>>) = try {
-        var record = 0
+    private fun saveBooleans(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
-        for ((uuid, batchEntries) in batch) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = batchEntries.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, entry) in batchEntries) {
-                innerRecord++
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Boolean field [$innerRecord of $innerRecordSize]")
-            }
+        entity.booleanProperties.forEach { fieldId, entry ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param batch
+     * @param entity
      */
-    private fun saveIntegers(batch: HashMap<String, HashMap<Long, WritableValue<Int>>>) = try {
-        var record = 0
+    private fun saveIntegers(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
-        for ((uuid, batchEntries) in batch) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = batchEntries.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, entry) in batchEntries) {
-                innerRecord++
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Integer field [$innerRecord of $innerRecordSize]")
-            }
+        entity.integerProperties.forEach { fieldId, entry ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param batch
+     * @param entity
      */
-    private fun saveFloats(batch: HashMap<String, HashMap<Long, WritableValue<Float>>>) = try {
-        var record = 0
+    private fun saveFloats(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
-        for ((uuid, batchEntries) in batch) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = batchEntries.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, entry) in batchEntries) {
-                innerRecord++
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    System.out.printf("Updating record $record. Float field [$innerRecord of $innerRecordSize]")
-            }
+        entity.floatProperties.forEach { fieldId, entry ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param batch
+     * @param entity
      */
-    private fun saveDoubles(batch: HashMap<String, HashMap<Long, WritableValue<Double>>>) = try {
-        var record = 0
+    private fun saveDoubles(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
-        for ((uuid, batchEntries) in batch) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = batchEntries.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, entry) in batchEntries) {
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record $record. Double field [$innerRecord of $innerRecordSize]")
-            }
+        entity.doubleProperties.forEach { fieldId, entry ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param batch
+     * @param entity
      */
-    private fun saveLongs(batch: HashMap<String, HashMap<Long, WritableValue<Long>>>) = try {
-        var record = 0
+    private fun saveLongs(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
-        for ((uuid, batchEntries) in batch) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = batchEntries.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, entry) in batchEntries) {
-                innerRecord++
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    System.out.printf("Updating record [$record]. Long field [$innerRecord of $innerRecordSize]")
-            }
+        entity.longProperties.forEach { fieldId, entry ->
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param stringProperties
+     * @param entity
      */
-    private fun saveStrings(stringProperties: HashMap<String, HashMap<Long, StringProperty>>) = try {
-        var record = 0
+    private fun saveStrings(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
-        for ((uuid, value1) in stringProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value1.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, value2) in value1) {
-                innerRecord++
-                val value = value2.get()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setString("value", value)
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Text field [$innerRecord of $innerRecordSize]")
-            }
+        entity.stringProperties.forEach { fieldId, value2 ->
+            val value = value2.get()
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setString("value", value)
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param monthDayProperties
-     * @param yearMonthProperties
-     * @param periodProperties
-     * @param durationProperties
+     * @param entity
      */
-    private fun saveDateConstructs(
-            monthDayProperties: HashMap<String, HashMap<Long, ObjectProperty<MonthDay>>>,
-            yearMonthProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>,
-            periodProperties: HashMap<String, HashMap<Long, ObjectProperty<Period>>>,
-            durationProperties: HashMap<String, HashMap<Long, ObjectProperty<Duration>>>) = try {
-        var record = 0
+    private fun saveDateConstructs(entity: JdsEntity) = try {
         val upsertText = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
         val upsertLong = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
-        for ((uuid, hashMap) in monthDayProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = hashMap.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, monthDayProperty) in hashMap) {
-                innerRecord++
-                val monthDay = monthDayProperty.get()
-                val value = monthDay.toString()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsertText.setString("uuid", uuid)
-                    upsertText.setLong("fieldId", fieldId)
-                    upsertText.setString("value", value)
-                    upsertText.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. MonthDay field [$innerRecord of $innerRecordSize]")
-            }
+        entity.monthDayProperties.forEach { fieldId, monthDayProperty ->
+            val monthDay = monthDayProperty.get()
+            val value = monthDay.toString()
+            upsertText.setString("uuid", entity.overview.compositeKey)
+            upsertText.setLong("fieldId", fieldId)
+            upsertText.setString("value", value)
+            upsertText.addBatch()
         }
-
-        for ((uuid, hashMap) in yearMonthProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = hashMap.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, yearMonthProperty) in hashMap) {
-                innerRecord++
-                val yearMonth = yearMonthProperty.get() as YearMonth
-                val value = yearMonth.toString()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsertText.setString("uuid", uuid)
-                    upsertText.setLong("fieldId", fieldId)
-                    upsertText.setString("value", value)
-                    upsertText.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. YearMonth field [$innerRecord of $innerRecordSize]")
-            }
+        entity.yearMonthProperties.forEach { fieldId, yearMonthProperty ->
+            val yearMonth = yearMonthProperty.get() as YearMonth
+            val value = yearMonth.toString()
+            upsertText.setString("uuid", entity.overview.compositeKey)
+            upsertText.setLong("fieldId", fieldId)
+            upsertText.setString("value", value)
+            upsertText.addBatch()
         }
-
-        for ((uuid, hashMap) in periodProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = hashMap.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, periodProperty) in hashMap) {
-                innerRecord++
-                val period = periodProperty.get()
-                val value = period.toString()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsertText.setString("uuid", uuid)
-                    upsertText.setLong("fieldId", fieldId)
-                    upsertText.setString("value", value)
-                    upsertText.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Period field [$innerRecord of $innerRecordSize]")
-            }
+        entity.periodProperties.forEach { fieldId, periodProperty ->
+            val period = periodProperty.get()
+            val value = period.toString()
+            upsertText.setString("uuid", entity.overview.compositeKey)
+            upsertText.setLong("fieldId", fieldId)
+            upsertText.setString("value", value)
+            upsertText.addBatch()
         }
-
-        for ((uuid, hashMap) in durationProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = hashMap.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, durationProperty) in hashMap) {
-                innerRecord++
-                val duration = durationProperty.get()
-                val value = duration.toNanos()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsertLong.setString("uuid", uuid)
-                    upsertLong.setLong("fieldId", fieldId)
-                    upsertLong.setLong("value", value)
-                    upsertLong.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Duration field [$innerRecord of $innerRecordSize]")
-            }
+        entity.durationProperties.forEach { fieldId, durationProperty ->
+            val duration = durationProperty.get()
+            val value = duration.toNanos()
+            upsertLong.setString("uuid", entity.overview.compositeKey)
+            upsertLong.setLong("fieldId", fieldId)
+            upsertLong.setLong("value", value)
+            upsertLong.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param localDateTimeProperties
-     * @param localDateProperties
-
+     * @param entity
      */
-    private fun saveDatesAndDateTimes(localDateTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>, localDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) = try {
-        var record = 0
+    private fun saveDatesAndDateTimes(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
-        for ((uuid, value) in localDateTimeProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, value1) in value) {
-                innerRecord++
-                val localDateTime = value1.get() as LocalDateTime
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setTimestamp("value", Timestamp.valueOf(localDateTime))
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. LocalDateTime field [$innerRecord of $innerRecordSize]")
-            }
+        entity.localDateTimeProperties.forEach { fieldId, value1 ->
+            val localDateTime = value1.get() as LocalDateTime
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setTimestamp("value", Timestamp.valueOf(localDateTime))
+            upsert.addBatch()
         }
-        for ((uuid, value) in localDateProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, value1) in value) {
-                innerRecord++
-                val localDate = value1.get() as LocalDate
-                upsert.setString("uuid", uuid)
-                upsert.setLong("fieldId", fieldId)
-                upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()))
-                upsert.addBatch()
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. LocalDate field [$innerRecord of $innerRecordSize]")
-            }
+        entity.localDateProperties.forEach { fieldId, value1 ->
+            val localDate = value1.get() as LocalDate
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()))
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param localTimeProperties
-
+     * @param entity
      */
-    private fun saveTimes(localTimeProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) = try {
-        var record = 0
+    private fun saveTimes(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
-        for ((uuid, value) in localTimeProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, value1) in value) {
-                innerRecord++
-                val localTime = value1.get() as LocalTime
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setLocalTime("value", localTime, jdsDb)
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. LocalTime field [$innerRecord of $innerRecordSize]")
+        entity.localTimeProperties.forEach { fieldId, value1 ->
+            val localTime = value1.get() as LocalTime
+            if (jdsDb.options.isWritingToPrimaryDataTables) {
+                upsert.setString("uuid", entity.overview.compositeKey)
+                upsert.setLong("fieldId", fieldId)
+                upsert.setLocalTime("value", localTime, jdsDb)
+                upsert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -653,57 +398,32 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param zonedDateProperties
+     * @param entity
      */
-    private fun saveZonedDateTimes(zonedDateProperties: HashMap<String, HashMap<Long, ObjectProperty<Temporal>>>) = try {
-        var record = 0
+    private fun saveZonedDateTimes(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
-        for ((uuid, value) in zonedDateProperties) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value.size
-            if (innerRecordSize == 0) continue
-            for ((fieldId, value1) in value) {
-                innerRecord++
-                val zonedDateTime = value1.get() as ZonedDateTime
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", fieldId)
-                    upsert.setZonedDateTime("value", zonedDateTime, jdsDb)
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    System.out.printf("Updating record [$record]. ZonedDateTime field [$innerRecord of $innerRecordSize]")
-            }
+        entity.zonedDateTimeProperties.forEach { fieldId, value1 ->
+            val zonedDateTime = value1.get() as ZonedDateTime
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", fieldId)
+            upsert.setZonedDateTime("value", zonedDateTime, jdsDb)
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
 
     /**
-     * @param enums
-
+     * @param entity
      */
-    private fun saveEnums(enums: HashMap<String, HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>>) = try {
-        var record = 0
+    private fun saveEnums(entity: JdsEntity) = try {
         val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
-        for ((uuid, value1) in enums) {
-            record++
-            var innerRecord = 0
-            val innerRecordSize = value1.size
-            if (innerRecordSize == 0) continue
-            for ((jdsFieldEnum, value2) in value1) {
-                innerRecord++
-                val value = value2.get()
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
-                    upsert.setString("uuid", uuid)
-                    upsert.setLong("fieldId", jdsFieldEnum.field.id)
-                    upsert.setInt("value", jdsFieldEnum.indexOf(value))
-                    upsert.addBatch()
-                }
-                if (jdsDb.options.isPrintingOutput)
-                    println("Updating record [$record]. Enum field [$innerRecord of $innerRecordSize]")
-            }
+        entity.enumProperties.forEach { jdsFieldEnum, value2 ->
+            val value = value2.get()
+            upsert.setString("uuid", entity.overview.compositeKey)
+            upsert.setLong("fieldId", jdsFieldEnum.field.id)
+            upsert.setInt("value", jdsFieldEnum.indexOf(value))
+            upsert.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -711,40 +431,27 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
     /**
      * Save all dates in one go
-     *
-     * @param dateTimeArrayProperties
-
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDates(dateTimeArrayProperties: HashMap<String, HashMap<Long, MutableCollection<LocalDateTime>>>) = try {
+    private fun saveArrayDates(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_date_time_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_date_time_array (sequence, value,field_id, composite_key) VALUES (?,?,?,?)"
 
         val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
-        var record = 0
-        for ((uuid, value) in dateTimeArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {
-                        delete.setLong(1, fieldId)
-                        delete.setString(2, uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt(1, index.get())
-                        insert.setTimestamp(2, Timestamp.valueOf(value))
-                        insert.setLong(3, fieldId)
-                        insert.setString(4, uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. DateTime field [$innerRecord of $innerTotal]")
-                }
+
+        entity.dateTimeArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                delete.setLong(1, fieldId)
+                delete.setString(2, entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setInt(1, index)
+                insert.setTimestamp(2, Timestamp.valueOf(value))
+                insert.setLong(3, fieldId)
+                insert.setString(4, entity.overview.compositeKey)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -756,35 +463,22 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayFloats(floatArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Float>>>) = try {
+    private fun saveArrayFloats(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_float_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_float_array (field_id, composite_key, value, sequence) VALUES (?,?,?,?)"
-
         val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
-        var record = 0
-        for ((uuid, value) in floatArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {//delete
-                        delete.setLong(1, fieldId)
-                        delete.setString(2, uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt(1, index.get())
-                        insert.setObject(2, value) //primitives could be null, default value has meaning
-                        insert.setLong(3, fieldId)
-                        insert.setString(4, uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. Float field [$innerRecord of $innerTotal]")
-                }
+        entity.floatArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                delete.setLong(1, fieldId)
+                delete.setString(2, entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setInt(1, index)
+                insert.setObject(2, value) //primitives could be null, default value has meaning
+                insert.setLong(3, fieldId)
+                insert.setString(4, entity.overview.compositeKey)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -792,40 +486,29 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param integerArrayProperties
-
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5] to [3,4]
      */
-    private fun saveArrayIntegers(integerArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Int>>>) = try {
+    private fun saveArrayIntegers(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
         val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
         var record = 0
-        for ((uuid, value) in integerArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {
-                        //delete
-                        delete.setLong("fieldId", fieldId)
-                        delete.setString("uuid", uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt("sequence", index.get())
-                        insert.setObject("value", value) //primitives could be null, default value has meaning
-                        insert.setLong("fieldId", fieldId)
-                        insert.setString("uuid", uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. Integer field [$innerRecord of $innerTotal]")
-                }
+
+        entity.integerArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                //delete
+                delete.setLong("fieldId", fieldId)
+                delete.setString("uuid", entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setInt("sequence", index)
+                insert.setObject("value", value) //primitives could be null, default value has meaning
+                insert.setLong("fieldId", fieldId)
+                insert.setString("uuid", entity.overview.compositeKey)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -833,39 +516,26 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param doubleArrayProperties
-
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayDoubles(doubleArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Double>>>) = try {
+    private fun saveArrayDoubles(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
         val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
-        var record = 0
-        for ((uuid, value) in doubleArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {
-                        //delete
-                        delete.setLong("fieldId", fieldId)
-                        delete.setString("uuid", uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt("fieldId", index.get())
-                        insert.setObject("uuid", value) //primitives could be null, default value has meaning
-                        insert.setLong("sequence", fieldId)
-                        insert.setString("value", uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. Double field [$innerRecord of $innerTotal]")
-                }
+        entity.doubleArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                //delete
+                delete.setLong("fieldId", fieldId)
+                delete.setString("uuid", entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setLong("fieldId", fieldId)
+                insert.setObject("uuid", value) //primitives could be null, default value has meaning
+                insert.setInt("sequence", index)
+                insert.setString("value", entity.overview.compositeKey)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -873,39 +543,25 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param longArrayProperties
-
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayLongs(longArrayProperties: HashMap<String, HashMap<Long, MutableCollection<Long>>>) = try {
+    private fun saveArrayLongs(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (?,?,?,?)"
-
         val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
-        var record = 0
-        for ((uuid, value) in longArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {//delete
-                        delete.setLong(1, fieldId)
-                        delete.setString(2, uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt(1, index.get())
-                        insert.setObject(2, value) //primitives could be null, default value has meaning
-                        insert.setLong(3, fieldId)
-                        insert.setString(4, uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. Long field [$innerRecord of $innerTotal]")
-                }
+        entity.longArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                delete.setLong(1, fieldId)
+                delete.setString(2, entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setInt(1, index)
+                insert.setObject(2, value) //primitives could be null, default value has meaning
+                insert.setLong(3, fieldId)
+                insert.setString(4, entity.overview.compositeKey)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -913,39 +569,26 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param stringArrayProperties
-
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveArrayStrings(stringArrayProperties: HashMap<String, HashMap<Long, MutableCollection<String>>>) = try {
+    private fun saveArrayStrings(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_text_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
         val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
-        var record = 0
-        for ((uuid, value) in stringArrayProperties) {
-            record++
-            val index = SimpleIntegerProperty(0)
-            for ((fieldId, value1) in value) {
-                val innerRecord = 0
-                val innerTotal = value1.size
-                for (value in value1) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {
-                        //delete
-                        delete.setLong("fieldId", fieldId)
-                        delete.setString("uuid", uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setInt("fieldId", index.get())
-                        insert.setString("uuid", value)
-                        insert.setLong("sequence", fieldId)
-                        insert.setString("value", uuid)
-                        insert.addBatch()
-                    }
-                    index.set(index.get() + 1)
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Inserting array record [$record]. String field [$innerRecord of $innerTotal]")
-                }
+        entity.stringArrayProperties.forEach { fieldId, u ->
+            u.forEachIndexed { index, value ->
+                //delete
+                delete.setLong("fieldId", fieldId)
+                delete.setString("uuid", entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setInt("fieldId", index)
+                insert.setString("uuid", entity.overview.compositeKey)
+                insert.setLong("sequence", fieldId)
+                insert.setString("value", value)
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -953,38 +596,27 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param enumStrings
-
+     *@param entity
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
-    private fun saveEnumCollections(enumStrings: HashMap<String, HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>>>) = try {
-        var record = 0
-        val recordTotal = enumStrings.size
+    private fun saveEnumCollections(entity: JdsEntity) = try {
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
         val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
-        for ((uuid, value) in enumStrings) {
-            record++
-            for ((jdsFieldEnum, value1) in value) {
-                if (value1.isEmpty()) continue
-                for ((sequence, anEnum) in value1.withIndex()) {
-                    if (jdsDb.options.isWritingToPrimaryDataTables) {
-                        //delete
-                        delete.setLong("fieldId", jdsFieldEnum.field.id)
-                        delete.setString("uuid", uuid)
-                        delete.addBatch()
-                        //insert
-                        insert.setLong("fieldId", jdsFieldEnum.field.id)
-                        insert.setString("uuid", uuid)
-                        insert.setInt("sequence", sequence)
-                        insert.setInt("value", jdsFieldEnum.indexOf(anEnum))
-                        insert.addBatch()
-                    }
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Updating enum [$sequence]. Object field [$record of $recordTotal]")
-                }
+        entity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
+            u.forEachIndexed { index, anEnum ->
+                //delete
+                delete.setLong("fieldId", jdsFieldEnum.field.id)
+                delete.setString("uuid", entity.overview.compositeKey)
+                delete.addBatch()
+                //insert
+                insert.setLong("fieldId", jdsFieldEnum.field.id)
+                insert.setString("uuid", entity.overview.compositeKey)
+                insert.setInt("sequence", index)
+                insert.setInt("value", jdsFieldEnum.indexOf(anEnum))
+                insert.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -992,85 +624,53 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     }
 
     /**
-     * @param connection
-     * @param objectArrayProperties
+     * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(objectArrayProperties: HashMap<String, HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>>) {
-        if (objectArrayProperties.isEmpty()) return
-        val entities = ConcurrentLinkedQueue<JdsEntity>()
-        var record = 0
-        val uuidToFieldMap = HashMap<String, Long>()
-        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
-            objectArrayProperties.values.parallelStream().forEach {
-                it.forEach { key, entityCollection ->
-                    entityCollection.forEach { jdsEntity ->
-                        uuidToFieldMap[jdsEntity.overview.uuid] = key.fieldEntity.id
-                        entities.add(jdsEntity)
-                        record++
-                        if (jdsDb.options.isPrintingOutput)
-                            println("Binding array object $record")
-                    }
-                }
-            }
+    private fun saveAndBindObjectArrays(entity: JdsEntity) {
+        if (entity.objectArrayProperties.isEmpty()) return
+        val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
+        val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
 
-            val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
-            for (jdsEntity in entities) {
+        entity.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
+            jdseEntityCollection.forEach {
                 //delete all entries of this field
-                clearOldBindings.setString(1, jdsEntity.overview.parentCompositeKey)
-                clearOldBindings.setLong(2, uuidToFieldMap[jdsEntity.overview.uuid]!!)
+                clearOldBindings.setString(1, it.overview.parentCompositeKey)
+                clearOldBindings.setLong(2, jdsFieldEnum.fieldEntity.id)
                 clearOldBindings.addBatch()
-
-                writeNewBindings.setString(1, jdsEntity.overview.parentCompositeKey)
-                writeNewBindings.setString(2, jdsEntity.overview.compositeKey)
-                writeNewBindings.setLong(3, uuidToFieldMap[jdsEntity.overview.uuid]!!)
-                writeNewBindings.setLong(4, jdsEntity.overview.entityId)
+                //
+                writeNewBindings.setString(1, it.overview.parentCompositeKey)
+                writeNewBindings.setString(2, it.overview.compositeKey)
+                writeNewBindings.setLong(3, jdsFieldEnum.fieldEntity.id)
+                writeNewBindings.setLong(4, it.overview.entityId)
                 writeNewBindings.addBatch()
             }
         }
     }
 
     /**
-     * @param connection
-     * @param objectProperties
+     * @param entity
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(objectProperties: HashMap<String, HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>>) {
-        if (objectProperties.isEmpty()) return //prevent stack overflow :)
-        var record = 0
-        val jdsEntities = ConcurrentLinkedQueue<JdsEntity>()
-        val uuidToFieldMap = HashMap<String, Long>()
-
-        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
-            objectProperties.values.parallelStream().forEach {
-                it.forEach { key, objectProperty ->
-                    val jdsEntity = objectProperty.get()
-                    jdsEntities.add(jdsEntity)
-                    uuidToFieldMap[objectProperty.get().overview.uuid] = key.fieldEntity.id
-                    record++
-                    if (jdsDb.options.isPrintingOutput)
-                        println("Binding object $record")
-                }
-            }
-
-            val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
-            val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
-            for (jdsEntity in jdsEntities) {
-                //delete all entries of this field
-                clearOldBindings.setString(1, jdsEntity.overview.parentCompositeKey)
-                clearOldBindings.setLong(2, uuidToFieldMap[jdsEntity.overview.uuid]!!)
-                clearOldBindings.addBatch()
-
-                writeNewBindings.setString(1, jdsEntity.overview.parentCompositeKey)
-                writeNewBindings.setString(2, jdsEntity.overview.uuid)
-                writeNewBindings.setLong(3, uuidToFieldMap[jdsEntity.overview.uuid]!!)
-                writeNewBindings.setLong(4, jdsEntity.overview.entityId)
-                writeNewBindings.addBatch()
-            }
+    private fun saveAndBindObjects(entity: JdsEntity) {
+        if (entity.objectProperties.isEmpty()) return //prevent stack overflow :)
+        val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
+        val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
+        entity.objectProperties.forEach { key, objectProperty ->
+            val jdsEntity = objectProperty.get()
+            //delete all entries of this field
+            clearOldBindings.setString(1, jdsEntity.overview.parentCompositeKey)
+            clearOldBindings.setLong(2, key.fieldEntity.id)
+            clearOldBindings.addBatch()
+            //add new binding
+            writeNewBindings.setString(1, jdsEntity.overview.parentCompositeKey)
+            writeNewBindings.setString(2, jdsEntity.overview.uuid)
+            writeNewBindings.setLong(3, key.fieldEntity.id)
+            writeNewBindings.setLong(4, jdsEntity.overview.entityId)
+            writeNewBindings.addBatch()
         }
     }
 
