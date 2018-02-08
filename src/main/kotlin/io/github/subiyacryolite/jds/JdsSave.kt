@@ -15,7 +15,6 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
-import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.OnPostSaveEventArguments
 import io.github.subiyacryolite.jds.events.OnPreSaveEventArguments
@@ -27,14 +26,11 @@ import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
 class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
-
-    private val jdsSaveEvents = LinkedList<JdsSaveEvent>()
 
     /**
      * @param jdsDb
@@ -75,7 +71,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     @Throws(Exception::class)
     override fun call(): Boolean {
-        val allEntities = buildSequence { entities.forEach { yieldAll(it.getAllEntities()) } }
+        val allEntities = LinkedList<JdsEntity>()
+        entities.forEach { it.getNestedEntities(allEntities) }
         try {
             val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
             allEntities.chunked(actualBatchSize).forEachIndexed { step, it ->
@@ -86,7 +83,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         } catch (ex: Exception) {
             throw ex
         } finally {
-            jdsSaveEvents.forEach { it.onSave(allEntities.asIterable(), connection) }
+            //jdsSaveEvents.forEach { it.onSave(allEntities.asIterable(), connection) }
             onPreSaveEventArguments.closeBatches()
             onPostSaveEventArguments.closeBatches()
             alternateConnections.forEach { it.value.close() }
@@ -696,10 +693,4 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     fun getOrAddNamedCall(query: String) = onPostSaveEventArguments.getOrAddNamedCall(query)
 
-    /**
-     * Helper method allowing you to add custom logic preceding a normal JDS save event
-     */
-    fun addCustomSaveEvent(jdsSaveEvent: JdsSaveEvent) {
-        jdsSaveEvents.add(jdsSaveEvent)
-    }
 }

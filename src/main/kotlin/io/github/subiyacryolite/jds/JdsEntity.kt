@@ -1183,18 +1183,28 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * Internal helper function that works with all nested objects
      */
-    fun getAllEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity> = buildSequence {
+    fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity> = buildSequence {
         if (includeThisEntity)
             yield(this@JdsEntity)
-        objectProperties.values.forEach { yieldAll(it.value.getAllEntities()) }
-        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.getAllEntities()) } }
+        objectProperties.values.forEach { yieldAll(it.value.getNestedEntities()) }
+        objectArrayProperties.values.forEach { it.forEach { yieldAll(it.getNestedEntities()) } }
+    }
+
+    /**
+     * Internal helper function that works with all nested objects
+     */
+    fun getNestedEntities(collection: MutableCollection<JdsEntity>, includeThisEntity: Boolean = true) {
+        if (includeThisEntity)
+            collection.add(this@JdsEntity)
+        objectProperties.values.forEach { it.value.getNestedEntities(collection) }
+        objectArrayProperties.values.forEach { it.forEach { it.getNestedEntities(collection) } }
     }
 
     /**
      * Set this jds entity and all of its children as live?
      */
     fun setAllLive(live: Boolean) {
-        getAllEntities().forEach { it.overview.live = live }
+        getNestedEntities().forEach { it.overview.live = live }
     }
 
     companion object : Externalizable {
