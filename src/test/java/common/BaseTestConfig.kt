@@ -24,11 +24,47 @@ abstract class BaseTestConfig {
     protected lateinit var jdsDb: JdsDb
 
     init {
-        val configFile = File("dbsettings.properties")
-        if (!configFile.exists()) {
-            Thread.currentThread().contextClassLoader.getResourceAsStream("dbsettings.properties.src").use {
+        val tsqlConfigFile = File("db.tsql.properties")
+        if (!tsqlConfigFile.exists()) {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("tsql.src.properties").use {
                 it.reader().use {
-                    configFile.writeText(it.readText())
+                    tsqlConfigFile.writeText(it.readText())
+                }
+            }
+        }
+
+        val pgConfigFile = File("db.pg.properties")
+        if (!pgConfigFile.exists()) {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("pg.src.properties").use {
+                it.reader().use {
+                    pgConfigFile.writeText(it.readText())
+                }
+            }
+        }
+
+        val oraConfigFile = File("db.ora.properties")
+        if (!oraConfigFile.exists()) {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("ora.src.properties").use {
+                it.reader().use {
+                    oraConfigFile.writeText(it.readText())
+                }
+            }
+        }
+
+        val mysqlConfigFile = File("db.mysql.properties")
+        if (!mysqlConfigFile.exists()) {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("mysql.src.properties").use {
+                it.reader().use {
+                    mysqlConfigFile.writeText(it.readText())
+                }
+            }
+        }
+
+        val mariaConfigFile = File("db.maria.properties")
+        if (!mariaConfigFile.exists()) {
+            Thread.currentThread().contextClassLoader.getResourceAsStream("mysql.src.properties").use {
+                it.reader().use {
+                    mariaConfigFile.writeText(it.readText())
                 }
             }
         }

@@ -13,4 +13,8 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-dbsettings.properties
+db.ora.properties
+db.maria.properties
+db.mysql.properties
+db.pg.properties
+db.tsql.properties

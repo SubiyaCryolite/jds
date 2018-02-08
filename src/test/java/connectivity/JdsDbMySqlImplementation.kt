@@ -22,7 +22,7 @@ class JdsDbMySqlImplementation : JdsDbMySql() {
     override fun getConnection(): Connection {
         Class.forName("com.mysql.cj.jdbc.Driver")
         val properties = Properties()
-        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
+        FileInputStream(File("db.mysql.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties)
     }
 }

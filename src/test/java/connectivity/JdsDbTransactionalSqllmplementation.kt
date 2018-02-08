@@ -22,7 +22,7 @@ class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
     override fun getConnection(): Connection {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
         val properties = Properties()
-        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
+        FileInputStream(File("db.tsql.properties")).use { properties.load(it) }
         //return DriverManager.getConnection("jdbc:sqlserver://BR7INDANA\\SMARTCARE40;databaseName=jds", properties)
         return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
     }

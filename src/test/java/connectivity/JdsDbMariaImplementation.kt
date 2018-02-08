@@ -22,7 +22,7 @@ class JdsDbMariaImplementation : JdsDbMaria() {
     override fun getConnection(): Connection {
         Class.forName("org.mariadb.jdbc.Driver")
         val properties = Properties()
-        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
+        FileInputStream(File("db.maria.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:mariadb://localhost:3307/jds", properties)
     }
 }

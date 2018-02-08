@@ -18,7 +18,7 @@ class JdsDbOracleImplementation : JdsDbOracle() {
     override fun getConnection(): Connection {
         Class.forName("oracle.jdbc.driver.OracleDriver")
         val properties = Properties()
-        FileInputStream(File("dbsettings.properties")).use { properties.load(it) }
+        FileInputStream(File("db.ora.properties")).use { properties.load(it) }
         return DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", properties)
     }
 }
