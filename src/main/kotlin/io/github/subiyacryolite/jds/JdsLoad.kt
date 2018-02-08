@@ -40,9 +40,16 @@ import kotlin.collections.ArrayList
  * @param T
  */
 class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableList<T>> {
-    private val collections = ArrayList<T>()
+
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
     private var filterIds: Iterable<out String> = emptyList()
+
+    companion object {
+        /**
+         * Java supports up to 1000 prepared supportsStatements depending on the driver
+         */
+        const val MAX_BATCH_SIZE = 1000
+    }
 
     /**
      *
@@ -76,11 +83,12 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
 
     @Throws(Exception::class)
     override fun call(): MutableList<T> {
-        val filterBatches = ArrayList(ArrayList<MutableList<String>>())
+        val entitiesToLoad = ArrayList<String>()
         val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
         val entityId = annotation.entityId
-        prepareActionBatches(jdsDb, MAX_BATCH_SIZE, entityId, filterBatches, filterIds)
-        filterBatches.forEach { populateInner(jdsDb, collections, it) }
+        prepareActionBatches(jdsDb, entityId, entitiesToLoad, filterIds)
+        val collections = ArrayList<T>()
+        entitiesToLoad.chunked(MAX_BATCH_SIZE).forEach { populateInner(jdsDb, collections, it) }
         return collections
     }
 
@@ -239,7 +247,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                     val refType = jdsDb.classes[entityId]!!
                     val entity = refType.newInstance()
                     entity.overview.uuid = uuid
-                    entity.overview.uuidLocation = uuidLocation?:"" //oracle treats empty strings as null
+                    entity.overview.uuidLocation = uuidLocation ?: "" //oracle treats empty strings as null
                     entity.overview.uuidLocationVersion = uuidLocationVersion
                     entity.overview.lastEdit = lastEdit.toLocalDateTime()
                     entity.overview.entityVersion = version
@@ -282,8 +290,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 }
             }
         }
-        val batches = createProcessingBatches(uuids)
-        batches.forEach { populateInner(jdsDb, innerObjects, it) }
+        uuids.chunked(MAX_BATCH_SIZE).forEach { populateInner(jdsDb, innerObjects, it) }
     }
 
     /**
@@ -408,27 +415,6 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      */
     private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String): Stream<T> {
         return entities.parallelStream().filter { it.overview.compositeKey == uuid }
-    }
-
-    /**
-     * @param uuids
-     * @return
-     */
-    private fun createProcessingBatches(uuids: Collection<String>): MutableList<MutableList<String>> {
-        val batches = ArrayList<MutableList<String>>()
-        var index = 0
-        var batch = 0
-        for (uuid in uuids) {
-            if (index == MAX_BATCH_SIZE) {
-                batch++
-                index = 0
-            }
-            if (index == 0)
-                batches.add(ArrayList())
-            batches[batch].add(uuid)
-            index++
-        }
-        return batches
     }
 
     /**
@@ -631,19 +617,14 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @param jdsDataBase
      * @param batchSize
      * @param entityId
-     * @param filterBatches
+     * @param entitiesToLoad
      * @param filterUUIDs
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    private fun prepareActionBatches(jdsDataBase: JdsDb, batchSize: Int, entityId: Long, filterBatches: MutableList<MutableList<String>>, filterUUIDs: Iterable<out String>) {
-        var batchIndex = 0
-        var batchContents = 0
-
+    private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<String>, filterUUIDs: Iterable<out String>) {
         val entityAndChildren = ArrayList<Long>()
         entityAndChildren.add(entityId)
-
         val searchByType = filterUUIDs.none()
-
         jdsDataBase.getConnection().use {
             it.prepareStatement("SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?").use {
                 it.setLong(1, entityAndChildren[0])
@@ -663,16 +644,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val loadAllByTypeSql = "SELECT DISTINCT eo.$filterColumn FROM jds_entity_instance ei JOIN jds_entity_overview eo ON ei.entity_composite_key = eo.composite_key WHERE ei.entity_id IN ($entityHeirarchy)"
                 it.prepareStatement(loadAllByTypeSql).use {
                     it.executeQuery().use {
-                        while (it.next()) {
-                            if (batchContents == batchSize) {
-                                batchIndex++
-                                batchContents = 0
-                            }
-                            if (batchContents == 0)
-                                filterBatches.add(ArrayList())
-                            filterBatches[batchIndex].add(it.getString(filterColumn))
-                            batchContents++
-                        }
+                        while (it.next())
+                            entitiesToLoad.add(it.getString(filterColumn))
                     }
                 }
             } else {
@@ -680,22 +653,17 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val loadByUuidSql = "SELECT DISTINCT $filterColumn FROM jds_entity_overview WHERE uuid IN (${quote(filterUUIDs)})"
                 it.prepareStatement(loadByUuidSql).use {
                     it.executeQuery().use {
-                        while (it.next()) {
-                            if (batchContents == batchSize) {
-                                batchIndex++
-                                batchContents = 0
-                            }
-                            if (batchContents == 0)
-                                filterBatches.add(ArrayList())
-                            filterBatches[batchIndex].add(it.getString(filterColumn))
-                            batchContents++
-                        }
+                        while (it.next())
+                            entitiesToLoad.add(it.getString(filterColumn))
                     }
                 }
             }
         }
     }
 
+    /**
+     * @param filterUuids
+     */
     private fun quote(filterUuids: Iterable<out String>): String {
         val list = filterUuids.map { it }
         return list.joinToString(",", "'", "'")
@@ -723,11 +691,4 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         preparedStatement.setString(index, uuid)
     }
 
-    companion object {
-
-        /**
-         * Java supports up to 1000 prepared supportsStatements depending on the driver
-         */
-        const val MAX_BATCH_SIZE = 1000
-    }
 }

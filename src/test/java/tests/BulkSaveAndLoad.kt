@@ -40,7 +40,7 @@ class BulkSaveAndLoad : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testPostgreSql() {
-        initialisePostgeSqlBackend()//13s 175ms
+        initialisePostgeSqlBackend()//6s 948ms
         saveAndLoad()
     }
 
@@ -54,7 +54,7 @@ class BulkSaveAndLoad : BaseTestConfig() {
     @Test
     @Throws(Exception::class)
     fun testTransactionalSql() {
-        initialiseTSqlBackend()//8s 326ms
+        initialiseTSqlBackend()//6s 624ms
         saveAndLoad()
     }
 
