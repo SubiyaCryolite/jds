@@ -13,6 +13,8 @@
  */
 package io.github.subiyacryolite.jds
 
+import com.javaworld.NamedCallableStatement
+import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
@@ -27,7 +29,6 @@ import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.collections.HashMap
 import kotlin.coroutines.experimental.buildSequence
 
 /**
@@ -80,10 +81,10 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         saveOverviews(allEntities)
         try {
             val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
-            allEntities.chunked(actualBatchSize).forEach {
+            allEntities.chunked(actualBatchSize).forEachIndexed { step, it ->
                 saveInner(it)
                 if (jdsDb.options.isPrintingOutput)
-                    println("Processing saves. Step $")
+                    println("Processing saves. Step $step")
             }
         } catch (ex: Exception) {
             throw ex
@@ -182,9 +183,10 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     @Throws(SQLException::class)
     private fun saveOverviews(overviews: Sequence<JdsEntity>) = try {
-        val saveOverview = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
-        val saveOverviewInheritance = if (jdsDb.supportsStatements) onPreSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else onPreSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
-        overviews.forEachIndexed { record, it ->
+        val saveOverview = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverview()) else NamedPreparedStatement(connection, jdsDb.saveOverview())
+        val saveOverviewInheritance = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverviewInheritance()) else NamedPreparedStatement(connection, jdsDb.saveOverviewInheritance())
+        var total = 0
+        overviews.forEach {
             //Entity Overview
             saveOverview.setString("compositeKey", it.overview.compositeKey)
             saveOverview.setString("uuid", it.overview.uuid)
@@ -200,9 +202,18 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
             saveOverviewInheritance.setString("uuid", it.overview.compositeKey)
             saveOverviewInheritance.setLong("entityId", it.overview.entityId)
             saveOverviewInheritance.addBatch()
-            if (jdsDb.options.isPrintingOutput) {
-                println("Saving Overview [record $record]")
-            }
+            total++
+        }
+
+        saveOverview.executeBatch()
+        saveOverviewInheritance.executeBatch()
+
+        saveOverview.close()
+        saveOverviewInheritance.close()
+
+        if (jdsDb.options.isPrintingOutput) {
+            println("Saving $total overview record(s)")
+        } else {
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
