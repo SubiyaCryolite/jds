@@ -13,8 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.events.JdsSaveListener
@@ -31,7 +29,7 @@ import java.util.concurrent.ConcurrentMap
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val postSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
+class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val postSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, val innerCall: Boolean = false) : Callable<Boolean> {
 
     /**
      * @param jdsDb
@@ -84,8 +82,6 @@ class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, priv
         } catch (ex: Exception) {
             throw ex
         } finally {
-            preSaveEventArguments.closeBatches()
-            postSaveEventArguments.closeBatches()
             if (closeConnection) {
                 alternateConnections.forEach { it.value.close() }
                 connection.close()
@@ -141,7 +137,7 @@ class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, priv
 
                     //save inner objects beforehand
                     val embeddedObjects = it.getNestedEntities(false)
-                    val innerSave = JdsSave(jdsDb, connection, 0, embeddedObjects.asIterable(), alternateConnections, preSaveEventArguments, postSaveEventArguments, false)
+                    val innerSave = JdsSave(jdsDb, connection, 0, embeddedObjects.asIterable(), alternateConnections, preSaveEventArguments, postSaveEventArguments, false, true)
                     innerSave.call()
 
                     //bind inner objects
@@ -161,8 +157,10 @@ class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, priv
 
             //respect execution sequence
             //respect JDS batches in each call
-            preSaveEventArguments.executeBatches()
-            postSaveEventArguments.executeBatches()
+            if (!innerCall) {
+                preSaveEventArguments.executeBatches()
+                postSaveEventArguments.executeBatches()
+            }
         } catch (ex: Exception) {
             throw ex
         }
@@ -185,10 +183,8 @@ class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, priv
      */
     @Throws(SQLException::class)
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
-        val initialValue = connection.autoCommit
-        connection.autoCommit = false
-        val saveOverview = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverview()) else NamedPreparedStatement(connection, jdsDb.saveOverview())
-        val saveOverviewInheritance = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverviewInheritance()) else NamedPreparedStatement(connection, jdsDb.saveOverviewInheritance())
+        val saveOverview = if (jdsDb.supportsStatements) preSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else preSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
+        val saveOverviewInheritance = if (jdsDb.supportsStatements) preSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else preSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
         entities.forEach { entity ->
             saveOverview.setString("compositeKey", entity.overview.compositeKey)
             saveOverview.setString("uuid", entity.overview.uuid)
@@ -205,10 +201,6 @@ class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, priv
             saveOverviewInheritance.setLong("entityId", entity.overview.entityId)
             saveOverviewInheritance.addBatch()
         }
-        saveOverview.executeBatch()
-        saveOverviewInheritance.executeBatch()
-        connection.commit()
-        connection.autoCommit = initialValue
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }

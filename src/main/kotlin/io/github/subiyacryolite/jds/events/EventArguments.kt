@@ -23,7 +23,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddStatement(query: String): PreparedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, connection.prepareStatement(query))
+            statements[query] = connection.prepareStatement(query)
         return statements[query] as PreparedStatement
     }
 
@@ -34,7 +34,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddCall(query: String): CallableStatement {
         if (!statements.containsKey(query))
-            statements.put(query, connection.prepareCall(query))
+            statements[query] = connection.prepareCall(query)
         return statements[query] as CallableStatement
     }
 
@@ -45,7 +45,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddNamedStatement(query: String): INamedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, NamedPreparedStatement(connection, query))
+            statements[query] = NamedPreparedStatement(connection, query)
         return statements[query] as INamedStatement
     }
 
@@ -56,7 +56,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddNamedCall(query: String): INamedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, NamedCallableStatement(connection, query))
+            statements[query] = NamedCallableStatement(connection, query)
         return statements[query] as INamedStatement
     }
 
@@ -69,7 +69,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     fun getOrAddStatement(targetConnection: Int, query: String): PreparedStatement {
         prepareConnection(targetConnection)
         if (!statements.containsKey(query))
-            statements.put(query, alternateConnection(targetConnection).prepareStatement(query))
+            statements[query] = alternateConnection(targetConnection).prepareStatement(query)
         return statements[query] as PreparedStatement
     }
 
@@ -82,7 +82,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     fun getOrAddCall(targetConnection: Int, query: String): CallableStatement {
         prepareConnection(targetConnection)
         if (!statements.containsKey(query))
-            statements.put(query, alternateConnection(targetConnection).prepareCall(query))
+            statements[query] = alternateConnection(targetConnection).prepareCall(query)
         return statements[query] as CallableStatement
     }
 
@@ -95,7 +95,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
         prepareConnection(targetConnection)
         if (!statements.containsKey(query))
-            statements.put(query, NamedPreparedStatement(alternateConnection(targetConnection), query))
+            statements[query] = NamedPreparedStatement(alternateConnection(targetConnection), query)
         return statements[query] as INamedStatement
     }
 
@@ -108,7 +108,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
         prepareConnection(targetConnection)
         if (!statements.containsKey(query))
-            statements.put(query, NamedCallableStatement(alternateConnection(targetConnection), query))
+            statements[query] = NamedCallableStatement(alternateConnection(targetConnection), query)
         return statements[query] as INamedStatement
     }
 
@@ -120,7 +120,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddStatement(connection: Connection, query: String): PreparedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, connection.prepareStatement(query))
+            statements[query] = connection.prepareStatement(query)
         return statements[query] as PreparedStatement
     }
 
@@ -132,7 +132,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddCall(connection: Connection, query: String): CallableStatement {
         if (!statements.containsKey(query))
-            statements.put(query, connection.prepareCall(query))
+            statements[query] = connection.prepareCall(query)
         return statements[query] as CallableStatement
     }
 
@@ -144,7 +144,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddNamedStatement(connection: Connection, query: String): INamedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, NamedPreparedStatement(connection, query))
+            statements[query] = NamedPreparedStatement(connection, query)
         return statements[query] as INamedStatement
     }
 
@@ -156,7 +156,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     @Throws(SQLException::class)
     fun getOrAddNamedCall(connection: Connection, query: String): INamedStatement {
         if (!statements.containsKey(query))
-            statements.put(query, NamedCallableStatement(connection, query))
+            statements[query] = NamedCallableStatement(connection, query)
         return statements[query] as INamedStatement
     }
 
@@ -167,7 +167,7 @@ abstract class EventArguments(val jdsDb: IJdsDb, val connection: Connection, pro
     private fun prepareConnection(targetConnection: Int) {
         if (!alternateConnections.containsKey(targetConnection)) {
             val connection = jdsDb.getConnection(targetConnection)
-            alternateConnections.put(targetConnection, connection)
+            alternateConnections[targetConnection] = connection
         }
     }
 
