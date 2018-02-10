@@ -82,7 +82,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             throw ex
         } finally {
-            if (closeConnection) {
+            if (closeConnection && !innerCall) {
                 alternateConnections.forEach { it.value.close() }
                 connection.close()
             }
@@ -421,20 +421,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveArrayDates(entity: JdsEntity) {
         if (entity.dateTimeArrayProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_date_time_array WHERE field_id = ? AND composite_key = ?"
-        val insertSql = "INSERT INTO jds_store_date_time_array (sequence, value,field_id, composite_key) VALUES (?,?,?,?)"
-        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
+        val deleteSql = "DELETE FROM jds_store_date_time_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_date_time_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.dateTimeArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
-                delete.setLong(1, fieldId)
-                delete.setString(2, entity.overview.compositeKey)
+            u.forEachIndexed { sequence, value ->
+                delete.setLong("fieldId", fieldId)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setInt(1, index)
-                insert.setTimestamp(2, Timestamp.valueOf(value))
-                insert.setLong(3, fieldId)
-                insert.setString(4, entity.overview.compositeKey)
+                insert.setInt("sequence", sequence)
+                insert.setTimestamp("value", Timestamp.valueOf(value))
+                insert.setLong("fieldId", fieldId)
+                insert.setString("compositeKey", entity.overview.compositeKey)
                 insert.addBatch()
             }
         }
@@ -447,20 +447,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveArrayFloats(entity: JdsEntity) {
         if (entity.floatArrayProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_float_array WHERE field_id = ? AND composite_key = ?"
-        val insertSql = "INSERT INTO jds_store_float_array (field_id, composite_key, value, sequence) VALUES (?,?,?,?)"
-        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
+        val deleteSql = "DELETE FROM jds_store_float_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_float_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.floatArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
-                delete.setLong(1, fieldId)
-                delete.setString(2, entity.overview.compositeKey)
+            u.forEachIndexed { sequence, value ->
+                delete.setLong("fieldId", fieldId)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setInt(1, index)
-                insert.setObject(2, value) //primitives could be null, default value has meaning
-                insert.setLong(3, fieldId)
-                insert.setString(4, entity.overview.compositeKey)
+                insert.setInt("sequence", sequence)
+                insert.setObject("value", value) //primitives could be null, default value has meaning
+                insert.setLong("fieldId", fieldId)
+                insert.setString("compositeKey", entity.overview.compositeKey)
                 insert.addBatch()
             }
         }
@@ -473,24 +473,24 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveArrayIntegers(entity: JdsEntity) {
         if (entity.integerArrayProperties.isEmpty()) return
 
-        val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
-        val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
 
         val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         var record = 0
 
         entity.integerArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
+            u.forEachIndexed { sequence, value ->
                 //delete
                 delete.setLong("fieldId", fieldId)
-                delete.setString("uuid", entity.overview.compositeKey)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setInt("sequence", index)
+                insert.setInt("sequence", sequence)
                 insert.setObject("value", value) //primitives could be null, default value has meaning
                 insert.setLong("fieldId", fieldId)
-                insert.setString("uuid", entity.overview.compositeKey)
+                insert.setString("compositeKey", entity.overview.compositeKey)
                 insert.addBatch()
             }
         }
@@ -502,21 +502,21 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveArrayDoubles(entity: JdsEntity) {
         if (entity.doubleArrayProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :uuid"
-        val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
         val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.doubleArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
+            u.forEachIndexed { sequence, value ->
                 //delete
                 delete.setLong("fieldId", fieldId)
-                delete.setString("uuid", entity.overview.compositeKey)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
                 insert.setLong("fieldId", fieldId)
-                insert.setObject("uuid", value) //primitives could be null, default value has meaning
-                insert.setInt("sequence", index)
-                insert.setString("value", entity.overview.compositeKey)
+                insert.setObject("value", value) //primitives could be null, default value has meaning
+                insert.setInt("sequence", sequence)
+                insert.setString("compositeKey", entity.overview.compositeKey)
                 insert.addBatch()
             }
         }
@@ -528,20 +528,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveArrayLongs(entity: JdsEntity) {
         if (entity.longArrayProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = ? AND composite_key = ?"
-        val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (?,?,?,?)"
-        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
+        val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.longArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
-                delete.setLong(1, fieldId)
-                delete.setString(2, entity.overview.compositeKey)
+            u.forEachIndexed { sequence, value ->
+                delete.setLong("fieldId", fieldId)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setInt(1, index)
-                insert.setObject(2, value) //primitives could be null, default value has meaning
-                insert.setLong(3, fieldId)
-                insert.setString(4, entity.overview.compositeKey)
+                insert.setLong("fieldId", fieldId)
+                insert.setString("compositeKey", entity.overview.compositeKey)
+                insert.setInt("sequence", sequence)
+                insert.setObject("value", value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -553,20 +553,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveArrayStrings(entity: JdsEntity) {
         if (entity.stringArrayProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND composite_key = :uuid"
-        val insertSql = "INSERT INTO jds_store_text_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_text_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
         val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.stringArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { index, value ->
+            u.forEachIndexed { sequence, value ->
                 //delete
                 delete.setLong("fieldId", fieldId)
-                delete.setString("uuid", entity.overview.compositeKey)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setInt("fieldId", index)
-                insert.setString("uuid", entity.overview.compositeKey)
-                insert.setLong("sequence", fieldId)
+                insert.setLong("fieldId", fieldId)
+                insert.setString("compositeKey", entity.overview.compositeKey)
+                insert.setInt("sequence", sequence)
                 insert.setString("value", value)
                 insert.addBatch()
             }
@@ -580,20 +580,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun saveEnumCollections(entity: JdsEntity) {
         if (entity.enumCollectionProperties.isEmpty()) return
-        val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
-        val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
+        val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
+        val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :compositeKey, :sequence, :value)"
         val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
-            u.forEachIndexed { index, anEnum ->
+            u.forEachIndexed { sequence, anEnum ->
                 //delete
                 delete.setLong("fieldId", jdsFieldEnum.field.id)
-                delete.setString("uuid", entity.overview.compositeKey)
+                delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
                 insert.setLong("fieldId", jdsFieldEnum.field.id)
-                insert.setString("uuid", entity.overview.compositeKey)
-                insert.setInt("sequence", index)
+                insert.setString("compositeKey", entity.overview.compositeKey)
+                insert.setInt("sequence", sequence)
                 insert.setInt("value", jdsFieldEnum.indexOf(anEnum))
                 insert.addBatch()
             }
