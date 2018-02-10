@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val onPreSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val onPostSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
+class JdsSave(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArguments: OnPreSaveEventArguments = OnPreSaveEventArguments(jdsDb, connection, alternateConnections), private val postSaveEventArguments: OnPostSaveEventArguments = OnPostSaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true) : Callable<Boolean> {
 
     /**
      * @param jdsDb
@@ -63,7 +63,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, batchSize: Int) : this(ConcurrentHashMap(), jdsDb, connection, batchSize, entities)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, batchSize: Int) : this(jdsDb, connection, batchSize, entities)
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -84,12 +84,12 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         } catch (ex: Exception) {
             throw ex
         } finally {
-            //jdsSaveEvents.forEach { it.onSave(allEntities.asIterable(), connection) }
-            onPreSaveEventArguments.closeBatches()
-            onPostSaveEventArguments.closeBatches()
-            alternateConnections.forEach { it.value.close() }
-            if (closeConnection)
+            preSaveEventArguments.closeBatches()
+            postSaveEventArguments.closeBatches()
+            if (closeConnection) {
+                alternateConnections.forEach { it.value.close() }
                 connection.close()
+            }
         }
         return true
     }
@@ -102,7 +102,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     private fun saveInner(batchEntities: Iterable<JdsEntity>) {
         try {
             //ensure that overviews are submitted before handing over to listeners
-            batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(onPreSaveEventArguments) }
+            batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPreSave(preSaveEventArguments) }
 
             batchEntities.forEach {
                 it.bindChildrenAndUpdateLastEdit()
@@ -141,8 +141,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
                     //save inner objects beforehand
                     val embeddedObjects = it.getNestedEntities(false)
-                    val innerSave = JdsSave(jdsDb, embeddedObjects.asIterable(), connection)
-                    innerSave.closeConnection = false
+                    val innerSave = JdsSave(jdsDb, connection, 0, embeddedObjects.asIterable(), alternateConnections, preSaveEventArguments, postSaveEventArguments, false)
                     innerSave.call()
 
                     //bind inner objects
@@ -151,7 +150,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 }
             }
 
-            batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(onPostSaveEventArguments) }
+            batchEntities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(postSaveEventArguments) }
 
             //crt point
             if (jdsDb.tables.isNotEmpty()) {
@@ -162,8 +161,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
 
             //respect execution sequence
             //respect JDS batches in each call
-            onPreSaveEventArguments.executeBatches()
-            onPostSaveEventArguments.executeBatches()
+            preSaveEventArguments.executeBatches()
+            postSaveEventArguments.executeBatches()
         } catch (ex: Exception) {
             throw ex
         }
@@ -177,7 +176,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, entity, onPostSaveEventArguments)
+            it.executeSave(jdsDb, connection, alternateConnections, entity, postSaveEventArguments)
         }
     }
 
@@ -219,7 +218,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveBlobs(entity: JdsEntity) {
         if (entity.blobProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveBlob()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBlob())
         entity.blobProperties.forEach { fieldId, blobProperty ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -233,7 +232,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveBooleans(entity: JdsEntity) {
         if (entity.booleanProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveBoolean()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveBoolean())
         entity.booleanProperties.forEach { fieldId, entry ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -247,7 +246,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveIntegers(entity: JdsEntity) {
         if (entity.integerProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
         entity.integerProperties.forEach { fieldId, entry ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -261,7 +260,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveFloats(entity: JdsEntity) {
         if (entity.floatProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveFloat()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveFloat())
         entity.floatProperties.forEach { fieldId, entry ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -275,7 +274,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveDoubles(entity: JdsEntity) {
         if (entity.doubleProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveDouble()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDouble())
         entity.doubleProperties.forEach { fieldId, entry ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -289,7 +288,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveLongs(entity: JdsEntity) {
         if (entity.longProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
         entity.longProperties.forEach { fieldId, entry ->
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", fieldId)
@@ -303,7 +302,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveStrings(entity: JdsEntity) {
         if (entity.stringProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
         entity.stringProperties.forEach { fieldId, value2 ->
             val value = value2.get()
             upsert.setString("uuid", entity.overview.compositeKey)
@@ -318,8 +317,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveDateConstructs(entity: JdsEntity) {
         if (entity.monthDayProperties.isEmpty() && entity.yearMonthProperties.isEmpty() && entity.periodProperties.isEmpty() && entity.durationProperties.isEmpty()) return
-        val upsertText = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
-        val upsertLong = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
+        val upsertText = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveString()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveString())
+        val upsertLong = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveLong()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveLong())
         entity.monthDayProperties.forEach { fieldId, monthDayProperty ->
             val monthDay = monthDayProperty.get()
             val value = monthDay.toString()
@@ -359,7 +358,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveDatesAndDateTimes(entity: JdsEntity) {
         if (entity.localDateTimeProperties.isEmpty() && entity.localDateProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveDateTime()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveDateTime())
         entity.localDateTimeProperties.forEach { fieldId, value1 ->
             val localDateTime = value1.get() as LocalDateTime
             upsert.setString("uuid", entity.overview.compositeKey)
@@ -381,7 +380,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveTimes(entity: JdsEntity) {
         if (entity.localTimeProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveTime()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveTime())
         entity.localTimeProperties.forEach { fieldId, value1 ->
             val localTime = value1.get() as LocalTime
             if (jdsDb.options.isWritingToPrimaryDataTables) {
@@ -398,7 +397,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveZonedDateTimes(entity: JdsEntity) {
         if (entity.zonedDateTimeProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveZonedDateTime()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveZonedDateTime())
         entity.zonedDateTimeProperties.forEach { fieldId, value1 ->
             val zonedDateTime = value1.get() as ZonedDateTime
             upsert.setString("uuid", entity.overview.compositeKey)
@@ -413,7 +412,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     private fun saveEnums(entity: JdsEntity) {
         if (entity.enumProperties.isEmpty()) return
-        val upsert = if (jdsDb.supportsStatements) onPostSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else onPostSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
+        val upsert = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveInteger()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveInteger())
         entity.enumProperties.forEach { jdsFieldEnum, value2 ->
             val value = value2.get()
             upsert.setString("uuid", entity.overview.compositeKey)
@@ -432,8 +431,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.dateTimeArrayProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_date_time_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_date_time_array (sequence, value,field_id, composite_key) VALUES (?,?,?,?)"
-        val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
         entity.dateTimeArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { index, value ->
                 delete.setLong(1, fieldId)
@@ -458,8 +457,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.floatArrayProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_float_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_float_array (field_id, composite_key, value, sequence) VALUES (?,?,?,?)"
-        val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
         entity.floatArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { index, value ->
                 delete.setLong(1, fieldId)
@@ -485,8 +484,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
 
-        val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         var record = 0
 
         entity.integerArrayProperties.forEach { fieldId, u ->
@@ -513,8 +512,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.doubleArrayProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
-        val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.doubleArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { index, value ->
                 //delete
@@ -539,8 +538,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.longArrayProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = ? AND composite_key = ?"
         val insertSql = "INSERT INTO jds_store_double_array (field_id, composite_key, sequence, value) VALUES (?,?,?,?)"
-        val delete = onPostSaveEventArguments.getOrAddStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddStatement(insertSql)
         entity.longArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { index, value ->
                 delete.setLong(1, fieldId)
@@ -564,8 +563,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.stringArrayProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_text_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
-        val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.stringArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { index, value ->
                 //delete
@@ -591,8 +590,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
         if (entity.enumCollectionProperties.isEmpty()) return
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :uuid"
         val insertSql = "INSERT INTO jds_store_integer_array (field_id, composite_key, sequence, value) VALUES (:fieldId, :uuid, :sequence, :value)"
-        val delete = onPostSaveEventArguments.getOrAddNamedStatement(deleteSql)
-        val insert = onPostSaveEventArguments.getOrAddNamedStatement(insertSql)
+        val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
+        val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
         entity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
             u.forEachIndexed { index, anEnum ->
                 //delete
@@ -617,8 +616,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     private fun saveAndBindObjectArrays(entity: JdsEntity) {
         if (entity.objectArrayProperties.isEmpty()) return
-        val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
-        val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
+        val clearOldBindings = postSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
+        val writeNewBindings = postSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
         entity.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
             jdseEntityCollection.forEach {
                 //delete all entries of this field
@@ -642,8 +641,8 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
     @Throws(Exception::class)
     private fun saveAndBindObjects(entity: JdsEntity) {
         if (entity.objectProperties.isEmpty()) return //prevent stack overflow :)
-        val clearOldBindings = onPostSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
-        val writeNewBindings = onPostSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
+        val clearOldBindings = postSaveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
+        val writeNewBindings = postSaveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
         entity.objectProperties.forEach { key, objectProperty ->
             val jdsEntity = objectProperty.get()
             //overview first
@@ -664,24 +663,24 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * Helper method allowing you to batch custom statements to a jds save event
      * @query the SQL code to execute
      */
-    fun getOrAddStatement(query: String) = onPostSaveEventArguments.getOrAddStatement(query)
+    fun getOrAddStatement(query: String) = postSaveEventArguments.getOrAddStatement(query)
 
     /**
      * Helper method allowing you to batch custom named statements to a jds save event
      * @query the SQL code to execute
      */
-    fun getOrAddNamedStatement(query: String) = onPostSaveEventArguments.getOrAddNamedStatement(query)
+    fun getOrAddNamedStatement(query: String) = postSaveEventArguments.getOrAddNamedStatement(query)
 
     /**
      * Helper method allowing you to batch custom calls to a jds save event
      * @query the SQL code to execute
      */
-    fun getOrAddCall(query: String) = onPostSaveEventArguments.getOrAddCall(query)
+    fun getOrAddCall(query: String) = postSaveEventArguments.getOrAddCall(query)
 
     /**
      * Helper method allowing you to batch custom named calls to a jds save event
      * @query the SQL code to execute
      */
-    fun getOrAddNamedCall(query: String) = onPostSaveEventArguments.getOrAddNamedCall(query)
+    fun getOrAddNamedCall(query: String) = postSaveEventArguments.getOrAddNamedCall(query)
 
 }
