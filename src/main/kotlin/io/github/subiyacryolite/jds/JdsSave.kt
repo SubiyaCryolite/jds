@@ -136,10 +136,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
 
                     //save inner objects beforehand
-                    val embeddedObjects = it.getNestedEntities(false)
-                    val innerSave = JdsSave(jdsDb, connection, 0, embeddedObjects.asIterable(), alternateConnections, preSaveEventArguments, postSaveEventArguments, false, true)
-                    innerSave.call()
-
+                    val innerEntities = ArrayList<JdsEntity>()
+                    it.objectProperties.forEach { t, u -> innerEntities.add(it) }
+                    it.objectArrayProperties.forEach { t, u -> innerEntities.addAll(u) }
+                    if (innerEntities.isNotEmpty()) {
+                        val innerSave = JdsSave(jdsDb, connection, 0, innerEntities, alternateConnections, preSaveEventArguments, postSaveEventArguments, false, true)
+                        innerSave.call()
+                    }
                     //bind inner objects
                     saveAndBindObjects(it)
                     saveAndBindObjectArrays(it)
@@ -478,7 +481,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
         val delete = postSaveEventArguments.getOrAddNamedStatement(deleteSql)
         val insert = postSaveEventArguments.getOrAddNamedStatement(insertSql)
-        var record = 0
 
         entity.integerArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
