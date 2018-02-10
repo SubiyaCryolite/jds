@@ -24,16 +24,17 @@ import java.util.concurrent.ConcurrentMap
  * [getOrAddStatement(String)][getOrAddStatement], [getOrAddNamedCall(String)][getOrAddNamedCall] and
  * [getOrAddNamedStatement(String)][getOrAddNamedStatement] methods.
  */
-open class OnPreSaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection) {
+open class SaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection) {
 
     @Throws(SQLException::class)
     override fun executeBatches() {
         try {
             connection.autoCommit = false
             alternateConnections.forEach { it.value.autoCommit = false }
-            statements.values.forEach { it.executeBatch() }
-            connection.commit()
-            alternateConnections.forEach { it.value.commit() }
+            statements.values.forEach {
+               it.executeBatch()
+               it.connection.commit()
+            }
         } catch (ex: Exception) {
             throw ex
         } finally {

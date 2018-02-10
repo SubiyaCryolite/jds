@@ -23,4 +23,4 @@ import java.util.concurrent.ConcurrentMap
  * {@link #getOrAddStatement(String) getOrAddStatement}, {@link #getOrAddNamedCall(String) getOrAddNamedCall} and
  * {@link #getOrAddNamedStatement(String) getOrAddNamedStatement} methods.
  */
-class OnPostSaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : OnPreSaveEventArguments(jdsDb, connection, alternateConnection)
+class OnPostSaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : SaveEventArguments(jdsDb, connection, alternateConnection)
