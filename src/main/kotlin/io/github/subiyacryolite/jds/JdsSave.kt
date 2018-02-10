@@ -27,7 +27,6 @@ import java.time.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
@@ -73,15 +72,15 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      */
     @Throws(Exception::class)
     override fun call(): Boolean {
-        val allEntities = buildSequence { entities.forEach { yieldAll(it.getNestedEntities()) } }
         try {
-            saveOverview(allEntities)
-            val actualBatchSize = if (batchSize == 0) allEntities.count() else batchSize
-            allEntities.chunked(actualBatchSize).forEachIndexed { step, it ->
-                saveInner(it)
-                if (jdsDb.options.isPrintingOutput)
-                    println("Processing saves. Step $step")
-            }
+            saveOverview(entities)
+            val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
+            if (actualBatchSize > 0)
+                entities.chunked(actualBatchSize).forEachIndexed { step, it ->
+                    saveInner(it)
+                    if (jdsDb.options.isPrintingOutput)
+                        println("Processing saves. Step $step")
+                }
         } catch (ex: Exception) {
             throw ex
         } finally {
@@ -139,6 +138,14 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
                 //objects and object arrays
                 //object entity overviews and entity bindings are ALWAYS persisted
                 if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
+
+                    //save inner objects beforehand
+                    val embeddedObjects = it.getNestedEntities(false)
+                    val innerSave = JdsSave(jdsDb, embeddedObjects.asIterable(), connection)
+                    innerSave.closeConnection = false
+                    innerSave.call()
+
+                    //bind inner objects
                     saveAndBindObjects(it)
                     saveAndBindObjectArrays(it)
                 }
@@ -178,7 +185,7 @@ class JdsSave private constructor(private val alternateConnections: ConcurrentMa
      * @param overviews
      */
     @Throws(SQLException::class)
-    private fun saveOverview(entities: Sequence<JdsEntity>) = try {
+    private fun saveOverview(entities: Iterable<JdsEntity>) = try {
         val initialValue = connection.autoCommit
         connection.autoCommit = false
         val saveOverview = if (jdsDb.supportsStatements) NamedCallableStatement(connection, jdsDb.saveOverview()) else NamedPreparedStatement(connection, jdsDb.saveOverview())
