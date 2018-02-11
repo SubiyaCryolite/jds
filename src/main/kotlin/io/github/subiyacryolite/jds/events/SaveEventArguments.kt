@@ -39,9 +39,4 @@ open class SaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateCo
         connection.autoCommit = true
         alternateConnections.forEach { it.value.autoCommit = true }
     }
-
-    fun closeBatches() {
-        connection.autoCommit = true
-        alternateConnections.forEach { it.value.autoCommit = true }
-    }
 }

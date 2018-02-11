@@ -377,21 +377,21 @@ open class JdsTable() : Serializable {
 
         if (entity is IJdsTableFilter)
             if (!entity.satisfiesCondition(this))
-                return false
+                return false //failed to meet criteria
 
         if (entities.isEmpty())
-            return true
+            return true //open to all entities
 
         entities.forEach {
             val entityType = jdsDb.classes[it]
             if (entityType != null) {
                 if (entityType.isInstance(entity))
-                    return true
+                    return true //matches specified entities
             } else
                 println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
         }
 
-        return false
+        return false //failed to meet criteria
     }
 
     /**

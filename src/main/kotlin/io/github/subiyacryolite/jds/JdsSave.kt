@@ -57,7 +57,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     @Throws(Exception::class)
     override fun call(): Boolean {
         try {
-            val chunks = entities.chunked(1024)
+            val chunks = entities.chunked(2048)
             val totalChunks = chunks.count()
             chunks.forEachIndexed { index, batch ->
                 saveInner(batch, index == (totalChunks - 1))
@@ -125,13 +125,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         } catch (ex: Exception) {
             throw ex
         } finally {
-            if (!recursiveInnerCall && finalStep) {
-                preSaveEventArguments.closeBatches()
-                postSaveEventArguments.closeBatches()
-                if (closeConnection) {
-                    alternateConnections.forEach { it.value.close() }
-                    connection.close()
-                }
+            if (!recursiveInnerCall && finalStep && closeConnection) {
+                alternateConnections.forEach { it.value.close() }
+                connection.close()
             }
         }
     }
@@ -154,7 +150,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     @Throws(SQLException::class)
     private fun saveOverview(entities: Iterable<JdsEntity>) {
         val saveOverview = if (jdsDb.supportsStatements) preSaveEventArguments.getOrAddCall(jdsDb.saveOverview()) else preSaveEventArguments.getOrAddStatement(jdsDb.saveOverview())
-        val saveOverviewInheritance = if (jdsDb.supportsStatements) postSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else postSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
+        val saveOverviewInheritance = if (jdsDb.supportsStatements) preSaveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else preSaveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
         entities.forEach {
             saveOverview.setString(1, it.overview.compositeKey)//p_composite_key
             saveOverview.setString(2, it.overview.uuid)//p_uuid
