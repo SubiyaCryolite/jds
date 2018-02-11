@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val batchSize: Int, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val saveEventArguments: SaveEventArguments = SaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, private val innerCall: Boolean = false) : Callable<Boolean> {
+class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private var batchSize: Int, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val saveEventArguments: SaveEventArguments = SaveEventArguments(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, private val innerCall: Boolean = false) : Callable<Boolean> {
 
     /**
      * @param jdsDb
@@ -70,6 +70,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     @Throws(Exception::class)
     override fun call(): Boolean {
         try {
+            if (batchSize < 0)
+                batchSize = 0
             val actualBatchSize = if (batchSize == 0) entities.count() else batchSize
             if (actualBatchSize > 0)
                 entities.chunked(actualBatchSize).forEachIndexed { step, it ->
@@ -133,15 +135,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 //objects and object arrays
                 //object entity overviews and entity bindings are ALWAYS persisted
                 if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
-
-                    //save inner objects beforehand
-                    val innerEntities = ArrayList<JdsEntity>()
-                    it.objectProperties.forEach { t, u -> innerEntities.add(it) }
-                    it.objectArrayProperties.forEach { t, u -> innerEntities.addAll(u) }
-                    if (innerEntities.isNotEmpty()) {
-                        val innerSave = JdsSave(jdsDb, connection, 0, innerEntities, alternateConnections, saveEventArguments, false, true)
-                        innerSave.call()
-                    }
                     //bind inner objects
                     saveAndBindObjects(it)
                     saveAndBindObjectArrays(it)
@@ -189,7 +182,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             val saveOverview = if (jdsDb.supportsStatements) saveEventArguments.getOrAddNamedCall(jdsDb.saveOverview()) else saveEventArguments.getOrAddNamedStatement(jdsDb.saveOverview())
             val saveOverviewInheritance = if (jdsDb.supportsStatements) saveEventArguments.getOrAddNamedCall(jdsDb.saveOverviewInheritance()) else saveEventArguments.getOrAddNamedStatement(jdsDb.saveOverviewInheritance())
             entities.forEach { entity ->
-                //:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :parentUuid, :entityId, :live, :entityVersion, :lastEdit
                 saveOverview.setString("compositeKey", entity.overview.compositeKey)
                 saveOverview.setString("uuid", entity.overview.uuid)
                 saveOverview.setString("uuidLocation", entity.overview.uuidLocation)
@@ -614,7 +606,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         if (entity.objectArrayProperties.isEmpty()) return
         val clearOldBindings = saveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
         val writeNewBindings = saveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding (parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
+
         entity.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
+
+            JdsSave(jdsDb, connection, 0, jdseEntityCollection.map { it }, alternateConnections, saveEventArguments, false, true).call()
+
             jdseEntityCollection.forEach {
                 //delete all entries of this field
                 clearOldBindings.setString(1, it.overview.parentCompositeKey)
@@ -639,9 +635,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         if (entity.objectProperties.isEmpty()) return //prevent stack overflow :)
         val clearOldBindings = saveEventArguments.getOrAddStatement("DELETE FROM jds_entity_binding WHERE parent_composite_key = ? AND field_id = ?")
         val writeNewBindings = saveEventArguments.getOrAddStatement("INSERT INTO jds_entity_binding(parent_composite_key, child_composite_key, field_id, child_entity_id) Values(?, ?, ?, ?)")
+
+
+        JdsSave(jdsDb, connection, 0, entity.objectProperties.values.map { it.value }, alternateConnections, saveEventArguments, false, true).call()
+
         entity.objectProperties.forEach { key, objectProperty ->
             val jdsEntity = objectProperty.get()
-            //overview first
+
             //delete all entries of this field
             clearOldBindings.setString(1, jdsEntity.overview.parentCompositeKey)
             clearOldBindings.setLong(2, key.fieldEntity.id)
