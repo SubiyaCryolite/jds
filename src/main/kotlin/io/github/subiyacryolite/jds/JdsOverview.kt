@@ -35,7 +35,18 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var entityVersion: Long = 1L
     override var live: Boolean = false
     override var lastEdit: LocalDateTime = LocalDateTime.now()
-    override val compositeKey: String get() = "$uuid.$uuidLocation.$uuidLocationVersion"
+    override val compositeKey: String
+        get() {
+            val stringBuilder = StringBuilder()
+            stringBuilder.append(uuid)
+            if (uuidLocation.isNotBlank()) {
+                stringBuilder.append('.')
+                stringBuilder.append(uuidLocation)
+            }
+            stringBuilder.append('.')
+            stringBuilder.append(uuidLocationVersion)
+            return stringBuilder.toString()
+        }
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
