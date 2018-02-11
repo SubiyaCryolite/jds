@@ -13,7 +13,7 @@ import java.util.concurrent.Executors
 /**
  * Created by ifunga on 12/04/2017.
  */
-class LoadAndSaveTests : BaseTestConfig() {
+class LoadAndSaveTests : BaseTestConfig("Load and Save tests") {
 
     @Throws(Exception::class)
     private fun save() {

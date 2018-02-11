@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 /**
  * Created by ifunga on 01/07/2017.
  */
-class Inheritance : BaseTestConfig() {
+class Inheritance : BaseTestConfig("Inheritance") {
 
     @Throws(Exception::class)
     private fun save() {

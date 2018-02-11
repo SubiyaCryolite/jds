@@ -5,7 +5,7 @@ import io.github.subiyacryolite.jds.JdsDelete
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
-class Deletes : BaseTestConfig() {
+class Deletes : BaseTestConfig("Deletes") {
 
     @Throws(Exception::class)
     private fun delete() {

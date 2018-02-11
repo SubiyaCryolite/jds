@@ -27,7 +27,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 /**
  * This class is responsible for the setup of SQL connections, default database
@@ -40,7 +39,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
-val options = JdsOptions()
+    val options = JdsOptions()
 
     /**
      * Initialise JDS base tables
@@ -543,10 +542,9 @@ val options = JdsOptions()
     }
 
     fun prepareTables() {
-        //pool connections so that there's no wastage
-        val connectionPool = HashMap<Int, Connection>()
-        tables.forEach { it.forceGenerateOrUpdateSchema(this, connectionPool) }
-        connectionPool.forEach { it.value.close() }
+        this.getConnection().use{connection->
+        tables.parallelStream().forEach { it.forceGenerateOrUpdateSchema(this,connection) }
+        }
     }
 
     fun map(entity: Class<out JdsEntity>) {

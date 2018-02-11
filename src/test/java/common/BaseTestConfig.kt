@@ -17,7 +17,7 @@ import java.util.*
 /**
  * Created by ifunga on 08/04/2017.
  */
-abstract class BaseTestConfig {
+abstract class BaseTestConfig(val testName: String) {
 
     protected val DOUBLE_DELTA = 1e-15
     protected val FLOAT_DELTA = 1e-2f
@@ -240,9 +240,9 @@ abstract class BaseTestConfig {
 
     private fun initJds() {
         jdsDb.init()
-        jdsDb.options.isPrintingOutput=true
+        jdsDb.options.isPrintingOutput = true
         initialiseJdsClasses()
-        println("=========== ${jdsDb.implementation} ===========\n")
+        println("=========== ${jdsDb.implementation} :: $testName ===========\n")
     }
 
     fun initialiseSqLiteBackend() {
@@ -295,7 +295,7 @@ abstract class BaseTestConfig {
         }
     }
 
-    protected fun <T> deserialize(fileToDeserialize: String?, classBeingDeserialized: Class<T>?): T? {
+    protected fun <T> deserialize(fileToDeserialize: String?, classBeingDeserialized: Class<out T>): T? {
         if (fileToDeserialize == null) {
             throw IllegalArgumentException("Cannot deserialize from a null filename.")
         }

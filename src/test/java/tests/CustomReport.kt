@@ -9,7 +9,7 @@ import io.github.subiyacryolite.jds.JdsTable
 import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 
-class CustomReport : BaseTestConfig() {
+class CustomReport : BaseTestConfig("Custom reports") {
 
     @Throws(Exception::class)
     private fun test() {

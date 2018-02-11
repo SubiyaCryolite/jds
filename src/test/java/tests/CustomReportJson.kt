@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 
-class CustomReportJson : BaseTestConfig() {
+class CustomReportJson : BaseTestConfig("Custom reports from json") {
 
     @Throws(Exception::class)
     private fun test() {

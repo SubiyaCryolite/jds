@@ -8,7 +8,8 @@ import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class TimeConstructs : BaseTestConfig() {
+class TimeConstructs : BaseTestConfig("Time constructs") {
+
     @Throws(Exception::class)
     private fun save() {
         val timeConstruct = timeConstruct;

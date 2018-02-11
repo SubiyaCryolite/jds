@@ -7,7 +7,7 @@ import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
-class NonExisting : BaseTestConfig() {
+class NonExisting : BaseTestConfig("Load non-existing items") {
 
     @Throws(Exception::class)
     fun loadNonExisting() {

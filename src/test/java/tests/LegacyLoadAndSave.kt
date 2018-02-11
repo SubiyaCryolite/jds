@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 /**
  * Created by ifunga on 18/02/2017.
  */
-class LegacyLoadAndSave : BaseTestConfig() {
+class LegacyLoadAndSave : BaseTestConfig("Legacy load and save") {
 
     @Throws(Exception::class)
     private fun save() {

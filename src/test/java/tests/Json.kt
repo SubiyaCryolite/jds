@@ -4,7 +4,7 @@ import common.BaseTestConfig
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class Json :BaseTestConfig(){
+class Json :BaseTestConfig("Json tests"){
     @Test
     @Throws(Exception::class)
     fun serialization() {

@@ -10,7 +10,7 @@ import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class PortableSaveStructure : BaseTestConfig() {
+class PortableSaveStructure : BaseTestConfig("Portable save structures") {
 
     @Test
     @Throws(Exception::class)

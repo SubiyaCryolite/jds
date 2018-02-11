@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
 /**
  * Created by ifunga on 05/03/2017.
  */
-class Filters : BaseTestConfig() {
+class Filters : BaseTestConfig("Load filters") {
 
     @Throws(Exception::class)
     private fun filter() {

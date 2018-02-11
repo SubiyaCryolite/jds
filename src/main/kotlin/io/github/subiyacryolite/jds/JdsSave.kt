@@ -406,7 +406,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             val value = value2.get()
             upsert.setString("uuid", entity.overview.compositeKey)
             upsert.setLong("fieldId", jdsFieldEnum.field.id)
-            upsert.setInt("value", jdsFieldEnum.indexOf(value))
+            upsert.setObject("value", when (value == null) {
+                true -> null
+                false -> jdsFieldEnum.indexOf(value!!)
+            }
+            )
             upsert.addBatch()
         }
     }
@@ -587,11 +591,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 delete.setString("compositeKey", entity.overview.compositeKey)
                 delete.addBatch()
                 //insert
-                insert.setLong("fieldId", jdsFieldEnum.field.id)
-                insert.setString("compositeKey", entity.overview.compositeKey)
-                insert.setInt("sequence", sequence)
-                insert.setInt("value", jdsFieldEnum.indexOf(anEnum))
-                insert.addBatch()
+                if (anEnum != null) {
+                    insert.setLong("fieldId", jdsFieldEnum.field.id)
+                    insert.setString("compositeKey", entity.overview.compositeKey)
+                    insert.setInt("sequence", sequence)
+                    insert.setObject("value", jdsFieldEnum.indexOf(anEnum))
+                    insert.addBatch()
+                }
             }
         }
     }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 /**
  * Created by indana on 5/17/2017.
  */
-class LegacyValidation : BaseTestConfig() {
+class LegacyValidation : BaseTestConfig("Legacy validation") {
 
     @Throws(Exception::class)
     private fun saveAndLoad() {

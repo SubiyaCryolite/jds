@@ -69,8 +69,8 @@ abstract class JdsEntity : IJdsEntity {
     internal val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
     internal val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
     //enumProperties
-    internal val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>>> = HashMap()
-    internal val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>>> = HashMap()
+    internal val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>?>> = HashMap()
+    internal val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>?>> = HashMap()
     //objects
     internal val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
     //blobs
@@ -270,7 +270,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
         mapEnums(overview.entityId, fieldEnum.field.id)
         mapField(overview.entityId, fieldEnum.field.id)
-        enumProperties.put(fieldEnum, property as ObjectProperty<Enum<*>>)
+        enumProperties[fieldEnum] = property as ObjectProperty<Enum<*>?>
     }
 
     /**
@@ -282,8 +282,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please assign the correct type to field [$fieldEnum]")
         mapEnums(overview.entityId, fieldEnum.field.id)
         mapField(overview.entityId, fieldEnum.field.id)
-        enumCollectionProperties.put(fieldEnum, properties as MutableCollection<Enum<*>>)
-
+        enumCollectionProperties[fieldEnum] = properties as MutableCollection<Enum<*>?>
     }
 
     /**
@@ -602,12 +601,12 @@ abstract class JdsEntity : IJdsEntity {
         putLongs(longArrayProperties, objectInputStream.readObject() as Map<Long, List<Long>>)
         putIntegers(integerArrayProperties, objectInputStream.readObject() as Map<Long, List<Int>>)
         //enumProperties
-        putEnum(enumProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, Enum<*>>)
-        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, List<Enum<*>>>)
+        putEnum(enumProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, Enum<*>?>)
+        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<JdsFieldEnum<*>, List<Enum<*>?>>)
     }
 
-    private fun serializeEnums(input: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>): Map<JdsFieldEnum<*>, Enum<*>> =
-            input.entries.associateBy({ it.key }, { it.value.get() })
+    private fun serializeEnums(input: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>?>>): Map<JdsFieldEnum<*>, Enum<*>?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
 
     private fun serializeBlobs(input: Map<Long, BlobProperty>): Map<Long, BlobProperty> =
             input.entries.associateBy({ it.key }, { it.value })
@@ -617,7 +616,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, Collection<Enum<*>>>): Map<JdsFieldEnum<*>, List<Enum<*>>> =
+    private fun serializeEnumCollections(input: Map<JdsFieldEnum<*>, Collection<Enum<*>?>>): Map<JdsFieldEnum<*>, List<Enum<*>?>> =
             input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
@@ -716,11 +715,11 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putEnums(destination: Map<JdsFieldEnum<*>, MutableCollection<Enum<*>>>, source: Map<JdsFieldEnum<*>, List<Enum<*>>>) {
+    private fun putEnums(destination: Map<JdsFieldEnum<*>, MutableCollection<Enum<*>?>>, source: Map<JdsFieldEnum<*>, List<Enum<*>?>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
-    private fun putEnum(destination: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>>>, source: Map<JdsFieldEnum<*>, Enum<*>>) {
+    private fun putEnum(destination: Map<JdsFieldEnum<*>, ObjectProperty<Enum<*>?>>, source: Map<JdsFieldEnum<*>, Enum<*>?>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
@@ -846,8 +845,8 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.forEach { embeddedObject.i.add(JdsIntegerEnumValues(it.key.field.id, it.value.value.ordinal)) }
-        enumCollectionProperties.entries.forEach { it.value.forEach { child -> embeddedObject.i.add(JdsIntegerEnumValues(it.key.field.id, child.ordinal)) } }
+        enumProperties.entries.forEach { embeddedObject.i.add(JdsIntegerEnumValues(it.key.field.id, it.value.value?.ordinal)) }
+        enumCollectionProperties.entries.forEach { it.value.forEach { child -> embeddedObject.i.add(JdsIntegerEnumValues(it.key.field.id, child?.ordinal)) } }
         //==============================================
         //ARRAYS
         //==============================================
@@ -1115,10 +1114,10 @@ abstract class JdsEntity : IJdsEntity {
             return longProperties[id]?.value
         if (integerProperties.containsKey(id))
             return integerProperties[id]?.value
-        enumProperties.filter { it.key.field.id == id && it.value.value.ordinal == ordinal }.forEach {
+        enumProperties.filter { it.key.field.id == id && it.value.value != null && it.value.value!!.ordinal == ordinal }.forEach {
             return 1
         }
-        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.filter { it.ordinal == ordinal }.forEach { return true } }
+        enumCollectionProperties.filter { it.key.field.id == id }.forEach { it.value.filter { it != null && it.ordinal == ordinal }.forEach { return true } }
         //single object references
         objectProperties.filter { it.key.fieldEntity.id == id }.forEach {
             return it.value.value.overview.uuid

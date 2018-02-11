@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import java.util.concurrent.Executors
 
-class BulkSaveAndLoad : BaseTestConfig() {
+class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
 
     @Throws(Exception::class)
     private fun save() {
