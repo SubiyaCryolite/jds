@@ -42,12 +42,12 @@ interface IJdsOverview {
     /**
      * A value that indicates the parent of this JdsEntity. Its value is determined on Save and at Load.
      */
-    var parentUuid: String?
+    var parentUuid: String
 
     /**
-     * A run-time only value that indicates the parent of this JdsEntity. Its value is populated on Save and at Load.
+     * A value that indicates the parent of this JdsEntity. Its value is populated on Save and at Load.
      */
-    var parentCompositeKey: String?
+    var parentCompositeKey: String
 
     /**
      * A flag indicating if this record is live or deprecated

@@ -139,8 +139,8 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
      */
     private fun toQuery(): String {
         val main = StringBuilder()
-        main.append("SELECT DISTINCT eo.$filterColumn FROM jds_entity_binding eb JOIN jds_entity_overview eo ON eo.composite_key = eb.child_composite_key ")
-        main.append("JOIN jds_ref_entity entity ON eb.child_entity_id = entity.entity_id")
+        main.append("SELECT DISTINCT eo.$filterColumn FROM jds_entity_overview eo ")
+        main.append("JOIN jds_ref_entity entity ON eb.entity_id = entity.entity_id")
         if (tablesToJoin.size > 0) {
             main.append(" JOIN ")
             main.append(createLeftJoins(tablesToJoin))

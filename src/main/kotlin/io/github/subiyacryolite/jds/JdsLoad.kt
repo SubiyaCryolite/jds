@@ -139,7 +139,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         val populateFloatCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_float_array WHERE composite_key IN ($parameters)"
                         val populateDoubleCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_double_array WHERE composite_key IN ($parameters)"
                         val populateDateTimeCollections = "SELECT composite_key, value, field_id, sequence FROM jds_store_date_time_array WHERE composite_key IN ($parameters)"
-                        val populateEmbeddedAndArrayObjects = "SELECT eb.child_composite_key, eb.parent_composite_key, eb.child_entity_id, eb.field_id, eo.uuid_location, eo.uuid_location_version FROM jds_entity_binding eb JOIN jds_entity_overview eo ON eo.composite_key = eb.child_composite_key AND eb.parent_composite_key IN ($parameters)"
+                        val populateEmbeddedAndArrayObjects = "SELECT child.composite_key, child.parent_composite_key, child.entity_id, child.field_id, child.uuid_location, child.uuid_location_version FROM jds_entity_overview child JOIN jds_entity_overview parent ON parent.composite_key IN ($parameters) AND parent.composite_key = child.parent_composite_key"
 
                         if (jdsDb.options.isWritingToPrimaryDataTables) {
                             //strings, derived from strings and string arrays
@@ -217,7 +217,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 }
                             connection.prepareStatement(populateEmbeddedAndArrayObjects).use {
                                 compositeKeys.forEachIndexed { index, value -> it.setString(index + 1, value) }
-                                populateObjectEntriesAndObjectArrays(jdsDb, entities, it, jdsDb.options.initialisePrimitives, jdsDb.options.initialiseDatesAndTimes, jdsDb.options.initialiseObjects)
+                                populateObjectEntriesAndObjectArrays(jdsDb, entities, it)
                             }
                         }
                         entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections)) }
@@ -271,18 +271,15 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      */
     @Throws(SQLException::class)
     private fun <T : JdsEntity> populateObjectEntriesAndObjectArrays(jdsDb: JdsDb, entities: Collection<T>,
-                                                                     preparedStatement: PreparedStatement,
-                                                                     initialisePrimitives: Boolean,
-                                                                     initialiseDatesAndTimes: Boolean,
-                                                                     initialiseObjects: Boolean) {
+                                                                     preparedStatement: PreparedStatement) {
         val uuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
         preparedStatement.executeQuery().use {
             while (it.next()) {
                 val parentCompositeKey = it.getString("parent_composite_key")
-                val uuid = it.getString("child_composite_key")
+                val uuid = it.getString("composite_key")
                 val fieldId = it.getLong("field_id")
-                val entityId = it.getLong("child_entity_id")
+                val entityId = it.getLong("entity_id")
                 val uuidLocation = it.getString("uuid_location")
                 val uuidLocationVersion = it.getInt("uuid_location_version")
                 optimalEntityLookup(entities, parentCompositeKey).forEach {
@@ -690,5 +687,4 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
     private fun setParameterForStatement(index: Int, uuid: String, preparedStatement: PreparedStatement) {
         preparedStatement.setString(index, uuid)
     }
-
 }

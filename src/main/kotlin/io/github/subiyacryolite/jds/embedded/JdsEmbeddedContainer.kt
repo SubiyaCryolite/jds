@@ -69,7 +69,7 @@ class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
  * @param live live
  * @param version version
  */
-class JdsEntityOverview(val compositeKey: String, val uuid: String, val uuidLocation: String, val uuidLocationVersion: Int, val entityId: Long, val fieldId: Long?, val live: Boolean, val version: Long, val lastEdit: LocalDateTime, val parentUuid: String?)
+class JdsEntityOverview(val compositeKey: String, val uuid: String, val uuidLocation: String, val uuidLocationVersion: Int, val entityId: Long, val fieldId: Long?, val live: Boolean, val version: Long, val lastEdit: LocalDateTime, val parentUuid: String)
 
 /**
  * @param entities a collection of [JdsEntity] objects to store in a portable manner

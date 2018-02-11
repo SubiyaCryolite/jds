@@ -28,19 +28,20 @@ open class SaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateCo
 
     @Throws(SQLException::class)
     override fun executeBatches() {
-        try {
-            connection.autoCommit = false
-            alternateConnections.forEach { it.value.autoCommit = false }
-            statements.values.forEach {
-               it.executeBatch()
-               it.connection.commit()
-            }
-        } catch (ex: Exception) {
-            throw ex
-        } finally {
-            connection.autoCommit = true
-            alternateConnections.forEach { it.value.autoCommit = true }
-            statements.values.forEach { it.clearBatch() }
-        }
+        connection.autoCommit = false
+        alternateConnections.forEach { it.value.autoCommit = false }
+
+        statements.values.forEach { it.executeBatch() }
+
+        connection.commit()
+        alternateConnections.forEach { it.value.commit() }
+
+        connection.autoCommit = true
+        alternateConnections.forEach { it.value.autoCommit = true }
+    }
+
+    fun closeBatches() {
+        connection.autoCommit = true
+        alternateConnections.forEach { it.value.autoCommit = true }
     }
 }

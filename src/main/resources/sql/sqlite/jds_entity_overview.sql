@@ -5,10 +5,12 @@ CREATE TABLE jds_entity_overview
   uuid_location         TEXT,
   uuid_location_version INTEGER,
   parent_uuid           TEXT,
+  parent_composite_key  TEXT,
   entity_id             BIGINT,
   entity_version        BIGINT,
   live                  BOOLEAN,
   last_edit             TIMESTAMP,
+  field_id              BIGINT,
   FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
     ON DELETE CASCADE
     DEFERRABLE INITIALLY DEFERRED,

@@ -1,5 +1,4 @@
-CREATE TABLE jds_entity_instance
-(
+CREATE TABLE jds_entity_instance (
   entity_composite_key VARCHAR(128),
   entity_id            BIGINT,
   CONSTRAINT unique_entity_instance UNIQUE (entity_composite_key, entity_id),

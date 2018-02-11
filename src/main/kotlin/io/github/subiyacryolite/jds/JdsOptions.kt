@@ -35,4 +35,9 @@ class JdsOptions {
      * Indicates if load operations should initialise embedded object and object collections
      */
     var initialiseObjects= true
+
+    /**
+     * Indicates if JDS db should write to custom reporting tables
+     */
+    var isWritingToReportingTables= true
 }

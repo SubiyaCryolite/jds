@@ -542,8 +542,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     fun prepareTables() {
-        this.getConnection().use{connection->
-        tables.parallelStream().forEach { it.forceGenerateOrUpdateSchema(this,connection) }
+        this.getConnection().use { connection ->
+            tables.forEach { it.forceGenerateOrUpdateSchema(this, connection) }
         }
     }
 
@@ -685,7 +685,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveOverview(): String {
-        return "{call proc_store_entity_overview_v3(:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :parentUuid, :entityId, :live, :entityVersion, :lastEdit)}"
+        return "{call proc_store_entity_overview_v3(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}"
     }
 
     /**
