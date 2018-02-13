@@ -9,7 +9,7 @@ import io.github.subiyacryolite.jds.JdsTable
 import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import org.junit.jupiter.api.Test
 
-class CustomReport : BaseTestConfig("Custom reports") {
+class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shared connections") {
 
     @Throws(Exception::class)
     private fun test() {
@@ -43,21 +43,21 @@ class CustomReport : BaseTestConfig("Custom reports") {
         login2.rights.add(Rights.CAN_DELETE_RECORD)
 
         jdsDb.getConnection().use {
-            val jdsSave1 = JdsSave(jdsDb, collection, it)
-            jdsSave1.closeConnection = false
-            jdsSave1.call()
+            val saveCollection = JdsSave(jdsDb, collection, it)
+            saveCollection.closeConnection = false
+            saveCollection.call()
 
-            val jdsSave2 = JdsSave(jdsDb, listOf(login1, login2), it)
-            jdsSave2.closeConnection = false
-            jdsSave2.call()
+            val saveLogins = JdsSave(jdsDb, listOf(login1, login2), it)
+            saveLogins.closeConnection = false
+            saveLogins.call()
 
-            val jdsSave3 = JdsSave(jdsDb, listOf(addressBook), it)
-            jdsSave3.closeConnection = false
-            jdsSave3.call()
+            val saveAddressBook = JdsSave(jdsDb, listOf(addressBook), it)
+            saveAddressBook.closeConnection = false
+            saveAddressBook.call()
 
-            val jdsSave4 = JdsSave(jdsDb, inheritanceCollection, it)
-            jdsSave4.closeConnection = false
-            jdsSave4.call()
+            val saveInheritedObjects = JdsSave(jdsDb, inheritanceCollection, it)
+            saveInheritedObjects.closeConnection = false
+            saveInheritedObjects.call()
         }
     }
 

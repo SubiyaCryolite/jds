@@ -9,7 +9,7 @@ import java.time.ZoneId
 class AllTests {
 
     private val bulkSaveAndLoad = BulkSaveAndLoad()
-    private val customReport = CustomReport()
+    private val customReport = CustomReportAndSharedConnections()
     private val customReportJson = CustomReportJson()
     private val inheritance = Inheritance()
     private val legacyValidation = LegacyValidation()
