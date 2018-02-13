@@ -42,17 +42,23 @@ class CustomReport : BaseTestConfig("Custom reports") {
         login2.rights.add(Rights.CAN_LOGIN)
         login2.rights.add(Rights.CAN_DELETE_RECORD)
 
-        val jdsSave1 = JdsSave(jdsDb, collection)
-        jdsSave1.call()
+        jdsDb.getConnection().use {
+            val jdsSave1 = JdsSave(jdsDb, collection, it)
+            jdsSave1.closeConnection = false
+            jdsSave1.call()
 
-        val jdsSave2 = JdsSave(jdsDb, listOf(login1, login2))
-        jdsSave2.call()
+            val jdsSave2 = JdsSave(jdsDb, listOf(login1, login2), it)
+            jdsSave2.closeConnection = false
+            jdsSave2.call()
 
-        val jdsSave3 = JdsSave(jdsDb, listOf(addressBook))
-        jdsSave3.call()
+            val jdsSave3 = JdsSave(jdsDb, listOf(addressBook), it)
+            jdsSave3.closeConnection = false
+            jdsSave3.call()
 
-        val jdsSave4 = JdsSave(jdsDb, inheritanceCollection)
-        jdsSave4.call()
+            val jdsSave4 = JdsSave(jdsDb, inheritanceCollection, it)
+            jdsSave4.closeConnection = false
+            jdsSave4.call()
+        }
     }
 
     @Test

@@ -759,6 +759,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 }
             }
         }
+        connection.autoCommit = false//inner jds save turns on AutoCommit by default!
         executeCommitAndClose(connection, updateFieldId)
     } catch (ex: Exception) {
         connection.rollback()
@@ -783,6 +784,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 updateFieldId.addBatch()
             }
         }
+        connection.autoCommit = false//inner jds save turns on AutoCommit by default!
         executeCommitAndClose(connection, updateFieldId)
     } catch (ex: Exception) {
         connection.rollback()
