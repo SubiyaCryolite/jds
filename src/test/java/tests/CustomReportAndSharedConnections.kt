@@ -22,6 +22,8 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
         customTable.uniqueBy = JdsFilterBy.UUID
 
         val crtAddress = JdsTable(Address::class.java, true)
+        crtAddress.uniqueBy = JdsFilterBy.UUID
+
         val crtAddressBook = JdsTable(AddressBook::class.java, true)
         val crtLogin = JdsTable(Login::class.java, true)
         val crtA = JdsTable(EntityA::class.java, true)

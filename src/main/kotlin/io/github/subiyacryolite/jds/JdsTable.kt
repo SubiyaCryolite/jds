@@ -118,7 +118,7 @@ open class JdsTable() : Serializable {
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity, eventArguments: EventArguments) {
+    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
@@ -128,40 +128,51 @@ open class JdsTable() : Serializable {
                 else -> alternateConnections.getOrPut(targetConnection) { jdsDb.getConnection(targetConnection) }
             }
 
-            if (uniqueEntries) {
-                deleteExistingRecords(eventArguments, reportingConnection, entity)
-            }
+            if (uniqueEntries)
+                deleteExistingRecords(alternateConnections, jdsDb, reportingConnection, entity)
 
-            val insertStatement = eventArguments.getOrAddStatement(reportingConnection, insertSql)
-            insertStatement.setString(1, entity.overview.compositeKey)
-            insertStatement.setString(2, entity.overview.uuid)
-            insertStatement.setString(3, entity.overview.uuidLocation)
-            insertStatement.setInt(4, entity.overview.uuidLocationVersion)
-            insertStatement.setString(5, entity.overview.parentUuid)
-            insertStatement.setLong(6, entity.overview.entityId)
-            //order will be maintained by linked list
-            columnNames.forEachIndexed { columnIndex, columnName ->
-                val field = columnToFieldMap[columnName]!!
-                val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
-                    true -> entity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
-                    false -> entity.getReportAtomicValue(field.id, 0)
+            try {
+                reportingConnection.autoCommit = false
+                val insertStatement = reportingConnection.prepareStatement(insertSql)
+                insertStatement.setString(1, entity.overview.compositeKey)
+                insertStatement.setString(2, entity.overview.uuid)
+                insertStatement.setString(3, entity.overview.uuidLocation)
+                insertStatement.setInt(4, entity.overview.uuidLocationVersion)
+                insertStatement.setString(5, entity.overview.parentUuid)
+                insertStatement.setLong(6, entity.overview.entityId)
+                //order will be maintained by linked list
+                columnNames.forEachIndexed { columnIndex, columnName ->
+                    val field = columnToFieldMap[columnName]!!
+                    val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
+                        true -> entity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
+                        false -> entity.getReportAtomicValue(field.id, 0)
+                    }
+                    when (value) {
+                        is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 7, value, jdsDb)
+                        is LocalTime -> insertStatement.setLocalTime(columnIndex + 7, value, jdsDb)
+                        else -> insertStatement.setObject(columnIndex + 7, value ?: null)
+                    }
                 }
-                when (value) {
-                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 7, value, jdsDb)
-                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 7, value, jdsDb)
-                    else -> insertStatement.setObject(columnIndex + 7, value ?: null)
-                }
+                insertStatement.use { it.executeUpdate() }
+                reportingConnection.commit()
+            } catch (ex: Exception) {
+                throw ex
+            } finally {
+                reportingConnection.autoCommit = true
             }
-            insertStatement.addBatch()
         }
     }
 
-    fun deleteExistingRecords(eventArguments: EventArguments, iConnection: Connection, entity: JdsEntity) {
+    fun deleteExistingRecords(alternateConnections: ConcurrentMap<Int, Connection>, jdsDb: JdsDb, connection: Connection, entity: JdsEntity) {
+        val reportingConnection = when (jdsDb.isSqLiteDb || targetConnection == 0) {
+            true -> connection
+            else -> alternateConnections.getOrPut(targetConnection) { jdsDb.getConnection(targetConnection) }
+        }
         when (uniqueBy) {
-            JdsFilterBy.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsFilterBy.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsFilterBy.UUID_LOCATION -> deleteRecordByUuidLocationInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsFilterBy.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid!!)
+            JdsFilterBy.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(reportingConnection, entity.overview.uuid)
+            JdsFilterBy.UUID -> deleteRecordByUuidInternal(reportingConnection, entity.overview.uuid)
+            JdsFilterBy.UUID_LOCATION -> deleteRecordByUuidLocationInternal(reportingConnection, entity.overview.uuid)
+            JdsFilterBy.PARENT_UUID -> deleteRecordByParentUuidInternal(reportingConnection, entity.overview.parentUuid!!)
         }
     }
 
@@ -174,97 +185,69 @@ open class JdsTable() : Serializable {
         preparedStatement.executeUpdate()
     }
 
-    /**
-     * @param jdsDb The [JdsDb] instance to use for this operation
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param entity the uuid to target for record deletion
-     */
-    fun deleteRecordById(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
-        val satisfied = satisfiesConditions(jdsDb, entity)
-        if (satisfied)
-            deleteRecordByUuidInternal(eventArguments, connection, entity.overview.uuid)
-    }
-
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param parentId the uuid to target for record deletion
-     */
-    fun deleteRecordByParentId(eventArguments: EventArguments, connection: Connection, parentId: String) {
-        deleteRecordByParentUuidInternal(eventArguments, connection, parentId)
-    }
-
-    /**
-     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByParentUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByParentUuidSql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
+    private fun deleteRecordByParentUuidInternal(connection: Connection, uuid: String) = try {
+        connection.autoCommit = false
+        val statement = connection.prepareStatement(deleteByParentUuidSql)
+        statement.setString(1, uuid)
+        statement.use { it.executeUpdate() }
+        connection.commit()
+    } catch (ex: Exception) {
+        throw ex
+    } finally {
+        connection.autoCommit = true
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param parentId the uuid to target for record deletion
-     */
-    fun deleteRecordByUuidLocation(eventArguments: EventArguments, connection: Connection, parentId: String) {
-        deleteRecordByUuidLocationInternal(eventArguments, connection, parentId)
-    }
-
-    /**
-     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByUuidLocationInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidLocationSql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
+    private fun deleteRecordByUuidLocationInternal(connection: Connection, uuid: String) = try {
+        connection.autoCommit = false
+        val statement = connection.prepareStatement(deleteByUuidLocationSql)
+        statement.setString(1, uuid)
+        statement.use { it.executeUpdate() }
+        connection.commit()
+    } catch (ex: Exception) {
+        throw ex
+    } finally {
+        connection.autoCommit = true
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param parentId the uuid to target for record deletion
-     */
-    fun deleteRecordByCompositeKey(eventArguments: EventArguments, connection: Connection, parentId: String) {
-        deleteRecordByCompositeKeyInternal(eventArguments, connection, parentId)
-    }
-
-    /**
-     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByCompositeKeyInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByCompositeKeySql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
+    private fun deleteRecordByCompositeKeyInternal(connection: Connection, uuid: String) = try {
+        connection.autoCommit = false
+        val statement = connection.prepareStatement(deleteByCompositeKeySql)
+        statement.setString(1, uuid)
+        statement.use { it.executeUpdate() }
+        connection.commit()
+    } catch (ex: Exception) {
+        throw ex
+    } finally {
+        connection.autoCommit = true
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param parentId the uuid to target for record deletion
-     */
-    fun deleteRecordByUuid(eventArguments: EventArguments, connection: Connection, parentId: String) {
-        deleteRecordByUuidInternal(eventArguments, connection, parentId)
-    }
-
-    /**
-     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidSql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
+    private fun deleteRecordByUuidInternal(connection: Connection, uuid: String) = try {
+        connection.autoCommit = false
+        val statement = connection.prepareStatement(deleteByUuidSql)
+        statement.setString(1, uuid)
+        statement.use { it.executeUpdate() }
+        connection.commit()
+    } catch (ex: Exception) {
+        throw ex
+    } finally {
+        connection.autoCommit = true
     }
 
     /**

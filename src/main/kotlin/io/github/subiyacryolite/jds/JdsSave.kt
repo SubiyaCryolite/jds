@@ -142,7 +142,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, entity, postSaveEventArguments)
+            it.executeSave(jdsDb, connection, alternateConnections, entity)
         }
     }
 
@@ -747,7 +747,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveAndBindObjectArrays(entities: Iterable<JdsEntity>) = try {
-        connection.autoCommit = false
         val updateFieldId = regularStatement("UPDATE jds_entity_overview SET field_id = ? WHERE composite_key = ?")
         entities.forEach {
             it.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
@@ -759,7 +758,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 }
             }
         }
-        connection.autoCommit = false//inner jds save turns on AutoCommit by default!
+        connection.autoCommit = false//inner jds save turns AutoCommit on by default!
         executeCommitAndClose(connection, updateFieldId)
     } catch (ex: Exception) {
         connection.rollback()
@@ -774,7 +773,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveAndBindObjects(entities: Iterable<JdsEntity>) = try {
-        connection.autoCommit = false
         val updateFieldId = regularStatement("UPDATE jds_entity_overview SET field_id = ? WHERE composite_key = ?")
         entities.forEach {
             JdsSave(jdsDb, connection, it.objectProperties.values.map { it.value }, alternateConnections, preSaveEventArguments, postSaveEventArguments, false, true).call()
@@ -784,7 +782,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 updateFieldId.addBatch()
             }
         }
-        connection.autoCommit = false//inner jds save turns on AutoCommit by default!
+        connection.autoCommit = false//inner jds save turns AutoCommit on by default!
         executeCommitAndClose(connection, updateFieldId)
     } catch (ex: Exception) {
         connection.rollback()
