@@ -26,12 +26,13 @@ import java.util.concurrent.ConcurrentMap
  */
 open class SaveEventArguments(jdsDb: IJdsDb, connection: Connection, alternateConnection: ConcurrentMap<Int, Connection>) : EventArguments(jdsDb, connection, alternateConnection) {
 
-    @Throws(SQLException::class)
     override fun executeBatches() {
         connection.autoCommit = false
         alternateConnections.forEach { it.value.autoCommit = false }
 
-        statements.values.forEach { it.executeBatch() }
+        statements.values.forEach {
+            it.executeBatch()
+        }
 
         connection.commit()
         alternateConnections.forEach { it.value.commit() }

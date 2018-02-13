@@ -23,6 +23,6 @@ class JdsDbMariaImplementation : JdsDbMaria() {
         Class.forName("org.mariadb.jdbc.Driver")
         val properties = Properties()
         FileInputStream(File("db.maria.properties")).use { properties.load(it) }
-        return DriverManager.getConnection("jdbc:mariadb://localhost:3307/jds", properties)
+        return DriverManager.getConnection("jdbc:mariadb://localhost:3306/jds", properties)
     }
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.Executors
 
 class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
 
+    @Throws(Exception::class)
     private fun save() {
         val memObjects = ArrayList<EntityA>()
         for (i in 0..9999) {
@@ -18,9 +19,10 @@ class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
             memObjects.add(entry)
         }
         val save = JdsSave(jdsDb, memObjects)
-        val process = Executors.newSingleThreadExecutor().submit(save)
-        if (!process.isDone)
-            Thread.sleep(16)
+        save.call()
+        //val process = Executors.newSingleThreadExecutor().submit(save)
+        //if (!process.isDone)
+        //    Thread.sleep(16)
         println("Successfully saved $memObjects")
     }
 
@@ -30,13 +32,10 @@ class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
         println("All A's [${entityAs.call()}]")
     }
 
+    @Throws(Exception::class)
     private fun saveAndLoad() {
-        try {
-            save()
-            load()
-        } catch (ex: Exception) {
-            ex.toString()
-        }
+        save()
+        load()
     }
 
     @Test
