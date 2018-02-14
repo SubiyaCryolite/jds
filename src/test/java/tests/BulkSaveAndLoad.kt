@@ -15,7 +15,7 @@ class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
         val memObjects = ArrayList<EntityA>()
         for (i in 0..9999) {
             val entry = EntityA()
-            entry.overview.uuid = String.format("guidBulk%s", i)
+            entry.overview.uuid = "guidBulk$i"
             memObjects.add(entry)
         }
         val process = Executors.newSingleThreadExecutor().submit(JdsSave(jdsDb, memObjects))
@@ -53,7 +53,7 @@ class BulkSaveAndLoad : BaseTestConfig("Bulk save and loads") {
     @Test
     @Throws(Exception::class)
     fun testTransactionalSql() {
-        initialiseTSqlBackend()//4s 532ms
+        initialiseTSqlBackend()//7s 978ms
         saveAndLoad()
     }
 
