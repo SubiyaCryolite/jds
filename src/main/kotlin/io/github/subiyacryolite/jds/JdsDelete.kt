@@ -52,7 +52,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
                     entity.onDelete(args)
-                jdsDb.tables.forEach { it.deleteExistingRecords(alternateConnections, jdsDb,connection, entity) }
+                jdsDb.tables.forEach { it.deleteExistingRecords(args, connection, entity) }
             }
         }
         //close alternate connections, leave main one as is

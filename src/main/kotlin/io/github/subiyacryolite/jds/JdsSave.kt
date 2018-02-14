@@ -142,7 +142,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, entity)
+            it.executeSave(jdsDb, connection, alternateConnections, entity,postSaveEventArguments)
         }
     }
 
