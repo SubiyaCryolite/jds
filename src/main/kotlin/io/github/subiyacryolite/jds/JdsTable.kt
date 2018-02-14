@@ -123,16 +123,20 @@ open class JdsTable() : Serializable {
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            val reportingConnection = when (jdsDb.isSqLiteDb || targetConnection == 0) {
+            val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
                 true -> connection
-                else -> alternateConnections.getOrPut(targetConnection) { jdsDb.getConnection(targetConnection) }
+                else -> {
+                    if (!alternateConnections.containsKey(targetConnection))
+                        alternateConnections[targetConnection] = jdsDb.getConnection(targetConnection)
+                    alternateConnections[targetConnection]!!
+                }
             }
 
             if (uniqueEntries) {
-                deleteExistingRecords(eventArguments, reportingConnection, entity)
+                deleteExistingRecords(eventArguments, iConnection, entity)
             }
 
-            val insertStatement = eventArguments.getOrAddStatement(reportingConnection, insertSql)
+            val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
             insertStatement.setString(1, entity.overview.compositeKey)
             insertStatement.setString(2, entity.overview.uuid)
             insertStatement.setString(3, entity.overview.uuidLocation)
@@ -269,21 +273,21 @@ open class JdsTable() : Serializable {
 
     /**
      * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
+     * @param pool a shared connection pool to quickly query the target schemas
      */
-    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) {
+    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) {
+
+        if (!pool.containsKey(targetConnection))
+            pool[targetConnection] = jdsDb.getConnection(targetConnection)
+
+        val connection = pool[targetConnection]!!
+
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val createTableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
 
-        val useStandardConnection = jdsDb.isSqLiteDb || targetConnection == 0
-        val innerConnection = when (useStandardConnection) {
-            true -> connection
-            else -> jdsDb.getConnection(targetConnection)
-        }
-
-        //target the reporting table
-        if (!jdsDb.doesTableExist(innerConnection, name))
-            innerConnection.prepareStatement(createTableSql).use {
+        if (!jdsDb.doesTableExist(connection, name))
+            connection.prepareStatement(createTableSql).use {
                 it.executeUpdate()
                 if (jdsDb.options.isPrintingOutput)
                     println("Created $name")
@@ -324,7 +328,7 @@ open class JdsTable() : Serializable {
         val stringJoiner = StringJoiner(", $delimiter", prefix, suffix)
         val sqliteJoiner = LinkedList<String>()
         createColumnsSql.forEach { columnName, createColumnSql ->
-            if (!jdsDb.doesColumnExist(innerConnection, name, columnName)) {
+            if (!jdsDb.doesColumnExist(connection, name, columnName)) {
                 if (!jdsDb.isSqLiteDb)
                     stringJoiner.add(createColumnSql)
                 else
@@ -340,26 +344,25 @@ open class JdsTable() : Serializable {
         if (foundChanges) {
             if (!jdsDb.isSqLiteDb) {
                 val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
-                innerConnection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
             } else {
                 //sqlite must alter columns once per entry
                 sqliteJoiner.forEach {
                     val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")
-                    innerConnection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                    connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
                 }
             }
         }
+
         deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} = ?"
         deleteByParentUuidSql = "DELETE FROM $name WHERE ${JdsSchema.parentUuidColumn} = ?"
         deleteByUuidSql = "DELETE FROM $name WHERE ${JdsSchema.uuidColumn} = ?"
         deleteByUuidLocationSql = "DELETE FROM $name WHERE ${JdsSchema.uuidLocationColumn} = ?"
+
+
         insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
 
         generatedOrUpdatedSchema = true
-
-        if (!useStandardConnection) {
-            innerConnection.close()
-        }
     }
 
     /**
@@ -377,21 +380,21 @@ open class JdsTable() : Serializable {
 
         if (entity is IJdsTableFilter)
             if (!entity.satisfiesCondition(this))
-                return false //failed to meet criteria
+                return false
 
         if (entities.isEmpty())
-            return true //open to all entities
+            return true
 
         entities.forEach {
             val entityType = jdsDb.classes[it]
             if (entityType != null) {
                 if (entityType.isInstance(entity))
-                    return true //matches specified entities
+                    return true
             } else
                 println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
         }
 
-        return false //failed to meet criteria
+        return false
     }
 
     /**

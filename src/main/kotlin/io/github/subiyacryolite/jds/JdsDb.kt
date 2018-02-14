@@ -542,9 +542,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     fun prepareTables() {
-        this.getConnection().use { connection ->
-            tables.forEach { it.forceGenerateOrUpdateSchema(this, connection) }
-        }
+        //pool connections so that there's no wastage
+        val connectionPool = HashMap<Int, Connection>()
+        tables.forEach { it.forceGenerateOrUpdateSchema(this, connectionPool) }
+        connectionPool.forEach { it.value.close() }
     }
 
     fun map(entity: Class<out JdsEntity>) {
