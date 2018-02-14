@@ -522,16 +522,22 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * Maps an entity's name to its id
      *
      * @param connection the SQL connection to use for DB operations
-     * @param entityId   the entity's id
-     * @param entityName the entity's name
+     * @param id   the entity's id
+     * @param name the entity's name
+     * @param caption
+     * @param description
+     * @param parent
      */
-    private fun populateRefEntity(connection: Connection, entityId: Long, entityName: String) = try {
+    private fun populateRefEntity(connection: Connection, id: Long, name: String, caption: String, description: String, parent: Boolean) = try {
         (if (supportsStatements) connection.prepareCall(populateRefEntity()) else connection.prepareStatement(populateRefEntity())).use { statement ->
-            statement.setLong(1, entityId)
-            statement.setString(2, entityName)
+            statement.setLong(1, id)
+            statement.setString(2, name)
+            statement.setString(3, caption)
+            statement.setString(4, description)
+            statement.setBoolean(5, parent)
             statement.executeUpdate()
             if (options.isPrintingOutput)
-                println("Mapped Entity [$entityName - $entityId]")
+                println("Mapped Entity [$name - $id]")
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -556,8 +562,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                 true -> entity.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            if (!classes.containsKey(entityAnnotation.entityId)) {
-                classes[entityAnnotation.entityId] = entity
+            if (!classes.containsKey(entityAnnotation.id)) {
+                classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
                     getConnection().use { connection ->
@@ -565,13 +571,13 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity = entity.newInstance()
                         JdsExtensions.determineParents(entity, parentEntities)
-                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.entityName)
+                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.caption, entityAnnotation.description, entityAnnotation.parent)
                         jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         if (options.isPrintingOutput)
-                            println("Mapped Entity [${entityAnnotation.entityName}]")
+                            println("Mapped Entity [${entityAnnotation.name}]")
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
@@ -734,7 +740,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun populateRefEntity(): String {
-        return "{call proc_ref_entity(?,?)}"
+        return "{call proc_ref_entity(?,?,?,?,?)}"
     }
 
     /**

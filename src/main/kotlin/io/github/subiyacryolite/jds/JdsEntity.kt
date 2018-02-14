@@ -85,7 +85,7 @@ abstract class JdsEntity : IJdsEntity {
                 true -> javaClass.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> javaClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            overview.entityId = entityAnnotation.entityId
+            overview.entityId = entityAnnotation.id
             overview.entityVersion = entityAnnotation.version
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")

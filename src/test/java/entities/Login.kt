@@ -7,7 +7,7 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 
-@JdsEntityAnnotation(entityName = "Login", entityId = 7900)
+@JdsEntityAnnotation(name = "Login", id = 7900)
 class Login : JdsEntity() {
 
     private val _rights = SimpleListProperty<Rights>(FXCollections.observableArrayList())

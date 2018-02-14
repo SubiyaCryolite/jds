@@ -54,7 +54,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
                 true -> referenceType.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> referenceType.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            entityId = je.entityId
+            entityId = je.id
         } else
             throw IllegalArgumentException("You must annotate the class [" + referenceType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
         //==================================

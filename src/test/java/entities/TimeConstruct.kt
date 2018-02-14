@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleObjectProperty
 
 import java.time.*
 
-@JdsEntityAnnotation(entityName = "TimeConstruct", entityId = 8000, version = 1)
+@JdsEntityAnnotation(name = "TimeConstruct", id = 8000, version = 1)
 class TimeConstruct : JdsEntity() {
     private val _period = SimpleObjectProperty(Period.ZERO)
     private val _duration = SimpleObjectProperty(Duration.ZERO)

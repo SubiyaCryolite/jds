@@ -13,7 +13,7 @@ import java.time.ZonedDateTime
 /**
  * Created by ifunga on 12/04/2017.
  */
-@JdsEntityAnnotation(entityId = 3, entityName = "TypeClass")
+@JdsEntityAnnotation(id = 3, name = "TypeClass")
 class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
     private val _stringField = SimpleStringProperty("")
     private val _timeField = SimpleObjectProperty(LocalTime.now())

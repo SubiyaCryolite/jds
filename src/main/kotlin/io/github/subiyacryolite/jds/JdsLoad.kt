@@ -85,7 +85,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
     override fun call(): MutableList<T> {
         val entitiesToLoad = ArrayList<String>()
         val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
-        val entityId = annotation.entityId
+        val entityId = annotation.id
         prepareActionBatches(jdsDb, entityId, entitiesToLoad, filterIds)
         val collections = ArrayList<T>()
         entitiesToLoad.chunked(MAX_BATCH_SIZE).forEach { populateInner(jdsDb, collections, it) }

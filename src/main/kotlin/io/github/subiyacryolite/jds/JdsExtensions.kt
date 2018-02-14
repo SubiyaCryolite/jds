@@ -142,7 +142,7 @@ object JdsExtensions {
         if (superclass == null) return
         if (superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val annotation = superclass.getAnnotation(JdsEntityAnnotation::class.java)
-            parentEntities.add(annotation.entityId)
+            parentEntities.add(annotation.id)
             addAllToList(superclass.superclass, parentEntities)
         }
     }

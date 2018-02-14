@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleStringProperty
 /**
  * Created by ifunga on 01/07/2017.
  */
-@JdsEntityAnnotation(entityId = 1001, entityName = "entityb")
+@JdsEntityAnnotation(id = 1001, name = "entityb")
 open class EntityB : EntityA() {
     private val _field = SimpleStringProperty("C")
 

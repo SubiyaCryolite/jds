@@ -6,7 +6,7 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 
-@JdsEntityAnnotation(entityId = 2, entityName = "address_book")
+@JdsEntityAnnotation(id = 2, name = "address_book")
 class AddressBook : JdsEntity() {
     private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
 

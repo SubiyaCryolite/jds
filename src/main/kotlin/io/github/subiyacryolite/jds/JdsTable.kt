@@ -64,7 +64,7 @@ open class JdsTable() : Serializable {
                 true -> entity.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            name = entityAnnotation.entityName
+            name = entityAnnotation.name
             this.uniqueEntries = uniqueEntries
             registerEntity(entity, true)
         }
@@ -85,7 +85,7 @@ open class JdsTable() : Serializable {
                 true -> entityClass.getAnnotation(JdsEntityAnnotation::class.java)
                 false -> entityClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
-            entities.add(entityAnnotation.entityId)
+            entities.add(entityAnnotation.id)
             if (registerFields) {
                 val entity = entityClass.newInstance()
                 entity.registerFields(this)

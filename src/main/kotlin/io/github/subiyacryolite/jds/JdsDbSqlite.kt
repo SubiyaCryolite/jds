@@ -224,7 +224,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun populateRefEntity(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity(id, caption) VALUES(?,?)"
+        return "INSERT OR REPLACE INTO jds_ref_entity(id, caption, caption, description, parent) VALUES(?,?,?,?,?)"
     }
 
     override fun populateRefEnum(): String {
