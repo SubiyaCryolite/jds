@@ -315,4 +315,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     override fun getDbBooleanDataType(): String {
         return "BIT"
     }
+
+    override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
+        return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
 }

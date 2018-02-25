@@ -287,4 +287,8 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     override fun getDbBooleanDataType(): String {
         return "SMALLINT"
     }
+
+    override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
+        return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
 }

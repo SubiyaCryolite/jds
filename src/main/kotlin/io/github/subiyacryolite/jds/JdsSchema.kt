@@ -107,6 +107,10 @@ object JdsSchema {
     }
 
 
+    fun generateIndex(jdsDb: JdsDb, tableName: String, column: String): String {
+        return jdsDb.getDbCreateIndexSyntax(tableName, column, "${tableName}_index_$column")
+    }
+
     /**
      * @return
      */

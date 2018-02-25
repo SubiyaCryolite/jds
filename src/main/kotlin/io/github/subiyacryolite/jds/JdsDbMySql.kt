@@ -284,4 +284,8 @@ abstract class JdsDbMySql : JdsDb {
     override fun getDbBooleanDataType(): String {
         return "BOOLEAN"
     }
+
+    override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
+        return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
 }

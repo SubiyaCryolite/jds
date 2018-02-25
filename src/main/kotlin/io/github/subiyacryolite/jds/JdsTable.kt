@@ -22,8 +22,8 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
-import java.time.LocalTime
-import java.time.ZonedDateTime
+import java.sql.Timestamp
+import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
@@ -153,6 +153,12 @@ open class JdsTable() : Serializable {
                 when (value) {
                     is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 7, value, jdsDb)
                     is LocalTime -> insertStatement.setLocalTime(columnIndex + 7, value, jdsDb)
+                    is LocalDateTime -> insertStatement.setTimestamp(columnIndex + 7, Timestamp.valueOf(value))
+                    is LocalDate -> insertStatement.setTimestamp(columnIndex + 7, Timestamp.valueOf(value.atStartOfDay()))
+                    is MonthDay -> insertStatement.setString(columnIndex + 7, value.toString())
+                    is YearMonth -> insertStatement.setString(columnIndex + 7, value.toString())
+                    is Period -> insertStatement.setString(columnIndex + 7, value.toString())
+                    is Duration -> insertStatement.setLong(columnIndex + 7, value.toNanos())
                     else -> insertStatement.setObject(columnIndex + 7, value ?: null)
                 }
             }
@@ -283,15 +289,19 @@ open class JdsTable() : Serializable {
         val connection = pool[targetConnection]!!
 
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
-        val createTableSql = JdsSchema.generateTable(jdsDb, name, uniqueEntries)
         val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
-
-        if (!jdsDb.doesTableExist(connection, name))
-            connection.prepareStatement(createTableSql).use {
+        if (!jdsDb.doesTableExist(connection, name)) {
+            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name, uniqueEntries)).use {
                 it.executeUpdate()
                 if (jdsDb.options.isPrintingOutput)
                     println("Created $name")
             }
+            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidColumn)).use { it.executeUpdate() }
+            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.parentUuidColumn)).use { it.executeUpdate() }
+            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationColumn)).use { it.executeUpdate() }
+            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationVersionColumn)).use { it.executeUpdate() }
+            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.entityIdColumn)).use { it.executeUpdate() }
+        }
 
         val insertColumns = StringJoiner(",")
         val insertParameters = StringJoiner(",")

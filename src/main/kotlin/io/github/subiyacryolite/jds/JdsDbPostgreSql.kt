@@ -280,4 +280,8 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     override fun getDbBooleanDataType(): String {
         return "BOOLEAN"
     }
+
+    override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
+        return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
 }

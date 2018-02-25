@@ -153,4 +153,11 @@ interface IJdsDb {
      * @return the Boolean data-type of the database implementation
      */
     fun getDbBooleanDataType(): String
+
+    /**
+     * @param
+     * @columnName
+     * @indexName
+     */
+    fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String
 }

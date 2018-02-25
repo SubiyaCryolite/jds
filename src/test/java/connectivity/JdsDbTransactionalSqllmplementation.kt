@@ -24,6 +24,6 @@ class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
         val properties = Properties()
         FileInputStream(File("db.tsql.properties")).use { properties.load(it) }
         //return DriverManager.getConnection("jdbc:sqlserver://BR7INDANA\\SMARTCARE40;databaseName=jds", properties)
-        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\SMARTCARE40;databaseName=jds", properties);
+        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
     }
 }
