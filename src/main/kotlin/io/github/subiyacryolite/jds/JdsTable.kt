@@ -34,6 +34,7 @@ import kotlin.collections.LinkedHashMap
 open class JdsTable() : Serializable {
 
     var name = ""
+    var createIndexes = false
     var uniqueEntries = false
     var onlyLiveRecords = false
     var onlyDeprecatedRecords = false
@@ -296,11 +297,13 @@ open class JdsTable() : Serializable {
                 if (jdsDb.options.isPrintingOutput)
                     println("Created $name")
             }
-            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidColumn)).use { it.executeUpdate() }
-            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.parentUuidColumn)).use { it.executeUpdate() }
-            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationColumn)).use { it.executeUpdate() }
-            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationVersionColumn)).use { it.executeUpdate() }
-            connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.entityIdColumn)).use { it.executeUpdate() }
+            if (createIndexes) {
+                connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidColumn)).use { it.executeUpdate() }
+                connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.parentUuidColumn)).use { it.executeUpdate() }
+                connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationColumn)).use { it.executeUpdate() }
+                connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.uuidLocationVersionColumn)).use { it.executeUpdate() }
+                connection.prepareStatement(JdsSchema.generateIndex(jdsDb, name, JdsSchema.entityIdColumn)).use { it.executeUpdate() }
+            }
         }
 
         val insertColumns = StringJoiner(",")
