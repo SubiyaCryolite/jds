@@ -59,17 +59,19 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     override fun call(): Boolean {
-        try {
-            val chunks = entities.chunked(1000)
-            val totalChunks = chunks.count()
-            chunks.forEachIndexed { index, batch ->
+
+        val chunks = entities.chunked(1000)
+        val totalChunks = chunks.count()
+        chunks.forEachIndexed { index, batch ->
+            try {
                 saveInner(batch, index == (totalChunks - 1))
                 if (jdsDb.options.isPrintingOutput)
                     println("Processing saves. Batch ${index + 1} of $totalChunks")
+            } catch (ex: Exception) {
+                throw ex
             }
-        } catch (ex: Exception) {
-            throw ex
         }
+
         return true
     }
 
@@ -142,7 +144,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, entity,postSaveEventArguments)
+            it.executeSave(jdsDb, connection, alternateConnections, entity, postSaveEventArguments)
         }
     }
 
@@ -155,15 +157,23 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
     private fun regularStatementOrCall(sql: String) = if (jdsDb.supportsStatements) connection.prepareCall(sql) else regularStatement(sql)
 
+    @Throws(Exception::class)
     private fun executeCommitAndClose(connection: Connection, vararg statement: Statement) {
-        statement.forEach { it.use { it.executeBatch() } }
+        statement.forEach {
+            try {
+                it.executeBatch()
+                it.close()
+            } catch (ex: Exception) {
+                ex.toString()
+            }
+        }
         connection.commit()
     }
 
     /**
      * @param overviews
      */
-    @Throws(SQLException::class)
+    @Throws(Exception::class)
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val saveOverview = regularStatementOrCall(jdsDb.saveOverview())
@@ -196,6 +206,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveBlobs(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveBlob())
@@ -218,6 +229,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveBooleans(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveBoolean())
@@ -306,6 +318,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveLongs(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveLong())
@@ -328,6 +341,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveStrings(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveString())
@@ -351,6 +365,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveDateConstructs(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsertText = namedStatementOrCall(jdsDb.saveString())
@@ -400,6 +415,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveDatesAndDateTimes(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveDateTime())
@@ -430,6 +446,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveTimes(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveTime())
@@ -453,6 +470,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveZonedDateTimes(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveZonedDateTime())
@@ -476,6 +494,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     /**
      * @param entity
      */
+    @Throws(Exception::class)
     private fun saveEnums(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val upsert = namedStatementOrCall(jdsDb.saveInteger())
@@ -505,6 +524,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection i.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayDates(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_date_time_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -539,6 +559,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayFloats(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_float_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -572,6 +593,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5] to [3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayIntegers(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -606,6 +628,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayDoubles(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -640,6 +663,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayLongs(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_double_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -673,6 +697,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveArrayStrings(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_text_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
@@ -708,6 +733,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @apiNote Enums are actually saved as index based integer arrays
      * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
      */
+    @Throws(Exception::class)
     private fun saveEnumCollections(entities: Iterable<JdsEntity>) = try {
         connection.autoCommit = false
         val deleteSql = "DELETE FROM jds_store_integer_array WHERE field_id = :fieldId AND composite_key = :compositeKey"
