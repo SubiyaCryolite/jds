@@ -21,42 +21,42 @@ import java.time.LocalDateTime
 /**
  * Class used to store blob values in a portable manner
  */
-class JdsBlobValues(val id: Long, val v: ByteArray?)
+data class JdsBlobValues(var id: Long = 0, var v: ByteArray? = null)
 
 /**
  * Class used to store [java.lang.Boolean] values in a portable manner
  */
-class JdsBooleanValues(val k: Long, val v: Int?)
+data class JdsBooleanValues(var k: Long = 0, var v: Int? = null)
 
 /**
  * Class used to store [java.lang.Double] in a portable manner
  */
-class JdsDoubleValues(val k: Long, val v: Double?)
+data class JdsDoubleValues(var k: Long = 0, var v: Double? = null)
 
 /**
  * Class used to store [java.lang.Integer] and [java.lang.Enum] values in a portable manner
  */
-class JdsIntegerEnumValues(val k: Long, val v: Int?)
+data class JdsIntegerEnumValues(var k: Long = 0, var v: Int? = null)
 
 /**
  * Class used to store [java.lang.Long], [java.time.ZonedDateTime],[java.time.LocalTime] and [java.time.Duration] values in a portable manner
  */
-class JdsLongValues(val k: Long, val v: Long?)
+data class JdsLongValues(var k: Long = 0, var v: Long? = null)
 
 /**
  * Class used to store [java.lang.String], [java.time.YearMonth],[java.time.MonthDay] and [java.time.Period] values in a portable manner
  */
-class JdsStringValues(val k: Long, val v: String?)
+data class JdsStringValues(var k: Long = 0, var v: String? = null)
 
 /**
  * Class used to store [java.lang.Float] values in a portable manner
  */
-class JdsFloatValues(val k: Long, val v: Float?)
+data class JdsFloatValues(var k: Long = 0, var v: Float? = null)
 
 /**
  * Class used to store [java.time.LocalDate] and [java.time.LocalDateTime] values in a portable manner based on [java.sql.Timestamp]s
  */
-class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
+data class JdsLocalDateTimeValues(var k: Long = 0, var v: Timestamp? = null)
 
 /**
  *
@@ -69,12 +69,25 @@ class JdsLocalDateTimeValues(val k: Long, val v: Timestamp?)
  * @param live live
  * @param version version
  */
-class JdsEntityOverview(val compositeKey: String, val uuid: String, val uuidLocation: String, val uuidLocationVersion: Int, val entityId: Long, val fieldId: Long?, val live: Boolean, val version: Long, val lastEdit: LocalDateTime, val parentUuid: String)
+data class JdsEntityOverview(var compositeKey: String = "",
+                             var uuid: String = "",
+                             var uuidLocation: String = "",
+                             var uuidLocationVersion: Int = 0,
+                             var entityId: Long = 0,
+                             var fieldId: Long? = null,
+                             var live: Boolean = false,
+                             var version: Long = 0,
+                             var lastEdit: LocalDateTime = LocalDateTime.now(),
+                             var parentUuid: String = "")
 
 /**
  * @param entities a collection of [JdsEntity] objects to store in a portable manner
  */
 class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
+
+    //empty constructor needed for json serialization
+    constructor() : this(emptyList())
+
     /**
      * Embedded objects
      */
@@ -83,7 +96,10 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
     init {
         entities.forEach {
             if (it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
-                e.add(JdsEmbeddedObject(it, null))
+                val eb = JdsEmbeddedObject()
+                eb.fieldId = null
+                eb.init(it)
+                e.add(eb)
             } else {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
             }

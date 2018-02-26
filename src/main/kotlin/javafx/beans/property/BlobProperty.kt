@@ -35,17 +35,6 @@ open class BlobProperty : Serializable {
     }
 
     /**
-     * Constructor
-     *
-     * @param value input stream source
-     * @throws IOException
-     */
-    @Throws(IOException::class)
-    constructor(value: InputStream) {
-        set(value)
-    }
-
-    /**
      * Acquire the blob as an array of bytes
      *
      * @return the blob as an array of bytes
@@ -62,25 +51,6 @@ open class BlobProperty : Serializable {
     fun set(bytes: ByteArray) {
         this.bytes = bytes
     }
-
-    /**
-     * Set the blob
-     *
-     * @param inputStream the blob as an input stream
-     * @throws IOException possible IO exception
-     */
-    @Throws(IOException::class)
-    fun set(inputStream: InputStream) {
-        bytes = inputStream.use { it.readBytes(1024) }
-    }
-
-    /**
-     * Acquire the blob as an input stream
-     *
-     * @return the blob as an input stream
-     */
-    val resourceAsStream: InputStream
-        get() = ByteArrayInputStream(bytes!!)
 
     /**
      * Determine if the blob is empty

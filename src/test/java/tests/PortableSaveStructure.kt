@@ -5,6 +5,7 @@ import entities.AddressBook
 import entities.Example
 import entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.embedded.JdsEmbeddedContainer
 import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
 import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
 import org.junit.jupiter.api.Test
@@ -45,6 +46,11 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         println("$outputReg")
         println("================ Object JDS JSON ================")
         println("$outputJds")
+
+
+        val embeddedObjectFromJson = objectMapper.readValue(outputJds, JdsEmbeddedContainer::class.java)
+        val isTheSame = embeddedObjectFromJson == embeddedObject
+        println("Is the same? = $isTheSame")
 
         val loadEmbedded = JdsLoadEmbedded(jdsDb, clazz, embeddedObject)
         val loadedEntity = loadEmbedded.call()

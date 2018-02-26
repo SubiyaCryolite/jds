@@ -860,10 +860,18 @@ abstract class JdsEntity : IJdsEntity {
         //EMBEDDED OBJECTS
         //==============================================
         objectArrayProperties.forEach { key, itx ->
-            itx.forEach { embeddedObject.eo.add(JdsEmbeddedObject(it, key.fieldEntity.id)) }
+            itx.forEach {
+                val eo = JdsEmbeddedObject()
+                eo.fieldId = key.fieldEntity.id
+                eo.init(it)
+                embeddedObject.eo.add(eo)
+            }
         }
         objectProperties.forEach { key, it ->
-            embeddedObject.eo.add(JdsEmbeddedObject(it.value, key.fieldEntity.id))
+            val eo = JdsEmbeddedObject()
+            eo.fieldId = key.fieldEntity.id
+            eo.init(it.value)
+            embeddedObject.eo.add(eo)
         }
     }
 

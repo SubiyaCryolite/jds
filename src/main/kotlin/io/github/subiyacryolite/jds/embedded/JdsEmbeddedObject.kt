@@ -19,7 +19,9 @@ import io.github.subiyacryolite.jds.JdsEntity
  * Class used to represent [JdsEntity] objects in a portable manner
  * @param entity
  */
-class JdsEmbeddedObject(entity: JdsEntity, fieldId: Long?) {
+class JdsEmbeddedObject {
+
+    var fieldId: Long?=null
 
     /**
      * Used to store Byte[] values in a portable manner
@@ -69,18 +71,19 @@ class JdsEmbeddedObject(entity: JdsEntity, fieldId: Long?) {
     /**
      * Object overview
      */
-    val o: JdsEntityOverview = JdsEntityOverview(entity.overview.compositeKey,
-            entity.overview.uuid,
-            entity.overview.uuidLocation,
-            entity.overview.uuidLocationVersion,
-            entity.overview.entityId,
-            fieldId,
-            entity.overview.live,
-            entity.overview.entityVersion,
-            entity.overview.lastEdit,
-            entity.overview.parentUuid)
+    lateinit var o: JdsEntityOverview
 
-    init {
+    fun init(entity: JdsEntity) {
         entity.assign(this);
+        o = JdsEntityOverview(entity.overview.compositeKey,
+        entity.overview.uuid,
+        entity.overview.uuidLocation,
+        entity.overview.uuidLocationVersion,
+        entity.overview.entityId,
+        fieldId,
+        entity.overview.live,
+        entity.overview.entityVersion,
+        entity.overview.lastEdit,
+        entity.overview.parentUuid)
     }
 }
