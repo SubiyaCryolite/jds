@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsDb
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import javafx.beans.property.ObjectProperty
 import java.util.HashSet
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -29,10 +30,10 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
      */
     override fun call(): List<T> {
         val output: MutableList<T> = ArrayList()
-        container.forEachIndexed { index, element ->
-            element.e.forEachIndexed { innerIndex, innerElement ->
+        container.forEach { element ->
+            element.e.forEach { innerElement ->
                 val instance = referenceType.newInstance()
-                populate(index, innerIndex, instance, innerElement)
+                populate(instance, innerElement)
                 output.add(instance)
             }
         }
@@ -41,12 +42,10 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
 
     /**
      *
-     * @param outerIndex
-     * @param innerIndex
      * @param entity
      * @param embeddedObject
      */
-    private fun populate(outerIndex: Int, innerIndex: Int, entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
+    private fun populate(entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
         //==============================================
         //Overviews
         //==============================================
@@ -119,12 +118,36 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         val uuids = HashSet<String>()//ids should be unique
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
-        innerObjects.forEach { jdsEntity ->
-            //populate the inner objects
-            embeddedObject.eo.filter { it.o.compositeKey == jdsEntity.overview.compositeKey }.forEach {
-                entity.populateObjects(jdsDb, it.o.fieldId, it.o.entityId, it.o.uuid, it.o.uuidLocation, it.o.uuidLocationVersion, entity.overview.uuid, innerObjects, uuids)
-                populate(outerIndex, innerIndex, jdsEntity, it)
-            }
+
+        embeddedObject.eo.forEach {
+            populateObjects(entity, jdsDb, it.o.fieldId, it.o.entityId, it.o.uuid, it.o.uuidLocation, it.o.uuidLocationVersion, it)
         }
+    }
+
+    private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, uuidLocation: String, uuidLocationVersion: Int, eo: JdsEmbeddedObject) {
+        if (fieldId == null) return
+        entity.objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+            val entity = jdsDb.classes[entityId]!!.newInstance()//create array element
+            entity.overview.uuid = uuid
+            entity.overview.uuidLocation = uuidLocation
+            entity.overview.uuidLocationVersion = uuidLocationVersion
+            entity.overview.parentUuid = entity.overview.uuid
+            populate(entity, eo)
+            it.value.add(entity)
+        }
+        //find existing elements
+        entity.objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+            if (it.value.value == null)
+                it.value.value = jdsDb.classes[entityId]!!.newInstance()//create array element
+            it.value.value.overview.uuid = uuid
+            it.value.value.overview.uuidLocation = uuidLocation
+            it.value.value.overview.uuidLocationVersion = uuidLocationVersion
+            it.value.value.overview.parentUuid = entity.overview.uuid
+            populate(it.value.value, eo)
+        }
+    }
+
+    fun filterFunction(entity: JdsEntity, eo: JdsEmbeddedObject): Boolean {
+        return entity.overview.uuid == eo.o.uuid && entity.overview.uuidLocation == eo.o.uuidLocation && entity.overview.uuidLocationVersion == eo.o.uuidLocationVersion
     }
 }

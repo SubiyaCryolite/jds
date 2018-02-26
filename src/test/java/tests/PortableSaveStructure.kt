@@ -52,14 +52,19 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         val isTheSame = embeddedObjectFromJson == embeddedObject
         println("Is the same? = $isTheSame")
 
-        val loadEmbedded = JdsLoadEmbedded(jdsDb, clazz, embeddedObject)
-        val loadedEntity = loadEmbedded.call()
+        val loadEmbeddedA = JdsLoadEmbedded(jdsDb, clazz, embeddedObject)
+        val loadedEntityA = loadEmbeddedA.call()
+
+        val loadEmbeddedB = JdsLoadEmbedded(jdsDb, clazz, embeddedObjectFromJson)
+        val loadedEntityB = loadEmbeddedB.call()
 
         val stringRepresentation1 = entity.toString()
-        val stringRepresentation2 = loadedEntity.toString()
+        val stringRepresentation2 = loadedEntityA.toString()
+        val stringRepresentation3 = loadedEntityB.toString()
 
         println("Before = $stringRepresentation1")
         println("After  = $stringRepresentation2")
+        println("After  FROM json = $stringRepresentation3")
 
         val equal = stringRepresentation1 == stringRepresentation2
         println("Equal? $equal")

@@ -967,7 +967,7 @@ abstract class JdsEntity : IJdsEntity {
      */
     internal fun populateObjects(jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, uuidLocation: String, uuidLocationVersion: Int, parentUuid: String, innerObjects: ConcurrentLinkedQueue<JdsEntity>, uuids: HashSet<String>) {
         try {
-            if (fieldId != null) return
+            if (fieldId == null) return
             objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val entity = jdsDb.classes[entityId]!!.newInstance()
                 entity.overview.uuid = uuid
@@ -979,14 +979,14 @@ abstract class JdsEntity : IJdsEntity {
                 innerObjects.add(entity)
             }
             objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
-                val jdsEntity = jdsDb.classes[entityId]!!.newInstance()
-                jdsEntity.overview.uuid = uuid
-                jdsEntity.overview.uuidLocation = uuidLocation
-                jdsEntity.overview.uuidLocationVersion = uuidLocationVersion
-                jdsEntity.overview.parentUuid = parentUuid
+                if (it.value.value == null)
+                    it.value.value = jdsDb.classes[entityId]!!.newInstance()
+                it.value.value.overview.uuid = uuid
+                it.value.value.overview.uuidLocation = uuidLocation
+                it.value.value.overview.uuidLocationVersion = uuidLocationVersion
+                it.value.value.overview.parentUuid = parentUuid
                 uuids.add(uuid)
-                it.value.set(jdsEntity)
-                innerObjects.add(jdsEntity)
+                innerObjects.add(it.value.value)
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
