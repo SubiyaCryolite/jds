@@ -57,9 +57,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @return computed result
      * @throws Exception if unable to compute a result
      */
-    @Throws(Exception::class)
     override fun call(): Boolean {
-
         val chunks = entities.chunked(1000)
         val totalChunks = chunks.count()
         chunks.forEachIndexed { index, batch ->
@@ -68,10 +66,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 if (jdsDb.options.isPrintingOutput)
                     println("Processing saves. Batch ${index + 1} of $totalChunks")
             } catch (ex: Exception) {
-                throw ex
+                ex.printStackTrace(System.err)
             }
         }
-
         return true
     }
 
