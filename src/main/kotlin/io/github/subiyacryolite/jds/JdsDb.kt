@@ -70,12 +70,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_ARRAY)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_ARRAY)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_ARRAY)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_LONG_ARRAY)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE_ARRAY)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME_ARRAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BLOB)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT)
@@ -136,12 +130,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     private fun initiateDatabaseComponent(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
             JdsComponent.STORE_ENTITY_INHERITANCE -> createStoreEntityInheritance(connection)
-            JdsComponent.STORE_TEXT_ARRAY -> createStoreTextArray(connection)
-            JdsComponent.STORE_FLOAT_ARRAY -> createStoreFloatArray(connection)
-            JdsComponent.STORE_INTEGER_ARRAY -> createStoreIntegerArray(connection)
-            JdsComponent.STORE_LONG_ARRAY -> createStoreLongArray(connection)
-            JdsComponent.STORE_DOUBLE_ARRAY -> createStoreDoubleArray(connection)
-            JdsComponent.STORE_DATE_TIME_ARRAY -> createStoreDateTimeArray(connection)
             JdsComponent.STORE_BOOLEAN -> createStoreBoolean(connection)
             JdsComponent.STORE_BLOB -> createStoreBlob(connection)
             JdsComponent.STORE_TEXT -> createStoreText(connection)
@@ -406,42 +394,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected abstract fun createStoreLong(connection: Connection)
 
     /**
-     * Database specific SQL used to create the schema that stores text array
-     * values
-     */
-    protected abstract fun createStoreTextArray(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores datetime
-     * array values
-     */
-    protected abstract fun createStoreDateTimeArray(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores integer array
-     * values
-     */
-    protected abstract fun createStoreIntegerArray(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores float array
-     * values
-     */
-    protected abstract fun createStoreFloatArray(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores double array
-     * values
-     */
-    protected abstract fun createStoreDoubleArray(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores long array
-     * values
-     */
-    protected abstract fun createStoreLongArray(connection: Connection)
-
-    /**
      * Database specific SQL used to create the schema that stores entity
      * definitions
      */
@@ -603,7 +555,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveString(): String {
-        return "{call proc_store_text(:uuid,:fieldId,:value)}"
+        return "{call proc_store_text(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -619,7 +571,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveLong(): String {
-        return "{call proc_store_long(:uuid,:fieldId,:value)}"
+        return "{call proc_store_long(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -627,7 +579,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveDouble(): String {
-        return "{call proc_store_double(:uuid,:fieldId,:value)}"
+        return "{call proc_store_double(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -644,7 +596,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveFloat(): String {
-        return "{call proc_store_float(:uuid,:fieldId,:value)}"
+        return "{call proc_store_float(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -652,7 +604,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveInteger(): String {
-        return "{call proc_store_integer(:uuid,:fieldId,:value)}"
+        return "{call proc_store_integer(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -660,7 +612,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveDateTime(): String {
-        return "{call proc_store_date_time(:uuid,:fieldId,:value)}"
+        return "{call proc_store_date_time(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**

@@ -1,6 +1,7 @@
 CREATE TABLE jds_store_text (
   composite_key NVARCHAR(128) NOT NULL,
   field_id      BIGINT,
+  sequence      INTEGER,
   value         NVARCHAR(MAX),
   PRIMARY KEY (field_id, composite_key)
 );

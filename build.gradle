@@ -9,13 +9,13 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "7.5.4-SNAPSHOT" //major.minor.revision
+version = "7.6.0-SNAPSHOT" //major.minor.revision
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-project.ext.jacksonVersion = "2.9.3"
+project.ext.jacksonVersion = "2.9.4"
 project.ext.kotlinVersion = "1.2.21"
 
 buildscript {
@@ -40,8 +40,8 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
     testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
-    testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
     testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"

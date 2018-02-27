@@ -94,30 +94,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_store_long.sql")
     }
 
-    override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_text_array.sql")
-    }
-
-    override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_date_time_array.sql")
-    }
-
-    override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_integer_array.sql")
-    }
-
-    override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_float_array.sql")
-    }
-
-    override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_double_array.sql")
-    }
-
-    override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_long_array.sql")
-    }
-
     override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity.sql")
     }
@@ -163,7 +139,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveString(): String {
-        return "INSERT OR REPLACE INTO jds_store_text(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_text(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveBoolean(): String {
@@ -171,23 +147,23 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveLong(): String {
-        return "INSERT OR REPLACE INTO jds_store_long(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_long(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveDouble(): String {
-        return "INSERT OR REPLACE INTO jds_store_double(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_double(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveFloat(): String {
-        return "INSERT OR REPLACE INTO jds_store_float(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_float(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveInteger(): String {
-        return "INSERT OR REPLACE INTO jds_store_integer(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_integer(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_date_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_date_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveTime(): String {

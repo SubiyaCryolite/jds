@@ -134,30 +134,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_store_long.sql")
     }
 
-    override fun createStoreTextArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_text_array.sql")
-    }
-
-    override fun createStoreDateTimeArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_date_time_array.sql")
-    }
-
-    override fun createStoreIntegerArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_integer_array.sql")
-    }
-
-    override fun createStoreFloatArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_float_array.sql")
-    }
-
-    override fun createStoreDoubleArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_double_array.sql")
-    }
-
-    override fun createStoreLongArray(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_long_array.sql")
-    }
-
     override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/jds_ref_entity.sql")
     }

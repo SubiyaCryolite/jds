@@ -22,12 +22,6 @@ package io.github.subiyacryolite.jds.enums;
  */
 enum class JdsComponent(val component: String, val alias: String) {
     NULL("Null", "null"),
-    STORE_TEXT_ARRAY("jds_store_text_array", "sta"),
-    STORE_FLOAT_ARRAY("jds_store_float_array", "sfa"),
-    STORE_INTEGER_ARRAY("jds_store_integer_array", "sia"),
-    STORE_LONG_ARRAY("jds_store_long_array", "sla"),
-    STORE_DOUBLE_ARRAY("jds_store_double_array", "sda"),
-    STORE_DATE_TIME_ARRAY("jds_store_date_time_array", "sdta"),
     STORE_TEXT("jds_store_text", "st"),
     STORE_BOOLEAN("jds_store_boolean", "sbn"),
     STORE_FLOAT("jds_store_float", "sf"),

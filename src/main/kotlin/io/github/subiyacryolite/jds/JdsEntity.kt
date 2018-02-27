@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalTimeSqlFormat
 import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -42,38 +43,65 @@ import kotlin.coroutines.experimental.buildSequence
  * [IJdsOverview] to store overview data
  */
 abstract class JdsEntity : IJdsEntity {
+    @get:JsonIgnore
+    @set:JsonIgnore
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
+    @get:JsonIgnore
     internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    @get:JsonIgnore
     internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    @get:JsonIgnore
     internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    @get:JsonIgnore
     internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    @get:JsonIgnore
     internal val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = HashMap()
+    @get:JsonIgnore
     internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    @get:JsonIgnore
     internal val periodProperties: HashMap<Long, ObjectProperty<Period>> = HashMap()
+    @get:JsonIgnore
     internal val durationProperties: HashMap<Long, ObjectProperty<Duration>> = HashMap()
     //strings
+    @get:JsonIgnore
     internal val stringProperties: HashMap<Long, StringProperty> = HashMap()
     //numeric
+    @get:JsonIgnore
     internal val floatProperties: HashMap<Long, WritableValue<Float>> = HashMap()
+    @get:JsonIgnore
     internal val doubleProperties: HashMap<Long, WritableValue<Double>> = HashMap()
+    @get:JsonIgnore
     internal val booleanProperties: HashMap<Long, WritableValue<Boolean>> = HashMap()
+    @get:JsonIgnore
     internal val longProperties: HashMap<Long, WritableValue<Long>> = HashMap()
+    @get:JsonIgnore
     internal val integerProperties: HashMap<Long, WritableValue<Int>> = HashMap()
     //arrays
+    @get:JsonIgnore
     internal val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
+    @get:JsonIgnore
     internal val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
+    @get:JsonIgnore
     internal val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
+    @get:JsonIgnore
     internal val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
+    @get:JsonIgnore
     internal val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
+    @get:JsonIgnore
     internal val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
+    @get:JsonIgnore
     internal val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
     //enumProperties
+    @get:JsonIgnore
     internal val enumProperties: HashMap<JdsFieldEnum<*>, ObjectProperty<Enum<*>?>> = HashMap()
+    @get:JsonIgnore
     internal val enumCollectionProperties: HashMap<JdsFieldEnum<*>, MutableCollection<Enum<*>?>> = HashMap()
     //objects
+    @get:JsonIgnore
     internal val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
     //blobs
+    @get:JsonIgnore
     internal val blobProperties: HashMap<Long, BlobProperty> = HashMap()
 
 

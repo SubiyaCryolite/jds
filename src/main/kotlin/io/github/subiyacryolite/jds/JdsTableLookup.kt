@@ -33,13 +33,13 @@ object JdsTableLookup {
         when (fieldType) {
             JdsFieldType.FLOAT -> return STORE_FLOAT
             JdsFieldType.DOUBLE -> return STORE_DOUBLE
-            JdsFieldType.FLOAT_COLLECTION -> return STORE_FLOAT_ARRAY
-            JdsFieldType.INT_COLLECTION -> return STORE_INTEGER_ARRAY
-            JdsFieldType.DOUBLE_COLLECTION -> return STORE_DOUBLE_ARRAY
-            JdsFieldType.LONG_COLLECTION -> return STORE_LONG_ARRAY
-            JdsFieldType.STRING_COLLECTION -> return STORE_TEXT_ARRAY
-            JdsFieldType.DATE_TIME_COLLECTION -> return STORE_DATE_TIME_ARRAY
-            JdsFieldType.ENUM_COLLECTION -> return STORE_INTEGER_ARRAY
+            JdsFieldType.FLOAT_COLLECTION -> return STORE_FLOAT
+            JdsFieldType.INT_COLLECTION -> return STORE_INTEGER
+            JdsFieldType.DOUBLE_COLLECTION -> return STORE_DOUBLE
+            JdsFieldType.LONG_COLLECTION -> return STORE_LONG
+            JdsFieldType.STRING_COLLECTION -> return STORE_TEXT
+            JdsFieldType.DATE_TIME_COLLECTION -> return STORE_DATE_TIME
+            JdsFieldType.ENUM_COLLECTION -> return STORE_INTEGER
             JdsFieldType.ZONED_DATE_TIME -> return STORE_ZONED_DATE_TIME
             JdsFieldType.TIME -> return STORE_TIME
             JdsFieldType.BLOB -> return STORE_BLOB
