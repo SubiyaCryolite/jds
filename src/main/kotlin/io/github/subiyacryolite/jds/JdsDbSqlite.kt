@@ -122,6 +122,10 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview.sql")
     }
 
+    override fun createRefEntityOverviewLight(connection: Connection) {
+        executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview_light.sql")
+    }
+
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/jds_entity_binding.sql")
     }
@@ -176,6 +180,11 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveZonedDateTime(): String {
         return "INSERT OR REPLACE INTO jds_store_zoned_date_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+    }
+
+
+    override fun saveOverviewLight(): String {
+        return "INSERT OR REPLACE INTO jds_entity_overview_light(composite_key) VALUES(?)"
     }
 
     override fun saveOverview(): String {

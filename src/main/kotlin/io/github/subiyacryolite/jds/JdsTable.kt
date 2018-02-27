@@ -132,11 +132,9 @@ open class JdsTable() : Serializable {
                     alternateConnections[targetConnection]!!
                 }
             }
-
             if (uniqueEntries) {
                 deleteExistingRecords(eventArguments, iConnection, entity)
             }
-
             val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
             insertStatement.setString(1, entity.overview.compositeKey)
             insertStatement.setString(2, entity.overview.uuid)

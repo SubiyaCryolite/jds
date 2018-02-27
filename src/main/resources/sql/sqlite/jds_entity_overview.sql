@@ -14,5 +14,7 @@ CREATE TABLE jds_entity_overview
   FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
     ON DELETE CASCADE
     DEFERRABLE INITIALLY DEFERRED,
-  PRIMARY KEY (composite_key)
+  FOREIGN KEY (composite_key) REFERENCES jds_entity_overview_light (composite_key) ON DELETE CASCADE
+    DEFERRABLE INITIALLY DEFERRED,
+    CONSTRAINT jds_entity_overview_uk_composite_key UNIQUE (composite_key)
 );

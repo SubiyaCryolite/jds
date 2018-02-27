@@ -162,6 +162,10 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_entity_overview.sql")
     }
 
+    override fun createRefEntityOverviewLight(connection: Connection) {
+        executeSqlFromFile(connection, "sql/oracle/jds_entity_overview_light.sql")
+    }
+
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/jds_entity_binding.sql")
     }
@@ -189,6 +193,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_LIGHT)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_3)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS)
@@ -201,6 +206,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
+            JdsComponent.SAVE_ENTITY_LIGHT-> executeSqlFromFile(connection, "sql/oracle/procedures/proc_entity_overview_light.sql")
             JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_overview_v3.sql")
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_inheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")

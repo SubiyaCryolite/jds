@@ -77,7 +77,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 JdsFilterBy.COMPOSITE_KEY -> "composite_key"
                 JdsFilterBy.UUID -> "uuid"
                 JdsFilterBy.UUID_LOCATION -> "uuid_location"
-                JdsFilterBy.PARENT_UUID -> "parent_uuid"
+                JdsFilterBy.PARENT_UUID -> "parent_composite_key"
             }
         }
 
@@ -104,11 +104,28 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                               uuids: Collection<String>) {
 
         val questionsString = prepareParamaterSequence(uuids.size)
-        val sqlEntities = "SELECT composite_key, uuid, uuid_location, uuid_location_version, entity_id, entity_version, last_edit, live, parent_uuid FROM jds_entity_overview WHERE $filterColumn IN ($questionsString)"
+        val sb = StringBuilder()
+        sb.append("SELECT\n")
+        sb.append("  repo.uuid,\n")
+        sb.append("  repo.uuid_location_version,\n")
+        sb.append("  composite_key,\n")
+        sb.append("  uuid_location,\n")
+        sb.append("  entity_id,\n")
+        sb.append("  entity_version,\n")
+        sb.append("  last_edit,\n")
+        sb.append("  live,\n")
+        sb.append("  parent_uuid\n")
+        sb.append("FROM jds_entity_overview repo\n")
+        sb.append("  JOIN (SELECT\n")
+        sb.append("          uuid,\n")
+        sb.append("          max(uuid_location_version) AS uuid_location_version\n")
+        sb.append("        FROM jds_entity_overview\n")
+        sb.append("        WHERE $filterColumn IN ($questionsString)\n")
+        sb.append("        GROUP BY uuid) latest\n")
+        sb.append("    ON repo.uuid = latest.uuid AND repo.uuid_location_version = latest.uuid_location_version")
         try {
-
             jdsDb.getConnection().use { connection ->
-                connection.prepareStatement(sqlEntities).use {
+                connection.prepareStatement(sb.toString()).use {
                     //work in batches to not break prepared statement
                     var batchSequence = 1
                     for (uuid in uuids) {
@@ -277,7 +294,6 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             }
         }
     }
-
 
 
     /**

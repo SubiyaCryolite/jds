@@ -156,6 +156,10 @@ abstract class JdsDbMySql : JdsDb {
         executeSqlFromFile(connection, "sql/mysql/jds_entity_overview.sql")
     }
 
+    override fun createRefEntityOverviewLight(connection: Connection) {
+        executeSqlFromFile(connection, "sql/mysql/jds_entity_overview_light.sql")
+    }
+
     override fun createStoreEntityBinding(connection: Connection) {
         executeSqlFromFile(connection, "sql/mysql/jds_entity_binding.sql")
     }
@@ -183,6 +187,7 @@ abstract class JdsDbMySql : JdsDb {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_LIGHT)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_3)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS)
@@ -195,6 +200,7 @@ abstract class JdsDbMySql : JdsDb {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
+            JdsComponent.SAVE_ENTITY_LIGHT-> executeSqlFromFile(connection, "sql/mysql/procedures/proc_entity_overview_light.sql")
             JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_entity_overview_v3.sql")
             JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_store_entity_inheritance.sql")
             JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/mysql/procedures/proc_ref_field.sql")

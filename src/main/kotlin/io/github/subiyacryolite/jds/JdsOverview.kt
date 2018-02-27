@@ -30,8 +30,8 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var uuid: String = UUID.randomUUID().toString()
     override var uuidLocation: String = ""
     override var uuidLocationVersion: Int = 0
-    override var parentUuid: String = ""
-    override var parentCompositeKey: String = ""
+    override var parentUuid: String = "" //from parent (got rid of entity binding)
+    override var parentCompositeKey: String = "" //from parent
     override var entityVersion: Long = 1L
     override var live: Boolean = false
     override var lastEdit: LocalDateTime = LocalDateTime.now()
