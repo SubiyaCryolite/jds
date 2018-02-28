@@ -237,7 +237,7 @@ open class JdsTable() : Serializable {
      * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
      * @param pool a shared connection pool to quickly query the target schemas
      */
-    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) {
+    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) = try {
 
         if (!pool.containsKey(targetConnection))
             pool[targetConnection] = jdsDb.getConnection(targetConnection)
@@ -303,6 +303,8 @@ open class JdsTable() : Serializable {
         deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid IN %s)"
 
         generatedOrUpdatedSchema = true
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**

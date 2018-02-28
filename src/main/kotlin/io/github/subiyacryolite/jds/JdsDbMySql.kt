@@ -30,7 +30,7 @@ abstract class JdsDbMySql : JdsDb {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         var toReturn = 0
-        val sql = "SELECT COUNT(table_schema) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = :tableName AND TABLE_SCHEMA = :tableSchema"
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :tableSchema AND TABLE_NAME = :tableName"
         try {
             NamedPreparedStatement(connection, sql).use {
                 it.setString("tableName", tableName)
@@ -49,7 +49,7 @@ abstract class JdsDbMySql : JdsDb {
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         var toReturn = 0
-        val sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName AND ROUTINE_SCHEMA = :procedureSchema"
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :procedureSchema AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName"
         try {
             NamedPreparedStatement(connection, sql).use {
                 it.setString("procedureName", procedureName)
@@ -68,7 +68,7 @@ abstract class JdsDbMySql : JdsDb {
 
     override fun viewExists(connection: Connection, viewName: String): Int {
         var toReturn = 0
-        val sql = "SELECT COUNT(ROUTINE_NAME) AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = :viewName AND TABLE_SCHEMA = :viewSchema"
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :viewSchema AND TABLE_NAME = :viewName"
         try {
             NamedPreparedStatement(connection, sql).use {
                 it.setString("viewName", viewName)
@@ -86,10 +86,8 @@ abstract class JdsDbMySql : JdsDb {
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        var toReturn = 0
-        val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
-        toReturn = columnExistsCommonImpl(connection, tableName, columnName, toReturn, sql)
-        return toReturn
+        val sql = "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
+        return columnExistsCommonImpl(connection, tableName, columnName, 0, sql)
     }
 
     override fun createStoreEntityInheritance(connection: Connection) {
