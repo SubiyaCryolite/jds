@@ -81,22 +81,22 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
         get() = _booleanField.get()
         set(booleanField) = _booleanField.set(booleanField)
 
-    override fun onPreSave(eventArguments: SaveEventArguments) {
+    override fun onPreSave(eventArguments: SaveEventArgument) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
     }
 
-    override fun onPostSave(eventArguments: SaveEventArguments) {
+    override fun onPostSave(eventArguments: SaveEventArgument) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
     }
 
-    override fun onPreLoad(eventArguments: OnPreLoadEventArguments) {
+    override fun onPreLoad(eventArguments: OnPreLoadEventArgument) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
     }
 
-    override fun onPostLoad(eventArguments: OnPostLoadEventArguments) {
+    override fun onPostLoad(eventArguments: OnPostLoadEventArgument) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
     }

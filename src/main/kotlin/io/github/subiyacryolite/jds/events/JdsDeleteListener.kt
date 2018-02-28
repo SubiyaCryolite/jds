@@ -21,5 +21,5 @@ interface JdsDeleteListener {
      * Action to perform when deleting a {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity}
      * @param onDeleteEventArguments the arguments to reference for this invocation
      */
-    fun onDelete(onDeleteEventArguments: OnDeleteEventArguments)
+    fun onDelete(onDeleteEventArguments: OnDeleteEventArgument)
 }

@@ -12,5 +12,5 @@ CREATE TABLE jds_entity_overview (
   field_id              BIGINT,
   PRIMARY KEY (composite_key),
   CONSTRAINT jds_entity_overview_fk_entity_id FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
 );

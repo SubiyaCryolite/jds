@@ -397,4 +397,8 @@ constructor(connection: Connection, query: String) : INamedStatement {
     override fun isWrapperFor(iface: Class<*>): Boolean {
         return preparedStatement.isWrapperFor(iface)
     }
+
+    override fun toString(): String {
+        return preparedStatement.toString()
+    }
 }

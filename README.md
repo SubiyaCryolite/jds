@@ -322,32 +322,32 @@ class Example : JdsEntity(), JdsLoadListener, JdsSaveListener {
         _blobField.set(blob)
     }
 
-    override fun onPreSave(eventArguments: OnPreSaveEventArguments) {
+    override fun onPreSave(eventArgument: OnPreSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
+        //eventArgument.getOrAddStatement("Batched SQL to execute")
+        //eventArgument.addBatch() -- this will be executed safely by jds
     }
 
-    override fun onPostSave(eventArguments: OnPostSaveEventArguments) {
+    override fun onPostSave(eventArgument: OnPostSaveEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
+        //eventArgument.getOrAddStatement("Batched SQL to execute")
+        //eventArgument.addBatch() -- this will be executed safely by jds
     }
 
-    override fun onPreLoad(eventArguments: OnPreLoadEventArguments) {
+    override fun onPreLoad(eventArgument: OnPreLoadEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
+        //eventArgument.getOrAddStatement("Batched SQL to execute")
+        //eventArgument.addBatch() -- this will be executed safely by jds
     }
 
-    override fun onPostLoad(eventArguments: OnPostLoadEventArguments) {
+    override fun onPostLoad(eventArgument: OnPostLoadEventArguments) {
         //Optional event i.e write to custom reporting tables, perform custom validation
         //Queries can be batched i.e
-        //eventArguments.getOrAddStatement("Batched SQL to execute")
-        //eventArguments.addBatch() -- this will be executed safely by jds
+        //eventArgument.getOrAddStatement("Batched SQL to execute")
+        //eventArgument.addBatch() -- this will be executed safely by jds
     }
 }
 ```

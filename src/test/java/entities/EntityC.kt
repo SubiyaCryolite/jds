@@ -21,10 +21,7 @@ class EntityC : EntityB() {
         set(s) = _field.set(s)
 
     override fun toString(): String {
-        return "{ field A = $entityAValue" +
-                ", field B = $entityBValue" +
-                ", field C = $entityCValue " +
-                "}"
+        return "{ EntityC { FieldA = $entityAValue, FieldB = $entityBValue, FieldC = $entityCValue } }"
     }
 
     companion object {

@@ -395,4 +395,8 @@ class NamedCallableStatement(connection: Connection, query: String) : INamedStat
     override fun isWrapperFor(iface: Class<*>): Boolean {
         return callableStatement.isWrapperFor(iface)
     }
+
+    override fun toString(): String {
+        return callableStatement.toString()
+    }
 }

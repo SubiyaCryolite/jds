@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.events.JdsDeleteListener
-import io.github.subiyacryolite.jds.events.OnDeleteEventArguments
+import io.github.subiyacryolite.jds.events.OnDeleteEventArgument
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -48,7 +48,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
     constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.map({ it.overview.uuid })) {
 
         jdsDb.getConnection().use { connection ->
-            val args = OnDeleteEventArguments(jdsDb, connection, alternateConnections)
+            val args = OnDeleteEventArgument(jdsDb, connection, alternateConnections)
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
                     entity.onDelete(args)

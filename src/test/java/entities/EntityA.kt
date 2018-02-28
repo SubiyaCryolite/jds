@@ -22,7 +22,7 @@ open class EntityA : JdsEntity() {
         set(value) = _field.set(value)
 
     override fun toString(): String {
-        return "{ fieldEntity A = $entityAValue }"
+        return "{ EntityA { FieldA = $entityAValue } }"
     }
 
     companion object {

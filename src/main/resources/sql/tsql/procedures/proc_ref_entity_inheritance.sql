@@ -1,4 +1,4 @@
-CREATE PROCEDURE proc_bind_parent_to_child(@parent_entity_id BIGINT, @child_entity_id BIGINT)
+CREATE PROCEDURE proc_ref_entity_inheritance(@parent_entity_id BIGINT, @child_entity_id BIGINT)
 AS
   BEGIN
     MERGE jds_ref_entity_inheritance AS dest

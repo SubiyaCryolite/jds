@@ -44,23 +44,18 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
         login2.rights.add(Rights.CAN_LOGIN)
         login2.rights.add(Rights.CAN_DELETE_RECORD)
 
-        jdsDb.getConnection().use {
-            val saveCollection = JdsSave(jdsDb, collection, it)
-            saveCollection.closeConnection = false
+
+            val saveCollection = JdsSave(jdsDb, collection)
             saveCollection.call()
 
-            val saveLogins = JdsSave(jdsDb, listOf(login1, login2), it)
-            saveLogins.closeConnection = false
+            val saveLogins = JdsSave(jdsDb, listOf(login1, login2))
             saveLogins.call()
 
-            val saveAddressBook = JdsSave(jdsDb, listOf(addressBook), it)
-            saveAddressBook.closeConnection = false
+            val saveAddressBook = JdsSave(jdsDb, listOf(addressBook))
             saveAddressBook.call()
 
-            val saveInheritedObjects = JdsSave(jdsDb, inheritanceCollection, it)
-            saveInheritedObjects.closeConnection = false
+            val saveInheritedObjects = JdsSave(jdsDb, inheritanceCollection)
             saveInheritedObjects.call()
-        }
     }
 
     @Test

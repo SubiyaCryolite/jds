@@ -98,10 +98,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         return toReturn
     }
 
-    override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_entity_instance.sql")
-    }
-
     override fun createStoreBoolean(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/jds_store_boolean.sql")
     }
@@ -166,10 +162,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_entity_overview_light.sql")
     }
 
-    override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_entity_binding.sql")
-    }
-
     override fun createStoreTime(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/jds_store_time.sql")
     }
@@ -183,46 +175,44 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection) {
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BOOLEAN)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_BLOB)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TEXT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_LONG)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_INTEGER)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_FLOAT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DOUBLE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_V_3)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_FIELDS)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_ENUMS)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_CLASS_NAME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENUM_VALUES)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_FIELD_NAMES)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.MAP_ENTITY_INHERITANCE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.SAVE_ENTITY_INHERITANCE)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BOOLEAN)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BLOB)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TEXT)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_LONG)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_INTEGER)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_FLOAT)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ZONED_DATE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENUM)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_FIELD)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_INHERITANCE)
     }
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.SAVE_ENTITY_V_3 -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_overview_v3.sql")
-            JdsComponent.SAVE_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_inheritance.sql")
-            JdsComponent.MAP_FIELD_NAMES -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")
-            JdsComponent.SAVE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_boolean.sql")
-            JdsComponent.SAVE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_blob.sql")
-            JdsComponent.SAVE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_time.sql")
-            JdsComponent.SAVE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_text.sql")
-            JdsComponent.SAVE_LONG -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_long.sql")
-            JdsComponent.SAVE_INTEGER -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_integer.sql")
-            JdsComponent.SAVE_FLOAT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_float.sql")
-            JdsComponent.SAVE_DOUBLE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_double.sql")
-            JdsComponent.SAVE_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_date_time.sql")
-            JdsComponent.SAVE_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_zoned_date_time.sql")
-            JdsComponent.MAP_ENTITY_FIELDS -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_field.sql")
-            JdsComponent.MAP_ENTITY_ENUMS -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_enum.sql")
-            JdsComponent.MAP_CLASS_NAME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity.sql")
-            JdsComponent.MAP_ENUM_VALUES -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_enum.sql")
-            JdsComponent.MAP_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_bind_parent_to_child.sql")
+            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")
+            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_boolean.sql")
+            JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_blob.sql")
+            JdsComponent.PROC_STORE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_time.sql")
+            JdsComponent.PROC_STORE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_text.sql")
+            JdsComponent.PROC_STORE_LONG -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_long.sql")
+            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_integer.sql")
+            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_float.sql")
+            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_double.sql")
+            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_date_time.sql")
+            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_zoned_date_time.sql")
+            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_field.sql")
+            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_enum.sql")
+            JdsComponent.PROC_REF_ENTITY -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity.sql")
+            JdsComponent.PROC_REF_ENUM -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_enum.sql")
+            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_inheritance.sql")
             else -> {
             }
         }

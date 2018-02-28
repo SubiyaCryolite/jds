@@ -21,10 +21,7 @@ open class EntityB : EntityA() {
         set(s) = _field.set(s)
 
     override fun toString(): String {
-        return "{ " +
-                "field A = $entityAValue" +
-                ", field B = $entityBValue" +
-                "}"
+        return "{ EntityB { FieldA = $entityAValue, FieldB = $entityBValue } }"
     }
 
     companion object {

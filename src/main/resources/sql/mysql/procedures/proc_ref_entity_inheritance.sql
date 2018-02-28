@@ -1,4 +1,4 @@
-CREATE PROCEDURE proc_bind_parent_to_child(IN p_parent_entity_id BIGINT,
+CREATE PROCEDURE proc_ref_entity_inheritance(IN p_parent_entity_id BIGINT,
                                            IN p_child_entity_id  BIGINT)
   BEGIN
     INSERT INTO jds_ref_entity_inheritance (parent_entity_id, child_entity_id)

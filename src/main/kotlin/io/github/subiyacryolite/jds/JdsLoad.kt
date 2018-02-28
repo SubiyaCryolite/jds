@@ -19,8 +19,8 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import io.github.subiyacryolite.jds.events.JdsLoadListener
-import io.github.subiyacryolite.jds.events.OnPostLoadEventArguments
-import io.github.subiyacryolite.jds.events.OnPreLoadEventArguments
+import io.github.subiyacryolite.jds.events.OnPostLoadEventArgument
+import io.github.subiyacryolite.jds.events.OnPreLoadEventArgument
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
@@ -143,7 +143,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         val compositeKeys = HashSet<String>()
                         createEntities(entities, it, compositeKeys)
 
-                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
+                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
 
                         val parameters = prepareParamaterSequence(compositeKeys.size)
                         val populateBooleans = "SELECT composite_key, value, field_id FROM jds_store_boolean WHERE composite_key IN $parameters"
@@ -212,7 +212,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 populateObjectEntriesAndObjectArrays(jdsDb, entities, it)
                             }
                         }
-                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArguments(jdsDb, connection, alternateConnections)) }
+                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArgument(jdsDb, connection, alternateConnections)) }
                     }
                     //close alternate connections
                     alternateConnections.forEach { it.value.close() }
@@ -522,27 +522,14 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
     private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<String>, filterUUIDs: Iterable<out String>) {
-        val entityAndChildren = ArrayList<Long>()
-        entityAndChildren.add(entityId)
         val searchByType = filterUUIDs.none()
         jdsDataBase.getConnection().use {
-            it.prepareStatement("SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?").use {
-                it.setLong(1, entityAndChildren[0])
-                it.executeQuery().use {
-                    while (it.next())
-                        entityAndChildren.add(it.getLong("child_entity_id"))
-                }
-            }
-
-            val entityHeirarchy = StringJoiner(",")
-            if (searchByType)
-                entityAndChildren.forEach { entityHeirarchy.add(it.toString()) }
-
             if (searchByType) {
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy
-                val loadAllByTypeSql = "SELECT DISTINCT eo.$filterColumn FROM jds_entity_instance ei JOIN jds_entity_overview eo ON ei.entity_composite_key = eo.composite_key WHERE ei.entity_id IN ($entityHeirarchy)"
+                val loadAllByTypeSql = "SELECT DISTINCT eo.$filterColumn FROM jds_entity_overview eo WHERE eo.entity_id IN (SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?)"
                 it.prepareStatement(loadAllByTypeSql).use {
+                    it.setLong(1, entityId)
                     it.executeQuery().use {
                         while (it.next())
                             entitiesToLoad.add(it.getString(filterColumn))

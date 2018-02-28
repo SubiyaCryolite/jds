@@ -58,10 +58,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         }
     }
 
-    override fun createStoreEntityInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_entity_instance.sql")
-    }
-
     override fun createStoreBoolean(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/jds_store_boolean.sql")
     }
@@ -126,10 +122,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview_light.sql")
     }
 
-    override fun createStoreEntityBinding(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_entity_binding.sql")
-    }
-
     override fun createStoreTime(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/jds_store_time.sql")
     }
@@ -185,10 +177,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     override fun saveOverview(): String {
         ////:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :parentUuid, :parentCompositeKey, :entityId, :live, :entityVersion, :lastEdit
         return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_location_version, parent_uuid, parent_composite_key, entity_id, live, entity_version, last_edit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    }
-
-    override fun saveOverviewInheritance(): String {
-        return "INSERT OR REPLACE INTO jds_entity_instance(entity_composite_key, entity_id) VALUES(:uuid, :entityId)"
     }
 
     override fun populateRefEntityField(): String {

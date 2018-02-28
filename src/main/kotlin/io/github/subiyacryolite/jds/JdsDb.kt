@@ -66,8 +66,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT)
@@ -129,7 +127,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     private fun initiateDatabaseComponent(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.STORE_ENTITY_INHERITANCE -> createStoreEntityInheritance(connection)
             JdsComponent.STORE_BOOLEAN -> createStoreBoolean(connection)
             JdsComponent.STORE_BLOB -> createStoreBlob(connection)
             JdsComponent.STORE_TEXT -> createStoreText(connection)
@@ -158,7 +155,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                 executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_uuid", "jds_entity_overview_ix_parent_uuid"))
                 executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_composite_key", "jds_entity_overview_ix_parent_composite_key"))
             }
-            JdsComponent.STORE_ENTITY_BINDING -> createStoreEntityBinding(connection)
             else -> {
             }
         }
@@ -454,18 +450,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected abstract fun createRefEntityOverviewLight(connection: Connection)
 
     /**
-     * Database specific SQL used to create the schema that stores entity to
-     * entity bindings
-     */
-    protected abstract fun createStoreEntityBinding(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores entity to type
-     * bindings
-     */
-    protected abstract fun createStoreEntityInheritance(connection: Connection)
-
-    /**
      * @param connection     the SQL connection to use for DB operations
      * @param parentEntities a collection of parent classes
      * @param entityCode     the value representing the entity
@@ -535,6 +519,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity = entity.newInstance()
+                        parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         JdsExtensions.determineParents(entity, parentEntities)
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.caption, entityAnnotation.description, entityAnnotation.parent)
                         jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
@@ -661,14 +646,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     /**
-     * SQL call to save entity overview values
-     * @return the default or overridden SQL statement for this operation
-     */
-    internal open fun saveOverviewInheritance(): String {
-        return "{call proc_store_entity_inheritance(:uuid, :entityId)}"
-    }
-
-    /**
      * SQL call to bind fieldIds to entityVersions
      * @return the default or overridden SQL statement for this operation
      */
@@ -697,7 +674,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun mapParentToChild(): String {
-        return "{call proc_bind_parent_to_child(?,?)}"
+        return "{call proc_ref_entity_inheritance(?,?)}"
     }
 
     /**

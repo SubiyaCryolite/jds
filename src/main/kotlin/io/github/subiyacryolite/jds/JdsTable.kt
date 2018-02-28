@@ -19,14 +19,13 @@ import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-import io.github.subiyacryolite.jds.events.EventArguments
+import io.github.subiyacryolite.jds.events.EventArgument
 import java.io.Serializable
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentMap
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashMap
@@ -112,12 +111,12 @@ open class JdsTable() : Serializable {
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
      * @param alternateConnections a [ConcurrentMap] of holding a pool of alternate [Connections] to write to
-     * @param entity a [JdsEntity] that may have [JdsField]s persisted to this [JdsTable]
-     * @param eventArguments [EventArguments] that will hold batched SQL queries for execution
+     * @param entity a [JdsEntity][JdsEntity] that may have [JdsField'S][JdsField] persisted to this [JdsTable]
+     * @param eventArgument The [EventArgument][EventArgument] that will hold batched SQL queries for execution
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArguments: EventArguments, deleteColumns: HashMap<String, HashSet<String>>, insertRows: HashMap<String, String>) {
+    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument, deleteColumns: HashMap<String, HashSet<String>>) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
@@ -125,7 +124,12 @@ open class JdsTable() : Serializable {
             if (uniqueEntries) {
                 deleteExistingRecords(entity, deleteColumns)
             }
-            insertRows["INSERT INTO $name(composite_key) VALUES(?)"] = entity.overview.compositeKey
+
+            //prepare insert placeholder
+            val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(composite_key) VALUES(?)")
+            stmt.setString(1, entity.overview.compositeKey)
+            stmt.addBatch()
+
 
             val updateValues = LinkedList<Any?>() //maintain order
             val updateColumns = LinkedList<String>() //maintain order
@@ -138,6 +142,8 @@ open class JdsTable() : Serializable {
                 updateColumns.add(it)
                 updateValues.add(value)
             }
+
+            if (updateColumns.isEmpty()) return //VERY important or else well have an invalid update with no columns
 
             val stringBuilder = StringBuilder()
             stringBuilder.append("UPDATE ")
@@ -152,7 +158,7 @@ open class JdsTable() : Serializable {
             stringBuilder.append(JdsSchema.compositeKeyColumn)
             stringBuilder.append(" = ?")
 
-            val insertStatement = eventArguments.getOrAddStatement(stringBuilder.toString())
+            val insertStatement = eventArgument.getOrAddStatement(stringBuilder.toString())
             updateValues.forEachIndexed { index, value ->
                 when (value) {
                     is ZonedDateTime -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
@@ -190,45 +196,45 @@ open class JdsTable() : Serializable {
 
     /**
      * @param jdsDb The [JdsDb] instance to use for this operation
-     * @param eventArguments the [EventArguments] to use for this operation
+     * @param eventArgument the [EventArgument] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param entity the uuid to target for record deletion
      */
-    fun deleteRecordById(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
+    fun deleteRecordById(jdsDb: JdsDb, eventArgument: EventArgument, connection: Connection, entity: JdsEntity) {
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied)
-            deleteRecordByUuidInternal(eventArguments, connection, entity.overview.uuid)
+            deleteRecordByUuidInternal(eventArgument, connection, entity.overview.uuid)
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
+     * @param eventArgument the [EventArgument] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByParentUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByParentUuidSql)
+    private fun deleteRecordByParentUuidInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
+        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByParentUuidSql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
+     * @param eventArgument the [EventArgument] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByCompositeKeyInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByCompositeKeySql)
+    private fun deleteRecordByCompositeKeyInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
+        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByCompositeKeySql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }
 
     /**
-     * @param eventArguments the [EventArguments] to use for this operation
+     * @param eventArgument the [EventArgument] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
-        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidSql)
+    private fun deleteRecordByUuidInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
+        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByUuidSql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }
