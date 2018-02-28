@@ -21,6 +21,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.*
+import java.util.ArrayList
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -55,7 +56,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @throws Exception if unable to compute a result
      */
     override fun call(): Boolean {
-        val chunks = entities.chunked(1000)
+        val chunks = entities.chunked(2048)
         val totalChunks = chunks.count()
         chunks.forEachIndexed { index, batch ->
             try {
@@ -110,11 +111,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
 
             entities.filterIsInstance<JdsSaveListener>().forEach { it.onPostSave(postSaveEventArguments) }
 
-            //crt point
-            if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty()) {
-                entities.forEach { processCrt(jdsDb, connection, alternateConnections, it) }
-            }
-
             preSaveEventArguments.executeBatches()
             postSaveEventArguments.executeBatches()
         } catch (ex: Exception) {
@@ -133,9 +129,9 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param alternateConnections
      * @param entity
      */
-    private fun processCrt(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity) {
+    private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArguments, entity: JdsEntity, deleteColumns: HashMap<String, HashSet<String>>, insertRows: HashMap<String, String>) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, connection, alternateConnections, entity, postSaveEventArguments)
+            it.executeSave(jdsDb, entity, saveEventArguments, deleteColumns, insertRows)
         }
     }
 
@@ -155,6 +151,10 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
         val saveOverview = regularStatementOrCall(preSaveEventArguments, jdsDb.saveOverview())
         val saveOverviewInheritance = namedStatementOrCall(preSaveEventArguments, jdsDb.saveOverviewInheritance())
+
+        val customTablesDelete = HashMap<String, HashSet<String>>()
+        val insertRows = HashMap<String, String>()
+
         entities.forEach {
 
             saveOverview.setString(1, it.overview.compositeKey)
@@ -174,7 +174,32 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 saveOverviewInheritance.setLong("entityId", it.overview.entityId)
                 saveOverviewInheritance.addBatch()
             }
+
+            //crt point
+            if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty()) {
+                processCrt(jdsDb, postSaveEventArguments, it, customTablesDelete, insertRows)
+            }
         }
+
+
+        //delete all custom table records in bulk beforehand
+        customTablesDelete.forEach { placeHolderQuery, filterKeys ->
+            val placeHolder = String.format(placeHolderQuery, JdsLoad.prepareParamaterSequence(filterKeys.size))
+            val stmt = preSaveEventArguments.getOrAddStatement(placeHolder)
+            filterKeys.forEachIndexed { index, filterKey ->
+                stmt.setString(index + 1, filterKey)
+            }
+            stmt.addBatch()
+        }
+
+        //insert empty custom table placeholders beforehand, save will be an update
+        insertRows.forEach { query, compositeKey ->
+            val stmt = preSaveEventArguments.getOrAddStatement(query)
+            stmt.setString(1, compositeKey)
+            stmt.addBatch()
+        }
+
+
     } catch (ex: SQLException) {
         ex.printStackTrace(System.err)
     }

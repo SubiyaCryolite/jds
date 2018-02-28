@@ -1242,6 +1242,25 @@ abstract class JdsEntity : IJdsEntity {
         getNestedEntities().forEach { it.overview.live = live }
     }
 
+    internal fun isEmpty(): Boolean {
+        //if any collections are empty
+        //OR if a primitive doesn't have a default value
+
+        //arrays
+        objectArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        stringArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        dateTimeArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        floatArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        doubleArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        longArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        integerArrayProperties.values.forEach { if (!it.isEmpty()) return false }
+        enumCollectionProperties.values.forEach { if (!it.isEmpty()) return false }
+
+        //primitives and enums
+
+        return true
+    }
+
     companion object : Externalizable {
 
         private const val serialVersionUID = 20180106_2125L

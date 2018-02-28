@@ -49,6 +49,13 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
          * Java supports up to 1000 prepared supportsStatements depending on the driver
          */
         const val MAX_BATCH_SIZE = 1000
+
+        fun prepareParamaterSequence(size: Int): String {
+            val questionArray = StringJoiner(",","(",")")
+            for (index in 0 until size)
+                questionArray.add("?")
+            return questionArray.toString()
+        }
     }
 
     /**
@@ -119,7 +126,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         sb.append("          uuid,\n")
         sb.append("          max(uuid_location_version) AS uuid_location_version\n")
         sb.append("        FROM jds_entity_overview\n")
-        sb.append("        WHERE $filterColumn IN ($questionsString)\n")
+        sb.append("        WHERE $filterColumn IN $questionsString\n")
         sb.append("        GROUP BY uuid) latest\n")
         sb.append("    ON repo.uuid = latest.uuid AND repo.uuid_location_version = latest.uuid_location_version")
         try {
@@ -139,17 +146,17 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArguments(jdsDb, connection, alternateConnections)) }
 
                         val parameters = prepareParamaterSequence(compositeKeys.size)
-                        val populateBooleans = "SELECT composite_key, value, field_id FROM jds_store_boolean WHERE composite_key IN ($parameters)"
-                        val populateStrings = "SELECT composite_key, value, field_id FROM jds_store_text WHERE composite_key IN ($parameters)"
-                        val populateLongs = "SELECT composite_key, value, field_id FROM jds_store_long WHERE composite_key IN ($parameters)"
-                        val populateIntegers = "SELECT composite_key, value, field_id FROM jds_store_integer WHERE composite_key IN ($parameters)"
-                        val populateFloats = "SELECT composite_key, value, field_id FROM jds_store_float WHERE composite_key IN ($parameters)"
-                        val populateDoubles = "SELECT composite_key, value, field_id FROM jds_store_double WHERE composite_key IN ($parameters)"
-                        val populateDateTimes = "SELECT composite_key, value, field_id FROM jds_store_date_time WHERE composite_key IN ($parameters)"
-                        val populateTimes = "SELECT composite_key, value, field_id FROM jds_store_time WHERE composite_key IN ($parameters)"
-                        val populateZonedDateTimes = "SELECT composite_key, value, field_id FROM jds_store_zoned_date_time WHERE composite_key IN ($parameters)"
-                        val populateBlobs = "SELECT composite_key, value, field_id FROM jds_store_blob WHERE composite_key IN ($parameters)"
-                        val populateEmbeddedAndArrayObjects = "SELECT child.composite_key, child.parent_composite_key, child.entity_id, child.field_id, child.uuid_location, child.uuid_location_version FROM jds_entity_overview child JOIN jds_entity_overview parent ON parent.composite_key IN ($parameters) AND parent.composite_key = child.parent_composite_key"
+                        val populateBooleans = "SELECT composite_key, value, field_id FROM jds_store_boolean WHERE composite_key IN $parameters"
+                        val populateStrings = "SELECT composite_key, value, field_id FROM jds_store_text WHERE composite_key IN $parameters"
+                        val populateLongs = "SELECT composite_key, value, field_id FROM jds_store_long WHERE composite_key IN $parameters"
+                        val populateIntegers = "SELECT composite_key, value, field_id FROM jds_store_integer WHERE composite_key IN $parameters"
+                        val populateFloats = "SELECT composite_key, value, field_id FROM jds_store_float WHERE composite_key IN $parameters"
+                        val populateDoubles = "SELECT composite_key, value, field_id FROM jds_store_double WHERE composite_key IN $parameters"
+                        val populateDateTimes = "SELECT composite_key, value, field_id FROM jds_store_date_time WHERE composite_key IN $parameters"
+                        val populateTimes = "SELECT composite_key, value, field_id FROM jds_store_time WHERE composite_key IN $parameters"
+                        val populateZonedDateTimes = "SELECT composite_key, value, field_id FROM jds_store_zoned_date_time WHERE composite_key IN $parameters"
+                        val populateBlobs = "SELECT composite_key, value, field_id FROM jds_store_blob WHERE composite_key IN $parameters"
+                        val populateEmbeddedAndArrayObjects = "SELECT child.composite_key, child.parent_composite_key, child.entity_id, child.field_id, child.uuid_location, child.uuid_location_version FROM jds_entity_overview child JOIN jds_entity_overview parent ON parent.composite_key IN $parameters AND parent.composite_key = child.parent_composite_key"
 
                         if (jdsDb.options.isWritingToPrimaryDataTables) {
                             //strings, derived from strings and string arrays
@@ -562,16 +569,6 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         return list.joinToString(",", "'", "'")
     }
 
-    /**
-     * @param size
-     * @return
-     */
-    private fun prepareParamaterSequence(size: Int): String {
-        val questionArray = StringJoiner(",")
-        for (index in 0 until size)
-            questionArray.add("?")
-        return questionArray.toString()
-    }
 
     /**
      * @param preparedStatement

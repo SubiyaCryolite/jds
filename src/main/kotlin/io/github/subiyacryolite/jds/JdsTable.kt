@@ -26,6 +26,7 @@ import java.sql.Timestamp
 import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentMap
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashMap
@@ -47,7 +48,6 @@ open class JdsTable() : Serializable {
     private var deleteByCompositeKeySql = ""
     private var deleteByParentUuidSql = ""
     private var deleteByUuidSql = ""
-    private var insertSql = ""
     private var generatedOrUpdatedSchema = false
 
     /**
@@ -117,52 +117,65 @@ open class JdsTable() : Serializable {
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, connection: Connection, alternateConnections: ConcurrentMap<Int, Connection>, entity: JdsEntity, eventArguments: EventArguments) {
+    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArguments: EventArguments, deleteColumns: HashMap<String, HashSet<String>>, insertRows: HashMap<String, String>) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            val iConnection = when (jdsDb.isSqLiteDb && targetConnection == 0) {
-                true -> connection
-                else -> {
-                    if (!alternateConnections.containsKey(targetConnection))
-                        alternateConnections[targetConnection] = jdsDb.getConnection(targetConnection)
-                    alternateConnections[targetConnection]!!
-                }
-            }
             if (uniqueEntries) {
-                deleteExistingRecords(eventArguments, iConnection, entity)
+                deleteExistingRecords(entity, deleteColumns)
             }
-            val insertStatement = eventArguments.getOrAddStatement(iConnection, insertSql)
-            insertStatement.setString(1, entity.overview.compositeKey)
-            //order will be maintained by linked list
-            columnNames.forEachIndexed { columnIndex, columnName ->
-                val field = columnToFieldMap[columnName]!!
+            insertRows["INSERT INTO $name(composite_key) VALUES(?)"] = entity.overview.compositeKey
+
+            val updateValues = LinkedList<Any?>() //maintain order
+            val updateColumns = LinkedList<String>() //maintain order
+            columnNames.forEach {
+                val field = columnToFieldMap[it]!!
                 val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
-                    true -> entity.getReportAtomicValue(field.id, enumOrdinals[columnName]!!)
+                    true -> entity.getReportAtomicValue(field.id, enumOrdinals[it]!!)
                     false -> entity.getReportAtomicValue(field.id, 0)
                 }
+                updateColumns.add(it)
+                updateValues.add(value)
+            }
+
+            val stringBuilder = StringBuilder()
+            stringBuilder.append("UPDATE ")
+            stringBuilder.append(name)
+            stringBuilder.append(" SET ")
+            val joiner = StringJoiner(", ")
+            updateColumns.forEach {
+                joiner.add("$it = ?")
+            }
+            stringBuilder.append(joiner)
+            stringBuilder.append(" WHERE ")
+            stringBuilder.append(JdsSchema.compositeKeyColumn)
+            stringBuilder.append(" = ?")
+
+            val insertStatement = eventArguments.getOrAddStatement(stringBuilder.toString())
+            updateValues.forEachIndexed { index, value ->
                 when (value) {
-                    is ZonedDateTime -> insertStatement.setZonedDateTime(columnIndex + 2, value, jdsDb)
-                    is LocalTime -> insertStatement.setLocalTime(columnIndex + 2, value, jdsDb)
-                    is LocalDateTime -> insertStatement.setTimestamp(columnIndex + 2, Timestamp.valueOf(value))
-                    is LocalDate -> insertStatement.setTimestamp(columnIndex + 2, Timestamp.valueOf(value.atStartOfDay()))
-                    is MonthDay -> insertStatement.setString(columnIndex + 2, value.toString())
-                    is YearMonth -> insertStatement.setString(columnIndex + 2, value.toString())
-                    is Period -> insertStatement.setString(columnIndex + 2, value.toString())
-                    is Duration -> insertStatement.setLong(columnIndex + 2, value.toNanos())
-                    else -> insertStatement.setObject(columnIndex + 2, value ?: null)
+                    is ZonedDateTime -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
+                    is LocalTime -> insertStatement.setLocalTime(index + 1, value, jdsDb)
+                    is LocalDateTime -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value))
+                    is LocalDate -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value.atStartOfDay()))
+                    is MonthDay -> insertStatement.setString(index + 1, value.toString())
+                    is YearMonth -> insertStatement.setString(index + 1, value.toString())
+                    is Period -> insertStatement.setString(index + 1, value.toString())
+                    is Duration -> insertStatement.setLong(index + 1, value.toNanos())
+                    else -> insertStatement.setObject(index + 1, value ?: null)
                 }
             }
+            insertStatement.setString(columnNames.size + 1, entity.overview.compositeKey)
             insertStatement.addBatch()
         }
     }
 
-    fun deleteExistingRecords(eventArguments: EventArguments, iConnection: Connection, entity: JdsEntity) {
+    fun deleteExistingRecords(entity: JdsEntity, deleteColumns: HashMap<String, HashSet<String>>) {
         when (uniqueBy) {
-            JdsFilterBy.COMPOSITE_KEY -> deleteRecordByCompositeKeyInternal(eventArguments, iConnection, entity.overview.compositeKey)
-            JdsFilterBy.UUID -> deleteRecordByUuidInternal(eventArguments, iConnection, entity.overview.uuid)
-            JdsFilterBy.PARENT_UUID -> deleteRecordByParentUuidInternal(eventArguments, iConnection, entity.overview.parentUuid)
+            JdsFilterBy.COMPOSITE_KEY -> deleteColumns.getOrPut(deleteByCompositeKeySql) { HashSet() }.add(entity.overview.compositeKey)
+            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { HashSet() }.add(entity.overview.uuid)
+            JdsFilterBy.PARENT_UUID -> deleteColumns.getOrPut(deleteByParentUuidSql) { HashSet() }.add(entity.overview.parentUuid)
         }
     }
 
@@ -241,13 +254,7 @@ open class JdsTable() : Serializable {
             }
         }
 
-        val insertColumns = StringJoiner(",")
-        val insertParameters = StringJoiner(",")
-
-        //mandatory primary key
-        insertColumns.add(JdsSchema.compositeKeyColumn)
-        insertParameters.add("?")
-
+        val insertColumns = LinkedList<String>()
         val delimiter = when (jdsDb.implementation) {
             JdsImplementation.TSQL, JdsImplementation.ORACLE -> " "
             else -> "ADD COLUMN "
@@ -276,7 +283,6 @@ open class JdsTable() : Serializable {
             //regardless of column existing add to the query
             columnNames.add(columnName)
             insertColumns.add(columnName)
-            insertParameters.add("?")
         }
 
         if (foundChanges) {
@@ -292,19 +298,17 @@ open class JdsTable() : Serializable {
             }
         }
 
-        deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} = ?"
-        deleteByParentUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE parent_uuid = ?)"
-        deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid = ?)"
-
-        insertSql = "INSERT INTO $name ($insertColumns) VALUES ($insertParameters)"
+        deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} IN %s"
+        deleteByParentUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE parent_uuid IN %s)"
+        deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid IN %s)"
 
         generatedOrUpdatedSchema = true
     }
 
     /**
      * Determine if this entity should have its properties persisted to this table
-     * @param jdsDb an instance of [JdsDb], used to lookup mapped classes
-     * @param entity a [JdsEntity] that may have [JdsField]s written to this table
+     * @param jdsDb an instance of [JdsDb][JdsDb], used to lookup mapped classes
+     * @param entity a [JdsEntity][JdsEntity] that may have [JdsField's][JdsField] written to this table
      */
     private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
 
