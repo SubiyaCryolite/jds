@@ -65,7 +65,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW_LIGHT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_INHERITANCE)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING)
@@ -151,7 +150,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
             JdsComponent.BIND_ENTITY_FIELDS -> createBindEntityFields(connection)
             JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
-            JdsComponent.STORE_ENTITY_OVERVIEW_LIGHT -> createRefEntityOverviewLight(connection)
             JdsComponent.STORE_ENTITY_OVERVIEW -> {
                 createRefEntityOverview(connection)
                 executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid", "jds_entity_overview_ix_uuid"))
@@ -652,15 +650,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     internal open fun saveTime(): String {
         return "{call proc_store_time(:uuid,:fieldId,:value)}"
-    }
-
-
-    /**
-     * SQL call to save entity overview values
-     * @return the default or overridden SQL statement for this operation
-     */
-    internal open fun saveOverviewLight(): String {
-        return "{call proc_entity_overview_light(?)}"
     }
 
     /**

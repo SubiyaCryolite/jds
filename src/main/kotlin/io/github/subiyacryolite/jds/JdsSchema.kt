@@ -13,20 +13,11 @@ object JdsSchema {
      */
     fun generateTable(jdsDb: JdsDb, reportName: String, appendOnly: Boolean): String {
         val compositeKeyDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 128)
-        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 64)
-        val parentUuidDataType = when (jdsDb.implementation) {
-            JdsImplementation.ORACLE -> getDbDataType(jdsDb, JdsFieldType.STRING, 0)//trigger nclob to prevent null, empty string is null in oracle
-            else -> getDbDataType(jdsDb, JdsFieldType.STRING, 64)
-        }
-        val uuidLocationDataType = when (jdsDb.implementation) {
-            JdsImplementation.ORACLE -> getDbDataType(jdsDb, JdsFieldType.STRING, 0)//trigger nclob to prevent null, empty string is null in oracle
-            else -> getDbDataType(jdsDb, JdsFieldType.STRING, 45)
-        }
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(reportName)
-        stringBuilder.append("( $compositeKeyColumn $compositeKeyDataType, $uuidColumn $uuidDataType, $parentUuidColumn $parentUuidDataType, $uuidLocationColumn $uuidLocationDataType, $uuidLocationVersionColumn ${jdsDb.getDbIntegerDataType()}, $entityIdColumn ${jdsDb.getDbLongDataType()} ${when (appendOnly) {
-            true -> ", PRIMARY KEY ($compositeKeyColumn)"
+        stringBuilder.append("( $compositeKeyColumn $compositeKeyDataType ${when (appendOnly) {
+            true -> ", FOREIGN KEY ($compositeKeyColumn) REFERENCES jds_entity_overview($compositeKeyColumn) ON DELETE CASCADE"
             else -> ""
         }})")
         return stringBuilder.toString()
@@ -115,29 +106,4 @@ object JdsSchema {
      * @return
      */
     val compositeKeyColumn = "composite_key"
-
-    /**
-     * @return
-     */
-    val uuidColumn = "uuid"
-
-    /**
-     * @return
-     */
-    val uuidLocationColumn = "uuid_location"
-
-    /**
-     * @return
-     */
-    val uuidLocationVersionColumn = "uuid_location_version"
-
-    /**
-     * @return
-     */
-    val entityIdColumn = "entity_id"
-
-    /**
-     *
-     */
-    val parentUuidColumn = "parent_uuid"
 }

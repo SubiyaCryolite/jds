@@ -11,10 +11,8 @@ CREATE TABLE jds_entity_overview
   live                  BOOLEAN,
   last_edit             TIMESTAMP,
   field_id              BIGINT,
+  PRIMARY KEY (composite_key),
   FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
     ON DELETE CASCADE
-    DEFERRABLE INITIALLY DEFERRED,
-  FOREIGN KEY (composite_key) REFERENCES jds_entity_overview_light (composite_key) ON DELETE CASCADE
-    DEFERRABLE INITIALLY DEFERRED,
-    CONSTRAINT jds_entity_overview_uk_composite_key UNIQUE (composite_key)
+    DEFERRABLE INITIALLY DEFERRED
 );

@@ -37,9 +37,8 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
     private val filterColumn: String
         get() {
             return when (filterBy) {
-                JdsFilterBy.COMPOSITE_KEY -> "composite_key"
                 JdsFilterBy.UUID -> "uuid"
-                JdsFilterBy.UUID_LOCATION -> "uuid_location"
+                JdsFilterBy.COMPOSITE_KEY -> "composite_key"
                 JdsFilterBy.PARENT_UUID -> "parent_uuid"
             }
         }

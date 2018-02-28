@@ -10,5 +10,6 @@ AS
     WHEN MATCHED THEN
       UPDATE SET dest.sequence = src.sequence, dest.value = src.value
     WHEN NOT MATCHED THEN
-      INSERT (composite_key, field_id, sequence, value) VALUES (src.composite_key, src.field_id, src.sequence, src.value);
+      INSERT (composite_key, field_id, sequence, value)
+      VALUES (src.composite_key, src.field_id, src.sequence, src.value);
   END

@@ -153,28 +153,23 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
-        val saveOverviewLight = regularStatementOrCall(preSaveEventArguments, jdsDb.saveOverviewLight())
         val saveOverview = regularStatementOrCall(preSaveEventArguments, jdsDb.saveOverview())
         val saveOverviewInheritance = namedStatementOrCall(preSaveEventArguments, jdsDb.saveOverviewInheritance())
         entities.forEach {
 
-            saveOverviewLight.setString(1, it.overview.compositeKey)
-            saveOverviewLight.addBatch()
+            saveOverview.setString(1, it.overview.compositeKey)
+            saveOverview.setString(2, it.overview.uuid)
+            saveOverview.setString(3, it.overview.uuidLocation)
+            saveOverview.setInt(4, it.overview.uuidLocationVersion)
+            saveOverview.setString(5, it.overview.parentUuid)
+            saveOverview.setString(6, it.overview.parentCompositeKey)
+            saveOverview.setLong(7, it.overview.entityId)
+            saveOverview.setLong(8, it.overview.entityVersion)
+            saveOverview.setBoolean(9, it.overview.live)
+            saveOverview.setTimestamp(10, Timestamp.valueOf(it.overview.lastEdit))
+            saveOverview.addBatch()
 
             if (jdsDb.options.isWritingToPrimaryDataTables) {
-                //overkill, only for native JDS persistence
-                saveOverview.setString(1, it.overview.compositeKey)
-                saveOverview.setString(2, it.overview.uuid)
-                saveOverview.setString(3, it.overview.uuidLocation)
-                saveOverview.setInt(4, it.overview.uuidLocationVersion)
-                saveOverview.setString(5, it.overview.parentUuid)
-                saveOverview.setString(6, it.overview.parentCompositeKey)
-                saveOverview.setLong(7, it.overview.entityId)
-                saveOverview.setLong(8, it.overview.entityVersion)
-                saveOverview.setBoolean(9, it.overview.live)
-                saveOverview.setTimestamp(10, Timestamp.valueOf(it.overview.lastEdit))
-                saveOverview.addBatch()
-
                 saveOverviewInheritance.setString("uuid", it.overview.compositeKey)
                 saveOverviewInheritance.setLong("entityId", it.overview.entityId)
                 saveOverviewInheritance.addBatch()

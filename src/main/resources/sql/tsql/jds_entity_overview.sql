@@ -10,10 +10,7 @@ CREATE TABLE jds_entity_overview (
   live                  BIT,
   last_edit             DATETIME,
   field_id              BIGINT,
-  CONSTRAINT jds_entity_overview_fk_composite_key FOREIGN KEY (composite_key)
-  REFERENCES jds_entity_overview_light (composite_key)
-    ON DELETE NO ACTION,
+  PRIMARY KEY (composite_key),
   CONSTRAINT jds_entity_overview_fk_entity_id FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
-    ON DELETE NO ACTION,
-  CONSTRAINT jds_entity_overview_uk_composite_key UNIQUE (composite_key)
+    ON DELETE NO ACTION
 );
