@@ -196,7 +196,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_entity_overview.sql")
             JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")
             JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_boolean.sql")
             JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_blob.sql")

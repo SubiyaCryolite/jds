@@ -216,7 +216,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_entity_overview_v3.sql")
+            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_entity_overview.sql")
             JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_field.sql")
             JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_boolean.sql")
             JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_blob.sql")

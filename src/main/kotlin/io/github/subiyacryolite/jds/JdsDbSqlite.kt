@@ -139,7 +139,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveBoolean(): String {
-        return "INSERT OR REPLACE INTO jds_store_boolean(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_boolean(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveLong(): String {
@@ -163,15 +163,15 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO jds_store_blob(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_blob(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveZonedDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_zoned_date_time(composite_key, field_id, value) VALUES(:uuid, :fieldId, :value)"
+        return "INSERT OR REPLACE INTO jds_store_zoned_date_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
     }
 
     override fun saveOverview(): String {

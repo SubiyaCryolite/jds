@@ -5,5 +5,5 @@ CREATE PROCEDURE proc_store_text(IN p_composite_key VARCHAR(128),
   BEGIN
     INSERT INTO jds_store_text (composite_key, field_id, sequence, value)
     VALUES (p_composite_key, p_field_id, p_sequence, p_value)
-    ON DUPLICATE KEY UPDATE value = p_value, sequence = p_sequence;
+    ON DUPLICATE KEY UPDATE value = p_value;
   END

@@ -561,7 +561,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveBoolean(): String {
-        return "{call proc_store_boolean(:uuid,:fieldId,:value)}"
+        return "{call proc_store_boolean(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -585,7 +585,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveBlob(): String {
-        return "{call proc_store_blob(:uuid,:fieldId,:value)}"
+        return "{call proc_store_blob(:uuid, :fieldId, :sequence, :value)}"
     }
 
 
@@ -618,7 +618,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveZonedDateTime(): String {
-        return "{call proc_store_zoned_date_time(:uuid,:fieldId,:value)}"
+        return "{call proc_store_zoned_date_time(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**
@@ -626,7 +626,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveDate(): String {
-        return "{call proc_store_date(:uuid,:fieldId,:value)}"
+        return "{call proc_store_date(:uuid,:fieldId,:sequence, :value)}"
     }
 
     /**
@@ -634,7 +634,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveTime(): String {
-        return "{call proc_store_time(:uuid,:fieldId,:value)}"
+        return "{call proc_store_time(:uuid, :fieldId, :sequence, :value)}"
     }
 
     /**

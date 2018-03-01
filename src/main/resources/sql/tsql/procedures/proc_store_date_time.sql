@@ -6,9 +6,9 @@ AS
   BEGIN
     MERGE jds_store_date_time AS dest
     USING (VALUES (@composite_key, @field_id, @sequence, @value)) AS src(composite_key, field_id, sequence, value)
-    ON (src.composite_key = dest.composite_key AND src.field_id = dest.field_id)
+    ON (src.composite_key = dest.composite_key AND src.field_id = dest.field_id AND src.sequence = dest.sequence)
     WHEN MATCHED THEN
-      UPDATE SET dest.sequence = src.sequence, dest.value = src.value
+      UPDATE SET dest.value = src.value
     WHEN NOT MATCHED THEN
       INSERT (composite_key, field_id, sequence, value)
       VALUES (src.composite_key, src.field_id, src.sequence, src.value);
