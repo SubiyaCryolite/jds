@@ -149,11 +149,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
             JdsComponent.STORE_ENTITY_OVERVIEW -> {
                 createRefEntityOverview(connection)
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid", "jds_entity_overview_ix_uuid"))
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid_location", "jds_entity_overview_ix_uuid_location"))
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid_location_version", "jds_entity_overview_ix_uuid_location_version"))
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_uuid", "jds_entity_overview_ix_parent_uuid"))
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_composite_key", "jds_entity_overview_ix_parent_composite_key"))
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid, uuid_location, uuid_location_version", "jds_entity_overview_ix_uuid"))
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_uuid, parent_composite_key", "jds_entity_overview_ix_parent"))
             }
             else -> {
             }
