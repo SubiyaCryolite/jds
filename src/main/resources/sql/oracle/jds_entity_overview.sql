@@ -11,5 +11,6 @@ CREATE TABLE jds_entity_overview (
   last_edit             TIMESTAMP,
   field_id              NUMBER(19),
   PRIMARY KEY (composite_key),
-  FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id) ON DELETE CASCADE
+  FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_composite_key) REFERENCES jds_entity_overview (composite_key) ON DELETE CASCADE
 )

@@ -11,6 +11,10 @@ CREATE TABLE jds_entity_overview (
   last_edit             DATETIME,
   field_id              BIGINT,
   PRIMARY KEY (composite_key),
-  CONSTRAINT jds_entity_overview_fk_entity_id FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
+  CONSTRAINT jds_entity_overview_fk_entity_id FOREIGN KEY (entity_id)
+  REFERENCES jds_ref_entity (id)
+    ON DELETE CASCADE,
+  CONSTRAINT jds_entity_overview_fk_parent_composite_key FOREIGN KEY (parent_composite_key)
+  REFERENCES jds_entity_overview (composite_key)
     ON DELETE CASCADE
 );
