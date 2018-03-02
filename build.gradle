@@ -16,7 +16,7 @@ description = "A dynamic, cross platform, high performance, ORM data-mapper. Des
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 project.ext.jacksonVersion = "2.9.4"
-project.ext.kotlinVersion = "1.2.21"
+project.ext.kotlinVersion = "1.2.30"
 
 buildscript {
     repositories {
