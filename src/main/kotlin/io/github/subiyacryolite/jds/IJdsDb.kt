@@ -92,67 +92,67 @@ interface IJdsDb {
      * Gets the correct syntax needed to add a new column to the underlying database implementation
      * @return the correct syntax needed to add a new column to the underlying database implementation
      */
-    open fun getDbAddColumnSyntax()="ALTER TABLE %s %s"
+    open fun getDbAddColumnSyntax() = "ALTER TABLE %s %s"
 
     /**
      * Gets the Float data-type of the current database implementation
      * @return the Float data-type of the database implementation
      */
-    fun getDbFloatDataType(): String
+    fun getNativeDataTypeFloat(): String
 
     /**
      * Gets the Double data-type of the current database implementation
      * @return the Double data-type of the database implementation
      */
-    fun getDbDoubleDataType(): String
+    fun getNativeDataTypeDouble(): String
 
     /**
      * Gets the ZonedDateTime data-type of the current database implementation
      * @return the ZonedDataTime data-type of the database implementation
      */
-    fun getDbZonedDateTimeDataType(): String
+    fun getNativeDataTypeZonedDateTime(): String
 
     /**
      * Gets the Time data-type of the current database implementation
      * @return the Time data-type of the database implementation
      */
-    fun getDbTimeDataType(): String
+    fun getNativeDataTypeTime(): String
 
     /**
      * Gets the Blob data-type of the current database implementation
      * @return the Blob data-type of the database implementation
      */
-    fun getDbBlobDataType(max: Int): String
+    fun getNativeDataTypeBlob(max: Int): String
 
     /**
      * Gets the Integer data-type of the current database implementation
      * @return the Integer data-type of the database implementation
      */
-    fun getDbIntegerDataType(): String
+    fun getNativeDataTypeInteger(): String
 
     /**
      * Gets the DateTime data-type of the current database implementation
      * @return the DateTime data-type of the database implementation
      */
-    fun getDbDateTimeDataType(): String
+    fun getNativeDataTypeDateTime(): String
 
     /**
      * Gets the Long data-type of the current database implementation
      * @return the Long data-type of the database implementation
      */
-    fun getDbLongDataType(): String
+    fun getNativeDataTypeLong(): String
 
     /**
      * Gets the String data-type of the current database implementation
      * @return the String data-type of the database implementation
      */
-    fun getDbStringDataType(max: Int): String
+    fun getNativeDataTypeString(max: Int): String
 
     /**
      * Gets the Boolean data-type of the current database implementation
      * @return the Boolean data-type of the database implementation
      */
-    fun getDbBooleanDataType(): String
+    fun getNativeDataTypeBoolean(): String
 
     /**
      * @param
@@ -160,4 +160,6 @@ interface IJdsDb {
      * @indexName
      */
     fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String
+
+    fun createOrAlterProc(procedureName: String, tableName: String, columns: Map<String, String>, uniqueColumns: Collection<String>, doNothingOnConflict: Boolean = false): String
 }

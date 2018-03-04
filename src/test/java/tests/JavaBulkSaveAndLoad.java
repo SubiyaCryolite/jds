@@ -18,22 +18,22 @@ public class JavaBulkSaveAndLoad extends BaseTestConfig {
     }
 
     private void save() throws SQLException, ClassNotFoundException, InterruptedException {
-        ArrayList<EntityA> memObjects = new ArrayList<EntityA>();
+        ArrayList<EntityA> memObjects = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             EntityA entry = new EntityA();
             entry.getOverview().setUuid(String.format("guidBulk%s", i));
             memObjects.add(entry);
         }
-        JdsSave save = new JdsSave(jdsDb, memObjects);
+        JdsSave save = new JdsSave(jdsDb, memObjects, null);
         Future<Boolean> process = Executors.newSingleThreadExecutor().submit(save);
         if (!process.isDone())
             Thread.sleep(16);
-        System.out.println("Successfully saved $memObjects");
+        System.out.println("Successfully saved " + memObjects);
     }
 
     private void load() throws Exception {
         JdsLoad<EntityA> entityAs = new JdsLoad(jdsDb, EntityA.class);
-        System.out.println("All A's [${entityAs.call()}]");
+        System.out.println("All A's [" + entityAs.call() + "]");
     }
 
     public void saveAndLoad() throws Exception {

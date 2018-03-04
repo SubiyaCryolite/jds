@@ -19,6 +19,7 @@ import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 
 import java.sql.Connection
+import java.util.LinkedHashMap
 
 /**
  * Created by ifunga on 14/07/2017.
@@ -98,38 +99,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         return toReturn
     }
 
-    override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_boolean.sql")
-    }
-
-    override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_text.sql")
-    }
-
-    override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_date_time.sql")
-    }
-
-    override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_zoned_date_time.sql")
-    }
-
-    override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_integer.sql")
-    }
-
-    override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_float.sql")
-    }
-
-    override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_double.sql")
-    }
-
-    override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_long.sql")
-    }
-
     override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/oracle/jds_ref_entity.sql")
     }
@@ -158,16 +127,8 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_entity_overview.sql")
     }
 
-    override fun createRefEntityOverviewLight(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_entity_overview_light.sql")
-    }
-
-    override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_time.sql")
-    }
-
-    override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_store_blob.sql")
+    override fun createBindEntityBinding(connection: Connection) {
+        executeSqlFromFile(connection, "sql/oracle/jds_entity_binding.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
@@ -185,7 +146,8 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
@@ -196,69 +158,86 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_entity_overview.sql")
-            JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_field.sql")
-            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_boolean.sql")
-            JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_blob.sql")
-            JdsComponent.PROC_STORE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_time.sql")
-            JdsComponent.PROC_STORE_TEXT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_text.sql")
-            JdsComponent.PROC_STORE_LONG -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_long.sql")
-            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_integer.sql")
-            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_float.sql")
-            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_double.sql")
-            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_date_time.sql")
-            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_store_zoned_date_time.sql")
-            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_field.sql")
-            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_enum.sql")
-            JdsComponent.PROC_REF_ENTITY -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity.sql")
-            JdsComponent.PROC_REF_ENUM -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_enum.sql")
-            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/oracle/procedures/proc_ref_entity_inheritance.sql")
+            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
+            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
+            JdsComponent.PROC_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
+            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
+            JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
+            JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
+            JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
+            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
+            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
+            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
+            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
+            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
+            JdsComponent.PROC_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
+            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
+            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
+            JdsComponent.PROC_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
+            JdsComponent.PROC_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
+            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
             else -> {
             }
         }
     }
 
-    override fun getDbFloatDataType(): String {
+    override fun getNativeDataTypeFloat(): String {
         return "BINARY_FLOAT"
     }
 
-    override fun getDbDoubleDataType(): String {
+    override fun getNativeDataTypeDouble(): String {
         return "BINARY_DOUBLE"
     }
 
-    override fun getDbZonedDateTimeDataType(): String {
+    override fun getNativeDataTypeZonedDateTime(): String {
         return "TIMESTAMP WITH TIME ZONE"
     }
 
-    override fun getDbTimeDataType(): String {
+    override fun getNativeDataTypeTime(): String {
         return "NUMBER(19)"
     }
 
-    override fun getDbBlobDataType(max: Int): String {
+    override fun getNativeDataTypeBlob(max: Int): String {
         return "BLOB"
     }
 
-    override fun getDbIntegerDataType(): String {
+    override fun getNativeDataTypeInteger(): String {
         return "NUMBER(10)"
     }
 
-    override fun getDbDateTimeDataType(): String {
+    override fun getNativeDataTypeDateTime(): String {
         return "TIMESTAMP"
     }
 
-    override fun getDbLongDataType(): String {
+    override fun getNativeDataTypeLong(): String {
         return "NUMBER(19)"
     }
 
-    override fun getDbStringDataType(max: Int): String {
+    override fun getNativeDataTypeString(max: Int): String {
         return if (max == 0) "NCLOB" else "NVARCHAR2($max)"
     }
 
-    override fun getDbBooleanDataType(): String {
+    override fun getNativeDataTypeBoolean(): String {
         return "SMALLINT"
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
+
+    override fun createOrAlterProc(procedureName: String,
+                                   tableName: String,
+                                   columns: Map<String, String>,
+                                   uniqueColumns: Collection<String>,
+                                   doNothingOnConflict:Boolean): String {
+        return ""
+    }
+
+    override fun createTable(tableName: String,
+                             columns: LinkedHashMap<String, String>,
+                             uniqueColumns: LinkedHashMap<String, String>,
+                             primaryKeys: LinkedHashMap<String, String>,
+                             foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>): String {
+        return ""
     }
 }

@@ -56,7 +56,6 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         entity.overview.uuidLocation = embeddedObject.o.uuidLocation
         entity.overview.uuidLocationVersion = embeddedObject.o.uuidLocationVersion
         entity.overview.lastEdit = embeddedObject.o.lastEdit
-        entity.overview.parentUuid = embeddedObject.o.parentUuid
         //==============================================
         //PRIMITIVES :: Key-Value
         //==============================================
@@ -131,7 +130,6 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             entity.overview.uuid = uuid
             entity.overview.uuidLocation = uuidLocation
             entity.overview.uuidLocationVersion = uuidLocationVersion
-            entity.overview.parentUuid = entity.overview.uuid
             populate(entity, eo)
             it.value.add(entity)
         }
@@ -142,7 +140,6 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             it.value.value.overview.uuid = uuid
             it.value.value.overview.uuidLocation = uuidLocation
             it.value.value.overview.uuidLocationVersion = uuidLocationVersion
-            it.value.value.overview.parentUuid = entity.overview.uuid
             populate(it.value.value, eo)
         }
     }

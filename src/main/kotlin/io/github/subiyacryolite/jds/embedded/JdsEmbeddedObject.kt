@@ -21,7 +21,7 @@ import io.github.subiyacryolite.jds.JdsEntity
  */
 class JdsEmbeddedObject {
 
-    var fieldId: Long?=null
+    var fieldId: Long? = null
 
     /**
      * Used to store Byte[] values in a portable manner
@@ -74,16 +74,17 @@ class JdsEmbeddedObject {
     lateinit var o: JdsEntityOverview
 
     fun init(entity: JdsEntity) {
-        entity.assign(this);
-        o = JdsEntityOverview(entity.overview.compositeKey,
-        entity.overview.uuid,
-        entity.overview.uuidLocation,
-        entity.overview.uuidLocationVersion,
-        entity.overview.entityId,
-        fieldId,
-        entity.overview.live,
-        entity.overview.entityVersion,
-        entity.overview.lastEdit,
-        entity.overview.parentUuid)
+        entity.assign(this)
+        o = JdsEntityOverview(
+                entity.overview.uuid,
+                entity.overview.uuidLocation,
+                entity.overview.uuidLocationVersion,
+                entity.overview.entityId,
+                fieldId,
+                entity.overview.live,
+                entity.overview.entityVersion,
+                entity.overview.lastEdit)
     }
+
+    //TODO add binding constructs for children
 }

@@ -27,5 +27,4 @@ annotation class JdsEntityAnnotation(val name: String = "",
                                      val id: Long = 1,
                                      val version: Long = 1,
                                      val caption: String = "",
-                                     val description: String = "",
-                                     val parent: Boolean = false)
+                                     val description: String = "")

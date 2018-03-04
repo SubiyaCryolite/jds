@@ -30,31 +30,16 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var uuid: String = UUID.randomUUID().toString()
     override var uuidLocation: String = ""
     override var uuidLocationVersion: Int = 0
-    override var parentUuid: String = "" //from parent (got rid of entity binding)
-    override var parentCompositeKey: String = "" //from parent
     override var entityVersion: Long = 1L
     override var live: Boolean = false
     override var lastEdit: LocalDateTime = LocalDateTime.now()
-    override val compositeKey: String
-        get() {
-            val stringBuilder = StringBuilder()
-            stringBuilder.append(uuid)
-            if (uuidLocation.isNotBlank()) {
-                stringBuilder.append('.')
-                stringBuilder.append(uuidLocation)
-            }
-            stringBuilder.append('.')
-            stringBuilder.append(uuidLocationVersion)
-            return stringBuilder.toString()
-        }
+
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
         objectOutputStream.writeUTF(uuid)
         objectOutputStream.writeUTF(uuidLocation)
         objectOutputStream.writeInt(uuidLocationVersion)
-        objectOutputStream.writeUTF(parentUuid)
-        objectOutputStream.writeUTF(parentCompositeKey)
         objectOutputStream.writeLong(entityId)
         objectOutputStream.writeBoolean(live)
         objectOutputStream.writeLong(entityVersion)
@@ -66,8 +51,6 @@ class JdsOverview : IJdsOverview, Externalizable {
         uuid = objectInputStream.readUTF()
         uuidLocation = objectInputStream.readUTF()
         uuidLocationVersion = objectInputStream.readInt()
-        parentUuid = objectInputStream.readUTF()
-        parentCompositeKey = objectInputStream.readUTF()
         entityId = objectInputStream.readLong()
         live = objectInputStream.readBoolean()
         entityVersion = objectInputStream.readLong()
@@ -75,7 +58,7 @@ class JdsOverview : IJdsOverview, Externalizable {
     }
 
     override fun toString(): String {
-        return "{ uuid = $uuid, entityId = $entityId, version = $entityVersion, live = $live }"
+        return "{ uuid = $uuid, uuidLocation = $uuidLocation, uuidLocationVersion = $uuidLocationVersion, entityId = $entityId, version = $entityVersion, live = $live, lastEdit = $lastEdit }"
     }
 
     companion object {

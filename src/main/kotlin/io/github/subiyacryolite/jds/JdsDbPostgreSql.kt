@@ -16,8 +16,8 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.enums.JdsComponent
 import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-
 import java.sql.Connection
+import java.util.*
 
 /**
  * The PostgreSQL implementation of [JdsDataBase][JdsDb]
@@ -88,38 +88,6 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         return toReturn
     }
 
-    override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_boolean.sql")
-    }
-
-    override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_text.sql")
-    }
-
-    override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_date_time.sql")
-    }
-
-    override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_zoned_date_time.sql")
-    }
-
-    override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_integer.sql")
-    }
-
-    override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_float.sql")
-    }
-
-    override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_double.sql")
-    }
-
-    override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_long.sql")
-    }
-
         override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/postgresql/jds_ref_entity.sql")
     }
@@ -148,16 +116,8 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         executeSqlFromFile(connection, "sql/postgresql/jds_entity_overview.sql")
     }
 
-    override fun createRefEntityOverviewLight(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_entity_overview_light.sql")
-    }
-
-    override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_time.sql")
-    }
-
-    override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/postgresql/jds_store_blob.sql")
+    override fun createBindEntityBinding(connection: Connection) {
+        executeSqlFromFile(connection, "sql/postgresql/jds_entity_binding.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
@@ -175,7 +135,8 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
@@ -186,72 +147,127 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_entity_overview.sql")
-            JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_field.sql")
-            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_boolean.sql")
-            JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_blob.sql")
-            JdsComponent.PROC_STORE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_time.sql")
-            JdsComponent.PROC_STORE_TEXT -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_text.sql")
-            JdsComponent.PROC_STORE_LONG -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_long.sql")
-            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_integer.sql")
-            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_float.sql")
-            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_double.sql")
-            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_date_time.sql")
-            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_store_zoned_date_time.sql")
-            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_entity_field.sql")
-            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_entity_enum.sql")
-            JdsComponent.PROC_REF_ENTITY -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_entity.sql")
-            JdsComponent.PROC_REF_ENUM -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_enum.sql")
-            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/postgresql/procedures/proc_ref_entity_inheritance.sql")
+            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
+            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
+            JdsComponent.PROC_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
+            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
+            JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
+            JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
+            JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
+            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
+            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
+            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
+            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
+            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
+            JdsComponent.PROC_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
+            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
+            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
+            JdsComponent.PROC_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
+            JdsComponent.PROC_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
+            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
             else -> {
             }
         }
     }
 
-    override fun getDbFloatDataType(): String {
+    override fun getNativeDataTypeFloat(): String {
         return "REAL"
     }
 
-    override fun getDbDoubleDataType(): String {
+    override fun getNativeDataTypeDouble(): String {
         return "FLOAT"
     }
 
-    override fun getDbZonedDateTimeDataType(): String {
+    override fun getNativeDataTypeZonedDateTime(): String {
         return "TIMESTAMP WITH TIME ZONE"
     }
 
-    override fun getDbTimeDataType(): String {
+    override fun getNativeDataTypeTime(): String {
         return "TIME WITHOUT TIME ZONE"
     }
 
-    override fun getDbBlobDataType(max: Int): String {
+    override fun getNativeDataTypeBlob(max: Int): String {
         return "BYTEA"
     }
 
-    override fun getDbIntegerDataType(): String {
+    override fun getNativeDataTypeInteger(): String {
         return "INTEGER"
     }
 
-    override fun getDbDateTimeDataType(): String {
+    override fun getNativeDataTypeDateTime(): String {
         return "TIMESTAMP"
     }
 
-    override fun getDbLongDataType(): String {
+    override fun getNativeDataTypeLong(): String {
         return "BIGINT"
     }
 
-    override fun getDbStringDataType(max: Int): String {
+    override fun getNativeDataTypeString(max: Int): String {
         return if (max == 0)
             "TEXT"
         else
             "VARCHAR($max)"
     }
 
-    override fun getDbBooleanDataType(): String {
+    override fun getNativeDataTypeBoolean(): String {
         return "BOOLEAN"
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
+
+    override fun createOrAlterProc(procedureName: String,
+                                   tableName: String,
+                                   columns: Map<String, String>,
+                                   uniqueColumns: Collection<String>,
+                                   doNothingOnConflict: Boolean): String {
+        val sqlBuilder = StringBuilder()
+
+        sqlBuilder.append("CREATE OR REPLACE FUNCTION $procedureName(")
+        val inputParameters = StringJoiner(",")
+        columns.forEach { column, type -> inputParameters.add("p_$column $type") }
+        sqlBuilder.append(inputParameters)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\tRETURNS VOID AS \$\$\n")
+        sqlBuilder.append("BEGIN\n")
+
+        sqlBuilder.append("\tINSERT INTO $tableName(")
+        val columnNames = StringJoiner(", ")
+        columns.forEach { column, _ -> columnNames.add(column) }
+        sqlBuilder.append(columnNames)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\tVALUES")
+        sqlBuilder.append("(")
+        val parameterNames = StringJoiner(", ")
+        columns.forEach { column, _ -> parameterNames.add("p_$column") }
+        sqlBuilder.append(parameterNames)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\tON CONFLICT (")
+        val uniqueConstraints = StringJoiner(", ")
+        uniqueColumns.forEach { uniqueConstraints.add(it) }
+        sqlBuilder.append(uniqueConstraints)
+        sqlBuilder.append(")\n")
+
+        if (doNothingOnConflict) {
+            sqlBuilder.append("\t\tDO NOTHING;")
+        } else {
+            sqlBuilder.append("\t\tDO UPDATE SET ")
+            val updateStatements = StringJoiner(", ")
+            columns.forEach { column, _ ->
+                if (!uniqueColumns.contains(column))//dont update unique columns
+                    updateStatements.add("$column = p_$column")
+            }
+            sqlBuilder.append(updateStatements)
+            sqlBuilder.append(";\n")
+        }
+
+        sqlBuilder.append("END;\n")
+        sqlBuilder.append("\$\$\n")
+        sqlBuilder.append("LANGUAGE plpgsql;")
+        return sqlBuilder.toString()
     }
 }

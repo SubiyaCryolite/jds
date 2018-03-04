@@ -34,7 +34,6 @@ import kotlin.collections.LinkedHashMap
 open class JdsTable() : Serializable {
 
     var name = ""
-    var uniqueEntries = false
     var onlyLiveRecords = false
     var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
@@ -48,13 +47,19 @@ open class JdsTable() : Serializable {
     private var deleteByParentUuidSql = ""
     private var deleteByUuidSql = ""
     private var generatedOrUpdatedSchema = false
+    private val storedProcedureName: String
+        get() {
+            val stringJoiner = StringJoiner("_")
+            entities.forEach { stringJoiner.add(it.toString()) }
+            return "jds_str_${name}_$stringJoiner"
+        }
 
     /**
      * @param entity
      * @param uniqueEntries
      */
     @JvmOverloads
-    constructor(entity: Class<out IJdsEntity>, uniqueEntries: Boolean = false) : this() {
+    constructor(entity: Class<out IJdsEntity>) : this() {
         val annotatedClass = entity.isAnnotationPresent(JdsEntityAnnotation::class.java)
         val annotatedParent = entity.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         if (annotatedClass || annotatedParent) {
@@ -63,7 +68,6 @@ open class JdsTable() : Serializable {
                 false -> entity.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
             name = entityAnnotation.name
-            this.uniqueEntries = uniqueEntries
             registerEntity(entity, true)
         }
     }
@@ -116,20 +120,23 @@ open class JdsTable() : Serializable {
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument, deleteColumns: HashMap<String, HashSet<String>>) {
+    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument, deleteColumns: HashMap<String, MutableCollection<Any>>) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            if (uniqueEntries) {
+            if (jdsDb.options.isUpdatingCustomReportTablesPerSave) {
                 deleteExistingRecords(entity, deleteColumns)
             }
 
             //prepare insert placeholder
-            val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(composite_key) VALUES(?)")
-            stmt.setString(1, entity.overview.compositeKey)
-            stmt.addBatch()
-
+            if (!jdsDb.supportsStatements) {
+                val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(uuid, uuid_location, uuid_version) VALUES(?, ?, ?)")
+                stmt.setString(1, entity.overview.uuid)
+                stmt.setString(2, entity.overview.uuidLocation)
+                stmt.setInt(3, entity.overview.uuidLocationVersion)
+                stmt.addBatch()
+            }
 
             val updateValues = LinkedList<Any?>() //maintain order
             val updateColumns = LinkedList<String>() //maintain order
@@ -145,20 +152,35 @@ open class JdsTable() : Serializable {
 
             if (updateColumns.isEmpty()) return //VERY important or else well have an invalid update with no columns
 
-            val stringBuilder = StringBuilder()
-            stringBuilder.append("UPDATE ")
-            stringBuilder.append(name)
-            stringBuilder.append(" SET ")
             val joiner = StringJoiner(", ")
             updateColumns.forEach {
-                joiner.add("$it = ?")
+                joiner.add(if (jdsDb.supportsStatements) "?" else "$it = ?")
             }
-            stringBuilder.append(joiner)
-            stringBuilder.append(" WHERE ")
-            stringBuilder.append(JdsSchema.compositeKeyColumn)
-            stringBuilder.append(" = ?")
+            if (jdsDb.supportsStatements) {
+                joiner.add("?")//last parameter for composite keys
+                joiner.add("?")//last parameter for composite keys
+                joiner.add("?")//last parameter for composite keys
+            }
 
-            val insertStatement = eventArgument.getOrAddStatement(stringBuilder.toString())
+            val statementQuery = when (jdsDb.supportsStatements) {
+                true -> "{call $storedProcedureName($joiner)}"
+                false -> {
+                    val stringBuilder = StringBuilder()
+                    stringBuilder.append("UPDATE ")
+                    stringBuilder.append(name)
+                    stringBuilder.append(" SET ")
+                    stringBuilder.append(joiner)
+                    stringBuilder.append(" WHERE ")
+                    stringBuilder.append("uuid = ? AND uuid_location = ? AND uuid_version = ?")//last parameter for composite key
+                    stringBuilder.toString()
+                }
+            }
+
+            val insertStatement = when (jdsDb.supportsStatements) {
+                true -> eventArgument.getOrAddCall(statementQuery)
+                false -> eventArgument.getOrAddStatement(statementQuery)
+            }
+
             updateValues.forEachIndexed { index, value ->
                 when (value) {
                     is ZonedDateTime -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
@@ -172,26 +194,26 @@ open class JdsTable() : Serializable {
                     else -> insertStatement.setObject(index + 1, value ?: null)
                 }
             }
-            insertStatement.setString(columnNames.size + 1, entity.overview.compositeKey)
+            insertStatement.setString(columnNames.size + 1, entity.overview.uuid)
+            insertStatement.setString(columnNames.size + 2, entity.overview.uuidLocation)
+            insertStatement.setInt(columnNames.size + 3, entity.overview.uuidLocationVersion)
             insertStatement.addBatch()
         }
     }
 
-    fun deleteExistingRecords(entity: JdsEntity, deleteColumns: HashMap<String, HashSet<String>>) {
+    fun deleteExistingRecords(entity: JdsEntity, deleteColumns: HashMap<String, MutableCollection<Any>>) {
         when (uniqueBy) {
-            JdsFilterBy.COMPOSITE_KEY -> deleteColumns.getOrPut(deleteByCompositeKeySql) { HashSet() }.add(entity.overview.compositeKey)
-            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { HashSet() }.add(entity.overview.uuid)
-            JdsFilterBy.PARENT_UUID -> deleteColumns.getOrPut(deleteByParentUuidSql) { HashSet() }.add(entity.overview.parentUuid)
+            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion))
+            JdsFilterBy.UUID_LOCATION -> deleteColumns.getOrPut(deleteByParentUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion))
         }
     }
 
     /**
      * Empty an entire table
-     * @param connection the [Connection] to use for this operation
+     * @param connection the [connection][Connection] used for this operation
      */
     fun truncateTable(connection: Connection) {
-        val preparedStatement = connection.prepareStatement("TRUNCATE TABLE $name")
-        preparedStatement.executeUpdate()
+        connection.prepareStatement("TRUNCATE TABLE $name").use { it.executeUpdate() }
     }
 
     /**
@@ -243,6 +265,7 @@ open class JdsTable() : Serializable {
      * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
      * @param pool a shared connection pool to quickly query the target schemas
      */
+    @Throws(Exception::class)
     internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) = try {
 
         if (!pool.containsKey(targetConnection))
@@ -253,7 +276,7 @@ open class JdsTable() : Serializable {
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
         if (!jdsDb.doesTableExist(connection, name)) {
-            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name, uniqueEntries)).use {
+            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use {
                 it.executeUpdate()
                 if (jdsDb.options.isPrintingOutput)
                     println("Created $name")
@@ -292,9 +315,16 @@ open class JdsTable() : Serializable {
         }
 
         if (foundChanges) {
-            if (!jdsDb.isSqLiteDb) {
+            if (jdsDb.supportsStatements) {
                 val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
                 connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+
+                val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
+                tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 64)
+                tableColumns["uuid_location"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 45)
+                tableColumns["uuid_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
+                val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "uuid_location", "uuid_version"), tableColumns.isEmpty())
+                connection.prepareStatement(createOrAlteredProcedureSQL).use { it.executeUpdate() }
             } else {
                 //sqlite must alter columns once per entry
                 sqliteJoiner.forEach {
@@ -304,13 +334,31 @@ open class JdsTable() : Serializable {
             }
         }
 
-        deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} IN %s"
-        deleteByParentUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE parent_uuid IN %s)"
-        deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid IN %s)"
+        //deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} IN %s"
+        //deleteByParentUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE parent_uuid IN %s)"
+        //deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid IN %s)"
+
+        /**
+         * SELECT agent_code,agent_name,working_area,commission
+        FROM agents
+        WHERE exists
+        (SELECT *
+        FROM customer
+        WHERE grade=3 AND agents.agent_code=customer.agent_code)
+         */
 
         generatedOrUpdatedSchema = true
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
+    }
+
+    private fun generateNativeColumnTypes(jdsDb: JdsDb, columnToFieldMap: LinkedHashMap<String, JdsField>): LinkedHashMap<String, String> {
+        val collection = LinkedHashMap<String, String>()
+        columnToFieldMap.forEach { columnName, field ->
+            if (!JdsSchema.isIgnoredType(field.type))
+                collection[columnName] = JdsSchema.getDbDataType(jdsDb, field.type)
+        }
+        return collection
     }
 
     /**
@@ -331,7 +379,7 @@ open class JdsTable() : Serializable {
                 return false
 
         if (entities.isEmpty())
-            return true
+            return true //this means this crt applies to all entities i.e unfiltered
 
         entities.forEach {
             val entityType = jdsDb.classes[it]

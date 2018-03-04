@@ -24,20 +24,25 @@ class JdsOptions {
     /**
      * Indicates if load operations should initialise java primitive types
      */
-    var initialisePrimitives= true
+    var initialisePrimitives = true
 
     /**
      * Indicates if load operations should initialise java date and time types
      */
-    var initialiseDatesAndTimes= true
+    var initialiseDatesAndTimes = true
 
     /**
      * Indicates if load operations should initialise embedded object and object collections
      */
-    var initialiseObjects= true
+    var initialiseObjects = true
 
     /**
      * Indicates if JDS db should write to custom reporting tables
      */
-    var isWritingToReportingTables= true
+    var isWritingToReportingTables = true
+
+    /**
+     * Indicates if JDS updates custom reports per entry
+     */
+    var isUpdatingCustomReportTablesPerSave = true
 }

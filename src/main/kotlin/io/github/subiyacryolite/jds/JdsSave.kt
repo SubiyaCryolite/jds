@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
+import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.SaveEventArgument
 import java.sql.Connection
@@ -29,7 +30,7 @@ import kotlin.coroutines.experimental.buildSequence
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val entities: Iterable<JdsEntity>, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), private val postSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, val recursiveInnerCall: Boolean = false) : Callable<Boolean> {
+class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val entities: Iterable<JdsEntity>, private val postSaveEvent: JdsSaveEvent? = null, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), private val postSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, val recursiveInnerCall: Boolean = false) : Callable<Boolean> {
 
 
     /**
@@ -38,7 +39,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this(jdsDb, entities, jdsDb.getConnection())
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, postSaveEvent: JdsSaveEvent? = null) : this(jdsDb, entities, jdsDb.getConnection(), postSaveEvent)
 
 
     /**
@@ -48,7 +49,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entities
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection) : this(jdsDb, connection, entities)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>, connection: Connection, postSaveEvent: JdsSaveEvent? = null) : this(jdsDb, connection, entities, postSaveEvent)
 
     /**
      * Computes a result, or throws an exception if unable to do so.
@@ -110,6 +111,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 }
                 if (it is JdsSaveListener)
                     it.onPostSave(postSaveEventArgument)
+
+                postSaveEvent?.onSave(it, postSaveEventArgument, connection)
             }
             preSaveEventArgument.executeBatches()
             postSaveEventArgument.executeBatches()
@@ -129,7 +132,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param alternateConnections
      * @param entity
      */
-    private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity, deleteColumns: HashMap<String, HashSet<String>>) {
+    private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity, deleteColumns: HashMap<String, MutableCollection<Any>>) {
         jdsDb.tables.forEach {
             it.executeSave(jdsDb, entity, saveEventArguments, deleteColumns)
         }
@@ -151,21 +154,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
 
         val saveOverview = regularStatementOrCall(preSaveEventArgument, jdsDb.saveOverview())
-        val customTablesDelete = HashMap<String, HashSet<String>>()
+        val customTablesDelete = HashMap<String, MutableCollection<Any>>()
 
         entities.forEach {
-
-            it.bindChildrenAndUpdateLastEdit()
-            saveOverview.setString(1, it.overview.compositeKey)
-            saveOverview.setString(2, it.overview.uuid)
-            saveOverview.setString(3, it.overview.uuidLocation)
-            saveOverview.setInt(4, it.overview.uuidLocationVersion)
-            saveOverview.setString(5, it.overview.parentUuid)
-            saveOverview.setString(6, it.overview.parentCompositeKey)
-            saveOverview.setLong(7, it.overview.entityId)
-            saveOverview.setLong(8, it.overview.entityVersion)
-            saveOverview.setBoolean(9, it.overview.live)
-            saveOverview.setTimestamp(10, Timestamp.valueOf(it.overview.lastEdit))
+            it.overview.lastEdit = LocalDateTime.now()
+            saveOverview.setString(1, it.overview.uuid)
+            saveOverview.setString(2, it.overview.uuidLocation)
+            saveOverview.setInt(3, it.overview.uuidLocationVersion)
+            saveOverview.setLong(4, it.overview.entityId)
+            saveOverview.setLong(5, it.overview.entityVersion)
+            saveOverview.setBoolean(6, it.overview.live)
+            saveOverview.setTimestamp(7, Timestamp.valueOf(it.overview.lastEdit))
             saveOverview.addBatch()
 
             if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty())
@@ -175,12 +174,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
                 it.onPreSave(preSaveEventArgument)
         }
 
-        customTablesDelete.forEach { placeHolderQuery, filterKeys ->
-            val placeHolder = String.format(placeHolderQuery, JdsLoad.prepareParamaterSequence(filterKeys.size))
-            val stmt = preSaveEventArgument.getOrAddStatement(placeHolder)
-            filterKeys.forEachIndexed { index, filterKey -> stmt.setString(index + 1, filterKey) }
-            stmt.addBatch()
-        }
+//        if (jdsDb.options.isUpdatingCustomReportTablesPerSave) {
+//            customTablesDelete.forEach { placeHolderQuery, filterKeys ->
+//                val placeHolder = String.format(placeHolderQuery, JdsLoad.prepareParamaterSequence(filterKeys.size))
+//                val stmt = preSaveEventArgument.getOrAddStatement(placeHolder)
+//                filterKeys.forEachIndexed { index, filterKey ->
+//                    stmt.setObject(index + 1, filterKey)
+//                }
+//                stmt.addBatch()
+//            }
+//        } else {
+//        }
     } catch (ex: SQLException) {
         ex.printStackTrace(System.err)
     }
@@ -190,12 +194,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveBlobs(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveBlob())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveBlob())
         it.blobProperties.forEach { fieldId, blobProperty ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setBytes("value", blobProperty.get())
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setBytes(5, blobProperty.get())
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -207,12 +212,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveBooleans(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveBoolean())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveBoolean())
         it.booleanProperties.forEach { fieldId, entry ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setObject(5, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -223,12 +229,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      */
     private fun saveIntegers(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
         it.integerProperties.forEach { fieldId, entry ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setObject(5, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -239,12 +246,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      */
     private fun saveFloats(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveFloat())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveFloat())
         it.floatProperties.forEach { fieldId, entry ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setObject(5, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -255,12 +263,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param entity
      */
     private fun saveDoubles(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveDouble())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDouble())
         it.doubleProperties.forEach { fieldId, entry ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setObject(5, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -272,12 +281,13 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveLongs(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveLong())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveLong())
         it.longProperties.forEach { fieldId, entry ->
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", entry.value) //primitives could be null, default value has meaning
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setObject(5, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -289,13 +299,14 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveStrings(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveString())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveString())
         it.stringProperties.forEach { fieldId, stringProperty ->
             val value = stringProperty.get()
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setString("value", value)
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setString(5, value)
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -307,43 +318,49 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveDateConstructs(it: JdsEntity) = try {
-        val upsertText = namedStatementOrCall(postSaveEventArgument, jdsDb.saveString())
-        val upsertLong = namedStatementOrCall(postSaveEventArgument, jdsDb.saveLong())
+        val upsertMonthDay = regularStatementOrCall(postSaveEventArgument, jdsDb.saveMonthDay())
+        val upsertYearMonth = regularStatementOrCall(postSaveEventArgument, jdsDb.saveYearMonth())
+        val upsertPeriod = regularStatementOrCall(postSaveEventArgument, jdsDb.savePeriod())
+        val upsertDuration = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDuration())
         it.monthDayProperties.forEach { fieldId, monthDayProperty ->
             val monthDay = monthDayProperty.get()
             val value = monthDay.toString()
-            upsertText.setString("uuid", it.overview.compositeKey)
-            upsertText.setLong("fieldId", fieldId)
-            upsertText.setInt("sequence", 0)
-            upsertText.setString("value", value)
-            upsertText.addBatch()
+            upsertMonthDay.setString(1, it.overview.uuid)
+            upsertMonthDay.setString(2, it.overview.uuidLocation)
+            upsertMonthDay.setInt(3, it.overview.uuidLocationVersion)
+            upsertMonthDay.setLong(4, fieldId)
+            upsertMonthDay.setString(5, value)
+            upsertMonthDay.addBatch()
         }
         it.yearMonthProperties.forEach { fieldId, yearMonthProperty ->
             val yearMonth = yearMonthProperty.get() as YearMonth
             val value = yearMonth.toString()
-            upsertText.setString("uuid", it.overview.compositeKey)
-            upsertText.setLong("fieldId", fieldId)
-            upsertText.setInt("sequence", 0)
-            upsertText.setString("value", value)
-            upsertText.addBatch()
+            upsertYearMonth.setString(1, it.overview.uuid)
+            upsertYearMonth.setString(2, it.overview.uuidLocation)
+            upsertYearMonth.setInt(3, it.overview.uuidLocationVersion)
+            upsertYearMonth.setLong(4, fieldId)
+            upsertYearMonth.setString(5, value)
+            upsertYearMonth.addBatch()
         }
         it.periodProperties.forEach { fieldId, periodProperty ->
             val period = periodProperty.get()
             val value = period.toString()
-            upsertText.setString("uuid", it.overview.compositeKey)
-            upsertText.setLong("fieldId", fieldId)
-            upsertText.setInt("sequence", 0)
-            upsertText.setString("value", value)
-            upsertText.addBatch()
+            upsertPeriod.setString(1, it.overview.uuid)
+            upsertPeriod.setString(2, it.overview.uuidLocation)
+            upsertPeriod.setInt(3, it.overview.uuidLocationVersion)
+            upsertPeriod.setLong(4, fieldId)
+            upsertPeriod.setString(5, value)
+            upsertPeriod.addBatch()
         }
         it.durationProperties.forEach { fieldId, durationProperty ->
             val duration = durationProperty.get()
             val value = duration.toNanos()
-            upsertLong.setString("uuid", it.overview.compositeKey)
-            upsertLong.setLong("fieldId", fieldId)
-            upsertLong.setInt("sequence", 0)
-            upsertLong.setLong("value", value)
-            upsertLong.addBatch()
+            upsertDuration.setString(1, it.overview.uuid)
+            upsertDuration.setString(2, it.overview.uuidLocation)
+            upsertDuration.setInt(3, it.overview.uuidLocationVersion)
+            upsertDuration.setLong(4, fieldId)
+            upsertDuration.setLong(5, value)
+            upsertDuration.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -354,23 +371,25 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveDatesAndDateTimes(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveDateTime())
-
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTime())
+        val upsertz = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDate())
         it.localDateTimeProperties.forEach { fieldId, value1 ->
             val localDateTime = value1.get() as LocalDateTime
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setTimestamp("value", Timestamp.valueOf(localDateTime))
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setTimestamp(5, Timestamp.valueOf(localDateTime))
             upsert.addBatch()
         }
         it.localDateProperties.forEach { fieldId, value1 ->
             val localDate = value1.get() as LocalDate
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setTimestamp("value", Timestamp.valueOf(localDate.atStartOfDay()))
-            upsert.addBatch()
+            upsertz.setString(1, it.overview.uuid)
+            upsertz.setString(2, it.overview.uuidLocation)
+            upsertz.setInt(3, it.overview.uuidLocationVersion)
+            upsertz.setLong(4, fieldId)
+            upsertz.setTimestamp(5, Timestamp.valueOf(localDate.atStartOfDay()))
+            upsertz.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -381,13 +400,14 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveTimes(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveTime())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveTime())
         it.localTimeProperties.forEach { fieldId, localTimeProperty ->
             val localTime = localTimeProperty.get() as LocalTime
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setLocalTime("value", localTime, jdsDb)
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setLocalTime(5, localTime, jdsDb)
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -399,13 +419,14 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveZonedDateTimes(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveZonedDateTime())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveZonedDateTime())
         it.zonedDateTimeProperties.forEach { fieldId, value1 ->
             val zonedDateTime = value1.get() as ZonedDateTime
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", fieldId)
-            upsert.setInt("sequence", 0)
-            upsert.setZonedDateTime("value", zonedDateTime, jdsDb)
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, fieldId)
+            upsert.setZonedDateTime(5, zonedDateTime, jdsDb)
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -417,15 +438,16 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveEnums(it: JdsEntity) = try {
-        val upsert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
+        val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnum())
         it.enumProperties.forEach { jdsFieldEnum, value2 ->
             val value = value2.get()
-            upsert.setString("uuid", it.overview.compositeKey)
-            upsert.setLong("fieldId", jdsFieldEnum.field.id)
-            upsert.setInt("sequence", 0)
-            upsert.setObject("value", when (value == null) {
+            upsert.setString(1, it.overview.uuid)
+            upsert.setString(2, it.overview.uuidLocation)
+            upsert.setInt(3, it.overview.uuidLocationVersion)
+            upsert.setLong(4, jdsFieldEnum)
+            upsert.setObject(5, when (value == null) {
                 true -> null
-                false -> jdsFieldEnum.indexOf(value!!)
+                false -> value!!.ordinal
             }
             )
             upsert.addBatch()
@@ -441,13 +463,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayDates(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveDateTime())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTimeCollection())
         it.dateTimeArrayProperties.forEach { fieldId, dateTimeArray ->
             dateTimeArray.forEachIndexed { sequence, value ->
-                insert.setTimestamp("value", Timestamp.valueOf(value))
-                insert.setLong("fieldId", fieldId)
-                insert.setInt("sequence", sequence)
-                insert.setString("uuid", it.overview.compositeKey)
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setTimestamp(6, Timestamp.valueOf(value))
                 insert.addBatch()
             }
         }
@@ -462,13 +486,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayFloats(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveFloat())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveFloatCollection())
         it.floatArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
-                insert.setObject("value", value) //primitives could be null, default value has meaning
-                insert.setLong("fieldId", fieldId)
-                insert.setInt("sequence", sequence)
-                insert.setString("uuid", it.overview.compositeKey)
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setObject(6, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -482,13 +508,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayIntegers(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveIntegerCollection())
         it.integerArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
-                insert.setObject("value", value) //primitives could be null, default value has meaning
-                insert.setLong("fieldId", fieldId)
-                insert.setInt("sequence", sequence)
-                insert.setString("uuid", it.overview.compositeKey)
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setObject(6, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -502,13 +530,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayDoubles(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveDouble())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDoubleCollection())
         it.doubleArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
-                insert.setString("uuid", it.overview.compositeKey)
-                insert.setLong("fieldId", fieldId)
-                insert.setInt("sequence", sequence)
-                insert.setObject("value", value) //primitives could be null, default value has meaning
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setObject(6, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -522,13 +552,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayLongs(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveLong())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveLongCollection())
         it.longArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
-                insert.setLong("fieldId", fieldId)
-                insert.setString("uuid", it.overview.compositeKey)
-                insert.setInt("sequence", sequence)
-                insert.setObject("value", value) //primitives could be null, default value has meaning
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setObject(6, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -542,13 +574,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayStrings(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveString())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveStringCollection())
         it.stringArrayProperties.forEach { fieldId, u ->
             u.forEachIndexed { sequence, value ->
-                insert.setLong("fieldId", fieldId)
-                insert.setString("uuid", it.overview.compositeKey)
-                insert.setInt("sequence", sequence)
-                insert.setString("value", value)
+                insert.setString(1, it.overview.uuid)
+                insert.setString(2, it.overview.uuidLocation)
+                insert.setInt(3, it.overview.uuidLocationVersion)
+                insert.setLong(4, fieldId)
+                insert.setInt(5, sequence)
+                insert.setString(6, value)
                 insert.addBatch()
             }
         }
@@ -563,15 +597,16 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveEnumCollections(it: JdsEntity) = try {
-        val insert = namedStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
+        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumCollection())
         it.enumCollectionProperties.forEach { jdsFieldEnum, u ->
             u.forEachIndexed { sequence, anEnum ->
-                //insert
                 if (anEnum != null) {
-                    insert.setLong("fieldId", jdsFieldEnum.field.id)
-                    insert.setString("uuid", it.overview.compositeKey)
-                    insert.setInt("sequence", sequence)
-                    insert.setObject("value", jdsFieldEnum.indexOf(anEnum))
+                    insert.setString(1, it.overview.uuid)
+                    insert.setString(2, it.overview.uuidLocation)
+                    insert.setInt(3, it.overview.uuidLocationVersion)
+                    insert.setLong(4, jdsFieldEnum)
+                    insert.setInt(5, sequence)
+                    insert.setObject(6, anEnum.ordinal)
                     insert.addBatch()
                 }
             }
@@ -581,18 +616,21 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     }
 
     /**
-     * @param entity
-     * @implNote Arrays have old entries deleted first. This for cases where a user may have reduced the amount of entries in the collection k.e [3,4,5]to[3,4]
+     * @param parentEntity
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(it: JdsEntity) = try {
-        val updateFieldId = regularStatement(postSaveEventArgument, "UPDATE jds_entity_overview SET field_id = ? WHERE composite_key = ?")
-        it.objectArrayProperties.forEach { jdsFieldEnum, jdseEntityCollection ->
-            //JdsSave(jdsDb, connection, jdseEntityCollection.map { it }, alternateConnections, preSaveEventArgument, postSaveEventArgument, false, true).call()
-            jdseEntityCollection.forEach {
-                updateFieldId.setLong(1, jdsFieldEnum.fieldEntity.id)
-                updateFieldId.setString(2, it.overview.compositeKey)
+    private fun saveAndBindObjectArrays(parentEntity: JdsEntity) = try {
+        val updateFieldId = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEntityBindings())
+        parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
+            entityCollection.forEach {
+                updateFieldId.setString(1, parentEntity.overview.uuid)
+                updateFieldId.setString(2, parentEntity.overview.uuidLocation)
+                updateFieldId.setInt(3, parentEntity.overview.uuidLocationVersion)
+                updateFieldId.setString(4, it.overview.uuid)
+                updateFieldId.setString(5, it.overview.uuidLocation)
+                updateFieldId.setInt(6, it.overview.uuidLocationVersion)
+                updateFieldId.setLong(7, fieldEntity.fieldEntity.id)
                 updateFieldId.addBatch()
             }
         }
@@ -601,16 +639,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
     }
 
     /**
-     * @param entity
+     * @param parentEntity
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(it: JdsEntity) = try {
-        val updateFieldId = regularStatement(postSaveEventArgument, "UPDATE jds_entity_overview SET field_id = ? WHERE composite_key = ?")
-        //JdsSave(jdsDb, connection, it.objectProperties.values.map { it.value }, alternateConnections, preSaveEventArgument, postSaveEventArgument, false, true).call()
-        it.objectProperties.forEach { k, v ->
-            updateFieldId.setLong(1, k.fieldEntity.id)
-            updateFieldId.setString(2, v.value.overview.compositeKey)
+    private fun saveAndBindObjects(parentEntity: JdsEntity) = try {
+        val updateFieldId = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEntityBindings())
+        parentEntity.objectProperties.forEach { fieldEntity, v ->
+            updateFieldId.setString(1, parentEntity.overview.uuid)
+            updateFieldId.setString(2, parentEntity.overview.uuidLocation)
+            updateFieldId.setInt(3, parentEntity.overview.uuidLocationVersion)
+            updateFieldId.setString(4, v.value.overview.uuid)
+            updateFieldId.setString(5, v.value.overview.uuidLocation)
+            updateFieldId.setInt(6, v.value.overview.uuidLocationVersion)
+            updateFieldId.setLong(7, fieldEntity.fieldEntity.id)
             updateFieldId.addBatch()
         }
     } catch (ex: Exception) {

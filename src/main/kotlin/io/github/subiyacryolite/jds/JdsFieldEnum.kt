@@ -61,15 +61,6 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     /**
-     * @param enumText
-     * @return
-     *
-     */
-    fun indexOf(enumText: Enum<*>): Int {
-        return values.indices.firstOrNull { values[it] === enumText } ?: -1
-    }
-
-    /**
      * @param index
      * @return
      */

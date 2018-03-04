@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 
 import java.sql.Connection
+import java.util.*
 
 /**
  * The TSQL implementation of [JdsDataBase][JdsDb]
@@ -118,38 +119,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         return toReturn
     }
 
-    override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_boolean.sql")
-    }
-
-    override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_text.sql")
-    }
-
-    override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_date_time.sql")
-    }
-
-    override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_zoned_date_time.sql")
-    }
-
-    override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_integer.sql")
-    }
-
-    override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_float.sql")
-    }
-
-    override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_double.sql")
-    }
-
-    override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_long.sql")
-    }
-
     override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/tsql/jds_ref_entity.sql")
     }
@@ -178,16 +147,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         executeSqlFromFile(connection, "sql/tsql/jds_entity_overview.sql")
     }
 
-    override fun createRefEntityOverviewLight(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_entity_overview_light.sql")
-    }
-
-    override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_time.sql")
-    }
-
-    override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/tsql/jds_store_blob.sql")
+    override fun createBindEntityBinding(connection: Connection) {
+        executeSqlFromFile(connection, "sql/tsql/jds_entity_binding.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
@@ -205,7 +166,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
@@ -216,75 +178,137 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.PROC_ENTITY_OVERVIEW -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_entity_overview.sql")
-            JdsComponent.PROC_REF_FIELD -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_field.sql")
-            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_boolean.sql")
-            JdsComponent.PROC_STORE_BLOB -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_blob.sql")
-            JdsComponent.PROC_STORE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_time.sql")
-            JdsComponent.PROC_STORE_TEXT -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_text.sql")
-            JdsComponent.PROC_STORE_LONG -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_long.sql")
-            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_integer.sql")
-            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_float.sql")
-            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_double.sql")
-            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_date_time.sql")
-            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_store_zoned_date_time.sql")
-            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity_field.sql")
-            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity_enum.sql")
-            JdsComponent.PROC_REF_ENTITY -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity.sql")
-            JdsComponent.PROC_REF_ENUM -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_enum.sql")
-            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromFile(connection, "sql/tsql/procedures/proc_ref_entity_inheritance.sql")
+            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
+            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
+            JdsComponent.PROC_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
+            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
+            JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
+            JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
+            JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
+            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
+            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
+            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
+            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
+            JdsComponent.PROC_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
+            JdsComponent.PROC_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
+            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
+            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
+            JdsComponent.PROC_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
+            JdsComponent.PROC_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
+            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
             else -> {
             }
         }
     }
 
-    override fun getDbFloatDataType(): String {
+    override fun getNativeDataTypeFloat(): String {
         return "REAL"
     }
 
-    override fun getDbDoubleDataType(): String {
+    override fun getNativeDataTypeDouble(): String {
         return "FLOAT"
     }
 
-    override fun getDbZonedDateTimeDataType(): String {
+    override fun getNativeDataTypeZonedDateTime(): String {
         return "DATETIMEOFFSET(7)"
     }
 
-    override fun getDbTimeDataType(): String {
+    override fun getNativeDataTypeTime(): String {
         return "TIME(7)"
     }
 
-    override fun getDbBlobDataType(max: Int): String {
+    override fun getNativeDataTypeBlob(max: Int): String {
         return return if (max == 0)
             "VARBINARY(MAX)"
         else
             "VARBINARY($max)"
     }
 
-    override fun getDbIntegerDataType(): String {
+    override fun getNativeDataTypeInteger(): String {
         return "INTEGER"
     }
 
-    override fun getDbDateTimeDataType(): String {
+    override fun getNativeDataTypeDateTime(): String {
         return "DATETIME"
     }
 
-    override fun getDbLongDataType(): String {
+    override fun getNativeDataTypeLong(): String {
         return "BIGINT"
     }
 
-    override fun getDbStringDataType(max: Int): String {
+    override fun getNativeDataTypeString(max: Int): String {
         return if (max == 0)
             "NVARCHAR(MAX)"
         else
             "NVARCHAR($max)"
     }
 
-    override fun getDbBooleanDataType(): String {
+    override fun getNativeDataTypeBoolean(): String {
         return "BIT"
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
+
+    override fun createOrAlterProc(procedureName: String,
+                                   tableName: String,
+                                   columns: Map<String, String>,
+                                   uniqueColumns: Collection<String>,
+                                   doNothingOnConflict: Boolean): String {
+        val sqlBuilder = StringBuilder()
+
+        sqlBuilder.append("CREATE OR ALTER PROCEDURE $procedureName(")
+        val inputParameters = StringJoiner(",")
+        columns.forEach { column, type -> inputParameters.add("@p_$column $type") }
+        sqlBuilder.append(inputParameters)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\t AS\n")
+        sqlBuilder.append("\t\tBEGIN\n")
+        sqlBuilder.append("\t\t\tMERGE  $tableName AS dest\n")
+
+        sqlBuilder.append("\t\t\tUSING (VALUES(")
+        val parameterColumns = StringJoiner(", ")
+        columns.forEach { column, _ -> parameterColumns.add("@p_$column") }
+        sqlBuilder.append(parameterColumns)
+        sqlBuilder.append("))")
+
+        sqlBuilder.append("AS src(")
+        val targetColumns = StringJoiner(", ")
+        columns.forEach { column, _ -> targetColumns.add(column) }
+        sqlBuilder.append(targetColumns)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\t\t\tON (")
+        val comparisonColumns = StringJoiner(" AND ")
+        uniqueColumns.forEach { column -> comparisonColumns.add("src.$column = dest.$column") }
+        sqlBuilder.append(comparisonColumns)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\t\t\tWHEN NOT MATCHED THEN INSERT (")
+        val notMatchedColumns = StringJoiner(", ")
+        columns.forEach { column, _ -> notMatchedColumns.add(column) }
+        sqlBuilder.append(notMatchedColumns)
+        sqlBuilder.append(")")
+
+        sqlBuilder.append(" VALUES(")
+        val notMatchedColumnsSrc = StringJoiner(", ")
+        columns.forEach { column, _ -> notMatchedColumnsSrc.add("src.$column") }
+        sqlBuilder.append(notMatchedColumnsSrc)
+        sqlBuilder.append(")\n")
+
+        if (!doNothingOnConflict) {
+            sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
+            val comparisonColumns = StringJoiner(", ")
+            columns.forEach { column, _ ->
+                if (!uniqueColumns.contains(column)) //dont update unique columns
+                    comparisonColumns.add("dest.$column = src.$column")
+            }
+            sqlBuilder.append(comparisonColumns)
+        }
+        sqlBuilder.append("\t\t\t;\n")
+        sqlBuilder.append("\t\tEND")
+        return sqlBuilder.toString()
     }
 }

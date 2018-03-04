@@ -38,12 +38,11 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
         get() {
             return when (filterBy) {
                 JdsFilterBy.UUID -> "uuid"
-                JdsFilterBy.COMPOSITE_KEY -> "composite_key"
-                JdsFilterBy.PARENT_UUID -> "parent_uuid"
+                JdsFilterBy.UUID_LOCATION -> "uuid_location"
             }
         }
 
-    constructor(jdsDb: JdsDb, referenceType: Class<T>) : this(jdsDb, referenceType, JdsFilterBy.COMPOSITE_KEY)
+    constructor(jdsDb: JdsDb, referenceType: Class<T>) : this(jdsDb, referenceType, JdsFilterBy.UUID)
 
     init {
         val classHasAnnotation = referenceType.isAnnotationPresent(JdsEntityAnnotation::class.java)
@@ -55,7 +54,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
             }
             entityId = je.id
         } else
-            throw IllegalArgumentException("You must annotate the class [" + referenceType.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+            throw IllegalArgumentException("You must annotate the class [" + referenceType.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         //==================================
         blockStrings.add(currentStrings)
         blockParameters.add(currentValues)

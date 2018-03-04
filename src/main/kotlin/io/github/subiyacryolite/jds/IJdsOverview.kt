@@ -35,21 +35,6 @@ interface IJdsOverview {
     var uuidLocationVersion: Int
 
     /**
-     * A composite key for this unique record at different locations and for each version
-     */
-    val compositeKey: String
-
-    /**
-     * A value that indicates the parent of this JdsEntity. Its value is determined on Save and at Load.
-     */
-    var parentUuid: String
-
-    /**
-     * A value that indicates the parent of this JdsEntity. Its value is populated on Save and at Load.
-     */
-    var parentCompositeKey: String
-
-    /**
      * A flag indicating if this record is live or deprecated
      */
     var live: Boolean

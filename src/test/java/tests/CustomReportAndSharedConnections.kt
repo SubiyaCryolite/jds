@@ -14,22 +14,21 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
     @Throws(Exception::class)
     private fun test() {
         val customTable = JdsTable()
-        customTable.uniqueEntries = true
         customTable.name = "CrtAddressSpecific"
         customTable.registerEntity(Address::class.java)
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)
         customTable.uniqueBy = JdsFilterBy.UUID
 
-        val crtAddress = JdsTable(Address::class.java, true)
+        val crtAddress = JdsTable(Address::class.java)
         crtAddress.uniqueBy = JdsFilterBy.UUID
 
-        val crtAddressBook = JdsTable(AddressBook::class.java, true)
-        val crtLogin = JdsTable(Login::class.java, true)
-        val crtA = JdsTable(EntityA::class.java, true)
-        val crtB = JdsTable(EntityB::class.java, true)
-        val crtC = JdsTable(EntityC::class.java, true)
-        val exampleType = JdsTable(Example::class.java, true)
+        val crtAddressBook = JdsTable(AddressBook::class.java)
+        val crtLogin = JdsTable(Login::class.java)
+        val crtA = JdsTable(EntityA::class.java)
+        val crtB = JdsTable(EntityB::class.java)
+        val crtC = JdsTable(EntityC::class.java)
+        val exampleType = JdsTable(Example::class.java)
 
         jdsDb.mapTable(customTable, crtAddress, crtAddressBook, crtLogin, crtA, crtB, crtC, exampleType)
         jdsDb.prepareTables()
@@ -44,18 +43,17 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
         login2.rights.add(Rights.CAN_LOGIN)
         login2.rights.add(Rights.CAN_DELETE_RECORD)
 
+        val saveCollection = JdsSave(jdsDb, collection)
+        saveCollection.call()
 
-            val saveCollection = JdsSave(jdsDb, collection)
-            saveCollection.call()
+        val saveLogins = JdsSave(jdsDb, listOf(login1, login2))
+        saveLogins.call()
 
-            val saveLogins = JdsSave(jdsDb, listOf(login1, login2))
-            saveLogins.call()
+        val saveAddressBook = JdsSave(jdsDb, listOf(addressBook))
+        saveAddressBook.call()
 
-            val saveAddressBook = JdsSave(jdsDb, listOf(addressBook))
-            saveAddressBook.call()
-
-            val saveInheritedObjects = JdsSave(jdsDb, inheritanceCollection)
-            saveInheritedObjects.call()
+        val saveInheritedObjects = JdsSave(jdsDb, inheritanceCollection)
+        saveInheritedObjects.call()
     }
 
     @Test

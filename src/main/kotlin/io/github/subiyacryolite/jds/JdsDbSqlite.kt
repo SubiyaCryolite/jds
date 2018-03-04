@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds
 import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
+import java.util.LinkedHashMap
 
 /**
  * The SQLite implementation of [JdsDataBase][JdsDb]
@@ -58,38 +59,6 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         }
     }
 
-    override fun createStoreBoolean(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_boolean.sql")
-    }
-
-    override fun createStoreText(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_text.sql")
-    }
-
-    override fun createStoreDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_date_time.sql")
-    }
-
-    override fun createStoreZonedDateTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_zoned_date_time.sql")
-    }
-
-    override fun createStoreInteger(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_integer.sql")
-    }
-
-    override fun createStoreFloat(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_float.sql")
-    }
-
-    override fun createStoreDouble(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_double.sql")
-    }
-
-    override fun createStoreLong(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_long.sql")
-    }
-
     override fun createStoreEntities(connection: Connection) {
         executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity.sql")
     }
@@ -118,16 +87,8 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview.sql")
     }
 
-    override fun createRefEntityOverviewLight(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview_light.sql")
-    }
-
-    override fun createStoreTime(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_time.sql")
-    }
-
-    override fun createStoreBlob(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_store_blob.sql")
+    override fun createBindEntityBinding(connection: Connection) {
+        executeSqlFromFile(connection, "sql/sqlite/jds_entity_binding.sql")
     }
 
     override fun createRefInheritance(connection: Connection) {
@@ -167,7 +128,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     }
 
     override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO jds_store_blob(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
+        return "INSERT OR REPLACE INTO jds_store_blob(uuid, uuid_location, uuid_version, field_id, value) VALUES(:uuid, :fieldId, , :value)"
     }
 
     override fun saveZonedDateTime(): String {
@@ -176,7 +137,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveOverview(): String {
         ////:compositeKey, :uuid, :uuidLocation, :uuidLocationVersion, :parentUuid, :parentCompositeKey, :entityId, :live, :entityVersion, :lastEdit
-        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_location_version, parent_uuid, parent_composite_key, entity_id, live, entity_version, last_edit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_version, parent_uuid, parent_composite_key, entity_id, live, entity_version, last_edit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     override fun populateRefEntityField(): String {
@@ -203,47 +164,63 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         return "INSERT OR REPLACE INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?,?)"
     }
 
-    override fun getDbFloatDataType(): String {
+    override fun getNativeDataTypeFloat(): String {
         return "REAL"
     }
 
-    override fun getDbDoubleDataType(): String {
+    override fun getNativeDataTypeDouble(): String {
         return "DOUBLE"
     }
 
-    override fun getDbZonedDateTimeDataType(): String {
+    override fun getNativeDataTypeZonedDateTime(): String {
         return "BIGINT"
     }
 
-    override fun getDbTimeDataType(): String {
+    override fun getNativeDataTypeTime(): String {
         return "INTEGER"
     }
 
-    override fun getDbBlobDataType(max: Int): String {
+    override fun getNativeDataTypeBlob(max: Int): String {
         return "BLOB"
     }
 
-    override fun getDbIntegerDataType(): String {
+    override fun getNativeDataTypeInteger(): String {
         return "INTEGER"
     }
 
-    override fun getDbDateTimeDataType(): String {
+    override fun getNativeDataTypeDateTime(): String {
         return "TIMESTAMP"
     }
 
-    override fun getDbLongDataType(): String {
+    override fun getNativeDataTypeLong(): String {
         return "BIGINT"
     }
 
-    override fun getDbStringDataType(max: Int): String {
+    override fun getNativeDataTypeString(max: Int): String {
         return "TEXT"
     }
 
-    override fun getDbBooleanDataType(): String {
+    override fun getNativeDataTypeBoolean(): String {
         return "BOOLEAN"
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
+    }
+
+    override fun createOrAlterProc(procedureName: String,
+                                   tableName: String,
+                                   columns: Map<String, String>,
+                                   uniqueColumns: Collection<String>,
+                                   doNothingOnConflict:Boolean): String {
+        return ""
+    }
+
+    override fun createTable(tableName: String,
+                             columns: LinkedHashMap<String, String>,
+                             uniqueColumns: LinkedHashMap<String, String>,
+                             primaryKeys: LinkedHashMap<String, String>,
+                             foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>): String {
+        return ""
     }
 }

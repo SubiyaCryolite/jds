@@ -69,16 +69,14 @@ data class JdsLocalDateTimeValues(var k: Long = 0, var v: Timestamp? = null)
  * @param live live
  * @param version version
  */
-data class JdsEntityOverview(var compositeKey: String = "",
-                             var uuid: String = "",
+data class JdsEntityOverview(var uuid: String = "",
                              var uuidLocation: String = "",
                              var uuidLocationVersion: Int = 0,
                              var entityId: Long = 0,
                              var fieldId: Long? = null,
                              var live: Boolean = false,
                              var version: Long = 0,
-                             var lastEdit: LocalDateTime = LocalDateTime.now(),
-                             var parentUuid: String = "")
+                             var lastEdit: LocalDateTime = LocalDateTime.now())
 
 /**
  * @param entities a collection of [JdsEntity] objects to store in a portable manner
@@ -95,13 +93,15 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
 
     init {
         entities.forEach {
-            if (it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
+            val classHasAnnotation = it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+            val superclassHasAnnotation = it.javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+            if (classHasAnnotation || superclassHasAnnotation) {
                 val eb = JdsEmbeddedObject()
                 eb.fieldId = null
                 eb.init(it)
                 e.add(eb)
             } else {
-                throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] with [" + JdsEntityAnnotation::class.java + "]")
+                throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
             }
         }
     }
