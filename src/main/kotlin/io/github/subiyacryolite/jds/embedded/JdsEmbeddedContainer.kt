@@ -16,7 +16,6 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import java.sql.Timestamp
-import java.time.LocalDateTime
 
 /**
  * Class used to store blob values in a portable manner
@@ -63,20 +62,17 @@ data class JdsLocalDateTimeValues(var k: Long = 0, var v: Timestamp? = null)
  * @param compositeKey composite key
  * @param uuid uuid
  * @param uuidLocation uuid location
- * @param uuidLocationVersion uuid location version
+ * @param editVersion uuid location version
  * @param entityId entity id
  * @param fieldId field id
  * @param live live
  * @param version version
  */
 data class JdsEntityOverview(var uuid: String = "",
-                             var uuidLocation: String = "",
-                             var uuidLocationVersion: Int = 0,
+                             var editVersion: Int = 0,
                              var entityId: Long = 0,
                              var fieldId: Long? = null,
-                             var live: Boolean = false,
-                             var version: Long = 0,
-                             var lastEdit: LocalDateTime = LocalDateTime.now())
+                             var version: Long = 0)
 
 /**
  * @param entities a collection of [JdsEntity] objects to store in a portable manner

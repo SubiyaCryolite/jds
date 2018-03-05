@@ -125,16 +125,14 @@ open class JdsTable() : Serializable {
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            if (jdsDb.options.isUpdatingCustomReportTablesPerSave) {
+            if (jdsDb.options.isUpdatingCustomReportTablesPerSave)
                 deleteExistingRecords(entity, deleteColumns)
-            }
 
             //prepare insert placeholder
             if (!jdsDb.supportsStatements) {
-                val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(uuid, uuid_location, uuid_version) VALUES(?, ?, ?)")
+                val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(uuid,  edit_version) VALUES(?,  ?)")
                 stmt.setString(1, entity.overview.uuid)
-                stmt.setString(2, entity.overview.uuidLocation)
-                stmt.setInt(3, entity.overview.uuidLocationVersion)
+                stmt.setInt(2, entity.overview.editVersion)
                 stmt.addBatch()
             }
 
@@ -159,7 +157,6 @@ open class JdsTable() : Serializable {
             if (jdsDb.supportsStatements) {
                 joiner.add("?")//last parameter for composite keys
                 joiner.add("?")//last parameter for composite keys
-                joiner.add("?")//last parameter for composite keys
             }
 
             val statementQuery = when (jdsDb.supportsStatements) {
@@ -171,7 +168,7 @@ open class JdsTable() : Serializable {
                     stringBuilder.append(" SET ")
                     stringBuilder.append(joiner)
                     stringBuilder.append(" WHERE ")
-                    stringBuilder.append("uuid = ? AND uuid_location = ? AND uuid_version = ?")//last parameter for composite key
+                    stringBuilder.append("uuid = ? AND edit_version = ?")//last parameter for composite key
                     stringBuilder.toString()
                 }
             }
@@ -195,16 +192,15 @@ open class JdsTable() : Serializable {
                 }
             }
             insertStatement.setString(columnNames.size + 1, entity.overview.uuid)
-            insertStatement.setString(columnNames.size + 2, entity.overview.uuidLocation)
-            insertStatement.setInt(columnNames.size + 3, entity.overview.uuidLocationVersion)
+            insertStatement.setInt(columnNames.size + 2, entity.overview.editVersion)
             insertStatement.addBatch()
         }
     }
 
     fun deleteExistingRecords(entity: JdsEntity, deleteColumns: HashMap<String, MutableCollection<Any>>) {
         when (uniqueBy) {
-            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion))
-            JdsFilterBy.UUID_LOCATION -> deleteColumns.getOrPut(deleteByParentUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.uuidLocation, entity.overview.uuidLocationVersion))
+            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
+            JdsFilterBy.UUID_LOCATION -> deleteColumns.getOrPut(deleteByParentUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
         }
     }
 
@@ -320,10 +316,9 @@ open class JdsTable() : Serializable {
                 connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
 
                 val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
-                tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 64)
-                tableColumns["uuid_location"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 45)
-                tableColumns["uuid_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
-                val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "uuid_location", "uuid_version"), tableColumns.isEmpty())
+                tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
+                tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
+                val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "edit_version"), tableColumns.isEmpty())
                 connection.prepareStatement(createOrAlteredProcedureSQL).use { it.executeUpdate() }
             } else {
                 //sqlite must alter columns once per entry
@@ -367,12 +362,6 @@ open class JdsTable() : Serializable {
      * @param entity a [JdsEntity][JdsEntity] that may have [JdsField's][JdsField] written to this table
      */
     private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
-
-        if (onlyLiveRecords && !entity.overview.live)
-            return false
-
-        if (onlyDeprecatedRecords && entity.overview.live)
-            return false
 
         if (entity is IJdsTableFilter)
             if (!entity.satisfiesCondition(this))

@@ -2,7 +2,7 @@ CREATE TABLE jds_entity_overview (
   composite_key         NVARCHAR2(128),
   uuid                  NVARCHAR2(64),
   uuid_location         NVARCHAR2(45),
-  uuid_version NUMBER(10),
+  edit_version NUMBER(10),
   parent_uuid           NVARCHAR2(64),
   parent_composite_key  NVARCHAR2(128),
   entity_id             NUMBER(19),

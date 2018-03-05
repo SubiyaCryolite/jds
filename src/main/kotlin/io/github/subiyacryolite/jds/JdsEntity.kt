@@ -162,31 +162,31 @@ abstract class JdsEntity : IJdsEntity {
                 if (field.type != JdsFieldType.DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
+                localDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
             }
             is ZonedDateTime -> {
                 if (field.type != JdsFieldType.ZONED_DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                zonedDateTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
+                zonedDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
             }
             is LocalDate -> {
                 if (field.type != JdsFieldType.DATE)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localDateProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
+                localDateProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
             }
             is LocalTime -> {
                 if (field.type != JdsFieldType.TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localTimeProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
+                localTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
             }
             is YearMonth -> {
                 if (field.type != JdsFieldType.YEAR_MONTH)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                yearMonthProperties.put(field.id, temporalProperty as ObjectProperty<Temporal>)
+                yearMonthProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
 
             }
         }
@@ -364,12 +364,9 @@ abstract class JdsEntity : IJdsEntity {
     </T> */
     private fun <T : IJdsEntity> copyOverviewValues(source: T) {
         overview.uuid = source.overview.uuid
-        overview.uuidLocation = source.overview.uuidLocation
-        overview.uuidLocationVersion = source.overview.uuidLocationVersion
-        overview.live = source.overview.live
+        overview.editVersion = source.overview.editVersion
         overview.entityVersion = source.overview.entityVersion
         overview.entityId = source.overview.entityId
-        overview.lastEdit = source.overview.lastEdit
     }
 
     /**
@@ -1126,8 +1123,7 @@ abstract class JdsEntity : IJdsEntity {
                                  fieldId: Long?,
                                  entityId: Long,
                                  uuid: String,
-                                 uuidLocation: String,
-                                 uuidLocationVersion: Int,
+                                 editVersion: Int,
                                  innerObjects: ConcurrentLinkedQueue<JdsEntity>,
                                  uuids: MutableCollection<JdsEntityComposite>) {
         try {
@@ -1135,9 +1131,8 @@ abstract class JdsEntity : IJdsEntity {
             objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 val entity = jdsDb.classes[entityId]!!.newInstance()
                 entity.overview.uuid = uuid
-                entity.overview.uuidLocation = uuidLocation
-                entity.overview.uuidLocationVersion = uuidLocationVersion
-                uuids.add(JdsEntityComposite(uuid, uuidLocation, uuidLocationVersion))
+                entity.overview.editVersion = editVersion
+                uuids.add(JdsEntityComposite(uuid, editVersion))
                 it.value.add(entity)
                 innerObjects.add(entity)
             }
@@ -1145,9 +1140,8 @@ abstract class JdsEntity : IJdsEntity {
                 if (it.value.value == null)
                     it.value.value = jdsDb.classes[entityId]!!.newInstance()
                 it.value.value.overview.uuid = uuid
-                it.value.value.overview.uuidLocation = uuidLocation
-                it.value.value.overview.uuidLocationVersion = uuidLocationVersion
-                uuids.add(JdsEntityComposite(uuid, uuidLocation, uuidLocationVersion))
+                it.value.value.overview.editVersion = editVersion
+                uuids.add(JdsEntityComposite(uuid, editVersion))
                 innerObjects.add(it.value.value)
             }
         } catch (ex: Exception) {
@@ -1320,11 +1314,9 @@ abstract class JdsEntity : IJdsEntity {
             //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
             it.value.forEachIndexed { sequence, entry ->
                 val entityId = entry.overview.entityId
-                val newUUID = "$uuid.$entityId.$sequence"
-                entry.overview.uuid = newUUID
-                //process children
-                standardizeObjectUUIDs(newUUID, entry.objectProperties)
-                standardizeObjectCollectionUUIDs(newUUID, entry.objectArrayProperties)
+                entry.overview.uuid = "$uuid.$entityId.$sequence"
+                standardizeObjectUUIDs(entry.overview.uuid, entry.objectProperties)
+                standardizeObjectCollectionUUIDs(entry.overview.uuid, entry.objectArrayProperties)
             }
         }
     }
@@ -1338,11 +1330,9 @@ abstract class JdsEntity : IJdsEntity {
         //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
         objectProperties.entries.forEach { entry ->
             val entityId = entry.value.value.overview.entityId
-            val newUUID = "$uuid.$entityId"
-            entry.value.value.overview.uuid = newUUID
-            //process children
-            standardizeObjectUUIDs(newUUID, entry.value.value.objectProperties)
-            standardizeObjectCollectionUUIDs(newUUID, entry.value.value.objectArrayProperties)
+            entry.value.value.overview.uuid = "$uuid.$entityId"
+            standardizeObjectUUIDs(entry.value.value.overview.uuid, entry.value.value.objectProperties)
+            standardizeObjectCollectionUUIDs(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
         }
     }
 
@@ -1364,13 +1354,6 @@ abstract class JdsEntity : IJdsEntity {
             collection.add(this@JdsEntity)
         objectProperties.values.forEach { it.value.getNestedEntities(collection) }
         objectArrayProperties.values.forEach { it.forEach { it.getNestedEntities(collection) } }
-    }
-
-    /**
-     * Set this jds entity and all of its children as live?
-     */
-    fun setAllLive(live: Boolean) {
-        getNestedEntities().forEach { it.overview.live = live }
     }
 
     companion object : Externalizable {

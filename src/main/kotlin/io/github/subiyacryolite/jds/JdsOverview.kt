@@ -17,7 +17,6 @@ import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -28,37 +27,28 @@ class JdsOverview : IJdsOverview, Externalizable {
 
     override var entityId: Long = 0
     override var uuid: String = UUID.randomUUID().toString()
-    override var uuidLocation: String = ""
-    override var uuidLocationVersion: Int = 0
+    override var editVersion: Int = 0
     override var entityVersion: Long = 1L
-    override var live: Boolean = false
-    override var lastEdit: LocalDateTime = LocalDateTime.now()
-
+    override var parent: JdsEntity? = null
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {
         objectOutputStream.writeUTF(uuid)
-        objectOutputStream.writeUTF(uuidLocation)
-        objectOutputStream.writeInt(uuidLocationVersion)
+        objectOutputStream.writeInt(editVersion)
         objectOutputStream.writeLong(entityId)
-        objectOutputStream.writeBoolean(live)
         objectOutputStream.writeLong(entityVersion)
-        objectOutputStream.writeObject(lastEdit)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(objectInputStream: ObjectInput) {
         uuid = objectInputStream.readUTF()
-        uuidLocation = objectInputStream.readUTF()
-        uuidLocationVersion = objectInputStream.readInt()
+        editVersion = objectInputStream.readInt()
         entityId = objectInputStream.readLong()
-        live = objectInputStream.readBoolean()
         entityVersion = objectInputStream.readLong()
-        lastEdit = objectInputStream.readObject() as LocalDateTime
     }
 
     override fun toString(): String {
-        return "{ uuid = $uuid, uuidLocation = $uuidLocation, uuidLocationVersion = $uuidLocationVersion, entityId = $entityId, version = $entityVersion, live = $live, lastEdit = $lastEdit }"
+        return "{ uuid = $uuid, editVersion = $editVersion, entityId = $entityId, version = $entityVersion }"
     }
 
     companion object {

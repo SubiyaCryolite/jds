@@ -84,6 +84,7 @@ enum class JdsComponent(val component: String, val alias: String) {
     PROC_STORE_DURATION("proc_store_duration", ""),
     PROC_STORE_PERIOD("proc_store_period", ""),
     PROC_STORE_MONTH_YEAR("proc_store_month_year", ""),
+    PROC_STORE_MONTH_DAY("proc_store_month_day", ""),
     PROC_STORE_YEAR_MONTH("proc_store_year_month", ""),
 
     ;

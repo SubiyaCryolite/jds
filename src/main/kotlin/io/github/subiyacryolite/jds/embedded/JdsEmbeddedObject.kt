@@ -77,13 +77,10 @@ class JdsEmbeddedObject {
         entity.assign(this)
         o = JdsEntityOverview(
                 entity.overview.uuid,
-                entity.overview.uuidLocation,
-                entity.overview.uuidLocationVersion,
+                entity.overview.editVersion,
                 entity.overview.entityId,
                 fieldId,
-                entity.overview.live,
-                entity.overview.entityVersion,
-                entity.overview.lastEdit)
+                entity.overview.entityVersion)
     }
 
     //TODO add binding constructs for children

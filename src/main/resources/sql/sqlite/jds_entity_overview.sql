@@ -3,7 +3,7 @@ CREATE TABLE jds_entity_overview
   composite_key         TEXT,
   uuid                  TEXT,
   uuid_location         TEXT,
-  uuid_version INTEGER,
+  edit_version INTEGER,
   parent_uuid           TEXT,
   parent_composite_key  TEXT,
   entity_id             BIGINT,

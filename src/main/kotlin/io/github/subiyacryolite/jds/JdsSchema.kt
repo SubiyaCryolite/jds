@@ -11,15 +11,14 @@ object JdsSchema {
      * @return
      */
     fun generateTable(jdsDb: JdsDb, tableName: String): String {
-        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 64)
-        val uuidLocationDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 45)
+        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 128)
         val uuidLocationVersionDataType = getDbDataType(jdsDb, JdsFieldType.INT)
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(tableName)
-        stringBuilder.append("(uuid $uuidDataType, uuid_location $uuidLocationDataType, uuid_version $uuidLocationVersionDataType,\n")
-        stringBuilder.append("CONSTRAINT ${tableName}_uc_composite UNIQUE (uuid, uuid_location, uuid_version),\n")
-        stringBuilder.append("FOREIGN KEY (uuid, uuid_location, uuid_version) REFERENCES jds_entity_overview(uuid, uuid_location, uuid_version) ON DELETE CASCADE)")
+        stringBuilder.append("(uuid $uuidDataType, edit_version $uuidLocationVersionDataType,\n")
+        stringBuilder.append("CONSTRAINT ${tableName}_uc_composite UNIQUE (uuid, edit_version),\n")
+        stringBuilder.append("FOREIGN KEY (uuid, edit_version) REFERENCES jds_entity_overview(uuid, edit_version) ON DELETE CASCADE)")
         return stringBuilder.toString()
     }
 

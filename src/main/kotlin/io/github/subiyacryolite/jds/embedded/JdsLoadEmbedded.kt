@@ -16,7 +16,6 @@ package io.github.subiyacryolite.jds.embedded
 import io.github.subiyacryolite.jds.JdsDb
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import javafx.beans.property.ObjectProperty
 import java.util.HashSet
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -51,11 +50,8 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         //==============================================
         entity.overview.entityId = embeddedObject.o.entityId
         entity.overview.uuid = embeddedObject.o.uuid
-        entity.overview.live = embeddedObject.o.live
         entity.overview.entityVersion = embeddedObject.o.version
-        entity.overview.uuidLocation = embeddedObject.o.uuidLocation
-        entity.overview.uuidLocationVersion = embeddedObject.o.uuidLocationVersion
-        entity.overview.lastEdit = embeddedObject.o.lastEdit
+        entity.overview.editVersion = embeddedObject.o.editVersion
         //==============================================
         //PRIMITIVES :: Key-Value
         //==============================================
@@ -119,17 +115,16 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         val innerObjects = ConcurrentLinkedQueue<JdsEntity>()//can be multiple copies of the same object however
 
         embeddedObject.eo.forEach {
-            populateObjects(entity, jdsDb, it.o.fieldId, it.o.entityId, it.o.uuid, it.o.uuidLocation, it.o.uuidLocationVersion, it)
+            populateObjects(entity, jdsDb, it.o.fieldId, it.o.entityId, it.o.uuid, it.o.editVersion, it)
         }
     }
 
-    private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, uuidLocation: String, uuidLocationVersion: Int, eo: JdsEmbeddedObject) {
+    private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, editVersion: Int, eo: JdsEmbeddedObject) {
         if (fieldId == null) return
         entity.objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
             val entity = jdsDb.classes[entityId]!!.newInstance()//create array element
             entity.overview.uuid = uuid
-            entity.overview.uuidLocation = uuidLocation
-            entity.overview.uuidLocationVersion = uuidLocationVersion
+            entity.overview.editVersion = editVersion
             populate(entity, eo)
             it.value.add(entity)
         }
@@ -138,13 +133,12 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             if (it.value.value == null)
                 it.value.value = jdsDb.classes[entityId]!!.newInstance()//create array element
             it.value.value.overview.uuid = uuid
-            it.value.value.overview.uuidLocation = uuidLocation
-            it.value.value.overview.uuidLocationVersion = uuidLocationVersion
+            it.value.value.overview.editVersion = editVersion
             populate(it.value.value, eo)
         }
     }
 
     fun filterFunction(entity: JdsEntity, eo: JdsEmbeddedObject): Boolean {
-        return entity.overview.uuid == eo.o.uuid && entity.overview.uuidLocation == eo.o.uuidLocation && entity.overview.uuidLocationVersion == eo.o.uuidLocationVersion
+        return entity.overview.uuid == eo.o.uuid &&  entity.overview.editVersion == eo.o.editVersion
     }
 }
