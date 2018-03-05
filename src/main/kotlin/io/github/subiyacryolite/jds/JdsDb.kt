@@ -72,14 +72,27 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BLOB)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER_COLLECTION)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_LONG)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_LONG_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DOUBLE_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DATE_TIME_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TIME)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_PERIOD)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_DURATION)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_YEAR_MONTH)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_MONTH_DAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
     }
 
@@ -132,47 +145,43 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         when (jdsComponent) {
             JdsComponent.STORE_BOOLEAN -> executeSqlFromString(connection, createStoreBoolean())
             JdsComponent.STORE_BLOB -> executeSqlFromString(connection, createStoreBlob())
-            JdsComponent.STORE_TEXT -> {
-                executeSqlFromString(connection, createStoreText())
-                executeSqlFromString(connection, createStoreTextCollection())
-            }
-            JdsComponent.STORE_FLOAT -> {
-                executeSqlFromString(connection, createStoreFloat())
-                executeSqlFromString(connection, createStoreFloatCollection())
-            }
-            JdsComponent.STORE_INTEGER -> {
-                executeSqlFromString(connection, createStoreInteger())
-                executeSqlFromString(connection, createStoreIntegerCollection())
-            }
-            JdsComponent.STORE_LONG -> {
-                executeSqlFromString(connection, createStoreLong())
-                executeSqlFromString(connection, createStoreLongCollection())
-            }
-            JdsComponent.STORE_DOUBLE -> {
-                executeSqlFromString(connection, createStoreDouble())
-                executeSqlFromString(connection, createStoreDoubleCollection())
-            }
-            JdsComponent.STORE_DATE_TIME -> {
-                executeSqlFromString(connection, createStoreDateTime())
-                executeSqlFromString(connection, createStoreDateTimeCollection())
-            }
+            JdsComponent.STORE_TEXT -> executeSqlFromString(connection, createStoreText())
+            JdsComponent.STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createStoreTextCollection())
+            JdsComponent.STORE_PERIOD -> executeSqlFromString(connection, createStorePeriod())
+            JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
+            JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
+            JdsComponent.STORE_MONTH_DAY -> executeSqlFromString(connection, createStoreMonthDay())
+            JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
+            JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
+            JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
+            JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloatCollection())
+            JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
+            JdsComponent.STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createStoreIntegerCollection())
+            JdsComponent.STORE_LONG -> executeSqlFromString(connection, createStoreLong())
+            JdsComponent.STORE_LONG_COLLECTION -> executeSqlFromString(connection, createStoreLongCollection())
+            JdsComponent.STORE_DOUBLE -> executeSqlFromString(connection, createStoreDouble())
+            JdsComponent.STORE_DOUBLE -> executeSqlFromString(connection, createStoreDoubleCollection())
+            JdsComponent.STORE_DATE -> executeSqlFromString(connection, createStoreDate())
+            JdsComponent.STORE_DATE_TIME -> executeSqlFromString(connection, createStoreDateTime())
+            JdsComponent.STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createStoreDateTimeCollection())
             JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
             JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
-            JdsComponent.REF_FIELD_TYPES -> {
-                createRefFieldTypes(connection)
-                populateFieldTypes(connection)
-            }
             JdsComponent.REF_FIELDS -> createRefFields(connection)
             JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
             JdsComponent.REF_ENUM_VALUES -> createRefEnumValues(connection)
             JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
             JdsComponent.BIND_ENTITY_FIELDS -> createBindEntityFields(connection)
             JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
+            JdsComponent.STORE_ENTITY_BINDING -> createBindEntityBinding(connection)
+        //====================================================================================
             JdsComponent.STORE_ENTITY_OVERVIEW -> {
                 createRefEntityOverview(connection)
                 createIndexes(connection)
             }
-            JdsComponent.STORE_ENTITY_BINDING -> createBindEntityBinding(connection)
+            JdsComponent.REF_FIELD_TYPES -> {
+                createRefFieldTypes(connection)
+                populateFieldTypes(connection)
+            }
             else -> {
             }
         }
@@ -711,7 +720,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumCollection() = "{call jds_pop_store_enum(?, ?, ?, ?, ?, ?)}"
+    internal open fun saveEnumCollection() = "{call jds_pop_store_enum_collection(?, ?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save date values
@@ -986,14 +995,56 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_store_text_collection", "jds_store_text_collection", columns, storeUniqueColumnsInclSequence, false)
     }
 
-    protected fun createPopJdsStoreTime(): String {
+    protected fun createPopJdsStoreEnum(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
+        return createOrAlterProc("jds_pop_store_enum", "jds_store_enum", columns, storeUniqueColumns, false)
+    }
+
+    protected fun createPopJdsStoreEnumCollection(): String {
         val columns = storeCommonColumnsInclSequence
+        columns["value"] = getNativeDataTypeString(0)
+        return createOrAlterProc("jds_pop_store_enum_collection", "jds_store_enum_collection", columns, storeUniqueColumnsInclSequence, false)
+    }
+
+    protected fun createPopJdsStoreTime(): String {
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeTime()
         return createOrAlterProc("jds_pop_store_time", "jds_store_time", columns, storeUniqueColumns, false)
     }
 
+    protected fun createPopJdsStoreDate(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeTime()
+        return createOrAlterProc("jds_pop_store_date", "jds_store_date", columns, storeUniqueColumns, false)
+    }
+
+    protected fun createPopJdsStoreDuration(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeTime()
+        return createOrAlterProc("jds_pop_store_duration", "jds_store_duration", columns, storeUniqueColumns, false)
+    }
+
+    protected fun createPopJdsStorePeriod(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeTime()
+        return createOrAlterProc("jds_pop_store_period", "jds_store_period", columns, storeUniqueColumns, false)
+    }
+
+    protected fun createPopJdsMonthYear(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeTime()
+        return createOrAlterProc("jds_pop_store_month_year", "jds_store_month_year", columns, storeUniqueColumns, false)
+    }
+
+    protected fun createPopJdsYearMonth(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeTime()
+        return createOrAlterProc("jds_pop_store_year_month", "jds_store_year_month", columns, storeUniqueColumns, false)
+    }
+
     protected fun createPopJdsStoreZonedDateTime(): String {
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeZonedDateTime()
         return createOrAlterProc("jds_pop_store_zoned_date_time", "jds_store_zoned_date_time", columns, storeUniqueColumns, false)
     }
@@ -1075,7 +1126,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
-    protected fun createStoreDuration(): String {
+    private fun createStoreDuration(): String {
         val tableName = "jds_store_duration"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
@@ -1086,7 +1137,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
-    protected fun createStoreEnum(): String {
+    private fun createStoreEnum(): String {
         val tableName = "jds_store_enum"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
@@ -1097,7 +1148,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
-    protected fun createStoreEnumCollection(): String {
+    private fun createStoreEnumCollection(): String {
         val tableName = "jds_store_enum_collection"
         val columns = storeCommonColumnsInclSequence
         columns["value"] = getNativeDataTypeInteger()
@@ -1185,7 +1236,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
-    protected fun createStorePeriod(): String {
+    private fun createStorePeriod(): String {
         val tableName = "jds_store_period"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
@@ -1229,7 +1280,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
-    protected fun createStoreYearMonth(): String {
+    private fun createStoreYearMonth(): String {
         val tableName = "jds_store_year_month"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)

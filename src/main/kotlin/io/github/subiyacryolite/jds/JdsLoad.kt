@@ -128,65 +128,97 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                             "AND parent.uuid = child.parent_uuid " +
                             "AND parent.uuid_location = child.parent_uuid_location " +
                             "AND parent.uuid_version = child.parent_uuid_version"
-                    val populateBooleanStmt = connection.prepareStatement("SELECT * FROM jds_store_boolean WHERE $filterColumn IN $questionsString")
-                    val populateStringStmt = connection.prepareStatement("SELECT * FROM jds_store_text WHERE $filterColumn IN $questionsString")
-                    val populateStringCollectionStmt = connection.prepareStatement("SELECT * FROM jds_store_text_collection WHERE $filterColumn IN $questionsString")
-                    val populateLongStmt = connection.prepareStatement("SELECT * FROM jds_store_long WHERE $filterColumn IN $questionsString")
-                    val populateLongCollectionStmt = connection.prepareStatement("SELECT * FROM jds_store_long_collection WHERE $filterColumn IN $questionsString")
-                    val populateIntegerStmt = connection.prepareStatement("SELECT * FROM jds_store_integer WHERE $filterColumn IN $questionsString")
-                    val populateIntegerCollectionStmt = connection.prepareStatement("SELECT * FROM jds_store_integer_collection WHERE $filterColumn IN $questionsString")
-                    val populateFloatStmt = connection.prepareStatement("SELECT * FROM jds_store_float WHERE $filterColumn IN $questionsString")
-                    val populateFloatCollectionStmt = connection.prepareStatement("SELECT * FROM jds_store_float_collection WHERE $filterColumn IN $questionsString")
-                    val populateDoubleStmt = connection.prepareStatement("SELECT * FROM jds_store_double WHERE $filterColumn IN $questionsString")
-                    val populateDoubleCollectionStmt = connection.prepareStatement("SELECT * FROM jds_store_double_collection WHERE $filterColumn IN $questionsString")
-                    val populateDateTimeStmt = connection.prepareStatement("SELECT * FROM jds_store_date_time WHERE $filterColumn IN $questionsString")
-                    val populateTimeStmt = connection.prepareStatement("SELECT * FROM jds_store_time WHERE $filterColumn IN $questionsString")
-                    val populateZonedDateTimesStmt = connection.prepareStatement("SELECT * FROM jds_store_zoned_date_time WHERE $filterColumn IN $questionsString")
-                    val populateBlobStmt = connection.prepareStatement("SELECT * FROM jds_store_blob WHERE $filterColumn IN $questionsString")
+
+                    val blobStatement = connection.prepareStatement("SELECT * FROM jds_store_blob WHERE $filterColumn IN $questionsString")
+                    val booleanStatement = connection.prepareStatement("SELECT * FROM jds_store_boolean WHERE $filterColumn IN $questionsString")
+                    val dateStatement = connection.prepareStatement("SELECT * FROM jds_store_date WHERE $filterColumn IN $questionsString")
+                    val dateTimeStatement = connection.prepareStatement("SELECT * FROM jds_store_date_time WHERE $filterColumn IN $questionsString")
+                    val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_date_time_collection WHERE $filterColumn IN $questionsString")
+                    val doubleStatement = connection.prepareStatement("SELECT * FROM jds_store_double WHERE $filterColumn IN $questionsString")
+                    val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_double_collection WHERE $filterColumn IN $questionsString")
+                    val durationStatement = connection.prepareStatement("SELECT * FROM jds_store_duration WHERE $filterColumn IN $questionsString")
+                    val enumStatement = connection.prepareStatement("SELECT * FROM jds_store_enum WHERE $filterColumn IN $questionsString")
+                    val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_enum_collection WHERE $filterColumn IN $questionsString")
+                    val floatStatement = connection.prepareStatement("SELECT * FROM jds_store_float WHERE $filterColumn IN $questionsString")
+                    val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_float_collection WHERE $filterColumn IN $questionsString")
+                    val intStatement = connection.prepareStatement("SELECT * FROM jds_store_integer WHERE $filterColumn IN $questionsString")
+                    val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_integer_collection WHERE $filterColumn IN $questionsString")
+                    val longStatement = connection.prepareStatement("SELECT * FROM jds_store_long WHERE $filterColumn IN $questionsString")
+                    val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_long_collection WHERE $filterColumn IN $questionsString")
+                    val monthDayStatement = connection.prepareStatement("SELECT * FROM jds_store_month_day WHERE $filterColumn IN $questionsString")
+                    val periodStatement = connection.prepareStatement("SELECT * FROM jds_store_period WHERE $filterColumn IN $questionsString")
+                    val stringStatement = connection.prepareStatement("SELECT * FROM jds_store_text WHERE $filterColumn IN $questionsString")
+                    val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_text_collection WHERE $filterColumn IN $questionsString")
+                    val timeStatement = connection.prepareStatement("SELECT * FROM jds_store_time WHERE $filterColumn IN $questionsString")
+                    val yearMonthStatement = connection.prepareStatement("SELECT * FROM jds_store_year_month WHERE $filterColumn IN $questionsString")
+                    val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM jds_store_zoned_date_time WHERE $filterColumn IN $questionsString")
                     val populateEmbeddedAndArrayObjectsStmt = connection.prepareStatement(populateEmbeddedAndArrayObjects)
 
                     //work in batches to not break prepared statement
                     uuids.forEachIndexed { index, uuid ->
                         setParameterForStatement(index + 1, uuid, preparedStatement)
-                        setParameterForStatement(index + 1, uuid, populateStringStmt)
-                        setParameterForStatement(index + 1, uuid, populateBooleanStmt)
-                        setParameterForStatement(index + 1, uuid, populateLongStmt)
-                        setParameterForStatement(index + 1, uuid, populateIntegerStmt)
-                        setParameterForStatement(index + 1, uuid, populateFloatStmt)
-                        setParameterForStatement(index + 1, uuid, populateDoubleStmt)
-                        setParameterForStatement(index + 1, uuid, populateDateTimeStmt)
-                        setParameterForStatement(index + 1, uuid, populateTimeStmt)
-                        setParameterForStatement(index + 1, uuid, populateZonedDateTimesStmt)
-                        setParameterForStatement(index + 1, uuid, populateBlobStmt)
                         setParameterForStatement(index + 1, uuid, populateEmbeddedAndArrayObjectsStmt)
+                        //===========================================================
+                        setParameterForStatement(index + 1, uuid, blobStatement)
+                        setParameterForStatement(index + 1, uuid, booleanStatement)
+                        setParameterForStatement(index + 1, uuid, dateStatement)
+                        setParameterForStatement(index + 1, uuid, dateTimeStatement)
+                        setParameterForStatement(index + 1, uuid, dateTimeCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, doubleStatement)
+                        setParameterForStatement(index + 1, uuid, doubleCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, durationStatement)
+                        setParameterForStatement(index + 1, uuid, enumStatement)
+                        setParameterForStatement(index + 1, uuid, enumCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, floatStatement)
+                        setParameterForStatement(index + 1, uuid, floatCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, intStatement)
+                        setParameterForStatement(index + 1, uuid, intCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, longStatement)
+                        setParameterForStatement(index + 1, uuid, longCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, monthDayStatement)
+                        setParameterForStatement(index + 1, uuid, periodStatement)
+                        setParameterForStatement(index + 1, uuid, stringStatement)
+                        setParameterForStatement(index + 1, uuid, stringCollectionStatement)
+                        setParameterForStatement(index + 1, uuid, timeStatement)
+                        setParameterForStatement(index + 1, uuid, yearMonthStatement)
+                        setParameterForStatement(index + 1, uuid, zonedDateTimeStatement)
                     }
                     //catch embedded/pre-created objects objects as well
                     if (jdsDb.options.initialisePrimitives || jdsDb.options.initialiseDatesAndTimes || jdsDb.options.initialiseObjects) {
                         createEntities(entities, preparedStatement)
                         entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
-
                         //all entities have been initialised, now we populate them
                         if (jdsDb.options.isWritingToPrimaryDataTables) {
-                            //strings, derived from strings and string arrays
-                            populateStringStmt.use {
-                                populateTextMonthDayYearMonthAndPeriod(entities, it)
-                                populateStringArrays(entities, it)
-                            }
-                            //primitives
-                            populateLongStmt.use { populateLongAndDuration(entities, it) }
-                            populateBooleanStmt.use { populateBoolean(entities, it) }
-                            populateIntegerStmt.use { populateIntegerAndEnum(entities, it) }
-                            populateFloatStmt.use { populateFloat(entities, it) }
-                            populateDoubleStmt.use { populateDouble(entities, it) }
+                            booleanStatement.use { populateBoolean(entities, it) }
+                            doubleStatement.use { populateDouble(entities, it) }
+                            enumStatement.use { populateEnum(entities, it) }
+                            floatStatement.use { populateFloat(entities, it) }
+                            intStatement.use { populateInteger(entities, it) }
+                            longStatement.use { populateLong(entities, it) }
+                            stringStatement.use { populateString(entities, it) }
+                        }
+                        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingArrayValues) {
+                            doubleCollectionStatement.use { populateDoubleCollection(entities, it) }
+                            dateTimeCollectionStatement.use { populateDateTimeCollection(entities, it) }
+                            enumCollectionStatement.use { populateEnumCollection(entities, it) }
+                            floatCollectionStatement.use { populateFloatCollection(entities, it) }
+                            intCollectionStatement.use { populateIntegerCollection(entities, it) }
+                            longCollectionStatement.use { populateLongCollection(entities, it) }
+                            stringCollectionStatement.use { populateStringCollection(entities, it) }
                         }
                         if (jdsDb.options.isWritingToPrimaryDataTables && jdsDb.options.initialiseDatesAndTimes) {
-                            populateZonedDateTimesStmt.use { populateZonedDateTime(entities, it) }
-                            populateDateTimeStmt.use { populateDateTimeAndDate(entities, it) }
-                            populateTimeStmt.use { populateTimes(entities, it) }
+                            dateStatement.use { populateDate(entities, it) }
+                            dateTimeStatement.use { populateDateTime(entities, it) }
+                            durationStatement.use { populateDuration(entities, it) }
+                            monthDayStatement.use { populateMonthDay(entities, it) }
+                            periodStatement.use { populatePeriod(entities, it) }
+                            timeStatement.use { populateTimes(entities, it) }
+                            yearMonthStatement.use { populateYearMonth(entities, it) }
+                            zonedDateTimeStatement.use { populateZonedDateTime(entities, it) }
                         }
                         if (jdsDb.options.initialiseObjects) {
                             if (jdsDb.options.isWritingToPrimaryDataTables)
-                                populateBlobStmt.use { populateBlobs(entities, it) }
+                                blobStatement.use { populateBlobs(entities, it) }
                             populateEmbeddedAndArrayObjectsStmt.use { populateObjectEntriesAndObjectArrays(jdsDb, entities, it) }
                         }
                         entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArgument(jdsDb, connection, alternateConnections)) }
@@ -260,28 +292,6 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
 
     /**
      * @param entities
-     * @param preparedStatement
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateStringArrays(entities: Collection<T>, preparedStatement: PreparedStatement) {
-        preparedStatement.executeQuery().use {
-            while (it.next()) {
-                val uuid = it.getString("uuid")
-                val uuidLocation = it.getString("uuid_location")
-                val uuidLocationVersion = it.getInt("uuid_version")
-                val value = it.getString("value")
-                val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
-                    it.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
-                }
-            }
-        }
-    }
-
-
-    /**
-     * @param entities
      * @param uuid
      * @return
      */
@@ -297,7 +307,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @throws SQLException
      */
     @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateDateTimeAndDate(entities: Collection<T>, preparedStatement: PreparedStatement) {
+    private fun <T : JdsEntity> populateDateTime(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
                 val uuid = it.getString("uuid")
@@ -307,7 +317,47 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDate(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getTimestamp("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.DATE, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDateTimeCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getTimestamp("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value)
                 }
             }
@@ -330,6 +380,26 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.DOUBLE, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDoubleCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value)
                 }
             }
@@ -375,6 +445,90 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                     it.populateProperties(JdsFieldType.INT, fieldId, value)
                     it.populateProperties(JdsFieldType.ENUM, fieldId, value)
                     it.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
+                    it.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateInteger(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
+                    it.populateProperties(JdsFieldType.INT, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateEnum(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
+                    it.populateProperties(JdsFieldType.ENUM, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateIntegerCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
+                    it.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateEnumCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
                 }
             }
@@ -439,6 +593,26 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.FLOAT, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateFloatCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getObject("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value)
                 }
             }
@@ -451,7 +625,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @throws SQLException
      */
     @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateLongAndDuration(entities: Collection<T>, preparedStatement: PreparedStatement) {
+    private fun <T : JdsEntity> populateLong(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
                 val uuid = it.getString("uuid")
@@ -461,8 +635,48 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val value = it.getObject("value") //primitives can be null
                 optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.LONG, fieldId, value)
-                    it.populateProperties(JdsFieldType.DURATION, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateLongCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val fieldId = it.getLong("field_id")
+                val value = it.getObject("value") //primitives can be null
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateDuration(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val fieldId = it.getLong("field_id")
+                val value = it.getObject("value") //primitives can be null
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
+                    it.populateProperties(JdsFieldType.DURATION, fieldId, value)
                 }
             }
         }
@@ -495,7 +709,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @throws SQLException
      */
     @Throws(SQLException::class)
-    private fun <T : JdsEntity> populateTextMonthDayYearMonthAndPeriod(entities: Collection<T>, preparedStatement: PreparedStatement) {
+    private fun <T : JdsEntity> populateString(entities: Collection<T>, preparedStatement: PreparedStatement) {
         preparedStatement.executeQuery().use {
             while (it.next()) {
                 val uuid = it.getString("uuid")
@@ -505,8 +719,89 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.STRING, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateStringCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
+                    it.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateMonthDay(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateYearMonth(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populatePeriod(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val uuidLocation = it.getString("uuid_location")
+                val uuidLocationVersion = it.getInt("uuid_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, uuidLocation, uuidLocationVersion).forEach {
                     it.populateProperties(JdsFieldType.PERIOD, fieldId, value)
                 }
             }

@@ -23,6 +23,13 @@ abstract class BaseTestConfig(val testName: String) {
     protected val FLOAT_DELTA = 1e-2f
     protected lateinit var jdsDb: JdsDb
 
+    private var initialisedMySQL = false
+    private var initialisedSqlIte = false
+    private var initialisedTSql = false
+    private var initialisedMaria = false
+    private var initialisedOracle = false
+    private var initialisedPostgres = false
+
     init {
         val tsqlConfigFile = File("db.tsql.properties")
         if (!tsqlConfigFile.exists()) {
@@ -246,28 +253,38 @@ abstract class BaseTestConfig(val testName: String) {
     }
 
     fun initialiseSqLiteBackend() {
+        if (initialisedSqlIte) return
         jdsDb = JdsDbSqliteImplementation()
         initJds()
+        initialisedSqlIte = true
     }
 
     fun initialisePostgeSqlBackend() {
+        if (initialisedPostgres) return
         jdsDb = JdsDbPostgreSqlmplementation()
         initJds()
+        initialisedPostgres = true
     }
 
     fun initialiseTSqlBackend() {
+        if (initialisedTSql) return
         jdsDb = JdsDbTransactionalSqllmplementation()
         initJds()
+        initialisedTSql = true
     }
 
     fun initialiseMysqlBackend() {
+        if (initialisedMySQL) return
         jdsDb = JdsDbMySqlImplementation()
         initJds()
+        initialisedMySQL = true
     }
 
     fun initialiseMariaDbBackend() {
+        if (initialisedMaria) return
         jdsDb = JdsDbMariaImplementation()
         initJds()
+        initialisedMaria = true
     }
 
     fun initialiseOracleBackend() {
