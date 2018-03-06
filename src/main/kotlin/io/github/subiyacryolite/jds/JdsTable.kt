@@ -311,20 +311,32 @@ open class JdsTable() : Serializable {
         }
 
         if (foundChanges) {
-            if (jdsDb.supportsStatements) {
+            if (jdsDb.isSqLiteDb) {
+                //sqlite must alter columns once per entry
+                sqliteJoiner.forEach {
+                    val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")
+                    connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                }
+            } else {
                 val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
-                connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                connection.prepareStatement(addNewColumnsSql).use {
+                    try {
+                        it.executeUpdate()
+                    } catch (ex: Exception) {
+                        ex.printStackTrace(System.err)
+                    }
+                }
 
                 val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
                 tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
                 tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
                 val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "edit_version"), tableColumns.isEmpty())
-                connection.prepareStatement(createOrAlteredProcedureSQL).use { it.executeUpdate() }
-            } else {
-                //sqlite must alter columns once per entry
-                sqliteJoiner.forEach {
-                    val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")
-                    connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+                connection.prepareStatement(createOrAlteredProcedureSQL).use {
+                    try {
+                        it.executeUpdate()
+                    } catch (ex: Exception) {
+                        ex.printStackTrace(System.err)
+                    }
                 }
             }
         }
