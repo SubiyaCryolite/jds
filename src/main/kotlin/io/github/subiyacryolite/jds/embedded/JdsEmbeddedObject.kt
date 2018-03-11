@@ -21,67 +21,65 @@ import io.github.subiyacryolite.jds.JdsEntity
  */
 class JdsEmbeddedObject {
 
+    lateinit var overview: JdsEntityOverview
+
     var fieldId: Long? = null
 
-    /**
-     * Used to store Byte[] values in a portable manner
-     */
-    val bl: MutableList<JdsBlobValues> = ArrayList()
+    val blv: MutableList<JdsStoreBlob> = ArrayList()
 
-    /**
-     * Used to store [java.lang.Boolean] values in a portable manner
-     */
-    val b: MutableList<JdsBooleanValues> = ArrayList()
+    val bv: MutableList<JdsStoreBoolean> = ArrayList()
 
-    /**
-     * Used to store [java.time.LocalDate] and [java.time.LocalDateTime] values in a portable manner based on [java.sql.Timestamp]s
-     */
-    val ldt: MutableList<JdsLocalDateTimeValues> = ArrayList()
+    val dte: MutableList<JdsStoreDate> = ArrayList()
 
-    /**
-     * Used to store [java.lang.Double] in a portable manner
-     */
-    val d: MutableList<JdsDoubleValues> = ArrayList()
+    val md: MutableList<JdsStoreMonthDay> = ArrayList()
 
-    /**
-     *  Used to store [java.lang.Integer] and [java.lang.Enum] values in a portable manner
-     */
-    val i: MutableList<JdsIntegerEnumValues> = ArrayList()
+    val ym: MutableList<JdsStoreYearMonth> = ArrayList()
 
-    /**
-     *  Class used to store long, [java.time.ZonedDateTime],[java.time.LocalTime] and [java.time.Duration] values in a portable manner
-     */
-    val l: MutableList<JdsLongValues> = ArrayList()
+    val dv: MutableList<JdsStoreDouble> = ArrayList()
 
-    /**
-     * Used to store [java.lang.String], [java.time.YearMonth],[java.time.MonthDay] and [java.time.Period] values in a portable manner
-     */
-    val s: MutableList<JdsStringValues> = ArrayList()
+    val dc: MutableList<JdsStoreDoubleCollection> = ArrayList()
 
-    /**
-     * Used to store [java.lang.Float] values in a portable manner
-     */
-    val f: MutableList<JdsFloatValues> = ArrayList()
+    val iv: MutableList<JdsStoreInteger> = ArrayList()
 
-    /**
-     * Embedded objects
-     */
+    val ic: MutableList<JdsStoreIntegerCollection> = ArrayList()
+
+    val lv: MutableList<JdsStoreLong> = ArrayList()
+
+    val lc: MutableList<JdsStoreLongCollection> = ArrayList()
+
+    val sv: MutableList<JdsStoreString> = ArrayList()
+
+    val sc: MutableList<JdsStoreStringCollection> = ArrayList()
+
+    val fv: MutableList<JdsStoreFloat> = ArrayList()
+
+    val fc: MutableList<JdsStoreFloatCollection> = ArrayList()
+
+    val dtv: MutableList<JdsStoreDateTime> = ArrayList()
+
+    val dtc: MutableList<JdsStoreDateTimeCollection> = ArrayList()
+
+    val zdt: MutableList<JdsStoreZonedDateTime> = ArrayList()
+
+    val tv: MutableList<JdsStoreTime> = ArrayList()
+
+    val du: MutableList<JdsStoreDuration> = ArrayList()
+
+    val pv: MutableList<JdsStorePeriod> = ArrayList()
+
+    val ev: MutableList<JdsStoreEnum> = ArrayList()
+
+    val ec: MutableList<JdsStoreEnumCollection> = ArrayList()
+
     val eo: MutableList<JdsEmbeddedObject> = ArrayList()
-
-    /**
-     * Object overview
-     */
-    lateinit var o: JdsEntityOverview
 
     fun init(entity: JdsEntity) {
         entity.assign(this)
-        o = JdsEntityOverview(
+        overview = JdsEntityOverview(
                 entity.overview.uuid,
                 entity.overview.editVersion,
                 entity.overview.entityId,
                 fieldId,
                 entity.overview.entityVersion)
     }
-
-    //TODO add binding constructs for children
 }

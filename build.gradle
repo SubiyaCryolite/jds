@@ -3,7 +3,7 @@ apply plugin: "maven"
 apply plugin: "signing"
 apply plugin: "kotlin"
 apply plugin: "org.jetbrains.dokka"
-//apply plugin: "io.codearte.nexus-staging"
+apply plugin: "io.codearte.nexus-staging"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -19,12 +19,15 @@ project.ext.jacksonVersion = "2.9.4"
 project.ext.kotlinVersion = "1.2.30"
 
 buildscript {
+    
+    project.ext.kotlinVersion = "1.2.30"
+
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.21"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.15"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
     }
@@ -47,7 +50,7 @@ dependencies {
     testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
     testCompile "org.xerial:sqlite-jdbc:3.16.1"
     testCompile "com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
-    testCompile "org.postgresql:postgresql:42.0.0"
+    testCompile "org.postgresql:postgresql:42.2.1"
     testCompile "mysql:mysql-connector-java:6.0.6"
     testCompile "org.mariadb.jdbc:mariadb-java-client:2.2.1"
     testCompile "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
@@ -133,9 +136,7 @@ uploadArchives {
     }
 }
 
-/*
 nexusStaging {
     packageGroup = "io.github.subiyacryolite"
     stagingProfileId = "57cb63f09e7fd5"
 }
-*/

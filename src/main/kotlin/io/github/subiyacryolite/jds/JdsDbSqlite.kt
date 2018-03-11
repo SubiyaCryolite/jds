@@ -16,7 +16,6 @@ package io.github.subiyacryolite.jds
 import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
-import java.util.LinkedHashMap
 
 /**
  * The SQLite implementation of [JdsDataBase][JdsDb]
@@ -95,114 +94,75 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_inheritance.sql")
     }
 
-    override fun saveString(): String {
-        return "INSERT OR REPLACE INTO jds_store_text(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveString() = "INSERT OR REPLACE INTO jds_store_text(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveBoolean(): String {
-        return "INSERT OR REPLACE INTO jds_store_boolean(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveBoolean() = "INSERT OR REPLACE INTO jds_store_boolean(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveLong(): String {
-        return "INSERT OR REPLACE INTO jds_store_long(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveLong() = "INSERT OR REPLACE INTO jds_store_long(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDouble(): String {
-        return "INSERT OR REPLACE INTO jds_store_double(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveDouble() = "INSERT OR REPLACE INTO jds_store_double(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveFloat(): String {
-        return "INSERT OR REPLACE INTO jds_store_float(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveFloat() = "INSERT OR REPLACE INTO jds_store_float(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveInteger(): String {
-        return "INSERT OR REPLACE INTO jds_store_integer(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveInteger() = "INSERT OR REPLACE INTO jds_store_integer(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_date_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveDateTime() = "INSERT OR REPLACE INTO jds_store_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveTime() = "INSERT OR REPLACE INTO jds_store_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveBlob(): String {
-        return "INSERT OR REPLACE INTO jds_store_blob(uuid, uuid_location, uuid_version, field_id, value) VALUES(:uuid, :fieldId, , :value)"
-    }
+    override fun saveBlob() = "INSERT OR REPLACE INTO jds_store_blob(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveZonedDateTime(): String {
-        return "INSERT OR REPLACE INTO jds_store_zoned_date_time(composite_key, field_id, sequence, value) VALUES(:uuid, :fieldId, :sequence, :value)"
-    }
+    override fun saveZonedDateTime() = "INSERT OR REPLACE INTO jds_store_zoned_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveOverview(): String {
-        ////:compositeKey, :uuid, :uuidLocation, :editVersion, :parentUuid, :parentCompositeKey, :entityId, :live, :entityVersion, :lastEdit
-        return "INSERT OR REPLACE INTO jds_entity_overview(composite_key, uuid, uuid_location, uuid_version, parent_uuid, parent_composite_key, entity_id, live, entity_version, last_edit) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    }
+    override fun saveDate() = "INSERT OR REPLACE INTO jds_store_date(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun populateRefEntityField(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?)"
-    }
+    override fun saveEnum() = "INSERT OR REPLACE INTO jds_store_enum(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun populateRefField(): String {
-        return "INSERT OR REPLACE INTO jds_ref_field(id, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
-    }
+    override fun saveMonthDay() = "INSERT OR REPLACE INTO jds_store_month_day(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun populateRefEntityEnum(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity_enum(entity_id, field_id) VALUES(?,?)"
-    }
+    override fun saveYearMonth() = "INSERT OR REPLACE INTO jds_store_year_month(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun populateRefEntity(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity(id, caption, caption, description, parent) VALUES(?,?,?,?,?)"
-    }
+    override fun savePeriod() = "INSERT OR REPLACE INTO jds_store_period(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun populateRefEnum(): String {
-        return "INSERT OR REPLACE INTO jds_ref_enum(field_id, seq, caption) VALUES(?,?,?)"
-    }
+    override fun saveDuration() = "INSERT OR REPLACE INTO jds_store_duration(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun mapParentToChild(): String {
-        return "INSERT OR REPLACE INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?,?)"
-    }
+    override fun saveOverview() = "INSERT OR REPLACE INTO jds_entity_overview(uuid, edit_version, entity_id, entity_version) VALUES(?, ?, ?, ?)"
 
-    override fun getNativeDataTypeFloat(): String {
-        return "REAL"
-    }
+    override fun saveEntityBindings() = "INSERT OR REPLACE INTO jds_entity_binding(parent_uuid, parent_edit_version, child_uuid, child_edit_version, child_attribute_id) VALUES(?, ?, ?, ?, ?)"
 
-    override fun getNativeDataTypeDouble(): String {
-        return "DOUBLE"
-    }
+    override fun populateRefEntityField() = "INSERT OR REPLACE INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?)"
 
-    override fun getNativeDataTypeZonedDateTime(): String {
-        return "BIGINT"
-    }
+    override fun populateRefField() = "INSERT OR REPLACE INTO jds_ref_field(id, caption, description, type_ordinal) VALUES(:fieldId, :fieldName, :fieldDescription, :typeOrdinal)"
 
-    override fun getNativeDataTypeTime(): String {
-        return "INTEGER"
-    }
+    override fun populateRefEntityEnum() = "INSERT OR REPLACE INTO jds_ref_entity_enum(entity_id, field_id) VALUES(?, ?)"
 
-    override fun getNativeDataTypeBlob(max: Int): String {
-        return "BLOB"
-    }
+    override fun populateRefEntity() = "INSERT OR REPLACE INTO jds_ref_entity(id, caption, caption, description, parent) VALUES(?, ?, ?, ?, ?)"
 
-    override fun getNativeDataTypeInteger(): String {
-        return "INTEGER"
-    }
+    override fun populateRefEnum() = "INSERT OR REPLACE INTO jds_ref_enum(field_id, seq, caption) VALUES(?,?,?)"
 
-    override fun getNativeDataTypeDateTime(): String {
-        return "TIMESTAMP"
-    }
+    override fun mapParentToChild() = "INSERT OR REPLACE INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?)"
 
-    override fun getNativeDataTypeLong(): String {
-        return "BIGINT"
-    }
+    override fun getNativeDataTypeFloat() = "REAL"
 
-    override fun getNativeDataTypeString(max: Int): String {
-        return "TEXT"
-    }
+    override fun getNativeDataTypeDouble() = "DOUBLE"
 
-    override fun getNativeDataTypeBoolean(): String {
-        return "BOOLEAN"
-    }
+    override fun getNativeDataTypeZonedDateTime() = "BIGINT"
+
+    override fun getNativeDataTypeTime() = "INTEGER"
+
+    override fun getNativeDataTypeBlob(max: Int) = "BLOB"
+
+    override fun getNativeDataTypeInteger() = "INTEGER"
+
+    override fun getNativeDataTypeDate() = "TIMESTAMP"
+
+    override fun getNativeDataTypeDateTime() = "TIMESTAMP"
+
+    override fun getNativeDataTypeLong() = "BIGINT"
+
+    override fun getNativeDataTypeString(max: Int) = "TEXT"
+
+    override fun getNativeDataTypeBoolean() = "BOOLEAN"
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
@@ -212,15 +172,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
                                    tableName: String,
                                    columns: Map<String, String>,
                                    uniqueColumns: Collection<String>,
-                                   doNothingOnConflict:Boolean): String {
-        return ""
-    }
-
-    override fun createTable(tableName: String,
-                             columns: LinkedHashMap<String, String>,
-                             uniqueColumns: LinkedHashMap<String, String>,
-                             primaryKeys: LinkedHashMap<String, String>,
-                             foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>): String {
+                                   doNothingOnConflict: Boolean): String {
         return ""
     }
 }

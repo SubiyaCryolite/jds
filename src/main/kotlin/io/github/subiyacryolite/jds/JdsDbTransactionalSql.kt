@@ -165,12 +165,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TEXT_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_LONG_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_INTEGER_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_FLOAT_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DURATION)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_PERIOD)
@@ -178,8 +172,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_DAY)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_YEAR_MONTH)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
@@ -205,23 +197,16 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
             JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
             JdsComponent.PROC_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
             JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
-            JdsComponent.PROC_STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreDateTimeCollection())
             JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
-            JdsComponent.PROC_STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreDoubleCollection())
             JdsComponent.PROC_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
             JdsComponent.PROC_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
-            JdsComponent.PROC_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreEnumCollection())
             JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
-            JdsComponent.PROC_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreFloatCollection())
             JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
-            JdsComponent.PROC_STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreIntegerCollection())
             JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
-            JdsComponent.PROC_STORE_LONG_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreLongCollection())
             JdsComponent.PROC_STORE_MONTH_YEAR -> executeSqlFromString(connection, createPopJdsMonthYear())
             JdsComponent.PROC_STORE_MONTH_DAY -> executeSqlFromString(connection, createPopJdsMonthDay())
             JdsComponent.PROC_STORE_PERIOD -> executeSqlFromString(connection, createPopJdsStorePeriod())
             JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
-            JdsComponent.PROC_STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreTextCollection())
             JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
             JdsComponent.PROC_STORE_YEAR_MONTH -> executeSqlFromString(connection, createPopJdsYearMonth())
             JdsComponent.PROC_STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
@@ -257,6 +242,10 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         return "INTEGER"
     }
 
+    override fun getNativeDataTypeDate(): String{
+        return "DATE"
+    }
+
     override fun getNativeDataTypeDateTime(): String {
         return "DATETIME"
     }
@@ -288,7 +277,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         val sqlBuilder = StringBuilder()
 
         sqlBuilder.append("CREATE OR ALTER PROCEDURE $procedureName(")
-        val inputParameters = StringJoiner(",")
+        val inputParameters = StringJoiner(", ")
         columns.forEach { column, type -> inputParameters.add("@p_$column $type") }
         sqlBuilder.append(inputParameters)
         sqlBuilder.append(")\n")

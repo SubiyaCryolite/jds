@@ -137,6 +137,12 @@ interface IJdsDb {
     fun getNativeDataTypeDateTime(): String
 
     /**
+     * Gets the Date data-type of the current database implementation
+     * @return the Date data-type of the database implementation
+     */
+    fun getNativeDataTypeDate(): String
+
+    /**
      * Gets the Long data-type of the current database implementation
      * @return the Long data-type of the database implementation
      */

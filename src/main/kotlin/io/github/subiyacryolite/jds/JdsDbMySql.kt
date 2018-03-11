@@ -30,65 +30,58 @@ abstract class JdsDbMySql : JdsDb {
     constructor() : this(JdsImplementation.MYSQL, true)
 
     override fun tableExists(connection: Connection, tableName: String): Int {
-        var toReturn = 0
-        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :tableSchema AND TABLE_NAME = :tableName"
         try {
-            NamedPreparedStatement(connection, sql).use {
+            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :tableSchema AND TABLE_NAME = :tableName").use {
                 it.setString("tableName", tableName)
                 it.setString("tableSchema", connection.catalog)
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
+            return 0
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
+            return 0
         }
-        return toReturn
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
-        var toReturn = 0
-        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :procedureSchema AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName"
         try {
-            NamedPreparedStatement(connection, sql).use {
+            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :procedureSchema AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName").use {
                 it.setString("procedureName", procedureName)
                 it.setString("procedureSchema", connection.catalog)
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
+            return 0
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
+            return 0
         }
-        return toReturn
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
-        var toReturn = 0
-        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :viewSchema AND TABLE_NAME = :viewName"
         try {
-            NamedPreparedStatement(connection, sql).use {
+            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :viewSchema AND TABLE_NAME = :viewName").use {
                 it.setString("viewName", viewName)
                 it.setString("viewSchema", connection.catalog)
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
+            return 0
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
+            return 0
         }
-        return toReturn
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
-        return columnExistsCommonImpl(connection, tableName, columnName, 0, sql)
+        return columnExistsCommonImpl(connection, tableName, columnName, 0, "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName")
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -137,12 +130,6 @@ abstract class JdsDbMySql : JdsDb {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TEXT_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_LONG_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_INTEGER_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_FLOAT_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DURATION)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_PERIOD)
@@ -150,8 +137,6 @@ abstract class JdsDbMySql : JdsDb {
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_DAY)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_YEAR_MONTH)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM_COLLECTION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ZONED_DATE_TIME)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
         prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
@@ -177,23 +162,16 @@ abstract class JdsDbMySql : JdsDb {
             JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
             JdsComponent.PROC_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
             JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
-            JdsComponent.PROC_STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreDateTimeCollection())
             JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
-            JdsComponent.PROC_STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreDoubleCollection())
             JdsComponent.PROC_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
             JdsComponent.PROC_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
-            JdsComponent.PROC_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreEnumCollection())
             JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
-            JdsComponent.PROC_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreFloatCollection())
             JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
-            JdsComponent.PROC_STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreIntegerCollection())
             JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
-            JdsComponent.PROC_STORE_LONG_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreLongCollection())
             JdsComponent.PROC_STORE_MONTH_YEAR -> executeSqlFromString(connection, createPopJdsMonthYear())
             JdsComponent.PROC_STORE_MONTH_DAY -> executeSqlFromString(connection, createPopJdsMonthDay())
             JdsComponent.PROC_STORE_PERIOD -> executeSqlFromString(connection, createPopJdsStorePeriod())
             JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
-            JdsComponent.PROC_STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createPopJdsStoreTextCollection())
             JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
             JdsComponent.PROC_STORE_YEAR_MONTH -> executeSqlFromString(connection, createPopJdsYearMonth())
             JdsComponent.PROC_STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
@@ -226,6 +204,10 @@ abstract class JdsDbMySql : JdsDb {
         return "INT"
     }
 
+    override fun getNativeDataTypeDate(): String{
+        return "DATE"
+    }
+
     override fun getNativeDataTypeDateTime(): String {
         return "DATETIME"
     }
@@ -254,14 +236,45 @@ abstract class JdsDbMySql : JdsDb {
                                    columns: Map<String, String>,
                                    uniqueColumns: Collection<String>,
                                    doNothingOnConflict: Boolean): String {
-        return ""
-    }
+        val sqlBuilder = StringBuilder()
 
-    override fun createTable(tableName: String,
-                             columns: LinkedHashMap<String, String>,
-                             uniqueColumns: LinkedHashMap<String, String>,
-                             primaryKeys: LinkedHashMap<String, String>,
-                             foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>): String {
-        return ""
+        sqlBuilder.append("CREATE PROCEDURE $procedureName(")
+        val inputParameters = StringJoiner(", ")
+        columns.forEach { column, type -> inputParameters.add("IN p_$column $type") }
+        sqlBuilder.append(inputParameters)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("BEGIN\n")
+        if (doNothingOnConflict)
+            sqlBuilder.append("\tINSERT IGNORE INTO $tableName(")
+        else
+            sqlBuilder.append("\tINSERT INTO $tableName(")
+        val columnNames = StringJoiner(", ")
+        columns.forEach { column, _ -> columnNames.add(column) }
+        sqlBuilder.append(columnNames)
+        sqlBuilder.append(")\n")
+
+        sqlBuilder.append("\tVALUES")
+        sqlBuilder.append("(")
+        val parameterNames = StringJoiner(", ")
+        columns.forEach { column, _ -> parameterNames.add("p_$column") }
+        sqlBuilder.append(parameterNames)
+        sqlBuilder.append(")\n")
+
+        if (!doNothingOnConflict) {
+            sqlBuilder.append("\tON DUPLICATE KEY ")
+            sqlBuilder.append("UPDATE ")
+            val updateStatements = StringJoiner(", ")
+            columns.forEach { column, _ ->
+                if (!uniqueColumns.contains(column))//dont update unique columns
+                    updateStatements.add("$column = p_$column")
+            }
+            sqlBuilder.append(updateStatements)
+        }
+
+        sqlBuilder.append(";\n")
+
+        sqlBuilder.append("END;\n")
+        return sqlBuilder.toString()
     }
 }

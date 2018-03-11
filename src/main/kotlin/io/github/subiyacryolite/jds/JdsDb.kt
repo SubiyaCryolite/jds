@@ -27,7 +27,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
 /**
@@ -145,24 +144,45 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.STORE_BOOLEAN -> executeSqlFromString(connection, createStoreBoolean())
             JdsComponent.STORE_BLOB -> executeSqlFromString(connection, createStoreBlob())
             JdsComponent.STORE_TEXT -> executeSqlFromString(connection, createStoreText())
-            JdsComponent.STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createStoreTextCollection())
+            JdsComponent.STORE_TEXT_COLLECTION -> {
+                executeSqlFromString(connection, createStoreTextCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_text_collection", "uuid, edit_version", "jds_store_text_collection_ix"))
+            }
             JdsComponent.STORE_PERIOD -> executeSqlFromString(connection, createStorePeriod())
             JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
             JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
             JdsComponent.STORE_MONTH_DAY -> executeSqlFromString(connection, createStoreMonthDay())
             JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
-            JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
+            JdsComponent.STORE_ENUM_COLLECTION -> {
+                executeSqlFromString(connection, createStoreEnumCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_enum_collection", "uuid, edit_version", "jds_store_enum_collection_ix"))
+            }
             JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
-            JdsComponent.STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createStoreFloatCollection())
+            JdsComponent.STORE_FLOAT_COLLECTION -> {
+                executeSqlFromString(connection, createStoreFloatCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_float_collection", "uuid, edit_version", "jds_store_float_collection_ix"))
+            }
             JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
-            JdsComponent.STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createStoreIntegerCollection())
+            JdsComponent.STORE_INTEGER_COLLECTION -> {
+                executeSqlFromString(connection, createStoreIntegerCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_integer_collection", "uuid, edit_version", "jds_store_integer_collection_ix"))
+            }
             JdsComponent.STORE_LONG -> executeSqlFromString(connection, createStoreLong())
-            JdsComponent.STORE_LONG_COLLECTION -> executeSqlFromString(connection, createStoreLongCollection())
+            JdsComponent.STORE_LONG_COLLECTION -> {
+                executeSqlFromString(connection, createStoreLongCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_long_collection", "uuid, edit_version", "jds_store_long_collection_ix"))
+            }
             JdsComponent.STORE_DOUBLE -> executeSqlFromString(connection, createStoreDouble())
-            JdsComponent.STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createStoreDoubleCollection())
+            JdsComponent.STORE_DOUBLE_COLLECTION -> {
+                executeSqlFromString(connection, createStoreDoubleCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_double_collection", "uuid, edit_version", "jds_store_double_collection_ix"))
+            }
             JdsComponent.STORE_DATE -> executeSqlFromString(connection, createStoreDate())
             JdsComponent.STORE_DATE_TIME -> executeSqlFromString(connection, createStoreDateTime())
-            JdsComponent.STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createStoreDateTimeCollection())
+            JdsComponent.STORE_DATE_TIME_COLLECTION -> {
+                executeSqlFromString(connection, createStoreDateTimeCollection())
+                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_date_time_collection", "uuid, edit_version", "jds_store_date_time_collection_ix"))
+            }
             JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
             JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
             JdsComponent.REF_FIELDS -> createRefFields(connection)
@@ -263,30 +283,22 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      *
      * @param fileName the file containing SQL to find
      */
-    internal fun executeSqlFromFile(connection: Connection, fileName: String) {
-        try {
-            Thread.currentThread().contextClassLoader.getResourceAsStream(fileName).use {
-                val innerSql = fileToString(it)
-                executeSqlFromString(connection, innerSql)
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+    internal fun executeSqlFromFile(connection: Connection, fileName: String) = try {
+        Thread.currentThread().contextClassLoader.getResourceAsStream(fileName).use {
+            val innerSql = fileToString(it)
+            executeSqlFromString(connection, innerSql)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     @JvmOverloads
-    fun executeSqlFromString(connection: Connection, sql: String, update: Boolean = false) {
-        try {
-            connection.prepareStatement(sql).use { statement ->
-                when (update) {
-                    true -> statement.executeUpdate()
-                    false -> statement.execute()
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
+    fun executeSqlFromString(connection: Connection, sql: String) = try {
+        connection.prepareStatement(sql).use { it.executeUpdate() }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
+
 
     /**
      * Method to read contents of a file to a String variable
@@ -552,10 +564,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     @Throws(Exception::class)
     fun prepareTables() {
-        //pool connections so that there's no wastage
-        val connectionPool = HashMap<Int, Connection>()
-        tables.forEach { it.forceGenerateOrUpdateSchema(this, connectionPool) }
-        connectionPool.forEach { it.value.close() }
+        getConnection().use { connection ->
+            tables.forEach { it.forceGenerateOrUpdateSchema(this, connection) }
+        }
     }
 
     fun map(entity: Class<out JdsEntity>) {
@@ -602,7 +613,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             it.executeBatch()
         }
     }
-
 
     internal open fun saveMonthDay() = "{call jds_pop_store_month_day(?, ?, ?, ?)}"
 
@@ -811,7 +821,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     protected fun createPopJdsEntityBinding(): String {
-        val uniqueColumns = setOf("parent_uuid",  "parent_edit_version", "child_uuid",  "child_edit_version")
+        val uniqueColumns = setOf("parent_uuid", "parent_edit_version", "child_uuid", "child_edit_version")
         val columns = LinkedHashMap<String, String>()
         columns["parent_uuid"] = getNativeDataTypeString(128)
         columns["parent_edit_version"] = getNativeDataTypeInteger()
@@ -885,7 +895,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     }
 
     private val storeUniqueColumns = setOf("uuid", "edit_version", "field_id")
-    private val storeUniqueColumnsInclSequence = setOf("uuid", "edit_version", "field_id", "sequence")
 
     private val storeCommonColumns: LinkedHashMap<String, String>
         get() {
@@ -893,13 +902,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             columns["uuid"] = getNativeDataTypeString(128)
             columns["edit_version"] = getNativeDataTypeInteger()
             columns["field_id"] = getNativeDataTypeLong()
-            return columns
-        }
-
-    private val storeCommonColumnsInclSequence: LinkedHashMap<String, String>
-        get() {
-            val columns = storeCommonColumns
-            columns["sequence"] = getNativeDataTypeInteger()
             return columns
         }
 
@@ -921,22 +923,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_store_date_time", "jds_store_date_time", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreDateTimeCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeDateTime()
-        return createOrAlterProc("jds_pop_store_date_time_collection", "jds_store_date_time_collection", columns, storeUniqueColumnsInclSequence, false)
-    }
-
     protected fun createPopJdsStoreDouble(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
         return createOrAlterProc("jds_pop_store_double", "jds_store_double", columns, storeUniqueColumns, false)
-    }
-
-    protected fun createPopJdsStoreDoubleCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeDouble()
-        return createOrAlterProc("jds_pop_store_double_collection", "jds_store_double_collection", columns, storeUniqueColumnsInclSequence, false)
     }
 
     protected fun createPopJdsStoreFloat(): String {
@@ -945,22 +935,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_store_float", "jds_store_float", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreFloatCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeFloat()
-        return createOrAlterProc("jds_pop_store_float_collection", "jds_store_float_collection", columns, storeUniqueColumnsInclSequence, false)
-    }
-
     protected fun createPopJdsStoreInteger(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         return createOrAlterProc("jds_pop_store_integer", "jds_store_integer", columns, storeUniqueColumns, false)
-    }
-
-    protected fun createPopJdsStoreIntegerCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_store_integer_collection", "jds_store_integer_collection", columns, storeUniqueColumnsInclSequence, false)
     }
 
     protected fun createPopJdsStoreLong(): String {
@@ -969,34 +947,16 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_store_long", "jds_store_long", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreLongCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeLong()
-        return createOrAlterProc("jds_pop_store_long_collection", "jds_store_long_collection", columns, storeUniqueColumnsInclSequence, false)
-    }
-
     protected fun createPopJdsStoreText(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         return createOrAlterProc("jds_pop_store_text", "jds_store_text", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreTextCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_text_collection", "jds_store_text_collection", columns, storeUniqueColumnsInclSequence, false)
-    }
-
     protected fun createPopJdsStoreEnum(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         return createOrAlterProc("jds_pop_store_enum", "jds_store_enum", columns, storeUniqueColumns, false)
-    }
-
-    protected fun createPopJdsStoreEnumCollection(): String {
-        val columns = storeCommonColumnsInclSequence
-        columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_store_enum_collection", "jds_store_enum_collection", columns, storeUniqueColumnsInclSequence, false)
     }
 
     protected fun createPopJdsStoreTime(): String {
@@ -1007,7 +967,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     protected fun createPopJdsStoreDate(): String {
         val columns = storeCommonColumns
-        columns["value"] = getNativeDataTypeDateTime()
+        columns["value"] = getNativeDataTypeDate()
         return createOrAlterProc("jds_pop_store_date", "jds_store_date", columns, storeUniqueColumns, false)
     }
 
@@ -1072,7 +1032,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     protected fun createStoreDate(): String {
         val tableName = "jds_store_date"
         val columns = storeCommonColumns
-        columns["value"] = getNativeDataTypeDateTime()
+        columns["value"] = getNativeDataTypeDate()
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -1093,10 +1053,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreDateTimeCollection(): String {
         val tableName = "jds_store_date_time_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1115,10 +1074,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreDoubleCollection(): String {
         val tableName = "jds_store_double_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1148,10 +1106,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreEnumCollection(): String {
         val tableName = "jds_store_enum_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1170,10 +1127,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreFloatCollection(): String {
         val tableName = "jds_store_float_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1192,10 +1148,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreIntegerCollection(): String {
         val tableName = "jds_store_integer_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1214,10 +1169,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreLongCollection(): String {
         val tableName = "jds_store_long_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
@@ -1258,10 +1212,9 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     private fun createStoreTextCollection(): String {
         val tableName = "jds_store_text_collection"
-        val columns = storeCommonColumnsInclSequence
+        val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id, sequence"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)

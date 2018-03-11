@@ -17,45 +17,51 @@ import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import java.sql.Timestamp
 
-/**
- * Class used to store blob values in a portable manner
- */
-data class JdsBlobValues(var id: Long = 0, var v: ByteArray? = null)
+data class JdsStoreBlob(var id: Long = 0, var v: ByteArray? = null)
 
-/**
- * Class used to store [java.lang.Boolean] values in a portable manner
- */
-data class JdsBooleanValues(var k: Long = 0, var v: Int? = null)
+data class JdsStoreBoolean(var k: Long = 0, var v: Int? = null)
 
-/**
- * Class used to store [java.lang.Double] in a portable manner
- */
-data class JdsDoubleValues(var k: Long = 0, var v: Double? = null)
+data class JdsStoreDouble(var k: Long = 0, var v: Double? = null)
 
-/**
- * Class used to store [java.lang.Integer] and [java.lang.Enum] values in a portable manner
- */
-data class JdsIntegerEnumValues(var k: Long = 0, var v: Int? = null)
+data class JdsStoreDoubleCollection(var k: Long = 0, val v: MutableCollection<Double> = ArrayList())
 
-/**
- * Class used to store [java.lang.Long], [java.time.ZonedDateTime],[java.time.LocalTime] and [java.time.Duration] values in a portable manner
- */
-data class JdsLongValues(var k: Long = 0, var v: Long? = null)
+data class JdsStoreEnum(var k: Long = 0, var v: Int? = null)
 
-/**
- * Class used to store [java.lang.String], [java.time.YearMonth],[java.time.MonthDay] and [java.time.Period] values in a portable manner
- */
-data class JdsStringValues(var k: Long = 0, var v: String? = null)
+data class JdsStoreEnumCollection(var k: Long = 0, val v: MutableCollection<Int> = ArrayList())
 
-/**
- * Class used to store [java.lang.Float] values in a portable manner
- */
-data class JdsFloatValues(var k: Long = 0, var v: Float? = null)
+data class JdsStoreInteger(var k: Long = 0, var v: Int? = null)
 
-/**
- * Class used to store [java.time.LocalDate] and [java.time.LocalDateTime] values in a portable manner based on [java.sql.Timestamp]s
- */
-data class JdsLocalDateTimeValues(var k: Long = 0, var v: Timestamp? = null)
+data class JdsStoreIntegerCollection(var k: Long = 0, val v: MutableCollection<Int> = ArrayList())
+
+data class JdsStoreLong(var k: Long = 0, var v: Long? = null)
+
+data class JdsStoreZonedDateTime(var k: Long = 0, var v: Long? = null)
+
+data class JdsStoreLongCollection(var k: Long = 0, val v: MutableCollection<Long> = ArrayList())
+
+data class JdsStoreTime(var k: Long = 0, var v: Long? = null)
+
+data class JdsStoreString(var k: Long = 0, var v: String? = null)
+
+data class JdsStoreStringCollection(var k: Long = 0, val v: MutableCollection<String> = ArrayList())
+
+data class JdsStoreFloat(var k: Long = 0, var v: Float? = null)
+
+data class JdsStoreFloatCollection(var k: Long = 0, val v: MutableCollection<Float> = ArrayList())
+
+data class JdsStoreDateTime(var k: Long = 0, var v: Timestamp? = null)
+
+data class JdsStoreDateTimeCollection(var k: Long = 0, var v: MutableCollection<Timestamp> = ArrayList())
+
+data class JdsStoreDate(var k: Long = 0, var v: Timestamp? = null)
+
+data class JdsStoreDuration(var k: Long = 0, var v: Long? = null)
+
+data class JdsStoreYearMonth(var k: Long = 0, var v: String? = null)
+
+data class JdsStoreMonthDay(var k: Long = 0, var v: String? = null)
+
+data class JdsStorePeriod(var k: Long = 0, var v: String? = null)
 
 /**
  *

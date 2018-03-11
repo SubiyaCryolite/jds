@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.JdsExtensions.setLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
@@ -22,6 +23,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.*
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -57,12 +59,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @throws Exception if unable to compute a result
      */
     override fun call(): Boolean {
-        val all = buildSequence { entities.forEach { yieldAll(it.getNestedEntities()) } }
-        val chunks = all.chunked(2048)
+        val chunks = entities.chunked(1024)
         val totalChunks = chunks.count()
         chunks.forEachIndexed { index, batch ->
             try {
-                saveInner(batch, index == (totalChunks - 1))
+                val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
+                saveInner(orderedList.asIterable(), index == (totalChunks - 1))
                 if (jdsDb.options.isPrintingOutput)
                     println("Processing saves. Batch ${index + 1} of $totalChunks")
             } catch (ex: Exception) {
@@ -371,7 +373,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             upsertz.setString(1, it.overview.uuid)
             upsertz.setInt(2, it.overview.editVersion)
             upsertz.setLong(3, fieldId)
-            upsertz.setTimestamp(4, Timestamp.valueOf(localDate.atStartOfDay()))
+            upsertz.setLocalDate(4, localDate, jdsDb)
             upsertz.addBatch()
         }
     } catch (ex: Exception) {
@@ -443,14 +445,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayDates(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTimeCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_date_time_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_date_time_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.dateTimeArrayProperties.forEach { fieldId, dateTimeArray ->
-            dateTimeArray.forEachIndexed { sequence, value ->
+            dateTimeArray.forEach { value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setTimestamp(5, Timestamp.valueOf(value))
+                insert.setTimestamp(4, Timestamp.valueOf(value))
                 insert.addBatch()
             }
         }
@@ -465,14 +471,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayFloats(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveFloatCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_float_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_float_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.floatArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { sequence, value ->
+            u.forEach { value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setObject(5, value) //primitives could be null, default value has meaning
+                insert.setObject(4, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -486,14 +496,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayIntegers(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveIntegerCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_integer_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_integer_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.integerArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { sequence, value ->
+            u.forEach { value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setObject(5, value) //primitives could be null, default value has meaning
+                insert.setObject(4, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -507,14 +521,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayDoubles(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDoubleCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_double_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_double_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.doubleArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { sequence, value ->
+            u.forEach{  value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setObject(5, value) //primitives could be null, default value has meaning
+                insert.setObject(4, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -528,14 +546,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayLongs(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveLongCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_long_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_long_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.longArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { sequence, value ->
+            u.forEach {  value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setObject(5, value) //primitives could be null, default value has meaning
+                insert.setObject(4, value) //primitives could be null, default value has meaning
                 insert.addBatch()
             }
         }
@@ -549,14 +571,18 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveArrayStrings(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveStringCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_text_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_text_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.stringArrayProperties.forEach { fieldId, u ->
-            u.forEachIndexed { sequence, value ->
+            u.forEach { value ->
+                delete.setString(1, it.overview.uuid)
+                delete.setInt(2, it.overview.editVersion)
+                delete.addBatch()
+
                 insert.setString(1, it.overview.uuid)
                 insert.setInt(2, it.overview.editVersion)
                 insert.setLong(3, fieldId)
-                insert.setInt(4, sequence)
-                insert.setString(5, value)
+                insert.setString(4, value)
                 insert.addBatch()
             }
         }
@@ -571,15 +597,19 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveEnumCollections(it: JdsEntity) = try {
-        val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumCollection())
+        val delete = regularStatementOrCall(preSaveEventArgument, "DELETE FROM jds_store_enum_collection WHERE uuid = ? AND edit_version = ?")
+        val insert = regularStatementOrCall(postSaveEventArgument, "INSERT INTO jds_store_enum_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)")
         it.enumCollectionProperties.forEach { jdsFieldEnum, u ->
-            u.forEachIndexed { sequence, anEnum ->
+            u.forEach {  anEnum ->
                 if (anEnum != null) {
+                    delete.setString(1, it.overview.uuid)
+                    delete.setInt(2, it.overview.editVersion)
+                    delete.addBatch()
+
                     insert.setString(1, it.overview.uuid)
                     insert.setInt(2, it.overview.editVersion)
                     insert.setLong(3, jdsFieldEnum)
-                    insert.setInt(4, sequence)
-                    insert.setObject(5, anEnum.ordinal)
+                    insert.setObject(4, anEnum.ordinal)
                     insert.addBatch()
                 }
             }
@@ -594,15 +624,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveAndBindObjectArrays(parentEntity: JdsEntity) = try {
-        val updateFieldId = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEntityBindings())
+        val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
         parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
             entityCollection.forEach {
-//                updateFieldId.setString(1, parentEntity.overview.uuid)
-//                updateFieldId.setInt(2, parentEntity.overview.editVersion)
-//                updateFieldId.setString(3, it.overview.uuid)
-//                updateFieldId.setInt(4, it.overview.editVersion)
-//                updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
-//                updateFieldId.addBatch()
+                updateFieldId.setString(1, parentEntity.overview.uuid)
+                updateFieldId.setInt(2, parentEntity.overview.editVersion)
+                updateFieldId.setString(3, it.overview.uuid)
+                updateFieldId.setInt(4, it.overview.editVersion)
+                updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
+                updateFieldId.addBatch()
             }
         }
     } catch (ex: Exception) {
@@ -615,14 +645,14 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      */
     @Throws(Exception::class)
     private fun saveAndBindObjects(parentEntity: JdsEntity) = try {
-        val updateFieldId = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEntityBindings())
+        val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
         parentEntity.objectProperties.forEach { fieldEntity, v ->
-//            updateFieldId.setString(1, parentEntity.overview.uuid)
-//            updateFieldId.setInt(2, parentEntity.overview.editVersion)
-//            updateFieldId.setString(3, v.value.overview.uuid)
-//            updateFieldId.setInt(4, v.value.overview.editVersion)
-//            updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
-//            updateFieldId.addBatch()
+            updateFieldId.setString(1, parentEntity.overview.uuid)
+            updateFieldId.setInt(2, parentEntity.overview.editVersion)
+            updateFieldId.setString(3, v.value.overview.uuid)
+            updateFieldId.setInt(4, v.value.overview.editVersion)
+            updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
+            updateFieldId.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)

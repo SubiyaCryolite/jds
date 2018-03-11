@@ -45,7 +45,8 @@ object JdsTableLookup {
             JdsFieldType.BLOB -> return STORE_BLOB
             JdsFieldType.BOOLEAN -> return STORE_BOOLEAN
             JdsFieldType.ENUM, JdsFieldType.INT -> return STORE_INTEGER
-            JdsFieldType.DATE, JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
+            JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
+            JdsFieldType.DATE -> return STORE_DATE
             JdsFieldType.LONG, JdsFieldType.DURATION -> return STORE_LONG
             JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return STORE_TEXT
             else -> return NULL

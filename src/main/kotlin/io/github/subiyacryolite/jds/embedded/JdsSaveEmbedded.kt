@@ -23,7 +23,6 @@ import java.util.concurrent.Callable
 class JdsSaveEmbedded(private val entities: Iterable<JdsEntity>) : Callable<JdsEmbeddedContainer> {
 
     override fun call(): JdsEmbeddedContainer {
-        val container = JdsEmbeddedContainer(entities)
-        return container
+        return JdsEmbeddedContainer(entities)
     }
 }

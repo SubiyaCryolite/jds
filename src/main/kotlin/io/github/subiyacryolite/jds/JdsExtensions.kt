@@ -13,12 +13,12 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.INamedStatement
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -26,43 +26,23 @@ import java.time.format.DateTimeFormatter
 
 object JdsExtensions {
 
-    private val tSqlDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSS xxx")
+    private val localDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val zonedDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSS xxx")
     private val localTimeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSS")
     private val localTimeFormatReadOnly = DateTimeFormatter.ofPattern("[HH:mm:ss.SSSSSSS][HH:mm:ss]")
 
-    /**
-     * @return
-     */
-    fun ZonedDateTime.toZonedDateTimeSqlFormat(): String = this.format(tSqlDateTimeFormat)
+    fun ZonedDateTime.toSqlStringFormat(): String = this.format(zonedDateTimeFormat)
 
-    /**
-     * @return
-     */
-    fun String.toZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(this, tSqlDateTimeFormat)
+    fun LocalTime.toSqlStringFormat(): String = this.format(localTimeFormat)
 
-    /**
-     * @return
-     */
-    fun LocalTime.localTimeFormat(): String = this.format(localTimeFormat)
+    fun LocalDate.toSqlStringFormat(): String = this.format(localDateFormat)
 
-    /**
-     * @return
-     */
-    fun String.toLocalTimeSqlFormat(): LocalTime = LocalTime.parse(this, localTimeFormatReadOnly)
+    fun String.toZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(this, zonedDateTimeFormat)
 
-    /**
-     * @param value
-     * @param input
-     * @param jdsDb
-     */
-    fun INamedStatement.setZonedDateTime(value: String, input: ZonedDateTime, jdsDb: JdsDb) {
-        when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input.toOffsetDateTime())
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
-            else -> this.setLong(value, input.toInstant().toEpochMilli())
-        }
-    }
+    fun String.toLocalTime(): LocalTime = LocalTime.parse(this, localTimeFormatReadOnly)
+
+    fun String.toLocalDate(): LocalDate = LocalDate.parse(this, localDateFormat)
+
 
     /**
      * @param value
@@ -71,7 +51,7 @@ object JdsExtensions {
      */
     fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> this.setString(value, input.toZonedDateTimeSqlFormat())
+            JdsImplementation.TSQL -> this.setString(value, input.toSqlStringFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input.toOffsetDateTime())
             JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
             else -> this.setLong(value, input.toInstant().toEpochMilli())
@@ -95,22 +75,9 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun INamedStatement.setLocalTime(value: String, input: LocalTime, jdsDb: JdsDb) {
-        when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.localTimeFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input)
-            else -> this.setLong(value, input.toNanoOfDay())
-        }
-    }
-
-    /**
-     * @param value
-     * @param input
-     * @param jdsDb
-     */
     fun PreparedStatement.setLocalTime(value: Int, input: LocalTime, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.localTimeFormat())
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.toSqlStringFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input)
             else -> this.setLong(value, input.toNanoOfDay())
         }
@@ -124,6 +91,30 @@ object JdsExtensions {
         JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.getString(column)
         JdsImplementation.POSTGRES -> this.getObject(column, LocalTime::class.java)
         else -> this.getLong(column)
+    }
+
+
+    /**
+     * @param value
+     * @param input
+     * @param jdsDb
+     */
+    fun PreparedStatement.setLocalDate(value: Int, input: LocalDate, jdsDb: JdsDb) {
+        when (jdsDb.implementation) {
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.toSqlStringFormat())
+            JdsImplementation.POSTGRES -> this.setObject(value, input)
+            else -> this.setTimestamp(value, Timestamp.valueOf(input.atStartOfDay())) //Oracle, Sqlite
+        }
+    }
+
+    /**
+     * @param column
+     * @param jdsDb
+     */
+    fun ResultSet.getLocalDate(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
+        JdsImplementation.TSQL -> this.getString(column)
+        JdsImplementation.POSTGRES -> this.getObject(column, LocalDate::class.java)
+        else -> this.getTimestamp(column)//Oracle, Sqlite, maria,sql
     }
 
     /**

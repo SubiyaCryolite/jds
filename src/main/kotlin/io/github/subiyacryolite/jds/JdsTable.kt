@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.JdsExtensions.setLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -34,15 +35,12 @@ import kotlin.collections.LinkedHashMap
 open class JdsTable() : Serializable {
 
     var name = ""
-    var onlyLiveRecords = false
-    var onlyDeprecatedRecords = false
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
     var uniqueBy = JdsFilterBy.UUID
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
-    private var targetConnection = 0
     private var deleteByCompositeKeySql = ""
     private var deleteByParentUuidSql = ""
     private var deleteByUuidSql = ""
@@ -129,8 +127,8 @@ open class JdsTable() : Serializable {
                 deleteExistingRecords(entity, deleteColumns)
 
             //prepare insert placeholder
-            if (!jdsDb.supportsStatements) {
-                val stmt = eventArgument.getOrAddStatement("INSERT INTO $name(uuid,  edit_version) VALUES(?,  ?)")
+            if (jdsDb.isSqLiteDb) {
+                val stmt = eventArgument.getOrAddStatement("INSERT OR REPLACE INTO $name(uuid, edit_version) VALUES(?,  ?)")
                 stmt.setString(1, entity.overview.uuid)
                 stmt.setInt(2, entity.overview.editVersion)
                 stmt.addBatch()
@@ -154,12 +152,12 @@ open class JdsTable() : Serializable {
             updateColumns.forEach {
                 joiner.add(if (jdsDb.supportsStatements) "?" else "$it = ?")
             }
-            if (jdsDb.supportsStatements) {
+            if (!jdsDb.isSqLiteDb) {
                 joiner.add("?")//last parameter for composite keys
                 joiner.add("?")//last parameter for composite keys
             }
 
-            val statementQuery = when (jdsDb.supportsStatements) {
+            val statementQuery = when (!jdsDb.isSqLiteDb) {
                 true -> "{call $storedProcedureName($joiner)}"
                 false -> {
                     val stringBuilder = StringBuilder()
@@ -173,7 +171,7 @@ open class JdsTable() : Serializable {
                 }
             }
 
-            val insertStatement = when (jdsDb.supportsStatements) {
+            val insertStatement = when (!jdsDb.isSqLiteDb) {
                 true -> eventArgument.getOrAddCall(statementQuery)
                 false -> eventArgument.getOrAddStatement(statementQuery)
             }
@@ -183,7 +181,7 @@ open class JdsTable() : Serializable {
                     is ZonedDateTime -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
                     is LocalTime -> insertStatement.setLocalTime(index + 1, value, jdsDb)
                     is LocalDateTime -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value))
-                    is LocalDate -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value.atStartOfDay()))
+                    is LocalDate -> insertStatement.setLocalDate(index + 1, value, jdsDb)
                     is MonthDay -> insertStatement.setString(index + 1, value.toString())
                     is YearMonth -> insertStatement.setString(index + 1, value.toString())
                     is Period -> insertStatement.setString(index + 1, value.toString())
@@ -202,6 +200,116 @@ open class JdsTable() : Serializable {
             JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
             JdsFilterBy.UUID_LOCATION -> deleteColumns.getOrPut(deleteByParentUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
         }
+    }
+
+    /**
+     * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
+     * @param pool a shared connection pool to quickly query the target schemas
+     */
+    @Throws(Exception::class)
+    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, connection: Connection) = try {
+
+        val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
+        val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
+        if (!jdsDb.doesTableExist(connection, name)) {
+            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use {
+                it.executeUpdate()
+                if (jdsDb.options.isPrintingOutput)
+                    println("Created $name")
+            }
+        }
+
+        val insertColumns = LinkedList<String>()
+        val delimiter = when (jdsDb.implementation) {
+            JdsImplementation.TSQL, JdsImplementation.ORACLE -> " "
+            else -> "ADD COLUMN "
+        }
+        val prefix = when (jdsDb.implementation) {
+            JdsImplementation.TSQL -> "ADD "
+            JdsImplementation.ORACLE -> "ADD ("
+            else -> "ADD COLUMN "
+        }
+        val suffix = when (jdsDb.implementation) {
+            JdsImplementation.ORACLE -> ")"
+            else -> ""
+        }
+
+        var foundChanges = false
+        val stringJoiner = StringJoiner(", $delimiter", prefix, suffix)
+        val sqliteJoiner = LinkedList<String>()
+        createColumnsSql.forEach { columnName, createColumnSql ->
+            if (!jdsDb.doesColumnExist(connection, name, columnName)) {
+                if (!jdsDb.isSqLiteDb)
+                    stringJoiner.add(createColumnSql)
+                else
+                    sqliteJoiner.add(createColumnSql)
+                foundChanges = true
+            }
+            //regardless of column existing add to the query
+            columnNames.add(columnName)
+            insertColumns.add(columnName)
+        }
+
+        if (foundChanges) {
+            if (jdsDb.isSqLiteDb) {
+                //sqlite must alter columns once per entry
+                sqliteJoiner.forEach { connection.prepareStatement(String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")).use { it.executeUpdate() } }
+            } else {
+                val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
+                connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
+            }
+        }
+
+        if (jdsDb.supportsStatements && (!jdsDb.doesProcedureExist(connection, storedProcedureName) || foundChanges)) {
+            val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
+            tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
+            tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
+
+            //MySQL && MariaDB don't support alters. Must be dropped first
+            if (setOf(JdsImplementation.MARIADB, JdsImplementation.MYSQL).contains(jdsDb.implementation))
+                connection.prepareStatement("DROP PROCEDURE IF EXISTS $storedProcedureName").use { it.executeUpdate() }
+
+            val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "edit_version"), tableColumns.count() <= 2)
+            connection.prepareStatement(createOrAlteredProcedureSQL).use { it.executeUpdate() }
+        }
+        generatedOrUpdatedSchema = true
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
+    }
+
+    private fun generateNativeColumnTypes(jdsDb: JdsDb, columnToFieldMap: LinkedHashMap<String, JdsField>): LinkedHashMap<String, String> {
+        val collection = LinkedHashMap<String, String>()
+        columnToFieldMap.forEach { columnName, field ->
+            if (!JdsSchema.isIgnoredType(field.type))
+                collection[columnName] = JdsSchema.getDbDataType(jdsDb, field.type)
+        }
+        return collection
+    }
+
+    /**
+     * Determine if this entity should have its properties persisted to this table
+     * @param jdsDb an instance of [JdsDb][JdsDb], used to lookup mapped classes
+     * @param entity a [JdsEntity][JdsEntity] that may have [JdsField's][JdsField] written to this table
+     */
+    private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
+
+        if (entity is IJdsTableFilter)
+            if (!entity.satisfiesCondition(this))
+                return false
+
+        if (entities.isEmpty())
+            return true //this means this crt applies to all entities i.e unfiltered
+
+        entities.forEach {
+            val entityType = jdsDb.classes[it]
+            if (entityType != null) {
+                if (entityType.isInstance(entity))
+                    return true
+            } else
+                println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
+        }
+
+        return false
     }
 
     /**
@@ -257,149 +365,6 @@ open class JdsTable() : Serializable {
         deleteStatement.addBatch()
     }
 
-    /**
-     * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
-     * @param pool a shared connection pool to quickly query the target schemas
-     */
-    @Throws(Exception::class)
-    internal fun forceGenerateOrUpdateSchema(jdsDb: JdsDb, pool: HashMap<Int, Connection>) = try {
-
-        if (!pool.containsKey(targetConnection))
-            pool[targetConnection] = jdsDb.getConnection(targetConnection)
-
-        val connection = pool[targetConnection]!!
-
-        val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
-        val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
-        if (!jdsDb.doesTableExist(connection, name)) {
-            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use {
-                it.executeUpdate()
-                if (jdsDb.options.isPrintingOutput)
-                    println("Created $name")
-            }
-        }
-
-        val insertColumns = LinkedList<String>()
-        val delimiter = when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.ORACLE -> " "
-            else -> "ADD COLUMN "
-        }
-        val prefix = when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> "ADD "
-            JdsImplementation.ORACLE -> "ADD ("
-            else -> "ADD COLUMN "
-        }
-        val suffix = when (jdsDb.implementation) {
-            JdsImplementation.ORACLE -> ")"
-            else -> ""
-        }
-
-        var foundChanges = false
-        val stringJoiner = StringJoiner(", $delimiter", prefix, suffix)
-        val sqliteJoiner = LinkedList<String>()
-        createColumnsSql.forEach { columnName, createColumnSql ->
-            if (!jdsDb.doesColumnExist(connection, name, columnName)) {
-                if (!jdsDb.isSqLiteDb)
-                    stringJoiner.add(createColumnSql)
-                else
-                    sqliteJoiner.add(createColumnSql)
-                foundChanges = true
-            }
-            //regardless of column existing add to the query
-            columnNames.add(columnName)
-            insertColumns.add(columnName)
-        }
-
-        if (foundChanges) {
-            if (jdsDb.isSqLiteDb) {
-                //sqlite must alter columns once per entry
-                sqliteJoiner.forEach {
-                    val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, "ADD COLUMN $it")
-                    connection.prepareStatement(addNewColumnsSql).use { it.executeUpdate() }
-                }
-            } else {
-                val addNewColumnsSql = String.format(jdsDb.getDbAddColumnSyntax(), name, stringJoiner)
-                connection.prepareStatement(addNewColumnsSql).use {
-                    try {
-                        it.executeUpdate()
-                    } catch (ex: Exception) {
-                        ex.printStackTrace(System.err)
-                    }
-                }
-
-                val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
-                tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
-                tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
-                val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "edit_version"), tableColumns.isEmpty())
-                connection.prepareStatement(createOrAlteredProcedureSQL).use {
-                    try {
-                        it.executeUpdate()
-                    } catch (ex: Exception) {
-                        ex.printStackTrace(System.err)
-                    }
-                }
-            }
-        }
-
-        //deleteByCompositeKeySql = "DELETE FROM $name WHERE ${JdsSchema.compositeKeyColumn} IN %s"
-        //deleteByParentUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE parent_uuid IN %s)"
-        //deleteByUuidSql = "DELETE FROM $name WHERE composite_key IN (SELECT composite_key FROM jds_entity_overview WHERE uuid IN %s)"
-
-        /**
-         * SELECT agent_code,agent_name,working_area,commission
-        FROM agents
-        WHERE exists
-        (SELECT *
-        FROM customer
-        WHERE grade=3 AND agents.agent_code=customer.agent_code)
-         */
-
-        generatedOrUpdatedSchema = true
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
-    }
-
-    private fun generateNativeColumnTypes(jdsDb: JdsDb, columnToFieldMap: LinkedHashMap<String, JdsField>): LinkedHashMap<String, String> {
-        val collection = LinkedHashMap<String, String>()
-        columnToFieldMap.forEach { columnName, field ->
-            if (!JdsSchema.isIgnoredType(field.type))
-                collection[columnName] = JdsSchema.getDbDataType(jdsDb, field.type)
-        }
-        return collection
-    }
-
-    /**
-     * Determine if this entity should have its properties persisted to this table
-     * @param jdsDb an instance of [JdsDb][JdsDb], used to lookup mapped classes
-     * @param entity a [JdsEntity][JdsEntity] that may have [JdsField's][JdsField] written to this table
-     */
-    private fun satisfiesConditions(jdsDb: JdsDb, entity: JdsEntity): Boolean {
-
-        if (entity is IJdsTableFilter)
-            if (!entity.satisfiesCondition(this))
-                return false
-
-        if (entities.isEmpty())
-            return true //this means this crt applies to all entities i.e unfiltered
-
-        entities.forEach {
-            val entityType = jdsDb.classes[it]
-            if (entityType != null) {
-                if (entityType.isInstance(entity))
-                    return true
-            } else
-                println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
-        }
-
-        return false
-    }
-
-    /**
-     * @param targetConnection
-     */
-    fun setTargetConnection(targetConnection: Int) {
-        this.targetConnection = targetConnection
-    }
 
     companion object {
 

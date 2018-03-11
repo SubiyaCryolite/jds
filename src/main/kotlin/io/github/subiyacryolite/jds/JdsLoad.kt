@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.JdsExtensions.getLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.getLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.getZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -319,7 +320,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             while (it.next()) {
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val value = it.getTimestamp("value")
+                val value = it.getLocalDate("value", jdsDb)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach {
                     it.populateProperties(JdsFieldType.DATE, fieldId, value)

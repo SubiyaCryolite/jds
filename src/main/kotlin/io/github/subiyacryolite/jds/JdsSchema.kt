@@ -67,18 +67,7 @@ object JdsSchema {
 
     fun isIgnoredType(type: Long): Boolean {
         val actualType = JdsField.values[type] ?: return true
-        return when (actualType.type) {
-            JdsFieldType.BLOB,
-            JdsFieldType.ENTITY_COLLECTION,
-            JdsFieldType.FLOAT_COLLECTION,
-            JdsFieldType.INT_COLLECTION,
-            JdsFieldType.DOUBLE_COLLECTION,
-            JdsFieldType.LONG_COLLECTION,
-            JdsFieldType.STRING_COLLECTION,
-            JdsFieldType.DATE_TIME_COLLECTION,
-            JdsFieldType.ENTITY -> true
-            else -> false
-        }
+        return isIgnoredType(actualType.type)
     }
 
     /**
@@ -111,7 +100,8 @@ object JdsSchema {
         JdsFieldType.BLOB -> jdsDb.getNativeDataTypeBlob(max)
         JdsFieldType.ENUM_COLLECTION, JdsFieldType.BOOLEAN -> jdsDb.getNativeDataTypeBoolean()
         JdsFieldType.ENUM, JdsFieldType.INT -> jdsDb.getNativeDataTypeInteger()
-        JdsFieldType.DATE, JdsFieldType.DATE_TIME -> jdsDb.getNativeDataTypeDateTime()
+        JdsFieldType.DATE_TIME -> jdsDb.getNativeDataTypeDateTime()
+        JdsFieldType.DATE -> jdsDb.getNativeDataTypeDate()
         JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getNativeDataTypeLong()
         JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> jdsDb.getNativeDataTypeString(max)
         else -> "invalid"

@@ -32,6 +32,7 @@ open class SaveEventArgument(jdsDb: IJdsDb, connection: Connection, alternateCon
         connection.commit()
         alternateConnections.forEach { it.value.commit() }
     } catch (exception: Exception) {
+        connection.rollback()
         exception.printStackTrace(System.err)
     } finally {
         connection.autoCommit = true

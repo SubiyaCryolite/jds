@@ -14,7 +14,8 @@
 package io.github.subiyacryolite.jds
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.github.subiyacryolite.jds.JdsExtensions.toLocalTimeSqlFormat
+import io.github.subiyacryolite.jds.JdsExtensions.toLocalDate
+import io.github.subiyacryolite.jds.JdsExtensions.toLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.embedded.*
@@ -47,61 +48,61 @@ abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
     @get:JsonIgnore
-    internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = HashMap()
+    internal val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = HashMap()
+    internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val periodProperties: HashMap<Long, ObjectProperty<Period>> = HashMap()
+    internal val periodProperties: HashMap<Long, ObjectProperty<Period>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val durationProperties: HashMap<Long, ObjectProperty<Duration>> = HashMap()
+    internal val durationProperties: HashMap<Long, ObjectProperty<Duration>> = LinkedHashMap()
     //strings
     @get:JsonIgnore
-    internal val stringProperties: HashMap<Long, StringProperty> = HashMap()
+    internal val stringProperties: HashMap<Long, StringProperty> = LinkedHashMap()
     //numeric
     @get:JsonIgnore
-    internal val floatProperties: HashMap<Long, WritableValue<Float>> = HashMap()
+    internal val floatProperties: HashMap<Long, WritableValue<Float>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val doubleProperties: HashMap<Long, WritableValue<Double>> = HashMap()
+    internal val doubleProperties: HashMap<Long, WritableValue<Double>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val booleanProperties: HashMap<Long, WritableValue<Boolean>> = HashMap()
+    internal val booleanProperties: HashMap<Long, WritableValue<Boolean>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val longProperties: HashMap<Long, WritableValue<Long>> = HashMap()
+    internal val longProperties: HashMap<Long, WritableValue<Long>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val integerProperties: HashMap<Long, WritableValue<Int>> = HashMap()
+    internal val integerProperties: HashMap<Long, WritableValue<Int>> = LinkedHashMap()
     //arrays
     @get:JsonIgnore
-    internal val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
+    internal val objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val stringArrayProperties: HashMap<Long, MutableCollection<String>> = HashMap()
+    internal val stringArrayProperties: HashMap<Long, MutableCollection<String>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
+    internal val dateTimeArrayProperties: HashMap<Long, MutableCollection<LocalDateTime>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = HashMap()
+    internal val floatArrayProperties: HashMap<Long, MutableCollection<Float>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = HashMap()
+    internal val doubleArrayProperties: HashMap<Long, MutableCollection<Double>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val longArrayProperties: HashMap<Long, MutableCollection<Long>> = HashMap()
+    internal val longArrayProperties: HashMap<Long, MutableCollection<Long>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = HashMap()
+    internal val integerArrayProperties: HashMap<Long, MutableCollection<Int>> = LinkedHashMap()
     //enumProperties
     @get:JsonIgnore
-    internal val enumProperties: HashMap<Long, ObjectProperty<Enum<*>?>> = HashMap()
+    internal val enumProperties: HashMap<Long, ObjectProperty<Enum<*>?>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val enumCollectionProperties: HashMap<Long, MutableCollection<Enum<*>?>> = HashMap()
+    internal val enumCollectionProperties: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
     //objects
     @get:JsonIgnore
-    internal val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
+    internal val objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = LinkedHashMap()
     //blobs
     @get:JsonIgnore
-    internal val blobProperties: HashMap<Long, BlobProperty> = HashMap()
+    internal val blobProperties: HashMap<Long, BlobProperty> = LinkedHashMap()
 
 
     init {
@@ -155,7 +156,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param temporalProperty
      */
-    protected fun map(field: JdsField, temporalProperty: ObjectProperty<out Temporal>) {
+    protected fun <T : Temporal> map(field: JdsField, temporalProperty: ObjectProperty<T>) {
         val temporal = temporalProperty.get()
         when (temporal) {
             is LocalDateTime -> {
@@ -309,7 +310,7 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Please assign the correct type to field [${fieldEnum.field}]")
         mapEnums(overview.entityId, fieldEnum.field.id)
         mapField(overview.entityId, fieldEnum.field.id)
-        enumCollectionProperties[fieldEnum.field.id] = properties as MutableCollection<Enum<*>?>
+        enumCollectionProperties[fieldEnum.field.id] = properties as MutableCollection<Enum<*>>
     }
 
     /**
@@ -377,81 +378,21 @@ abstract class JdsEntity : IJdsEntity {
     </T> */
     private fun <T : JdsEntity> copyPropertyValues(source: T) {
         val dest = this
-        source.booleanProperties.entries.forEach {
-            if (dest.booleanProperties.containsKey(it.key)) {
-                dest.booleanProperties[it.key] = it.value
-            }
-        }
-        source.localDateTimeProperties.entries.forEach {
-            if (dest.localDateTimeProperties.containsKey(it.key)) {
-                dest.localDateTimeProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.zonedDateTimeProperties.entries.forEach {
-            if (dest.zonedDateTimeProperties.containsKey(it.key)) {
-                dest.zonedDateTimeProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.localTimeProperties.entries.forEach {
-            if (dest.localTimeProperties.containsKey(it.key)) {
-                dest.localTimeProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.localDateProperties.entries.forEach {
-            if (dest.localDateProperties.containsKey(it.key)) {
-                dest.localDateProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.stringProperties.entries.forEach {
-            if (dest.stringProperties.containsKey(it.key)) {
-                dest.stringProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.floatProperties.entries.forEach {
-            if (dest.floatProperties.containsKey(it.key)) {
-                dest.floatProperties[it.key] = it.value
-            }
-        }
-        source.doubleProperties.entries.forEach {
-            if (dest.doubleProperties.containsKey(it.key)) {
-                dest.doubleProperties[it.key] = it.value
-            }
-        }
-        source.longProperties.entries.forEach {
-            if (dest.longProperties.containsKey(it.key)) {
-                dest.longProperties[it.key] = it.value
-            }
-        }
-        source.integerProperties.entries.forEach {
-            if (dest.integerProperties.containsKey(it.key)) {
-                dest.integerProperties[it.key] = it.value
-            }
-        }
-        source.blobProperties.entries.forEach {
-            if (dest.blobProperties.containsKey(it.key)) {
-                dest.blobProperties[it.key]?.set(it.value.get()!!)
-            }
-        }
-        source.durationProperties.entries.forEach {
-            if (dest.durationProperties.containsKey(it.key)) {
-                dest.durationProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.periodProperties.entries.forEach {
-            if (dest.periodProperties.containsKey(it.key)) {
-                dest.periodProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.yearMonthProperties.entries.forEach {
-            if (dest.yearMonthProperties.containsKey(it.key)) {
-                dest.yearMonthProperties[it.key]?.set(it.value.get())
-            }
-        }
-        source.monthDayProperties.entries.forEach {
-            if (dest.monthDayProperties.containsKey(it.key)) {
-                dest.monthDayProperties[it.key]?.set(it.value.get()!!)
-            }
-        }
+        source.booleanProperties.entries.forEach { dest.booleanProperties[it.key] = it.value }
+        source.localDateTimeProperties.entries.forEach { dest.localDateTimeProperties[it.key]?.set(it.value.get()) }
+        source.zonedDateTimeProperties.entries.forEach { dest.zonedDateTimeProperties[it.key]?.set(it.value.get()) }
+        source.localTimeProperties.entries.forEach { dest.localTimeProperties[it.key]?.set(it.value.get()) }
+        source.localDateProperties.entries.forEach { dest.localDateProperties[it.key]?.set(it.value.get()) }
+        source.stringProperties.entries.forEach { dest.stringProperties[it.key]?.set(it.value.get()) }
+        source.floatProperties.entries.forEach { dest.floatProperties[it.key] = it.value }
+        source.doubleProperties.entries.forEach { dest.doubleProperties[it.key] = it.value }
+        source.longProperties.entries.forEach { dest.longProperties[it.key] = it.value }
+        source.integerProperties.entries.forEach { dest.integerProperties[it.key] = it.value }
+        source.blobProperties.entries.forEach { dest.blobProperties[it.key]?.set(it.value.get()!!) }
+        source.durationProperties.entries.forEach { dest.durationProperties[it.key]?.set(it.value.get()) }
+        source.periodProperties.entries.forEach { dest.periodProperties[it.key]?.set(it.value.get()) }
+        source.yearMonthProperties.entries.forEach { dest.yearMonthProperties[it.key]?.set(it.value.get()) }
+        source.monthDayProperties.entries.forEach { dest.monthDayProperties[it.key]?.set(it.value.get()!!) }
     }
 
     /**
@@ -629,7 +570,7 @@ abstract class JdsEntity : IJdsEntity {
         putIntegers(integerArrayProperties, objectInputStream.readObject() as Map<Long, List<Int>>)
         //enumProperties
         putEnum(enumProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
-        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<Long, List<Enum<*>?>>)
+        putEnums(enumCollectionProperties, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
     }
 
     private fun serializeEnums(input: Map<Long, ObjectProperty<Enum<*>?>>): Map<Long, Enum<*>?> =
@@ -715,7 +656,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeTemporal(input: Map<Long, ObjectProperty<out Temporal>>): Map<Long, Temporal> =
+    private fun <T : Temporal> serializeTemporal(input: Map<Long, ObjectProperty<T>>): Map<Long, T> =
             input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
@@ -742,7 +683,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putEnums(destination: Map<Long, MutableCollection<Enum<*>?>>, source: Map<Long, List<Enum<*>?>>) {
+    private fun putEnums(destination: Map<Long, MutableCollection<Enum<*>>>, source: Map<Long, List<Enum<*>>>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
     }
 
@@ -806,7 +747,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
     }
 
-    private fun putTemporal(destination: Map<Long, ObjectProperty<Temporal>>, source: Map<Long, Temporal>) {
+    private fun putTemporal(destination: Map<Long, ObjectProperty<in Temporal>>, source: Map<Long, Temporal>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
@@ -827,42 +768,44 @@ abstract class JdsEntity : IJdsEntity {
                 false -> 0
                 else -> null
             }
-            embeddedObject.b.add(JdsBooleanValues(it.key, input))
+            embeddedObject.bv.add(JdsStoreBoolean(it.key, input))
         }
-        stringProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value)) }
-        floatProperties.entries.forEach { embeddedObject.f.add(JdsFloatValues(it.key, it.value.value)) }
-        doubleProperties.entries.forEach { embeddedObject.d.add(JdsDoubleValues(it.key, it.value.value)) }
-        longProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value)) }
-        integerProperties.entries.forEach { embeddedObject.i.add(JdsIntegerEnumValues(it.key, it.value.value)) }
+        stringProperties.entries.forEach { embeddedObject.sv.add(JdsStoreString(it.key, it.value.value)) }
+        floatProperties.entries.forEach { embeddedObject.fv.add(JdsStoreFloat(it.key, it.value.value)) }
+        doubleProperties.entries.forEach { embeddedObject.dv.add(JdsStoreDouble(it.key, it.value.value)) }
+        longProperties.entries.forEach { embeddedObject.lv.add(JdsStoreLong(it.key, it.value.value)) }
+        integerProperties.entries.forEach { embeddedObject.iv.add(JdsStoreInteger(it.key, it.value.value)) }
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
-        durationProperties.entries.forEach { embeddedObject.l.add(JdsLongValues(it.key, it.value.value.toNanos())) }
-        localDateTimeProperties.entries.forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        localDateProperties.entries.forEach { embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
-        monthDayProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value?.toString())) }
-        yearMonthProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, (it.value.value as YearMonth?)?.toString())) }
-        periodProperties.entries.forEach { embeddedObject.s.add(JdsStringValues(it.key, it.value.value?.toString())) }
+        zonedDateTimeProperties.entries.forEach { embeddedObject.zdt.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
+        localTimeProperties.entries.forEach { embeddedObject.tv.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
+        durationProperties.entries.forEach { embeddedObject.du.add(JdsStoreDuration(it.key, it.value.value.toNanos())) }
+        localDateTimeProperties.entries.forEach { embeddedObject.dtv.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
+        localDateProperties.entries.forEach { embeddedObject.dte.add(JdsStoreDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        monthDayProperties.entries.forEach { embeddedObject.md.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
+        yearMonthProperties.entries.forEach { embeddedObject.ym.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
+        periodProperties.entries.forEach { embeddedObject.pv.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
         //==============================================
         //BLOB
         //==============================================
-        blobProperties.entries.forEach { embeddedObject.bl.add(JdsBlobValues(it.key, it.value.get() ?: ByteArray(0))) }
+        blobProperties.entries.forEach {
+            embeddedObject.blv.add(JdsStoreBlob(it.key, it.value.get() ?: ByteArray(0)))
+        }
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.forEach { embeddedObject.i.add(JdsIntegerEnumValues(it.key, it.value.value?.ordinal)) }
-        enumCollectionProperties.entries.forEach { it.value.forEach { child -> embeddedObject.i.add(JdsIntegerEnumValues(it.key, child?.ordinal)) } }
+        enumProperties.entries.forEach { embeddedObject.ev.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
+        enumCollectionProperties.entries.forEach { embeddedObject.ec.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
         //==============================================
         //ARRAYS
         //==============================================
-        stringArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.s.add(JdsStringValues(it.key, child)) } }
-        dateTimeArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.ldt.add(JdsLocalDateTimeValues(it.key, Timestamp.valueOf(child))) } }
-        floatArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.f.add(JdsFloatValues(it.key, child)) } }
-        doubleArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.d.add(JdsDoubleValues(it.key, child)) } }
-        longArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.l.add(JdsLongValues(it.key, child)) } }
-        integerArrayProperties.entries.forEach { it.value.forEach { child -> embeddedObject.i.add(JdsIntegerEnumValues(it.key, child)) } }
+        stringArrayProperties.entries.forEach { embeddedObject.sc.add(JdsStoreStringCollection(it.key, it.value)) }
+        dateTimeArrayProperties.entries.forEach { embeddedObject.dtc.add(JdsStoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
+        floatArrayProperties.entries.forEach { embeddedObject.fc.add(JdsStoreFloatCollection(it.key, it.value)) }
+        doubleArrayProperties.entries.forEach { embeddedObject.dc.add(JdsStoreDoubleCollection(it.key, it.value)) }
+        longArrayProperties.entries.forEach { embeddedObject.lc.add(JdsStoreLongCollection(it.key, it.value)) }
+        integerArrayProperties.entries.forEach { embeddedObject.ic.add(JdsStoreIntegerCollection(it.key, it.value)) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -880,6 +823,16 @@ abstract class JdsEntity : IJdsEntity {
             eo.init(it.value)
             embeddedObject.eo.add(eo)
         }
+    }
+
+    private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>): MutableCollection<Timestamp> {
+        values.forEach { ArrayList<Timestamp>().add(Timestamp.valueOf(it)) }
+        return ArrayList()
+    }
+
+    private fun toIntCollection(values: MutableCollection<Enum<*>>): MutableCollection<Int> {
+        values.forEach { ArrayList<Int>().add(it.ordinal) }
+        return ArrayList()
     }
 
     /**
@@ -940,7 +893,11 @@ abstract class JdsEntity : IJdsEntity {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
                     val enumValues = fieldEnum.values
-                    val index = when (value) { is Int -> value; is BigDecimal -> value.intValueExact(); else -> enumValues.size; }
+                    val index = when (value) {
+                        is Int -> value
+                        is BigDecimal -> value.intValueExact()
+                        else -> enumValues.size
+                    }
                     if (index < enumValues.size) {
                         it.value.add(enumValues[index] as Enum<*>)
                     }
@@ -958,12 +915,17 @@ abstract class JdsEntity : IJdsEntity {
                 is OffsetDateTime -> zonedDateTimeProperties[fieldId]?.set(value.let { it.atZoneSameInstant(ZoneId.systemDefault()) })
             }
 
-            JdsFieldType.DATE -> localDateProperties[fieldId]?.set((value as Timestamp).toLocalDateTime().toLocalDate())
+            JdsFieldType.DATE -> when (value) {
+                is Timestamp -> localDateProperties[fieldId]?.set(value.toLocalDateTime().toLocalDate())
+                is LocalDate -> localDateProperties[fieldId]?.set(value)
+                is String -> localDateProperties[fieldId]?.set(value.toLocalDate())
+                else -> localDateProperties[fieldId]?.set(LocalDate.now())
+            }
 
             JdsFieldType.TIME -> when (value) {
                 is Long -> localTimeProperties[fieldId]?.set(LocalTime.MIN.plusNanos(value))
                 is LocalTime -> localTimeProperties[fieldId]?.set(value)
-                is String -> localTimeProperties[fieldId]?.set(value.toLocalTimeSqlFormat())
+                is String -> localTimeProperties[fieldId]?.set(value.toLocalTime())
             }
 
             JdsFieldType.DURATION -> durationProperties[fieldId]?.set(when (value) {
@@ -1248,13 +1210,13 @@ abstract class JdsEntity : IJdsEntity {
      */
     fun getReportAtomicValue(fieldId: Long, ordinal: Int): Any? {
         if (localDateTimeProperties.containsKey(fieldId))
-            return Timestamp.valueOf(localDateTimeProperties[fieldId]!!.value as LocalDateTime)
+            return localDateTimeProperties[fieldId]!!.value as LocalDateTime
         if (zonedDateTimeProperties.containsKey(fieldId))
-            return (zonedDateTimeProperties[fieldId]!!.value as ZonedDateTime)
+            return zonedDateTimeProperties[fieldId]!!.value as ZonedDateTime
         if (localDateProperties.containsKey(fieldId))
-            return Timestamp.valueOf((localDateProperties[fieldId]!!.value as LocalDate).atStartOfDay())
+            return localDateProperties[fieldId]!!.value as LocalDate
         if (localTimeProperties.containsKey(fieldId))
-            return (localTimeProperties[fieldId]!!.value as LocalTime)
+            return localTimeProperties[fieldId]!!.value as LocalTime
         if (monthDayProperties.containsKey(fieldId))
             return monthDayProperties[fieldId]!!.value.toString()
         if (yearMonthProperties.containsKey(fieldId))
@@ -1359,14 +1321,14 @@ abstract class JdsEntity : IJdsEntity {
     companion object : Externalizable {
 
         private const val serialVersionUID = 20180106_2125L
-        private val allFields = ConcurrentHashMap<Long, MutableSet<Long>>()
-        private val allEnums = ConcurrentHashMap<Long, MutableSet<Long>>()
+        private val allFields = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
+        private val allEnums = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
 
         override fun readExternal(objectInput: ObjectInput) {
             allFields.clear()
-            allFields.putAll(objectInput.readObject() as Map<Long, MutableSet<Long>>)
+            allFields.putAll(objectInput.readObject() as Map<Long, LinkedHashSet<Long>>)
             allEnums.clear()
-            allEnums.putAll(objectInput.readObject() as Map<Long, MutableSet<Long>>)
+            allEnums.putAll(objectInput.readObject() as Map<Long, LinkedHashSet<Long>>)
         }
 
         override fun writeExternal(objectOutput: ObjectOutput) {
@@ -1382,8 +1344,8 @@ abstract class JdsEntity : IJdsEntity {
             getEnums(entityId).add(fieldId)
         }
 
-        internal fun getFields(entityId: Long) = allFields.getOrPut(entityId) { HashSet() }
+        internal fun getFields(entityId: Long) = allFields.getOrPut(entityId) { LinkedHashSet() }
 
-        internal fun getEnums(entityId: Long) = allEnums.getOrPut(entityId) { HashSet() }
+        internal fun getEnums(entityId: Long) = allEnums.getOrPut(entityId) { LinkedHashSet() }
     }
 }
