@@ -11,7 +11,7 @@ class AddressBook : JdsEntity() {
     private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
 
     init {
-        map(Entities.ADDRESS_FIELD, _addresses)
+        map(Entities.ADDRESSES, _addresses)
     }
 
     val addresses: MutableList<Address>

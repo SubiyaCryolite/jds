@@ -9,7 +9,6 @@ import javafx.beans.property.NullableIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.LocalTime
-import java.time.ZonedDateTime
 
 @JdsEntityAnnotation(id = 1, name = "address", version = 1)
 class Address : JdsEntity() {
@@ -20,8 +19,7 @@ class Address : JdsEntity() {
     private val _provinceOrState = SimpleStringProperty("")
     private val _country = SimpleStringProperty("")
     private val _primaryAddress = SimpleObjectProperty(PrimaryAddress.NO)
-    private val _timeOfEntry = SimpleObjectProperty(ZonedDateTime.now())
-    private val _time = SimpleObjectProperty(LocalTime.now())
+    private val _timeOfEntry = SimpleObjectProperty(LocalTime.now())
 
     init {
         map(Fields.STREET_NAME, _streetName)
@@ -30,8 +28,7 @@ class Address : JdsEntity() {
         map(Fields.CITY_NAME, _city)
         map(Fields.COUNTRY_NAME, _country)
         map(Fields.PROVINCE_NAME, _provinceOrState)
-        map(Fields.ZONED_DATE_OF_REGISTRATION, _timeOfEntry)
-        map(Fields.TIME_FIELD, _time)
+        map(Fields.TIME_OF_ENTRY, _timeOfEntry)
         map(Enums.PRIMARY_ADDRESS_ENUM, _primaryAddress)
     }
 
@@ -65,13 +62,9 @@ class Address : JdsEntity() {
         get() = _country.get()
         set(value) = _country.set(value)
 
-    var timeOfEntry: ZonedDateTime
+    var timeOfEntry: LocalTime
         get() = _timeOfEntry.get()
         set(timeOfEntry) = _timeOfEntry.set(timeOfEntry)
-
-    var time: LocalTime
-        get() = _time.get()
-        set(timeOfEntry) = _time.set(timeOfEntry)
 
     override fun toString(): String {
         return "{" +
@@ -84,7 +77,6 @@ class Address : JdsEntity() {
                 ", provinceOrState = $provinceOrState " +
                 ", country = $country " +
                 ", timeOfEntry = $timeOfEntry " +
-                ", time = $time" +
                 '}'
     }
 }

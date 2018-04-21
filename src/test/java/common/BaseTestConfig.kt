@@ -81,15 +81,14 @@ abstract class BaseTestConfig(val testName: String) {
     protected val addressBook: AddressBook
         get() {
             val primaryAddress = Address()
-            primaryAddress.overview.uuid = "primaryAddress"
+            primaryAddress.overview.uuid = "primaryAddress" //custom uuid
             primaryAddress.area = "Norte Broad"
             primaryAddress.city = "Livingstone"
             primaryAddress.country = "Zambia"
             primaryAddress.plotNumber = null
             primaryAddress.provinceOrState = "Southern"
             primaryAddress.streetName = "East Street"
-            primaryAddress.timeOfEntry = ZonedDateTime.now()
-            primaryAddress.time = primaryAddress.timeOfEntry.toLocalTime()
+            primaryAddress.timeOfEntry = LocalTime.now()
             primaryAddress.primaryAddress = PrimaryAddress.YES
 
             val secondAddress = Address()
@@ -100,8 +99,7 @@ abstract class BaseTestConfig(val testName: String) {
             secondAddress.plotNumber = 2
             secondAddress.provinceOrState = "Lusaka"
             secondAddress.streetName = "West Street"
-            secondAddress.timeOfEntry = ZonedDateTime.now().minusMonths(2)
-            secondAddress.time = secondAddress.timeOfEntry.toLocalTime()
+            secondAddress.timeOfEntry = ZonedDateTime.now().minusMonths(2).toLocalTime()
             secondAddress.primaryAddress = PrimaryAddress.NO
 
             val thirdAddress = Address()
@@ -112,8 +110,7 @@ abstract class BaseTestConfig(val testName: String) {
             thirdAddress.plotNumber = 9
             thirdAddress.provinceOrState = "Copperbelt"
             thirdAddress.streetName = "West Street"
-            thirdAddress.timeOfEntry = ZonedDateTime.now().minusDays(3)
-            thirdAddress.time = thirdAddress.timeOfEntry.toLocalTime()
+            thirdAddress.timeOfEntry = ZonedDateTime.now().minusDays(3).toLocalTime()
             thirdAddress.primaryAddress = PrimaryAddress.NO
 
             val addressBook = AddressBook()

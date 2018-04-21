@@ -17,8 +17,8 @@ class CustomReportJson : BaseTestConfig("Custom reports from json") {
         jdsDb.prepareTables()
 
 
-        val sav = JdsSave(jdsDb, Arrays.asList(addressBook))
-        sav.call()
+        val jdsSave = JdsSave(jdsDb, Arrays.asList(addressBook))
+        jdsSave.call()
     }
 
     @Test

@@ -12,9 +12,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
 
-/**
- * @author indana
- */
 class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
 
     override val connection: Connection

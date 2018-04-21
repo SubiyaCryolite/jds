@@ -7,9 +7,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
 
-/**
- * @author indana
- */
 class JdsDbOracleImplementation : JdsDbOracle() {
 
     override val connection: Connection

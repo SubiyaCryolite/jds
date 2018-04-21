@@ -7,9 +7,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
 
-/**
- * @author indana
- */
 class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
 
     override val connection: Connection

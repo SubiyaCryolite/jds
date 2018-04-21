@@ -11,10 +11,6 @@ import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 
-/**
- *
- * @author indana
- */
 class JdsDbSqliteImplementation : JdsDbSqlite() {
 
     private val fileLocation: String
