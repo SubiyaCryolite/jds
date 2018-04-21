@@ -739,7 +739,7 @@ The **jds*ref*** tables are used as reference tables.
 
 The **jds*entity*** tables are used to store all high level meta-data regarding every Jds Entity in the database.
 
-![Database design](database_design.svg?raw=true)
+<img src="https://github.com/SubiyaCryolite/jds/blob/master/database_design.svg" width="100%"/>
 
 # Development
 
