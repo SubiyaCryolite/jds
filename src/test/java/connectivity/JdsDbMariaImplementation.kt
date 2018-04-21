@@ -10,7 +10,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.SQLException
 import java.util.*
 
 /**
@@ -18,11 +17,11 @@ import java.util.*
  */
 class JdsDbMariaImplementation : JdsDbMaria() {
 
-    @Throws(ClassNotFoundException::class, SQLException::class)
-    override fun getConnection(): Connection {
-        Class.forName("org.mariadb.jdbc.Driver")
-        val properties = Properties()
-        FileInputStream(File("db.maria.properties")).use { properties.load(it) }
-        return DriverManager.getConnection("jdbc:mariadb://localhost:3307/jds", properties)
-    }
+    override val connection: Connection
+        get () {
+            Class.forName("org.mariadb.jdbc.Driver")
+            val properties = Properties()
+            FileInputStream(File("db.maria.properties")).use { properties.load(it) }
+            return DriverManager.getConnection("jdbc:mariadb://localhost:3307/jds", properties)
+        }
 }

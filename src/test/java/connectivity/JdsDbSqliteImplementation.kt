@@ -7,11 +7,9 @@ package connectivity
 
 import io.github.subiyacryolite.jds.JdsDbSqlite
 import org.sqlite.SQLiteConfig
-
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.SQLException
 
 /**
  *
@@ -31,12 +29,12 @@ class JdsDbSqliteImplementation : JdsDbSqlite() {
             return path.absolutePath
         }
 
-    @Throws(ClassNotFoundException::class, SQLException::class)
-    override fun getConnection(): Connection {
-        val url = "jdbc:sqlite:$fileLocation"
-        val sqLiteConfig = SQLiteConfig()
-        sqLiteConfig.enforceForeignKeys(true) //You must enable foreign keys in SQLite
-        Class.forName("org.sqlite.JDBC")
-        return DriverManager.getConnection(url, sqLiteConfig.toProperties())
-    }
+    override val connection: Connection
+        get () {
+            val url = "jdbc:sqlite:$fileLocation"
+            val sqLiteConfig = SQLiteConfig()
+            sqLiteConfig.enforceForeignKeys(true) //You must enable foreign keys in SQLite
+            Class.forName("org.sqlite.JDBC")
+            return DriverManager.getConnection(url, sqLiteConfig.toProperties())
+        }
 }

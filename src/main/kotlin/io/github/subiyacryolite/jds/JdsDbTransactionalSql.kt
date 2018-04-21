@@ -155,66 +155,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         executeSqlFromFile(connection, "sql/tsql/jds_ref_entity_inheritance.sql")
     }
 
-    override fun prepareCustomDatabaseComponents(connection: Connection) {
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BOOLEAN)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BLOB)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TEXT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_LONG)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_INTEGER)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_FLOAT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DURATION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_PERIOD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_YEAR)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_DAY)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_YEAR_MONTH)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_FIELD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_INHERITANCE)
-    }
-
-    override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
-        when (jdsComponent) {
-            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
-            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
-            JdsComponent.PROC_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
-            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
-            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
-            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
-            JdsComponent.PROC_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
-            JdsComponent.PROC_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
-            JdsComponent.PROC_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
-            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
-            JdsComponent.PROC_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
-            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
-            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
-            JdsComponent.PROC_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
-            JdsComponent.PROC_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
-            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
-            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
-            JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
-            JdsComponent.PROC_STORE_MONTH_YEAR -> executeSqlFromString(connection, createPopJdsMonthYear())
-            JdsComponent.PROC_STORE_MONTH_DAY -> executeSqlFromString(connection, createPopJdsMonthDay())
-            JdsComponent.PROC_STORE_PERIOD -> executeSqlFromString(connection, createPopJdsStorePeriod())
-            JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
-            JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
-            JdsComponent.PROC_STORE_YEAR_MONTH -> executeSqlFromString(connection, createPopJdsYearMonth())
-            JdsComponent.PROC_STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
-            else -> {
-            }
-        }
-    }
-
     override fun getNativeDataTypeFloat(): String {
         return "REAL"
     }
@@ -316,7 +256,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         sqlBuilder.append(notMatchedColumnsSrc)
         sqlBuilder.append(")\n")
 
-        if (!doNothingOnConflict) {
+        if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
             val comparisonColumns = StringJoiner(", ")
             columns.forEach { column, _ ->

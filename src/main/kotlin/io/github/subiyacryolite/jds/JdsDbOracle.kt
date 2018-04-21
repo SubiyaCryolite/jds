@@ -14,8 +14,6 @@
 package io.github.subiyacryolite.jds
 
 import com.javaworld.NamedPreparedStatement
-import io.github.subiyacryolite.jds.enums.JdsComponent
-import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
@@ -134,66 +132,6 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_inheritance.sql")
     }
 
-    override fun prepareCustomDatabaseComponents(connection: Connection) {
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BOOLEAN)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_BLOB)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TEXT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_LONG)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_INTEGER)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_FLOAT)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DOUBLE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DATE)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_DURATION)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_PERIOD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_YEAR)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_MONTH_DAY)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_YEAR_MONTH)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_STORE_ZONED_DATE_TIME)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_FIELD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENUM)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_FIELD)
-        prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.PROC_REF_ENTITY_INHERITANCE)
-    }
-
-    override fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {
-        when (jdsComponent) {
-            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
-            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
-            JdsComponent.PROC_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
-            JdsComponent.PROC_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
-            JdsComponent.PROC_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
-            JdsComponent.PROC_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
-            JdsComponent.PROC_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
-            JdsComponent.PROC_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
-            JdsComponent.PROC_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
-            JdsComponent.PROC_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
-            JdsComponent.PROC_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
-            JdsComponent.PROC_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
-            JdsComponent.PROC_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
-            JdsComponent.PROC_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
-            JdsComponent.PROC_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
-            JdsComponent.PROC_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
-            JdsComponent.PROC_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
-            JdsComponent.PROC_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
-            JdsComponent.PROC_STORE_MONTH_YEAR -> executeSqlFromString(connection, createPopJdsMonthYear())
-            JdsComponent.PROC_STORE_MONTH_DAY -> executeSqlFromString(connection, createPopJdsMonthDay())
-            JdsComponent.PROC_STORE_PERIOD -> executeSqlFromString(connection, createPopJdsStorePeriod())
-            JdsComponent.PROC_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
-            JdsComponent.PROC_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
-            JdsComponent.PROC_STORE_YEAR_MONTH -> executeSqlFromString(connection, createPopJdsYearMonth())
-            JdsComponent.PROC_STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
-            else -> {
-            }
-        }
-    }
-
     override fun getNativeDataTypeFloat(): String {
         return "BINARY_FLOAT"
     }
@@ -218,7 +156,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         return "NUMBER(10)"
     }
 
-    override fun getNativeDataTypeDate(): String{
+    override fun getNativeDataTypeDate(): String {
         return "DATE"
     }
 
@@ -249,9 +187,15 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
                                    doNothingOnConflict: Boolean): String {
         val sqlBuilder = StringBuilder()
 
-        sqlBuilder.append("CREATE OR ALTER PROCEDURE $procedureName(")
+        sqlBuilder.append("CREATE OR REPLACE PROCEDURE $procedureName(")
         val inputParameters = StringJoiner(", ")
-        columns.forEach { column, type -> inputParameters.add("p_$column IN $type") }
+        columns.forEach { column, type ->
+            var shortType = type
+            val containsBrackets = type.contains("(")
+            if (containsBrackets)
+                shortType = shortType.substring(0, shortType.indexOf('('))
+            inputParameters.add("p_$column IN $shortType")
+        }
         sqlBuilder.append(inputParameters)
         sqlBuilder.append(")\n")
 
@@ -259,9 +203,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         sqlBuilder.append("\t\tBEGIN\n")
         sqlBuilder.append("\t\t\tMERGE  INTO $tableName dest\n")
 
-        sqlBuilder.append("\t\t\tUSING DUAL\n")
-
-        sqlBuilder.append("\t\t\tON (")
+        sqlBuilder.append("\t\t\tUSING DUAL ON (")
         val comparisonColumns = StringJoiner(" AND ")
         uniqueColumns.forEach { column -> comparisonColumns.add("$column = p_$column") }
         sqlBuilder.append(comparisonColumns)
@@ -275,21 +217,21 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
         sqlBuilder.append(" VALUES(")
         val notMatchedColumnsSrc = StringJoiner(", ")
-        columns.forEach { column, _ -> notMatchedColumnsSrc.add("src.$column") }
+        columns.forEach { column, _ -> notMatchedColumnsSrc.add("p_$column") }
         sqlBuilder.append(notMatchedColumnsSrc)
         sqlBuilder.append(")\n")
 
-        if (!doNothingOnConflict) {
+        if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
             val comparisonColumns = StringJoiner(", ")
             columns.forEach { column, _ ->
                 if (!uniqueColumns.contains(column)) //dont update unique columns
-                    comparisonColumns.add("dest.$column = src.$column")
+                    comparisonColumns.add("$column = p_$column")
             }
             sqlBuilder.append(comparisonColumns)
         }
         sqlBuilder.append("\t\t\t;\n")
-        sqlBuilder.append("\t\tEND $procedureName")
+        sqlBuilder.append("\t\tEND $procedureName;")
         return sqlBuilder.toString()
     }
 }

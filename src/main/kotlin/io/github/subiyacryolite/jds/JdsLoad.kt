@@ -99,128 +99,130 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      */
     private fun <T : JdsEntity> populateInner(jdsDb: JdsDb,
                                               entities: MutableCollection<T>,
-                                              uuids: ArrayList<JdsEntityComposite>) {
-        if (uuids.isEmpty()) return
-        val questionsString = prepareParamaterSequence(uuids.size)
-        val getOverviewRecords = StringBuilder()
-        getOverviewRecords.append("SELECT\n")
-        getOverviewRecords.append("  repo.uuid,\n")
-        getOverviewRecords.append("  repo.edit_version,\n")
-        getOverviewRecords.append("  entity_id,\n")
-        getOverviewRecords.append("  entity_version\n")
-        getOverviewRecords.append("FROM jds_entity_overview repo\n")
-        getOverviewRecords.append("  JOIN (SELECT\n")
-        getOverviewRecords.append("          uuid,\n")
-        getOverviewRecords.append("          max(edit_version) AS edit_version\n")
-        getOverviewRecords.append("        FROM jds_entity_overview\n")
-        getOverviewRecords.append("        WHERE uuid IN $questionsString\n")
-        getOverviewRecords.append("        GROUP BY uuid) latest\n")
-        getOverviewRecords.append("    ON repo.uuid = latest.uuid AND repo.edit_version = latest.edit_version")
-
+                                              uuidsBulk: ArrayList<JdsEntityComposite>) {
+        if (uuidsBulk.isEmpty()) return
         try {
-            jdsDb.getConnection().use { connection ->
-                connection.prepareStatement(getOverviewRecords.toString()).use { preparedStatement ->
-                    //create sql to populate fields
-                    val populateEmbeddedAndArrayObjects = "SELECT child.* FROM jds_entity_binding child JOIN jds_entity_overview parent ON parent.uuid IN $questionsString " +
-                            "AND parent.uuid = child.parent_uuid " +
-                            "AND parent.edit_version = child.parent_edit_version"
+            jdsDb.connection.use { connection ->
+                uuidsBulk.chunked(MAX_BATCH_SIZE).forEach { uuids ->
+                    val questionsString = prepareParamaterSequence(uuids.size)
+                    val getOverviewRecords = StringBuilder()
+                    getOverviewRecords.append("SELECT\n")
+                    getOverviewRecords.append("  repo.uuid,\n")
+                    getOverviewRecords.append("  repo.edit_version,\n")
+                    getOverviewRecords.append("  entity_id,\n")
+                    getOverviewRecords.append("  entity_version\n")
+                    getOverviewRecords.append("FROM jds_entity_overview repo\n")
+                    getOverviewRecords.append("  JOIN (SELECT\n")
+                    getOverviewRecords.append("          uuid,\n")
+                    getOverviewRecords.append("          max(edit_version) AS edit_version\n")
+                    getOverviewRecords.append("        FROM jds_entity_overview\n")
+                    getOverviewRecords.append("        WHERE uuid IN $questionsString\n")
+                    getOverviewRecords.append("        GROUP BY uuid) latest\n")
+                    getOverviewRecords.append("    ON repo.uuid = latest.uuid AND repo.edit_version = latest.edit_version")
 
-                    val blobStatement = connection.prepareStatement("SELECT * FROM jds_store_blob WHERE uuid IN $questionsString")
-                    val booleanStatement = connection.prepareStatement("SELECT * FROM jds_store_boolean WHERE uuid IN $questionsString")
-                    val dateStatement = connection.prepareStatement("SELECT * FROM jds_store_date WHERE uuid IN $questionsString")
-                    val dateTimeStatement = connection.prepareStatement("SELECT * FROM jds_store_date_time WHERE uuid IN $questionsString")
-                    val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_date_time_collection WHERE uuid IN $questionsString")
-                    val doubleStatement = connection.prepareStatement("SELECT * FROM jds_store_double WHERE uuid IN $questionsString")
-                    val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_double_collection WHERE uuid IN $questionsString")
-                    val durationStatement = connection.prepareStatement("SELECT * FROM jds_store_duration WHERE uuid IN $questionsString")
-                    val enumStatement = connection.prepareStatement("SELECT * FROM jds_store_enum WHERE uuid IN $questionsString")
-                    val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_enum_collection WHERE uuid IN $questionsString")
-                    val floatStatement = connection.prepareStatement("SELECT * FROM jds_store_float WHERE uuid IN $questionsString")
-                    val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_float_collection WHERE uuid IN $questionsString")
-                    val intStatement = connection.prepareStatement("SELECT * FROM jds_store_integer WHERE uuid IN $questionsString")
-                    val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_integer_collection WHERE uuid IN $questionsString")
-                    val longStatement = connection.prepareStatement("SELECT * FROM jds_store_long WHERE uuid IN $questionsString")
-                    val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_long_collection WHERE uuid IN $questionsString")
-                    val monthDayStatement = connection.prepareStatement("SELECT * FROM jds_store_month_day WHERE uuid IN $questionsString")
-                    val periodStatement = connection.prepareStatement("SELECT * FROM jds_store_period WHERE uuid IN $questionsString")
-                    val stringStatement = connection.prepareStatement("SELECT * FROM jds_store_text WHERE uuid IN $questionsString")
-                    val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_store_text_collection WHERE uuid IN $questionsString")
-                    val timeStatement = connection.prepareStatement("SELECT * FROM jds_store_time WHERE uuid IN $questionsString")
-                    val yearMonthStatement = connection.prepareStatement("SELECT * FROM jds_store_year_month WHERE uuid IN $questionsString")
-                    val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM jds_store_zoned_date_time WHERE uuid IN $questionsString")
-                    val populateEmbeddedAndArrayObjectsStmt = connection.prepareStatement(populateEmbeddedAndArrayObjects)
+                    connection.prepareStatement(getOverviewRecords.toString()).use { preparedStatement ->
+                        //create sql to populate fields
+                        val populateEmbeddedAndArrayObjects = "SELECT child.* FROM jds_entity_binding child JOIN jds_entity_overview parent ON parent.uuid IN $questionsString " +
+                                "AND parent.uuid = child.parent_uuid " +
+                                "AND parent.edit_version = child.parent_edit_version"
 
-                    //work in batches to not break prepared statement
-                    uuids.forEachIndexed { index, uuid ->
-                        preparedStatement.setString(index + 1, uuid.uuid)
-                        populateEmbeddedAndArrayObjectsStmt.setString(index + 1, uuid.uuid)
-                        //===========================================================
-                        blobStatement.setString(index + 1, uuid.uuid)
-                        booleanStatement.setString(index + 1, uuid.uuid)
-                        dateStatement.setString(index + 1, uuid.uuid)
-                        dateTimeStatement.setString(index + 1, uuid.uuid)
-                        dateTimeCollectionStatement.setString(index + 1, uuid.uuid)
-                        doubleStatement.setString(index + 1, uuid.uuid)
-                        doubleCollectionStatement.setString(index + 1, uuid.uuid)
-                        durationStatement.setString(index + 1, uuid.uuid)
-                        enumStatement.setString(index + 1, uuid.uuid)
-                        enumCollectionStatement.setString(index + 1, uuid.uuid)
-                        floatStatement.setString(index + 1, uuid.uuid)
-                        floatCollectionStatement.setString(index + 1, uuid.uuid)
-                        intStatement.setString(index + 1, uuid.uuid)
-                        intCollectionStatement.setString(index + 1, uuid.uuid)
-                        longStatement.setString(index + 1, uuid.uuid)
-                        longCollectionStatement.setString(index + 1, uuid.uuid)
-                        monthDayStatement.setString(index + 1, uuid.uuid)
-                        periodStatement.setString(index + 1, uuid.uuid)
-                        stringStatement.setString(index + 1, uuid.uuid)
-                        stringCollectionStatement.setString(index + 1, uuid.uuid)
-                        timeStatement.setString(index + 1, uuid.uuid)
-                        yearMonthStatement.setString(index + 1, uuid.uuid)
-                        zonedDateTimeStatement.setString(index + 1, uuid.uuid)
+                        val blobStatement = connection.prepareStatement("SELECT * FROM jds_str_blob WHERE uuid IN $questionsString")
+                        val booleanStatement = connection.prepareStatement("SELECT * FROM jds_str_boolean WHERE uuid IN $questionsString")
+                        val dateStatement = connection.prepareStatement("SELECT * FROM jds_str_date WHERE uuid IN $questionsString")
+                        val dateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time WHERE uuid IN $questionsString")
+                        val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time_collection WHERE uuid IN $questionsString")
+                        val doubleStatement = connection.prepareStatement("SELECT * FROM jds_str_double WHERE uuid IN $questionsString")
+                        val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_double_collection WHERE uuid IN $questionsString")
+                        val durationStatement = connection.prepareStatement("SELECT * FROM jds_str_duration WHERE uuid IN $questionsString")
+                        val enumStatement = connection.prepareStatement("SELECT * FROM jds_str_enum WHERE uuid IN $questionsString")
+                        val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_collection WHERE uuid IN $questionsString")
+                        val floatStatement = connection.prepareStatement("SELECT * FROM jds_str_float WHERE uuid IN $questionsString")
+                        val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_collection WHERE uuid IN $questionsString")
+                        val intStatement = connection.prepareStatement("SELECT * FROM jds_str_integer WHERE uuid IN $questionsString")
+                        val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_integer_collection WHERE uuid IN $questionsString")
+                        val longStatement = connection.prepareStatement("SELECT * FROM jds_str_long WHERE uuid IN $questionsString")
+                        val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_long_collection WHERE uuid IN $questionsString")
+                        val monthDayStatement = connection.prepareStatement("SELECT * FROM jds_str_month_day WHERE uuid IN $questionsString")
+                        val periodStatement = connection.prepareStatement("SELECT * FROM jds_str_period WHERE uuid IN $questionsString")
+                        val stringStatement = connection.prepareStatement("SELECT * FROM jds_str_text WHERE uuid IN $questionsString")
+                        val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_text_collection WHERE uuid IN $questionsString")
+                        val timeStatement = connection.prepareStatement("SELECT * FROM jds_str_time WHERE uuid IN $questionsString")
+                        val yearMonthStatement = connection.prepareStatement("SELECT * FROM jds_str_year_month WHERE uuid IN $questionsString")
+                        val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_zoned_date_time WHERE uuid IN $questionsString")
+                        val populateEmbeddedAndArrayObjectsStmt = connection.prepareStatement(populateEmbeddedAndArrayObjects)
+
+                        //work in batches to not break prepared statement
+                        uuids.forEachIndexed { index, uuid ->
+                            preparedStatement.setString(index + 1, uuid.uuid)
+                            populateEmbeddedAndArrayObjectsStmt.setString(index + 1, uuid.uuid)
+                            //===========================================================
+                            blobStatement.setString(index + 1, uuid.uuid)
+                            booleanStatement.setString(index + 1, uuid.uuid)
+                            dateStatement.setString(index + 1, uuid.uuid)
+                            dateTimeStatement.setString(index + 1, uuid.uuid)
+                            dateTimeCollectionStatement.setString(index + 1, uuid.uuid)
+                            doubleStatement.setString(index + 1, uuid.uuid)
+                            doubleCollectionStatement.setString(index + 1, uuid.uuid)
+                            durationStatement.setString(index + 1, uuid.uuid)
+                            enumStatement.setString(index + 1, uuid.uuid)
+                            enumCollectionStatement.setString(index + 1, uuid.uuid)
+                            floatStatement.setString(index + 1, uuid.uuid)
+                            floatCollectionStatement.setString(index + 1, uuid.uuid)
+                            intStatement.setString(index + 1, uuid.uuid)
+                            intCollectionStatement.setString(index + 1, uuid.uuid)
+                            longStatement.setString(index + 1, uuid.uuid)
+                            longCollectionStatement.setString(index + 1, uuid.uuid)
+                            monthDayStatement.setString(index + 1, uuid.uuid)
+                            periodStatement.setString(index + 1, uuid.uuid)
+                            stringStatement.setString(index + 1, uuid.uuid)
+                            stringCollectionStatement.setString(index + 1, uuid.uuid)
+                            timeStatement.setString(index + 1, uuid.uuid)
+                            yearMonthStatement.setString(index + 1, uuid.uuid)
+                            zonedDateTimeStatement.setString(index + 1, uuid.uuid)
+                        }
+                        //catch embedded/pre-created objects objects as well
+                        if (jdsDb.options.initialisePrimitives || jdsDb.options.initialiseDatesAndTimes || jdsDb.options.initialiseObjects) {
+                            createEntities(entities, preparedStatement)
+                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
+                            //all entities have been initialised, now we populate them
+                            if (jdsDb.options.isWritingToPrimaryDataTables) {
+                                booleanStatement.use { populateBoolean(entities, it) }
+                                doubleStatement.use { populateDouble(entities, it) }
+                                enumStatement.use { populateEnum(entities, it) }
+                                floatStatement.use { populateFloat(entities, it) }
+                                intStatement.use { populateInteger(entities, it) }
+                                longStatement.use { populateLong(entities, it) }
+                                stringStatement.use { populateString(entities, it) }
+                            }
+                            if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingArrayValues) {
+                                doubleCollectionStatement.use { populateDoubleCollection(entities, it) }
+                                dateTimeCollectionStatement.use { populateDateTimeCollection(entities, it) }
+                                enumCollectionStatement.use { populateEnumCollection(entities, it) }
+                                floatCollectionStatement.use { populateFloatCollection(entities, it) }
+                                intCollectionStatement.use { populateIntegerCollection(entities, it) }
+                                longCollectionStatement.use { populateLongCollection(entities, it) }
+                                stringCollectionStatement.use { populateStringCollection(entities, it) }
+                            }
+                            if (jdsDb.options.isWritingToPrimaryDataTables && jdsDb.options.initialiseDatesAndTimes) {
+                                dateStatement.use { populateDate(entities, it) }
+                                dateTimeStatement.use { populateDateTime(entities, it) }
+                                durationStatement.use { populateDuration(entities, it) }
+                                monthDayStatement.use { populateMonthDay(entities, it) }
+                                periodStatement.use { populatePeriod(entities, it) }
+                                timeStatement.use { populateTimes(entities, it) }
+                                yearMonthStatement.use { populateYearMonth(entities, it) }
+                                zonedDateTimeStatement.use { populateZonedDateTime(entities, it) }
+                            }
+                            if (jdsDb.options.initialiseObjects) {
+                                if (jdsDb.options.isWritingToPrimaryDataTables)
+                                    blobStatement.use { populateBlobs(entities, it) }
+                                populateEmbeddedAndArrayObjectsStmt.use { populateObjectEntriesAndObjectArrays(jdsDb, entities, it) }
+                            }
+                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArgument(jdsDb, connection, alternateConnections)) }
+                        }
+                        //close alternate connections
+                        alternateConnections.forEach { it.value.close() }
                     }
-                    //catch embedded/pre-created objects objects as well
-                    if (jdsDb.options.initialisePrimitives || jdsDb.options.initialiseDatesAndTimes || jdsDb.options.initialiseObjects) {
-                        createEntities(entities, preparedStatement)
-                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
-                        //all entities have been initialised, now we populate them
-                        if (jdsDb.options.isWritingToPrimaryDataTables) {
-                            booleanStatement.use { populateBoolean(entities, it) }
-                            doubleStatement.use { populateDouble(entities, it) }
-                            enumStatement.use { populateEnum(entities, it) }
-                            floatStatement.use { populateFloat(entities, it) }
-                            intStatement.use { populateInteger(entities, it) }
-                            longStatement.use { populateLong(entities, it) }
-                            stringStatement.use { populateString(entities, it) }
-                        }
-                        if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingArrayValues) {
-                            doubleCollectionStatement.use { populateDoubleCollection(entities, it) }
-                            dateTimeCollectionStatement.use { populateDateTimeCollection(entities, it) }
-                            enumCollectionStatement.use { populateEnumCollection(entities, it) }
-                            floatCollectionStatement.use { populateFloatCollection(entities, it) }
-                            intCollectionStatement.use { populateIntegerCollection(entities, it) }
-                            longCollectionStatement.use { populateLongCollection(entities, it) }
-                            stringCollectionStatement.use { populateStringCollection(entities, it) }
-                        }
-                        if (jdsDb.options.isWritingToPrimaryDataTables && jdsDb.options.initialiseDatesAndTimes) {
-                            dateStatement.use { populateDate(entities, it) }
-                            dateTimeStatement.use { populateDateTime(entities, it) }
-                            durationStatement.use { populateDuration(entities, it) }
-                            monthDayStatement.use { populateMonthDay(entities, it) }
-                            periodStatement.use { populatePeriod(entities, it) }
-                            timeStatement.use { populateTimes(entities, it) }
-                            yearMonthStatement.use { populateYearMonth(entities, it) }
-                            zonedDateTimeStatement.use { populateZonedDateTime(entities, it) }
-                        }
-                        if (jdsDb.options.initialiseObjects) {
-                            if (jdsDb.options.isWritingToPrimaryDataTables)
-                                blobStatement.use { populateBlobs(entities, it) }
-                            populateEmbeddedAndArrayObjectsStmt.use { populateObjectEntriesAndObjectArrays(jdsDb, entities, it) }
-                        }
-                        entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArgument(jdsDb, connection, alternateConnections)) }
-                    }
-                    //close alternate connections
-                    alternateConnections.forEach { it.value.close() }
                 }
             }
         } catch (ex: Exception) {
@@ -759,7 +761,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
     @Throws(SQLException::class, ClassNotFoundException::class)
     private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<out String>) {
         val searchByType = filterUUIDs.none()
-        jdsDataBase.getConnection().use {
+        jdsDataBase.connection.use {
             if (searchByType) {
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy

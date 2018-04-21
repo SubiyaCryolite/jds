@@ -15,8 +15,8 @@ description = "A dynamic, cross platform, high performance, ORM data-mapper. Des
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-project.ext.jacksonVersion = "2.9.4"
-project.ext.kotlinVersion = "1.2.30"
+project.ext.jacksonVersion = "2.9.5"
+project.ext.kotlinVersion = "1.2.40"
 
 buildscript {
     

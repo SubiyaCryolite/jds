@@ -10,7 +10,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.SQLException
 import java.util.*
 
 /**
@@ -18,12 +17,12 @@ import java.util.*
  */
 class JdsDbTransactionalSqllmplementation : JdsDbTransactionalSql() {
 
-    @Throws(ClassNotFoundException::class, SQLException::class)
-    override fun getConnection(): Connection {
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
-        val properties = Properties()
-        FileInputStream(File("db.tsql.properties")).use { properties.load(it) }
-        //return DriverManager.getConnection("jdbc:sqlserver://BR7INDANA\\SMARTCARE40;databaseName=jds", properties)
-        return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
-    }
+    override val connection: Connection
+        get () {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
+            val properties = Properties()
+            FileInputStream(File("db.tsql.properties")).use { properties.load(it) }
+            //return DriverManager.getConnection("jdbc:sqlserver://BR7INDANA\\SMARTCARE40;databaseName=jds", properties)
+            return DriverManager.getConnection("jdbc:sqlserver://DESKTOP-64C7FRP\\JDSINSTANCE;databaseName=jds", properties);
+        }
 }

@@ -2,31 +2,36 @@
 
 # Create tablespace and temp files
 ```sql
-create tablespace jds_tabspace datafile 'jds_tabspace.dat' size 10M autoextend on;
-create temporary tablespace jds_tabspace_temp tempfile 'jds_tabspace_temp.dat' size 5M autoextend on;
+CREATE TABLESPACE jds_tabspace DATAFILE 'jds_tabspace.dat' SIZE 10M AUTOEXTEND ON;
+CREATE TEMPORARY TABLESPACE jds_tabspace_temp TEMPFILE 'jds_tabspace_temp.dat' SIZE 5M AUTOEXTEND on;
 ```
 
 # Create user
 ```sql
-create user jds identified by jds default tablespace jds_tabspace temporary tablespace jds_tabspace_temp
+CREATE USER jds IDENTIFIED BY jds DEFAULT TABLESPACE jds_tabspace TEMPORARY TABLESPACE jds_tabspace_temp
 ```
 
 # Assign necessary rights
 ```sql
-grant create session to jds;
-grant create table to jds;
-grant create view to jds;
-grant create procedure to jds;
-grant create trigger to jds;
-grant unlimited tablespace to jds;
+GRANT CREATE SESSION TO jds;
+GRANT CREATE TABLE TO jds;
+GRANT CREATE VIEW TO jds;
+GRANT CREATE PROCEDURE TO jds;
+GRANT CREATE TRIGGER TO jds;
+GRANT UNLIMITED TABLESPACE TO jds;
 ```
 
 # Use this to drop ALL your tables
 ```sql
-select 'drop table '||table_name||' cascade constraints;' from user_tables;
+SELECT 'drop table '||table_name||' cascade constraints;' FROM user_tables;
 ```
 
 # Use this to drop ALL your objects
 ```sql
-select 'drop '||object_type||' '|| object_name || ';' from user_objects where object_type in ('VIEW','PACKAGE','SEQUENCE', 'PROCEDURE', 'FUNCTION', 'INDEX')
+SELECT 'drop '||object_type||' '|| object_name || ';' FROM user_objects WHERE object_type IN ('VIEW','PACKAGE','SEQUENCE', 'PROCEDURE', 'FUNCTION', 'INDEX')
+```
+
+# If you password expires, login as admin and run the command
+```sql
+ALTER USER jds IDENTIFIED BY jds;
 ```

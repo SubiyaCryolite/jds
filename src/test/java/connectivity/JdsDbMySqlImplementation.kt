@@ -10,7 +10,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.SQLException
 import java.util.*
 
 /**
@@ -18,11 +17,11 @@ import java.util.*
  */
 class JdsDbMySqlImplementation : JdsDbMySql() {
 
-    @Throws(ClassNotFoundException::class, SQLException::class)
-    override fun getConnection(): Connection {
-        Class.forName("com.mysql.cj.jdbc.Driver")
-        val properties = Properties()
-        FileInputStream(File("db.mysql.properties")).use { properties.load(it) }
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties)
-    }
+    override val connection: Connection
+        get () {
+            Class.forName("com.mysql.cj.jdbc.Driver")
+            val properties = Properties()
+            FileInputStream(File("db.mysql.properties")).use { properties.load(it) }
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties)
+        }
 }

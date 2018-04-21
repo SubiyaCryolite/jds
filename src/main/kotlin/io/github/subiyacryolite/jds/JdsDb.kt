@@ -47,9 +47,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     fun init() {
         try {
-            getConnection().use { connection ->
+            connection.use { connection ->
                 prepareDatabaseComponents(connection)
-                prepareCustomDatabaseComponents(connection)
             }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
@@ -66,10 +65,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_FIELDS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENUM_VALUES)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_INHERITANCE)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_OVERVIEW)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENTITY_BINDING)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_FIELDS)
-        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.BIND_ENTITY_ENUMS)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.ENTITY_OVERVIEW)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.ENTITY_BINDING)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENTITY_FIELD)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.REF_ENTITY_ENUMS)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BLOB)
@@ -93,6 +92,42 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_YEAR_MONTH)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_MONTH_DAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.ENTITY_LIVE_VERSION)
+        if (supportsStatements) {
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_BOOLEAN)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_BLOB)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_TEXT)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_LONG)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_INTEGER)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_FLOAT)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DOUBLE)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DATE_TIME)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_TIME)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DATE)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DURATION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_PERIOD)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_MONTH_YEAR)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_MONTH_DAY)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_YEAR_MONTH)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ZONED_DATE_TIME)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_ENTITY_FIELD)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_ENTITY_ENUM)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_ENTITY)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_ENUM)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_FIELD)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_REF_ENTITY_INHERITANCE)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_LIVE_VERSION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_TEXT_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_FLOAT_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_INTEGER_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_LONG_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DOUBLE_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DATE_TIME_COLLECTION)
+        }
     }
 
     val isOracleDb: Boolean
@@ -119,7 +154,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param jdsComponent      an enum that maps to the components concrete
      * implementation details
      */
-    internal fun prepareDatabaseComponent(connection: Connection, databaseComponent: JdsComponentType, jdsComponent: JdsComponent) {
+    private fun prepareDatabaseComponent(connection: Connection, databaseComponent: JdsComponentType, jdsComponent: JdsComponent) {
         when (databaseComponent) {
             JdsComponentType.TABLE -> if (!doesTableExist(connection, jdsComponent.component))
                 initiateDatabaseComponent(connection, jdsComponent)
@@ -141,70 +176,84 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     private fun initiateDatabaseComponent(connection: Connection, jdsComponent: JdsComponent) {
         when (jdsComponent) {
-            JdsComponent.STORE_BOOLEAN -> executeSqlFromString(connection, createStoreBoolean())
-            JdsComponent.STORE_BLOB -> executeSqlFromString(connection, createStoreBlob())
-            JdsComponent.STORE_TEXT -> executeSqlFromString(connection, createStoreText())
-            JdsComponent.STORE_TEXT_COLLECTION -> {
-                executeSqlFromString(connection, createStoreTextCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_text_collection", "uuid, edit_version", "jds_store_text_collection_ix"))
-            }
-            JdsComponent.STORE_PERIOD -> executeSqlFromString(connection, createStorePeriod())
-            JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
-            JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
-            JdsComponent.STORE_MONTH_DAY -> executeSqlFromString(connection, createStoreMonthDay())
-            JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
-            JdsComponent.STORE_ENUM_COLLECTION -> {
-                executeSqlFromString(connection, createStoreEnumCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_enum_collection", "uuid, edit_version", "jds_store_enum_collection_ix"))
-            }
-            JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
-            JdsComponent.STORE_FLOAT_COLLECTION -> {
-                executeSqlFromString(connection, createStoreFloatCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_float_collection", "uuid, edit_version", "jds_store_float_collection_ix"))
-            }
-            JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
-            JdsComponent.STORE_INTEGER_COLLECTION -> {
-                executeSqlFromString(connection, createStoreIntegerCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_integer_collection", "uuid, edit_version", "jds_store_integer_collection_ix"))
-            }
-            JdsComponent.STORE_LONG -> executeSqlFromString(connection, createStoreLong())
-            JdsComponent.STORE_LONG_COLLECTION -> {
-                executeSqlFromString(connection, createStoreLongCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_long_collection", "uuid, edit_version", "jds_store_long_collection_ix"))
-            }
-            JdsComponent.STORE_DOUBLE -> executeSqlFromString(connection, createStoreDouble())
-            JdsComponent.STORE_DOUBLE_COLLECTION -> {
-                executeSqlFromString(connection, createStoreDoubleCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_double_collection", "uuid, edit_version", "jds_store_double_collection_ix"))
-            }
-            JdsComponent.STORE_DATE -> executeSqlFromString(connection, createStoreDate())
-            JdsComponent.STORE_DATE_TIME -> executeSqlFromString(connection, createStoreDateTime())
-            JdsComponent.STORE_DATE_TIME_COLLECTION -> {
-                executeSqlFromString(connection, createStoreDateTimeCollection())
-                executeSqlFromString(connection, getDbCreateIndexSyntax("jds_store_date_time_collection", "uuid, edit_version", "jds_store_date_time_collection_ix"))
-            }
-            JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
-            JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
-            JdsComponent.REF_FIELDS -> createRefFields(connection)
-            JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
-            JdsComponent.REF_ENUM_VALUES -> createRefEnumValues(connection)
-            JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
-            JdsComponent.BIND_ENTITY_FIELDS -> createBindEntityFields(connection)
-            JdsComponent.BIND_ENTITY_ENUMS -> createBindEntityEnums(connection)
-            JdsComponent.STORE_ENTITY_BINDING -> createBindEntityBinding(connection)
-        //====================================================================================
-            JdsComponent.STORE_ENTITY_OVERVIEW -> {
+            JdsComponent.ENTITY_BINDING -> createBindEntityBinding(connection)
+            JdsComponent.ENTITY_LIVE_VERSION -> executeSqlFromString(connection, createEntityLiveVersionTable())
+            JdsComponent.ENTITY_OVERVIEW -> {
                 createRefEntityOverview(connection)
                 createIndexes(connection)
             }
+            JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
+            JdsComponent.REF_ENTITY_ENUMS -> createBindEntityEnums(connection)
+            JdsComponent.REF_ENTITY_FIELD -> createBindEntityFields(connection)
+            JdsComponent.REF_ENUM_VALUES -> createRefEnumValues(connection)
             JdsComponent.REF_FIELD_TYPES -> {
                 createRefFieldTypes(connection)
                 populateFieldTypes(connection)
             }
+            JdsComponent.REF_FIELDS -> createRefFields(connection)
+            JdsComponent.REF_INHERITANCE -> createRefInheritance(connection)
+            JdsComponent.STORE_BLOB -> executeSqlFromString(connection, createStoreBlob())
+            JdsComponent.STORE_BOOLEAN -> executeSqlFromString(connection, createStoreBoolean())
+            JdsComponent.STORE_DATE -> executeSqlFromString(connection, createStoreDate())
+            JdsComponent.STORE_DATE_TIME -> executeSqlFromString(connection, createStoreDateTime())
+            JdsComponent.STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createStoreDateTimeCollection())
+            JdsComponent.STORE_DOUBLE -> executeSqlFromString(connection, createStoreDouble())
+            JdsComponent.STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createStoreDoubleCollection())
+            JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
+            JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
+            JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
+            JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
+            JdsComponent.STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createStoreFloatCollection())
+            JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
+            JdsComponent.STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createStoreIntegerCollection())
+            JdsComponent.STORE_LONG -> executeSqlFromString(connection, createStoreLong())
+            JdsComponent.STORE_LONG_COLLECTION -> executeSqlFromString(connection, createStoreLongCollection())
+            JdsComponent.STORE_MONTH_DAY -> executeSqlFromString(connection, createStoreMonthDay())
+            JdsComponent.STORE_PERIOD -> executeSqlFromString(connection, createStorePeriod())
+            JdsComponent.STORE_TEXT -> executeSqlFromString(connection, createStoreText())
+            JdsComponent.STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createStoreTextCollection())
+            JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
+            JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
+            JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
+         /********************************************************
+         * Directives that create stored procedures follow below
+         ********************************************************/
+            JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
+            JdsComponent.POP_ENTITY_LIVE_VERSION -> executeSqlFromString(connection, createPopEntityLiveVersion())
+            JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
+            JdsComponent.POP_REF_ENTITY -> executeSqlFromString(connection, createPopJdsRefEntity())
+            JdsComponent.POP_REF_ENTITY_ENUM -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
+            JdsComponent.POP_REF_ENTITY_FIELD -> executeSqlFromString(connection, createPopJdsRefEntityField())
+            JdsComponent.POP_REF_ENTITY_INHERITANCE -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
+            JdsComponent.POP_REF_ENUM -> executeSqlFromString(connection, createPopJdsRefEnum())
+            JdsComponent.POP_REF_FIELD -> executeSqlFromString(connection, createPopJdsRefField())
+            JdsComponent.POP_STORE_BLOB -> executeSqlFromString(connection, createPopJdsStoreBlob())
+            JdsComponent.POP_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
+            JdsComponent.POP_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
+            JdsComponent.POP_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
+            JdsComponent.POP_STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createPopDateTimeCollection())
+            JdsComponent.POP_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
+            JdsComponent.POP_STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createPopDoubleCollection())
+            JdsComponent.POP_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
+            JdsComponent.POP_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
+            JdsComponent.POP_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopEnumCollection())
+            JdsComponent.POP_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
+            JdsComponent.POP_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopFloatCollection())
+            JdsComponent.POP_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
+            JdsComponent.POP_STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createPopIntegerCollection())
+            JdsComponent.POP_STORE_LONG -> executeSqlFromString(connection, createPopJdsStoreLong())
+            JdsComponent.POP_STORE_LONG_COLLECTION -> executeSqlFromString(connection, createPopLongCollection())
+            JdsComponent.POP_STORE_MONTH_DAY -> executeSqlFromString(connection, createPopJdsMonthDay())
+            JdsComponent.POP_STORE_MONTH_YEAR -> executeSqlFromString(connection, createPopJdsMonthYear())
+            JdsComponent.POP_STORE_PERIOD -> executeSqlFromString(connection, createPopJdsStorePeriod())
+            JdsComponent.POP_STORE_TEXT -> executeSqlFromString(connection, createPopJdsStoreText())
+            JdsComponent.POP_STORE_TEXT_COLLECTION -> executeSqlFromString(connection, createPopTextCollection())
+            JdsComponent.POP_STORE_TIME -> executeSqlFromString(connection, createPopJdsStoreTime())
+            JdsComponent.POP_STORE_YEAR_MONTH -> executeSqlFromString(connection, createPopJdsYearMonth())
+            JdsComponent.POP_STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreZonedDateTime())
             else -> {
             }
         }
-        prepareCustomDatabaseComponents(connection, jdsComponent)
     }
 
     fun createIndexes(connection: Connection) = try {
@@ -222,15 +271,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
-
-    /**
-     * Initialises custom JDS Database components
-     *
-     * @param connection   The SQL connection to use
-     * @param jdsComponent an enum that maps to the components concrete
-     * implementation details
-     */
-    internal open fun prepareCustomDatabaseComponents(connection: Connection, jdsComponent: JdsComponent) {}
 
     override fun doesTableExist(connection: Connection, tableName: String): Boolean {
         val answer = tableExists(connection, tableName)
@@ -292,8 +332,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         ex.printStackTrace(System.err)
     }
 
-    @JvmOverloads
-    fun executeSqlFromString(connection: Connection, sql: String) = try {
+    private fun executeSqlFromString(connection: Connection, sql: String) = try {
         connection.prepareStatement(sql).use { it.executeUpdate() }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -320,16 +359,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         bufferedInputStream.close()
         return byteArrayOutputStream.toString()
     }
-
-    /**
-     * Override this method with custom implementations of [prepareDatabaseComponents][.prepareDatabaseComponent]
-     * [prepareDatabaseComponents][.prepareDatabaseComponent]
-     * delegates the creation of custom database components depending on the
-     * underlying JDS Database implementation
-     *
-     * @param connection the SQL connection to use
-     */
-    internal open fun prepareCustomDatabaseComponents(connection: Connection) {}
 
     /**
      * Internal checks to see if the specified table exists the the database
@@ -361,10 +390,10 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * @param foreignKeys LinkedHashMap<constraintName -> LinkedHashMap< LocalColumns -> ReferenceTable(ReferenceColumns)>>
      */
     open fun createTable(tableName: String,
-                         columns: java.util.LinkedHashMap<String, String>,
-                         uniqueColumns: java.util.LinkedHashMap<String, String>,
-                         primaryKeys: java.util.LinkedHashMap<String, String>,
-                         foreignKeys: java.util.LinkedHashMap<String, java.util.LinkedHashMap<String, String>>): String {
+                         columns: HashMap<String, String>,
+                         uniqueColumns: HashMap<String, String>,
+                         primaryKeys: HashMap<String, String>,
+                         foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>): String {
         val sqlBuilder = StringBuilder()
         sqlBuilder.append("CREATE TABLE $tableName(\n")
 
@@ -564,7 +593,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
 
     @Throws(Exception::class)
     fun prepareTables() {
-        getConnection().use { connection ->
+        connection.use { connection ->
             tables.forEach { it.forceGenerateOrUpdateSchema(this, connection) }
         }
     }
@@ -581,7 +610,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                 classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
-                    getConnection().use { connection ->
+                    connection.use { connection ->
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
                         var jdsEntity = entity.newInstance()
@@ -614,127 +643,165 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         }
     }
 
-    internal open fun saveMonthDay() = "{call jds_pop_store_month_day(?, ?, ?, ?)}"
+    internal open fun saveEntityLiveVersion() = "{call jds_pop_entity_live_version(?)}"
 
-    internal open fun saveYearMonth() = "{call jds_pop_store_year_month(?, ?, ?, ?)}"
+    internal open fun saveMonthDay() = "{call jds_pop_month_day(?, ?, ?, ?)}"
 
-    internal open fun savePeriod() = "{call jds_pop_store_period(?, ?, ?, ?)}"
+    internal open fun saveYearMonth() = "{call jds_pop_year_month(?, ?, ?, ?)}"
 
-    internal open fun saveDuration() = "{call jds_pop_store_duration(?, ?, ?, ?)}"
+    internal open fun savePeriod() = "{call jds_pop_period(?, ?, ?, ?)}"
+
+    internal open fun saveDuration() = "{call jds_pop_duration(?, ?, ?, ?)}"
 
     /**
      * SQL call to save blob values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveBlob() = "{call jds_pop_store_blob(?, ?, ?, ?)}"
+    internal open fun saveBlob() = "{call jds_pop_blob(?, ?, ?, ?)}"
 
     /**
      * SQL call to save boolean values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveBoolean() = "{call jds_pop_store_boolean(?, ?, ?, ?)}"
+    internal open fun saveBoolean() = "{call jds_pop_boolean(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTime() = "{call jds_pop_store_date_time(?, ?, ?, ?)}"
+    internal open fun saveDateTime() = "{call jds_pop_date_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTimeCollection() = "{call jds_pop_store_date_time_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveDateTimeCollection() = "{call jds_pop_date_time_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save double values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDouble() = "{call jds_pop_store_double(?, ?, ?, ?)}"
+    internal open fun saveDouble() = "{call jds_pop_double(?, ?, ?, ?)}"
 
     /**
      * SQL call to save double values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDoubleCollection() = "{call jds_pop_store_double_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveDoubleCollection() = "{call jds_pop_double_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloat() = "{call jds_pop_store_float(?, ?, ?, ?)}"
+    internal open fun saveFloat() = "{call jds_pop_float(?, ?, ?, ?)}"
 
     /**
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloatCollection() = "{call jds_pop_store_float_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveFloatCollection() = "{call jds_pop_float_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveInteger() = "{call jds_pop_store_integer(?, ?, ?, ?)}"
+    internal open fun saveInteger() = "{call jds_pop_integer(?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveIntegerCollection() = "{call jds_pop_store_integer_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveIntegerCollection() = "{call jds_pop_integer_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLong() = "{call jds_pop_store_long(?, ?, ?, ?)}"
+    internal open fun saveLong() = "{call jds_pop_long(?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLongCollection() = "{call jds_pop_store_long_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveLongCollection() = "{call jds_pop_long_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save text values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveString() = "{call jds_pop_store_text(?, ?, ?, ?)}"
+    internal open fun saveString() = "{call jds_pop_text(?, ?, ?, ?)}"
 
     /**
      * SQL call to save text values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveStringCollection() = "{call jds_pop_store_text_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveStringCollection() = "{call jds_pop_text_collection(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save time values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveTime() = "{call jds_pop_store_time(?, ?, ?, ?)}"
+    internal open fun saveTime() = "{call jds_pop_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveZonedDateTime() = "{call jds_pop_store_zoned_date_time(?, ?, ?, ?)}"
+    internal open fun saveZonedDateTime() = "{call jds_pop_zoned_date_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnum() = "{call jds_pop_store_enum(?, ?, ?, ?)}"
-
-    /**
-     * SQL call to save datetime values
-     * @return the default or overridden SQL statement for this operation
-     */
-    internal open fun saveEnumCollection() = "{call jds_pop_store_enum_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveEnum() = "{call jds_pop_enum(?, ?, ?, ?)}"
 
     /**
      * SQL call to save date values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDate() = "{call jds_pop_store_date(?, ?, ?, ?)}"
+    internal open fun saveDate() = "{call jds_pop_date(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save enum collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveEnumCollections() = "{call jds_pop_enum_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save date time collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveDateTimeCollections() = "{call jds_pop_date_time_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save float collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveFloatCollections() = "{call jds_pop_float_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save integer collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveIntegerCollections() = "{call jds_pop_integer_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save double collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveDoubleCollections() = "{call jds_pop_double_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save long collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveLongCollections() = "{call jds_pop_long_collection(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save string collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveStringCollections() = "{call jds_pop_text_collection(?, ?, ?, ?)}"
 
     /**
      * SQL call to save entity overview values
@@ -809,7 +876,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
     override fun getConnection(targetConnection: Int): Connection {
-        return getConnection()
+        return connection
     }
 
     /**
@@ -820,7 +887,16 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         false -> JdsFieldType.UNKNOWN
     }
 
-    protected fun createPopJdsEntityBinding(): String {
+    private val storeCommonColumns: LinkedHashMap<String, String>
+        get() {
+            val columns = LinkedHashMap<String, String>()
+            columns["uuid"] = getNativeDataTypeString(128)
+            columns["edit_version"] = getNativeDataTypeInteger()
+            columns["field_id"] = getNativeDataTypeLong()
+            return columns
+        }
+
+    private fun createPopJdsEntityBinding(): String {
         val uniqueColumns = setOf("parent_uuid", "parent_edit_version", "child_uuid", "child_edit_version")
         val columns = LinkedHashMap<String, String>()
         columns["parent_uuid"] = getNativeDataTypeString(128)
@@ -831,7 +907,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_entity_binding", "jds_entity_binding", columns, uniqueColumns, false)
     }
 
-    protected fun createPopJdsEntityOverview(): String {
+    private fun createPopJdsEntityOverview(): String {
         val uniqueColumns = setOf("uuid", "edit_version")
         val columns = LinkedHashMap<String, String>()
         columns["uuid"] = getNativeDataTypeString(128)
@@ -841,7 +917,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_entity_overview", "jds_entity_overview", columns, uniqueColumns, false)
     }
 
-    protected fun createPopJdsRefEntity(): String {
+    private fun createPopJdsRefEntity(): String {
         val uniqueColumns = setOf("id")
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getNativeDataTypeLong()
@@ -851,7 +927,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_entity", "jds_ref_entity", columns, uniqueColumns, false)
     }
 
-    protected fun createPopJdsRefEntityEnum(): String {
+    private fun createPopJdsRefEntityEnum(): String {
         val uniqueColumns = setOf("entity_id", "field_id")
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getNativeDataTypeLong()
@@ -859,7 +935,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_entity_enum", "jds_ref_entity_enum", columns, uniqueColumns, true)
     }
 
-    protected fun createPopJdsRefEntityField(): String {
+    private fun createPopJdsRefEntityField(): String {
         val uniqueColumns = setOf("entity_id", "field_id")
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getNativeDataTypeLong()
@@ -867,7 +943,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_entity_field", "jds_ref_entity_field", columns, uniqueColumns, true)
     }
 
-    protected fun createPopJdsRefEntityInheritance(): String {
+    private fun createPopJdsRefEntityInheritance(): String {
         val uniqueColumns = setOf("parent_entity_id", "child_entity_id")
         val columns = LinkedHashMap<String, String>()
         columns["parent_entity_id"] = getNativeDataTypeLong()
@@ -875,7 +951,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_entity_inheritance", "jds_ref_entity_inheritance", columns, uniqueColumns, true)
     }
 
-    protected fun createPopJdsRefEnum(): String {
+    private fun createPopJdsRefEnum(): String {
         val uniqueColumns = setOf("field_id", "seq")
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getNativeDataTypeLong()
@@ -884,7 +960,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_enum", "jds_ref_enum", columns, uniqueColumns, false)
     }
 
-    protected fun createPopJdsRefField(): String {
+    private fun createPopJdsRefField(): String {
         val uniqueColumns = setOf("id")
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getNativeDataTypeLong()
@@ -894,362 +970,425 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         return createOrAlterProc("jds_pop_ref_field", "jds_ref_field", columns, uniqueColumns, false)
     }
 
-    private val storeUniqueColumns = setOf("uuid", "edit_version", "field_id")
-
-    private val storeCommonColumns: LinkedHashMap<String, String>
-        get() {
-            val columns = LinkedHashMap<String, String>()
-            columns["uuid"] = getNativeDataTypeString(128)
-            columns["edit_version"] = getNativeDataTypeInteger()
-            columns["field_id"] = getNativeDataTypeLong()
-            return columns
-        }
-
-    protected fun createPopJdsStoreBlob(): String {
+    private fun createPopJdsStoreBlob(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeBlob(0)
-        return createOrAlterProc("jds_pop_store_blob", "jds_store_blob", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_blob", "jds_str_blob", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreBoolean(): String {
+    private fun createPopJdsStoreBoolean(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeBoolean()
-        return createOrAlterProc("jds_pop_store_boolean", "jds_store_boolean", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_boolean", "jds_str_boolean", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreDateTime(): String {
+    private fun createPopJdsStoreDateTime(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
-        return createOrAlterProc("jds_pop_store_date_time", "jds_store_date_time", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_date_time", "jds_str_date_time", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreDouble(): String {
+    private fun createPopDateTimeCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeDateTime()
+        return createOrAlterProc("jds_pop_date_time_collection", "jds_str_date_time_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreDouble(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
-        return createOrAlterProc("jds_pop_store_double", "jds_store_double", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_double", "jds_str_double", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreFloat(): String {
+    private fun createPopDoubleCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeDouble()
+        return createOrAlterProc("jds_pop_double_collection", "jds_str_double_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreFloat(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
-        return createOrAlterProc("jds_pop_store_float", "jds_store_float", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_float", "jds_str_float", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreInteger(): String {
+    private fun createPopFloatCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeFloat()
+        return createOrAlterProc("jds_pop_float_collection", "jds_str_float_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreInteger(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_store_integer", "jds_store_integer", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_integer", "jds_str_integer", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreLong(): String {
+    private fun createPopIntegerCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeInteger()
+        return createOrAlterProc("jds_pop_integer_collection", "jds_str_integer_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreLong(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
-        return createOrAlterProc("jds_pop_store_long", "jds_store_long", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_long", "jds_str_long", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreText(): String {
+    private fun createPopLongCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeLong()
+        return createOrAlterProc("jds_pop_long_collection", "jds_str_long_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreText(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_text", "jds_store_text", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_text", "jds_str_text", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreEnum(): String {
+    private fun createPopTextCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
+        return createOrAlterProc("jds_pop_text_collection", "jds_str_text_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreEnum(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_store_enum", "jds_store_enum", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_enum", "jds_str_enum", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreTime(): String {
+    private fun createPopEnumCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeInteger()
+        return createOrAlterProc("jds_pop_enum_collection", "jds_str_enum_collection", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreTime(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeTime()
-        return createOrAlterProc("jds_pop_store_time", "jds_store_time", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_time", "jds_str_time", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreDate(): String {
+    private fun createPopJdsStoreDate(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDate()
-        return createOrAlterProc("jds_pop_store_date", "jds_store_date", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_date", "jds_str_date", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreDuration(): String {
+    private fun createPopJdsStoreDuration(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
-        return createOrAlterProc("jds_pop_store_duration", "jds_store_duration", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_duration", "jds_str_duration", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStorePeriod(): String {
+    private fun createPopJdsStorePeriod(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_period", "jds_store_period", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_period", "jds_str_period", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsMonthYear(): String {
+    private fun createPopJdsMonthYear(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_month_year", "jds_store_month_year", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_month_year", "jds_str_month_year", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsMonthDay(): String {
+    private fun createPopJdsMonthDay(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_month_day", "jds_store_month_day", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_month_day", "jds_str_month_day", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsYearMonth(): String {
+    private fun createPopJdsYearMonth(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_store_year_month", "jds_store_year_month", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_year_month", "jds_str_year_month", columns, storeUniqueColumns, false)
     }
 
-    protected fun createPopJdsStoreZonedDateTime(): String {
+    private fun createPopJdsStoreZonedDateTime(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeZonedDateTime()
-        return createOrAlterProc("jds_pop_store_zoned_date_time", "jds_store_zoned_date_time", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_zoned_date_time", "jds_str_zoned_date_time", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopEntityLiveVersion(): String {
+        val columns = LinkedHashMap<String, String>()
+        columns["uuid"] = getNativeDataTypeString(128)
+        //don't include edit_version column, a seperate SQL statement updates that column
+        val proc = createOrAlterProc("jds_pop_entity_live_version", "jds_entity_live_version", columns, setOf("uuid"), false)
+        return proc
+    }
+
+    private fun createEntityLiveVersionTable(): String {
+        val tableName = "jds_entity_live_version"
+        val columns = LinkedHashMap<String, String>()
+        columns["uuid"] = getNativeDataTypeString(128)
+        columns["edit_version"] = getNativeDataTypeInteger()
+        val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid"
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreBlob(): String {
-        val tableName = "jds_store_blob"
+        val tableName = "jds_str_blob"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeBlob(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreBoolean(): String {
-        val tableName = "jds_store_boolean"
+        val tableName = "jds_str_boolean"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeBoolean()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     protected fun createStoreDate(): String {
-        val tableName = "jds_store_date"
+        val tableName = "jds_str_date"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDate()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTime(): String {
-        val tableName = "jds_store_date_time"
+        val tableName = "jds_str_date_time"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTimeCollection(): String {
-        val tableName = "jds_store_date_time_collection"
+        val tableName = "jds_str_date_time_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDouble(): String {
-        val tableName = "jds_store_double"
+        val tableName = "jds_str_double"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDoubleCollection(): String {
-        val tableName = "jds_store_double_collection"
+        val tableName = "jds_str_double_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDuration(): String {
-        val tableName = "jds_store_duration"
+        val tableName = "jds_str_duration"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnum(): String {
-        val tableName = "jds_store_enum"
+        val tableName = "jds_str_enum"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumCollection(): String {
-        val tableName = "jds_store_enum_collection"
+        val tableName = "jds_str_enum_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreFloat(): String {
-        val tableName = "jds_store_float"
+        val tableName = "jds_str_float"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreFloatCollection(): String {
-        val tableName = "jds_store_float_collection"
+        val tableName = "jds_str_float_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreInteger(): String {
-        val tableName = "jds_store_integer"
+        val tableName = "jds_str_integer"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreIntegerCollection(): String {
-        val tableName = "jds_store_integer_collection"
+        val tableName = "jds_str_integer_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLong(): String {
-        val tableName = "jds_store_long"
+        val tableName = "jds_str_long"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLongCollection(): String {
-        val tableName = "jds_store_long_collection"
+        val tableName = "jds_str_long_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     protected fun createStoreMonthDay(): String {
-        val tableName = "jds_store_month_day"
+        val tableName = "jds_str_month_day"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStorePeriod(): String {
-        val tableName = "jds_store_period"
+        val tableName = "jds_str_period"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreText(): String {
-        val tableName = "jds_store_text"
+        val tableName = "jds_str_text"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreTextCollection(): String {
-        val tableName = "jds_store_text_collection"
+        val tableName = "jds_str_text_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreTime(): String {
-        val tableName = "jds_store_time"
+        val tableName = "jds_str_time"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeTime()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreYearMonth(): String {
-        val tableName = "jds_store_year_month"
+        val tableName = "jds_str_year_month"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreZonedDateTime(): String {
-        val tableName = "jds_store_zoned_date_time"
+        val tableName = "jds_str_zoned_date_time"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeZonedDateTime()
         val uniqueColumns = LinkedHashMap<String, String>()
-        uniqueColumns["${tableName}_uc"] = "uuid, edit_version, field_id"
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    companion object {
+
+        private val storeUniqueColumns = setOf("uuid", "edit_version", "field_id")
     }
 }

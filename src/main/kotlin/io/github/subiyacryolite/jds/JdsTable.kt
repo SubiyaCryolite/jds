@@ -120,7 +120,7 @@ open class JdsTable() : Serializable {
     @Throws(Exception::class)
     fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument, deleteColumns: HashMap<String, MutableCollection<Any>>) {
         if (!generatedOrUpdatedSchema)
-            throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema()")
+            throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema() before you can persist this table: $name")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
             if (jdsDb.options.isUpdatingCustomReportTablesPerSave)

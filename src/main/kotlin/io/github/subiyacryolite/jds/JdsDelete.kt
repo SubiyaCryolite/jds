@@ -47,7 +47,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
     @Throws(SQLException::class, ClassNotFoundException::class)
     constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.map({ it.overview.uuid })) {
 
-        jdsDb.getConnection().use { connection ->
+        jdsDb.connection.use { connection ->
             val args = OnDeleteEventArgument(jdsDb, connection, alternateConnections)
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
@@ -73,7 +73,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      */
     @Throws(Exception::class)
     override fun call(): Boolean? {
-        jdsDb.getConnection().use { connection ->
+        jdsDb.connection.use { connection ->
             connection.prepareStatement(DELETE_SQL).use { statement ->
                 connection.autoCommit = false
                 for (entity in entities) {

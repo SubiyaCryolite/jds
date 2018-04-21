@@ -28,8 +28,7 @@ interface IJdsDb {
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
      * @throws SQLException when a standard SQL Exception occurs
      */
-    @Throws(ClassNotFoundException::class, SQLException::class)
-    fun getConnection(): Connection
+    val connection: Connection
 
     /**
      * Acquire a custom connection to a database

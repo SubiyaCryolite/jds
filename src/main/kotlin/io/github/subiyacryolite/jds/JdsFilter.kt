@@ -107,7 +107,7 @@ class JdsFilter<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceTy
         val matchingFilterIds = ArrayList<String>()
         val sql = this.toQuery()
         try {
-            jdsDb.getConnection().use {
+            jdsDb.connection.use {
                 it.prepareStatement(sql).use {
                     var parameterIndex = 1
                     for (parameters in blockParameters)

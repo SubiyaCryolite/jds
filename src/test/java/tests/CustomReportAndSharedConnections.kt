@@ -14,7 +14,7 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
     @Throws(Exception::class)
     private fun test() {
         val customTable = JdsTable()
-        customTable.name = "CrtAddressSpecific"
+        customTable.name = "address_specific"
         customTable.registerEntity(Address::class.java)
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)

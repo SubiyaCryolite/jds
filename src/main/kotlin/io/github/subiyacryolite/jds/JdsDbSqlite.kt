@@ -94,37 +94,53 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_inheritance.sql")
     }
 
-    override fun saveString() = "INSERT OR REPLACE INTO jds_store_text(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveEntityLiveVersion() = "INSERT OR REPLACE INTO jds_entity_live_version(uuid) VALUES(?)"
 
-    override fun saveBoolean() = "INSERT OR REPLACE INTO jds_store_boolean(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveString() = "INSERT OR REPLACE INTO jds_str_text(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveLong() = "INSERT OR REPLACE INTO jds_store_long(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveBoolean() = "INSERT OR REPLACE INTO jds_str_boolean(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDouble() = "INSERT OR REPLACE INTO jds_store_double(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveLong() = "INSERT OR REPLACE INTO jds_str_long(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveFloat() = "INSERT OR REPLACE INTO jds_store_float(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveDouble() = "INSERT OR REPLACE INTO jds_str_double(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveInteger() = "INSERT OR REPLACE INTO jds_store_integer(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveFloat() = "INSERT OR REPLACE INTO jds_str_float(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDateTime() = "INSERT OR REPLACE INTO jds_store_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveInteger() = "INSERT OR REPLACE INTO jds_str_integer(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveTime() = "INSERT OR REPLACE INTO jds_store_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveDateTime() = "INSERT OR REPLACE INTO jds_str_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveBlob() = "INSERT OR REPLACE INTO jds_store_blob(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveTime() = "INSERT OR REPLACE INTO jds_str_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveZonedDateTime() = "INSERT OR REPLACE INTO jds_store_zoned_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveBlob() = "INSERT OR REPLACE INTO jds_str_blob(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDate() = "INSERT OR REPLACE INTO jds_store_date(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveZonedDateTime() = "INSERT OR REPLACE INTO jds_str_zoned_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveEnum() = "INSERT OR REPLACE INTO jds_store_enum(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveDate() = "INSERT OR REPLACE INTO jds_str_date(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveMonthDay() = "INSERT OR REPLACE INTO jds_store_month_day(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveEnum() = "INSERT OR REPLACE INTO jds_str_enum(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveYearMonth() = "INSERT OR REPLACE INTO jds_store_year_month(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveMonthDay() = "INSERT OR REPLACE INTO jds_str_month_day(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun savePeriod() = "INSERT OR REPLACE INTO jds_store_period(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun saveYearMonth() = "INSERT OR REPLACE INTO jds_str_year_month(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveDuration() = "INSERT OR REPLACE INTO jds_store_duration(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+    override fun savePeriod() = "INSERT OR REPLACE INTO jds_str_period(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+
+    override fun saveDuration() = "INSERT OR REPLACE INTO jds_str_duration(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+
+    override fun saveEnumCollections() = "INSERT OR REPLACE INTO jds_str_enum_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveDateTimeCollections() = "INSERT OR REPLACE INTO jds_str_date_time_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveFloatCollections() = "INSERT OR REPLACE INTO jds_str_float_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveIntegerCollections() = "INSERT OR REPLACE INTO jds_str_integer_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveDoubleCollections() = "INSERT OR REPLACE INTO jds_str_double_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveLongCollections() = "INSERT OR REPLACE INTO jds_str_long_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
+    override fun saveStringCollections() = "INSERT OR REPLACE INTO jds_str_text_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
     override fun saveOverview() = "INSERT OR REPLACE INTO jds_entity_overview(uuid, edit_version, entity_id, entity_version) VALUES(?, ?, ?, ?)"
 
