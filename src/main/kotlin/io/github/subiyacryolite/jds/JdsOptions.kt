@@ -40,9 +40,4 @@ class JdsOptions {
      * Indicates if JDS db should write to custom reporting tables
      */
     var isWritingToReportingTables = true
-
-    /**
-     * Indicates if JDS updates custom reports per entry
-     */
-    var isUpdatingCustomReportTablesPerSave = true
 }

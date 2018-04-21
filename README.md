@@ -44,14 +44,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>9.0.0</version>
+    <version>9.1.0</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:9.0.0'
+compile 'io.github.subiyacryolite:jds:9.1.0'
 ```
 
 # Dependencies
@@ -708,7 +708,7 @@ Below is an example of a JdsTable that will persist **all the fields** in the Ad
 ```kotlin
 fun mapAndPrepareTablesWithAllFields(){
     val crtAddress = JdsTable(Address::class.java, true)
-    customTable.uniqueBy = JdsFilterBy.UUID
+    customTable.isStoringLiveRecordsOnly = true
 
     //register table
     jdsDb.mapTable(customTable)
@@ -723,7 +723,7 @@ You can define your JdsTables in code or you may deserialize them in JSON format
 ```json
 {
   "name": "json_report",
-  "uniqueBy": "UUID",
+  "storingLiveRecordsOnly": true,
   "entities": [1, 3],
   "fields": [3, 5, 7, 4]
 }

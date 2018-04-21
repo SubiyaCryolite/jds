@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "9.0.0-SNAPSHOT" //major.minor.revision
+version = "9.1.0-SNAPSHOT" //major.minor.revision
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -20,7 +20,7 @@ project.ext.kotlinVersion = "1.2.40"
 
 buildscript {
     
-    project.ext.kotlinVersion = "1.2.30"
+    project.ext.kotlinVersion = "1.2.40"
 
     repositories {
         mavenCentral()

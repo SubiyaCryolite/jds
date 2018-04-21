@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
+import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.SaveEventArgument
@@ -23,7 +24,6 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.*
-import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -32,7 +32,15 @@ import kotlin.coroutines.experimental.buildSequence
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
  */
-class JdsSave private constructor(private val jdsDb: JdsDb, private val connection: Connection, private val entities: Iterable<JdsEntity>, private val postSaveEvent: JdsSaveEvent? = null, private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(), private val preSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), private val postSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections), var closeConnection: Boolean = true, val recursiveInnerCall: Boolean = false) : Callable<Boolean> {
+class JdsSave private constructor(private val jdsDb: JdsDb,
+                                  private val connection: Connection,
+                                  private val entities: Iterable<JdsEntity>,
+                                  private val postSaveEvent: JdsSaveEvent? = null,
+                                  private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(),
+                                  private val preSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections),
+                                  private val postSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections),
+                                  var closeConnection: Boolean = true,
+                                  private val recursiveInnerCall: Boolean = false) : Callable<Boolean> {
 
 
     /**
@@ -134,9 +142,14 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
      * @param alternateConnections
      * @param entity
      */
-    private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity, deleteColumns: HashMap<String, MutableCollection<Any>>) {
+    private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity) {
         jdsDb.tables.forEach {
-            it.executeSave(jdsDb, entity, saveEventArguments, deleteColumns)
+            it.executeSave(jdsDb, entity, saveEventArguments)
+            //if flat tables only store latest data delete all entries that dont have a map in JdsLatestEntry
+            if (it.isStoringLiveRecordsOnly) {
+                val stmt = saveEventArguments.getOrAddStatement(it.deleteOldRecords(jdsDb))
+                stmt.addBatch()
+            }
         }
     }
 
@@ -159,8 +172,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
         val saveLiveVersion = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityLiveVersion())
         val updateLiveVersion = regularStatement(preSaveEventArgument, "UPDATE jds_entity_live_version SET edit_version = ? WHERE uuid = ? AND (edit_version < ? OR edit_version IS NULL)")
 
-        val customTablesDelete = HashMap<String, MutableCollection<Any>>()
-
         entities.forEach {
             saveOverview.setString(1, it.overview.uuid)
             saveOverview.setInt(2, it.overview.editVersion)
@@ -177,7 +188,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb, private val connecti
             updateLiveVersion.addBatch()
 
             if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty())
-                processCrt(jdsDb, postSaveEventArgument, it, customTablesDelete)
+                processCrt(jdsDb, postSaveEventArgument, it)
 
             if (it is JdsSaveListener)
                 it.onPreSave(preSaveEventArgument)

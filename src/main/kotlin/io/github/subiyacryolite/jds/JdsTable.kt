@@ -18,7 +18,6 @@ import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import io.github.subiyacryolite.jds.enums.JdsFilterBy
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.EventArgument
 import java.io.Serializable
@@ -37,14 +36,13 @@ open class JdsTable() : Serializable {
     var name = ""
     var entities = HashSet<Long>()
     var fields = HashSet<Long>()
-    var uniqueBy = JdsFilterBy.UUID
+    var isStoringLiveRecordsOnly = true
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
-    private var deleteByCompositeKeySql = ""
-    private var deleteByParentUuidSql = ""
-    private var deleteByUuidSql = ""
     private var generatedOrUpdatedSchema = false
+    private val deleteByUuidSql: String
+        get() = "DELETE FROM $name WHERE uuid = ?"
     private val storedProcedureName: String
         get() {
             val stringJoiner = StringJoiner("_")
@@ -54,7 +52,6 @@ open class JdsTable() : Serializable {
 
     /**
      * @param entity
-     * @param uniqueEntries
      */
     @JvmOverloads
     constructor(entity: Class<out IJdsEntity>) : this() {
@@ -118,14 +115,11 @@ open class JdsTable() : Serializable {
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument, deleteColumns: HashMap<String, MutableCollection<Any>>) {
+    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema() before you can persist this table: $name")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
-            if (jdsDb.options.isUpdatingCustomReportTablesPerSave)
-                deleteExistingRecords(entity, deleteColumns)
-
             //prepare insert placeholder
             if (jdsDb.isSqLiteDb) {
                 val stmt = eventArgument.getOrAddStatement("INSERT OR REPLACE INTO $name(uuid, edit_version) VALUES(?,  ?)")
@@ -195,13 +189,6 @@ open class JdsTable() : Serializable {
         }
     }
 
-    fun deleteExistingRecords(entity: JdsEntity, deleteColumns: HashMap<String, MutableCollection<Any>>) {
-        when (uniqueBy) {
-            JdsFilterBy.UUID -> deleteColumns.getOrPut(deleteByUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
-            JdsFilterBy.UUID_LOCATION -> deleteColumns.getOrPut(deleteByParentUuidSql) { LinkedList() }.addAll(arrayOf(entity.overview.uuid, entity.overview.editVersion))
-        }
-    }
-
     /**
      * @param jdsDb an instance of [JdsDb], used determine SQL types based on implementation
      * @param pool a shared connection pool to quickly query the target schemas
@@ -265,7 +252,7 @@ open class JdsTable() : Serializable {
             tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
             tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
 
-            //MySQL && MariaDB don't support alters. Must be dropped first
+            //MySQL && MariaDB don't support CREATE OR ALTER. Old definitions must be dropped first
             if (setOf(JdsImplementation.MARIADB, JdsImplementation.MYSQL).contains(jdsDb.implementation))
                 connection.prepareStatement("DROP PROCEDURE IF EXISTS $storedProcedureName").use { it.executeUpdate() }
 
@@ -337,32 +324,35 @@ open class JdsTable() : Serializable {
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByParentUuidInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
-        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByParentUuidSql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
-    }
-
-    /**
-     * @param eventArgument the [EventArgument] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param uuid the uuid to target for record deletion
-     */
-    private fun deleteRecordByCompositeKeyInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
-        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByCompositeKeySql)
-        deleteStatement.setString(1, uuid)
-        deleteStatement.addBatch()
-    }
-
-    /**
-     * @param eventArgument the [EventArgument] to use for this operation
-     * @param connection the [Connection] to use for this operation
-     * @param uuid the uuid to target for record deletion
-     */
     private fun deleteRecordByUuidInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
         val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByUuidSql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
+    }
+
+    /**
+     * Generate SQL to delete records that are not longer represent the most recent state of the database
+     * @implNote Use the recommended style for each DB Engine to ensure optimal performance
+     */
+    internal fun deleteOldRecords(jdsDb: JdsDb) = when (jdsDb.implementation) {
+        JdsImplementation.TSQL -> "DELETE $name FROM $name report_table\n" +
+                "INNER JOIN jds_entity_live_version live_records\n" +
+                "ON live_records.uuid = report_table.uuid\n" +
+                "AND live_records.edit_version = report_table.edit_version\n" +
+                "WHERE live_records.uuid IS NULL"
+        JdsImplementation.POSTGRES -> "DELETE FROM $name AS report_table\n" +
+                "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +
+                "WHERE report_table.edit_version = live_records.edit_version\n" +
+                "AND report_table.uuid = live_records.uuid)"
+        JdsImplementation.MARIADB, JdsImplementation.MYSQL -> "DELETE report_table FROM $name report_table\n" +
+                "LEFT JOIN jds_entity_live_version live_records ON live_records.uuid = report_table.uuid\n" +
+                "AND live_records.edit_version = report_table.edit_version\n" +
+                "WHERE live_records.uuid IS NULL"
+        JdsImplementation.ORACLE,JdsImplementation.SQLITE  -> "DELETE FROM $name\n" +
+                "WHERE NOT EXISTS(SELECT *\n" +
+                "FROM jds_entity_live_version\n" +
+                "WHERE $name.uuid = jds_entity_live_version.uuid AND\n" +
+                "$name.edit_version = jds_entity_live_version.edit_version)"
     }
 
 

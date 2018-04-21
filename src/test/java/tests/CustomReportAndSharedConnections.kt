@@ -18,10 +18,8 @@ class CustomReportAndSharedConnections : BaseTestConfig("Custom reports and shar
         customTable.registerEntity(Address::class.java)
         customTable.registerField(Fields.AREA_NAME)
         customTable.registerField(Fields.CITY_NAME)
-        customTable.uniqueBy = JdsFilterBy.UUID
 
         val crtAddress = JdsTable(Address::class.java)
-        crtAddress.uniqueBy = JdsFilterBy.UUID
 
         val crtAddressBook = JdsTable(AddressBook::class.java)
         val crtLogin = JdsTable(Login::class.java)
