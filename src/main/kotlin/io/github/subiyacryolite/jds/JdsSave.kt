@@ -16,7 +16,6 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
-import io.github.subiyacryolite.jds.enums.JdsImplementation
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
 import io.github.subiyacryolite.jds.events.SaveEventArgument
@@ -79,6 +78,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 ex.printStackTrace(System.err)
             }
         }
+        trimReportingTables(jdsDb, postSaveEventArgument)
         return true
     }
 
@@ -145,7 +145,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity) {
         jdsDb.tables.forEach {
             it.executeSave(jdsDb, entity, saveEventArguments)
-            //if flat tables only store latest data delete all entries that dont have a map in JdsLatestEntry
+        }
+    }
+
+    /**
+     * @param jdsDb
+     * @param connection
+     * @param alternateConnections
+     * @param entity
+     */
+    private fun trimReportingTables(jdsDb: JdsDb, saveEventArguments: SaveEventArgument) {
+        jdsDb.tables.forEach {
             if (it.isStoringLiveRecordsOnly) {
                 val stmt = saveEventArguments.getOrAddStatement(it.deleteOldRecords(jdsDb))
                 stmt.addBatch()
@@ -193,18 +203,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             if (it is JdsSaveListener)
                 it.onPreSave(preSaveEventArgument)
         }
-
-//        if (jdsDb.options.isUpdatingCustomReportTablesPerSave) {
-//            customTablesDelete.forEach { placeHolderQuery, filterKeys ->
-//                val placeHolder = String.format(placeHolderQuery, JdsLoad.prepareParamaterSequence(filterKeys.size))
-//                val stmt = preSaveEventArgument.getOrAddStatement(placeHolder)
-//                filterKeys.forEachIndexed { index, filterKey ->
-//                    stmt.setObject(index + 1, filterKey)
-//                }
-//                stmt.addBatch()
-//            }
-//        } else {
-//        }
     } catch (ex: SQLException) {
         ex.printStackTrace(System.err)
     }
