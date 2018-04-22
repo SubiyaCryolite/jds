@@ -35,7 +35,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 import kotlin.coroutines.experimental.buildSequence
 
 /**
@@ -1258,12 +1257,23 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * Ensures child entities have ids that link them to their parent.
      * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
-     * @param uuid
+     * @param pattern The pattern to set for each nested entity
      */
     @JvmOverloads
-    fun standardizeUUIDs(uuid: String = overview.uuid) {
-        standardizeObjectUUIDs(uuid, objectProperties)
-        standardizeObjectCollectionUUIDs(uuid, objectArrayProperties)
+    fun standardizeUUIDs(pattern: String = overview.uuid) {
+        standardizeObjectUuids(pattern, objectProperties)
+        standardizeCollectionUuids(pattern, objectArrayProperties)
+    }
+
+    /**
+     * Ensures child entities have edit versions that match their parents
+     * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
+     * @param version The version to set for each nested entity
+     */
+    @JvmOverloads
+    fun standardizeEditVersion(version: Int = overview.editVersion) {
+        standardizeObjectEditVersion(version, objectProperties)
+        standardizeCollectionEditVersion(version, objectArrayProperties)
     }
 
     /**
@@ -1271,14 +1281,13 @@ abstract class JdsEntity : IJdsEntity {
      * @param uuid
      * @param objectArrayProperties
      */
-    private fun standardizeObjectCollectionUUIDs(uuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+    private fun standardizeCollectionUuids(uuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
         objectArrayProperties.entries.forEach {
-            //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
+            //parent_uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
             it.value.forEachIndexed { sequence, entry ->
-                val entityId = entry.overview.entityId
-                entry.overview.uuid = "$uuid.$entityId.$sequence"
-                standardizeObjectUUIDs(entry.overview.uuid, entry.objectProperties)
-                standardizeObjectCollectionUUIDs(entry.overview.uuid, entry.objectArrayProperties)
+                entry.overview.uuid = "$uuid.${entry.overview.entityId}.$sequence"
+                standardizeObjectUuids(entry.overview.uuid, entry.objectProperties)
+                standardizeCollectionUuids(entry.overview.uuid, entry.objectArrayProperties)
             }
         }
     }
@@ -1288,13 +1297,39 @@ abstract class JdsEntity : IJdsEntity {
      * @param uuid
      * @param objectProperties
      */
-    private fun standardizeObjectUUIDs(uuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
-        //parent-uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
+    private fun standardizeObjectUuids(uuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
+        //parent_uuid.entity_id e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
         objectProperties.entries.forEach { entry ->
-            val entityId = entry.value.value.overview.entityId
-            entry.value.value.overview.uuid = "$uuid.$entityId"
-            standardizeObjectUUIDs(entry.value.value.overview.uuid, entry.value.value.objectProperties)
-            standardizeObjectCollectionUUIDs(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
+            entry.value.value.overview.uuid = "$uuid.${entry.value.value.overview.entityId}"
+            standardizeObjectUuids(entry.value.value.overview.uuid, entry.value.value.objectProperties)
+            standardizeCollectionUuids(entry.value.value.overview.uuid, entry.value.value.objectArrayProperties)
+        }
+    }
+
+    /**
+     * Ensures child entities have ids that link them to their parent.
+     * @param version
+     * @param objectArrayProperties
+     */
+    private fun standardizeCollectionEditVersion(version: Int, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+        objectArrayProperties.entries.forEach {
+            it.value.forEach { entry ->
+                standardizeObjectEditVersion(version, entry.objectProperties)
+                standardizeCollectionEditVersion(version, entry.objectArrayProperties)
+            }
+        }
+    }
+
+    /**
+     * Ensures child entities have ids that link them to their parent.
+     * @param version
+     * @param objectProperties
+     */
+    private fun standardizeObjectEditVersion(version: Int, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
+        //parent-version.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
+        objectProperties.entries.forEach { entry ->
+            standardizeObjectEditVersion(version, entry.value.value.objectProperties)
+            standardizeCollectionEditVersion(version, entry.value.value.objectArrayProperties)
         }
     }
 
