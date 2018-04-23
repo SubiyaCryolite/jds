@@ -1314,6 +1314,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun standardizeCollectionEditVersion(version: Int, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
         objectArrayProperties.entries.forEach {
             it.value.forEach { entry ->
+                entry.overview.editVersion = version
                 standardizeObjectEditVersion(version, entry.objectProperties)
                 standardizeCollectionEditVersion(version, entry.objectArrayProperties)
             }
@@ -1328,6 +1329,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun standardizeObjectEditVersion(version: Int, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
         //parent-version.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
         objectProperties.entries.forEach { entry ->
+            entry.value.value.overview.editVersion = version
             standardizeObjectEditVersion(version, entry.value.value.objectProperties)
             standardizeCollectionEditVersion(version, entry.value.value.objectArrayProperties)
         }
