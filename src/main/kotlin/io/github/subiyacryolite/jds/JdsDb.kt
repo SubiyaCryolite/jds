@@ -215,7 +215,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
             JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
             JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
-         /********************************************************
+        /********************************************************
          * Directives that create stored procedures follow below
          ********************************************************/
             JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
@@ -1385,6 +1385,16 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    fun deleteOldDataFromReportTables(connection: Connection) {
+        tables.forEach {
+            if (it.isStoringLiveRecordsOnly) {
+                connection.prepareStatement(it.deleteOldRecords(JdsDb@this)).use {
+                    it.executeUpdate()
+                }
+            }
+        }
     }
 
     companion object {

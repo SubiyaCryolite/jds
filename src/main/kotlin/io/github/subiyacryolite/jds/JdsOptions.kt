@@ -40,4 +40,10 @@ class JdsOptions {
      * Indicates if JDS db should write to custom reporting tables
      */
     var isWritingToReportingTables = true
+
+    /**
+     * Indicates if JDS should delete old data from report tables after every save. For bulk saves you can disable this
+     * property and manually call [deleteOldDataFromReportTables][JdsDb.deleteOldDataFromReportTables] from [JdsDb][JdsDb]
+     */
+    var deleteOldDataFromReportTablesAfterSave = true
 }
