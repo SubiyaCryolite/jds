@@ -37,7 +37,12 @@ class JdsOptions {
     var initialiseObjects = true
 
     /**
-     * Indicates if JDS db should write to custom reporting tables
+     * Indicates if JDS should write to custom reporting tables
      */
     var isWritingToReportingTables = true
+
+    /**
+     * Indicates if JDS should write parent to child entity bindings. This is nexessary when saving in EAV mode, and can be skipped to save hard-drive space when using nested portable containers persisted in a format such as JSON
+     */
+    var isWritingEntityBindings = true
 }
