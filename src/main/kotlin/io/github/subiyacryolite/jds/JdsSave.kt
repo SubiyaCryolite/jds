@@ -38,8 +38,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                                   private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap(),
                                   private val preSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections),
                                   private val postSaveEventArgument: SaveEventArgument = SaveEventArgument(jdsDb, connection, alternateConnections),
-                                  var closeConnection: Boolean = true,
-                                  private val recursiveInnerCall: Boolean = false) : Callable<Boolean> {
+                                  var closeConnection: Boolean = true) : Callable<Boolean> {
 
 
     /**
@@ -66,20 +65,31 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @throws Exception if unable to compute a result
      */
     override fun call(): Boolean {
-        val chunks = entities.chunked(1024)
-        val totalChunks = chunks.count()
-        chunks.forEachIndexed { index, batch ->
-            try {
-                val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
-                saveInner(orderedList.asIterable(), index == (totalChunks - 1))
-                if (jdsDb.options.isPrintingOutput)
-                    println("Processing saves. Batch ${index + 1} of $totalChunks")
-            } catch (ex: Exception) {
-                ex.printStackTrace(System.err)
+        try {
+            val chunks = entities.chunked(1024)
+            val totalChunks = chunks.count()
+            chunks.forEachIndexed { index, batch ->
+                try {
+                    val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
+                    saveInner(orderedList.asIterable(), index == (totalChunks - 1))
+                    if (jdsDb.options.isPrintingOutput)
+                        println("Processing saves. Batch ${index + 1} of $totalChunks")
+                } catch (ex: Exception) {
+                    ex.printStackTrace(System.err)
+                }
+            }
+            if (jdsDb.options.deleteOldDataFromReportTablesAfterSave)
+                jdsDb.deleteOldDataFromReportTables(connection)
+            return true
+        } catch (ex: Exception) {
+            ex.printStackTrace(System.err)
+            return false
+        } finally {
+            if (closeConnection) {
+                alternateConnections.forEach { it.value.close() }
+                connection.close()
             }
         }
-        trimReportingTables(jdsDb, postSaveEventArgument)
-        return true
     }
 
     /**
@@ -128,11 +138,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             postSaveEventArgument.executeBatches()
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
-        } finally {
-            if (!recursiveInnerCall && finalStep && closeConnection) {
-                alternateConnections.forEach { it.value.close() }
-                connection.close()
-            }
         }
     }
 
@@ -145,21 +150,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity) {
         jdsDb.tables.forEach {
             it.executeSave(jdsDb, entity, saveEventArguments)
-        }
-    }
-
-    /**
-     * @param jdsDb
-     * @param connection
-     * @param alternateConnections
-     * @param entity
-     */
-    private fun trimReportingTables(jdsDb: JdsDb, saveEventArguments: SaveEventArgument) {
-        jdsDb.tables.forEach {
-            if (it.isStoringLiveRecordsOnly) {
-                val stmt = saveEventArguments.getOrAddStatement(it.deleteOldRecords(jdsDb))
-                stmt.addBatch()
-            }
         }
     }
 
