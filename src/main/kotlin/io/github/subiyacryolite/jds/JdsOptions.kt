@@ -12,11 +12,6 @@ class JdsOptions {
     var isWritingToPrimaryDataTables = true
 
     /**
-     * Indicate if JDS should write data to overview fields
-     */
-    var isWritingOverviewFields = true
-
-    /**
      * Indicate if JDS should write array types to the DB
      */
     var isWritingArrayValues = true

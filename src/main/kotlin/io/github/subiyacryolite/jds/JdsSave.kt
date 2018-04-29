@@ -125,13 +125,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     saveArrayFloats(it)
                     saveEnumCollections(it)
                 }
-                if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
-                    saveAndBindObjects(it)
-                    saveAndBindObjectArrays(it)
+                if (jdsDb.options.isWritingEntityBindings) {
+                    saveObjectBindings(it)
+                    saveObjectArrayBindings(it)
                 }
                 if (it is JdsSaveListener)
                     it.onPostSave(postSaveEventArgument)
-
                 postSaveEvent?.onSave(it, postSaveEventArgument, connection)
             }
             preSaveEventArgument.executeBatches()
@@ -588,23 +587,20 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(parentEntity: JdsEntity) {
-        if (!jdsDb.options.isWritingEntityBindings) return
-        try {
-            val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
-            parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
-                entityCollection.forEach {
-                    updateFieldId.setString(1, parentEntity.overview.uuid)
-                    updateFieldId.setInt(2, parentEntity.overview.editVersion)
-                    updateFieldId.setString(3, it.overview.uuid)
-                    updateFieldId.setInt(4, it.overview.editVersion)
-                    updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
-                    updateFieldId.addBatch()
-                }
+    private fun saveObjectArrayBindings(parentEntity: JdsEntity) = try {
+        val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
+        parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
+            entityCollection.forEach {
+                updateFieldId.setString(1, parentEntity.overview.uuid)
+                updateFieldId.setInt(2, parentEntity.overview.editVersion)
+                updateFieldId.setString(3, it.overview.uuid)
+                updateFieldId.setInt(4, it.overview.editVersion)
+                updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
+                updateFieldId.addBatch()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 
     /**
@@ -612,20 +608,17 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(parentEntity: JdsEntity) {
-        if (!jdsDb.options.isWritingEntityBindings) return
-        try {
-            val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
-            parentEntity.objectProperties.forEach { fieldEntity, v ->
-                updateFieldId.setString(1, parentEntity.overview.uuid)
-                updateFieldId.setInt(2, parentEntity.overview.editVersion)
-                updateFieldId.setString(3, v.value.overview.uuid)
-                updateFieldId.setInt(4, v.value.overview.editVersion)
-                updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
-                updateFieldId.addBatch()
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
+    private fun saveObjectBindings(parentEntity: JdsEntity) = try {
+        val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
+        parentEntity.objectProperties.forEach { fieldEntity, v ->
+            updateFieldId.setString(1, parentEntity.overview.uuid)
+            updateFieldId.setInt(2, parentEntity.overview.editVersion)
+            updateFieldId.setString(3, v.value.overview.uuid)
+            updateFieldId.setInt(4, v.value.overview.editVersion)
+            updateFieldId.setLong(5, fieldEntity.fieldEntity.id)
+            updateFieldId.addBatch()
         }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
     }
 }
