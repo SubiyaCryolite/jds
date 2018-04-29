@@ -42,7 +42,13 @@ class JdsOptions {
     var isWritingToReportingTables = true
 
     /**
-     * Indicates if JDS should write parent to child entity bindings. This is nexessary when saving in EAV mode, and can be skipped to save hard-drive space when using nested portable containers persisted in a format such as JSON
+     * Indicates if JDS should write parent to child entity bindings. This is necessary when saving in EAV mode, and can be skipped to save hard-drive space when using nested portable containers persisted in a format such as JSON
      */
     var isWritingEntityBindings = true
+
+    /**
+     * Indicates if JDS should delete old data from report tables after every save. For bulk saves you can disable this
+     * property and manually call [deleteOldDataFromReportTables][JdsDb.deleteOldDataFromReportTables] from [JdsDb][JdsDb]
+     */
+    var isDeletingOldDataFromReportTablesAfterSave = true
 }

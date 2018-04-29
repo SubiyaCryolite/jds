@@ -78,7 +78,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     ex.printStackTrace(System.err)
                 }
             }
-            if (jdsDb.options.deleteOldDataFromReportTablesAfterSave)
+            if (jdsDb.options.isDeletingOldDataFromReportTablesAfterSave)
                 jdsDb.deleteOldDataFromReportTables(connection)
             return true
         } catch (ex: Exception) {
