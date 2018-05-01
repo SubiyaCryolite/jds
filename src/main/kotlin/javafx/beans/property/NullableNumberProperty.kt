@@ -16,7 +16,12 @@ package javafx.beans.property
 import javafx.beans.value.WritableValue
 import java.io.Serializable
 
-open class NullableNumberProperty<T : Number> : WritableValue<T>, Serializable {
+open class NullableNumberProperty<T : Number>() : WritableValue<T>, Serializable {
+
+    constructor(value: T? = null) : this() {
+        setValue(value)
+    }
+
 
     private var _value: T? = null
 

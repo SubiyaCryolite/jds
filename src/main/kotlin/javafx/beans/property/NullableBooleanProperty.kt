@@ -16,7 +16,11 @@ package javafx.beans.property
 import javafx.beans.value.WritableValue
 import java.io.Serializable
 
-class NullableBooleanProperty : WritableValue<Boolean>, Serializable {
+class NullableBooleanProperty() : WritableValue<Boolean>, Serializable {
+
+    constructor(value: Boolean? = null) : this() {
+        setValue(value)
+    }
 
     private var _value: Boolean? = null
 
