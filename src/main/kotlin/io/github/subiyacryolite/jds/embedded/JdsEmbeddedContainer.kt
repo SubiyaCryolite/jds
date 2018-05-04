@@ -207,11 +207,11 @@ data class JdsStorePeriod(@get:JsonProperty("k") @set:JsonProperty("k") var key:
  * @param fieldId field id
  * @param version version
  */
-data class JdsEntityOverview(var uuid: String = "",
-                             var editVersion: Int = 0,
-                             var entityId: Long = 0,
-                             var fieldId: Long? = null,
-                             var version: Long = 0)
+data class JdsEntityOverview(@get:JsonProperty("u") @set:JsonProperty("u") var uuid: String = "",
+                             @get:JsonProperty("ev") @set:JsonProperty("ev") var editVersion: Int = 0,
+                             @get:JsonProperty("e") @set:JsonProperty("e") var entityId: Long = 0,
+                             @get:JsonProperty("f") @set:JsonProperty("f") var fieldId: Long? = null,
+                             @get:JsonProperty("v") @set:JsonProperty("v") var version: Long = 0)
 
 /**
  * @param entities a collection of [JdsEntity][JdsEntity] objects to store in a portable manner
