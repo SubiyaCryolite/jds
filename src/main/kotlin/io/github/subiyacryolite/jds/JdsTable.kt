@@ -53,7 +53,6 @@ open class JdsTable() : Serializable {
     /**
      * @param entity
      */
-    @JvmOverloads
     constructor(entity: Class<out IJdsEntity>) : this() {
         val annotatedClass = entity.isAnnotationPresent(JdsEntityAnnotation::class.java)
         val annotatedParent = entity.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
@@ -91,19 +90,27 @@ open class JdsTable() : Serializable {
     }
 
     /**
-     * Method used to register [JdsField]s that shall be persisted to [JdsTable]s
-     * @param fieldId a numeric value corresponding to a [JdsField] which's value shall be persisted to this[JdsTable]
+     * Method used to register [JdsField's][JdsField] that shall be persisted to a [JdsTable][JdsTable]
+     * @param fieldId a numeric value corresponding to a [JdsField][JdsField] which's value shall be persisted to this[JdsTable]
      */
     fun registerField(fieldId: Long) {
         fields.add(fieldId)
     }
 
     /**
-     * Method used to register [JdsField]s that shall be persisted to [JdsTable]s
-     * @param jdsField a [JdsField] which's value shall be persisted to this[JdsTable]
+     * Method used to register [JdsField's][JdsField] that shall be persisted to a [JdsTable][JdsTable]
+     * @param jdsField a [JdsField][JdsField] which's value shall be persisted to this[JdsTable]
      */
     fun registerField(jdsField: JdsField) {
         registerField(jdsField.id)
+    }
+
+    /**
+     * Method used to register [JdsField's][JdsField] that shall be persisted to a [JdsTable][JdsTable]
+     * @param jdsFields an array of [JdsField's][JdsField] whose values shall be persisted to this[JdsTable]
+     */
+    fun registerFields(vararg jdsFields: JdsField) {
+        jdsFields.forEach { registerField(it) }
     }
 
     /**
