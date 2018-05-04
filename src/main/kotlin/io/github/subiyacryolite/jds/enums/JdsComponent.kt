@@ -24,7 +24,7 @@ enum class JdsComponent(val component: String, val alias: String) {
     NULL("Null", "null"),
     ENTITY_BINDING("jds_entity_binding", "eb"),
     ENTITY_LIVE_VERSION("jds_entity_live_version","elv"),
-    ENTITY_OVERVIEW("jds_entity_overview", "eo"),
+    ENTITY_OVERVIEW("jds_entity_overview", "entityOverviews"),
     POP_ENTITY_BINDING("jds_pop_entity_binding", ""),
     POP_ENTITY_LIVE_VERSION("jds_pop_entity_live_version",""),
     POP_ENTITY_OVERVIEW("jds_pop_entity_overview", ""),
@@ -81,12 +81,12 @@ enum class JdsComponent(val component: String, val alias: String) {
     STORE_INTEGER_COLLECTION("jds_str_integer_collection", "sic"),
     STORE_LONG("jds_str_long", "sl"),
     STORE_LONG_COLLECTION("jds_str_long_collection", "slc"),
-    STORE_MONTH_DAY("jds_str_month_day", "md"),
+    STORE_MONTH_DAY("jds_str_month_day", "monthDayValues"),
     STORE_PERIOD("jds_str_period", "sp"),
     STORE_TEXT("jds_str_text", "st"),
     STORE_TEXT_COLLECTION("jds_str_text_collection", "stc"),
     STORE_TIME("jds_str_time", "stt"),
-    STORE_YEAR_MONTH("jds_str_year_month", "ym"),
+    STORE_YEAR_MONTH("jds_str_year_month", "yearMonthValues"),
     STORE_ZONED_DATE_TIME("jds_str_zoned_date_time", "szdt"),
     ;
 

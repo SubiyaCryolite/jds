@@ -767,44 +767,44 @@ abstract class JdsEntity : IJdsEntity {
                 false -> 0
                 else -> null
             }
-            embeddedObject.bv.add(JdsStoreBoolean(it.key, input))
+            embeddedObject.booleanValues.add(JdsStoreBoolean(it.key, input))
         }
-        stringProperties.entries.forEach { embeddedObject.sv.add(JdsStoreString(it.key, it.value.value)) }
-        floatProperties.entries.forEach { embeddedObject.fv.add(JdsStoreFloat(it.key, it.value.value)) }
-        doubleProperties.entries.forEach { embeddedObject.dv.add(JdsStoreDouble(it.key, it.value.value)) }
-        longProperties.entries.forEach { embeddedObject.lv.add(JdsStoreLong(it.key, it.value.value)) }
-        integerProperties.entries.forEach { embeddedObject.iv.add(JdsStoreInteger(it.key, it.value.value)) }
+        stringProperties.entries.forEach { embeddedObject.stringValues.add(JdsStoreString(it.key, it.value.value)) }
+        floatProperties.entries.forEach { embeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value)) }
+        doubleProperties.entries.forEach { embeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value)) }
+        longProperties.entries.forEach { embeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value)) }
+        integerProperties.entries.forEach { embeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value)) }
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeProperties.entries.forEach { embeddedObject.zdt.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.forEach { embeddedObject.tv.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
-        durationProperties.entries.forEach { embeddedObject.du.add(JdsStoreDuration(it.key, it.value.value.toNanos())) }
-        localDateTimeProperties.entries.forEach { embeddedObject.dtv.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        localDateProperties.entries.forEach { embeddedObject.dte.add(JdsStoreDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
-        monthDayProperties.entries.forEach { embeddedObject.md.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
-        yearMonthProperties.entries.forEach { embeddedObject.ym.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
-        periodProperties.entries.forEach { embeddedObject.pv.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
+        zonedDateTimeProperties.entries.forEach { embeddedObject.zonedDateTimeValues.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
+        localTimeProperties.entries.forEach { embeddedObject.timeValues.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
+        durationProperties.entries.forEach { embeddedObject.durationValues.add(JdsStoreDuration(it.key, it.value.value.toNanos())) }
+        localDateTimeProperties.entries.forEach { embeddedObject.dateTimeValues.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
+        localDateProperties.entries.forEach { embeddedObject.dateValues.add(JdsStoreDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        monthDayProperties.entries.forEach { embeddedObject.monthDayValues.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
+        yearMonthProperties.entries.forEach { embeddedObject.yearMonthValues.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
+        periodProperties.entries.forEach { embeddedObject.periodValues.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
         //==============================================
         //BLOB
         //==============================================
         blobProperties.entries.forEach {
-            embeddedObject.blv.add(JdsStoreBlob(it.key, it.value.get() ?: ByteArray(0)))
+            embeddedObject.blobValues.add(JdsStoreBlob(it.key, it.value.get() ?: ByteArray(0)))
         }
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.forEach { embeddedObject.ev.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
-        enumCollectionProperties.entries.forEach { embeddedObject.ec.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
+        enumProperties.entries.forEach { embeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
+        enumCollectionProperties.entries.forEach { embeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
         //==============================================
         //ARRAYS
         //==============================================
-        stringArrayProperties.entries.forEach { embeddedObject.sc.add(JdsStoreStringCollection(it.key, it.value)) }
-        dateTimeArrayProperties.entries.forEach { embeddedObject.dtc.add(JdsStoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
-        floatArrayProperties.entries.forEach { embeddedObject.fc.add(JdsStoreFloatCollection(it.key, it.value)) }
-        doubleArrayProperties.entries.forEach { embeddedObject.dc.add(JdsStoreDoubleCollection(it.key, it.value)) }
-        longArrayProperties.entries.forEach { embeddedObject.lc.add(JdsStoreLongCollection(it.key, it.value)) }
-        integerArrayProperties.entries.forEach { embeddedObject.ic.add(JdsStoreIntegerCollection(it.key, it.value)) }
+        stringArrayProperties.entries.forEach { embeddedObject.stringCollections.add(JdsStoreStringCollection(it.key, it.value)) }
+        dateTimeArrayProperties.entries.forEach { embeddedObject.dateTimeCollection.add(JdsStoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
+        floatArrayProperties.entries.forEach { embeddedObject.floatCollections.add(JdsStoreFloatCollection(it.key, it.value)) }
+        doubleArrayProperties.entries.forEach { embeddedObject.doubleCollections.add(JdsStoreDoubleCollection(it.key, it.value)) }
+        longArrayProperties.entries.forEach { embeddedObject.longCollections.add(JdsStoreLongCollection(it.key, it.value)) }
+        integerArrayProperties.entries.forEach { embeddedObject.integerCollections.add(JdsStoreIntegerCollection(it.key, it.value)) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -813,14 +813,14 @@ abstract class JdsEntity : IJdsEntity {
                 val eo = JdsEmbeddedObject()
                 eo.fieldId = key.fieldEntity.id
                 eo.init(it)
-                embeddedObject.eo.add(eo)
+                embeddedObject.entityOverviews.add(eo)
             }
         }
         objectProperties.forEach { key, it ->
             val eo = JdsEmbeddedObject()
             eo.fieldId = key.fieldEntity.id
             eo.init(it.value)
-            embeddedObject.eo.add(eo)
+            embeddedObject.entityOverviews.add(eo)
         }
     }
 
@@ -854,7 +854,7 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.LONG -> longProperties[fieldId]?.value = when (value) {
                 is Long? -> value
                 is BigDecimal -> value.toLong() //Oracle
-                is Integer -> value.toLong()
+                is Int -> value.toLong()
                 else -> null
             }
 
