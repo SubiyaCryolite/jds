@@ -12,11 +12,6 @@ class JdsOptions {
     var isWritingToPrimaryDataTables = true
 
     /**
-     * Indicate if JDS should write data to overview fields
-     */
-    var isWritingOverviewFields = true
-
-    /**
      * Indicate if JDS should write array types to the DB
      */
     var isWritingArrayValues = true
@@ -37,13 +32,18 @@ class JdsOptions {
     var initialiseObjects = true
 
     /**
-     * Indicates if JDS db should write to custom reporting tables
+     * Indicates if JDS should write to custom reporting tables
      */
     var isWritingToReportingTables = true
+
+    /**
+     * Indicates if JDS should write parent to child entity bindings. This is necessary when saving in EAV mode, and can be skipped to save hard-drive space when using nested portable containers persisted in a format such as JSON
+     */
+    var isWritingEntityBindings = true
 
     /**
      * Indicates if JDS should delete old data from report tables after every save. For bulk saves you can disable this
      * property and manually call [deleteOldDataFromReportTables][JdsDb.deleteOldDataFromReportTables] from [JdsDb][JdsDb]
      */
-    var deleteOldDataFromReportTablesAfterSave = true
+    var isDeletingOldDataFromReportTablesAfterSave = true
 }

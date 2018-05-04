@@ -78,7 +78,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     ex.printStackTrace(System.err)
                 }
             }
-            if (jdsDb.options.deleteOldDataFromReportTablesAfterSave)
+            if (jdsDb.options.isDeletingOldDataFromReportTablesAfterSave)
                 jdsDb.deleteOldDataFromReportTables(connection)
             return true
         } catch (ex: Exception) {
@@ -125,13 +125,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     saveArrayFloats(it)
                     saveEnumCollections(it)
                 }
-                if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingOverviewFields || jdsDb.options.isWritingArrayValues) {
-                    saveAndBindObjects(it)
-                    saveAndBindObjectArrays(it)
+                if (jdsDb.options.isWritingEntityBindings) {
+                    saveObjectBindings(it)
+                    saveObjectArrayBindings(it)
                 }
                 if (it is JdsSaveListener)
                     it.onPostSave(postSaveEventArgument)
-
                 postSaveEvent?.onSave(it, postSaveEventArgument, connection)
             }
             preSaveEventArgument.executeBatches()
@@ -588,7 +587,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjectArrays(parentEntity: JdsEntity) = try {
+    private fun saveObjectArrayBindings(parentEntity: JdsEntity) = try {
         val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
         parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
             entityCollection.forEach {
@@ -609,7 +608,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @implNote For the love of Christ don't use parallel stream here
      */
     @Throws(Exception::class)
-    private fun saveAndBindObjects(parentEntity: JdsEntity) = try {
+    private fun saveObjectBindings(parentEntity: JdsEntity) = try {
         val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
         parentEntity.objectProperties.forEach { fieldEntity, v ->
             updateFieldId.setString(1, parentEntity.overview.uuid)
