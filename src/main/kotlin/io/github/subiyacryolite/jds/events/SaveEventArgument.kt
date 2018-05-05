@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.events
 
 import io.github.subiyacryolite.jds.IJdsDb
 import java.sql.Connection
+import java.sql.SQLException
 import java.util.concurrent.ConcurrentMap
 
 /**
@@ -28,10 +29,7 @@ open class SaveEventArgument(jdsDb: IJdsDb, connection: Connection, alternateCon
     override fun executeBatches() = try {
         connection.autoCommit = false
         alternateConnections.forEach { it.value.autoCommit = false }
-        statements.values.forEach {
-            it.executeBatch()
-            it.close()
-        }
+        statements.values.forEach { it.executeBatch() }
         connection.commit()
         alternateConnections.forEach { it.value.commit() }
     } catch (exception: Exception) {
@@ -43,4 +41,8 @@ open class SaveEventArgument(jdsDb: IJdsDb, connection: Connection, alternateCon
         alternateConnections.forEach { it.value.autoCommit = true }
     }
 
+    @Throws(SQLException::class)
+    fun closeStatements() {
+        statements.values.forEach { it.close() }
+    }
 }

@@ -85,6 +85,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             ex.printStackTrace(System.err)
             return false
         } finally {
+            preSaveEventArgument.closeStatements()
+            postSaveEventArgument.closeStatements()
             if (closeConnection) {
                 alternateConnections.forEach { it.value.close() }
                 connection.close()
