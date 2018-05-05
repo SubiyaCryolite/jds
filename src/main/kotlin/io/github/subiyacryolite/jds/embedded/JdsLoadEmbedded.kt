@@ -44,7 +44,6 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
     private fun populate(entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
         entity.overview.entityId = embeddedObject.overview.entityId
         entity.overview.uuid = embeddedObject.overview.uuid
-        entity.overview.entityVersion = embeddedObject.overview.version
         entity.overview.editVersion = embeddedObject.overview.editVersion
         //==============================================
         embeddedObject.blobValues.forEach { entity.populateProperties(JdsFieldType.BLOB, it.key, it.value) }

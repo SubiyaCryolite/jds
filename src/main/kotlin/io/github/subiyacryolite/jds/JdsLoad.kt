@@ -109,8 +109,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                     getOverviewRecords.append("SELECT\n")
                     getOverviewRecords.append("  repo.uuid,\n")
                     getOverviewRecords.append("  repo.edit_version,\n")
-                    getOverviewRecords.append("  entity_id,\n")
-                    getOverviewRecords.append("  entity_version\n")
+                    getOverviewRecords.append("  entity_id\n")
                     getOverviewRecords.append("FROM jds_entity_overview repo\n")
                     getOverviewRecords.append("  JOIN (SELECT\n")
                     getOverviewRecords.append("          uuid,\n")
@@ -236,13 +235,11 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val entityId = it.getLong("entity_id")
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val entityVersion = it.getLong("entity_version")
                 if (jdsDb.classes.containsKey(entityId)) {
                     val refType = jdsDb.classes[entityId]!!
                     val entity = refType.newInstance()
                     entity.overview.uuid = uuid
                     entity.overview.editVersion = editVersion
-                    entity.overview.entityVersion = entityVersion
                     entities.add(entity as T)
                 }
             }

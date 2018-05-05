@@ -107,7 +107,6 @@ class JdsEmbeddedObject {
                 entity.overview.uuid,
                 entity.overview.editVersion,
                 entity.overview.entityId,
-                fieldId,
-                entity.overview.entityVersion)
+                fieldId)
     }
 }

@@ -142,7 +142,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveStringCollections() = "INSERT OR REPLACE INTO jds_str_text_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveOverview() = "INSERT OR REPLACE INTO jds_entity_overview(uuid, edit_version, entity_id, entity_version) VALUES(?, ?, ?, ?)"
+    override fun saveOverview() = "INSERT OR REPLACE INTO jds_entity_overview(uuid, edit_version, entity_id) VALUES(?, ?, ?)"
 
     override fun saveEntityBindings() = "INSERT OR REPLACE INTO jds_entity_binding(parent_uuid, parent_edit_version, child_uuid, child_edit_version, child_attribute_id) VALUES(?, ?, ?, ?, ?)"
 

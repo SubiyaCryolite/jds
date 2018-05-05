@@ -44,14 +44,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>9.1.4-SNAPSHOT</version>
+    <version>9.2.2-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:9.1.4-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:9.2.2-SNAPSHOT'
 ```
 
 # Dependencies

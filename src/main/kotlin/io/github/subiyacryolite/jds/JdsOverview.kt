@@ -28,7 +28,6 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var entityId: Long = 0
     override var uuid: String = UUID.randomUUID().toString()
     override var editVersion: Int = 0
-    override var entityVersion: Long = 1L
     override var parent: JdsEntity? = null
 
     @Throws(IOException::class)
@@ -36,7 +35,6 @@ class JdsOverview : IJdsOverview, Externalizable {
         objectOutputStream.writeUTF(uuid)
         objectOutputStream.writeInt(editVersion)
         objectOutputStream.writeLong(entityId)
-        objectOutputStream.writeLong(entityVersion)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
@@ -44,14 +42,13 @@ class JdsOverview : IJdsOverview, Externalizable {
         uuid = objectInputStream.readUTF()
         editVersion = objectInputStream.readInt()
         entityId = objectInputStream.readLong()
-        entityVersion = objectInputStream.readLong()
     }
 
     override fun toString(): String {
-        return "{ uuid = $uuid, editVersion = $editVersion, entityId = $entityId, version = $entityVersion }"
+        return "{ uuid = $uuid, editVersion = $editVersion, entityId = $entityId}"
     }
 
     companion object {
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
     }
 }

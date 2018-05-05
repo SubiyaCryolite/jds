@@ -133,7 +133,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 }
                 if (it is JdsSaveListener)
                     it.onPostSave(postSaveEventArgument)
-                postSaveEvent?.onSave(it, postSaveEventArgument, connection)
+                postSaveEvent?.onSave(it, preSaveEventArgument, postSaveEventArgument, connection)
             }
             preSaveEventArgument.executeBatches()
             postSaveEventArgument.executeBatches()
@@ -174,16 +174,16 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
         val updateLiveVersion = regularStatement(preSaveEventArgument, "UPDATE jds_entity_live_version SET edit_version = ? WHERE uuid = ? AND (edit_version < ? OR edit_version IS NULL)")
 
         entities.forEach {
-            saveOverview.setString(1, it.overview.uuid)
-            saveOverview.setInt(2, it.overview.editVersion)
-            saveOverview.setLong(3, it.overview.entityId)
-            saveOverview.setLong(4, it.overview.entityVersion)
-            saveOverview.addBatch()
-
-            saveLiveVersion.setString(1, it.overview.uuid)
-            saveLiveVersion.addBatch()
-
+            if (jdsDb.options.isWritingToOverviewTable) {
+                saveOverview.setString(1, it.overview.uuid)
+                saveOverview.setInt(2, it.overview.editVersion)
+                saveOverview.setLong(3, it.overview.entityId)
+                saveOverview.addBatch()
+            }
             if (jdsDb.options.isWritingLatestEntityVersion) {
+                saveLiveVersion.setString(1, it.overview.uuid)
+                saveLiveVersion.addBatch()
+
                 updateLiveVersion.setInt(1, it.overview.editVersion)
                 updateLiveVersion.setString(2, it.overview.uuid)
                 updateLiveVersion.setInt(3, it.overview.editVersion)
@@ -191,7 +191,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             }
             if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty())
                 processCrt(jdsDb, postSaveEventArgument, it)
-
             if (it is JdsSaveListener)
                 it.onPreSave(preSaveEventArgument)
         }

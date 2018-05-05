@@ -10,7 +10,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.LocalTime
 
-@JdsEntityAnnotation(id = 1, name = "address", version = 1)
+@JdsEntityAnnotation(id = 1, name = "address")
 class Address : JdsEntity() {
     private val _streetName = SimpleStringProperty("")
     private val _plotNumber = NullableIntegerProperty()

@@ -51,4 +51,6 @@ class JdsOptions {
      * Indicates if JDS is writing the latest version to the jds_entity_live_version table
      */
     var isWritingLatestEntityVersion = true
+
+    var isWritingToOverviewTable = true
 }
