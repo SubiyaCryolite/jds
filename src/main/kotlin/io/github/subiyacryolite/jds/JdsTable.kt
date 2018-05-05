@@ -351,7 +351,7 @@ open class JdsTable() : Serializable {
                         "  LEFT JOIN (SELECT\n" +
                         "                MAX(eo.edit_version) AS edit_version,\n" +
                         "                eo.uuid\n" +
-                        "              FROM jds_entity_overview eo\n" +
+                        "              FROM ${jdsDb.dimensionTable} eo\n" +
                         "              GROUP BY eo.uuid) live_records\n" +
                         "    ON live_records.uuid = report_table.uuid AND live_records.edit_version = report_table.edit_version\n" +
                         "WHERE live_records.uuid IS NULL"
@@ -367,7 +367,7 @@ open class JdsTable() : Serializable {
                         "WHERE NOT EXISTS(SELECT\n" +
                         "                   MAX(eo.edit_version) AS edit_version,\n" +
                         "                   eo.uuid\n" +
-                        "                 FROM jds_entity_overview eo\n" +
+                        "                 FROM ${jdsDb.dimensionTable} eo\n" +
                         "                 WHERE eo.uuid = report_table.uuid AND eo.edit_version = report_table.edit_version\n" +
                         "                 GROUP BY eo.uuid)"
             }
@@ -382,7 +382,7 @@ open class JdsTable() : Serializable {
                         "  LEFT JOIN (SELECT\n" +
                         "               MAX(eo.edit_version) AS edit_version,\n" +
                         "               eo.uuid\n" +
-                        "             FROM jds_entity_overview eo\n" +
+                        "             FROM ${jdsDb.dimensionTable} eo\n" +
                         "             GROUP BY eo.uuid) live_records ON live_records.uuid = report_table.uuid\n" +
                         "                                               AND live_records.edit_version = report_table.edit_version\n" +
                         "WHERE live_records.uuid IS NULL"
@@ -399,7 +399,7 @@ open class JdsTable() : Serializable {
                         "WHERE NOT EXISTS(SELECT\n" +
                         "                   MAX(eo.edit_version) AS edit_version,\n" +
                         "                   eo.uuid\n" +
-                        "                 FROM jds_entity_overview eo\n" +
+                        "                 FROM ${jdsDb.dimensionTable} eo\n" +
                         "                 WHERE eo.uuid = $name.uuid AND eo.edit_version = $name.edit_version\n" +
                         "                 GROUP BY eo.uuid)"
             }

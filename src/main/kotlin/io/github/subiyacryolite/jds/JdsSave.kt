@@ -144,8 +144,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
 
     /**
      * @param jdsDb
-     * @param connection
-     * @param alternateConnections
+     * @param saveEventArguments
      * @param entity
      */
     private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity) {
@@ -153,11 +152,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             it.executeSave(jdsDb, entity, saveEventArguments)
         }
     }
-
-
-    private fun namedStatement(eventArguments: SaveEventArgument, sql: String) = eventArguments.getOrAddNamedStatement(connection, sql)
-
-    private fun namedStatementOrCall(eventArguments: SaveEventArgument, sql: String) = if (jdsDb.supportsStatements) eventArguments.getOrAddNamedCall(sql) else namedStatement(eventArguments, sql)
 
     private fun regularStatement(eventArguments: SaveEventArgument, sql: String) = eventArguments.getOrAddStatement(sql)
 
