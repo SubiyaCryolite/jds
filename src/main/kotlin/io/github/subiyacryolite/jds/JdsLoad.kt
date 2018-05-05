@@ -185,7 +185,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                             createEntities(entities, preparedStatement)
                             entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
                             //all entities have been initialised, now we populate them
-                            if (jdsDb.options.isWritingToPrimaryDataTables) {
+                            if (jdsDb.options.isWritingValuesToEavTables) {
                                 booleanStatement.use { populateBoolean(entities, it) }
                                 doubleStatement.use { populateDouble(entities, it) }
                                 enumStatement.use { populateEnum(entities, it) }
@@ -194,7 +194,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 longStatement.use { populateLong(entities, it) }
                                 stringStatement.use { populateString(entities, it) }
                             }
-                            if (jdsDb.options.isWritingToPrimaryDataTables || jdsDb.options.isWritingArrayValues) {
+                            if (jdsDb.options.isWritingValuesToEavTables || jdsDb.options.isWritingCollectionsToEavTables) {
                                 doubleCollectionStatement.use { populateDoubleCollection(entities, it) }
                                 dateTimeCollectionStatement.use { populateDateTimeCollection(entities, it) }
                                 enumCollectionStatement.use { populateEnumCollection(entities, it) }
@@ -203,7 +203,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 longCollectionStatement.use { populateLongCollection(entities, it) }
                                 stringCollectionStatement.use { populateStringCollection(entities, it) }
                             }
-                            if (jdsDb.options.isWritingToPrimaryDataTables && jdsDb.options.initialiseDatesAndTimes) {
+                            if (jdsDb.options.isWritingValuesToEavTables && jdsDb.options.initialiseDatesAndTimes) {
                                 dateStatement.use { populateDate(entities, it) }
                                 dateTimeStatement.use { populateDateTime(entities, it) }
                                 durationStatement.use { populateDuration(entities, it) }
@@ -214,7 +214,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 zonedDateTimeStatement.use { populateZonedDateTime(entities, it) }
                             }
                             if (jdsDb.options.initialiseObjects) {
-                                if (jdsDb.options.isWritingToPrimaryDataTables)
+                                if (jdsDb.options.isWritingValuesToEavTables)
                                     blobStatement.use { populateBlobs(entities, it) }
                                 populateEmbeddedAndArrayObjectsStmt.use { populateObjectEntriesAndObjectArrays(jdsDb, entities, it) }
                             }

@@ -25,7 +25,6 @@ import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
 import java.util.*
-import java.util.concurrent.ConcurrentMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashMap
@@ -116,7 +115,6 @@ open class JdsTable() : Serializable {
     /**
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
-     * @param alternateConnections a [ConcurrentMap] of holding a pool of alternate [Connections] to write to
      * @param entity a [JdsEntity][JdsEntity] that may have [JdsField'S][JdsField] persisted to this [JdsTable]
      * @param eventArgument The [EventArgument][EventArgument] that will hold batched SQL queries for execution
      * @throws Exception General IO errors
@@ -208,7 +206,7 @@ open class JdsTable() : Serializable {
         if (!jdsDb.doesTableExist(connection, name)) {
             connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use {
                 it.executeUpdate()
-                if (jdsDb.options.isPrintingOutput)
+                if (jdsDb.options.isLoggingOutput)
                     println("Created $name")
             }
         }
@@ -342,24 +340,70 @@ open class JdsTable() : Serializable {
      * @implNote Use the recommended style for each DB Engine to ensure optimal performance
      */
     internal fun deleteOldRecords(jdsDb: JdsDb) = when (jdsDb.implementation) {
-        JdsImplementation.TSQL -> "DELETE $name FROM $name report_table\n" +
-                "INNER JOIN jds_entity_live_version live_records\n" +
-                "ON live_records.uuid = report_table.uuid\n" +
-                "AND live_records.edit_version = report_table.edit_version\n" +
-                "WHERE live_records.uuid IS NULL"
-        JdsImplementation.POSTGRES -> "DELETE FROM $name AS report_table\n" +
-                "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +
-                "WHERE report_table.edit_version = live_records.edit_version\n" +
-                "AND report_table.uuid = live_records.uuid)"
-        JdsImplementation.MARIADB, JdsImplementation.MYSQL -> "DELETE report_table FROM $name report_table\n" +
-                "LEFT JOIN jds_entity_live_version live_records ON live_records.uuid = report_table.uuid\n" +
-                "AND live_records.edit_version = report_table.edit_version\n" +
-                "WHERE live_records.uuid IS NULL"
-        JdsImplementation.ORACLE,JdsImplementation.SQLITE  -> "DELETE FROM $name\n" +
-                "WHERE NOT EXISTS(SELECT *\n" +
-                "FROM jds_entity_live_version\n" +
-                "WHERE $name.uuid = jds_entity_live_version.uuid AND\n" +
-                "$name.edit_version = jds_entity_live_version.edit_version)"
+        JdsImplementation.TSQL -> {
+            when (jdsDb.options.isWritingLatestEntityVersion) {
+                true -> "DELETE $name FROM $name report_table\n" +
+                        "INNER JOIN jds_entity_live_version live_records\n" +
+                        "ON live_records.uuid = report_table.uuid\n" +
+                        "AND live_records.edit_version = report_table.edit_version\n" +
+                        "WHERE live_records.uuid IS NULL"
+                false -> "DELETE $name FROM $name report_table\n" +
+                        "  LEFT JOIN (SELECT\n" +
+                        "                MAX(eo.edit_version) AS edit_version,\n" +
+                        "                eo.uuid\n" +
+                        "              FROM jds_entity_overview eo\n" +
+                        "              GROUP BY eo.uuid) live_records\n" +
+                        "    ON live_records.uuid = report_table.uuid AND live_records.edit_version = report_table.edit_version\n" +
+                        "WHERE live_records.uuid IS NULL"
+            }
+        }
+        JdsImplementation.POSTGRES -> {
+            when (jdsDb.options.isWritingLatestEntityVersion) {
+                true -> "DELETE FROM $name AS report_table\n" +
+                        "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +
+                        "WHERE report_table.edit_version = live_records.edit_version\n" +
+                        "AND report_table.uuid = live_records.uuid)"
+                false -> "DELETE FROM $name AS report_table\n" +
+                        "WHERE NOT EXISTS(SELECT\n" +
+                        "                   MAX(eo.edit_version) AS edit_version,\n" +
+                        "                   eo.uuid\n" +
+                        "                 FROM jds_entity_overview eo\n" +
+                        "                 WHERE eo.uuid = report_table.uuid AND eo.edit_version = report_table.edit_version\n" +
+                        "                 GROUP BY eo.uuid)"
+            }
+        }
+        JdsImplementation.MARIADB, JdsImplementation.MYSQL -> {
+            when (jdsDb.options.isWritingLatestEntityVersion) {
+                true -> "DELETE report_table FROM $name report_table\n" +
+                        "LEFT JOIN jds_entity_live_version live_records ON live_records.uuid = report_table.uuid\n" +
+                        "AND live_records.edit_version = report_table.edit_version\n" +
+                        "WHERE live_records.uuid IS NULL"
+                false -> "DELETE report_table FROM $name report_table\n" +
+                        "  LEFT JOIN (SELECT\n" +
+                        "               MAX(eo.edit_version) AS edit_version,\n" +
+                        "               eo.uuid\n" +
+                        "             FROM jds_entity_overview eo\n" +
+                        "             GROUP BY eo.uuid) live_records ON live_records.uuid = report_table.uuid\n" +
+                        "                                               AND live_records.edit_version = report_table.edit_version\n" +
+                        "WHERE live_records.uuid IS NULL"
+            }
+        }
+        JdsImplementation.ORACLE, JdsImplementation.SQLITE -> {
+            when (jdsDb.options.isWritingLatestEntityVersion) {
+                true -> "DELETE FROM $name\n" +
+                        "WHERE NOT EXISTS(SELECT *\n" +
+                        "FROM jds_entity_live_version\n" +
+                        "WHERE $name.uuid = jds_entity_live_version.uuid AND\n" +
+                        "$name.edit_version = jds_entity_live_version.edit_version)"
+                false -> "DELETE FROM $name\n" +
+                        "WHERE NOT EXISTS(SELECT\n" +
+                        "                   MAX(eo.edit_version) AS edit_version,\n" +
+                        "                   eo.uuid\n" +
+                        "                 FROM jds_entity_overview eo\n" +
+                        "                 WHERE eo.uuid = $name.uuid AND eo.edit_version = $name.edit_version\n" +
+                        "                 GROUP BY eo.uuid)"
+            }
+        }
     }
 
 

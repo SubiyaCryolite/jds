@@ -72,7 +72,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 try {
                     val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
                     saveInner(orderedList.asIterable(), index == (totalChunks - 1))
-                    if (jdsDb.options.isPrintingOutput)
+                    if (jdsDb.options.isLoggingOutput)
                         println("Processing saves. Batch ${index + 1} of $totalChunks")
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
@@ -101,7 +101,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             //ensure that overviews are submitted before handing over to listeners
             saveOverview(entities)
             entities.forEach {
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingValuesToEavTables) {
                     saveDateConstructs(it)
                     saveDatesAndDateTimes(it)
                     saveZonedDateTimes(it)
@@ -115,7 +115,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     saveBlobs(it)
                     saveEnums(it)
                 }
-                if (jdsDb.options.isWritingArrayValues) {
+                if (jdsDb.options.isWritingCollectionsToEavTables) {
                     //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
                     saveArrayDates(it)
                     saveArrayStrings(it)
@@ -181,11 +181,12 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             saveLiveVersion.setString(1, it.overview.uuid)
             saveLiveVersion.addBatch()
 
-            updateLiveVersion.setInt(1, it.overview.editVersion)
-            updateLiveVersion.setString(2, it.overview.uuid)
-            updateLiveVersion.setInt(3, it.overview.editVersion)
-            updateLiveVersion.addBatch()
-
+            if (jdsDb.options.isWritingLatestEntityVersion) {
+                updateLiveVersion.setInt(1, it.overview.editVersion)
+                updateLiveVersion.setString(2, it.overview.uuid)
+                updateLiveVersion.setInt(3, it.overview.editVersion)
+                updateLiveVersion.addBatch()
+            }
             if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty())
                 processCrt(jdsDb, postSaveEventArgument, it)
 

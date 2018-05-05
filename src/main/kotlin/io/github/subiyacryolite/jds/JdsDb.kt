@@ -36,7 +36,7 @@ import kotlin.collections.LinkedHashMap
  * @param implementation
  * @param supportsStatements
  */
-abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb, Serializable {
+abstract class JdsDb(val implementation: JdsImplementation, val supportsStatements: Boolean) : IJdsDb, Serializable {
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
@@ -580,7 +580,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             statement.setString(3, caption)
             statement.setString(4, description)
             statement.executeUpdate()
-            if (options.isPrintingOutput)
+            if (options.isLoggingOutput)
                 println("Mapped Entity [$name - $id]")
         }
     } catch (ex: Exception) {
@@ -621,7 +621,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
-                        if (options.isPrintingOutput)
+                        if (options.isLoggingOutput)
                             println("Mapped Entity [${entityAnnotation.name}]")
                     }
                 } catch (ex: Exception) {

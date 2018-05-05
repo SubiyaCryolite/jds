@@ -28,11 +28,15 @@ open class SaveEventArgument(jdsDb: IJdsDb, connection: Connection, alternateCon
     override fun executeBatches() = try {
         connection.autoCommit = false
         alternateConnections.forEach { it.value.autoCommit = false }
-        statements.values.forEach { it.executeBatch() }
+        statements.values.forEach {
+            it.executeBatch()
+            it.close()
+        }
         connection.commit()
         alternateConnections.forEach { it.value.commit() }
     } catch (exception: Exception) {
         connection.rollback()
+        alternateConnections.forEach { it.value.rollback() }
         exception.printStackTrace(System.err)
     } finally {
         connection.autoCommit = true

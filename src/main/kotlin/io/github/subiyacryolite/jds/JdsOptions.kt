@@ -4,17 +4,17 @@ class JdsOptions {
     /**
      * A value indicating whether JDS should print internal log information
      */
-    var isPrintingOutput: Boolean = false
+    var isLoggingOutput: Boolean = false
 
     /**
-     * Indicate whether JDS is persisting to the primary data tables
+     * Indicates whether JDS is persisting values to the EAV jds_str_* tables
      */
-    var isWritingToPrimaryDataTables = true
+    var isWritingValuesToEavTables = true
 
     /**
-     * Indicate if JDS should write array types to the DB
+     * Indicates whether JDS is persisting collections to the EAV jds_str_*_collection tables
      */
-    var isWritingArrayValues = true
+    var isWritingCollectionsToEavTables = true
 
     /**
      * Indicates if load operations should initialise java primitive types
@@ -46,4 +46,9 @@ class JdsOptions {
      * property and manually call [deleteOldDataFromReportTables][JdsDb.deleteOldDataFromReportTables] from [JdsDb][JdsDb]
      */
     var isDeletingOldDataFromReportTablesAfterSave = true
+
+    /**
+     * Indicates if JDS is writing the latest version to the jds_entity_live_version table
+     */
+    var isWritingLatestEntityVersion = true
 }
