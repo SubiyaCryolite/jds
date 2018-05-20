@@ -31,11 +31,6 @@ interface IJdsOverview {
     var entityId: Long
 
     /**
-     * A flag indicating the version of this [JdsEntity]
-     */
-    var entityVersion: Long
-
-    /**
      * A runtime only flag to assist in certain tasks. This field is only populated at save and initialization time
      */
     var parent: JdsEntity?

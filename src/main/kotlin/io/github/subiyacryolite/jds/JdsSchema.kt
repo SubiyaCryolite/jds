@@ -18,7 +18,7 @@ object JdsSchema {
         stringBuilder.append(tableName)
         stringBuilder.append("(uuid $uuidDataType, edit_version $uuidLocationVersionDataType,\n")
         stringBuilder.append("CONSTRAINT ${tableName}_uc_composite UNIQUE (uuid, edit_version),\n")
-        stringBuilder.append("FOREIGN KEY (uuid, edit_version) REFERENCES jds_entity_overview(uuid, edit_version) ON DELETE CASCADE)")
+        stringBuilder.append("FOREIGN KEY (uuid, edit_version) REFERENCES ${jdsDb.dimensionTable}(uuid, edit_version) ON DELETE CASCADE)")
         return stringBuilder.toString()
     }
 

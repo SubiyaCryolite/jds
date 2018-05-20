@@ -90,7 +90,7 @@ data class JdsStoreInteger(@get:JsonProperty("k") @set:JsonProperty("k") var key
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
- * @param value the corresponding value
+ * @param values the corresponding value
  */
 data class JdsStoreIntegerCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Int> = ArrayList())
 
@@ -111,7 +111,7 @@ data class JdsStoreZonedDateTime(@get:JsonProperty("k") @set:JsonProperty("k") v
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
- * @param value the corresponding value
+ * @param values the corresponding value
  */
 data class JdsStoreLongCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Long> = ArrayList())
 
@@ -132,7 +132,7 @@ data class JdsStoreString(@get:JsonProperty("k") @set:JsonProperty("k") var key:
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
- * @param value the corresponding value
+ * @param values the corresponding value
  */
 data class JdsStoreStringCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<String> = ArrayList())
 
@@ -146,7 +146,7 @@ data class JdsStoreFloat(@get:JsonProperty("k") @set:JsonProperty("k") var key: 
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
- * @param value the corresponding value
+ * @param values the corresponding value
  */
 data class JdsStoreFloatCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Float> = ArrayList())
 
@@ -160,7 +160,7 @@ data class JdsStoreDateTime(@get:JsonProperty("k") @set:JsonProperty("k") var ke
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
- * @param value the corresponding value
+ * @param values the corresponding value
  */
 data class JdsStoreDateTimeCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Timestamp> = ArrayList())
 
@@ -207,11 +207,10 @@ data class JdsStorePeriod(@get:JsonProperty("k") @set:JsonProperty("k") var key:
  * @param fieldId field id
  * @param version version
  */
-data class JdsEntityOverview(var uuid: String = "",
-                             var editVersion: Int = 0,
-                             var entityId: Long = 0,
-                             var fieldId: Long? = null,
-                             var version: Long = 0)
+data class JdsEntityOverview(@get:JsonProperty("u") @set:JsonProperty("u") var uuid: String = "",
+                             @get:JsonProperty("ev") @set:JsonProperty("ev") var editVersion: Int = 0,
+                             @get:JsonProperty("e") @set:JsonProperty("e") var entityId: Long = 0,
+                             @get:JsonProperty("f") @set:JsonProperty("f") var fieldId: Long? = null)
 
 /**
  * @param entities a collection of [JdsEntity][JdsEntity] objects to store in a portable manner
@@ -231,10 +230,10 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
             val classHasAnnotation = it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
             val superclassHasAnnotation = it.javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
             if (classHasAnnotation || superclassHasAnnotation) {
-                val eb = JdsEmbeddedObject()
-                eb.fieldId = null
-                eb.init(it)
-                e.add(eb)
+                val embeddedObject = JdsEmbeddedObject()
+                embeddedObject.fieldId = null
+                embeddedObject.init(it)
+                e.add(embeddedObject)
             } else {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
             }

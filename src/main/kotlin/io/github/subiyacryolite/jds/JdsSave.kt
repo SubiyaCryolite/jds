@@ -72,7 +72,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 try {
                     val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
                     saveInner(orderedList.asIterable(), index == (totalChunks - 1))
-                    if (jdsDb.options.isPrintingOutput)
+                    if (jdsDb.options.isLoggingOutput)
                         println("Processing saves. Batch ${index + 1} of $totalChunks")
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
@@ -85,6 +85,8 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             ex.printStackTrace(System.err)
             return false
         } finally {
+            preSaveEventArgument.closeStatements()
+            postSaveEventArgument.closeStatements()
             if (closeConnection) {
                 alternateConnections.forEach { it.value.close() }
                 connection.close()
@@ -101,7 +103,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             //ensure that overviews are submitted before handing over to listeners
             saveOverview(entities)
             entities.forEach {
-                if (jdsDb.options.isWritingToPrimaryDataTables) {
+                if (jdsDb.options.isWritingValuesToEavTables) {
                     saveDateConstructs(it)
                     saveDatesAndDateTimes(it)
                     saveZonedDateTimes(it)
@@ -115,7 +117,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                     saveBlobs(it)
                     saveEnums(it)
                 }
-                if (jdsDb.options.isWritingArrayValues) {
+                if (jdsDb.options.isWritingCollectionsToEavTables) {
                     //array properties [NOTE arrays have old entries deleted first, for cases where a user reduced the amount of entries in the collection]
                     saveArrayDates(it)
                     saveArrayStrings(it)
@@ -131,7 +133,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 }
                 if (it is JdsSaveListener)
                     it.onPostSave(postSaveEventArgument)
-                postSaveEvent?.onSave(it, postSaveEventArgument, connection)
+                postSaveEvent?.onSave(it, preSaveEventArgument, postSaveEventArgument, connection)
             }
             preSaveEventArgument.executeBatches()
             postSaveEventArgument.executeBatches()
@@ -142,8 +144,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
 
     /**
      * @param jdsDb
-     * @param connection
-     * @param alternateConnections
+     * @param saveEventArguments
      * @param entity
      */
     private fun processCrt(jdsDb: JdsDb, saveEventArguments: SaveEventArgument, entity: JdsEntity) {
@@ -151,11 +152,6 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             it.executeSave(jdsDb, entity, saveEventArguments)
         }
     }
-
-
-    private fun namedStatement(eventArguments: SaveEventArgument, sql: String) = eventArguments.getOrAddNamedStatement(connection, sql)
-
-    private fun namedStatementOrCall(eventArguments: SaveEventArgument, sql: String) = if (jdsDb.supportsStatements) eventArguments.getOrAddNamedCall(sql) else namedStatement(eventArguments, sql)
 
     private fun regularStatement(eventArguments: SaveEventArgument, sql: String) = eventArguments.getOrAddStatement(sql)
 
@@ -172,23 +168,23 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
         val updateLiveVersion = regularStatement(preSaveEventArgument, "UPDATE jds_entity_live_version SET edit_version = ? WHERE uuid = ? AND (edit_version < ? OR edit_version IS NULL)")
 
         entities.forEach {
-            saveOverview.setString(1, it.overview.uuid)
-            saveOverview.setInt(2, it.overview.editVersion)
-            saveOverview.setLong(3, it.overview.entityId)
-            saveOverview.setLong(4, it.overview.entityVersion)
-            saveOverview.addBatch()
+            if (jdsDb.options.isWritingToOverviewTable) {
+                saveOverview.setString(1, it.overview.uuid)
+                saveOverview.setInt(2, it.overview.editVersion)
+                saveOverview.setLong(3, it.overview.entityId)
+                saveOverview.addBatch()
+            }
+            if (jdsDb.options.isWritingLatestEntityVersion) {
+                saveLiveVersion.setString(1, it.overview.uuid)
+                saveLiveVersion.addBatch()
 
-            saveLiveVersion.setString(1, it.overview.uuid)
-            saveLiveVersion.addBatch()
-
-            updateLiveVersion.setInt(1, it.overview.editVersion)
-            updateLiveVersion.setString(2, it.overview.uuid)
-            updateLiveVersion.setInt(3, it.overview.editVersion)
-            updateLiveVersion.addBatch()
-
+                updateLiveVersion.setInt(1, it.overview.editVersion)
+                updateLiveVersion.setString(2, it.overview.uuid)
+                updateLiveVersion.setInt(3, it.overview.editVersion)
+                updateLiveVersion.addBatch()
+            }
             if (jdsDb.options.isWritingToReportingTables && jdsDb.tables.isNotEmpty())
                 processCrt(jdsDb, postSaveEventArgument, it)
-
             if (it is JdsSaveListener)
                 it.onPreSave(preSaveEventArgument)
         }

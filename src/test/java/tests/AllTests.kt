@@ -116,8 +116,8 @@ class AllTests {
 
     internal object DateHelper {
 
-        private val TICKS_AT_EPOCH = 621355968000000000L
-        private val TICKS_PER_MILLISECOND: Long = 10000
+        private const val TICKS_AT_EPOCH = 621355968000000000L
+        private const val TICKS_PER_MILLISECOND: Long = 10000
 
         fun getDate(UTCTicks: Long): Instant = Instant.ofEpochMilli((UTCTicks - TICKS_AT_EPOCH) / TICKS_PER_MILLISECOND)
 

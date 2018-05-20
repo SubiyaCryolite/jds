@@ -36,17 +36,20 @@ import kotlin.collections.LinkedHashMap
  * @param implementation
  * @param supportsStatements
  */
-abstract class JdsDb(var implementation: JdsImplementation, var supportsStatements: Boolean) : IJdsDb, Serializable {
+abstract class JdsDb(val implementation: JdsImplementation, val supportsStatements: Boolean) : IJdsDb, Serializable {
 
     val classes = ConcurrentHashMap<Long, Class<out JdsEntity>>()
     val tables = HashSet<JdsTable>()
     val options = JdsOptions()
+    var dimensionTable = ""
 
     /**
      * Initialise JDS base tables
      */
-    fun init() {
+    @JvmOverloads
+    fun init(dimensionTable: String = "jds_entity_overview") {
         try {
+            this.dimensionTable = dimensionTable
             connection.use { connection ->
                 prepareDatabaseComponents(connection)
             }
@@ -580,7 +583,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
             statement.setString(3, caption)
             statement.setString(4, description)
             statement.executeUpdate()
-            if (options.isPrintingOutput)
+            if (options.isLoggingOutput)
                 println("Mapped Entity [$name - $id]")
         }
     } catch (ex: Exception) {
@@ -621,7 +624,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
-                        if (options.isPrintingOutput)
+                        if (options.isLoggingOutput)
                             println("Mapped Entity [${entityAnnotation.name}]")
                     }
                 } catch (ex: Exception) {
@@ -807,7 +810,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
      * SQL call to save entity overview values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveOverview() = "{call jds_pop_entity_overview(?, ?, ?, ?)}"
+    internal open fun saveOverview() = "{call jds_pop_entity_overview(?, ?, ?)}"
 
     /**
      * SQL call to save entity overview values
@@ -913,7 +916,6 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         columns["uuid"] = getNativeDataTypeString(128)
         columns["edit_version"] = getNativeDataTypeInteger()
         columns["entity_id"] = getNativeDataTypeLong()
-        columns["entity_version"] = getNativeDataTypeLong()
         return createOrAlterProc("jds_pop_entity_overview", "jds_entity_overview", columns, uniqueColumns, false)
     }
 
@@ -1117,9 +1119,8 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
     private fun createPopEntityLiveVersion(): String {
         val columns = LinkedHashMap<String, String>()
         columns["uuid"] = getNativeDataTypeString(128)
-        //don't include edit_version column, a seperate SQL statement updates that column
-        val proc = createOrAlterProc("jds_pop_entity_live_version", "jds_entity_live_version", columns, setOf("uuid"), false)
-        return proc
+        //don't include edit_version column, a separate SQL statement updates that column
+        return createOrAlterProc("jds_pop_entity_live_version", "jds_entity_live_version", columns, setOf("uuid"), false)
     }
 
     private fun createEntityLiveVersionTable(): String {
@@ -1130,7 +1131,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1141,7 +1142,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1152,7 +1153,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1163,7 +1164,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1174,7 +1175,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1185,7 +1186,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1196,7 +1197,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1207,7 +1208,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1218,7 +1219,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1229,7 +1230,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1240,7 +1241,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1251,7 +1252,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1262,7 +1263,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1273,7 +1274,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1284,7 +1285,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1295,7 +1296,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1306,7 +1307,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1317,7 +1318,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1328,7 +1329,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1339,7 +1340,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1350,7 +1351,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1361,7 +1362,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1372,7 +1373,7 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
@@ -1383,14 +1384,14 @@ abstract class JdsDb(var implementation: JdsImplementation, var supportsStatemen
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "jds_entity_overview(uuid, edit_version)")
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
         return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     fun deleteOldDataFromReportTables(connection: Connection) {
         tables.forEach {
             if (it.isStoringLiveRecordsOnly) {
-                connection.prepareStatement(it.deleteOldRecords(JdsDb@this)).use {
+                connection.prepareStatement(it.deleteOldRecords(JdsDb@ this)).use {
                     it.executeUpdate()
                 }
             }

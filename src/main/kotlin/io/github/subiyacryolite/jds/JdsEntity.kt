@@ -111,7 +111,6 @@ abstract class JdsEntity : IJdsEntity {
                 false -> javaClass.superclass.getAnnotation(JdsEntityAnnotation::class.java)
             }
             overview.entityId = entityAnnotation.id
-            overview.entityVersion = entityAnnotation.version
         } else {
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         }
@@ -363,7 +362,6 @@ abstract class JdsEntity : IJdsEntity {
     private fun <T : IJdsEntity> copyOverviewValues(source: T) {
         overview.uuid = source.overview.uuid
         overview.editVersion = source.overview.editVersion
-        overview.entityVersion = source.overview.entityVersion
         overview.entityId = source.overview.entityId
     }
 
@@ -1148,7 +1146,7 @@ abstract class JdsEntity : IJdsEntity {
     internal fun populateRefEnumRefEntityEnum(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         populateRefEnum(jdsDb, connection, getEnums(overview.entityId))
         populateRefEntityEnum(jdsDb, connection, entityId, getEnums(overview.entityId))
-        if (jdsDb.options.isPrintingOutput)
+        if (jdsDb.options.isLoggingOutput)
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
     }
 

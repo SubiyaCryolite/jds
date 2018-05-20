@@ -244,7 +244,7 @@ abstract class BaseTestConfig(val testName: String) {
 
     private fun initJds() {
         jdsDb.init()
-        jdsDb.options.isPrintingOutput = true
+        jdsDb.options.isLoggingOutput = true
         initialiseJdsClasses()
         println("=========== ${jdsDb.implementation} :: $testName ===========\n")
     }
