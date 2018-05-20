@@ -52,6 +52,6 @@ class JdsOverview : IJdsOverview, Externalizable {
     }
 
     companion object {
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
     }
 }

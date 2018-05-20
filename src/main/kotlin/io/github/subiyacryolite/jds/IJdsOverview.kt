@@ -13,8 +13,6 @@
  */
 package io.github.subiyacryolite.jds;
 
-import java.time.LocalDateTime;
-
 interface IJdsOverview {
 
       /**

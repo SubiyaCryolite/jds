@@ -42,8 +42,6 @@ import kotlin.coroutines.experimental.buildSequence
  * [IJdsOverview] to store overview data
  */
 abstract class JdsEntity : IJdsEntity {
-    @get:JsonIgnore
-    @set:JsonIgnore
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
     @get:JsonIgnore
