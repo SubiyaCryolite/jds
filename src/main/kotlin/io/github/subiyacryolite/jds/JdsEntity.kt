@@ -823,14 +823,17 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>): MutableCollection<Timestamp> {
-        values.forEach { ArrayList<Timestamp>().add(Timestamp.valueOf(it)) }
-        return ArrayList()
+        val dest = ArrayList<Timestamp>()
+        values.forEach { dest.add(Timestamp.valueOf(it)) }
+        return dest
     }
 
     private fun toIntCollection(values: MutableCollection<Enum<*>>): MutableCollection<Int> {
-        values.forEach { ArrayList<Int>().add(it.ordinal) }
-        return ArrayList()
+        val dest = ArrayList<Int>()
+        values.forEach { dest.add(it.ordinal) }
+        return dest
     }
+
 
     /**
      * @param fieldType
