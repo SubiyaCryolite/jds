@@ -3,7 +3,7 @@
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/io.github.subiyacryolite/jds.svg)](https://oss.sonatype.org/content/repositories/snapshots/io/github/subiyacryolite/jds/)
 [![Javadocs](https://javadoc.io/badge/io.github.subiyacryolite/jds.svg)](https://javadoc.io/doc/io.github.subiyacryolite/jds)
 [![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
-![Size](https://reposs.herokuapp.com/?path=SubiyaCryolite/jds)
+![Size](https://github-size-badge.herokuapp.com/subiyacryolite/jds.svg)
 
 # Jenesis Data Store
 
