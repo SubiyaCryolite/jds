@@ -49,12 +49,12 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime, jdsDb: JdsDb) {
+    fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> this.setString(value, input.toSqlStringFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input.toOffsetDateTime())
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, Timestamp.from(input.toInstant()))
-            else -> this.setLong(value, input.toInstant().toEpochMilli())
+            JdsImplementation.TSQL -> this.setString(value, input?.toSqlStringFormat())
+            JdsImplementation.POSTGRES -> this.setObject(value, input?.toOffsetDateTime())
+            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
+            else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
         }
     }
 
@@ -75,11 +75,11 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setLocalTime(value: Int, input: LocalTime, jdsDb: JdsDb) {
+    fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.toSqlStringFormat())
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input?.toSqlStringFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input)
-            else -> this.setLong(value, input.toNanoOfDay())
+            else -> this.setObject(value, input?.toNanoOfDay())
         }
     }
 
@@ -99,11 +99,11 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setLocalDate(value: Int, input: LocalDate, jdsDb: JdsDb) {
+    fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input.toSqlStringFormat())
+            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input?.toSqlStringFormat())
             JdsImplementation.POSTGRES -> this.setObject(value, input)
-            else -> this.setTimestamp(value, Timestamp.valueOf(input.atStartOfDay())) //Oracle, Sqlite
+            else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
         }
     }
 

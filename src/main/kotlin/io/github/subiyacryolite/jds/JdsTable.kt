@@ -177,15 +177,15 @@ open class JdsTable() : Serializable {
 
             updateValues.forEachIndexed { index, value ->
                 when (value) {
-                    is ZonedDateTime -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
-                    is LocalTime -> insertStatement.setLocalTime(index + 1, value, jdsDb)
-                    is LocalDateTime -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value))
-                    is LocalDate -> insertStatement.setLocalDate(index + 1, value, jdsDb)
-                    is MonthDay -> insertStatement.setString(index + 1, value.toString())
-                    is YearMonth -> insertStatement.setString(index + 1, value.toString())
-                    is Period -> insertStatement.setString(index + 1, value.toString())
-                    is Duration -> insertStatement.setLong(index + 1, value.toNanos())
-                    else -> insertStatement.setObject(index + 1, value ?: null)
+                    is ZonedDateTime? -> insertStatement.setZonedDateTime(index + 1, value, jdsDb)
+                    is LocalTime? -> insertStatement.setLocalTime(index + 1, value, jdsDb)
+                    is LocalDateTime? -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value))
+                    is LocalDate? -> insertStatement.setLocalDate(index + 1, value, jdsDb)
+                    is MonthDay? -> insertStatement.setString(index + 1, value.toString())
+                    is YearMonth? -> insertStatement.setString(index + 1, value.toString())
+                    is Period? -> insertStatement.setString(index + 1, value.toString())
+                    is Duration? -> insertStatement.setObject(index + 1, value?.toNanos())
+                    else -> insertStatement.setObject(index + 1, value)
                 }
             }
             insertStatement.setString(columnNames.size + 1, entity.overview.uuid)

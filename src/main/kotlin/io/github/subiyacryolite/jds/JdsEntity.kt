@@ -157,35 +157,30 @@ abstract class JdsEntity : IJdsEntity {
     protected fun <T : Temporal?> map(field: JdsField, temporalProperty: ObjectProperty<T>) {
         val temporal = temporalProperty.get()
         when (temporal) {
-            is LocalDateTime,
             is LocalDateTime? -> {
                 if (field.type != JdsFieldType.DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
                 localDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is ZonedDateTime,
             is ZonedDateTime? -> {
                 if (field.type != JdsFieldType.ZONED_DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
                 zonedDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is LocalDate,
             is LocalDate? -> {
                 if (field.type != JdsFieldType.DATE)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
                 localDateProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is LocalTime,
             is LocalTime? -> {
                 if (field.type != JdsFieldType.TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
                 localTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is YearMonth,
             is YearMonth? -> {
                 if (field.type != JdsFieldType.YEAR_MONTH)
                     throw RuntimeException("Please assign the correct type to field [$field]")
