@@ -47,17 +47,17 @@ abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
     @get:JsonIgnore
-    internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
+    internal val localDateTimeProperties: HashMap<Long, ObjectProperty<Temporal?>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
+    internal val zonedDateTimeProperties: HashMap<Long, ObjectProperty<Temporal?>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
+    internal val localDateProperties: HashMap<Long, ObjectProperty<Temporal?>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
+    internal val localTimeProperties: HashMap<Long, ObjectProperty<Temporal?>> = LinkedHashMap()
     @get:JsonIgnore
     internal val monthDayProperties: HashMap<Long, ObjectProperty<MonthDay>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal>> = LinkedHashMap()
+    internal val yearMonthProperties: HashMap<Long, ObjectProperty<Temporal?>> = LinkedHashMap()
     @get:JsonIgnore
     internal val periodProperties: HashMap<Long, ObjectProperty<Period>> = LinkedHashMap()
     @get:JsonIgnore
@@ -157,35 +157,40 @@ abstract class JdsEntity : IJdsEntity {
     protected fun <T : Temporal> map(field: JdsField, temporalProperty: ObjectProperty<T>) {
         val temporal = temporalProperty.get()
         when (temporal) {
-            is LocalDateTime -> {
+            is LocalDateTime,
+            is LocalDateTime? -> {
                 if (field.type != JdsFieldType.DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
+                localDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is ZonedDateTime -> {
+            is ZonedDateTime,
+            is ZonedDateTime? -> {
                 if (field.type != JdsFieldType.ZONED_DATE_TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                zonedDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
+                zonedDateTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is LocalDate -> {
+            is LocalDate,
+            is LocalDate? -> {
                 if (field.type != JdsFieldType.DATE)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localDateProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
+                localDateProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is LocalTime -> {
+            is LocalTime,
+            is LocalTime? -> {
                 if (field.type != JdsFieldType.TIME)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                localTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
+                localTimeProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
             }
-            is YearMonth -> {
+            is YearMonth,
+            is YearMonth? -> {
                 if (field.type != JdsFieldType.YEAR_MONTH)
                     throw RuntimeException("Please assign the correct type to field [$field]")
                 mapField(overview.entityId, field.id)
-                yearMonthProperties[field.id] = temporalProperty as ObjectProperty<Temporal>
+                yearMonthProperties[field.id] = temporalProperty as ObjectProperty<Temporal?>
 
             }
         }
@@ -653,7 +658,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun <T : Temporal> serializeTemporal(input: Map<Long, ObjectProperty<T>>): Map<Long, T> =
+    private fun <T : Temporal?> serializeTemporal(input: Map<Long, ObjectProperty<T>>): Map<Long, T> =
             input.entries.associateBy({ it.key }, { it.value.get() })
 
     /**
@@ -672,7 +677,7 @@ abstract class JdsEntity : IJdsEntity {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
-    private fun putYearMonths(destination: HashMap<Long, ObjectProperty<Temporal>>, source: Map<Long, Temporal>) {
+    private fun putYearMonths(destination: HashMap<Long, ObjectProperty<Temporal?>>, source: Map<Long, Temporal?>) {
         source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
     }
 
