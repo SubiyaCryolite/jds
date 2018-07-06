@@ -154,7 +154,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param field
      * @param temporalProperty
      */
-    protected fun <T : Temporal> map(field: JdsField, temporalProperty: ObjectProperty<T>) {
+    protected fun <T : Temporal?> map(field: JdsField, temporalProperty: ObjectProperty<T>) {
         val temporal = temporalProperty.get()
         when (temporal) {
             is LocalDateTime,
