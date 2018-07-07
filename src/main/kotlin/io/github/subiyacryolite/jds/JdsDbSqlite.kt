@@ -120,6 +120,8 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveEnum() = "INSERT OR REPLACE INTO jds_str_enum(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
+    override fun saveEnumString() = "INSERT OR REPLACE INTO jds_str_enum_string(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
+
     override fun saveMonthDay() = "INSERT OR REPLACE INTO jds_str_month_day(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
     override fun saveYearMonth() = "INSERT OR REPLACE INTO jds_str_year_month(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"

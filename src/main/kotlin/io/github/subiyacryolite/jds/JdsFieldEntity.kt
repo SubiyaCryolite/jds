@@ -35,6 +35,6 @@ class JdsFieldEntity<T : IJdsEntity>(var entityType: Class<out IJdsEntity>, var 
     override fun toString(): String = "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
 
     companion object {
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
     }
 }

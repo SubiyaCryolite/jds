@@ -103,7 +103,7 @@ object JdsSchema {
         JdsFieldType.DATE_TIME -> jdsDb.getNativeDataTypeDateTime()
         JdsFieldType.DATE -> jdsDb.getNativeDataTypeDate()
         JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getNativeDataTypeLong()
-        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> jdsDb.getNativeDataTypeString(max)
+        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY, JdsFieldType.ENUM_STRING -> jdsDb.getNativeDataTypeString(max)
         else -> "invalid"
     }
 

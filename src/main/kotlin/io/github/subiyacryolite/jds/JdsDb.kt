@@ -76,6 +76,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_TEXT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BLOB)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_STRING)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_COLLECTION)
@@ -113,6 +114,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_MONTH_DAY)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_YEAR_MONTH)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM_STRING)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ZONED_DATE_TIME)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_OVERVIEW)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_BINDING)
@@ -204,6 +206,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createStoreDoubleCollection())
             JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
             JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
+            JdsComponent.STORE_ENUM_STRING-> executeSqlFromString(connection, createStoreEnumString())
             JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
             JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
             JdsComponent.STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createStoreFloatCollection())
@@ -239,6 +242,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.POP_STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createPopDoubleCollection())
             JdsComponent.POP_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
             JdsComponent.POP_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
+            JdsComponent.POP_STORE_ENUM_STRING -> executeSqlFromString(connection, createPopJdsStoreEnumString())
             JdsComponent.POP_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopEnumCollection())
             JdsComponent.POP_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
             JdsComponent.POP_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopFloatCollection())
@@ -753,10 +757,16 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     internal open fun saveZonedDateTime() = "{call jds_pop_zoned_date_time(?, ?, ?, ?)}"
 
     /**
-     * SQL call to save datetime values
+     * SQL call to save enum values as ordinal int values
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun saveEnum() = "{call jds_pop_enum(?, ?, ?, ?)}"
+
+    /**
+     * QL call to save enum values as string values
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveEnumString() = "{call jds_pop_enum_string(?, ?, ?, ?)}"
 
     /**
      * SQL call to save date values
@@ -1062,6 +1072,12 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         return createOrAlterProc("jds_pop_enum", "jds_str_enum", columns, storeUniqueColumns, false)
     }
 
+    private fun createPopJdsStoreEnumString(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
+        return createOrAlterProc("jds_pop_enum_string", "jds_str_enum_string", columns, storeUniqueColumns, false)
+    }
+
     private fun createPopEnumCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
@@ -1227,6 +1243,17 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val tableName = "jds_str_enum"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
+        val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
+        return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    private fun createStoreEnumString(): String {
+        val tableName = "jds_str_enum_string"
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()

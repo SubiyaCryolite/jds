@@ -158,7 +158,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun regularStatementOrCall(eventArguments: SaveEventArgument, sql: String) = if (jdsDb.supportsStatements) eventArguments.getOrAddCall(sql) else regularStatement(eventArguments, sql)
 
     /**
-     * @param overviews
+     * @param entities
      */
     @Throws(Exception::class)
     private fun saveOverview(entities: Iterable<JdsEntity>) = try {
@@ -298,11 +298,10 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun saveStrings(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveString())
         jdsEntity.stringProperties.forEach { fieldId, stringProperty ->
-            val value = stringProperty.get()
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setString(4, value)
+            upsert.setString(4, stringProperty.value)
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -319,39 +318,31 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
         val upsertPeriod = regularStatementOrCall(postSaveEventArgument, jdsDb.savePeriod())
         val upsertDuration = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDuration())
         jdsEntity.monthDayProperties.forEach { fieldId, monthDayProperty ->
-            val monthDay = monthDayProperty.get()
-            val value = monthDay.toString()
             upsertMonthDay.setString(1, jdsEntity.overview.uuid)
             upsertMonthDay.setInt(2, jdsEntity.overview.editVersion)
             upsertMonthDay.setLong(3, fieldId)
-            upsertMonthDay.setString(4, value)
+            upsertMonthDay.setString(4, monthDayProperty.value.toString())
             upsertMonthDay.addBatch()
         }
         jdsEntity.yearMonthProperties.forEach { fieldId, yearMonthProperty ->
-            val yearMonth = yearMonthProperty.get() as YearMonth
-            val value = yearMonth.toString()
             upsertYearMonth.setString(1, jdsEntity.overview.uuid)
             upsertYearMonth.setInt(2, jdsEntity.overview.editVersion)
             upsertYearMonth.setLong(3, fieldId)
-            upsertYearMonth.setString(4, value)
+            upsertYearMonth.setString(4, yearMonthProperty.value.toString())
             upsertYearMonth.addBatch()
         }
         jdsEntity.periodProperties.forEach { fieldId, periodProperty ->
-            val period = periodProperty.get()
-            val value = period.toString()
             upsertPeriod.setString(1, jdsEntity.overview.uuid)
             upsertPeriod.setInt(2, jdsEntity.overview.editVersion)
             upsertPeriod.setLong(3, fieldId)
-            upsertPeriod.setString(4, value)
+            upsertPeriod.setString(4, periodProperty.value.toString())
             upsertPeriod.addBatch()
         }
         jdsEntity.durationProperties.forEach { fieldId, durationProperty ->
-            val duration = durationProperty.get()
-            val value = duration.toNanos()
             upsertDuration.setString(1, jdsEntity.overview.uuid)
             upsertDuration.setInt(2, jdsEntity.overview.editVersion)
             upsertDuration.setLong(3, fieldId)
-            upsertDuration.setLong(4, value)
+            upsertDuration.setObject(4, durationProperty.value.toNanos())
             upsertDuration.addBatch()
         }
     } catch (ex: Exception) {
@@ -366,15 +357,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTime())
         val upsertz = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDate())
         jdsEntity.localDateTimeProperties.forEach { fieldId, value1 ->
-            val localDateTime = value1.get() as LocalDateTime
+            val localDateTime = value1.value as LocalDateTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setTimestamp(4, Timestamp.valueOf(localDateTime))
+            upsert.setTimestamp(4, if (localDateTime != null) Timestamp.valueOf(localDateTime) else null)
             upsert.addBatch()
         }
         jdsEntity.localDateProperties.forEach { fieldId, value1 ->
-            val localDate = value1.get() as LocalDate
+            val localDate = value1.value as LocalDate?
             upsertz.setString(1, jdsEntity.overview.uuid)
             upsertz.setInt(2, jdsEntity.overview.editVersion)
             upsertz.setLong(3, fieldId)
@@ -392,7 +383,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun saveTimes(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveTime())
         jdsEntity.localTimeProperties.forEach { fieldId, localTimeProperty ->
-            val localTime = localTimeProperty.get() as LocalTime
+            val localTime = localTimeProperty.value as LocalTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
@@ -410,7 +401,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun saveZonedDateTimes(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveZonedDateTime())
         jdsEntity.zonedDateTimeProperties.forEach { fieldId, value1 ->
-            val zonedDateTime = value1.get() as ZonedDateTime
+            val zonedDateTime = value1.value as ZonedDateTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
@@ -428,7 +419,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun saveEnums(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnum())
         jdsEntity.enumProperties.forEach { jdsFieldEnum, value2 ->
-            val value = value2.get()
+            val value = value2.value
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, jdsFieldEnum)
@@ -438,6 +429,15 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             }
             )
             upsert.addBatch()
+        }
+        val upsertEnumString = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumString())
+        jdsEntity.enumStringProperties.forEach { jdsFieldEnum, value2 ->
+            val value = value2.value
+            upsertEnumString.setString(1, jdsEntity.overview.uuid)
+            upsertEnumString.setInt(2, jdsEntity.overview.editVersion)
+            upsertEnumString.setLong(3, jdsFieldEnum)
+            upsertEnumString.setString(4, value.toString())
+            upsertEnumString.addBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)

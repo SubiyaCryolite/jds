@@ -13,24 +13,25 @@
  */
 package javafx.beans.property
 
-import java.io.ByteArrayInputStream
-import java.io.IOException
-import java.io.InputStream
+import javafx.beans.value.WritableValue
 import java.io.Serializable
 
 /**
  * Created by ifunga on 18/06/2017.
  * This class was designed to store binary values in a backing byte array. The byte array can also be read as an input stream
  */
-open class BlobProperty : Serializable {
+open class BlobProperty : WritableValue<ByteArray?>,Serializable {
+
     private var bytes: ByteArray? = null
+
+    constructor():this(null)
 
     /**
      * Constructor
      *
      * @param value byte array input
      */
-    constructor(value: ByteArray) {
+    constructor(value: ByteArray?) {
         set(value)
     }
 
@@ -48,7 +49,7 @@ open class BlobProperty : Serializable {
      *
      * @param bytes the blob as an array of bytes
      */
-    fun set(bytes: ByteArray) {
+    fun set(bytes: ByteArray?) {
         this.bytes = bytes
     }
 
@@ -60,9 +61,15 @@ open class BlobProperty : Serializable {
     val isEmpty: Boolean
         get() = bytes == null || bytes!!.isEmpty()
 
+    override fun setValue(value: ByteArray?) {
+        set(value)
+    }
+
+    override fun getValue(): ByteArray? {
+        return get()
+    }
 
     companion object {
-
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
     }
 }

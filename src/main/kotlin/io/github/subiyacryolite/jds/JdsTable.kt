@@ -181,10 +181,10 @@ open class JdsTable() : Serializable {
                     is LocalTime? -> insertStatement.setLocalTime(index + 1, value, jdsDb)
                     is LocalDateTime? -> insertStatement.setTimestamp(index + 1, Timestamp.valueOf(value))
                     is LocalDate? -> insertStatement.setLocalDate(index + 1, value, jdsDb)
+                    is Duration? -> insertStatement.setObject(index + 1, value?.toNanos())
                     is MonthDay? -> insertStatement.setString(index + 1, value.toString())
                     is YearMonth? -> insertStatement.setString(index + 1, value.toString())
                     is Period? -> insertStatement.setString(index + 1, value.toString())
-                    is Duration? -> insertStatement.setObject(index + 1, value?.toNanos())
                     else -> insertStatement.setObject(index + 1, value)
                 }
             }

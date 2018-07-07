@@ -30,6 +30,7 @@ class Address : JdsEntity() {
         map(Fields.PROVINCE_NAME, _provinceOrState)
         map(Fields.TIME_OF_ENTRY, _timeOfEntry)
         map(Enums.PRIMARY_ADDRESS_ENUM, _primaryAddress)
+        map(Enums.PRIMARY_ADDRESS_ENUM_STRING, _primaryAddress)
     }
 
     var primaryAddress: PrimaryAddress

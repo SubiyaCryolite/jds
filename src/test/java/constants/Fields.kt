@@ -34,5 +34,6 @@ object Fields {
     val DURATION = JdsField(25, "duration", JdsFieldType.DURATION)
     val MONTH_DAY = JdsField(26, "month_day", JdsFieldType.MONTH_DAY)
     val YEAR_MONTH = JdsField(27, "year_month", JdsFieldType.YEAR_MONTH)
-    val RIGHTS= JdsField(28, "rights", JdsFieldType.ENUM_COLLECTION)
+    val RIGHTS = JdsField(28, "rights", JdsFieldType.ENUM_COLLECTION)
+    val PRIMARY_ADDRESS_ENUM_STRING = JdsField(29, "primary_address_enum_str", JdsFieldType.ENUM_STRING)
 }

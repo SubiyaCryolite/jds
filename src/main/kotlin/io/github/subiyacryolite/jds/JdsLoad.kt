@@ -134,6 +134,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_double_collection WHERE uuid IN $questionsString")
                         val durationStatement = connection.prepareStatement("SELECT * FROM jds_str_duration WHERE uuid IN $questionsString")
                         val enumStatement = connection.prepareStatement("SELECT * FROM jds_str_enum WHERE uuid IN $questionsString")
+                        val enumStringStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string WHERE uuid IN $questionsString")
                         val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_collection WHERE uuid IN $questionsString")
                         val floatStatement = connection.prepareStatement("SELECT * FROM jds_str_float WHERE uuid IN $questionsString")
                         val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_collection WHERE uuid IN $questionsString")
@@ -164,6 +165,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                             doubleCollectionStatement.setString(index + 1, uuid.uuid)
                             durationStatement.setString(index + 1, uuid.uuid)
                             enumStatement.setString(index + 1, uuid.uuid)
+                            enumStringStatement.setString(index + 1, uuid.uuid)
                             enumCollectionStatement.setString(index + 1, uuid.uuid)
                             floatStatement.setString(index + 1, uuid.uuid)
                             floatCollectionStatement.setString(index + 1, uuid.uuid)
@@ -188,6 +190,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                 booleanStatement.use { populateBoolean(entities, it) }
                                 doubleStatement.use { populateDouble(entities, it) }
                                 enumStatement.use { populateEnum(entities, it) }
+                                enumStringStatement.use { populateEnumString(entities, it) }
                                 floatStatement.use { populateFloat(entities, it) }
                                 intStatement.use { populateInteger(entities, it) }
                                 longStatement.use { populateLong(entities, it) }
@@ -443,6 +446,26 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach {
                     it.populateProperties(JdsFieldType.ENUM, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateEnumString(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val editVersion = it.getInt("edit_version")
+                val value = it.getString("value") //primitives can be null
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, editVersion).forEach {
+                    it.populateProperties(JdsFieldType.ENUM_STRING, fieldId, value)
                 }
             }
         }

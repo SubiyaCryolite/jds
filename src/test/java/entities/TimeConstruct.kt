@@ -15,9 +15,9 @@ class TimeConstruct : JdsEntity() {
     private val _yearMonth = SimpleObjectProperty(YearMonth.of(1991, 7))
 
     init {
-        mapPeriod(Fields.PERIOD, _period)
-        mapDuration(Fields.DURATION, _duration)
-        mapMonthDay(Fields.MONTH_DAY, _monthDay)
+        map(Fields.PERIOD, _period)
+        map(Fields.DURATION, _duration)
+        map(Fields.MONTH_DAY, _monthDay)
         map(Fields.YEAR_MONTH, _yearMonth)
     }
 

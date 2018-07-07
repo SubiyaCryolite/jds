@@ -22,11 +22,11 @@ import java.util.*
 /**
  * Represents a fieldEntity enum in JDS
  */
-class JdsFieldEnum<T : Enum<T>>() : Externalizable {
+class JdsFieldEnum<T : Enum<*>>() : Externalizable {
     lateinit var enumType: Class<T>
     lateinit var field: JdsField
 
-    var values = arrayOfNulls<Enum<T>>(0)
+    var values = arrayOfNulls<Enum<*>>(0)
         private set//keep order at all times
 
     /**
@@ -69,6 +69,18 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     /**
+     * @param index
+     * @return
+     */
+    fun valueOf(index: String?): Enum<*>? {
+        values.forEach {
+            if (it.toString() == index)
+                return it
+        }
+        return null
+    }
+
+    /**
      * @param out
      * @throws IOException
      */
@@ -88,12 +100,12 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     override fun readExternal(input: ObjectInput) {
         enumType = input.readObject() as Class<T>
         field = input.readObject() as JdsField
-        values = input.readObject() as Array<Enum<T>?>
+        values = input.readObject() as Array<Enum<*>?>
     }
 
     companion object : Externalizable {
 
-        private val serialVersionUID = 20171109_0853L
+        private const val serialVersionUID = 20171109_0853L
 
         val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap()
 

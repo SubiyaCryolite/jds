@@ -44,5 +44,7 @@ enum class JdsFieldType(val type: Int, val shortCode: String) {
     PERIOD(22, "p"),
     DURATION(23, "dr"),
     ENTITY_COLLECTION(24, "enumCollections"),
-    UNKNOWN(25, "un");
+    UNKNOWN(25, "un"),
+    ENUM_STRING(26, "ens"),
+    ENUM_STRING_COLLECTION(27, "ensc");
 }
