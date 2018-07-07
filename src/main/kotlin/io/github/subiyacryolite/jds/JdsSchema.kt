@@ -60,6 +60,7 @@ object JdsSchema {
         JdsFieldType.DOUBLE_COLLECTION,
         JdsFieldType.LONG_COLLECTION,
         JdsFieldType.STRING_COLLECTION,
+        JdsFieldType.ENUM_COLLECTION,
         JdsFieldType.DATE_TIME_COLLECTION,
         JdsFieldType.ENTITY -> true
         else -> false

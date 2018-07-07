@@ -120,17 +120,17 @@ Fields are big part of the JDS framework. Each Field MUST have a unique Field Id
 | LONG_COLLECTION      | Collection\<Long\>                         | Collection of type Long                                      |
 | STRING_COLLECTION    | Collection\<String\>                       | Collection of type String                                    |
 | BLOB                 | byte[] or InputStream                      | Blob values                                                  |
-| BOOLEAN              | boolean                                    | Boolean values                                               |
+| BOOLEAN              | boolean / Boolean                          | Boolean values                                               |
 | ENTITY               | Class\<? extends JdsEntity\>               | Object of type JdsEntity                                     |
 | DATE_TIME            | LocalDateTime                              | DateTime instances based on the host machines local timezone |
 | DATE                 | LocalDate                                  | Local date instances                                         |
-| DOUBLE               | double                                     | Numeric double values                                        |
+| DOUBLE               | double / Double                            | Numeric double values                                        |
 | DURATION             | Duration                                   | Object of type Duration                                      |
 | ENUM_COLLECTION      | Collection\<Enum\>                         | Collection of type Enum                                      |
 | ENUM                 | Enum                                       | Object of type Enum                                          |
-| FLOAT                | float                                      | Numeric float values                                         |
-| INT                  | int                                        | Numeric integer values                                       |
-| LONG                 | long                                       | Numeric long values                                          |
+| FLOAT                | float / Float                              | Numeric float values                                         |
+| INT                  | int / Integer                              | Numeric integer values                                       |
+| LONG                 | long / Long                                | Numeric long values                                          |
 | MONTH_DAY            | MonthDay                                   | Object of type MonthDay                                      |
 | PERIOD               | Period                                     | Object of type Period                                        |
 | STRING               | String                                     | String values with no max limit                              |
@@ -198,31 +198,31 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 
 | JDS Field Type       | Container                                                                                                            | Mapping Call |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------ |
-| DATE_TIME_COLLECTION | [Collection\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                   | mapDateTimes |
-| DOUBLE_COLLECTION    | [Collection\<Double\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | mapDoubles   |
+| DATE_TIME_COLLECTION | [Collection\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                   | map          |
+| DOUBLE_COLLECTION    | [Collection\<Double\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | map          |
 | ENTITY_COLLECTION    | [Collection\<Class\<? extends JdsEntity\>\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)         | map          |
-| FLOAT_COLLECTION     | [Collection\<Float\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                           | mapFloats    |
-| INT_COLLECTION       | [Collection\<Integer\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                         | mapIntegers  |
-| LONG_COLLECTION      | [Collection\<Long\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                            | mapLongs     |
-| STRING_COLLECTION    | [Collection\<String\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | mapStrings   |
+| FLOAT_COLLECTION     | [Collection\<Float\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                           | map          |
+| INT_COLLECTION       | [Collection\<Integer\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                         | map          |
+| LONG_COLLECTION      | [Collection\<Long\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                            | map          |
+| STRING_COLLECTION    | [Collection\<String\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | map          |
 | BOOLEAN              | [WritableValue\<Boolean\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | map          |
-| BLOB                 | [BlobProperty](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/BlobProperty.html) | map          |
+| BLOB                 | [WritableValue\<byte[]\>](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/BlobProperty.html) | map          |
 | ENTITY               | [Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)                       | map          |
-| DATE                 | [ObjectProperty\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)                    | map          |
-| DATE_TIME            | [ObjectProperty\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)            | map          |
+| DATE                 | [WritableValue\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)                     | map          |
+| DATE_TIME            | [WritableValue\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)             | map          |
 | DOUBLE               | [WritableValue\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                | map          |
-| DURATION             | [ObjectProperty\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)                      | mapDuration  |
-| ENUM                 | [ObjectProperty\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                              | map          |
-| ENUM_COLLECTION      | [Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                            | mapEnums     |
+| DURATION             | [WritableValue\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)                       | map          |
+| ENUM                 | [WritableValue\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                               | map          |
+| ENUM_COLLECTION      | [Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                                  | map          |
 | FLOAT                | [WritableValue\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                 | map          |
 | INT                  | [WritableValue\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | map          |
 | LONG                 | [WritableValue\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                  | map          |
-| MONTH_DAY            | [ObjectProperty\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)                      | mapMonthDay  |
-| PERIOD               | [ObjectProperty\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)                          | mapPeriod    |
-| STRING               | [StringProperty](https://docs.oracle.com/javafx/2/api/javafx/beans/property/StringProperty.html)                     | map          |
-| TIME                 | [ObjectProperty\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)                    | map          |
-| YEAR_MONTH           | [ObjectProperty\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)                    | map          |
-| ZONED_DATE_TIME      | [ObjectProperty\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)            | map          |
+| MONTH_DAY            | [WritableValue\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)                       | map          |
+| PERIOD               | [WritableValue\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)                           | map          |
+| STRING               | [WritableValue\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/StringProperty.html)            | map          |
+| TIME                 | [WritableValue\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)                     | map          |
+| YEAR_MONTH           | [WritableValue\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)                     | map          |
+| ZONED_DATE_TIME      | [WritableValue\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)             | map          |
 
 **Note:** All supported primitive types (Boolean, Double, Float, Int, Long) can be persisted as nulls by providing your own implementation of WritableValue\<Number\> or using the helper classes: NullableBooleanProperty, NullableDoubleProperty, NullableFloatProperty, NullableIntegerProperty, NullableLongProperty and NullableNumberProperty.
 

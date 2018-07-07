@@ -76,9 +76,24 @@ data class JdsStoreEnum(@get:JsonProperty("k") @set:JsonProperty("k") var key: L
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param value the corresponding value
+ */
+data class JdsStoreEnumString(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+
+/**
+ * Used to store values of type in a portable manner
+ * @param key the [field][JdsField] [ID][JdsField.id]
  * @param values the corresponding value
  */
 data class JdsStoreEnumCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Int> = ArrayList())
+
+/**
+ * Used to store values of type in a portable manner
+ * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param values the corresponding value
+ */
+data class JdsStoreEnumStringCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<String> = ArrayList())
+
 
 /**
  * Used to store values of type in a portable manner
@@ -223,7 +238,8 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
     /**
      * Embedded objects
      */
-    val e: MutableList<JdsEmbeddedObject> = ArrayList()
+    @get:JsonProperty("e")
+    val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()
 
     init {
         entities.forEach {
@@ -233,7 +249,7 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
                 val embeddedObject = JdsEmbeddedObject()
                 embeddedObject.fieldId = null
                 embeddedObject.init(it)
-                e.add(embeddedObject)
+                embeddedObjects.add(embeddedObject)
             } else {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
             }

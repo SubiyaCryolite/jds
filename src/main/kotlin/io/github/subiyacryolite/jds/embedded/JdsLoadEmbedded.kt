@@ -27,7 +27,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
     override fun call(): List<T> {
         val output: MutableList<T> = ArrayList()
         container.forEach { element ->
-            element.e.forEach { innerElement ->
+            element.embeddedObjects.forEach { innerElement ->
                 val instance = referenceType.newInstance()
                 populate(instance, innerElement)
                 output.add(instance)
@@ -55,7 +55,9 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         embeddedObject.doubleValues.forEach { entity.populateProperties(JdsFieldType.DOUBLE, it.key, it.value) }
         embeddedObject.durationValues.forEach { entity.populateProperties(JdsFieldType.DURATION, it.key, it.value) }
         embeddedObject.enumCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.ENUM_COLLECTION, parent.key, it) } }
+        embeddedObject.enumStringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.ENUM_STRING_COLLECTION, parent.key, it) } }
         embeddedObject.enumValues.forEach { entity.populateProperties(JdsFieldType.ENUM, it.key, it.value) }
+        embeddedObject.enumStringValues.forEach { entity.populateProperties(JdsFieldType.ENUM_STRING, it.key, it.value) }
         embeddedObject.floatCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.FLOAT_COLLECTION, parent.key, it) } }
         embeddedObject.floatValue.forEach { entity.populateProperties(JdsFieldType.FLOAT, it.key, it.value) }
         embeddedObject.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.INT_COLLECTION, parent.key, it) } }

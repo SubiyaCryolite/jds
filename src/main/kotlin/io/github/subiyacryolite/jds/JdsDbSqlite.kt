@@ -132,6 +132,8 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveEnumCollections() = "INSERT OR REPLACE INTO jds_str_enum_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
+    override fun saveEnumStringCollections() = "INSERT OR REPLACE INTO jds_str_enum_string_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+
     override fun saveDateTimeCollections() = "INSERT OR REPLACE INTO jds_str_date_time_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
     override fun saveFloatCollections() = "INSERT OR REPLACE INTO jds_str_float_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"

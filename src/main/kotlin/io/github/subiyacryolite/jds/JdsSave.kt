@@ -574,6 +574,16 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 insert.addBatch()
             }
         }
+        val insertString = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumStringCollections())
+        jdsEntity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
+            u.forEach { anEnum ->
+                insertString.setString(1, jdsEntity.overview.uuid)
+                insertString.setInt(2, jdsEntity.overview.editVersion)
+                insertString.setLong(3, jdsFieldEnum)
+                insertString.setString(4, anEnum.toString())
+                insertString.addBatch()
+            }
+        }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }

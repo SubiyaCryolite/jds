@@ -95,8 +95,14 @@ class JdsEmbeddedObject {
     @get:JsonProperty("ev")
     val enumValues: MutableList<JdsStoreEnum> = ArrayList()
 
+    @get:JsonProperty("es")
+    val enumStringValues: MutableList<JdsStoreEnumString> = ArrayList()
+
     @get:JsonProperty("ec")
     val enumCollections: MutableList<JdsStoreEnumCollection> = ArrayList()
+
+    @get:JsonProperty("esc")
+    val enumStringCollections: MutableList<JdsStoreEnumStringCollection> = ArrayList()
 
     @get:JsonProperty("eo")
     val entityOverviews: MutableList<JdsEmbeddedObject> = ArrayList()

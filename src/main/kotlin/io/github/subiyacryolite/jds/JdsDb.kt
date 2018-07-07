@@ -78,6 +78,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_STRING)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_COLLECTION)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_STRING_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER)
@@ -208,6 +209,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
             JdsComponent.STORE_ENUM_STRING-> executeSqlFromString(connection, createStoreEnumString())
             JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
+            JdsComponent.STORE_ENUM_STRING_COLLECTION -> executeSqlFromString(connection, createStoreEnumStringCollection())
             JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
             JdsComponent.STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createStoreFloatCollection())
             JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
@@ -244,6 +246,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.POP_STORE_ENUM -> executeSqlFromString(connection, createPopJdsStoreEnum())
             JdsComponent.POP_STORE_ENUM_STRING -> executeSqlFromString(connection, createPopJdsStoreEnumString())
             JdsComponent.POP_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopEnumCollection())
+            JdsComponent.POP_STORE_ENUM_STRING_COLLECTION -> executeSqlFromString(connection, createPopEnumStringCollection())
             JdsComponent.POP_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
             JdsComponent.POP_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopFloatCollection())
             JdsComponent.POP_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
@@ -781,6 +784,12 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     internal open fun saveEnumCollections() = "{call jds_pop_enum_collection(?, ?, ?, ?)}"
 
     /**
+     * SQL call to save enum string collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveEnumStringCollections() = "{call jds_pop_enum_string_collection(?, ?, ?, ?)}"
+
+    /**
      * SQL call to save date time collections
      * @return the default or overridden SQL statement for this operation
      */
@@ -1084,6 +1093,12 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         return createOrAlterProc("jds_pop_enum_collection", "jds_str_enum_collection", columns, storeUniqueColumns, false)
     }
 
+    private fun createPopEnumStringCollection(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
+        return createOrAlterProc("jds_pop_enum_string_collection", "jds_str_enum_string_collection", columns, storeUniqueColumns, false)
+    }
+
     private fun createPopJdsStoreTime(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeTime()
@@ -1265,6 +1280,17 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val tableName = "jds_str_enum_collection"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
+        val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
+        return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    private fun createStoreEnumStringCollection(): String {
+        val tableName = "jds_str_enum_string_collection"
+        val columns = storeCommonColumns
+        columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()

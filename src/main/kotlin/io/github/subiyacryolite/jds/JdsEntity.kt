@@ -698,7 +698,9 @@ abstract class JdsEntity : IJdsEntity {
         //Enums
         //==============================================
         enumProperties.entries.forEach { embeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
+        enumStringProperties.entries.forEach { embeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value.toString())) }
         enumCollectionProperties.entries.forEach { embeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
+        enumStringCollectionProperties.entries.forEach { embeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, it.value)) }
         //==============================================
         //ARRAYS
         //==============================================
@@ -738,7 +740,6 @@ abstract class JdsEntity : IJdsEntity {
         values.forEach { dest.add(it.ordinal) }
         return dest
     }
-
 
     /**
      * @param fieldType
@@ -815,6 +816,21 @@ abstract class JdsEntity : IJdsEntity {
                 }
             }
 
+            /*
+            JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollectionProperties.filter { it.key == fieldId }.forEach {
+                val fieldEnum = JdsFieldEnum.enums[it.key]
+                if (fieldEnum != null) {
+                    val enumValues = fieldEnum.values
+                    val index = when (value) {
+                        is Int -> value
+                        is BigDecimal -> value.intValueExact()
+                        else -> enumValues.size
+                    }
+                    if (index < enumValues.size) {
+                        it.value.add((enumValues[index] as Enum<*>).toString())
+                    }
+                }
+            }*/
             JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollectionProperties[fieldId]?.add(value as String)
 
             JdsFieldType.STRING -> stringProperties[fieldId]?.value = (value as String?)
