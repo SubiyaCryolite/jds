@@ -29,4 +29,10 @@ class NullableBooleanProperty() : WritableValue<Boolean>, Serializable {
     }
 
     override fun getValue(): Boolean? = _value
+
+    fun get(): Boolean? = value
+
+    fun set(v : Boolean?) {
+        value = v
+    }
 }

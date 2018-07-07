@@ -22,7 +22,6 @@ open class NullableNumberProperty<T : Number>() : WritableValue<T>, Serializable
         setValue(value)
     }
 
-
     private var _value: T? = null
 
     override fun setValue(value: T?) {
@@ -30,4 +29,10 @@ open class NullableNumberProperty<T : Number>() : WritableValue<T>, Serializable
     }
 
     override fun getValue(): T? = _value
+
+    fun get(): T? = value
+
+    fun set(v : T?) {
+        value = v
+    }
 }
