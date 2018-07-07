@@ -128,6 +128,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_ENTITY_LIVE_VERSION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_TEXT_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM_COLLECTION)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_ENUM_STRING_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_FLOAT_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_INTEGER_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_LONG_COLLECTION)
@@ -685,7 +686,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTimeCollection() = "{call jds_pop_date_time_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveDateTimeCollection() = "{call jds_pop_date_time_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save double values
@@ -697,7 +698,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save double values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDoubleCollection() = "{call jds_pop_double_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveDoubleCollection() = "{call jds_pop_double_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save float values
@@ -709,7 +710,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloatCollection() = "{call jds_pop_float_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveFloatCollection() = "{call jds_pop_float_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer values
@@ -721,7 +722,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveIntegerCollection() = "{call jds_pop_integer_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveIntegerCollection() = "{call jds_pop_integer_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
@@ -733,7 +734,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save long values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLongCollection() = "{call jds_pop_long_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveLongCollection() = "{call jds_pop_long_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save text values
@@ -745,7 +746,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save text values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveStringCollection() = "{call jds_pop_text_collection(?, ?, ?, ?, ?)}"
+    internal open fun saveStringCollection() = "{call jds_pop_text_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save time values
@@ -781,49 +782,49 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save enum collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumCollections() = "{call jds_pop_enum_collection(?, ?, ?, ?)}"
+    internal open fun saveEnumCollections() = "{call jds_pop_enum_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save enum string collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumStringCollections() = "{call jds_pop_enum_string_collection(?, ?, ?, ?)}"
+    internal open fun saveEnumStringCollections() = "{call jds_pop_enum_string_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save date time collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTimeCollections() = "{call jds_pop_date_time_collection(?, ?, ?, ?)}"
+    internal open fun saveDateTimeCollections() = "{call jds_pop_date_time_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save float collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloatCollections() = "{call jds_pop_float_collection(?, ?, ?, ?)}"
+    internal open fun saveFloatCollections() = "{call jds_pop_float_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveIntegerCollections() = "{call jds_pop_integer_collection(?, ?, ?, ?)}"
+    internal open fun saveIntegerCollections() = "{call jds_pop_integer_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save double collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDoubleCollections() = "{call jds_pop_double_collection(?, ?, ?, ?)}"
+    internal open fun saveDoubleCollections() = "{call jds_pop_double_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save long collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLongCollections() = "{call jds_pop_long_collection(?, ?, ?, ?)}"
+    internal open fun saveLongCollections() = "{call jds_pop_long_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save string collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveStringCollections() = "{call jds_pop_text_collection(?, ?, ?, ?)}"
+    internal open fun saveStringCollections() = "{call jds_pop_text_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save entity overview values
@@ -1012,7 +1013,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopDateTimeCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
-        return createOrAlterProc("jds_pop_date_time_collection", "jds_str_date_time_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_date_time_col", "jds_str_date_time_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDouble(): String {
@@ -1024,7 +1025,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopDoubleCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
-        return createOrAlterProc("jds_pop_double_collection", "jds_str_double_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_double_col", "jds_str_double_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreFloat(): String {
@@ -1036,7 +1037,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopFloatCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
-        return createOrAlterProc("jds_pop_float_collection", "jds_str_float_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_float_col", "jds_str_float_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreInteger(): String {
@@ -1048,7 +1049,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopIntegerCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_integer_collection", "jds_str_integer_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_integer_col", "jds_str_integer_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreLong(): String {
@@ -1060,7 +1061,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopLongCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
-        return createOrAlterProc("jds_pop_long_collection", "jds_str_long_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_long_col", "jds_str_long_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreText(): String {
@@ -1072,7 +1073,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopTextCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_text_collection", "jds_str_text_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_text_col", "jds_str_text_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreEnum(): String {
@@ -1090,13 +1091,13 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopEnumCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
-        return createOrAlterProc("jds_pop_enum_collection", "jds_str_enum_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_enum_col", "jds_str_enum_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopEnumStringCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
-        return createOrAlterProc("jds_pop_enum_string_collection", "jds_str_enum_string_collection", columns, storeUniqueColumns, false)
+        return createOrAlterProc("jds_pop_enum_string_col", "jds_str_enum_string_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreTime(): String {
@@ -1211,7 +1212,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreDateTimeCollection(): String {
-        val tableName = "jds_str_date_time_collection"
+        val tableName = "jds_str_date_time_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDateTime()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1233,7 +1234,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreDoubleCollection(): String {
-        val tableName = "jds_str_double_collection"
+        val tableName = "jds_str_double_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeDouble()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1277,7 +1278,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreEnumCollection(): String {
-        val tableName = "jds_str_enum_collection"
+        val tableName = "jds_str_enum_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1288,7 +1289,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreEnumStringCollection(): String {
-        val tableName = "jds_str_enum_string_collection"
+        val tableName = "jds_str_enum_string_col"//Oracle length
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1310,7 +1311,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreFloatCollection(): String {
-        val tableName = "jds_str_float_collection"
+        val tableName = "jds_str_float_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeFloat()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1332,7 +1333,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreIntegerCollection(): String {
-        val tableName = "jds_str_integer_collection"
+        val tableName = "jds_str_integer_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1354,7 +1355,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreLongCollection(): String {
-        val tableName = "jds_str_long_collection"
+        val tableName = "jds_str_long_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeLong()
         val uniqueColumns = LinkedHashMap<String, String>()
@@ -1398,7 +1399,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     }
 
     private fun createStoreTextCollection(): String {
-        val tableName = "jds_str_text_collection"
+        val tableName = "jds_str_text_col"
         val columns = storeCommonColumns
         columns["value"] = getNativeDataTypeString(0)
         val uniqueColumns = LinkedHashMap<String, String>()

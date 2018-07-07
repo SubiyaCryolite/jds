@@ -32,20 +32,18 @@ object JdsSchema {
      */
     fun generateColumns(jdsDb: IJdsDb, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
-        fields.sortedBy { it.name }.forEach {
-            if (!isIgnoredType(it.type)) {
-                when (it.type) {
-                    JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
-                        val columnName = "${it.name}_${enum!!.ordinal}"
-                        val columnDataType = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
-                        collection[columnName] = "$columnName $columnDataType"
-                        columnToFieldMap[columnName] = it
-                        enumOrdinals[columnName] = enum!!.ordinal
-                    }
-                    else -> {
-                        collection[it.name] = generateColumn(jdsDb, it)
-                        columnToFieldMap[it.name] = it
-                    }
+        fields.filterNot { isIgnoredType(it.type) }.sortedBy { it.name }.forEach {
+            when (it.type) {
+                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
+                    val columnName = "${it.name}_${enum!!.ordinal}"
+                    val columnDataType = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
+                    collection[columnName] = "$columnName $columnDataType"
+                    columnToFieldMap[columnName] = it
+                    enumOrdinals[columnName] = enum.ordinal
+                }
+                else -> {
+                    collection[it.name] = generateColumn(jdsDb, it)
+                    columnToFieldMap[it.name] = it
                 }
             }
         }
@@ -60,7 +58,7 @@ object JdsSchema {
         JdsFieldType.DOUBLE_COLLECTION,
         JdsFieldType.LONG_COLLECTION,
         JdsFieldType.STRING_COLLECTION,
-        JdsFieldType.ENUM_COLLECTION,
+        JdsFieldType.ENUM_STRING_COLLECTION,
         JdsFieldType.DATE_TIME_COLLECTION,
         JdsFieldType.ENTITY -> true
         else -> false

@@ -185,6 +185,12 @@ open class JdsTable() : Serializable {
                     is MonthDay? -> insertStatement.setString(index + 1, value.toString())
                     is YearMonth? -> insertStatement.setString(index + 1, value.toString())
                     is Period? -> insertStatement.setString(index + 1, value.toString())
+                    is Boolean? -> {
+                        if (jdsDb.isOracleDb && value != null)
+                            insertStatement.setBoolean(index + 1, value)
+                        else
+                            insertStatement.setObject(index + 1, value)
+                    }
                     else -> insertStatement.setObject(index + 1, value)
                 }
             }

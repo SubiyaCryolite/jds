@@ -130,21 +130,21 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveDuration() = "INSERT OR REPLACE INTO jds_str_duration(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?)"
 
-    override fun saveEnumCollections() = "INSERT OR REPLACE INTO jds_str_enum_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveEnumCollections() = "INSERT OR REPLACE INTO jds_str_enum_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveEnumStringCollections() = "INSERT OR REPLACE INTO jds_str_enum_string_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveEnumStringCollections() = "INSERT OR REPLACE INTO jds_str_enum_string_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveDateTimeCollections() = "INSERT OR REPLACE INTO jds_str_date_time_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveDateTimeCollections() = "INSERT OR REPLACE INTO jds_str_date_time_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveFloatCollections() = "INSERT OR REPLACE INTO jds_str_float_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveFloatCollections() = "INSERT OR REPLACE INTO jds_str_float_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveIntegerCollections() = "INSERT OR REPLACE INTO jds_str_integer_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveIntegerCollections() = "INSERT OR REPLACE INTO jds_str_integer_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveDoubleCollections() = "INSERT OR REPLACE INTO jds_str_double_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveDoubleCollections() = "INSERT OR REPLACE INTO jds_str_double_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveLongCollections() = "INSERT OR REPLACE INTO jds_str_long_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveLongCollections() = "INSERT OR REPLACE INTO jds_str_long_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
-    override fun saveStringCollections() = "INSERT OR REPLACE INTO jds_str_text_collection(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
+    override fun saveStringCollections() = "INSERT OR REPLACE INTO jds_str_text_col(uuid, edit_version, field_id, value) VALUES (?, ?, ?, ?)"
 
     override fun saveOverview() = "INSERT OR REPLACE INTO jds_entity_overview(uuid, edit_version, entity_id) VALUES(?, ?, ?)"
 

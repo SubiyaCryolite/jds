@@ -173,7 +173,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun getNativeDataTypeBoolean(): String {
-        return "SMALLINT"
+        return "NUMBER(1,0)"
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {

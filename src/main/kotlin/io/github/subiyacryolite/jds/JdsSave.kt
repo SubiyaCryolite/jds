@@ -342,7 +342,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             upsertDuration.setString(1, jdsEntity.overview.uuid)
             upsertDuration.setInt(2, jdsEntity.overview.editVersion)
             upsertDuration.setLong(3, fieldId)
-            upsertDuration.setObject(4, durationProperty.value.toNanos())
+            upsertDuration.setObject(4, durationProperty.value?.toNanos())
             upsertDuration.addBatch()
         }
     } catch (ex: Exception) {
@@ -570,7 +570,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
                 insert.setLong(3, jdsFieldEnum)
-                insert.setObject(4, anEnum.ordinal)
+                insert.setObject(4, anEnum?.ordinal)
                 insert.addBatch()
             }
         }

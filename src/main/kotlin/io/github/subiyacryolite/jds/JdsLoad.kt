@@ -129,24 +129,24 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         val booleanStatement = connection.prepareStatement("SELECT * FROM jds_str_boolean WHERE uuid IN $questionsString")
                         val dateStatement = connection.prepareStatement("SELECT * FROM jds_str_date WHERE uuid IN $questionsString")
                         val dateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time WHERE uuid IN $questionsString")
-                        val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time_collection WHERE uuid IN $questionsString")
+                        val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time_col WHERE uuid IN $questionsString")
                         val doubleStatement = connection.prepareStatement("SELECT * FROM jds_str_double WHERE uuid IN $questionsString")
-                        val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_double_collection WHERE uuid IN $questionsString")
+                        val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_double_col WHERE uuid IN $questionsString")
                         val durationStatement = connection.prepareStatement("SELECT * FROM jds_str_duration WHERE uuid IN $questionsString")
                         val enumStatement = connection.prepareStatement("SELECT * FROM jds_str_enum WHERE uuid IN $questionsString")
                         val enumStringStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string WHERE uuid IN $questionsString")
-                        val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_collection WHERE uuid IN $questionsString")
-                        val enumStringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string_collection WHERE uuid IN $questionsString")
+                        val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_col WHERE uuid IN $questionsString")
+                        val enumStringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string_col WHERE uuid IN $questionsString")
                         val floatStatement = connection.prepareStatement("SELECT * FROM jds_str_float WHERE uuid IN $questionsString")
-                        val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_collection WHERE uuid IN $questionsString")
+                        val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_col WHERE uuid IN $questionsString")
                         val intStatement = connection.prepareStatement("SELECT * FROM jds_str_integer WHERE uuid IN $questionsString")
-                        val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_integer_collection WHERE uuid IN $questionsString")
+                        val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_integer_col WHERE uuid IN $questionsString")
                         val longStatement = connection.prepareStatement("SELECT * FROM jds_str_long WHERE uuid IN $questionsString")
-                        val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_long_collection WHERE uuid IN $questionsString")
+                        val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_long_col WHERE uuid IN $questionsString")
                         val monthDayStatement = connection.prepareStatement("SELECT * FROM jds_str_month_day WHERE uuid IN $questionsString")
                         val periodStatement = connection.prepareStatement("SELECT * FROM jds_str_period WHERE uuid IN $questionsString")
                         val stringStatement = connection.prepareStatement("SELECT * FROM jds_str_text WHERE uuid IN $questionsString")
-                        val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_text_collection WHERE uuid IN $questionsString")
+                        val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_text_col WHERE uuid IN $questionsString")
                         val timeStatement = connection.prepareStatement("SELECT * FROM jds_str_time WHERE uuid IN $questionsString")
                         val yearMonthStatement = connection.prepareStatement("SELECT * FROM jds_str_year_month WHERE uuid IN $questionsString")
                         val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_zoned_date_time WHERE uuid IN $questionsString")
@@ -289,7 +289,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @return
      */
     private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String, editVersion: Int): Stream<T> {
-        return entities.parallelStream().filter {
+        return entities.stream().filter {
             it.overview.uuid == uuid && it.overview.editVersion == editVersion
         }
     }

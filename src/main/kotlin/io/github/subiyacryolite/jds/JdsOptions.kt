@@ -12,7 +12,7 @@ class JdsOptions {
     var isWritingValuesToEavTables = true
 
     /**
-     * Indicates whether JDS is persisting collections to the EAV jds_str_*_collection tables
+     * Indicates whether JDS is persisting collections to the EAV jds_str_*_col tables
      */
     var isWritingCollectionsToEavTables = true
 
