@@ -9,18 +9,18 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "io.github.subiyacryolite"
-version = "10.0.2-SNAPSHOT"
+version = "10.0.3-SNAPSHOT"
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 project.ext.jacksonVersion = "2.9.5"
-project.ext.kotlinVersion = "1.2.50"
+project.ext.kotlinVersion = "1.2.51"
 
 buildscript {
 
-    project.ext.kotlinVersion = "1.2.50"
+    project.ext.kotlinVersion = "1.2.51"
 
     repositories {
         mavenCentral()

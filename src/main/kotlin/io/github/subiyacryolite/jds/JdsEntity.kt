@@ -617,8 +617,8 @@ abstract class JdsEntity : IJdsEntity {
     private fun putDateTimes(destination: Map<Long, MutableCollection<LocalDateTime?>>, source: Map<Long, List<LocalDateTime?>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putFloats(destination: Map<Long, MutableCollection<Float?>>, source: Map<Long, List<Float?>>)=
-        source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
+    private fun putFloats(destination: Map<Long, MutableCollection<Float?>>, source: Map<Long, List<Float?>>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
     private fun putDoubles(destination: Map<Long, MutableCollection<Double?>>, source: Map<Long, List<Double?>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
@@ -679,11 +679,11 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeProperties.entries.forEach { embeddedObject.zonedDateTimeValues.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime).toInstant().toEpochMilli())) }
-        localTimeProperties.entries.forEach { embeddedObject.timeValues.add(JdsStoreTime(it.key, (it.value.value as LocalTime).toNanoOfDay())) }
+        zonedDateTimeProperties.entries.forEach { embeddedObject.zonedDateTimeValues.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
+        localTimeProperties.entries.forEach { embeddedObject.timeValues.add(JdsStoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
         durationProperties.entries.forEach { embeddedObject.durationValues.add(JdsStoreDuration(it.key, it.value.value?.toNanos())) }
-        localDateTimeProperties.entries.forEach { embeddedObject.dateTimeValues.add(JdsStoreDateTime(it.key, Timestamp.valueOf(it.value.value as LocalDateTime))) }
-        localDateProperties.entries.forEach { embeddedObject.dateValues.add(JdsStoreDate(it.key, Timestamp.valueOf((it.value.value as LocalDate).atStartOfDay()))) }
+        localDateTimeProperties.entries.forEach { embeddedObject.dateTimeValues.add(JdsStoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
+        localDateProperties.entries.forEach { embeddedObject.dateValues.add(JdsStoreDate(it.key, safeLocalDate(it.value.value))) }
         monthDayProperties.entries.forEach { embeddedObject.monthDayValues.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
         yearMonthProperties.entries.forEach { embeddedObject.yearMonthValues.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
         periodProperties.entries.forEach { embeddedObject.periodValues.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
@@ -726,6 +726,20 @@ abstract class JdsEntity : IJdsEntity {
             eo.init(it.value)
             embeddedObject.entityOverviews.add(eo)
         }
+    }
+
+    private fun safeLocalDateTime(value: Temporal?): Timestamp? {
+        val localDateTime = value as LocalDateTime?
+        if (localDateTime != null)
+            return Timestamp.valueOf(localDateTime)
+        return null
+    }
+
+    private fun safeLocalDate(value: Temporal?): Timestamp? {
+        val localDate = value as LocalDate?
+        if (localDate != null)
+            return Timestamp.valueOf(localDate.atStartOfDay())
+        return null
     }
 
     private fun toTimeStampCollection(values: MutableCollection<LocalDateTime?>): MutableCollection<Timestamp?> {
