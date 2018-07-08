@@ -129,27 +129,134 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: WritableValue<*>) {
         var throwException = true
         when (field.type) {
-            JdsFieldType.DOUBLE -> (property as WritableValue<Double?>).let { doubleProperties[field.id] = it;throwException = false }
-            JdsFieldType.LONG -> (property as WritableValue<Long?>).let { longProperties[field.id] = it;throwException = false }
-            JdsFieldType.INT -> (property as WritableValue<Int?>).let { integerProperties[field.id] = it;throwException = false }
-            JdsFieldType.FLOAT -> (property as WritableValue<Float?>).let { floatProperties[field.id] = it;throwException = false }
-            JdsFieldType.BOOLEAN -> (property as WritableValue<Boolean?>).let {
-                booleanProperties[field.id] = it
-                throwException = false
+            JdsFieldType.DOUBLE -> {
+                val target = property as WritableValue<Double?>?
+                if (target != null) {
+                    doubleProperties[field.id] = target
+                    throwException = false
+                }
             }
-            JdsFieldType.STRING -> (property as WritableValue<String?>).let { stringProperties[field.id] = it;throwException = false }
-            JdsFieldType.DATE_TIME -> (property as WritableValue<Temporal?>).let { localDateTimeProperties[field.id] = it;throwException = false }
-            JdsFieldType.ZONED_DATE_TIME -> (property as WritableValue<Temporal?>).let { zonedDateTimeProperties[field.id] = it;throwException = false }
-            JdsFieldType.DATE -> (property as WritableValue<Temporal?>).let { localDateProperties[field.id] = it;throwException = false }
-            JdsFieldType.TIME -> (property as WritableValue<Temporal?>).let { localTimeProperties[field.id] = it;throwException = false }
-            JdsFieldType.BLOB -> (property as BlobProperty).let { blobProperties[field.id] = it;throwException = false; }
-            JdsFieldType.ENUM -> (property as WritableValue<Enum<*>?>).let { enumProperties[field.id] = it;throwException = false; mapEnums(overview.entityId, field.id) }
-            JdsFieldType.MONTH_DAY -> (property as WritableValue<MonthDay?>).let { monthDayProperties[field.id] = it;throwException = false }
-            JdsFieldType.YEAR_MONTH -> (property as WritableValue<Temporal?>).let { yearMonthProperties[field.id] = it;throwException = false }
-            JdsFieldType.PERIOD -> (property as WritableValue<Period?>).let { periodProperties[field.id] = it;throwException = false }
-            JdsFieldType.DURATION -> (property as WritableValue<Duration?>).let { durationProperties[field.id] = it;throwException = false }
-            JdsFieldType.ENUM_STRING -> (property as WritableValue<Enum<*>?>).let { enumStringProperties[field.id] = it;throwException = false; mapEnums(overview.entityId, field.id) }
-            JdsFieldType.STRING_COLLECTION -> (property as MutableCollection<String?>).let { stringArrayProperties[field.id] = it;throwException = false; }
+            JdsFieldType.LONG -> {
+                val target = property as WritableValue<Long?>?
+                if (target != null) {
+                    longProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.INT -> {
+                val target = property as WritableValue<Int?>?
+                if (target != null) {
+                    integerProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.FLOAT -> {
+                val target = property as WritableValue<Float?>?
+                if (target != null) {
+                    floatProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.BOOLEAN -> {
+                val target = property as WritableValue<Boolean?>?
+                if (target != null) {
+                    booleanProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.STRING -> {
+                val target = property as WritableValue<String?>?
+                if (target != null) {
+                    stringProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.DATE_TIME -> {
+                val target = property as WritableValue<Temporal?>?
+                if (target != null) {
+                    localDateTimeProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.ZONED_DATE_TIME -> {
+                val target = property as WritableValue<Temporal?>?
+                if (target != null) {
+                    zonedDateTimeProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.DATE -> {
+                val target = property as WritableValue<Temporal?>?
+                if (target != null) {
+                    localDateProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.TIME -> {
+                val target = property as WritableValue<Temporal?>?
+                if (target != null) {
+                    localTimeProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.BLOB -> {
+                val target = property as BlobProperty?
+                if (target != null) {
+                    blobProperties[field.id] = target
+                    throwException = false;
+                }
+            }
+            JdsFieldType.ENUM -> {
+                val target = property as WritableValue<Enum<*>?>?
+                if (target != null) {
+                    enumProperties[field.id] = target
+                    throwException = false
+                    mapEnums(overview.entityId, field.id)
+                }
+            }
+            JdsFieldType.MONTH_DAY -> {
+                val target = property as WritableValue<MonthDay?>?
+                if (target != null) {
+                    monthDayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.YEAR_MONTH -> {
+                val target = property as WritableValue<Temporal?>?
+                if (target != null) {
+                    yearMonthProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.PERIOD -> {
+                val target = property as WritableValue<Period?>?
+                if (target != null) {
+                    periodProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.DURATION -> {
+                val target = property as WritableValue<Duration?>?
+                if (target != null) {
+                    durationProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.ENUM_STRING -> {
+                val target = property as WritableValue<Enum<*>?>?
+                if (target != null) {
+                    enumStringProperties[field.id] = target
+                    throwException = false
+                    mapEnums(overview.entityId, field.id)
+                }
+            }
+            JdsFieldType.STRING_COLLECTION -> {
+                val target = property as MutableCollection<String?>?
+                if (target != null) {
+                    stringArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
         }
         if (throwException)
             throw RuntimeException("Please assign the correct type to field [$field]")
@@ -166,14 +273,64 @@ abstract class JdsEntity : IJdsEntity {
     protected fun map(field: JdsField, property: MutableCollection<*>) {
         var throwException = true
         when (field.type) {
-            JdsFieldType.STRING_COLLECTION -> (property as MutableCollection<String?>).let { stringArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.DATE_TIME_COLLECTION -> (property as MutableCollection<LocalDateTime?>).let { dateTimeArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.FLOAT_COLLECTION -> (property as MutableCollection<Float?>).let { floatArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.INT_COLLECTION -> (property as MutableCollection<Int?>).let { integerArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.DOUBLE_COLLECTION -> (property as MutableCollection<Double?>).let { doubleArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.LONG_COLLECTION -> (property as MutableCollection<Long?>).let { longArrayProperties[field.id] = it;throwException = false; }
-            JdsFieldType.ENUM_COLLECTION -> (property as MutableCollection<Enum<*>?>).let { enumCollectionProperties[field.id] = it;throwException = false; mapEnums(overview.entityId, field.id) }
-            JdsFieldType.ENUM_STRING_COLLECTION -> (property as MutableCollection<String?>).let { enumStringCollectionProperties[field.id] = it;throwException = false; mapEnums(overview.entityId, field.id) }
+            JdsFieldType.STRING_COLLECTION -> {
+                val target = property as MutableCollection<String?>?
+                if (target != null) {
+                    stringArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.DATE_TIME_COLLECTION -> {
+                val target = property as MutableCollection<LocalDateTime?>?
+                if (target != null) {
+                    dateTimeArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.FLOAT_COLLECTION -> {
+                val target = property as MutableCollection<Float?>?
+                if (target != null) {
+                    floatArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.INT_COLLECTION -> {
+                val target = property as MutableCollection<Int?>?
+                if (target != null) {
+                    integerArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.DOUBLE_COLLECTION -> {
+                val target = property as MutableCollection<Double?>?
+                if (target != null) {
+                    doubleArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.LONG_COLLECTION -> {
+                val target = property as MutableCollection<Long?>?
+                if (target != null) {
+                    longArrayProperties[field.id] = target
+                    throwException = false
+                }
+            }
+            JdsFieldType.ENUM_COLLECTION -> {
+                val target = property as MutableCollection<Enum<*>?>?
+                if (target != null) {
+                    enumCollectionProperties[field.id] = target
+                    mapEnums(overview.entityId, field.id)
+                    throwException = false
+                }
+            }
+            JdsFieldType.ENUM_STRING_COLLECTION -> {
+                val target = property as MutableCollection<String?>?
+                if (target != null) {
+                    enumStringCollectionProperties[field.id] = target
+                    mapEnums(overview.entityId, field.id)
+                    throwException = false
+                }
+            }
         }
         if (throwException)
             throw RuntimeException("Please assign the correct type to field [$field]")
