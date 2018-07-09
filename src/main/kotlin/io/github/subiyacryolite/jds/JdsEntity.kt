@@ -84,26 +84,26 @@ abstract class JdsEntity : IJdsEntity {
     @get:JsonIgnore
     internal val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val stringCollections: HashMap<Long, MutableCollection<String?>> = LinkedHashMap()
+    internal val stringCollections: HashMap<Long, MutableCollection<String>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val dateTimeCollections: HashMap<Long, MutableCollection<LocalDateTime?>> = LinkedHashMap()
+    internal val dateTimeCollections: HashMap<Long, MutableCollection<LocalDateTime>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val floatCollections: HashMap<Long, MutableCollection<Float?>> = LinkedHashMap()
+    internal val floatCollections: HashMap<Long, MutableCollection<Float>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val doubleCollections: HashMap<Long, MutableCollection<Double?>> = LinkedHashMap()
+    internal val doubleCollections: HashMap<Long, MutableCollection<Double>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val longCollections: HashMap<Long, MutableCollection<Long?>> = LinkedHashMap()
+    internal val longCollections: HashMap<Long, MutableCollection<Long>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val integerCollections: HashMap<Long, MutableCollection<Int?>> = LinkedHashMap()
+    internal val integerCollections: HashMap<Long, MutableCollection<Int>> = LinkedHashMap()
     //enumProperties
     @get:JsonIgnore
     internal val enumProperties: HashMap<Long, WritableValue<Enum<*>?>> = LinkedHashMap()
     @get:JsonIgnore
     internal val enumStringProperties: HashMap<Long, WritableValue<Enum<*>?>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>?>> = LinkedHashMap()
+    internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val enumStringCollections: HashMap<Long, MutableCollection<String?>> = LinkedHashMap()
+    internal val enumStringCollections: HashMap<Long, MutableCollection<String>> = LinkedHashMap()
     //objects
     @get:JsonIgnore
     internal val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = LinkedHashMap()
@@ -247,7 +247,7 @@ abstract class JdsEntity : IJdsEntity {
     protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, property: WritableValue<T?>) = map(fieldEnum.field, property)
 
     @JvmName("mapStrings")
-    protected fun map(field: JdsField, property: MutableCollection<String?>) {
+    protected fun map(field: JdsField, property: MutableCollection<String>) {
         if (field.type != JdsFieldType.STRING_COLLECTION && field.type != JdsFieldType.ENUM_STRING_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         if (field.type == JdsFieldType.STRING_COLLECTION)
@@ -260,7 +260,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapDateTimes")
-    protected fun map(field: JdsField, property: MutableCollection<LocalDateTime?>) {
+    protected fun map(field: JdsField, property: MutableCollection<LocalDateTime>) {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         dateTimeCollections[field.id] = property
@@ -268,7 +268,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapFloats")
-    protected fun map(field: JdsField, property: MutableCollection<Float?>) {
+    protected fun map(field: JdsField, property: MutableCollection<Float>) {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         floatCollections[field.id] = property
@@ -276,7 +276,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapIntegers")
-    protected fun map(field: JdsField, property: MutableCollection<Int?>) {
+    protected fun map(field: JdsField, property: MutableCollection<Int>) {
         if (field.type != JdsFieldType.INT_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         integerCollections[field.id] = property
@@ -284,7 +284,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapDoubles")
-    protected fun map(field: JdsField, property: MutableCollection<Double?>) {
+    protected fun map(field: JdsField, property: MutableCollection<Double>) {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         doubleCollections[field.id] = property
@@ -292,7 +292,7 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapLongs")
-    protected fun map(field: JdsField, property: MutableCollection<Long?>) {
+    protected fun map(field: JdsField, property: MutableCollection<Long>) {
         if (field.type != JdsFieldType.LONG_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
         longCollections[field.id] = property
@@ -300,10 +300,10 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapEnums")
-    protected fun <T:Enum<T>>map(field: JdsField, property: MutableCollection<T?>) {
+    protected fun <T : Enum<T>> map(field: JdsField, property: MutableCollection<T>) {
         if (field.type != JdsFieldType.ENUM_COLLECTION)
             throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
-        enumCollections[field.id] = property as MutableCollection<Enum<*>?>
+        enumCollections[field.id] = property as MutableCollection<Enum<*>>
         mapField(overview.entityId, field.id)
         mapEnums(overview.entityId, field.id)
     }
@@ -312,7 +312,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEnum
      * @param properties
      */
-    protected fun <T:Enum<T>>mapEnums(fieldEnum: JdsFieldEnum<T>, properties: MutableCollection<T?>) = map(fieldEnum.field, properties)
+    protected fun <T : Enum<T>> mapEnums(fieldEnum: JdsFieldEnum<T>, properties: MutableCollection<T>) = map(fieldEnum.field, properties)
 
     /**
      * @param entity
@@ -580,15 +580,15 @@ abstract class JdsEntity : IJdsEntity {
         putBlobs(blobValues, objectInputStream.readObject() as Map<Long, WritableValue<ByteArray?>>)
         //arrays
         putObjects(objectCollections, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
-        putStrings(stringCollections, objectInputStream.readObject() as Map<Long, List<String?>>)
-        putDateTimes(dateTimeCollections, objectInputStream.readObject() as Map<Long, List<LocalDateTime?>>)
-        putFloats(floatCollections, objectInputStream.readObject() as Map<Long, List<Float?>>)
-        putDoubles(doubleCollections, objectInputStream.readObject() as Map<Long, List<Double?>>)
-        putLongs(longCollections, objectInputStream.readObject() as Map<Long, List<Long?>>)
-        putIntegers(integerCollections, objectInputStream.readObject() as Map<Long, List<Int?>>)
+        putStrings(stringCollections, objectInputStream.readObject() as Map<Long, List<String>>)
+        putDateTimes(dateTimeCollections, objectInputStream.readObject() as Map<Long, List<LocalDateTime>>)
+        putFloats(floatCollections, objectInputStream.readObject() as Map<Long, List<Float>>)
+        putDoubles(doubleCollections, objectInputStream.readObject() as Map<Long, List<Double>>)
+        putLongs(longCollections, objectInputStream.readObject() as Map<Long, List<Long>>)
+        putIntegers(integerCollections, objectInputStream.readObject() as Map<Long, List<Int>>)
         //enumProperties
         putEnum(enumProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
-        putEnums(enumCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>?>>)
+        putEnums(enumCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
     }
 
     private fun serializeEnums(input: Map<Long, WritableValue<Enum<*>?>>): Map<Long, Enum<*>?> =
@@ -694,7 +694,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun putMonthDays(destination: HashMap<Long, WritableValue<MonthDay?>>, source: Map<Long, MonthDay?>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
-    private fun putEnums(destination: Map<Long, MutableCollection<Enum<*>?>>, source: Map<Long, List<Enum<*>?>>) =
+    private fun putEnums(destination: Map<Long, MutableCollection<Enum<*>>>, source: Map<Long, List<Enum<*>>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
     private fun putEnum(destination: Map<Long, WritableValue<Enum<*>?>>, source: Map<Long, Enum<*>?>) =
@@ -703,22 +703,22 @@ abstract class JdsEntity : IJdsEntity {
     private fun putObjects(destination: Map<JdsFieldEntity<*>, MutableCollection<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putStrings(destination: Map<Long, MutableCollection<String?>>, source: Map<Long, List<String?>>) =
+    private fun putStrings(destination: Map<Long, MutableCollection<String>>, source: Map<Long, List<String>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putDateTimes(destination: Map<Long, MutableCollection<LocalDateTime?>>, source: Map<Long, List<LocalDateTime?>>) =
+    private fun putDateTimes(destination: Map<Long, MutableCollection<LocalDateTime>>, source: Map<Long, List<LocalDateTime>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putFloats(destination: Map<Long, MutableCollection<Float?>>, source: Map<Long, List<Float?>>) =
+    private fun putFloats(destination: Map<Long, MutableCollection<Float>>, source: Map<Long, List<Float>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putDoubles(destination: Map<Long, MutableCollection<Double?>>, source: Map<Long, List<Double?>>) =
+    private fun putDoubles(destination: Map<Long, MutableCollection<Double>>, source: Map<Long, List<Double>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putLongs(destination: Map<Long, MutableCollection<Long?>>, source: Map<Long, List<Long?>>) =
+    private fun putLongs(destination: Map<Long, MutableCollection<Long>>, source: Map<Long, List<Long>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putIntegers(destination: Map<Long, MutableCollection<Int?>>, source: Map<Long, List<Int?>>) =
+    private fun putIntegers(destination: Map<Long, MutableCollection<Int>>, source: Map<Long, List<Int>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
     private fun putBlobs(destination: MutableMap<Long, WritableValue<ByteArray?>>, source: Map<Long, WritableValue<ByteArray?>>) =
@@ -825,15 +825,15 @@ abstract class JdsEntity : IJdsEntity {
         return null
     }
 
-    private fun toTimeStampCollection(values: MutableCollection<LocalDateTime?>): MutableCollection<Timestamp?> {
-        val dest = ArrayList<Timestamp?>()
-        values.filterNotNull().forEach { dest.add(Timestamp.valueOf(it)) }
+    private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>): MutableCollection<Timestamp> {
+        val dest = ArrayList<Timestamp>()
+        values.forEach { dest.add(Timestamp.valueOf(it)) }
         return dest
     }
 
-    private fun toIntCollection(values: MutableCollection<Enum<*>?>): MutableCollection<Int?> {
-        val dest = ArrayList<Int?>()
-        values.filterNotNull().forEach { dest.add(it.ordinal) }
+    private fun toIntCollection(values: MutableCollection<Enum<*>>): MutableCollection<Int> {
+        val dest = ArrayList<Int>()
+        values.forEach { dest.add(it.ordinal) }
         return dest
     }
 
