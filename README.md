@@ -210,13 +210,13 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 | ENTITY               | [Class\<? extends JdsEntity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)                       | map          | map          |
 | DATE                 | [WritableValue\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)                     | mapDate          | map          |
 | DATE_TIME            | [WritableValue\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)             | mapDateTime          | map          |
-| DOUBLE               | [WritableValue\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                | mapDouble          | map          |
+| DOUBLE               | [WritableValue\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                | mapNumeric          | map          |
 | DURATION             | [WritableValue\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)                       | mapDuration          | map          |
 | ENUM                 | [WritableValue\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                               | mapEnum          | map          |
 | ENUM_COLLECTION      | [Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                                  | mapEnums          | map          |
-| FLOAT                | [WritableValue\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                 | mapFloat          | map          |
-| INT                  | [WritableValue\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | mapInt          | map          |
-| LONG                 | [WritableValue\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                  | mapLong          | map          |
+| FLOAT                | [WritableValue\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                 | mapNumeric          | map          |
+| INT                  | [WritableValue\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | mapNumeric          | map          |
+| LONG                 | [WritableValue\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                  | mapNumeric          | map          |
 | MONTH_DAY            | [WritableValue\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)                       | mapMonthDay          | map          |
 | PERIOD               | [WritableValue\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)                           | mapPeriod          | map          |
 | STRING               | [WritableValue\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/StringProperty.html)            | mapString          | map          |
