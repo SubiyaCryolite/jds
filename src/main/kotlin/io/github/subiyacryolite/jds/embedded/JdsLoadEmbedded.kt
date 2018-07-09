@@ -77,7 +77,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
 
     private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, editVersion: Int, eo: JdsEmbeddedObject) {
         if (fieldId == null) return
-        entity.objectArrayProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+        entity.objectCollections.filter { it.key.fieldEntity.id == fieldId }.forEach {
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
                 val entity = referenceClass.newInstance()//create array element
@@ -88,7 +88,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             }
         }
         //find existing elements
-        entity.objectProperties.filter { it.key.fieldEntity.id == fieldId }.forEach {
+        entity.objectValues.filter { it.key.fieldEntity.id == fieldId }.forEach {
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
                 if (it.value.value == null)

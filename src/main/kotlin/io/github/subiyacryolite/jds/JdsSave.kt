@@ -22,7 +22,10 @@ import io.github.subiyacryolite.jds.events.SaveEventArgument
 import java.sql.Connection
 import java.sql.SQLException
 import java.sql.Timestamp
-import java.time.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -198,11 +201,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveBlobs(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveBlob())
-        jdsEntity.blobProperties.forEach { fieldId, blobProperty ->
+        jdsEntity.blobValues.forEach { fieldId, blobProperty ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setBytes(4, blobProperty.get())
+            upsert.setBytes(4, blobProperty.value)
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -215,7 +218,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveBooleans(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveBoolean())
-        jdsEntity.booleanProperties.forEach { fieldId, entry ->
+        jdsEntity.booleanValues.forEach { fieldId, entry ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
@@ -231,11 +234,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      */
     private fun saveIntegers(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveInteger())
-        jdsEntity.integerProperties.forEach { fieldId, entry ->
+        jdsEntity.integerValues.forEach { fieldId, entry ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            upsert.setObject(4, entry.value?.toInt()) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -247,11 +250,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      */
     private fun saveFloats(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveFloat())
-        jdsEntity.floatProperties.forEach { fieldId, entry ->
+        jdsEntity.floatValues.forEach { fieldId, entry ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            upsert.setObject(4, entry.value?.toFloat()) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -263,11 +266,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      */
     private fun saveDoubles(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDouble())
-        jdsEntity.doubleProperties.forEach { fieldId, entry ->
+        jdsEntity.doubleValues.forEach { fieldId, entry ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            upsert.setObject(4, entry.value?.toDouble()) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -280,11 +283,11 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveLongs(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveLong())
-        jdsEntity.longProperties.forEach { fieldId, entry ->
+        jdsEntity.longValues.forEach { fieldId, entry ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            upsert.setObject(4, entry.value?.toLong()) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
@@ -297,7 +300,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveStrings(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveString())
-        jdsEntity.stringProperties.forEach { fieldId, stringProperty ->
+        jdsEntity.stringValues.forEach { fieldId, stringProperty ->
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
@@ -317,28 +320,28 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
         val upsertYearMonth = regularStatementOrCall(postSaveEventArgument, jdsDb.saveYearMonth())
         val upsertPeriod = regularStatementOrCall(postSaveEventArgument, jdsDb.savePeriod())
         val upsertDuration = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDuration())
-        jdsEntity.monthDayProperties.forEach { fieldId, monthDayProperty ->
+        jdsEntity.monthDayValues.forEach { fieldId, monthDayProperty ->
             upsertMonthDay.setString(1, jdsEntity.overview.uuid)
             upsertMonthDay.setInt(2, jdsEntity.overview.editVersion)
             upsertMonthDay.setLong(3, fieldId)
             upsertMonthDay.setString(4, monthDayProperty.value.toString())
             upsertMonthDay.addBatch()
         }
-        jdsEntity.yearMonthProperties.forEach { fieldId, yearMonthProperty ->
+        jdsEntity.yearMonthValues.forEach { fieldId, yearMonthProperty ->
             upsertYearMonth.setString(1, jdsEntity.overview.uuid)
             upsertYearMonth.setInt(2, jdsEntity.overview.editVersion)
             upsertYearMonth.setLong(3, fieldId)
             upsertYearMonth.setString(4, yearMonthProperty.value.toString())
             upsertYearMonth.addBatch()
         }
-        jdsEntity.periodProperties.forEach { fieldId, periodProperty ->
+        jdsEntity.periodValues.forEach { fieldId, periodProperty ->
             upsertPeriod.setString(1, jdsEntity.overview.uuid)
             upsertPeriod.setInt(2, jdsEntity.overview.editVersion)
             upsertPeriod.setLong(3, fieldId)
             upsertPeriod.setString(4, periodProperty.value.toString())
             upsertPeriod.addBatch()
         }
-        jdsEntity.durationProperties.forEach { fieldId, durationProperty ->
+        jdsEntity.durationValues.forEach { fieldId, durationProperty ->
             upsertDuration.setString(1, jdsEntity.overview.uuid)
             upsertDuration.setInt(2, jdsEntity.overview.editVersion)
             upsertDuration.setLong(3, fieldId)
@@ -356,7 +359,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     private fun saveDatesAndDateTimes(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTime())
         val upsertz = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDate())
-        jdsEntity.localDateTimeProperties.forEach { fieldId, value1 ->
+        jdsEntity.localDateTimeValues.forEach { fieldId, value1 ->
             val localDateTime = value1.value as LocalDateTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
@@ -364,7 +367,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             upsert.setTimestamp(4, if (localDateTime != null) Timestamp.valueOf(localDateTime) else null)
             upsert.addBatch()
         }
-        jdsEntity.localDateProperties.forEach { fieldId, value1 ->
+        jdsEntity.localDateValues.forEach { fieldId, value1 ->
             val localDate = value1.value as LocalDate?
             upsertz.setString(1, jdsEntity.overview.uuid)
             upsertz.setInt(2, jdsEntity.overview.editVersion)
@@ -382,7 +385,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveTimes(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveTime())
-        jdsEntity.localTimeProperties.forEach { fieldId, localTimeProperty ->
+        jdsEntity.localTimeValues.forEach { fieldId, localTimeProperty ->
             val localTime = localTimeProperty.value as LocalTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
@@ -400,7 +403,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveZonedDateTimes(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveZonedDateTime())
-        jdsEntity.zonedDateTimeProperties.forEach { fieldId, value1 ->
+        jdsEntity.zonedDateTimeValues.forEach { fieldId, value1 ->
             val zonedDateTime = value1.value as ZonedDateTime?
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
@@ -450,7 +453,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayDates(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDateTimeCollections())
-        jdsEntity.dateTimeArrayProperties.forEach { fieldId, dateTimeArray ->
+        jdsEntity.dateTimeCollections.forEach { fieldId, dateTimeArray ->
             dateTimeArray.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -469,7 +472,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayFloats(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveFloatCollections())
-        jdsEntity.floatArrayProperties.forEach { fieldId, u ->
+        jdsEntity.floatCollections.forEach { fieldId, u ->
             u.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -488,7 +491,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayIntegers(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveIntegerCollections())
-        jdsEntity.integerArrayProperties.forEach { fieldId, u ->
+        jdsEntity.integerCollections.forEach { fieldId, u ->
             u.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -507,7 +510,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayDoubles(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveDoubleCollections())
-        jdsEntity.doubleArrayProperties.forEach { fieldId, u ->
+        jdsEntity.doubleCollections.forEach { fieldId, u ->
             u.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -526,7 +529,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayLongs(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveLongCollections())
-        jdsEntity.longArrayProperties.forEach { fieldId, u ->
+        jdsEntity.longCollections.forEach { fieldId, u ->
             u.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -545,7 +548,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveArrayStrings(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveStringCollections())
-        jdsEntity.stringArrayProperties.forEach { fieldId, u ->
+        jdsEntity.stringCollections.forEach { fieldId, u ->
             u.forEach { value ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -565,7 +568,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveEnumCollections(jdsEntity: JdsEntity) = try {
         val insert = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumCollections())
-        jdsEntity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
+        jdsEntity.enumCollections.forEach { jdsFieldEnum, u ->
             u.forEach { anEnum ->
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
@@ -575,7 +578,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             }
         }
         val insertString = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumStringCollections())
-        jdsEntity.enumCollectionProperties.forEach { jdsFieldEnum, u ->
+        jdsEntity.enumCollections.forEach { jdsFieldEnum, u ->
             u.forEach { anEnum ->
                 insertString.setString(1, jdsEntity.overview.uuid)
                 insertString.setInt(2, jdsEntity.overview.editVersion)
@@ -595,7 +598,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveObjectArrayBindings(parentEntity: JdsEntity) = try {
         val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
-        parentEntity.objectArrayProperties.forEach { fieldEntity, entityCollection ->
+        parentEntity.objectCollections.forEach { fieldEntity, entityCollection ->
             entityCollection.forEach {
                 updateFieldId.setString(1, parentEntity.overview.uuid)
                 updateFieldId.setInt(2, parentEntity.overview.editVersion)
@@ -616,7 +619,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveObjectBindings(parentEntity: JdsEntity) = try {
         val updateFieldId = regularStatementOrCall(preSaveEventArgument, jdsDb.saveEntityBindings())
-        parentEntity.objectProperties.forEach { fieldEntity, v ->
+        parentEntity.objectValues.forEach { fieldEntity, v ->
             updateFieldId.setString(1, parentEntity.overview.uuid)
             updateFieldId.setInt(2, parentEntity.overview.editVersion)
             updateFieldId.setString(3, v.value.overview.uuid)
