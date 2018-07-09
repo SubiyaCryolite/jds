@@ -28,7 +28,6 @@ class JdsOverview : IJdsOverview, Externalizable {
     override var entityId: Long = 0
     override var uuid: String = UUID.randomUUID().toString()
     override var editVersion: Int = 0
-    override var parent: JdsEntity? = null
 
     @Throws(IOException::class)
     override fun writeExternal(objectOutputStream: ObjectOutput) {

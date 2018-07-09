@@ -578,7 +578,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             }
         }
         val insertString = regularStatementOrCall(postSaveEventArgument, jdsDb.saveEnumStringCollections())
-        jdsEntity.enumCollections.forEach { jdsFieldEnum, u ->
+        jdsEntity.enumStringCollections.forEach { jdsFieldEnum, u ->
             u.forEach { anEnum ->
                 insertString.setString(1, jdsEntity.overview.uuid)
                 insertString.setInt(2, jdsEntity.overview.editVersion)

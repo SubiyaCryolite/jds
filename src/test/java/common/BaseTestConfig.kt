@@ -301,7 +301,7 @@ abstract class BaseTestConfig(val testName: String) {
             FileOutputStream(fileName).use { fos ->
                 ObjectOutputStream(fos).use { oos ->
                     oos.writeObject(objectToSerialize)
-                    println("Serialization of completed: " + objectToSerialize)
+                    println("Serialization of completed: $objectToSerialize")
                 }
             }
         } catch (ioException: IOException) {
@@ -309,7 +309,7 @@ abstract class BaseTestConfig(val testName: String) {
         }
     }
 
-    protected fun <T> deserialize(fileToDeserialize: String?, classBeingDeserialized: Class<out T>): T? {
+    protected fun <T> deserialize(fileToDeserialize: String?, classBeingDeserialized: Class<out T>?): T? {
         if (fileToDeserialize == null) {
             throw IllegalArgumentException("Cannot deserialize from a null filename.")
         }
@@ -321,7 +321,7 @@ abstract class BaseTestConfig(val testName: String) {
             FileInputStream(fileToDeserialize).use { fis ->
                 ObjectInputStream(fis).use { ois ->
                     objectOut = ois.readObject() as T
-                    println("Deserialization of completed: " + objectOut!!)
+                    println("Deserialization completed: $objectOut")
                 }
             }
         } catch (exception: IOException) {

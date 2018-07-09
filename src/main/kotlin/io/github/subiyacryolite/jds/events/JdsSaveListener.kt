@@ -26,7 +26,7 @@ interface JdsSaveListener {
 
     /**
      * This method is called after saving preliminary overview information and after saving all {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity} field values
-     *@param onPostSaveEventArguments the arguments to reference for this invocation
+     *@param saveEventArguments the arguments to reference for this invocation
      */
     fun onPostSave(saveEventArguments: SaveEventArgument)
 }

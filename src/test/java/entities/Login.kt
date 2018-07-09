@@ -13,7 +13,7 @@ class Login : JdsEntity() {
     private val _rights = SimpleListProperty<Rights>(FXCollections.observableArrayList())
 
     init {
-        mapEnums(Enums.RIGHTS, _rights)
+        map(Enums.RIGHTS, _rights)
     }
 
     var rights: MutableList<Rights>
@@ -22,4 +22,8 @@ class Login : JdsEntity() {
             _rights.clear()
             _rights.addAll(value)
         }
+
+    override fun toString(): String {
+        return "Login(rights=$rights)"
+    }
 }

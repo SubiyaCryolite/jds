@@ -525,7 +525,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             while (it.next()) {
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val value = it.getObject("value") //primitives can be null
+                val value = it.getString("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach {
                     it.populateProperties(JdsFieldType.ENUM_STRING_COLLECTION, fieldId, value)

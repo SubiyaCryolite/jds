@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.utility.DeepCopy
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBlobProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -103,7 +104,7 @@ abstract class JdsEntity : IJdsEntity {
     @get:JsonIgnore
     internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
     @get:JsonIgnore
-    internal val enumStringCollections: HashMap<Long, MutableCollection<String>> = LinkedHashMap()
+    internal val enumStringCollections: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
     //objects
     @get:JsonIgnore
     internal val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = LinkedHashMap()
@@ -132,7 +133,7 @@ abstract class JdsEntity : IJdsEntity {
                 field.type != JdsFieldType.INT &&
                 field.type != JdsFieldType.LONG &&
                 field.type != JdsFieldType.FLOAT)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         if (field.type == JdsFieldType.DOUBLE)
             doubleValues[field.id] = property
         if (field.type == JdsFieldType.INT)
@@ -147,7 +148,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapBoolean")
     protected fun map(field: JdsField, property: WritableValue<Boolean?>) {
         if (field.type != JdsFieldType.BOOLEAN)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         booleanValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -155,7 +156,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapString")
     protected fun map(field: JdsField, property: WritableValue<String?>) {
         if (field.type != JdsFieldType.STRING)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         stringValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -163,7 +164,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapDateTime")
     protected fun map(field: JdsField, property: WritableValue<LocalDateTime?>) {
         if (field.type != JdsFieldType.DATE_TIME)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         localDateTimeValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -171,7 +172,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapZonedDateTime")
     protected fun map(field: JdsField, property: WritableValue<ZonedDateTime?>) {
         if (field.type != JdsFieldType.ZONED_DATE_TIME)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         zonedDateTimeValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -179,7 +180,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapDate")
     protected fun map(field: JdsField, property: WritableValue<LocalDate?>) {
         if (field.type != JdsFieldType.DATE)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         localDateValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -187,7 +188,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapTime")
     protected fun map(field: JdsField, property: WritableValue<LocalTime?>) {
         if (field.type != JdsFieldType.TIME)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         localTimeValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -195,7 +196,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapBlob")
     protected fun map(field: JdsField, property: WritableValue<ByteArray?>) {
         if (field.type != JdsFieldType.BLOB)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         blobValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -203,7 +204,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapMonthDay")
     protected fun map(field: JdsField, property: WritableValue<MonthDay?>) {
         if (field.type != JdsFieldType.MONTH_DAY)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         monthDayValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -211,7 +212,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapYearMonth")
     protected fun map(field: JdsField, property: WritableValue<YearMonth?>) {
         if (field.type != JdsFieldType.YEAR_MONTH)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         yearMonthValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -219,7 +220,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapPeriod")
     protected fun map(field: JdsField, property: WritableValue<Period?>) {
         if (field.type != JdsFieldType.PERIOD)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         periodValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -227,7 +228,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapDuration")
     protected fun map(field: JdsField, property: WritableValue<Duration?>) {
         if (field.type != JdsFieldType.DURATION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         durationValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -235,7 +236,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapEnum")
     protected fun <T : Enum<T>> map(field: JdsField, property: WritableValue<T?>) {
         if (field.type != JdsFieldType.ENUM && field.type != JdsFieldType.ENUM_STRING)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         if (field.type == JdsFieldType.ENUM)
             enumProperties[field.id] = property as WritableValue<Enum<*>?>
         else
@@ -248,21 +249,16 @@ abstract class JdsEntity : IJdsEntity {
 
     @JvmName("mapStrings")
     protected fun map(field: JdsField, property: MutableCollection<String>) {
-        if (field.type != JdsFieldType.STRING_COLLECTION && field.type != JdsFieldType.ENUM_STRING_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
-        if (field.type == JdsFieldType.STRING_COLLECTION)
-            stringCollections[field.id] = property
-        else {
-            enumStringCollections[field.id] = property
-            mapEnums(overview.entityId, field.id)
-        }
+        if (field.type != JdsFieldType.STRING_COLLECTION)
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        stringCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
 
     @JvmName("mapDateTimes")
     protected fun map(field: JdsField, property: MutableCollection<LocalDateTime>) {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         dateTimeCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -270,7 +266,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapFloats")
     protected fun map(field: JdsField, property: MutableCollection<Float>) {
         if (field.type != JdsFieldType.FLOAT_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         floatCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -278,7 +274,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapIntegers")
     protected fun map(field: JdsField, property: MutableCollection<Int>) {
         if (field.type != JdsFieldType.INT_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         integerCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -286,7 +282,7 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapDoubles")
     protected fun map(field: JdsField, property: MutableCollection<Double>) {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         doubleCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
@@ -294,16 +290,19 @@ abstract class JdsEntity : IJdsEntity {
     @JvmName("mapLongs")
     protected fun map(field: JdsField, property: MutableCollection<Long>) {
         if (field.type != JdsFieldType.LONG_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         longCollections[field.id] = property
         mapField(overview.entityId, field.id)
     }
 
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(field: JdsField, property: MutableCollection<T>) {
-        if (field.type != JdsFieldType.ENUM_COLLECTION)
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
-        enumCollections[field.id] = property as MutableCollection<Enum<*>>
+        if (field.type != JdsFieldType.ENUM_COLLECTION && field.type != JdsFieldType.ENUM_STRING_COLLECTION)
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        if (field.type == JdsFieldType.ENUM_COLLECTION)
+            enumCollections[field.id] = property as MutableCollection<Enum<*>>
+        else
+            enumStringCollections[field.id] = property as MutableCollection<Enum<*>>
         mapField(overview.entityId, field.id)
         mapEnums(overview.entityId, field.id)
     }
@@ -312,7 +311,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEnum
      * @param properties
      */
-    protected fun <T : Enum<T>> mapEnums(fieldEnum: JdsFieldEnum<T>, properties: MutableCollection<T>) = map(fieldEnum.field, properties)
+    protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, properties: MutableCollection<T>) = map(fieldEnum.field, properties)
 
     /**
      * @param entity
@@ -351,167 +350,90 @@ abstract class JdsEntity : IJdsEntity {
      * @param <T>    A valid JDSEntity
     </T> */
     fun <T : JdsEntity> copy(source: T) {
-        copyArrayValues(source)
-        copyPropertyValues(source)
-        copyOverviewValues(source)
-        copyEnumAndEnumArrayValues(source)
-        copyObjectAndObjectArrayValues(source)
-    }
+        this.overview.uuid = source.overview.uuid
+        this.overview.editVersion = source.overview.editVersion
+        this.overview.entityId = source.overview.entityId
 
-    /**
-     * Copy all header overview information
-     *
-     * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity
-    </T> */
-    private fun <T : IJdsEntity> copyOverviewValues(source: T) {
-        overview.uuid = source.overview.uuid
-        overview.editVersion = source.overview.editVersion
-        overview.entityId = source.overview.entityId
-    }
+        localDateTimeValues.clear()
+        localDateTimeValues.putAll(DeepCopy.clone(source.localDateTimeValues)!!)
 
-    /**
-     * Copy all property values
-     *
-     * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity A valid JDSEntity
-    </T> */
-    private fun <T : JdsEntity> copyPropertyValues(source: T) {
-        val dest = this
-        source.booleanValues.entries.forEach { dest.booleanValues[it.key] = it.value }
-        source.localDateTimeValues.entries.forEach { dest.localDateTimeValues[it.key] = it.value }
-        source.zonedDateTimeValues.entries.forEach { dest.zonedDateTimeValues[it.key] = it.value }
-        source.localTimeValues.entries.forEach { dest.localTimeValues[it.key] = it.value }
-        source.localDateValues.entries.forEach { dest.localDateValues[it.key] = it.value }
-        source.stringValues.entries.forEach { dest.stringValues[it.key] = it.value }
-        source.floatValues.entries.forEach { dest.floatValues[it.key] = it.value }
-        source.doubleValues.entries.forEach { dest.doubleValues[it.key] = it.value }
-        source.longValues.entries.forEach { dest.longValues[it.key] = it.value }
-        source.integerValues.entries.forEach { dest.integerValues[it.key] = it.value }
-        source.blobValues.entries.forEach { dest.blobValues[it.key] = it.value }
-        source.durationValues.entries.forEach { dest.durationValues[it.key] = it.value }
-        source.periodValues.entries.forEach { dest.periodValues[it.key] = it.value }
-        source.yearMonthValues.entries.forEach { dest.yearMonthValues[it.key] = it.value }
-        source.monthDayValues.entries.forEach { dest.monthDayValues[it.key] = it.value }
-    }
+        zonedDateTimeValues.clear()
+        zonedDateTimeValues.putAll(DeepCopy.clone(source.zonedDateTimeValues)!!)
 
-    /**
-     * Copy all property array values
-     *
-     * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity A valid JDSEntity
-    </T> */
-    private fun <T : JdsEntity> copyArrayValues(source: T) {
-        val dest = this
-        source.stringCollections.entries.forEach {
-            if (dest.stringCollections.containsKey(it.key)) {
-                val entry = dest.stringCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-        source.dateTimeCollections.entries.forEach {
-            if (dest.dateTimeCollections.containsKey(it.key)) {
-                val entry = dest.dateTimeCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-        source.floatCollections.entries.forEach {
-            if (dest.floatCollections.containsKey(it.key)) {
-                val entry = dest.floatCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-        source.doubleCollections.entries.forEach {
-            if (dest.doubleCollections.containsKey(it.key)) {
-                val entry = dest.doubleCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-        source.longCollections.entries.forEach {
-            if (dest.longCollections.containsKey(it.key)) {
-                val entry = dest.longCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-        source.integerCollections.entries.forEach {
-            if (dest.integerCollections.containsKey(it.key)) {
-                val entry = dest.integerCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-    }
+        localDateValues.clear()
+        localDateValues.putAll(DeepCopy.clone(source.localDateValues)!!)
 
-    /**
-     * Copy over object and object array values
-     *
-     * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity
-    </T> */
-    private fun <T : JdsEntity> copyObjectAndObjectArrayValues(source: T) {
-        val dest = this
-        source.objectValues.entries.forEach {
-            if (dest.objectValues.containsKey(it.key)) {
-                dest.objectValues[it.key]?.set(it.value.get())
-            }
-        }
+        localTimeValues.clear()
+        localTimeValues.putAll(DeepCopy.clone(source.localTimeValues)!!)
 
-        source.objectCollections.entries.forEach {
-            if (dest.objectCollections.containsKey(it.key)) {
-                val entry = dest.objectCollections[it.key]
-                entry?.clear()
-                entry?.addAll(it.value)
-            }
-        }
-    }
+        monthDayValues.clear()
+        monthDayValues.putAll(DeepCopy.clone(source.monthDayValues)!!)
 
-    /**
-     * Copy over object enum values
-     *
-     * @param source The entity to copy values from
-     * @param <T> A valid JDSEntity
-    </T> */
-    private fun <T : JdsEntity> copyEnumAndEnumArrayValues(source: T) {
-        val dest = this
-        source.enumCollections.entries.forEach {
-            if (dest.enumCollections.containsKey(it.key)) {
-                val dstEntry = dest.enumCollections[it.key]
-                dstEntry?.clear()
-                val itz = it.value.iterator()
-                while (itz.hasNext()) {
-                    val nxt = itz.next()
-                    dstEntry?.add(nxt)
-                }
-            }
-        }
-        source.enumStringCollections.entries.forEach {
-            if (dest.enumStringCollections.containsKey(it.key)) {
-                val dstEntry = dest.enumStringCollections[it.key]
-                dstEntry?.clear()
-                val itz = it.value.iterator()
-                while (itz.hasNext()) {
-                    val nxt = itz.next()
-                    dstEntry?.add(nxt)
-                }
-            }
-        }
-        source.enumProperties.entries.forEach {
-            if (dest.enumProperties.containsKey(it.key)) {
-                val dstEntry = dest.enumProperties[it.key]
-                dstEntry?.value = it.value.value
-            }
-        }
-        source.enumStringProperties.entries.forEach {
-            if (dest.enumStringProperties.containsKey(it.key)) {
-                val dstEntry = dest.enumStringProperties[it.key]
-                dstEntry?.value = it.value.value
-            }
-        }
+        yearMonthValues.clear()
+        yearMonthValues.putAll(DeepCopy.clone(source.yearMonthValues)!!)
+
+        periodValues.clear()
+        periodValues.putAll(DeepCopy.clone(source.periodValues)!!)
+
+        durationValues.clear()
+        durationValues.putAll(DeepCopy.clone(source.durationValues)!!)
+
+        stringValues.clear()
+        stringValues.putAll(DeepCopy.clone(source.stringValues)!!)
+
+        booleanValues.clear()
+        booleanValues.putAll(DeepCopy.clone(source.booleanValues)!!)
+
+        floatValues.clear()
+        floatValues.putAll(DeepCopy.clone(source.floatValues)!!)
+
+        doubleValues.clear()
+        doubleValues.putAll(DeepCopy.clone(source.doubleValues)!!)
+
+        longValues.clear()
+        longValues.putAll(DeepCopy.clone(source.longValues)!!)
+
+        integerValues.clear()
+        integerValues.putAll(DeepCopy.clone(source.integerValues)!!)
+
+        objectCollections.clear()
+        objectCollections.putAll(DeepCopy.clone(source.objectCollections)!!)
+
+        stringCollections.clear()
+        stringCollections.putAll(DeepCopy.clone(source.stringCollections)!!)
+
+        dateTimeCollections.clear()
+        dateTimeCollections.putAll(DeepCopy.clone(source.dateTimeCollections)!!)
+
+        floatCollections.clear()
+        floatCollections.putAll(DeepCopy.clone(source.floatCollections)!!)
+
+        doubleCollections.clear()
+        doubleCollections.putAll(DeepCopy.clone(source.doubleCollections)!!)
+
+        longCollections.clear()
+        longCollections.putAll(DeepCopy.clone(source.longCollections)!!)
+
+        integerCollections.clear()
+        integerCollections.putAll(DeepCopy.clone(source.integerCollections)!!)
+
+        enumProperties.clear()
+        enumProperties.putAll(DeepCopy.clone(source.enumProperties)!!)
+
+        enumStringProperties.clear()
+        enumStringProperties.putAll(DeepCopy.clone(source.enumStringProperties)!!)
+
+        enumCollections.clear()
+        enumCollections.putAll(DeepCopy.clone(source.enumCollections)!!)
+
+        enumStringCollections.clear()
+        enumStringCollections.putAll(DeepCopy.clone(source.enumStringCollections)!!)
+
+        objectValues.clear()
+        objectValues.putAll(DeepCopy.clone(source.objectValues)!!)
+
+        blobValues.clear()
+        blobValues.putAll(DeepCopy.clone(source.blobValues)!!)
     }
 
     @Throws(IOException::class)
@@ -525,31 +447,34 @@ abstract class JdsEntity : IJdsEntity {
         objectOutputStream.writeObject(serializeTemporal(zonedDateTimeValues))
         objectOutputStream.writeObject(serializeTemporal(localDateValues))
         objectOutputStream.writeObject(serializeTemporal(localTimeValues))
-        objectOutputStream.writeObject(monthDayValues)
-        objectOutputStream.writeObject(yearMonthValues)
-        objectOutputStream.writeObject(periodValues)
-        objectOutputStream.writeObject(durationValues)
+        objectOutputStream.writeObject(serializeMonthDay(monthDayValues))
+        objectOutputStream.writeObject(serializeTemporal(yearMonthValues))
+        objectOutputStream.writeObject(serializePeriod(periodValues))
+        objectOutputStream.writeObject(serializeDuration(durationValues))
         //strings
         objectOutputStream.writeObject(serializableString(stringValues))
+        //boolean
+        objectOutputStream.writeObject(serializeBoolean(booleanValues))
         //numeric
-        objectOutputStream.writeObject(floatValues)
-        objectOutputStream.writeObject(doubleValues)
-        objectOutputStream.writeObject(booleanValues)
-        objectOutputStream.writeObject(longValues)
-        objectOutputStream.writeObject(integerValues)
+        objectOutputStream.writeObject(serializeNumber(floatValues))
+        objectOutputStream.writeObject(serializeNumber(doubleValues))
+        objectOutputStream.writeObject(serializeNumber(longValues))
+        objectOutputStream.writeObject(serializeNumber(integerValues))
         //blobs
         objectOutputStream.writeObject(serializeBlobs(blobValues))
         //arrays
         objectOutputStream.writeObject(serializeObjects(objectCollections))
         objectOutputStream.writeObject(serializeStrings(stringCollections))
         objectOutputStream.writeObject(serializeDateTimes(dateTimeCollections))
-        objectOutputStream.writeObject(serializeFloats(floatCollections))
-        objectOutputStream.writeObject(serializeDoubles(doubleCollections))
-        objectOutputStream.writeObject(serializeLongs(longCollections))
-        objectOutputStream.writeObject(serializeIntegers(integerCollections))
+        objectOutputStream.writeObject(serializeNumbers(floatCollections))
+        objectOutputStream.writeObject(serializeNumbers(doubleCollections))
+        objectOutputStream.writeObject(serializeNumbers(longCollections))
+        objectOutputStream.writeObject(serializeNumbers(integerCollections))
         //enumProperties
         objectOutputStream.writeObject(serializeEnums(enumProperties))
+        objectOutputStream.writeObject(serializeEnums(enumStringProperties))
         objectOutputStream.writeObject(serializeEnumCollections(enumCollections))
+        objectOutputStream.writeObject(serializeEnumCollections(enumStringCollections))
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
@@ -559,25 +484,25 @@ abstract class JdsEntity : IJdsEntity {
         //objects
         putObject(objectValues, objectInputStream.readObject() as Map<JdsFieldEntity<*>, JdsEntity>)
         //time constructs
-        putTemporal(localDateTimeValues, objectInputStream.readObject() as Map<Long, WritableValue<out Temporal?>>)
-        putTemporal(zonedDateTimeValues, objectInputStream.readObject() as Map<Long, WritableValue<out Temporal?>>)
-        putTemporal(localDateValues, objectInputStream.readObject() as Map<Long, WritableValue<out Temporal?>>)
-        putTemporal(localTimeValues, objectInputStream.readObject() as Map<Long, WritableValue<out Temporal?>>)
+        putTemporal(localDateTimeValues, objectInputStream.readObject() as Map<Long, Temporal?>)
+        putTemporal(zonedDateTimeValues, objectInputStream.readObject() as Map<Long, Temporal?>)
+        putTemporal(localDateValues, objectInputStream.readObject() as Map<Long, Temporal?>)
+        putTemporal(localTimeValues, objectInputStream.readObject() as Map<Long, Temporal?>)
         putMonthDays(monthDayValues, objectInputStream.readObject() as Map<Long, MonthDay?>)
-        putTemporal(yearMonthValues, objectInputStream.readObject() as Map<Long, WritableValue<out Temporal?>>)
+        putTemporal(yearMonthValues, objectInputStream.readObject() as Map<Long, Temporal?>)
         putPeriods(periodValues, objectInputStream.readObject() as Map<Long, Period?>)
         putDurations(durationValues, objectInputStream.readObject() as Map<Long, Duration?>)
         //string
         putString(stringValues, objectInputStream.readObject() as Map<Long, String?>)
         //boolean
-        putBoolean(booleanValues, objectInputStream.readObject() as Map<Long, WritableValue<Boolean?>>)
+        putBoolean(booleanValues, objectInputStream.readObject() as Map<Long, Boolean?>)
         //numeric
-        putNumber(floatValues, objectInputStream.readObject() as Map<Long, WritableValue<out Number?>>)
-        putNumber(doubleValues, objectInputStream.readObject() as Map<Long, WritableValue<out Number?>>)
-        putNumber(longValues, objectInputStream.readObject() as Map<Long, WritableValue<out Number?>>)
-        putNumber(integerValues, objectInputStream.readObject() as Map<Long, WritableValue<out Number?>>)
+        putNumber(floatValues, objectInputStream.readObject() as Map<Long, Number?>)
+        putNumber(doubleValues, objectInputStream.readObject() as Map<Long, Number?>)
+        putNumber(longValues, objectInputStream.readObject() as Map<Long, Number?>)
+        putNumber(integerValues, objectInputStream.readObject() as Map<Long, Number?>)
         //blobs
-        putBlobs(blobValues, objectInputStream.readObject() as Map<Long, WritableValue<ByteArray?>>)
+        putBlobs(blobValues, objectInputStream.readObject() as Map<Long, ByteArray?>)
         //arrays
         putObjects(objectCollections, objectInputStream.readObject() as Map<JdsFieldEntity<*>, List<JdsEntity>>)
         putStrings(stringCollections, objectInputStream.readObject() as Map<Long, List<String>>)
@@ -588,7 +513,9 @@ abstract class JdsEntity : IJdsEntity {
         putIntegers(integerCollections, objectInputStream.readObject() as Map<Long, List<Int>>)
         //enumProperties
         putEnum(enumProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
+        putEnum(enumStringProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
         putEnums(enumCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
+        putEnums(enumStringCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
     }
 
     private fun serializeEnums(input: Map<Long, WritableValue<Enum<*>?>>): Map<Long, Enum<*>?> =
@@ -610,31 +537,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeIntegers(input: Map<Long, Collection<Int?>>): Map<Long, List<Int?>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeLongs(input: Map<Long, Collection<Long?>>): Map<Long, List<Long?>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeDoubles(input: Map<Long, Collection<Double?>>): Map<Long, List<Double?>> =
-            input.entries.associateBy({ it.key }, { ArrayList(it.value) })
-
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
-    private fun serializeFloats(input: Map<Long, Collection<Float?>>): Map<Long, List<Float?>> =
+    private fun serializeNumbers(input: Map<Long, Collection<out Number?>>): Map<Long, List<out Number?>> =
             input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
@@ -677,12 +580,22 @@ abstract class JdsEntity : IJdsEntity {
     private fun serializeTemporal(input: Map<Long, WritableValue<out Temporal?>>): Map<Long, Temporal?> =
             input.entries.associateBy({ it.key }, { it.value.value })
 
-    /**
-     * Create a map that can be serialized
-     * @param input an unserializable map
-     * @return A serialisable map
-     */
+    private fun serializeMonthDay(input: Map<Long, WritableValue<out MonthDay?>>): Map<Long, MonthDay?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
+
+    private fun serializePeriod(input: Map<Long, WritableValue<out Period?>>): Map<Long, Period?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
+
+    private fun serializeDuration(input: Map<Long, WritableValue<out Duration?>>): Map<Long, Duration?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
+
     private fun serializableString(input: Map<Long, WritableValue<String?>>): Map<Long, String?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
+
+    private fun serializeNumber(input: Map<Long, WritableValue<out Number?>>): Map<Long, Number?> =
+            input.entries.associateBy({ it.key }, { it.value.value })
+
+    private fun serializeBoolean(input: Map<Long, WritableValue<out Boolean?>>): Map<Long, Boolean?> =
             input.entries.associateBy({ it.key }, { it.value.value })
 
     private fun putDurations(destination: HashMap<Long, WritableValue<Duration?>>, source: Map<Long, Duration?>) =
@@ -721,20 +634,20 @@ abstract class JdsEntity : IJdsEntity {
     private fun putIntegers(destination: Map<Long, MutableCollection<Int>>, source: Map<Long, List<Int>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putBlobs(destination: MutableMap<Long, WritableValue<ByteArray?>>, source: Map<Long, WritableValue<ByteArray?>>) =
-            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
+    private fun putBlobs(destination: MutableMap<Long, WritableValue<ByteArray?>>, source: Map<Long, ByteArray?>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
-    private fun putBoolean(destination: MutableMap<Long, WritableValue<Boolean?>>, source: Map<Long, WritableValue<Boolean?>>) =
-            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
+    private fun putBoolean(destination: MutableMap<Long, WritableValue<Boolean?>>, source: Map<Long, Boolean?>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
     private fun putObject(destination: Map<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>, source: Map<JdsFieldEntity<*>, JdsEntity>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.set(entry.value) }
 
-    private fun putNumber(destination: MutableMap<Long, WritableValue<out Number?>>, source: Map<Long, WritableValue<out Number?>>) =
-            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
+    private fun putNumber(destination: MutableMap<Long, WritableValue<out Number?>>, source: Map<Long, Number?>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
-    private fun putTemporal(destination: MutableMap<Long, WritableValue<out Temporal?>>, source: Map<Long, WritableValue<out Temporal?>>) =
-            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key] = entry.value }
+    private fun putTemporal(destination: MutableMap<Long, WritableValue<out Temporal?>>, source: Map<Long, Temporal?>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
     private fun putString(destination: Map<Long, WritableValue<String?>>, source: Map<Long, String?>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
@@ -782,7 +695,7 @@ abstract class JdsEntity : IJdsEntity {
         enumProperties.entries.forEach { embeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
         enumStringProperties.entries.forEach { embeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value.toString())) }
         enumCollections.entries.forEach { embeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
-        enumStringCollections.entries.forEach { embeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, it.value)) }
+        enumStringCollections.entries.forEach { embeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, toStringCollection(it.value))) }
         //==============================================
         //ARRAYS
         //==============================================
@@ -837,6 +750,12 @@ abstract class JdsEntity : IJdsEntity {
         return dest
     }
 
+    private fun toStringCollection(values: MutableCollection<Enum<*>>): MutableCollection<String> {
+        val dest = ArrayList<String>()
+        values.forEach { dest.add(it.toString()) }
+        return dest
+    }
+
     /**
      * @param fieldType
      * @param fieldId
@@ -885,7 +804,7 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.ENUM -> enumProperties.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null)
-                    it.value?.value = (when (value) {
+                    it.value.value = (when (value) {
                         is BigDecimal -> fieldEnum.valueOf(value.intValueExact())
                         else -> fieldEnum.valueOf(value as Int)
                     })
@@ -912,7 +831,16 @@ abstract class JdsEntity : IJdsEntity {
                 }
             }
 
-            JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollections[fieldId]?.add(value as String)
+            JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollections.filter { it.key == fieldId }.forEach {
+                val fieldEnum = JdsFieldEnum.enums[it.key]
+                if (fieldEnum != null) {
+                    val enumStr = value.toString()
+                    val enumVal = fieldEnum.valueOf(enumStr)
+                    if (enumVal != null) {
+                        it.value.add(enumVal)
+                    }
+                }
+            }
 
             JdsFieldType.STRING -> stringValues[fieldId]?.value = (value as String?)
 
