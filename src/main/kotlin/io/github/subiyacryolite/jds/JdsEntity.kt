@@ -898,7 +898,7 @@ abstract class JdsEntity : IJdsEntity {
         when (fieldType) {
 
             JdsFieldType.STRING -> if (!stringValues.containsKey(fieldId))
-                stringValues[fieldId] = SimpleStringProperty("")
+                stringValues[fieldId] = SimpleStringProperty(value.toString())
 
             JdsFieldType.DOUBLE_COLLECTION -> if (!doubleCollections.containsKey(fieldId))
                 doubleCollections[fieldId] = ArrayList()

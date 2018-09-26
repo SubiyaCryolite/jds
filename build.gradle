@@ -28,7 +28,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.16"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.17"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
     }
 }
@@ -43,20 +43,20 @@ repositories {
 dependencies {
     implementation "org.openjfx:javafx-base:11:win"
     /*We specify win though in reality all we care about is JavaFX bean classes. There are no OS dependencies*/
-    compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
-    compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
-    testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
-    testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-    testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
-    testCompile "org.xerial:sqlite-jdbc:3.16.1"
-    testCompile "com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
-    testCompile "org.postgresql:postgresql:42.2.1"
-    testCompile "mysql:mysql-connector-java:6.0.6"
-    testCompile "org.mariadb.jdbc:mariadb-java-client:2.2.1"
-    testCompile "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
-    testCompile "org.junit.jupiter:junit-jupiter-api:5.0.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    testImplementation"org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
+    testImplementation"com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testImplementation"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    testImplementation"com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonVersion}"
+    testImplementation"org.xerial:sqlite-jdbc:3.16.1"
+    testImplementation"com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8"
+    testImplementation"org.postgresql:postgresql:42.2.1"
+    testImplementation"mysql:mysql-connector-java:6.0.6"
+    testImplementation"org.mariadb.jdbc:mariadb-java-client:2.2.1"
+    testImplementation"com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
+    testImplementation"org.junit.jupiter:junit-jupiter-api:5.0.0"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:5.0.0"
 }
 
@@ -77,7 +77,7 @@ test {
 }
 
 dokka {
-    outputFormat = "javadoc"
+    outputFormat = "html"
     outputDirectory = "$buildDir/javadoc"
 }
 

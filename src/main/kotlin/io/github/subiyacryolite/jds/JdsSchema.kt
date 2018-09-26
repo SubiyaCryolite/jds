@@ -76,7 +76,6 @@ object JdsSchema {
      * @param max
      * @return
      */
-    @JvmOverloads
     private fun generateColumn(jdsDb: IJdsDb, field: JdsField, max: Int = 0): String {
         val columnName = field.name
         val columnType = getDbDataType(jdsDb, field.type, max)
