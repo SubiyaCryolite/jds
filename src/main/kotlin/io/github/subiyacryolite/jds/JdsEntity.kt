@@ -22,7 +22,7 @@ import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBlobProperty
+import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.WritableValue

@@ -13,7 +13,9 @@
  */
 package io.github.subiyacryolite.jds
 
-import javafx.beans.property.*
+import io.github.subiyacryolite.jds.beans.property.BlobProperty
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.StringProperty
 import javafx.beans.value.WritableValue
 import java.time.Duration
 import java.time.LocalDateTime

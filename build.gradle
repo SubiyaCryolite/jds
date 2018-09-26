@@ -5,22 +5,22 @@ apply plugin: "kotlin"
 apply plugin: "org.jetbrains.dokka"
 apply plugin: "io.codearte.nexus-staging"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.9
+targetCompatibility = 1.9
 
 group = "io.github.subiyacryolite"
-version = "10.0.8-SNAPSHOT"
+version = "10.0.9-SNAPSHOT"
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-project.ext.jacksonVersion = "2.9.5"
-project.ext.kotlinVersion = "1.2.51"
+project.ext.jacksonVersion = "2.9.7"
+project.ext.kotlinVersion = "1.2.71"
 
 buildscript {
 
-    project.ext.kotlinVersion = "1.2.51"
+    project.ext.kotlinVersion = "1.2.71"
 
     repositories {
         mavenCentral()
@@ -41,9 +41,11 @@ repositories {
 }
 
 dependencies {
+    compileOnly files('libs/javafx.base.jar')
     compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    testCompile files('libs/javafx.base.jar')
     testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"

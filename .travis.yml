@@ -1,14 +1,14 @@
 language: java
-jdk: oraclejdk8
+jdk: oraclejdk10 #Oracle JDK has JavaFX bundled in version 10 and prior. JavaFX removed from version 11 and above
 install: true
 group: stable
 dist: precise
 os: linux
 branches:
   only:
-    - master
+  - master
 cache:
   directories:
   - $HOME/.gradle
 before_install:
- - chmod +x gradlew
+- chmod +x gradlew

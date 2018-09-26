@@ -5,7 +5,7 @@ import constants.Fields
 import constants.PrimaryAddress
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
-import javafx.beans.property.NullableIntegerProperty
+import io.github.subiyacryolite.jds.beans.property.NullableIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.LocalTime

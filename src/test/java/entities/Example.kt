@@ -3,6 +3,8 @@ package entities
 import constants.Fields
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.NullableIntegerProperty
+import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
 import io.github.subiyacryolite.jds.events.*
 import javafx.beans.property.*
 import java.time.LocalDate

@@ -5,12 +5,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.DateTimeFormatter
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
-import javax.crypto.spec.IvParameterSpec
-import java.util.Base64.getEncoder
-import com.sun.deploy.util.Base64Wrapper.encodeToString
-import java.util.*
 
 
 class MD5Hash {
@@ -64,11 +58,11 @@ class MD5Hash {
         println("=================================================")
         println("Final output = $finalOutput")
 
-        var v = finalOutput.subSequence(0, 8)
-        var i = finalOutput.subSequence(8, 16)
-        var m = finalOutput.subSequence(16, 24)
-        var h = finalOutput.subSequence(24, 56)
-        var b = finalOutput.subSequence(56, finalOutput.length - 1)
+        val v = finalOutput.subSequence(0, 8)
+        val i = finalOutput.subSequence(8, 16)
+        val m = finalOutput.subSequence(16, 24)
+        val h = finalOutput.subSequence(24, 56)
+        val b = finalOutput.subSequence(56, finalOutput.length - 1)
 
         println("=================================================")
         println("Version = $v")
