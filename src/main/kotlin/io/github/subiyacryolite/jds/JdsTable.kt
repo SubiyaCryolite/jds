@@ -82,7 +82,7 @@ open class JdsTable() : Serializable {
             }
             entities.add(entityAnnotation.id)
             if (registerFields) {
-                val entity = entityClass.newInstance()
+                val entity = entityClass.getDeclaredConstructor().newInstance()
                 entity.registerFields(this)
             }
         }

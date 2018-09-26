@@ -24,61 +24,54 @@ import java.util.*
 abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, tableName.toUpperCase())
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return 0
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?"
         try {
             connection.prepareStatement(sql).use {
                 it.setString(1, viewName.toUpperCase())
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return 0
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?"
         try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, procedureName.toUpperCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
+            connection.prepareStatement(sql).use { preparedStatement ->
+                preparedStatement.setString(1, procedureName.toUpperCase())
+                preparedStatement.executeQuery().use { resultSet ->
+                    while (resultSet.next())
+                        return resultSet.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return 0
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
         try {
             NamedPreparedStatement(connection, sql).use {
@@ -86,14 +79,13 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
                 it.setString("columnName", columnName.toUpperCase())
                 it.executeQuery().use {
                     while (it.next())
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                 }
             }
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return 0
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -223,12 +215,12 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
         if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
-            val comparisonColumns = StringJoiner(", ")
+            val updateColumns = StringJoiner(", ")
             columns.forEach { column, _ ->
                 if (!uniqueColumns.contains(column)) //dont update unique columns
-                    comparisonColumns.add("$column = p_$column")
+                    updateColumns.add("$column = p_$column")
             }
-            sqlBuilder.append(comparisonColumns)
+            sqlBuilder.append(updateColumns)
         }
         sqlBuilder.append("\t\t\t;\n")
         sqlBuilder.append("\t\tEND $procedureName;")

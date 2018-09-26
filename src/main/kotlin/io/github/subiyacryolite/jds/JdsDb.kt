@@ -187,7 +187,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.ENTITY_LIVE_VERSION -> executeSqlFromString(connection, createEntityLiveVersionTable())
             JdsComponent.ENTITY_OVERVIEW -> {
                 createRefEntityOverview(connection)
-                createIndexes(connection)
             }
             JdsComponent.REF_ENTITIES -> createStoreEntities(connection)
             JdsComponent.REF_ENTITY_ENUMS -> createBindEntityEnums(connection)
@@ -208,7 +207,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createStoreDoubleCollection())
             JdsComponent.STORE_DURATION -> executeSqlFromString(connection, createStoreDuration())
             JdsComponent.STORE_ENUM -> executeSqlFromString(connection, createStoreEnum())
-            JdsComponent.STORE_ENUM_STRING-> executeSqlFromString(connection, createStoreEnumString())
+            JdsComponent.STORE_ENUM_STRING -> executeSqlFromString(connection, createStoreEnumString())
             JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
             JdsComponent.STORE_ENUM_STRING_COLLECTION -> executeSqlFromString(connection, createStoreEnumStringCollection())
             JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
@@ -224,9 +223,9 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.STORE_TIME -> executeSqlFromString(connection, createStoreTime())
             JdsComponent.STORE_YEAR_MONTH -> executeSqlFromString(connection, createStoreYearMonth())
             JdsComponent.STORE_ZONED_DATE_TIME -> executeSqlFromString(connection, createStoreZonedDateTime())
-        /********************************************************
-         * Directives that create stored procedures follow below
-         ********************************************************/
+            /********************************************************
+             * Directives that create stored procedures follow below
+             ********************************************************/
             JdsComponent.POP_ENTITY_BINDING -> executeSqlFromString(connection, createPopJdsEntityBinding())
             JdsComponent.POP_ENTITY_LIVE_VERSION -> executeSqlFromString(connection, createPopEntityLiveVersion())
             JdsComponent.POP_ENTITY_OVERVIEW -> executeSqlFromString(connection, createPopJdsEntityOverview())
@@ -267,22 +266,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         }
     }
 
-    fun createIndexes(connection: Connection) = try {
-        //executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "uuid, edit_version", "jds_entity_overview_ix_uuid"))
-        //executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_composite_key", "jds_entity_overview_ix_parent_composite_key"))
-        //executeSqlFromString(connection, getDbCreateIndexSyntax("jds_entity_overview", "parent_uuid", "jds_entity_overview_ix_parent_uuid"))
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
-    }
-
-    fun dropIndexes(connection: Connection) = try {
-        //connection.prepareStatement("DROP INDEX jds_entity_overview_ix_uuid").use { it.executeUpdate() }
-        //connection.prepareStatement("DROP INDEX jds_entity_overview_ix_parent_composite_key").use { it.executeUpdate() }
-        //connection.prepareStatement("DROP INDEX jds_entity_overview_ix_parent_uuid").use { it.executeUpdate() }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
-    }
-
     override fun doesTableExist(connection: Connection, tableName: String): Boolean {
         val answer = tableExists(connection, tableName)
         return answer == 1
@@ -308,8 +291,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         return answer == 1
     }
 
-    internal fun columnExistsCommonImpl(connection: Connection, tableName: String, columnName: String, toReturn: Int, sql: String): Int {
-        var toReturn = toReturn
+    internal fun columnExistsCommonImpl(connection: Connection, tableName: String, columnName: String, sql: String): Int {
         try {
             NamedPreparedStatement(connection, sql).use {
                 it.setString("tableName", tableName)
@@ -317,15 +299,14 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
                 it.setString("tableCatalog", connection.catalog)
                 it.executeQuery().use {
                     while (it.next()) {
-                        toReturn = it.getInt("Result")
+                        return it.getInt("Result")
                     }
                 }
             }
         } catch (ex: Exception) {
-            toReturn = 0
             ex.printStackTrace(System.err)
         }
-        return toReturn
+        return 0
     }
 
     /**
@@ -449,9 +430,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @param procedureName the procedure to look up
      * @return 1 if the specified procedure exists in the database
      */
-    open fun procedureExists(connection: Connection, procedureName: String): Int {
-        return 0
-    }
+    open fun procedureExists(connection: Connection, procedureName: String): Int = 0
 
     /**
      * Internal checks to see if the specified view exists in the database
@@ -460,9 +439,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @param viewName the view to look up
      * @return 1 if the specified procedure exists in the database
      */
-    open fun viewExists(connection: Connection, viewName: String): Int {
-        return 0
-    }
+    open fun viewExists(connection: Connection, viewName: String): Int = 0
 
     /**
      * Internal checks to see if the specified trigger exists in the database
@@ -471,9 +448,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @param triggerName the trigger to look up
      * @return 1 if the specified trigger exists in the database
      */
-    open fun triggerExists(connection: Connection, triggerName: String): Int {
-        return 0
-    }
+    open fun triggerExists(connection: Connection, triggerName: String): Int = 0
 
     /**
      * Internal checks to see if the specified index exists in the database
@@ -482,9 +457,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @param indexName the trigger to look up
      * @return 1 if the specified index exists in the database
      */
-    fun indexExists(connection: Connection, indexName: String): Int {
-        return 0
-    }
+    fun indexExists(connection: Connection, indexName: String): Int = 0
 
     /**
      * Internal checks to see if the specified column exists in the database
@@ -624,7 +597,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
                     connection.use { connection ->
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
-                        var jdsEntity = entity.newInstance()
+                        var jdsEntity = entity.getDeclaredConstructor().newInstance()
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         JdsExtensions.determineParents(entity, parentEntities)
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.caption, entityAnnotation.description)

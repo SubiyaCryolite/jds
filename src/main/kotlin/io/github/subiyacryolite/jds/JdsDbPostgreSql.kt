@@ -80,10 +80,8 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_CATALOG = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
-        toReturn = columnExistsCommonImpl(connection, tableName.toLowerCase(), columnName.toLowerCase(), toReturn, sql)
-        return toReturn
+        return  columnExistsCommonImpl(connection, tableName.toLowerCase(), columnName.toLowerCase(),  sql)
     }
 
     override fun createStoreEntities(connection: Connection) {

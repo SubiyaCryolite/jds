@@ -13,10 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.enums.JdsComponent
-import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-
 import java.sql.Connection
 import java.util.*
 
@@ -113,10 +110,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = :tableCatalog and TABLE_NAME = :tableName and COLUMN_NAME = :columnName"
-        toReturn = columnExistsCommonImpl(connection, tableName, columnName, toReturn, sql)
-        return toReturn
+        return columnExistsCommonImpl(connection, tableName, columnName, sql)
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -182,7 +177,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         return "INTEGER"
     }
 
-    override fun getNativeDataTypeDate(): String{
+    override fun getNativeDataTypeDate(): String {
         return "DATE"
     }
 
@@ -258,12 +253,12 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
         if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
-            val comparisonColumns = StringJoiner(", ")
+            val updateColumns = StringJoiner(", ")
             columns.forEach { column, _ ->
                 if (!uniqueColumns.contains(column)) //dont update unique columns
-                    comparisonColumns.add("dest.$column = src.$column")
+                    updateColumns.add("dest.$column = src.$column")
             }
-            sqlBuilder.append(comparisonColumns)
+            sqlBuilder.append(updateColumns)
         }
         sqlBuilder.append("\t\t\t;\n")
         sqlBuilder.append("\t\tEND")

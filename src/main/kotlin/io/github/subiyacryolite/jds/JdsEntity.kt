@@ -18,11 +18,11 @@ import io.github.subiyacryolite.jds.JdsExtensions.toLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import javafx.beans.property.ObjectProperty
-import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.WritableValue
@@ -537,7 +537,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param input an unserializable map
      * @return A serialisable map
      */
-    private fun serializeNumbers(input: Map<Long, Collection<out Number?>>): Map<Long, List<out Number?>> =
+    private fun serializeNumbers(input: Map<Long, Collection<Number?>>): Map<Long, List<Number?>> =
             input.entries.associateBy({ it.key }, { ArrayList(it.value) })
 
     /**
@@ -1029,7 +1029,7 @@ abstract class JdsEntity : IJdsEntity {
         try {
             if (fieldId == null) return
             objectCollections.filter { it.key.fieldEntity.id == fieldId }.forEach {
-                val entity = jdsDb.classes[entityId]!!.newInstance()
+                val entity = jdsDb.classes[entityId]!!.getDeclaredConstructor().newInstance()
                 entity.overview.uuid = uuid
                 entity.overview.editVersion = editVersion
                 uuids.add(JdsEntityComposite(uuid, editVersion))
@@ -1038,7 +1038,7 @@ abstract class JdsEntity : IJdsEntity {
             }
             objectValues.filter { it.key.fieldEntity.id == fieldId }.forEach {
                 if (it.value.value == null)
-                    it.value.value = jdsDb.classes[entityId]!!.newInstance()
+                    it.value.value = jdsDb.classes[entityId]!!.getDeclaredConstructor().newInstance()
                 it.value.value.overview.uuid = uuid
                 it.value.value.overview.editVersion = editVersion
                 uuids.add(JdsEntityComposite(uuid, editVersion))
@@ -1179,18 +1179,18 @@ abstract class JdsEntity : IJdsEntity {
             return integerValues[fieldId]?.value?.toInt()
         if (enumProperties.containsKey(fieldId))
             return enumProperties[fieldId]?.value?.ordinal
-        enumCollections.filter { it.key == fieldId }.forEach { it.value.filter { it != null && it.ordinal == ordinal }.forEach { return true } }
+        enumCollections.filter { it.key == fieldId }.forEach { it -> it.value.filter { it.ordinal == ordinal }.forEach { _ -> return true } }
         objectValues.filter { it.key.fieldEntity.id == fieldId }.forEach { return it.value.value.overview.uuid }
         return null
     }
 
     /**
-     * @param table
+     * @param jdsTable
      */
-    override fun registerFields(table: JdsTable) {
+    override fun registerFields(jdsTable: JdsTable) {
         getFields(overview.entityId).forEach {
             if (!JdsSchema.isIgnoredType(it))
-                table.registerField(it)
+                jdsTable.registerField(it)
         }
     }
 
@@ -1292,7 +1292,7 @@ abstract class JdsEntity : IJdsEntity {
         if (includeThisEntity)
             collection.add(this@JdsEntity)
         objectValues.values.forEach { it.value.getNestedEntities(collection) }
-        objectCollections.values.forEach { it.forEach { it.getNestedEntities(collection) } }
+        objectCollections.values.forEach { it -> it.forEach { it.getNestedEntities(collection) } }
     }
 
     companion object : Externalizable {

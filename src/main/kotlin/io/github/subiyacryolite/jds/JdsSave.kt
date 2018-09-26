@@ -74,7 +74,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             chunks.forEachIndexed { index, batch ->
                 try {
                     val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
-                    saveInner(orderedList.asIterable(), index == (totalChunks - 1))
+                    saveInner(orderedList.asIterable())
                     if (jdsDb.options.isLoggingOutput)
                         println("Processing saves. Batch ${index + 1} of $totalChunks")
                 } catch (ex: Exception) {
@@ -101,7 +101,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
      * @param batchEntities
      * @throws Exception
      */
-    private fun saveInner(entities: Iterable<JdsEntity>, finalStep: Boolean) {
+    private fun saveInner(entities: Iterable<JdsEntity>) {
         try {
             //ensure that overviews are submitted before handing over to listeners
             saveOverview(entities)
@@ -573,7 +573,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 insert.setString(1, jdsEntity.overview.uuid)
                 insert.setInt(2, jdsEntity.overview.editVersion)
                 insert.setLong(3, jdsFieldEnum)
-                insert.setObject(4, anEnum?.ordinal)
+                insert.setObject(4, anEnum.ordinal)
                 insert.addBatch()
             }
         }

@@ -14,8 +14,6 @@
 package io.github.subiyacryolite.jds
 
 import com.javaworld.NamedPreparedStatement
-import io.github.subiyacryolite.jds.enums.JdsComponent
-import io.github.subiyacryolite.jds.enums.JdsComponentType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
@@ -73,15 +71,14 @@ abstract class JdsDbMySql : JdsDb {
                         return it.getInt("Result")
                 }
             }
-            return 0
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
-            return 0
         }
+        return 0
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        return columnExistsCommonImpl(connection, tableName, columnName, 0, "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName")
+        return columnExistsCommonImpl(connection, tableName, columnName, "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName")
     }
 
     override fun createStoreEntities(connection: Connection) {

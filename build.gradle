@@ -36,7 +36,7 @@ buildscript {
 repositories {
     mavenCentral()
     jcenter()
-    maven { url "https://maven.atlassian.com/3rdparty/" }
+    maven { url "https://maven.atlassian.com/3rdparty/" }JdsDb
     maven { url "http://clojars.org/repo/" }
 }
 

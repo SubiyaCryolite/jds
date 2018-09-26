@@ -28,7 +28,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         val output: MutableList<T> = ArrayList()
         container.forEach { element ->
             element.embeddedObjects.forEach { innerElement ->
-                val instance = referenceType.newInstance()
+                val instance = referenceType.getDeclaredConstructor().newInstance()
                 populate(instance, innerElement)
                 output.add(instance)
             }
@@ -80,11 +80,11 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         entity.objectCollections.filter { it.key.fieldEntity.id == fieldId }.forEach {
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
-                val entity = referenceClass.newInstance()//create array element
-                entity.overview.uuid = uuid
-                entity.overview.editVersion = editVersion
-                populate(entity, eo)
-                it.value.add(entity)
+                val innerEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                innerEntity.overview.uuid = uuid
+                innerEntity.overview.editVersion = editVersion
+                populate(innerEntity, eo)
+                it.value.add(innerEntity)
             }
         }
         //find existing elements
@@ -92,7 +92,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
                 if (it.value.value == null)
-                    it.value.value = referenceClass.newInstance()//create array element
+                    it.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 it.value.value.overview.uuid = uuid
                 it.value.value.overview.editVersion = editVersion
                 populate(it.value.value, eo)

@@ -13,16 +13,11 @@
  */
 package io.github.subiyacryolite.jds.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
  * The annotation used to decorate [JdsEntity]
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+@kotlin.annotation.Target(AnnotationTarget.CLASS)
 annotation class JdsEntityAnnotation(val name: String = "",
                                      val id: Long = 1,
                                      val caption: String = "",

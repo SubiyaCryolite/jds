@@ -43,7 +43,7 @@ import kotlin.collections.ArrayList
 class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableList<T>> {
 
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
-    private var filterIds: Iterable<out String> = emptyList()
+    private var filterIds: Iterable<String> = emptyList()
 
     companion object {
         /**
@@ -243,7 +243,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 if (jdsDb.classes.containsKey(entityId)) {
                     val refType = jdsDb.classes[entityId]!!
-                    val entity = refType.newInstance()
+                    val entity = refType.getDeclaredConstructor().newInstance()
                     entity.overview.uuid = uuid
                     entity.overview.editVersion = editVersion
                     entities.add(entity as T)
@@ -802,7 +802,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @param filterUUIDs
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<out String>) {
+    private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<String>) {
         val searchByType = filterUUIDs.none()
         jdsDataBase.connection.use {
             if (searchByType) {
@@ -835,9 +835,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
     /**
      * @param filterUuids
      */
-    private fun parametize(filterUuids: Iterable<out String>): String {
+    private fun parametize(filterUuids: Iterable<String>): String {
         val stringJoiner = StringJoiner(",")
-        filterUuids.forEach { stringJoiner.add("?") }
+        filterUuids.forEach { _ -> stringJoiner.add("?") }
         return stringJoiner.toString()
     }
 
