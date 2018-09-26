@@ -36,16 +36,15 @@ buildscript {
 repositories {
     mavenCentral()
     jcenter()
-    maven { url "https://maven.atlassian.com/3rdparty/" }JdsDb
+    maven { url "https://maven.atlassian.com/3rdparty/" }
     maven { url "http://clojars.org/repo/" }
 }
 
 dependencies {
-    compileOnly files('libs/javafx.base.jar')
+    implementation "org.openjfx:javafx-base:11:win" /*We specify win though in reality all we care about is JavaFX bean classes. There are no OS dependencies*/
     compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
-    testCompile files('libs/javafx.base.jar')
     testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     testCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"

@@ -167,7 +167,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun getNativeDataTypeBlob(max: Int): String {
-        return return if (max == 0)
+        return if (max == 0)
             "VARBINARY(MAX)"
         else
             "VARBINARY($max)"

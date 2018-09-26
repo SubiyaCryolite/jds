@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 class TestNullable {
 
     @Test
-    fun isNullale() {
+    fun isNullable() {
         val zonedDateTime = ZonedDateTime.now()
         if (zonedDateTime is ZonedDateTime?)
             println("$zonedDateTime is a ZonedDateTime?")

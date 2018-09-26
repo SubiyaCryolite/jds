@@ -281,11 +281,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         return answer == 1
     }
 
-    override fun doesIndexExist(connection: Connection, indexName: String): Boolean {
-        val answer = indexExists(connection, indexName)
-        return answer == 1
-    }
-
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
         val answer = columnExists(connection, tableName, columnName)
         return answer == 1
@@ -412,7 +407,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         }
 
         if (!primaryKeys.isEmpty()) {
-            primaryKeys.forEach { constraintName, constraintColumns ->
+            primaryKeys.forEach { _, constraintColumns ->
                 endingComponents.add("PRIMARY KEY ($constraintColumns)")
             }
         }
@@ -449,15 +444,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @return 1 if the specified trigger exists in the database
      */
     open fun triggerExists(connection: Connection, triggerName: String): Int = 0
-
-    /**
-     * Internal checks to see if the specified index exists in the database
-     *
-     * @param connection the connection to use
-     * @param indexName the trigger to look up
-     * @return 1 if the specified index exists in the database
-     */
-    fun indexExists(connection: Connection, indexName: String): Int = 0
 
     /**
      * Internal checks to see if the specified column exists in the database
@@ -1418,7 +1404,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     fun deleteOldDataFromReportTables(connection: Connection) {
         tables.forEach {
             if (it.isStoringLiveRecordsOnly) {
-                connection.prepareStatement(it.deleteOldRecords(JdsDb@ this)).use {
+                connection.prepareStatement(it.deleteOldRecords(this)).use {
                     it.executeUpdate()
                 }
             }

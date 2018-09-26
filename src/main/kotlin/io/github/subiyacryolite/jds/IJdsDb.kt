@@ -79,15 +79,6 @@ interface IJdsDb {
     fun doesTriggerExist(connection: Connection, triggerName: String): Boolean
 
     /**
-     * Checks if the specified index exists the the database
-     *
-     * @param connection the connection to use
-     * @param indexName the index to look up
-     * @return true if the specified index exists the the database
-     */
-    fun doesIndexExist(connection: Connection, indexName: String): Boolean
-
-    /**
      * Gets the correct syntax needed to add a new column to the underlying database implementation
      * @return the correct syntax needed to add a new column to the underlying database implementation
      */

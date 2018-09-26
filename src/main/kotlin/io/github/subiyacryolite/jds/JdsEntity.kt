@@ -885,6 +885,9 @@ abstract class JdsEntity : IJdsEntity {
                 is ByteArray -> blobValues[fieldId]?.value = value
                 null -> blobValues[fieldId]?.value = ByteArray(0)//Oracle
             }
+
+            else-> {
+            }
         }
     }
 
@@ -1007,6 +1010,9 @@ abstract class JdsEntity : IJdsEntity {
 
                     override fun getValue(): Boolean? = backingValue
                 }
+
+            else-> {
+            }
         }
 
     }
