@@ -29,7 +29,6 @@ import java.time.ZonedDateTime
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * This class is responsible for persisting on or more [JdsEntities][JdsEntity]
@@ -73,7 +72,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             val totalChunks = chunks.count()
             chunks.forEachIndexed { index, batch ->
                 try {
-                    val orderedList = buildSequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
+                    val orderedList = sequence { batch.forEach { yieldAll(it.getNestedEntities()) } }
                     saveInner(orderedList.asIterable())
                     if (jdsDb.options.isLoggingOutput)
                         println("Processing saves. Batch ${index + 1} of $totalChunks")
@@ -439,7 +438,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
             upsertEnumString.setString(1, jdsEntity.overview.uuid)
             upsertEnumString.setInt(2, jdsEntity.overview.editVersion)
             upsertEnumString.setLong(3, jdsFieldEnum)
-            upsertEnumString.setString(4, value.toString())
+            upsertEnumString.setString(4, value?.name)
             upsertEnumString.addBatch()
         }
     } catch (ex: Exception) {
@@ -583,7 +582,7 @@ class JdsSave private constructor(private val jdsDb: JdsDb,
                 insertString.setString(1, jdsEntity.overview.uuid)
                 insertString.setInt(2, jdsEntity.overview.editVersion)
                 insertString.setLong(3, jdsFieldEnum)
-                insertString.setString(4, anEnum.toString())
+                insertString.setString(4, anEnum.name)
                 insertString.addBatch()
             }
         }

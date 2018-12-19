@@ -71,14 +71,14 @@ data class JdsStoreDoubleCollection(@get:JsonProperty("k") @set:JsonProperty("k"
  * @param key the [field][JdsField] [ID][JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreEnum(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Int? = null)
+data class JdsStoreEnum(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Int = 0)
 
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreEnumString(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStoreEnumString(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String = "")
 
 /**
  * Used to store values of type in a portable manner

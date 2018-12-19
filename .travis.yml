@@ -1,9 +1,9 @@
 language: java
-jdk: oraclejdk10 #Oracle JDK has JavaFX bundled in version 10 and prior. JavaFX removed from version 11 and above
+jdk: openjdk10
 install: true
 sudo: true
 group: stable
-dist: precise
+dist: xenial
 os: linux
 branches:
   only:

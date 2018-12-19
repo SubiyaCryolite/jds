@@ -18,16 +18,17 @@ import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
 import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * Represents a fieldEntity enum in JDS
  */
-class JdsFieldEnum<T : Enum<*>>() : Externalizable {
+class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     lateinit var enumType: Class<T>
     lateinit var field: JdsField
 
-    var values = arrayOfNulls<Enum<*>>(0)
-        private set//keep order at all times
+    var values: Set<T> = HashSet(0)
+        private set
 
     /**
      * @param type
@@ -43,8 +44,7 @@ class JdsFieldEnum<T : Enum<*>>() : Externalizable {
      */
     constructor(type: Class<T>, field: JdsField, vararg values: T) : this(type) {
         this.field = field
-        this.values = arrayOfNulls(values.size)
-        System.arraycopy(values, 0, this.values, 0, values.size)
+        this.values = setOf(*values)
         bind()
     }
 
@@ -53,7 +53,7 @@ class JdsFieldEnum<T : Enum<*>>() : Externalizable {
      */
     private fun bind() {
         if (!enums.containsKey(field.id))
-            enums.put(field.id, this)
+            enums[field.id] = this
     }
 
     override fun toString(): String {
@@ -61,23 +61,19 @@ class JdsFieldEnum<T : Enum<*>>() : Externalizable {
     }
 
     /**
-     * @param index
+     * @param ordinal
      * @return
      */
-    fun valueOf(index: Int): Enum<*>? {
-        return if (index >= values.size) null else values[index]
+    fun valueOf(ordinal: Int): T {
+        return values.first { it.ordinal == ordinal }
     }
 
     /**
-     * @param index
+     * @param name
      * @return
      */
-    fun valueOf(index: String?): Enum<*>? {
-        values.forEach {
-            if (it.toString() == index)
-                return it
-        }
-        return null
+    fun valueOf(name: String): T {
+        return values.first { it.name == name }
     }
 
     /**
@@ -100,7 +96,7 @@ class JdsFieldEnum<T : Enum<*>>() : Externalizable {
     override fun readExternal(input: ObjectInput) {
         enumType = input.readObject() as Class<T>
         field = input.readObject() as JdsField
-        values = input.readObject() as Array<Enum<*>?>
+        values = input.readObject() as Set<T>
     }
 
     companion object : Externalizable {
