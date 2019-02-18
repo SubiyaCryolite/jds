@@ -1,5 +1,5 @@
 language: java
-jdk: openjdk10
+jdk: openjdk8
 install: true
 sudo: true
 group: stable
