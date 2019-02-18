@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/SubiyaCryolite/jds.svg?branch=master)](https://travis-ci.org/SubiyaCryolite/jds)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.subiyacryolite/jds)
-[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/io.github.subiyacryolite/jds.svg)](https://oss.sonatype.org/content/repositories/snapshots/io/github/subiyacryolite/jds/)
 [![Javadocs](https://javadoc.io/badge/io.github.subiyacryolite/jds.svg)](https://javadoc.io/doc/io.github.subiyacryolite/jds)
 [![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
 ![Size](https://github-size-badge.herokuapp.com/subiyacryolite/jds.svg)
+<!--- [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/io.github.subiyacryolite/jds.svg)](https://oss.sonatype.org/content/repositories/snapshots/io/github/subiyacryolite/jds/))--->
 
 # Jenesis Data Store
 
