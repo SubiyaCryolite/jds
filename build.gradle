@@ -100,37 +100,39 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            pom.project {
-                name "Jenesis Data Store"
-                packaging "jar"
-                description = project.description
-                url "https://github.com/SubiyaCryolite/jds"
-                scm {
-                    connection "scm:git:git@github.com:SubiyaCryolite/jds.git"
-                    developerConnection "scm:git:git@github.com:SubiyaCryolite/jds.git"
+if (project.hasProperty("ossrhUsername")) {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+                pom.project {
+                    name "Jenesis Data Store"
+                    packaging "jar"
+                    description = project.description
                     url "https://github.com/SubiyaCryolite/jds"
-                }
-                licenses {
-                    license {
-                        name "The 3-Clause BSD License"
-                        url "https://opensource.org/licenses/BSD-3-Clause"
+                    scm {
+                        connection "scm:git:git@github.com:SubiyaCryolite/jds.git"
+                        developerConnection "scm:git:git@github.com:SubiyaCryolite/jds.git"
+                        url "https://github.com/SubiyaCryolite/jds"
                     }
-                }
-                developers {
-                    developer {
-                        id "SubiyaCryolite"
-                        name "Ifunga Ndana"
-                        email "ifungandana@gmail.com"
+                    licenses {
+                        license {
+                            name "The 3-Clause BSD License"
+                            url "https://opensource.org/licenses/BSD-3-Clause"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id "SubiyaCryolite"
+                            name "Ifunga Ndana"
+                            email "ifungandana@gmail.com"
+                        }
                     }
                 }
             }
