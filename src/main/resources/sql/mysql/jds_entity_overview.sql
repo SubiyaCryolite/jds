@@ -1,6 +1,6 @@
 CREATE TABLE jds_entity_overview
 (
-  uuid           VARCHAR(128),
+  uuid           VARCHAR(36),
   edit_version   INTEGER,
   entity_id      BIGINT,
   PRIMARY KEY (uuid, edit_version),

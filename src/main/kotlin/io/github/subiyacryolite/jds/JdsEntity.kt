@@ -1201,14 +1201,13 @@ abstract class JdsEntity : IJdsEntity {
 
     /**
      * Ensures child entities have ids that link them to their parent.
-     * @param uuid
+     * @param parentUuid
      * @param objectArrayProperties
      */
-    private fun standardizeCollectionUuids(uuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
+    private fun standardizeCollectionUuids(parentUuid: String, objectArrayProperties: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>>) {
         objectArrayProperties.entries.forEach {
-            //parent_uuid.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256.3
             it.value.forEachIndexed { sequence, entry ->
-                entry.overview.uuid = "$uuid.${entry.overview.entityId}.$sequence"
+                entry.overview.uuid = standardiseLength(parentUuid, ":${entry.overview.entityId}:$sequence")
                 standardizeObjectUuids(entry.overview.uuid, entry.objectValues)
                 standardizeCollectionUuids(entry.overview.uuid, entry.objectCollections)
             }
@@ -1217,13 +1216,12 @@ abstract class JdsEntity : IJdsEntity {
 
     /**
      * Ensures child entities have ids that link them to their parent.
-     * @param uuid
+     * @param parentUuid
      * @param objectProperties
      */
-    private fun standardizeObjectUuids(uuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
-        //parent_uuid.entity_id e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
+    private fun standardizeObjectUuids(parentUuid: String, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
         objectProperties.entries.forEach { entry ->
-            entry.value.value.overview.uuid = "$uuid.${entry.value.value.overview.entityId}"
+            entry.value.value.overview.uuid = standardiseLength(parentUuid, ":${entry.value.value.overview.entityId}")
             standardizeObjectUuids(entry.value.value.overview.uuid, entry.value.value.objectValues)
             standardizeCollectionUuids(entry.value.value.overview.uuid, entry.value.value.objectCollections)
         }
@@ -1250,11 +1248,10 @@ abstract class JdsEntity : IJdsEntity {
      * @param objectProperties
      */
     private fun standardizeObjectEditVersion(version: Int, objectProperties: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>>) {
-        //parent-version.entity_id.sequence e.g ab9d2da6-fb64-47a9-9a3c-a6e0a998703f.256
-        objectProperties.entries.forEach { entry ->
-            entry.value.value.overview.editVersion = version
-            standardizeObjectEditVersion(version, entry.value.value.objectValues)
-            standardizeCollectionEditVersion(version, entry.value.value.objectCollections)
+        objectProperties.entries.forEach { objectProperty ->
+            objectProperty.value.value.overview.editVersion = version
+            standardizeObjectEditVersion(version, objectProperty.value.value.objectValues)
+            standardizeCollectionEditVersion(version, objectProperty.value.value.objectCollections)
         }
     }
 
@@ -1264,8 +1261,8 @@ abstract class JdsEntity : IJdsEntity {
     fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity> = sequence {
         if (includeThisEntity)
             yield(this@JdsEntity)
-        objectValues.values.forEach { yieldAll(it.value.getNestedEntities()) }
-        objectCollections.values.forEach { it.forEach { yieldAll(it.getNestedEntities()) } }
+        objectValues.values.forEach { objectProperty -> yieldAll(objectProperty.value.getNestedEntities()) }
+        objectCollections.values.forEach { objectCollection -> objectCollection.forEach { entity -> yieldAll(entity.getNestedEntities()) } }
     }
 
     /**
@@ -1283,6 +1280,12 @@ abstract class JdsEntity : IJdsEntity {
         private const val serialVersionUID = 20180106_2125L
         private val allFields = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
         private val allEnums = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
+
+        private fun standardiseLength(dest: String, append: String): String {
+            val appendLength = append.length //e.g 5
+            val substringIndex = dest.length - appendLength //e.g 36
+            return "${dest.subSequence(0, substringIndex)}${append}"
+        }
 
         override fun readExternal(objectInput: ObjectInput) {
             allFields.clear()
