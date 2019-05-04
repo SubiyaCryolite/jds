@@ -1,6 +1,6 @@
 CREATE PROCEDURE proc_ref_entity(IN p_id          BIGINT,
-                                 IN p_name        VARCHAR(256),
-                                 IN p_caption     VARCHAR(256),
+                                 IN p_name        VARCHAR(64),
+                                 IN p_caption     VARCHAR(64),
                                  IN p_description VARCHAR(256),
                                  IN p_parent      BOOLEAN)
   BEGIN

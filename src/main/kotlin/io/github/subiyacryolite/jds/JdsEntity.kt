@@ -50,66 +50,66 @@ abstract class JdsEntity : IJdsEntity {
     override var overview: IJdsOverview = JdsOverview()
     //time constructs
     @get:JsonIgnore
-    internal val localDateTimeValues: HashMap<Long, WritableValue<out Temporal?>> = LinkedHashMap()
+    internal val localDateTimeValues: HashMap<Long, WritableValue<out Temporal?>> = HashMap()
     @get:JsonIgnore
-    internal val zonedDateTimeValues: HashMap<Long, WritableValue<out Temporal?>> = LinkedHashMap()
+    internal val zonedDateTimeValues: HashMap<Long, WritableValue<out Temporal?>> = HashMap()
     @get:JsonIgnore
-    internal val localDateValues: HashMap<Long, WritableValue<out Temporal?>> = LinkedHashMap()
+    internal val localDateValues: HashMap<Long, WritableValue<out Temporal?>> = HashMap()
     @get:JsonIgnore
-    internal val localTimeValues: HashMap<Long, WritableValue<out Temporal?>> = LinkedHashMap()
+    internal val localTimeValues: HashMap<Long, WritableValue<out Temporal?>> = HashMap()
     @get:JsonIgnore
-    internal val monthDayValues: HashMap<Long, WritableValue<MonthDay?>> = LinkedHashMap()
+    internal val monthDayValues: HashMap<Long, WritableValue<MonthDay?>> = HashMap()
     @get:JsonIgnore
-    internal val yearMonthValues: HashMap<Long, WritableValue<out Temporal?>> = LinkedHashMap()
+    internal val yearMonthValues: HashMap<Long, WritableValue<out Temporal?>> = HashMap()
     @get:JsonIgnore
-    internal val periodValues: HashMap<Long, WritableValue<Period?>> = LinkedHashMap()
+    internal val periodValues: HashMap<Long, WritableValue<Period?>> = HashMap()
     @get:JsonIgnore
-    internal val durationValues: HashMap<Long, WritableValue<Duration?>> = LinkedHashMap()
+    internal val durationValues: HashMap<Long, WritableValue<Duration?>> = HashMap()
     //strings
     @get:JsonIgnore
-    internal val stringValues: HashMap<Long, WritableValue<String?>> = LinkedHashMap()
+    internal val stringValues: HashMap<Long, WritableValue<String?>> = HashMap()
     //boolean
     @get:JsonIgnore
-    internal val booleanValues: HashMap<Long, WritableValue<Boolean?>> = LinkedHashMap()
+    internal val booleanValues: HashMap<Long, WritableValue<Boolean?>> = HashMap()
     //numeric
     @get:JsonIgnore
-    internal val floatValues: HashMap<Long, WritableValue<out Number?>> = LinkedHashMap()
+    internal val floatValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     @get:JsonIgnore
-    internal val doubleValues: HashMap<Long, WritableValue<out Number?>> = LinkedHashMap()
+    internal val doubleValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     @get:JsonIgnore
-    internal val longValues: HashMap<Long, WritableValue<out Number?>> = LinkedHashMap()
+    internal val longValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     @get:JsonIgnore
-    internal val integerValues: HashMap<Long, WritableValue<out Number?>> = LinkedHashMap()
+    internal val integerValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     //arrays
     @get:JsonIgnore
-    internal val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = LinkedHashMap()
+    internal val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
     @get:JsonIgnore
-    internal val stringCollections: HashMap<Long, MutableCollection<String>> = LinkedHashMap()
+    internal val stringCollections: HashMap<Long, MutableCollection<String>> = HashMap()
     @get:JsonIgnore
-    internal val dateTimeCollections: HashMap<Long, MutableCollection<LocalDateTime>> = LinkedHashMap()
+    internal val dateTimeCollections: HashMap<Long, MutableCollection<LocalDateTime>> = HashMap()
     @get:JsonIgnore
-    internal val floatCollections: HashMap<Long, MutableCollection<Float>> = LinkedHashMap()
+    internal val floatCollections: HashMap<Long, MutableCollection<Float>> = HashMap()
     @get:JsonIgnore
-    internal val doubleCollections: HashMap<Long, MutableCollection<Double>> = LinkedHashMap()
+    internal val doubleCollections: HashMap<Long, MutableCollection<Double>> = HashMap()
     @get:JsonIgnore
-    internal val longCollections: HashMap<Long, MutableCollection<Long>> = LinkedHashMap()
+    internal val longCollections: HashMap<Long, MutableCollection<Long>> = HashMap()
     @get:JsonIgnore
-    internal val integerCollections: HashMap<Long, MutableCollection<Int>> = LinkedHashMap()
+    internal val integerCollections: HashMap<Long, MutableCollection<Int>> = HashMap()
     //enumProperties
     @get:JsonIgnore
-    internal val enumProperties: HashMap<Long, WritableValue<Enum<*>>> = LinkedHashMap()
+    internal val enumProperties: HashMap<Long, WritableValue<Enum<*>>> = HashMap()
     @get:JsonIgnore
-    internal val enumStringProperties: HashMap<Long, WritableValue<Enum<*>>> = LinkedHashMap()
+    internal val enumStringProperties: HashMap<Long, WritableValue<Enum<*>>> = HashMap()
     @get:JsonIgnore
-    internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
+    internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>>> = HashMap()
     @get:JsonIgnore
-    internal val enumStringCollections: HashMap<Long, MutableCollection<Enum<*>>> = LinkedHashMap()
+    internal val enumStringCollections: HashMap<Long, MutableCollection<Enum<*>>> = HashMap()
     //objects
     @get:JsonIgnore
-    internal val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = LinkedHashMap()
+    internal val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<JdsEntity>> = HashMap()
     //blobs
     @get:JsonIgnore
-    internal val blobValues: HashMap<Long, WritableValue<ByteArray?>> = LinkedHashMap()
+    internal val blobValues: HashMap<Long, WritableValue<ByteArray?>> = HashMap()
 
 
     init {
@@ -707,7 +707,7 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
-        objectCollections.forEach { key, itx ->
+        objectCollections.forEach { (key, itx) ->
             itx.forEach {
                 val eo = JdsEmbeddedObject()
                 eo.fieldId = key.fieldEntity.id
@@ -715,7 +715,7 @@ abstract class JdsEntity : IJdsEntity {
                 embeddedObject.entityOverviews.add(eo)
             }
         }
-        objectValues.forEach { key, it ->
+        objectValues.forEach { (key, it) ->
             val eo = JdsEmbeddedObject()
             eo.fieldId = key.fieldEntity.id
             eo.init(it.value)

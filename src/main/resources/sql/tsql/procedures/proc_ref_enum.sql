@@ -1,4 +1,4 @@
-CREATE PROCEDURE proc_ref_enum(@field_id BIGINT, @seq INTEGER, @caption NVARCHAR(MAX))
+CREATE PROCEDURE proc_ref_enum(@field_id BIGINT, @seq INTEGER, @caption NVARCHAR(64))
 AS
   BEGIN
     MERGE jds_ref_enum AS dest

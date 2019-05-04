@@ -1,6 +1,6 @@
 CREATE FUNCTION proc_ref_entity(p_id          BIGINT,
-                                p_name        VARCHAR(256),
-                                p_caption     VARCHAR(256),
+                                p_name        VARCHAR(64),
+                                p_caption     VARCHAR(64),
                                 p_description VARCHAR(256))
   RETURNS VOID AS $$
 BEGIN

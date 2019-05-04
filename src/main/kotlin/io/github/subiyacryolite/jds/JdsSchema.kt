@@ -7,11 +7,10 @@ object JdsSchema {
     /**
      * @param jdsDb
      * @param tableName
-     * @param appendOnly
      * @return
      */
     fun generateTable(jdsDb: JdsDb, tableName: String): String {
-        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 128)
+        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 36)
         val uuidLocationVersionDataType = getDbDataType(jdsDb, JdsFieldType.INT)
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
@@ -24,7 +23,6 @@ object JdsSchema {
 
     /**
      * @param jdsDb
-     * @param reportName
      * @param fields
      * @param columnToFieldMap
      * @param enumOrdinals
@@ -35,7 +33,7 @@ object JdsSchema {
         fields.filterNot { isIgnoredType(it.type) }.sortedBy { it.name }.forEach {
             when (it.type) {
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
-                    val columnName = "${it.name}_${enum!!.ordinal}"
+                    val columnName = "${it.name}_${enum.ordinal}"
                     val columnDataType = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
                     collection[columnName] = "$columnName $columnDataType"
                     columnToFieldMap[columnName] = it
@@ -71,7 +69,6 @@ object JdsSchema {
 
     /**
      * @param jdsDb
-     * @param reportName
      * @param field
      * @param max
      * @return
@@ -90,7 +87,7 @@ object JdsSchema {
      */
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String = when (fieldType) {
-        JdsFieldType.ENTITY -> jdsDb.getNativeDataTypeString(195)//act as a FK if you will
+        JdsFieldType.ENTITY -> jdsDb.getNativeDataTypeString(36)//act as a FK if you will
         JdsFieldType.FLOAT -> jdsDb.getNativeDataTypeFloat()
         JdsFieldType.DOUBLE -> jdsDb.getNativeDataTypeDouble()
         JdsFieldType.ZONED_DATE_TIME -> jdsDb.getNativeDataTypeZonedDateTime()

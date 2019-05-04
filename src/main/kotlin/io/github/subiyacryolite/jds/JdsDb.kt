@@ -288,13 +288,13 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
 
     internal fun columnExistsCommonImpl(connection: Connection, tableName: String, columnName: String, sql: String): Int {
         try {
-            NamedPreparedStatement(connection, sql).use {
-                it.setString("tableName", tableName)
-                it.setString("columnName", columnName)
-                it.setString("tableCatalog", connection.catalog)
-                it.executeQuery().use {
-                    while (it.next()) {
-                        return it.getInt("Result")
+            NamedPreparedStatement(connection, sql).use { statement ->
+                statement.setString("tableName", tableName)
+                statement.setString("columnName", columnName)
+                statement.setString("tableCatalog", connection.catalog)
+                statement.executeQuery().use { resultSet ->
+                    while (resultSet.next()) {
+                        return resultSet.getInt("Result")
                     }
                 }
             }
@@ -872,7 +872,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private val storeCommonColumns: LinkedHashMap<String, String>
         get() {
             val columns = LinkedHashMap<String, String>()
-            columns["uuid"] = getNativeDataTypeString(128)
+            columns["uuid"] = getNativeDataTypeString(36)
             columns["edit_version"] = getNativeDataTypeInteger()
             columns["field_id"] = getNativeDataTypeLong()
             return columns
@@ -892,7 +892,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createPopJdsEntityOverview(): String {
         val uniqueColumns = setOf("uuid", "edit_version")
         val columns = LinkedHashMap<String, String>()
-        columns["uuid"] = getNativeDataTypeString(128)
+        columns["uuid"] = getNativeDataTypeString(36)
         columns["edit_version"] = getNativeDataTypeInteger()
         columns["entity_id"] = getNativeDataTypeLong()
         return createOrAlterProc("jds_pop_entity_overview", "jds_entity_overview", columns, uniqueColumns, false)
@@ -902,8 +902,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val uniqueColumns = setOf("id")
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getNativeDataTypeLong()
-        columns["name"] = getNativeDataTypeString(256)
-        columns["caption"] = getNativeDataTypeString(256)
+        columns["name"] = getNativeDataTypeString(64)
+        columns["caption"] = getNativeDataTypeString(64)
         columns["description"] = getNativeDataTypeString(256)
         return createOrAlterProc("jds_pop_ref_entity", "jds_ref_entity", columns, uniqueColumns, false)
     }
@@ -937,7 +937,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getNativeDataTypeLong()
         columns["seq"] = getNativeDataTypeInteger()
-        columns["caption"] = getNativeDataTypeString(0)
+        columns["caption"] = getNativeDataTypeString(64)
         return createOrAlterProc("jds_pop_ref_enum", "jds_ref_enum", columns, uniqueColumns, false)
     }
 
@@ -945,7 +945,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val uniqueColumns = setOf("id")
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getNativeDataTypeLong()
-        columns["caption"] = getNativeDataTypeString(128)
+        columns["caption"] = getNativeDataTypeString(64)
         columns["description"] = getNativeDataTypeString(256)
         columns["type_ordinal"] = getNativeDataTypeInteger()
         return createOrAlterProc("jds_pop_ref_field", "jds_ref_field", columns, uniqueColumns, false)
@@ -1109,7 +1109,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
 
     private fun createPopEntityLiveVersion(): String {
         val columns = LinkedHashMap<String, String>()
-        columns["uuid"] = getNativeDataTypeString(128)
+        columns["uuid"] = getNativeDataTypeString(36)
         //don't include edit_version column, a separate SQL statement updates that column
         return createOrAlterProc("jds_pop_entity_live_version", "jds_entity_live_version", columns, setOf("uuid"), false)
     }
@@ -1117,7 +1117,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun createEntityLiveVersionTable(): String {
         val tableName = "jds_entity_live_version"
         val columns = LinkedHashMap<String, String>()
-        columns["uuid"] = getNativeDataTypeString(128)
+        columns["uuid"] = getNativeDataTypeString(36)
         columns["edit_version"] = getNativeDataTypeInteger()
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid"
@@ -1404,8 +1404,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     fun deleteOldDataFromReportTables(connection: Connection) {
         tables.forEach {
             if (it.isStoringLiveRecordsOnly) {
-                connection.prepareStatement(it.deleteOldRecords(this)).use {
-                    it.executeUpdate()
+                connection.prepareStatement(it.deleteOldRecords(this)).use { statement ->
+                    statement.executeUpdate()
                 }
             }
         }
