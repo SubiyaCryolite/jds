@@ -1,8 +1,5 @@
 package io.github.subiyacryolite.jds.events
 
-import com.javaworld.INamedStatement
-import com.javaworld.NamedCallableStatement
-import com.javaworld.NamedPreparedStatement
 import io.github.subiyacryolite.jds.IJdsDb
 import java.sql.*
 import java.util.concurrent.ConcurrentMap
@@ -40,28 +37,6 @@ abstract class EventArgument(val jdsDb: IJdsDb, val connection: Connection, prot
 
     /**
      * @param query
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedStatement(query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = NamedPreparedStatement(connection, query)
-        return statements[query] as INamedStatement
-    }
-
-    /**
-     * @param query
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedCall(query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = NamedCallableStatement(connection, query)
-        return statements[query] as INamedStatement
-    }
-
-    /**
-     * @param query
      * @param targetConnection
      */
     @Synchronized
@@ -88,32 +63,6 @@ abstract class EventArgument(val jdsDb: IJdsDb, val connection: Connection, prot
 
     /**
      * @param query
-     * @param targetConnection
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedStatement(targetConnection: Int, query: String): INamedStatement {
-        prepareConnection(targetConnection)
-        if (!statements.containsKey(query))
-            statements[query] = NamedPreparedStatement(alternateConnection(targetConnection), query)
-        return statements[query] as INamedStatement
-    }
-
-    /**
-     * @param query
-     * @param targetConnection
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedCall(targetConnection: Int, query: String): INamedStatement {
-        prepareConnection(targetConnection)
-        if (!statements.containsKey(query))
-            statements[query] = NamedCallableStatement(alternateConnection(targetConnection), query)
-        return statements[query] as INamedStatement
-    }
-
-    /**
-     * @param query
      * @param connection
      */
     @Synchronized
@@ -134,30 +83,6 @@ abstract class EventArgument(val jdsDb: IJdsDb, val connection: Connection, prot
         if (!statements.containsKey(query))
             statements[query] = connection.prepareCall(query)
         return statements[query] as CallableStatement
-    }
-
-    /**
-     * @param query
-     * @param connection
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedStatement(connection: Connection, query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = NamedPreparedStatement(connection, query)
-        return statements[query] as INamedStatement
-    }
-
-    /**
-     * @param query
-     * @param connection
-     */
-    @Synchronized
-    @Throws(SQLException::class)
-    fun getOrAddNamedCall(connection: Connection, query: String): INamedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = NamedCallableStatement(connection, query)
-        return statements[query] as INamedStatement
     }
 
     /**

@@ -24,8 +24,6 @@ open class BlobProperty : WritableValue<ByteArray?>,Serializable {
 
     private var bytes: ByteArray? = null
 
-    constructor():this(null)
-
     /**
      * Constructor
      *

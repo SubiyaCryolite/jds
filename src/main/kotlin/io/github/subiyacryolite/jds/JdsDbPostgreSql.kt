@@ -13,75 +13,34 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
 
 /**
- * The PostgreSQL implementation of [JdsDataBase][JdsDb]
+ * The PostgreSQL implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
 abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
+
     override fun tableExists(connection: Connection, tableName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, connection.catalog)
-                it.setString(2, tableName.toLowerCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
-        return toReturn
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName.toLowerCase()))
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
-        var toReturn = 0
         val sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? and routine_name = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, connection.catalog)
-                it.setString(2, procedureName.toLowerCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
-        return toReturn
+        return getResult(connection, sql, arrayOf(connection.catalog, procedureName.toLowerCase()))
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
-        var toReturn = 0
         val sql = "select COUNT(*) AS Result from information_schema.views where table_catalog = ? and table_name = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, connection.catalog)
-                it.setString(2, viewName.toLowerCase())
-                it.executeQuery().use {
-                    while (it.next()) {
-                        toReturn = it.getInt("Result")
-                    }
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
-        return toReturn
+        return getResult(connection, sql, arrayOf(connection.catalog, viewName.toLowerCase()))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_CATALOG = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
-        return  columnExistsCommonImpl(connection, tableName.toLowerCase(), columnName.toLowerCase(),  sql)
+        val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM information_schema.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName.toLowerCase(), columnName.toLowerCase()))
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -120,51 +79,19 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         executeSqlFromFile(connection, "sql/postgresql/jds_ref_entity_inheritance.sql")
     }
 
-    override fun getNativeDataTypeFloat(): String {
-        return "REAL"
-    }
-
-    override fun getNativeDataTypeDouble(): String {
-        return "FLOAT"
-    }
-
-    override fun getNativeDataTypeZonedDateTime(): String {
-        return "TIMESTAMP WITH TIME ZONE"
-    }
-
-    override fun getNativeDataTypeTime(): String {
-        return "TIME WITHOUT TIME ZONE"
-    }
-
-    override fun getNativeDataTypeBlob(max: Int): String {
-        return "BYTEA"
-    }
-
-    override fun getNativeDataTypeInteger(): String {
-        return "INTEGER"
-    }
-
-    override fun getNativeDataTypeDate(): String {
-        return "DATE"
-    }
-
-    override fun getNativeDataTypeDateTime(): String {
-        return "TIMESTAMP WITHOUT TIME ZONE"
-    }
-
-    override fun getNativeDataTypeLong(): String {
-        return "BIGINT"
-    }
-
-    override fun getNativeDataTypeString(max: Int): String {
-        return if (max == 0)
-            "TEXT"
-        else
-            "VARCHAR($max)"
-    }
-
-    override fun getNativeDataTypeBoolean(): String {
-        return "BOOLEAN"
+    override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
+        JdsFieldType.FLOAT -> "REAL"
+        JdsFieldType.DOUBLE -> "FLOAT"
+        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP WITH TIME ZONE"
+        JdsFieldType.TIME -> "TIME WITHOUT TIME ZONE"
+        JdsFieldType.BLOB -> "BYTEA"
+        JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.DATE -> "DATE"
+        JdsFieldType.DATE_TIME -> "TIMESTAMP WITHOUT TIME ZONE"
+        JdsFieldType.LONG -> "BIGINT"
+        JdsFieldType.STRING -> if (max == 0) "TEXT" else "VARCHAR($max)"
+        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        else -> ""
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
@@ -180,7 +107,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
 
         sqlBuilder.append("CREATE OR REPLACE FUNCTION $procedureName(")
         val inputParameters = StringJoiner(", ")
-        columns.forEach { column, type -> inputParameters.add("p_$column $type") }
+        columns.forEach { (column, type) -> inputParameters.add("p_$column $type") }
         sqlBuilder.append(inputParameters)
         sqlBuilder.append(")\n")
 
@@ -189,14 +116,14 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
 
         sqlBuilder.append("\tINSERT INTO $tableName(")
         val columnNames = StringJoiner(", ")
-        columns.forEach { column, _ -> columnNames.add(column) }
+        columns.forEach { (column, _) -> columnNames.add(column) }
         sqlBuilder.append(columnNames)
         sqlBuilder.append(")\n")
 
         sqlBuilder.append("\tVALUES")
         sqlBuilder.append("(")
         val parameterNames = StringJoiner(", ")
-        columns.forEach { column, _ -> parameterNames.add("p_$column") }
+        columns.forEach { (column, _) -> parameterNames.add("p_$column") }
         sqlBuilder.append(parameterNames)
         sqlBuilder.append(")\n")
 
@@ -211,7 +138,7 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         } else {
             sqlBuilder.append("\t\tDO UPDATE SET ")
             val updateStatements = StringJoiner(", ")
-            columns.forEach { column, _ ->
+            columns.forEach { (column, _) ->
                 if (!uniqueColumns.contains(column))//dont update unique columns
                     updateStatements.add("$column = p_$column")
             }

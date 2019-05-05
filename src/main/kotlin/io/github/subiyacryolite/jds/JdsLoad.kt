@@ -99,11 +99,11 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      */
     private fun <T : JdsEntity> populateInner(jdsDb: JdsDb,
                                               entities: MutableCollection<T>,
-                                              uuidsBulk: ArrayList<JdsEntityComposite>) {
-        if (uuidsBulk.isEmpty()) return
+                                              uuids: ArrayList<JdsEntityComposite>) {
+        if (uuids.isEmpty()) return
         try {
             jdsDb.connection.use { connection ->
-                uuidsBulk.chunked(MAX_BATCH_SIZE).forEach { uuids ->
+                uuids.chunked(MAX_BATCH_SIZE).forEach { uuids ->
                     val questionsString = prepareParamaterSequence(uuids.size)
                     val getOverviewRecords = StringBuilder()
                     getOverviewRecords.append("SELECT\n")
@@ -256,9 +256,6 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @param jdsDb
      * @param entities
      * @param preparedStatement
-     * @param initialisePrimitives
-     * @param initialiseDatesAndTimes
-     * @param initialiseObjects
      * @throws SQLException
      */
     @Throws(SQLException::class)
@@ -275,8 +272,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val childEditVersion = it.getInt("child_edit_version")
                 val fieldId = it.getLong("field_id")
                 val entityId = it.getLong("entity_id")
-                optimalEntityLookup(entities, parentUuid, parentEditVersion).forEach {
-                    it.populateObjects(jdsDb, fieldId, entityId, childUuid, childEditVersion, innerObjects, uuids)
+                optimalEntityLookup(entities, parentUuid, parentEditVersion).forEach { jdsEntity ->
+                    jdsEntity.populateObjects(jdsDb, fieldId, entityId, childUuid, childEditVersion, innerObjects, uuids)
                 }
             }
         }
@@ -289,9 +286,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
      * @return
      */
     private fun <T : JdsEntity> optimalEntityLookup(entities: Collection<T>, uuid: String, editVersion: Int): Stream<T> {
-        return entities.stream().filter {
-            it.overview.uuid == uuid && it.overview.editVersion == editVersion
-        }
+        return entities.stream().filter { it.overview.uuid == uuid && it.overview.editVersion == editVersion }
     }
 
     /**
@@ -307,8 +302,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DATE_TIME, fieldId, value)
                 }
             }
         }
@@ -327,8 +322,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getLocalDate("value", jdsDb)
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DATE, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DATE, fieldId, value)
                 }
             }
         }
@@ -347,8 +342,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getTimestamp("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DATE_TIME_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -367,8 +362,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DOUBLE, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DOUBLE, fieldId, value)
                 }
             }
         }
@@ -387,8 +382,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DOUBLE_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -407,8 +402,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getBytes("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.BLOB, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.BLOB, fieldId, value)
                 }
             }
         }
@@ -427,8 +422,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.INT, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.INT, fieldId, value)
                 }
             }
         }
@@ -447,8 +442,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.ENUM, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.ENUM, fieldId, value)
                 }
             }
         }
@@ -467,8 +462,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.ENUM_STRING, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.ENUM_STRING, fieldId, value)
                 }
             }
         }
@@ -487,8 +482,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.INT_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -507,8 +502,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.ENUM_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -527,8 +522,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.ENUM_STRING_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.ENUM_STRING_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -547,8 +542,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.BOOLEAN, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.BOOLEAN, fieldId, value)
                 }
             }
         }
@@ -567,8 +562,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getLocalTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.TIME, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.TIME, fieldId, value)
                 }
             }
         }
@@ -587,8 +582,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.FLOAT, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.FLOAT, fieldId, value)
                 }
             }
         }
@@ -607,8 +602,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getObject("value") //primitives can be null
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.FLOAT_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -627,8 +622,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val fieldId = it.getLong("field_id")
                 val value = it.getObject("value") //primitives can be null
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.LONG, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.LONG, fieldId, value)
                 }
             }
         }
@@ -647,8 +642,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val fieldId = it.getLong("field_id")
                 val value = it.getObject("value") //primitives can be null
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.LONG_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -667,8 +662,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val fieldId = it.getLong("field_id")
                 val value = it.getObject("value") //primitives can be null
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.DURATION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.DURATION, fieldId, value)
                 }
             }
         }
@@ -687,8 +682,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getZonedDateTime("value", jdsDb)
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value)
                 }
             }
         }
@@ -707,8 +702,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.STRING, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.STRING, fieldId, value)
                 }
             }
         }
@@ -727,8 +722,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.STRING_COLLECTION, fieldId, value)
                 }
             }
         }
@@ -747,8 +742,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.MONTH_DAY, fieldId, value)
                 }
             }
         }
@@ -767,8 +762,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.YEAR_MONTH, fieldId, value)
                 }
             }
         }
@@ -787,8 +782,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val editVersion = it.getInt("edit_version")
                 val value = it.getString("value")
                 val fieldId = it.getLong("field_id")
-                optimalEntityLookup(entities, uuid, editVersion).forEach {
-                    it.populateProperties(JdsFieldType.PERIOD, fieldId, value)
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.PERIOD, fieldId, value)
                 }
             }
         }
@@ -809,23 +804,23 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy
                 val loadAllByTypeSql = "SELECT eo.uuid, eo.edit_version FROM jds_entity_overview eo WHERE eo.entity_id IN (SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?)"
-                it.prepareStatement(loadAllByTypeSql).use {
-                    it.setLong(1, entityId)
-                    it.executeQuery().use {
-                        while (it.next())
-                            entitiesToLoad.add(JdsEntityComposite(it.getString("uuid"), it.getInt("edit_version")))
+                it.prepareStatement(loadAllByTypeSql).use { statement ->
+                    statement.setLong(1, entityId)
+                    statement.executeQuery().use { resultSet ->
+                        while (resultSet.next())
+                            entitiesToLoad.add(JdsEntityComposite(resultSet.getString("uuid"), resultSet.getInt("edit_version")))
                     }
                 }
             } else {
                 //load all in filter
                 val loadByUuidSql = "SELECT uuid, edit_version FROM jds_entity_overview WHERE uuid IN (${parametize(filterUUIDs)})"
-                it.prepareStatement(loadByUuidSql).use { prepStmt ->
+                it.prepareStatement(loadByUuidSql).use { statement ->
                     filterUUIDs.forEachIndexed { index, filterValue ->
-                        prepStmt.setString(index + 1, filterValue)
+                        statement.setString(index + 1, filterValue)
                     }
-                    prepStmt.executeQuery().use {
-                        while (it.next())
-                            entitiesToLoad.add(JdsEntityComposite(it.getString("uuid"), it.getInt("edit_version")))
+                    statement.executeQuery().use { resultSet ->
+                        while (resultSet.next())
+                            entitiesToLoad.add(JdsEntityComposite(resultSet.getString("uuid"), resultSet.getInt("edit_version")))
                     }
                 }
             }
@@ -839,17 +834,5 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         val stringJoiner = StringJoiner(",")
         filterUuids.forEach { _ -> stringJoiner.add("?") }
         return stringJoiner.toString()
-    }
-
-
-    /**
-     * @param preparedStatement
-     * @param index
-     * @param uuid
-     * @throws SQLException
-     */
-    @Throws(SQLException::class)
-    private fun setParameterForStatement(index: Int, uuid: JdsEntityComposite, preparedStatement: PreparedStatement) {
-        preparedStatement.setString(index, uuid.uuid)
     }
 }

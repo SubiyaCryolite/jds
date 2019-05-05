@@ -87,18 +87,18 @@ object JdsSchema {
      */
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String = when (fieldType) {
-        JdsFieldType.ENTITY -> jdsDb.getNativeDataTypeString(36)//act as a FK if you will
-        JdsFieldType.FLOAT -> jdsDb.getNativeDataTypeFloat()
-        JdsFieldType.DOUBLE -> jdsDb.getNativeDataTypeDouble()
-        JdsFieldType.ZONED_DATE_TIME -> jdsDb.getNativeDataTypeZonedDateTime()
-        JdsFieldType.TIME -> jdsDb.getNativeDataTypeTime()
-        JdsFieldType.BLOB -> jdsDb.getNativeDataTypeBlob(max)
-        JdsFieldType.ENUM_COLLECTION, JdsFieldType.BOOLEAN -> jdsDb.getNativeDataTypeBoolean()
-        JdsFieldType.ENUM, JdsFieldType.INT -> jdsDb.getNativeDataTypeInteger()
-        JdsFieldType.DATE_TIME -> jdsDb.getNativeDataTypeDateTime()
-        JdsFieldType.DATE -> jdsDb.getNativeDataTypeDate()
-        JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getNativeDataTypeLong()
-        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY, JdsFieldType.ENUM_STRING -> jdsDb.getNativeDataTypeString(max)
+        JdsFieldType.ENTITY -> jdsDb.getDataType(JdsFieldType.STRING, 36)//act as a FK if you will
+        JdsFieldType.FLOAT -> jdsDb.getDataType(JdsFieldType.FLOAT)
+        JdsFieldType.DOUBLE -> jdsDb.getDataType(JdsFieldType.DOUBLE)
+        JdsFieldType.ZONED_DATE_TIME -> jdsDb.getDataType(JdsFieldType.ZONED_DATE_TIME)
+        JdsFieldType.TIME -> jdsDb.getDataType(JdsFieldType.TIME)
+        JdsFieldType.BLOB -> jdsDb.getDataType(JdsFieldType.BLOB, max)
+        JdsFieldType.ENUM_COLLECTION, JdsFieldType.BOOLEAN -> jdsDb.getDataType(JdsFieldType.BOOLEAN)
+        JdsFieldType.ENUM, JdsFieldType.INT -> jdsDb.getDataType(JdsFieldType.INT)
+        JdsFieldType.DATE_TIME -> jdsDb.getDataType(JdsFieldType.DATE_TIME)
+        JdsFieldType.DATE -> jdsDb.getDataType(JdsFieldType.DATE)
+        JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getDataType(JdsFieldType.LONG)
+        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY, JdsFieldType.ENUM_STRING -> jdsDb.getDataType(JdsFieldType.STRING, max)
         else -> "invalid"
     }
 

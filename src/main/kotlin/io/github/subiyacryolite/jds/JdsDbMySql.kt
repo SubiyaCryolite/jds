@@ -13,13 +13,13 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedPreparedStatement
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
 
 /**
- * The MySQL implementation of [JdsDataBase][JdsDb]
+ * The MySQL implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
 abstract class JdsDbMySql : JdsDb {
 
@@ -28,57 +28,23 @@ abstract class JdsDbMySql : JdsDb {
     constructor() : this(JdsImplementation.MYSQL, true)
 
     override fun tableExists(connection: Connection, tableName: String): Int {
-        try {
-            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :tableSchema AND TABLE_NAME = :tableName").use {
-                it.setString("tableName", tableName)
-                it.setString("tableSchema", connection.catalog)
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-            return 0
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-            return 0
-        }
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName))
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
-        try {
-            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :procedureSchema AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = :procedureName").use {
-                it.setString("procedureName", procedureName)
-                it.setString("procedureSchema", connection.catalog)
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-            return 0
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-            return 0
-        }
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = ? AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, procedureName))
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
-        try {
-            NamedPreparedStatement(connection, "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :viewSchema AND TABLE_NAME = :viewName").use {
-                it.setString("viewName", viewName)
-                it.setString("viewSchema", connection.catalog)
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return 0
+        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, viewName))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        return columnExistsCommonImpl(connection, tableName, columnName, "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :tableCatalog AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName")
+        val sql = "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName, columnName))
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -117,51 +83,19 @@ abstract class JdsDbMySql : JdsDb {
         executeSqlFromFile(connection, "sql/mysql/jds_ref_entity_inheritance.sql")
     }
 
-    override fun getNativeDataTypeFloat(): String {
-        return "FLOAT"
-    }
-
-    override fun getNativeDataTypeDouble(): String {
-        return "DOUBLE"
-    }
-
-    override fun getNativeDataTypeZonedDateTime(): String {
-        return "TIMESTAMP"
-    }
-
-    override fun getNativeDataTypeTime(): String {
-        return "TIME"
-    }
-
-    override fun getNativeDataTypeBlob(max: Int): String {
-        return "BLOB"
-    }
-
-    override fun getNativeDataTypeInteger(): String {
-        return "INT"
-    }
-
-    override fun getNativeDataTypeDate(): String {
-        return "DATE"
-    }
-
-    override fun getNativeDataTypeDateTime(): String {
-        return "DATETIME"
-    }
-
-    override fun getNativeDataTypeLong(): String {
-        return "BIGINT"
-    }
-
-    override fun getNativeDataTypeString(max: Int): String {
-        return if (max == 0)
-            "TEXT"
-        else
-            "VARCHAR($max)"
-    }
-
-    override fun getNativeDataTypeBoolean(): String {
-        return "BOOLEAN"
+    override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
+        JdsFieldType.FLOAT -> "FLOAT"
+        JdsFieldType.DOUBLE -> "DOUBLE"
+        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP"
+        JdsFieldType.TIME -> "TIME"
+        JdsFieldType.BLOB -> "BLOB"
+        JdsFieldType.INT -> "INT"
+        JdsFieldType.DATE -> "DATE"
+        JdsFieldType.DATE_TIME -> "DATETIME"
+        JdsFieldType.LONG -> "BIGINT"
+        JdsFieldType.STRING -> if (max == 0) "TEXT" else "VARCHAR($max)"
+        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        else -> ""
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
@@ -177,7 +111,7 @@ abstract class JdsDbMySql : JdsDb {
 
         sqlBuilder.append("CREATE PROCEDURE $procedureName(")
         val inputParameters = StringJoiner(", ")
-        columns.forEach { column, type -> inputParameters.add("IN p_$column $type") }
+        columns.forEach { (column, type) -> inputParameters.add("IN p_$column $type") }
         sqlBuilder.append(inputParameters)
         sqlBuilder.append(")\n")
 
@@ -187,14 +121,14 @@ abstract class JdsDbMySql : JdsDb {
         else
             sqlBuilder.append("\tINSERT INTO $tableName(")
         val columnNames = StringJoiner(", ")
-        columns.forEach { column, _ -> columnNames.add(column) }
+        columns.forEach { (column, _) -> columnNames.add(column) }
         sqlBuilder.append(columnNames)
         sqlBuilder.append(")\n")
 
         sqlBuilder.append("\tVALUES")
         sqlBuilder.append("(")
         val parameterNames = StringJoiner(", ")
-        columns.forEach { column, _ -> parameterNames.add("p_$column") }
+        columns.forEach { (column, _) -> parameterNames.add("p_$column") }
         sqlBuilder.append(parameterNames)
         sqlBuilder.append(")\n")
 
@@ -202,7 +136,7 @@ abstract class JdsDbMySql : JdsDb {
             sqlBuilder.append("\tON DUPLICATE KEY ")
             sqlBuilder.append("UPDATE ")
             val updateStatements = StringJoiner(", ")
-            columns.forEach { column, _ ->
+            columns.forEach { (column, _) ->
                 if (!uniqueColumns.contains(column))//dont update unique columns
                     updateStatements.add("$column = p_$column")
             }

@@ -14,7 +14,11 @@
 package io.github.subiyacryolite.jds.annotations;
 
 /**
- * The annotation used to decorate [JdsEntity]
+ * The annotation used to decorate [io.github.subiyacryolite.jds.JdsEntity]
+ * @param name
+ * @param id
+ * @param caption
+ * @param description
  */
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 @kotlin.annotation.Target(AnnotationTarget.CLASS)

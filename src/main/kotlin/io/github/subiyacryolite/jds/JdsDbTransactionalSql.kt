@@ -13,30 +13,19 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
 
 /**
- * The TSQL implementation of [JdsDataBase][JdsDb]
+ * The TSQL implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
 abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, tableName)
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
+        val toReturn = getResult(connection, sql, arrayOf(tableName))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
@@ -44,21 +33,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, procedureName)
-                it.setString(2, "P")
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
+        val toReturn = getResult(connection, sql, arrayOf(procedureName, "P"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
@@ -66,21 +42,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun triggerExists(connection: Connection, triggerName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, triggerName)
-                it.setString(2, "TR")
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
+        val toReturn = getResult(connection, sql, arrayOf(triggerName, "TR"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
@@ -88,21 +51,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, viewName)
-                it.setString(2, "V")
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            toReturn = 0
-            ex.printStackTrace(System.err)
-        }
+        val toReturn = getResult(connection, sql, arrayOf(viewName, "V"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
@@ -110,8 +60,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = :tableCatalog and TABLE_NAME = :tableName and COLUMN_NAME = :columnName"
-        return columnExistsCommonImpl(connection, tableName, columnName, sql)
+        val sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = ? and TABLE_NAME = ? and COLUMN_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName, columnName))
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -150,54 +100,19 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         executeSqlFromFile(connection, "sql/tsql/jds_ref_entity_inheritance.sql")
     }
 
-    override fun getNativeDataTypeFloat(): String {
-        return "REAL"
-    }
-
-    override fun getNativeDataTypeDouble(): String {
-        return "FLOAT"
-    }
-
-    override fun getNativeDataTypeZonedDateTime(): String {
-        return "DATETIMEOFFSET(7)"
-    }
-
-    override fun getNativeDataTypeTime(): String {
-        return "TIME(7)"
-    }
-
-    override fun getNativeDataTypeBlob(max: Int): String {
-        return if (max == 0)
-            "VARBINARY(MAX)"
-        else
-            "VARBINARY($max)"
-    }
-
-    override fun getNativeDataTypeInteger(): String {
-        return "INTEGER"
-    }
-
-    override fun getNativeDataTypeDate(): String {
-        return "DATE"
-    }
-
-    override fun getNativeDataTypeDateTime(): String {
-        return "DATETIME"
-    }
-
-    override fun getNativeDataTypeLong(): String {
-        return "BIGINT"
-    }
-
-    override fun getNativeDataTypeString(max: Int): String {
-        return if (max == 0)
-            "NVARCHAR(MAX)"
-        else
-            "NVARCHAR($max)"
-    }
-
-    override fun getNativeDataTypeBoolean(): String {
-        return "BIT"
+    override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
+        JdsFieldType.FLOAT -> "REAL"
+        JdsFieldType.DOUBLE -> "FLOAT"
+        JdsFieldType.ZONED_DATE_TIME -> "DATETIMEOFFSET(7)"
+        JdsFieldType.TIME -> "TIME(7)"
+        JdsFieldType.BLOB -> if (max == 0) "VARBINARY(MAX)" else "VARBINARY($max)"
+        JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.DATE -> "DATE"
+        JdsFieldType.DATE_TIME -> "DATETIME"
+        JdsFieldType.LONG -> "BIGINT"
+        JdsFieldType.STRING -> if (max == 0) "NVARCHAR(MAX)" else "NVARCHAR($max)"
+        JdsFieldType.BOOLEAN -> "BIT"
+        else -> ""
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
@@ -213,7 +128,7 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
         sqlBuilder.append("CREATE OR ALTER PROCEDURE $procedureName(")
         val inputParameters = StringJoiner(", ")
-        columns.forEach { column, type -> inputParameters.add("@p_$column $type") }
+        columns.forEach { (column, type) -> inputParameters.add("@p_$column $type") }
         sqlBuilder.append(inputParameters)
         sqlBuilder.append(")\n")
 
@@ -223,13 +138,13 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
         sqlBuilder.append("\t\t\tUSING (VALUES(")
         val parameterColumns = StringJoiner(", ")
-        columns.forEach { column, _ -> parameterColumns.add("@p_$column") }
+        columns.forEach { (column, _) -> parameterColumns.add("@p_$column") }
         sqlBuilder.append(parameterColumns)
         sqlBuilder.append("))")
 
         sqlBuilder.append("AS src(")
         val targetColumns = StringJoiner(", ")
-        columns.forEach { column, _ -> targetColumns.add(column) }
+        columns.forEach { (column, _) -> targetColumns.add(column) }
         sqlBuilder.append(targetColumns)
         sqlBuilder.append(")\n")
 
@@ -241,20 +156,20 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
 
         sqlBuilder.append("\t\t\tWHEN NOT MATCHED THEN INSERT (")
         val notMatchedColumns = StringJoiner(", ")
-        columns.forEach { column, _ -> notMatchedColumns.add(column) }
+        columns.forEach { (column, _) -> notMatchedColumns.add(column) }
         sqlBuilder.append(notMatchedColumns)
         sqlBuilder.append(")")
 
         sqlBuilder.append(" VALUES(")
         val notMatchedColumnsSrc = StringJoiner(", ")
-        columns.forEach { column, _ -> notMatchedColumnsSrc.add("src.$column") }
+        columns.forEach { (column, _) -> notMatchedColumnsSrc.add("src.$column") }
         sqlBuilder.append(notMatchedColumnsSrc)
         sqlBuilder.append(")\n")
 
         if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
             val updateColumns = StringJoiner(", ")
-            columns.forEach { column, _ ->
+            columns.forEach { (column, _) ->
                 if (!uniqueColumns.contains(column)) //dont update unique columns
                     updateColumns.add("dest.$column = src.$column")
             }

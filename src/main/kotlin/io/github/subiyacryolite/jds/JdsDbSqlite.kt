@@ -13,39 +13,27 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedPreparedStatement
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 
 /**
- * The SQLite implementation of [JdsDataBase][JdsDb]
+ * The SQLite implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
 abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
-        var toReturn = 0
         val sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, tableName)
-                it.executeQuery().use {
-                    while (it.next())
-                        toReturn = it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return toReturn
+        return getResult(connection, sql, arrayOf(tableName))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         val sql = "PRAGMA table_info('$tableName')"
         try {
-            NamedPreparedStatement(connection, sql).use {
-                it.executeQuery().use {
-                    while (it.next()) {
-                        val column = it.getString("name")
+            connection.prepareStatement(sql).use { statement ->
+                statement.executeQuery().use { resultSet ->
+                    while (resultSet.next()) {
+                        val column = resultSet.getString("name")
                         if (column.equals(columnName, ignoreCase = true))
                             return 1 //does exist
                     }
@@ -162,27 +150,20 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun mapParentToChild() = "INSERT OR REPLACE INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?)"
 
-    override fun getNativeDataTypeFloat() = "REAL"
-
-    override fun getNativeDataTypeDouble() = "DOUBLE"
-
-    override fun getNativeDataTypeZonedDateTime() = "BIGINT"
-
-    override fun getNativeDataTypeTime() = "INTEGER"
-
-    override fun getNativeDataTypeBlob(max: Int) = "BLOB"
-
-    override fun getNativeDataTypeInteger() = "INTEGER"
-
-    override fun getNativeDataTypeDate() = "TIMESTAMP"
-
-    override fun getNativeDataTypeDateTime() = "TIMESTAMP"
-
-    override fun getNativeDataTypeLong() = "BIGINT"
-
-    override fun getNativeDataTypeString(max: Int) = "TEXT"
-
-    override fun getNativeDataTypeBoolean() = "BOOLEAN"
+    override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
+        JdsFieldType.FLOAT -> "REAL"
+        JdsFieldType.DOUBLE -> "DOUBLE"
+        JdsFieldType.ZONED_DATE_TIME -> "BIGINT"
+        JdsFieldType.TIME -> "INTEGER"
+        JdsFieldType.BLOB -> "BLOB"
+        JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.DATE -> "TIMESTAMP"
+        JdsFieldType.DATE_TIME -> "TIMESTAMP"
+        JdsFieldType.LONG -> "BIGINT"
+        JdsFieldType.STRING -> "TEXT"
+        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        else -> ""
+    }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
         return "CREATE INDEX $indexName ON $tableName($columnName);"

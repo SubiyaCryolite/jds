@@ -13,79 +13,34 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.javaworld.NamedPreparedStatement
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
 import java.sql.Connection
 import java.util.*
 
 /**
- * Created by ifunga on 14/07/2017.
+ * The Oracle implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
 abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, tableName.toUpperCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return 0
+        return getResult(connection, sql, arrayOf(tableName.toUpperCase()))
     }
 
     override fun viewExists(connection: Connection, viewName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?"
-        try {
-            connection.prepareStatement(sql).use {
-                it.setString(1, viewName.toUpperCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return 0
+        return getResult(connection, sql, arrayOf(viewName.toUpperCase()))
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?"
-        try {
-            connection.prepareStatement(sql).use { preparedStatement ->
-                preparedStatement.setString(1, procedureName.toUpperCase())
-                preparedStatement.executeQuery().use { resultSet ->
-                    while (resultSet.next())
-                        return resultSet.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return 0
+        return getResult(connection, sql, arrayOf(procedureName.toUpperCase()))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = :tableName AND COLUMN_NAME = :columnName"
-        try {
-            NamedPreparedStatement(connection, sql).use {
-                it.setString("tableName", tableName.toUpperCase())
-                it.setString("columnName", columnName.toUpperCase())
-                it.executeQuery().use {
-                    while (it.next())
-                        return it.getInt("Result")
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-        return 0
+        val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?"
+        return getResult(connection, sql, arrayOf(tableName.toUpperCase(), columnName.toUpperCase()))
     }
 
     override fun createStoreEntities(connection: Connection) {
@@ -124,48 +79,19 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_inheritance.sql")
     }
 
-    override fun getNativeDataTypeFloat(): String {
-        return "BINARY_FLOAT"
-    }
-
-    override fun getNativeDataTypeDouble(): String {
-        return "BINARY_DOUBLE"
-    }
-
-    override fun getNativeDataTypeZonedDateTime(): String {
-        return "TIMESTAMP WITH TIME ZONE"
-    }
-
-    override fun getNativeDataTypeTime(): String {
-        return "NUMBER(19)"
-    }
-
-    override fun getNativeDataTypeBlob(max: Int): String {
-        return "BLOB"
-    }
-
-    override fun getNativeDataTypeInteger(): String {
-        return "NUMBER(10)"
-    }
-
-    override fun getNativeDataTypeDate(): String {
-        return "DATE"
-    }
-
-    override fun getNativeDataTypeDateTime(): String {
-        return "TIMESTAMP"
-    }
-
-    override fun getNativeDataTypeLong(): String {
-        return "NUMBER(19)"
-    }
-
-    override fun getNativeDataTypeString(max: Int): String {
-        return if (max == 0) "NCLOB" else "NVARCHAR2($max)"
-    }
-
-    override fun getNativeDataTypeBoolean(): String {
-        return "NUMBER(1,0)"
+    override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
+        JdsFieldType.FLOAT -> "BINARY_FLOAT"
+        JdsFieldType.DOUBLE -> "BINARY_DOUBLE"
+        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP WITH TIME ZONE"
+        JdsFieldType.TIME -> "NUMBER(19)"
+        JdsFieldType.BLOB -> "BLOB"
+        JdsFieldType.INT -> "NUMBER(10)"
+        JdsFieldType.DATE -> "DATE"
+        JdsFieldType.DATE_TIME -> "TIMESTAMP"
+        JdsFieldType.LONG -> "NUMBER(19)"
+        JdsFieldType.STRING -> if (max == 0) "NCLOB" else "NVARCHAR2($max)"
+        JdsFieldType.BOOLEAN -> "NUMBER(1,0)"
+        else -> ""
     }
 
     override fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String {
@@ -181,7 +107,7 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
         sqlBuilder.append("CREATE OR REPLACE PROCEDURE $procedureName(")
         val inputParameters = StringJoiner(", ")
-        columns.forEach { column, type ->
+        columns.forEach { (column, type) ->
             var shortType = type
             val containsBrackets = type.contains("(")
             if (containsBrackets)
@@ -203,20 +129,20 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
 
         sqlBuilder.append("\t\t\tWHEN NOT MATCHED THEN INSERT (")
         val notMatchedColumns = StringJoiner(", ")
-        columns.forEach { column, _ -> notMatchedColumns.add(column) }
+        columns.forEach { (column, _) -> notMatchedColumns.add(column) }
         sqlBuilder.append(notMatchedColumns)
         sqlBuilder.append(")")
 
         sqlBuilder.append(" VALUES(")
         val notMatchedColumnsSrc = StringJoiner(", ")
-        columns.forEach { column, _ -> notMatchedColumnsSrc.add("p_$column") }
+        columns.forEach { (column, _) -> notMatchedColumnsSrc.add("p_$column") }
         sqlBuilder.append(notMatchedColumnsSrc)
         sqlBuilder.append(")\n")
 
         if (!doNothingOnConflict && columns.count() > uniqueColumns.count()) {
             sqlBuilder.append("\t\t\tWHEN MATCHED THEN UPDATE SET ")
             val updateColumns = StringJoiner(", ")
-            columns.forEach { column, _ ->
+            columns.forEach { (column, _) ->
                 if (!uniqueColumns.contains(column)) //dont update unique columns
                     updateColumns.add("$column = p_$column")
             }

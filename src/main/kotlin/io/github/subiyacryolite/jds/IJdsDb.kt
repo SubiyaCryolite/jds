@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.enums.JdsFieldType
 import java.sql.Connection
 import java.sql.SQLException
 
@@ -82,73 +83,22 @@ interface IJdsDb {
      * Gets the correct syntax needed to add a new column to the underlying database implementation
      * @return the correct syntax needed to add a new column to the underlying database implementation
      */
-    open fun getDbAddColumnSyntax() = "ALTER TABLE %s %s"
+    fun getDbAddColumnSyntax() = "ALTER TABLE %s %s"
 
     /**
-     * Gets the Float data-type of the current database implementation
-     * @return the Float data-type of the database implementation
+     * Gets the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
+     * @param fieldType the supplied [io.github.subiyacryolite.jds.JdsField]
+     * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
      */
-    fun getNativeDataTypeFloat(): String
+    fun getDataType(fieldType: JdsFieldType): String
 
     /**
-     * Gets the Double data-type of the current database implementation
-     * @return the Double data-type of the database implementation
+     * Gets the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
+     * @param fieldType the supplied [io.github.subiyacryolite.jds.JdsField]
+     * @param max the maximum length of the database type, applied against [io.github.subiyacryolite.jds.enums.JdsFieldType.STRING] and [io.github.subiyacryolite.jds.enums.JdsFieldType.BLOB] types
+     * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
      */
-    fun getNativeDataTypeDouble(): String
-
-    /**
-     * Gets the ZonedDateTime data-type of the current database implementation
-     * @return the ZonedDataTime data-type of the database implementation
-     */
-    fun getNativeDataTypeZonedDateTime(): String
-
-    /**
-     * Gets the Time data-type of the current database implementation
-     * @return the Time data-type of the database implementation
-     */
-    fun getNativeDataTypeTime(): String
-
-    /**
-     * Gets the Blob data-type of the current database implementation
-     * @return the Blob data-type of the database implementation
-     */
-    fun getNativeDataTypeBlob(max: Int): String
-
-    /**
-     * Gets the Integer data-type of the current database implementation
-     * @return the Integer data-type of the database implementation
-     */
-    fun getNativeDataTypeInteger(): String
-
-    /**
-     * Gets the DateTime data-type of the current database implementation
-     * @return the DateTime data-type of the database implementation
-     */
-    fun getNativeDataTypeDateTime(): String
-
-    /**
-     * Gets the Date data-type of the current database implementation
-     * @return the Date data-type of the database implementation
-     */
-    fun getNativeDataTypeDate(): String
-
-    /**
-     * Gets the Long data-type of the current database implementation
-     * @return the Long data-type of the database implementation
-     */
-    fun getNativeDataTypeLong(): String
-
-    /**
-     * Gets the String data-type of the current database implementation
-     * @return the String data-type of the database implementation
-     */
-    fun getNativeDataTypeString(max: Int): String
-
-    /**
-     * Gets the Boolean data-type of the current database implementation
-     * @return the Boolean data-type of the database implementation
-     */
-    fun getNativeDataTypeBoolean(): String
+    fun getDataType(fieldType: JdsFieldType, max: Int): String
 
     /**
      * @param
