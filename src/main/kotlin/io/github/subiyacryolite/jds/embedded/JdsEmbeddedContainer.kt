@@ -220,7 +220,6 @@ data class JdsStorePeriod(@get:JsonProperty("k") @set:JsonProperty("k") var key:
  * @param editVersion uuid location version
  * @param entityId entity id
  * @param fieldId field id
- * @param version version
  */
 data class JdsEntityOverview(@get:JsonProperty("u") @set:JsonProperty("u") var uuid: String = "",
                              @get:JsonProperty("ev") @set:JsonProperty("ev") var editVersion: Int = 0,
@@ -254,5 +253,15 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
             }
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 }

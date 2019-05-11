@@ -1275,6 +1275,22 @@ abstract class JdsEntity : IJdsEntity {
         objectCollections.values.forEach { it -> it.forEach { it.getNestedEntities(collection) } }
     }
 
+
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
+    }
+
+    override fun toString(): String {
+        return "JdsEntity(uuid=${overview.uuid},editVersion=${overview.editVersion},entityId=${overview.entityId})"
+    }
+
     companion object : Externalizable {
 
         private const val serialVersionUID = 20180106_2125L

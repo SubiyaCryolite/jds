@@ -99,6 +99,26 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
         values = input.readObject() as Set<T>
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as JdsFieldEnum<*>
+
+        if (enumType != other.enumType) return false
+        if (field != other.field) return false
+        if (values != other.values) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = enumType.hashCode()
+        result = 31 * result + field.hashCode()
+        result = 31 * result + values.hashCode()
+        return result
+    }
+
     companion object : Externalizable {
 
         private const val serialVersionUID = 20171109_0853L

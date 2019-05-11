@@ -34,6 +34,24 @@ class JdsFieldEntity<T : IJdsEntity>(var entityType: Class<out IJdsEntity>, var 
 
     override fun toString(): String = "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as JdsFieldEntity<*>
+
+        if (entityType != other.entityType) return false
+        if (fieldEntity != other.fieldEntity) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = entityType.hashCode()
+        result = 31 * result + fieldEntity.hashCode()
+        return result
+    }
+
     companion object {
         private const val serialVersionUID = 20171109_0853L
     }
