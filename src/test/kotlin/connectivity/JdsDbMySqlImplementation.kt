@@ -14,11 +14,17 @@ import java.util.*
 
 class JdsDbMySqlImplementation : JdsDbMySql() {
 
+    private val properties: Properties = Properties()
+    private val connectionString: String
+
+    init {
+        FileInputStream(File("db.mysql.properties")).use { properties.load(it) }
+        connectionString = "jdbc:mysql://${properties["dbUrl"]}:${properties["dbPort"]}/${properties["dbName"]}"
+    }
+
     override val connection: Connection
         get () {
             Class.forName("com.mysql.cj.jdbc.Driver")
-            val properties = Properties()
-            FileInputStream(File("db.mysql.properties")).use { properties.load(it) }
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/jds", properties)
+            return DriverManager.getConnection(connectionString, properties)
         }
 }
