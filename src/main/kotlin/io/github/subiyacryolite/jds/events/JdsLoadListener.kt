@@ -20,13 +20,13 @@ interface JdsLoadListener {
 
     /**
      * This method is called after initializing the base object and before populating any field values within a {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity}
-     *@param onPreLoadEventArguments the arguments to reference for this invocation
+     *@param eventArguments the arguments to reference for this invocation
      */
-    fun onPreLoad(onPreLoadEventArguments: OnPreLoadEventArgument)
+    fun onPreLoad(eventArguments: EventArguments)
 
     /**
      * This method is called after initializing the base object and after populating all field values within a {@link io.github.subiyacryolite.jds.JdsEntity JdsEntity}
-     *@param onPostLoadEventArguments the arguments to reference for this invocation
+     *@param eventArguments the arguments to reference for this invocation
      */
-    fun onPostLoad(onPostLoadEventArguments: OnPostLoadEventArgument)
+    fun onPostLoad(eventArguments: EventArguments)
 }

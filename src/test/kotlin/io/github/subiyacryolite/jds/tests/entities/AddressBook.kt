@@ -1,0 +1,21 @@
+package io.github.subiyacryolite.jds.tests.entities
+
+import io.github.subiyacryolite.jds.tests.constants.Entities
+import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import javafx.beans.property.SimpleListProperty
+import javafx.collections.FXCollections
+
+@JdsEntityAnnotation(id = 2, name = "address_book")
+class AddressBook : JdsEntity() {
+    private val _addresses: SimpleListProperty<Address> = SimpleListProperty(FXCollections.observableArrayList())
+
+    init {
+        map(Entities.ADDRESSES, _addresses)
+    }
+
+    val addresses: MutableList<Address>
+        get() = _addresses.get()
+
+    override fun toString(): String = "{ addresses = $addresses }"
+}

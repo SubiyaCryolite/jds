@@ -467,7 +467,7 @@ class JdsDbMariaImplementation : JdsDbMaria() {
         get () {
             Class.forName("org.mariadb.jdbc.Driver")
             val properties = Properties()
-            FileInputStream(File("db.maria.properties")).use { properties.load(it) }
+            FileInputStream(File("db.mariadb.properties")).use { properties.load(it) }
             return DriverManager.getConnection("jdbc:mariadb://IP_ADDRESS:PORT/DATABASE", properties)
         }
 }

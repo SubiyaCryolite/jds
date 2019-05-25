@@ -26,6 +26,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import javax.sql.DataSource
 import kotlin.collections.LinkedHashMap
 
 /**
@@ -49,7 +50,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     fun init(dimensionTable: String = "jds_entity_overview") {
         try {
             this.dimensionTable = dimensionTable
-            connection.use { connection ->
+            dataSource.connection.use { connection ->
                 prepareDatabaseComponents(connection)
             }
         } catch (ex: Exception) {
@@ -540,7 +541,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * @param name the entity's name
      * @param caption
      * @param description
-     * @param parent
      */
     private fun populateRefEntity(connection: Connection, id: Long, name: String, caption: String, description: String) = try {
         (if (supportsStatements) connection.prepareCall(populateRefEntity()) else connection.prepareStatement(populateRefEntity())).use { statement ->
@@ -562,7 +562,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
 
     @Throws(Exception::class)
     fun prepareTables() {
-        connection.use { connection ->
+        dataSource.connection.use { connection ->
             tables.forEach { it.forceGenerateOrUpdateSchema(this, connection) }
         }
     }
@@ -579,7 +579,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
                 classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
-                    connection.use { connection ->
+                    dataSource.connection.use { connection ->
                         connection.autoCommit = false
                         val parentEntities = ArrayList<Long>()
                         val jdsEntity = entity.getDeclaredConstructor().newInstance()
@@ -590,6 +590,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
+                        connection.autoCommit = true
                         if (options.isLoggingOutput)
                             println("Mapped Entity [${entityAnnotation.name}]")
                     }
@@ -850,14 +851,14 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
 
     /**
      * Acquire a custom connection to a database
-     * @param targetConnection a custom flag to access a particular connection
+     * @param targetDataSource a custom flag to access a particular connection
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
      * @throws SQLException when a standard SQL Exception occurs
      * @return a custom connection to a database
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
-    override fun getConnection(targetConnection: Int): Connection {
-        return connection
+    override fun getDataSource(targetDataSource: Int): DataSource {
+        return dataSource
     }
 
     /**

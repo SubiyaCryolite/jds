@@ -30,7 +30,8 @@ object JdsSchema {
      */
     fun generateColumns(jdsDb: IJdsDb, fields: Collection<JdsField>, columnToFieldMap: LinkedHashMap<String, JdsField>, enumOrdinals: HashMap<String, Int>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
-        fields.filterNot { isIgnoredType(it.type) }.sortedBy { it.name }.forEach {
+        //sort fields by ID to ensure correct insertion
+        fields.sortedBy { it.id }.filterNot { isIgnoredType(it.type) }.sortedBy { it.name }.forEach {
             when (it.type) {
                 JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
                     val columnName = "${it.name}_${enum.ordinal}"

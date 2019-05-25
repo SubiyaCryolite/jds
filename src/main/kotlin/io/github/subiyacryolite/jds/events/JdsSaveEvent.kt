@@ -17,5 +17,5 @@ import io.github.subiyacryolite.jds.JdsEntity
 import java.sql.Connection
 
 interface JdsSaveEvent {
-    fun onSave(entity: JdsEntity, preSaveEventArgument: SaveEventArgument, postSaveEventArgument: SaveEventArgument, connection: Connection)
+    fun onSave(entity: JdsEntity, preSaveEventArguments: EventArguments, postSaveEventArguments: EventArguments, connection: Connection)
 }

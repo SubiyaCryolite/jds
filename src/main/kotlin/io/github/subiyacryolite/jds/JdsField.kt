@@ -14,7 +14,6 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.enums.JdsFieldType
-import io.github.subiyacryolite.jds.enums.JdsFieldType.STRING
 import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
@@ -22,39 +21,15 @@ import java.io.ObjectOutput
 import java.util.*
 
 /**
- * Represents a fieldEntity in JDS
+ * Represents a jdsField in JDS
  */
-class JdsField() : Externalizable {
-    var id: Long = 0
-        private set
-    var name: String = ""
-        private set
-    var description: String = ""
-        private set
-    var type: JdsFieldType = JdsFieldType.STRING
-        private set
+data class JdsField(var id: Long = 0,
+                    var name: String = "",
+                    var type: JdsFieldType = JdsFieldType.STRING,
+                    var description: String = "") : Externalizable {
 
-    init {
-        type = STRING
-    }
-
-    /**
-     * @param id
-     * @param name
-     * @param description
-     * @param type
-     */
-    @JvmOverloads
-    constructor(id: Long, name: String, type: JdsFieldType, description: String = "") : this() {
-        this.id = id
-        this.name = name
-        this.type = type
-        this.description = description
-        bindForGlobalLookup(this)
-    }
-
-    override fun toString(): String {
-        return "JdsField{ id = $id, name = $name, type = $type, description = $description }"
+    internal fun bind() {
+        values[this.id] = this
     }
 
     @Throws(IOException::class)
@@ -73,28 +48,6 @@ class JdsField() : Externalizable {
         type = input.readObject() as JdsFieldType
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as JdsField
-
-        if (id != other.id) return false
-        if (name != other.name) return false
-        if (description != other.description) return false
-        if (type != other.type) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + description.hashCode()
-        result = 31 * result + type.hashCode()
-        return result
-    }
-
     companion object : Externalizable {
         private const val serialVersionUID = 20171109_0853L
 
@@ -110,14 +63,6 @@ class JdsField() : Externalizable {
         @Throws(IOException::class)
         override fun writeExternal(objectOutput: ObjectOutput) {
             objectOutput.writeObject(values)
-        }
-
-        /**
-         * @param jdsField
-         */
-        private fun bindForGlobalLookup(jdsField: JdsField) {
-            if (!values.containsKey(jdsField.id))
-                values.put(jdsField.id, jdsField)
         }
     }
 }

@@ -21,7 +21,7 @@ import java.util.*
 import kotlin.collections.HashSet
 
 /**
- * Represents a fieldEntity enum in JDS
+ * Represents a jdsField enum in JDS
  */
 class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     lateinit var enumType: Class<T>
@@ -57,7 +57,7 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
     }
 
     override fun toString(): String {
-        return "JdsFieldEnum{ fieldEntity= $field , values=$values }"
+        return "JdsFieldEnum{ jdsField= $field , values=$values }"
     }
 
     /**

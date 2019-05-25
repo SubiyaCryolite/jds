@@ -19,9 +19,8 @@ import io.github.subiyacryolite.jds.JdsExtensions.getZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsFilterBy
+import io.github.subiyacryolite.jds.events.EventArguments
 import io.github.subiyacryolite.jds.events.JdsLoadListener
-import io.github.subiyacryolite.jds.events.OnPostLoadEventArgument
-import io.github.subiyacryolite.jds.events.OnPreLoadEventArgument
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
@@ -35,12 +34,12 @@ import kotlin.collections.ArrayList
 
 /**
  * This class is responsible for loading an [entity's][JdsEntity] [fields][JdsField]
- * @param jdsDb
+ * @param db
  * @param referenceType
  * @param filterBy
  * @param T
  */
-class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableList<T>> {
+class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableList<T>> {
 
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
     private var filterIds: Iterable<String> = emptyList()
@@ -84,9 +83,9 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
         val entitiesToLoad = ArrayList<JdsEntityComposite>()
         val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
         val entityId = annotation.id
-        prepareActionBatches(jdsDb, entityId, entitiesToLoad, filterIds)
+        prepareActionBatches(db, entityId, entitiesToLoad, filterIds)
         val collections = ArrayList<T>()
-        populateInner(jdsDb, collections, entitiesToLoad)
+        populateInner(db, collections, entitiesToLoad)
         return collections
     }
 
@@ -102,7 +101,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                               uuids: ArrayList<JdsEntityComposite>) {
         if (uuids.isEmpty()) return
         try {
-            jdsDb.connection.use { connection ->
+            jdsDb.dataSource.connection.use { connection ->
                 uuids.chunked(MAX_BATCH_SIZE).forEach { uuids ->
                     val questionsString = prepareParamaterSequence(uuids.size)
                     val getOverviewRecords = StringBuilder()
@@ -186,7 +185,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                         //catch embedded/pre-created objects objects as well
                         if (jdsDb.options.initialisePrimitives || jdsDb.options.initialiseDatesAndTimes || jdsDb.options.initialiseObjects) {
                             createEntities(entities, preparedStatement)
-                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(OnPreLoadEventArgument(jdsDb, connection, alternateConnections)) }
+                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPreLoad(EventArguments(connection)) }
                             //all entities have been initialised, now we populate them
                             if (jdsDb.options.isWritingValuesToEavTables) {
                                 booleanStatement.use { populateBoolean(entities, it) }
@@ -223,7 +222,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                                     blobStatement.use { populateBlobs(entities, it) }
                                 populateEmbeddedAndArrayObjectsStmt.use { populateObjectEntriesAndObjectArrays(jdsDb, entities, it) }
                             }
-                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(OnPostLoadEventArgument(jdsDb, connection, alternateConnections)) }
+                            entities.filterIsInstance(JdsLoadListener::class.java).forEach { it.onPostLoad(EventArguments(connection)) }
                         }
                         //close alternate connections
                         alternateConnections.forEach { it.value.close() }
@@ -241,8 +240,8 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
                 val entityId = it.getLong("entity_id")
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                if (jdsDb.classes.containsKey(entityId)) {
-                    val refType = jdsDb.classes[entityId]!!
+                if (db.classes.containsKey(entityId)) {
+                    val refType = db.classes[entityId]!!
                     val entity = refType.getDeclaredConstructor().newInstance()
                     entity.overview.uuid = uuid
                     entity.overview.editVersion = editVersion
@@ -320,7 +319,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             while (it.next()) {
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val value = it.getLocalDate("value", jdsDb)
+                val value = it.getLocalDate("value", db)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
                     jdsEntity.populateProperties(JdsFieldType.DATE, fieldId, value)
@@ -560,7 +559,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             while (it.next()) {
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val value = it.getLocalTime("value", jdsDb)
+                val value = it.getLocalTime("value", db)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
                     jdsEntity.populateProperties(JdsFieldType.TIME, fieldId, value)
@@ -680,7 +679,7 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
             while (it.next()) {
                 val uuid = it.getString("uuid")
                 val editVersion = it.getInt("edit_version")
-                val value = it.getZonedDateTime("value", jdsDb)
+                val value = it.getZonedDateTime("value", db)
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
                     jdsEntity.populateProperties(JdsFieldType.ZONED_DATE_TIME, fieldId, value)
@@ -790,16 +789,15 @@ class JdsLoad<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType
     }
 
     /**
-     * @param jdsDataBase
-     * @param batchSize
+     * @param jdsDb
      * @param entityId
      * @param entitiesToLoad
      * @param filterUUIDs
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    private fun prepareActionBatches(jdsDataBase: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<String>) {
+    private fun prepareActionBatches(jdsDb: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<String>) {
         val searchByType = filterUUIDs.none()
-        jdsDataBase.connection.use {
+        jdsDb.dataSource.connection.use {
             if (searchByType) {
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy

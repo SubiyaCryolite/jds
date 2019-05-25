@@ -13,8 +13,8 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.events.EventArguments
 import io.github.subiyacryolite.jds.events.JdsDeleteListener
-import io.github.subiyacryolite.jds.events.OnDeleteEventArgument
 import java.sql.Connection
 import java.sql.SQLException
 import java.util.*
@@ -45,10 +45,10 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      * @throws ClassNotFoundException
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.map({ it.overview.uuid })) {
+    constructor(jdsDb: JdsDb, entities: Collection<JdsEntity>) : this(jdsDb, entities.map { it.overview.uuid }) {
 
-        jdsDb.connection.use { connection ->
-            val args = OnDeleteEventArgument(jdsDb, connection, alternateConnections)
+        jdsDb.dataSource.connection.use { connection ->
+            val args = EventArguments( connection)
             entities.forEach { entity ->
                 if (entity is JdsDeleteListener)
                     entity.onDelete(args)
@@ -73,7 +73,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
      */
     @Throws(Exception::class)
     override fun call(): Boolean? {
-        jdsDb.connection.use { connection ->
+        jdsDb.dataSource.connection.use { connection ->
             connection.prepareStatement(DELETE_SQL).use { statement ->
                 connection.autoCommit = false
                 for (entity in entities) {
@@ -96,7 +96,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
          * @param entities
          * @throws Exception
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(jdsDb, entityVersions).call()", "io.github.subiyacryolite.jds.JdsDelete"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(db, entityVersions).call()", "io.github.subiyacryolite.jds.JdsDelete"))
         @Throws(Exception::class)
         fun delete(jdsDb: JdsDb, entities: Collection<JdsEntity>) {
             JdsDelete(jdsDb, entities).call()
@@ -107,7 +107,7 @@ class JdsDelete(private val jdsDb: JdsDb, uuids: List<CharSequence>) : Callable<
          * @param entities
          * @throws Exception
          */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("delete(jdsDb, Arrays.asList(*entityVersions))", "io.github.subiyacryolite.jds.JdsDelete.Companion.delete", "java.util.Arrays"))
+        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("delete(db, Arrays.asList(*entityVersions))", "io.github.subiyacryolite.jds.JdsDelete.Companion.delete", "java.util.Arrays"))
         @Throws(Exception::class)
         fun delete(jdsDb: JdsDb, vararg entities: JdsEntity) {
             delete(jdsDb, Arrays.asList(*entities))

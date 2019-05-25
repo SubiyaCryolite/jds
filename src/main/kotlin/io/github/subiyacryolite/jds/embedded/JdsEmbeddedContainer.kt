@@ -226,21 +226,13 @@ data class JdsEntityOverview(@get:JsonProperty("u") @set:JsonProperty("u") var u
                              @get:JsonProperty("e") @set:JsonProperty("e") var entityId: Long = 0,
                              @get:JsonProperty("f") @set:JsonProperty("f") var fieldId: Long? = null)
 
-/**
- * @param entities a collection of [JdsEntity][JdsEntity] objects to store in a portable manner
- */
-class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
-
-    //empty constructor needed for json serialization
-    constructor() : this(emptyList())
+data class JdsEmbeddedContainer(@get:JsonProperty("e")
+                                val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()) {
 
     /**
-     * Embedded objects
+     * @param entities a collection of [JdsEntity] objects to store in a portable manner
      */
-    @get:JsonProperty("e")
-    val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()
-
-    init {
+    constructor(entities: Iterable<JdsEntity>) : this() {
         entities.forEach {
             val classHasAnnotation = it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
             val superclassHasAnnotation = it.javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
@@ -253,15 +245,5 @@ class JdsEmbeddedContainer(entities: Iterable<JdsEntity>) {
                 throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
             }
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return javaClass.hashCode()
     }
 }

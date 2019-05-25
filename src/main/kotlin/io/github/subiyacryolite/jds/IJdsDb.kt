@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds;
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import java.sql.Connection
 import java.sql.SQLException
+import javax.sql.DataSource
 
 /**
  * @author indana
@@ -29,18 +30,18 @@ interface IJdsDb {
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
      * @throws SQLException when a standard SQL Exception occurs
      */
-    val connection: Connection
+    val dataSource: DataSource
 
     /**
      * Acquire a custom connection to a database
-     * @param targetConnection a custom flag to access a custom database
+     * @param targetDataSource a custom flag to access a custom database
      *
      * @return standard connection to the database
      * @throws ClassNotFoundException when JDBC driver is not configured correctly
      * @throws SQLException when a standard SQL Exception occurs
      */
     @Throws(ClassNotFoundException::class, SQLException::class)
-    fun getConnection(targetConnection: Int): Connection
+    fun getDataSource(targetDataSource: Int): DataSource
 
     /**
      * Checks if the specified index exists the the database

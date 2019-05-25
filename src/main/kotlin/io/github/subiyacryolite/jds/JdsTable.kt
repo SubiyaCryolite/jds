@@ -19,23 +19,21 @@ import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.enums.JdsImplementation
-import io.github.subiyacryolite.jds.events.EventArgument
+import io.github.subiyacryolite.jds.events.EventArguments
 import java.io.Serializable
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashMap
 
 
-open class JdsTable() : Serializable {
+data class JdsTable(var name: String = "",
+                    var entities: TreeSet<Long> = TreeSet<Long>(),
+                    var fields: TreeSet<Long> = TreeSet<Long>(),
+                    var isStoringLiveRecordsOnly: Boolean = true) : Serializable {
 
-    var name = ""
-    var entities = HashSet<Long>()
-    var fields = HashSet<Long>()
-    var isStoringLiveRecordsOnly = true
     private val columnToFieldMap = LinkedHashMap<String, JdsField>()
     private val enumOrdinals = HashMap<String, Int>()
     private val columnNames = LinkedList<String>()
@@ -100,7 +98,7 @@ open class JdsTable() : Serializable {
      * Method used to register [JdsField's][JdsField] that shall be persisted to a [JdsTable][JdsTable]
      * @param jdsField a [JdsField][JdsField] which's value shall be persisted to this[JdsTable]
      */
-    fun registerField(jdsField: JdsField) {
+    private fun registerField(jdsField: JdsField) {
         registerField(jdsField.id)
     }
 
@@ -116,18 +114,18 @@ open class JdsTable() : Serializable {
      *
      * @param jdsDb an instance of JdsDb, used to lookup mapped classes and determine SQL types based on implementation
      * @param entity a [JdsEntity][JdsEntity] that may have [JdsField'S][JdsField] persisted to this [JdsTable]
-     * @param eventArgument The [EventArgument][EventArgument] that will hold batched SQL queries for execution
+     * @param eventArguments The [EventArgument][EventArguments] that will hold batched SQL queries for execution
      * @throws Exception General IO errors
      */
     @Throws(Exception::class)
-    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArgument: EventArgument) {
+    fun executeSave(jdsDb: JdsDb, entity: JdsEntity, eventArguments: EventArguments) {
         if (!generatedOrUpdatedSchema)
             throw ExceptionInInitializerError("You must call forceGenerateOrUpdateSchema() before you can persist this table: $name")
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied) {
             //prepare insert placeholder
             if (jdsDb.isSqLiteDb) {
-                val stmt = eventArgument.getOrAddStatement("INSERT OR REPLACE INTO $name(uuid, edit_version) VALUES(?,  ?)")
+                val stmt = eventArguments.getOrAddStatement("INSERT OR REPLACE INTO $name(uuid, edit_version) VALUES(?,  ?)")
                 stmt.setString(1, entity.overview.uuid)
                 stmt.setInt(2, entity.overview.editVersion)
                 stmt.addBatch()
@@ -171,8 +169,8 @@ open class JdsTable() : Serializable {
             }
 
             val insertStatement = when (!jdsDb.isSqLiteDb) {
-                true -> eventArgument.getOrAddCall(statementQuery)
-                false -> eventArgument.getOrAddStatement(statementQuery)
+                true -> eventArguments.getOrAddCall(statementQuery)
+                false -> eventArguments.getOrAddStatement(statementQuery)
             }
 
             updateValues.forEachIndexed { index, value ->
@@ -235,7 +233,7 @@ open class JdsTable() : Serializable {
         var foundChanges = false
         val stringJoiner = StringJoiner(", $delimiter", prefix, suffix)
         val sqliteJoiner = LinkedList<String>()
-        createColumnsSql.forEach { columnName, createColumnSql ->
+        createColumnsSql.forEach { (columnName, createColumnSql) ->
             if (!jdsDb.doesColumnExist(connection, name, columnName)) {
                 if (!jdsDb.isSqLiteDb)
                     stringJoiner.add(createColumnSql)
@@ -277,7 +275,7 @@ open class JdsTable() : Serializable {
 
     private fun generateNativeColumnTypes(jdsDb: JdsDb, columnToFieldMap: LinkedHashMap<String, JdsField>): LinkedHashMap<String, String> {
         val collection = LinkedHashMap<String, String>()
-        columnToFieldMap.forEach { columnName, field ->
+        columnToFieldMap.forEach { (columnName, field) ->
             if (!JdsSchema.isIgnoredType(field.type))
                 collection[columnName] = JdsSchema.getDbDataType(jdsDb, field.type)
         }
@@ -298,13 +296,13 @@ open class JdsTable() : Serializable {
         if (entities.isEmpty())
             return true //this means this crt applies to all entities i.e unfiltered
 
-        entities.forEach {
-            val entityType = jdsDb.classes[it]
+        entities.forEach { entityId ->
+            val entityType = jdsDb.classes[entityId]
             if (entityType != null) {
                 if (entityType.isInstance(entity))
                     return true
             } else
-                println("JdsTable :: Entity ID $it is not mapped, will not be written to table '$name'")
+                println("JdsTable :: Entity ID $entityId is not mapped, will not be written to table '$name'")
         }
 
         return false
@@ -320,23 +318,23 @@ open class JdsTable() : Serializable {
 
     /**
      * @param jdsDb The [JdsDb] instance to use for this operation
-     * @param eventArgument the [EventArgument] to use for this operation
+     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param entity the uuid to target for record deletion
      */
-    fun deleteRecordById(jdsDb: JdsDb, eventArgument: EventArgument, connection: Connection, entity: JdsEntity) {
+    fun deleteRecordById(jdsDb: JdsDb, eventArguments: EventArguments, connection: Connection, entity: JdsEntity) {
         val satisfied = satisfiesConditions(jdsDb, entity)
         if (satisfied)
-            deleteRecordByUuidInternal(eventArgument, connection, entity.overview.uuid)
+            deleteRecordByUuidInternal(eventArguments, connection, entity.overview.uuid)
     }
 
     /**
-     * @param eventArgument the [EventArgument] to use for this operation
+     * @param eventArguments the [EventArguments] to use for this operation
      * @param connection the [Connection] to use for this operation
      * @param uuid the uuid to target for record deletion
      */
-    private fun deleteRecordByUuidInternal(eventArgument: EventArgument, connection: Connection, uuid: String) {
-        val deleteStatement = eventArgument.getOrAddStatement(connection, deleteByUuidSql)
+    private fun deleteRecordByUuidInternal(eventArguments: EventArguments, connection: Connection, uuid: String) {
+        val deleteStatement = eventArguments.getOrAddStatement(connection, deleteByUuidSql)
         deleteStatement.setString(1, uuid)
         deleteStatement.addBatch()
     }

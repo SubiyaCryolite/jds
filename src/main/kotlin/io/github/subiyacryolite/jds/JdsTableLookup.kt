@@ -25,11 +25,11 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
 object JdsTableLookup {
 
     /**
-     * Retrieve the table that stores the requested fieldEntity type
-     * @param fieldType the requested fieldEntity type
-     * @return the table that stores the requested fieldEntity type
+     * Retrieve the table that stores the requested jdsField type
+     * @param fieldType the requested jdsField type
+     * @return the table that stores the requested jdsField type
      */
-    fun getComponentForFieldType(fieldType: JdsFieldType): JdsComponent {
+    private fun getComponentForFieldType(fieldType: JdsFieldType): JdsComponent {
         when (fieldType) {
             JdsFieldType.FLOAT -> return STORE_FLOAT
             JdsFieldType.DOUBLE -> return STORE_DOUBLE
@@ -54,18 +54,18 @@ object JdsTableLookup {
     }
 
     /**
-     * Retrieve the table that stores the requested fieldEntity type
-     * @param fieldType the requested fieldEntity type
-     * @return the table that stores the requested fieldEntity type
+     * Retrieve the table that stores the requested jdsField type
+     * @param fieldType the requested jdsField type
+     * @return the table that stores the requested jdsField type
      */
     fun getTableForFieldType(fieldType: JdsFieldType): String {
         return getComponentForFieldType(fieldType).component
     }
 
     /**
-     * Get the short version of the table that holds the requested fieldEntity type
-     * @param fieldType the requested fieldEntity type
-     * @return the short version of the table that holds the requested fieldEntity type
+     * Get the short version of the table that holds the requested jdsField type
+     * @param fieldType the requested jdsField type
+     * @return the short version of the table that holds the requested jdsField type
      */
     fun getTableAliasForFieldType(fieldType: JdsFieldType): String {
         return getComponentForFieldType(fieldType).alias

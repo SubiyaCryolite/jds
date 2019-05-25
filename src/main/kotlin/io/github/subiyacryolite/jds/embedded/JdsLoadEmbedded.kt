@@ -18,7 +18,7 @@ import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import java.util.concurrent.Callable
 
-class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<List<T>> {
+class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<List<T>> {
 
     /**
      *
@@ -72,12 +72,12 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
         embeddedObject.yearMonthValues.forEach { entity.populateProperties(JdsFieldType.YEAR_MONTH, it.key, it.value) }
         embeddedObject.zonedDateTimeValues.forEach { entity.populateProperties(JdsFieldType.ZONED_DATE_TIME, it.key, it.value) }
         //==============================================
-        embeddedObject.entityOverviews.forEach { populateObjects(entity, jdsDb, it.overview.fieldId, it.overview.entityId, it.overview.uuid, it.overview.editVersion, it) }
+        embeddedObject.entityOverviews.forEach { populateObjects(entity, db, it.overview.fieldId, it.overview.entityId, it.overview.uuid, it.overview.editVersion, it) }
     }
 
     private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, editVersion: Int, eo: JdsEmbeddedObject) {
         if (fieldId == null) return
-        entity.objectCollections.filter { it.key.fieldEntity.id == fieldId }.forEach {
+        entity.objectCollections.filter { it.key.field.id == fieldId }.forEach {
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
                 val innerEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
@@ -88,7 +88,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val jdsDb: JdsDb, private val refer
             }
         }
         //find existing elements
-        entity.objectValues.filter { it.key.fieldEntity.id == fieldId }.forEach {
+        entity.objectValues.filter { it.key.field.id == fieldId }.forEach {
             val referenceClass = jdsDb.classes[entityId]
             if (referenceClass != null) {
                 if (it.value.value == null)

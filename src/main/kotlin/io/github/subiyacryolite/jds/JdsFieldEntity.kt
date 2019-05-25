@@ -18,21 +18,21 @@ import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
 
-class JdsFieldEntity<T : IJdsEntity>(var entityType: Class<out IJdsEntity>, var fieldEntity: JdsField) : Externalizable {
+class JdsFieldEntity<T : IJdsEntity>(var entity: Class<out IJdsEntity>, var field: JdsField) : Externalizable {
 
     @Throws(IOException::class)
     override fun writeExternal(out: ObjectOutput) {
-        out.writeObject(entityType)
-        out.writeObject(fieldEntity)
+        out.writeObject(entity)
+        out.writeObject(field)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun readExternal(input: ObjectInput) {
-        entityType = input.readObject() as Class<T>
-        fieldEntity = input.readObject() as JdsField
+        entity = input.readObject() as Class<T>
+        field = input.readObject() as JdsField
     }
 
-    override fun toString(): String = "JdsFieldEntity{ fieldEntity=$fieldEntity, class= $entityType }"
+    override fun toString(): String = "JdsFieldEntity{ field=$field, entity= $entity }"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -40,15 +40,15 @@ class JdsFieldEntity<T : IJdsEntity>(var entityType: Class<out IJdsEntity>, var 
 
         other as JdsFieldEntity<*>
 
-        if (entityType != other.entityType) return false
-        if (fieldEntity != other.fieldEntity) return false
+        if (entity != other.entity) return false
+        if (field != other.field) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = entityType.hashCode()
-        result = 31 * result + fieldEntity.hashCode()
+        var result = entity.hashCode()
+        result = 31 * result + field.hashCode()
         return result
     }
 
