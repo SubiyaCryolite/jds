@@ -9,11 +9,17 @@ import java.util.*
 
 class JdsDbPostgreSqlmplementation : JdsDbPostgreSql() {
 
+    private val properties: Properties = Properties()
+    private val connectionString: String
+
+    init {
+        FileInputStream(File("db.pg.properties")).use { properties.load(it) }
+        connectionString = "jdbc:postgresql://${properties["dbUrl"]}:${properties["dbPort"]}/${properties["dbName"]}"
+    }
+
     override val connection: Connection
         get () {
             Class.forName("org.postgresql.Driver")
-            val properties = Properties()
-            FileInputStream(File("db.pg.properties")).use { properties.load(it) }
-            return DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/jds", properties)
+            return DriverManager.getConnection(connectionString, properties)
         }
 }
