@@ -1,12 +1,27 @@
-apply plugin: "java"
+buildscript {
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.com.zyxist:chainsaw:0.3.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.31"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.17"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.31"
+    }
+}
+
 apply plugin: "maven"
 apply plugin: "signing"
 apply plugin: "kotlin"
 apply plugin: "org.jetbrains.dokka"
 apply plugin: "io.codearte.nexus-staging"
-
-sourceCompatibility = 9
-targetCompatibility = 9
+apply plugin: "com.zyxist.chainsaw"
+apply plugin: "org.jetbrains.kotlin.jvm"
 
 group = "io.github.subiyacryolite"
 version = "11.0.0-SNAPSHOT"
@@ -14,24 +29,12 @@ archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 project.ext.jacksonVersion = "2.9.9"
 project.ext.kotlinVersion = "1.3.31"
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-buildscript {
-
-    project.ext.kotlinVersion = "1.3.31"
-
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.17"
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
-    }
-}
+sourceCompatibility = 9
+targetCompatibility = 9
 
 repositories {
     mavenCentral()
@@ -41,8 +44,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.openjfx:javafx-base:11:win"
-    /*We specify win though in reality all we care about is JavaFX bean classes. There are no OS dependencies*/
+    implementation "org.openjfx:javafx-base:11:win"/*We specify win though in reality all we care about is JavaFX bean classes. There are no OS dependencies*/
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
@@ -72,6 +74,20 @@ jar {
         )
     }
 }
+
+// ============================== Support Java 9 modules ==================================== //
+sourceSets {
+    main {
+        java.outputDir = file(java.outputDir.toString().replaceAll("\\${File.separatorChar}java", ""))
+        kotlin.outputDir = java.outputDir
+    }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+    destinationDir = sourceSets.main.kotlin.outputDir
+}
+// ============================== Support Java 9 modules ==================================== //
 
 test {
     //prevent problems with TravisCI
