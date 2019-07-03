@@ -33,8 +33,8 @@ project.ext.jacksonVersion = "2.9.9"
 project.ext.kotlinVersion = "1.3.40"
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-sourceCompatibility = 9
-targetCompatibility = 9
+sourceCompatibility = 11
+targetCompatibility = 11
 
 repositories {
     mavenCentral()
