@@ -46,5 +46,7 @@ enum class JdsFieldType(val type: Int, val shortCode: String) {
     ENTITY_COLLECTION(24, "enumCollections"),
     UNKNOWN(25, "un"),
     ENUM_STRING(26, "ens"),
-    ENUM_STRING_COLLECTION(27, "ensc");
+    ENUM_STRING_COLLECTION(27, "ensc"),
+    SHORT(28, "st"),
+    UUID(29, "uu");
 }

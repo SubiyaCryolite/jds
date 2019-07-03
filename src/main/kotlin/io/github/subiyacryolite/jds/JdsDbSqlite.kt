@@ -94,6 +94,10 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun saveFloat() = "INSERT INTO jds_str_float(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(uuid, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
+    override fun saveShort() = "INSERT INTO jds_str_short(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(uuid, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+
+    override fun saveUuid() = "INSERT INTO jds_str_uuid(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(uuid, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+
     override fun saveInteger() = "INSERT INTO jds_str_integer(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(uuid, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
     override fun saveDateTime() = "INSERT INTO jds_str_date_time(uuid, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(uuid, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
@@ -157,6 +161,8 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
         JdsFieldType.TIME -> "INTEGER"
         JdsFieldType.BLOB -> "BLOB"
         JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.SHORT -> "INTEGER"
+        JdsFieldType.UUID -> "TEXT"
         JdsFieldType.DATE -> "TIMESTAMP"
         JdsFieldType.DATE_TIME -> "TIMESTAMP"
         JdsFieldType.LONG -> "BIGINT"

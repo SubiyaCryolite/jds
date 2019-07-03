@@ -86,6 +86,8 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
         JdsFieldType.TIME -> "TIME WITHOUT TIME ZONE"
         JdsFieldType.BLOB -> "BYTEA"
         JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.SHORT -> "SMALLINT"
+        JdsFieldType.UUID -> "UUID"
         JdsFieldType.DATE -> "DATE"
         JdsFieldType.DATE_TIME -> "TIMESTAMP WITHOUT TIME ZONE"
         JdsFieldType.LONG -> "BIGINT"

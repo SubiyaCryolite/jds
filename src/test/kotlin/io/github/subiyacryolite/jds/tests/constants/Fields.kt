@@ -8,7 +8,7 @@ import io.github.subiyacryolite.jds.enums.JdsFieldType
  */
 object Fields {
     val STREET_NAME = JdsField(1, "street_name", JdsFieldType.STRING)
-    val PLOT_NUMBER = JdsField(2, "plot_number", JdsFieldType.INT)
+    val PLOT_NUMBER = JdsField(2, "plot_number", JdsFieldType.SHORT)
     val AREA_NAME = JdsField(3, "area_name", JdsFieldType.STRING)
     val PROVINCE_NAME = JdsField(4, "province_name", JdsFieldType.STRING)
     val CITY_NAME = JdsField(5, "city_name", JdsFieldType.STRING)
@@ -36,4 +36,5 @@ object Fields {
     val YEAR_MONTH = JdsField(27, "year_month", JdsFieldType.YEAR_MONTH)
     val RIGHTS = JdsField(28, "rights", JdsFieldType.ENUM_COLLECTION)
     val PRIMARY_ADDRESS_ENUM_STRING = JdsField(29, "primary_address_enum_str", JdsFieldType.ENUM_STRING)
+    val ENTRY_UUID = JdsField(30, "entry_uuid", JdsFieldType.UUID)
 }

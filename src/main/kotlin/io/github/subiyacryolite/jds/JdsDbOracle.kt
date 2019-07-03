@@ -86,6 +86,8 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
         JdsFieldType.TIME -> "NUMBER(19)"
         JdsFieldType.BLOB -> "BLOB"
         JdsFieldType.INT -> "NUMBER(10)"
+        JdsFieldType.SHORT -> "NUMBER(5)"
+        JdsFieldType.UUID -> "RAW(16)"
         JdsFieldType.DATE -> "DATE"
         JdsFieldType.DATE_TIME -> "TIMESTAMP"
         JdsFieldType.LONG -> "NUMBER(19)"

@@ -139,6 +139,8 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
                         val floatStatement = connection.prepareStatement("SELECT * FROM jds_str_float WHERE uuid IN $questionsString")
                         val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_col WHERE uuid IN $questionsString")
                         val intStatement = connection.prepareStatement("SELECT * FROM jds_str_integer WHERE uuid IN $questionsString")
+                        val shortStatement = connection.prepareStatement("SELECT * FROM jds_str_short WHERE uuid IN $questionsString")
+                        val uuidStatement = connection.prepareStatement("SELECT * FROM jds_str_uuid WHERE uuid IN $questionsString")
                         val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_integer_col WHERE uuid IN $questionsString")
                         val longStatement = connection.prepareStatement("SELECT * FROM jds_str_long WHERE uuid IN $questionsString")
                         val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_long_col WHERE uuid IN $questionsString")
@@ -180,6 +182,8 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
                             stringCollectionStatement.setString(index + 1, uuid.uuid)
                             timeStatement.setString(index + 1, uuid.uuid)
                             yearMonthStatement.setString(index + 1, uuid.uuid)
+                            shortStatement.setString(index + 1, uuid.uuid)
+                            uuidStatement.setString(index + 1, uuid.uuid)
                             zonedDateTimeStatement.setString(index + 1, uuid.uuid)
                         }
                         //catch embedded/pre-created objects objects as well
@@ -196,6 +200,8 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
                                 intStatement.use { populateInteger(entities, it) }
                                 longStatement.use { populateLong(entities, it) }
                                 stringStatement.use { populateString(entities, it) }
+                                uuidStatement.use { populateUuid(entities, it) }
+                                shortStatement.use { populateShort(entities, it) }
                             }
                             if (jdsDb.options.isWritingValuesToEavTables || jdsDb.options.isWritingCollectionsToEavTables) {
                                 doubleCollectionStatement.use { populateDoubleCollection(entities, it) }
@@ -703,6 +709,46 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
                 val fieldId = it.getLong("field_id")
                 optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
                     jdsEntity.populateProperties(JdsFieldType.STRING, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateUuid(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val editVersion = it.getInt("edit_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.UUID, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : JdsEntity> populateShort(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use {
+            while (it.next()) {
+                val uuid = it.getString("uuid")
+                val editVersion = it.getInt("edit_version")
+                val value = it.getString("value")
+                val fieldId = it.getLong("field_id")
+                optimalEntityLookup(entities, uuid, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(JdsFieldType.SHORT, fieldId, value)
                 }
             }
         }

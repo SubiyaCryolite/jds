@@ -1,27 +1,30 @@
 package io.github.subiyacryolite.jds.tests.entities
 
+import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
 import io.github.subiyacryolite.jds.tests.constants.Enums
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import io.github.subiyacryolite.jds.tests.constants.PrimaryAddress
-import io.github.subiyacryolite.jds.JdsEntity
-import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.NullableIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import java.time.LocalTime
+import java.util.*
 
 @JdsEntityAnnotation(id = 1, name = "address")
 class Address : JdsEntity() {
     private val _streetName = SimpleStringProperty("")
-    private val _plotNumber = NullableIntegerProperty()
+    private val _plotNumber = NullableShortProperty()
     private val _area = SimpleStringProperty("")
     private val _city = SimpleStringProperty("")
     private val _provinceOrState = SimpleStringProperty("")
     private val _country = SimpleStringProperty("")
+    private val _entryUuid = SimpleObjectProperty(UUID.randomUUID())
     private val _primaryAddress = SimpleObjectProperty(PrimaryAddress.NO)
     private val _timeOfEntry = SimpleObjectProperty(LocalTime.now())
 
     init {
+        map(Fields.ENTRY_UUID, _entryUuid)
         map(Fields.STREET_NAME, _streetName)
         map(Fields.PLOT_NUMBER, _plotNumber)
         map(Fields.AREA_NAME, _area)
@@ -33,6 +36,10 @@ class Address : JdsEntity() {
         map(Enums.PRIMARY_ADDRESS_ENUM_STRING, _primaryAddress)
     }
 
+    var entryUuid: UUID
+        get() = _entryUuid.get()
+        set(value) = _entryUuid.set(value)
+
     var primaryAddress: PrimaryAddress
         get() = _primaryAddress.get()
         set(value) = _primaryAddress.set(value)
@@ -41,7 +48,7 @@ class Address : JdsEntity() {
         get() = _streetName.get()
         set(value) = _streetName.set(value)
 
-    var plotNumber: Int?
+    var plotNumber: Short?
         get() = _plotNumber.value
         set(value) {
             _plotNumber.value = value

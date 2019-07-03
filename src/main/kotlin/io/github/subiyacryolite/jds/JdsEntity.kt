@@ -73,6 +73,8 @@ abstract class JdsEntity : IJdsEntity {
     internal val booleanValues: HashMap<Long, WritableValue<Boolean?>> = HashMap()
     //numeric
     @get:JsonIgnore
+    internal val shortValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
+    @get:JsonIgnore
     internal val floatValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     @get:JsonIgnore
     internal val doubleValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
@@ -80,6 +82,8 @@ abstract class JdsEntity : IJdsEntity {
     internal val longValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
     @get:JsonIgnore
     internal val integerValues: HashMap<Long, WritableValue<out Number?>> = HashMap()
+    @get:JsonIgnore
+    internal val uuidValues: HashMap<Long, WritableValue<UUID?>> = HashMap()
     //arrays
     @get:JsonIgnore
     internal val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<JdsEntity>> = HashMap()
@@ -131,9 +135,12 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.DOUBLE &&
                 field.type != JdsFieldType.INT &&
                 field.type != JdsFieldType.LONG &&
-                field.type != JdsFieldType.FLOAT)
+                field.type != JdsFieldType.FLOAT&&
+                field.type != JdsFieldType.SHORT)
             throw RuntimeException("Incorrect type supplied for field [$field]")
         field.bind()
+        if (field.type == JdsFieldType.SHORT)
+            shortValues[field.id] = property
         if (field.type == JdsFieldType.DOUBLE)
             doubleValues[field.id] = property
         if (field.type == JdsFieldType.INT)
@@ -151,6 +158,15 @@ abstract class JdsEntity : IJdsEntity {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         field.bind()
         booleanValues[field.id] = property
+        mapField(overview.entityId, field.id)
+    }
+
+    @JvmName("mapUuid")
+    protected fun map(field: JdsField, property: WritableValue<UUID?>) {
+        if (field.type != JdsFieldType.UUID)
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        field.bind()
+        uuidValues[field.id] = property
         mapField(overview.entityId, field.id)
     }
 
@@ -411,11 +427,17 @@ abstract class JdsEntity : IJdsEntity {
         doubleValues.clear()
         doubleValues.putAll(DeepCopy.clone(source.doubleValues)!!)
 
+        shortValues.clear()
+        shortValues.putAll(DeepCopy.clone(source.shortValues)!!)
+
         longValues.clear()
         longValues.putAll(DeepCopy.clone(source.longValues)!!)
 
         integerValues.clear()
         integerValues.putAll(DeepCopy.clone(source.integerValues)!!)
+
+        uuidValues.clear()
+        uuidValues.putAll(DeepCopy.clone(source.uuidValues)!!)
 
         objectCollections.clear()
         objectCollections.putAll(DeepCopy.clone(source.objectCollections)!!)
@@ -479,8 +501,10 @@ abstract class JdsEntity : IJdsEntity {
         //numeric
         objectOutputStream.writeObject(serializeNumber(floatValues))
         objectOutputStream.writeObject(serializeNumber(doubleValues))
+        objectOutputStream.writeObject(serializeNumber(shortValues))
         objectOutputStream.writeObject(serializeNumber(longValues))
         objectOutputStream.writeObject(serializeNumber(integerValues))
+        objectOutputStream.writeObject(uuidValues)
         //blobs
         objectOutputStream.writeObject(serializeBlobs(blobValues))
         //arrays
@@ -520,8 +544,10 @@ abstract class JdsEntity : IJdsEntity {
         //numeric
         putNumber(floatValues, objectInputStream.readObject() as Map<Long, Number?>)
         putNumber(doubleValues, objectInputStream.readObject() as Map<Long, Number?>)
+        putNumber(shortValues, objectInputStream.readObject() as Map<Long, Number?>)
         putNumber(longValues, objectInputStream.readObject() as Map<Long, Number?>)
         putNumber(integerValues, objectInputStream.readObject() as Map<Long, Number?>)
+        putUuid(uuidValues, objectInputStream.readObject() as Map<Long, UUID?>)
         //blobs
         putBlobs(blobValues, objectInputStream.readObject() as Map<Long, ByteArray?>)
         //arrays
@@ -667,6 +693,9 @@ abstract class JdsEntity : IJdsEntity {
     private fun putNumber(destination: MutableMap<Long, WritableValue<out Number?>>, source: Map<Long, Number?>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
+    private fun putUuid(destination: MutableMap<Long, WritableValue<UUID?>>, source: Map<Long, UUID?>) =
+            source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
+
     private fun putTemporal(destination: MutableMap<Long, WritableValue<out Temporal?>>, source: Map<Long, Temporal?>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
@@ -691,8 +720,10 @@ abstract class JdsEntity : IJdsEntity {
         stringValues.entries.forEach { embeddedObject.stringValues.add(JdsStoreString(it.key, it.value.value)) }
         floatValues.entries.forEach { embeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value?.toFloat())) }
         doubleValues.entries.forEach { embeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value?.toDouble())) }
+        shortValues.entries.forEach { embeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value?.toShort())) }
         longValues.entries.forEach { embeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value?.toLong())) }
         integerValues.entries.forEach { embeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value?.toInt())) }
+        uuidValues.entries.forEach { embeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value)) }
         //==============================================
         //Dates & Time
         //==============================================
@@ -776,6 +807,8 @@ abstract class JdsEntity : IJdsEntity {
 
             JdsFieldType.DOUBLE -> doubleValues[fieldId]?.value = value as Double?
 
+            JdsFieldType.SHORT -> shortValues[fieldId]?.value = value as Short?
+
             JdsFieldType.LONG -> longValues[fieldId]?.value = when (value) {
                 is Long? -> value
                 is BigDecimal -> value.toLong() //Oracle
@@ -786,6 +819,12 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.INT -> integerValues[fieldId]?.value = when (value) {
                 is Int? -> value
                 is BigDecimal -> value.toInt() //Oracle
+                else -> null
+            }
+
+            JdsFieldType.UUID -> uuidValues[fieldId]?.value  = when (value) {
+                is String -> UUID.fromString(value)
+                is UUID? -> value as UUID?
                 else -> null
             }
 
@@ -976,6 +1015,18 @@ abstract class JdsEntity : IJdsEntity {
                     override fun getValue(): Double? = backingValue
                 }
 
+            JdsFieldType.SHORT -> if (!shortValues.containsKey(fieldId))
+                shortValues[fieldId] = object : WritableValue<Short?> {
+
+                    private var backingValue: Short? = null
+
+                    override fun setValue(value: Short?) {
+                        backingValue = value
+                    }
+
+                    override fun getValue(): Short? = backingValue
+                }
+
             JdsFieldType.LONG -> if (!longValues.containsKey(fieldId))
                 longValues[fieldId] = object : WritableValue<Long?> {
 
@@ -998,6 +1049,18 @@ abstract class JdsEntity : IJdsEntity {
                     }
 
                     override fun getValue(): Int? = backingValue
+                }
+
+            JdsFieldType.UUID -> if (!uuidValues.containsKey(fieldId))
+                uuidValues[fieldId] = object : WritableValue<UUID?> {
+
+                    private var backingValue: UUID? = null
+
+                    override fun setValue(value: UUID?) {
+                        backingValue = value
+                    }
+
+                    override fun getValue(): UUID? = backingValue
                 }
 
             JdsFieldType.BOOLEAN -> if (!booleanValues.containsKey(fieldId))
@@ -1174,6 +1237,8 @@ abstract class JdsEntity : IJdsEntity {
             return floatValues[fieldId]?.value?.toFloat()
         if (doubleValues.containsKey(fieldId))
             return doubleValues[fieldId]?.value?.toDouble()
+        if (shortValues.containsKey(fieldId))
+            return shortValues[fieldId]?.value?.toShort()
         if (booleanValues.containsKey(fieldId))
             return booleanValues[fieldId]?.value
         if (longValues.containsKey(fieldId))
@@ -1182,6 +1247,8 @@ abstract class JdsEntity : IJdsEntity {
             return enumStringProperties[fieldId]?.value.toString()
         if (integerValues.containsKey(fieldId))
             return integerValues[fieldId]?.value?.toInt()
+        if(uuidValues.containsKey(fieldId))
+            return uuidValues[fieldId]?.value
         if (enumProperties.containsKey(fieldId))
             return enumProperties[fieldId]?.value?.ordinal
         enumCollections.filter { it.key == fieldId }.forEach { it -> it.value.filter { it.ordinal == ordinal }.forEach { _ -> return true } }

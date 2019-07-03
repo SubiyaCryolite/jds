@@ -79,6 +79,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_STRING)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_ENUM_STRING_COLLECTION)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_SHORT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_FLOAT_COLLECTION)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_INTEGER)
@@ -97,6 +98,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_YEAR_MONTH)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_MONTH_DAY)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_BOOLEAN)
+        prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.STORE_UUID)
         prepareDatabaseComponent(connection, JdsComponentType.TABLE, JdsComponent.ENTITY_LIVE_VERSION)
         if (supportsStatements) {
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_BOOLEAN)
@@ -105,6 +107,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_LONG)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_INTEGER)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_FLOAT)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_SHORT)
+            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_UUID)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DOUBLE)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DATE_TIME)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_TIME)
@@ -211,6 +215,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createStoreEnumCollection())
             JdsComponent.STORE_ENUM_STRING_COLLECTION -> executeSqlFromString(connection, createStoreEnumStringCollection())
             JdsComponent.STORE_FLOAT -> executeSqlFromString(connection, createStoreFloat())
+            JdsComponent.STORE_SHORT -> executeSqlFromString(connection, createStoreShort())
+            JdsComponent.STORE_UUID -> executeSqlFromString(connection, createStoreUuid())
             JdsComponent.STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createStoreFloatCollection())
             JdsComponent.STORE_INTEGER -> executeSqlFromString(connection, createStoreInteger())
             JdsComponent.STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createStoreIntegerCollection())
@@ -248,6 +254,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.POP_STORE_ENUM_COLLECTION -> executeSqlFromString(connection, createPopEnumCollection())
             JdsComponent.POP_STORE_ENUM_STRING_COLLECTION -> executeSqlFromString(connection, createPopEnumStringCollection())
             JdsComponent.POP_STORE_FLOAT -> executeSqlFromString(connection, createPopJdsStoreFloat())
+            JdsComponent.POP_STORE_SHORT -> executeSqlFromString(connection, createPopJdsStoreShort())
+            JdsComponent.POP_STORE_UUID -> executeSqlFromString(connection, createPopJdsStoreUuid())
             JdsComponent.POP_STORE_FLOAT_COLLECTION -> executeSqlFromString(connection, createPopFloatCollection())
             JdsComponent.POP_STORE_INTEGER -> executeSqlFromString(connection, createPopJdsStoreInteger())
             JdsComponent.POP_STORE_INTEGER_COLLECTION -> executeSqlFromString(connection, createPopIntegerCollection())
@@ -666,6 +674,18 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     internal open fun saveFloat() = "{call jds_pop_float(?, ?, ?, ?)}"
 
     /**
+     * SQL call to save short values
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveShort() = "{call jds_pop_short(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to save short values
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun saveUuid() = "{call jds_pop_uuid(?, ?, ?, ?)}"
+
+    /**
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
@@ -993,6 +1013,18 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         return createOrAlterProc("jds_pop_float", "jds_str_float", columns, storeUniqueColumns, false)
     }
 
+    private fun createPopJdsStoreShort(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getDataType(JdsFieldType.SHORT)
+        return createOrAlterProc("jds_pop_short", "jds_str_short", columns, storeUniqueColumns, false)
+    }
+
+    private fun createPopJdsStoreUuid(): String {
+        val columns = storeCommonColumns
+        columns["value"] = getDataType(JdsFieldType.UUID)
+        return createOrAlterProc("jds_pop_uuid", "jds_str_uuid", columns, storeUniqueColumns, false)
+    }
+
     private fun createPopFloatCollection(): String {
         val columns = storeCommonColumns
         columns["value"] = getDataType(JdsFieldType.FLOAT)
@@ -1262,6 +1294,28 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val tableName = "jds_str_float"
         val columns = storeCommonColumns
         columns["value"] = getDataType(JdsFieldType.FLOAT)
+        val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
+        return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    private fun createStoreShort(): String {
+        val tableName = "jds_str_short"
+        val columns = storeCommonColumns
+        columns["value"] = getDataType(JdsFieldType.SHORT)
+        val uniqueColumns = LinkedHashMap<String, String>()
+        uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
+        return createTable(tableName, columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+    }
+
+    private fun createStoreUuid(): String {
+        val tableName = "jds_str_uuid"
+        val columns = storeCommonColumns
+        columns["value"] = getDataType(JdsFieldType.UUID)
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()

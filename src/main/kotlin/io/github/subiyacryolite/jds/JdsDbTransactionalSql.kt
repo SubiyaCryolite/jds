@@ -107,6 +107,8 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
         JdsFieldType.TIME -> "TIME(7)"
         JdsFieldType.BLOB -> if (max == 0) "VARBINARY(MAX)" else "VARBINARY($max)"
         JdsFieldType.INT -> "INTEGER"
+        JdsFieldType.SHORT -> "SMALLINT"
+        JdsFieldType.UUID -> "UNIQUEIDENTIFIER"
         JdsFieldType.DATE -> "DATE"
         JdsFieldType.DATE_TIME -> "DATETIME"
         JdsFieldType.LONG -> "BIGINT"

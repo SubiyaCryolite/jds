@@ -45,6 +45,12 @@ data class JdsEmbeddedObject(@get:JsonProperty("o")
                              @get:JsonProperty("dv")
                              val doubleValues: MutableList<JdsStoreDouble> = ArrayList(),
 
+                             @get:JsonProperty("stc")
+                             val shortValues: MutableList<JdsStoreShort> = ArrayList(),
+
+                             @get:JsonProperty("su")
+                             val uuidValues: MutableList<JdsStoreUuid> = ArrayList(),
+
                              @get:JsonProperty("dc")
                              val doubleCollections: MutableList<JdsStoreDoubleCollection> = ArrayList(),
 

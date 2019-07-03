@@ -62,6 +62,21 @@ data class JdsStoreDouble(@get:JsonProperty("k") @set:JsonProperty("k") var key:
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param value the corresponding value
+ */
+data class JdsStoreShort(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Short? = null)
+
+/**
+ * Used to store values of type in a portable manner
+ * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param value the corresponding value
+ */
+data class JdsStoreUuid(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: UUID? = null)
+
+
+/**
+ * Used to store values of type in a portable manner
+ * @param key the [field][JdsField] [ID][JdsField.id]
  * @param values the corresponding value
  */
 data class JdsStoreDoubleCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Double> = ArrayList())

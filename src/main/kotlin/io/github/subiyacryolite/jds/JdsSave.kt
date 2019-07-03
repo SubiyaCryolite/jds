@@ -97,6 +97,8 @@ class JdsSave(private val jdsDb: JdsDb,
                     saveDoubles(entity)
                     saveIntegers(entity)
                     saveFloats(entity)
+                    saveShorts(entity)
+                    saveUuids(entity)
                     saveStrings(entity)
                     saveBlobs(entity)
                     saveEnums(entity)
@@ -237,6 +239,38 @@ class JdsSave(private val jdsDb: JdsDb,
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
             upsert.setObject(4, entry.value?.toFloat()) //primitives could be null, default value has meaning
+            upsert.addBatch()
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
+    }
+
+    /**
+     * @param jdsEntity
+     */
+    private fun saveShorts(jdsEntity: JdsEntity) = try {
+        val upsert = regularStatementOrCall(onSaveEventArguments, jdsDb.saveShort())
+        jdsEntity.shortValues.forEach { (fieldId, entry) ->
+            upsert.setString(1, jdsEntity.overview.uuid)
+            upsert.setInt(2, jdsEntity.overview.editVersion)
+            upsert.setLong(3, fieldId)
+            upsert.setObject(4, entry.value?.toShort()) //primitives could be null, default value has meaning
+            upsert.addBatch()
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
+    }
+
+    /**
+     * @param jdsEntity
+     */
+    private fun saveUuids(jdsEntity: JdsEntity) = try {
+        val upsert = regularStatementOrCall(onSaveEventArguments, jdsDb.saveUuid())
+        jdsEntity.uuidValues.forEach { (fieldId, entry) ->
+            upsert.setString(1, jdsEntity.overview.uuid)
+            upsert.setInt(2, jdsEntity.overview.editVersion)
+            upsert.setLong(3, fieldId)
+            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
             upsert.addBatch()
         }
     } catch (ex: Exception) {
