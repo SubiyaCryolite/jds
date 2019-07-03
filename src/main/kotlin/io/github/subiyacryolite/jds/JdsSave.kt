@@ -16,6 +16,7 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.setLocalTime
 import io.github.subiyacryolite.jds.JdsExtensions.setZonedDateTime
+import io.github.subiyacryolite.jds.JdsExtensions.toByteArray
 import io.github.subiyacryolite.jds.events.EventArguments
 import io.github.subiyacryolite.jds.events.JdsSaveEvent
 import io.github.subiyacryolite.jds.events.JdsSaveListener
@@ -270,7 +271,11 @@ class JdsSave(private val jdsDb: JdsDb,
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, fieldId)
-            upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            if ((jdsDb.isOracleDb || jdsDb.isMySqlDb) && entry.value != null) {
+                upsert.setObject(4, entry.value.toByteArray())
+            } else {
+                upsert.setObject(4, entry.value) //primitives could be null, default value has meaning
+            }
             upsert.addBatch()
         }
     } catch (ex: Exception) {

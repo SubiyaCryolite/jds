@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsImplementation
+import java.nio.ByteBuffer
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -22,6 +23,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 object JdsExtensions {
@@ -31,11 +33,11 @@ object JdsExtensions {
     private val localTimeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSS")
     private val localTimeFormatReadOnly = DateTimeFormatter.ofPattern("[HH:mm:ss.SSSSSSS][HH:mm:ss]")
 
-    fun ZonedDateTime.toSqlStringFormat(): String = this.format(zonedDateTimeFormat)
+    private fun ZonedDateTime.toSqlStringFormat(): String = this.format(zonedDateTimeFormat)
 
-    fun LocalTime.toSqlStringFormat(): String = this.format(localTimeFormat)
+    private fun LocalTime.toSqlStringFormat(): String = this.format(localTimeFormat)
 
-    fun LocalDate.toSqlStringFormat(): String = this.format(localDateFormat)
+    private fun LocalDate.toSqlStringFormat(): String = this.format(localDateFormat)
 
     fun String.toZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(this, zonedDateTimeFormat)
 
@@ -43,6 +45,21 @@ object JdsExtensions {
 
     fun String.toLocalDate(): LocalDate = LocalDate.parse(this, localDateFormat)
 
+    fun ByteArray?.toUuid(): UUID? = if (this == null) {
+        null
+    } else {
+        val byteBuffer = ByteBuffer.wrap(this)
+        UUID(byteBuffer.long, byteBuffer.long)
+    }
+
+    fun UUID?.toByteArray(): ByteArray? = if (this == null) {
+        null
+    } else {
+        val byteBuffer = ByteBuffer.wrap(ByteArray(16))
+        byteBuffer.putLong(this.mostSignificantBits)
+        byteBuffer.putLong(this.leastSignificantBits)
+        byteBuffer.array()
+    }
 
     /**
      * @param value

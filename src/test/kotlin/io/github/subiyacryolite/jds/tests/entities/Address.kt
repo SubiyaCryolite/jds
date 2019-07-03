@@ -6,22 +6,25 @@ import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
 import io.github.subiyacryolite.jds.tests.constants.Enums
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import io.github.subiyacryolite.jds.tests.constants.PrimaryAddress
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import java.time.LocalTime
 import java.util.*
 
 @JdsEntityAnnotation(id = 1, name = "address")
-class Address : JdsEntity() {
-    private val _streetName = SimpleStringProperty("")
-    private val _plotNumber = NullableShortProperty()
-    private val _area = SimpleStringProperty("")
-    private val _city = SimpleStringProperty("")
-    private val _provinceOrState = SimpleStringProperty("")
-    private val _country = SimpleStringProperty("")
-    private val _entryUuid = SimpleObjectProperty(UUID.randomUUID())
-    private val _primaryAddress = SimpleObjectProperty(PrimaryAddress.NO)
-    private val _timeOfEntry = SimpleObjectProperty(LocalTime.now())
+data class Address(
+        private val _streetName: StringProperty = SimpleStringProperty(""),
+        private val _plotNumber: NullableShortProperty = NullableShortProperty(),
+        private val _area: StringProperty = SimpleStringProperty(""),
+        private val _city: StringProperty = SimpleStringProperty(""),
+        private val _provinceOrState: StringProperty = SimpleStringProperty(""),
+        private val _country: StringProperty = SimpleStringProperty(""),
+        private val _entryUuid: ObjectProperty<UUID> = SimpleObjectProperty(UUID.randomUUID()),
+        private val _primaryAddress: ObjectProperty<PrimaryAddress> = SimpleObjectProperty(PrimaryAddress.NO),
+        private val _timeOfEntry: ObjectProperty<LocalTime> = SimpleObjectProperty(LocalTime.now())
+) : JdsEntity() {
 
     init {
         map(Fields.ENTRY_UUID, _entryUuid)
@@ -73,18 +76,4 @@ class Address : JdsEntity() {
     var timeOfEntry: LocalTime
         get() = _timeOfEntry.get()
         set(timeOfEntry) = _timeOfEntry.set(timeOfEntry)
-
-    override fun toString(): String {
-        return "{" +
-                "overview = $overview," +
-                ", primaryAddress = $primaryAddress " +
-                ", streetName = $streetName " +
-                ", plotNumber = $plotNumber " +
-                ", area = $area " +
-                ", city = $city " +
-                ", provinceOrState = $provinceOrState " +
-                ", country = $country " +
-                ", timeOfEntry = $timeOfEntry " +
-                '}'
-    }
 }

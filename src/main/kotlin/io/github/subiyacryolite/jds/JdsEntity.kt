@@ -14,8 +14,10 @@
 package io.github.subiyacryolite.jds
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.github.subiyacryolite.jds.JdsExtensions.toByteArray
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalTime
+import io.github.subiyacryolite.jds.JdsExtensions.toUuid
 import io.github.subiyacryolite.jds.JdsExtensions.toZonedDateTime
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
@@ -135,7 +137,7 @@ abstract class JdsEntity : IJdsEntity {
         if (field.type != JdsFieldType.DOUBLE &&
                 field.type != JdsFieldType.INT &&
                 field.type != JdsFieldType.LONG &&
-                field.type != JdsFieldType.FLOAT&&
+                field.type != JdsFieldType.FLOAT &&
                 field.type != JdsFieldType.SHORT)
             throw RuntimeException("Incorrect type supplied for field [$field]")
         field.bind()
@@ -723,7 +725,7 @@ abstract class JdsEntity : IJdsEntity {
         shortValues.entries.forEach { embeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value?.toShort())) }
         longValues.entries.forEach { embeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value?.toLong())) }
         integerValues.entries.forEach { embeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value?.toInt())) }
-        uuidValues.entries.forEach { embeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value)) }
+        uuidValues.entries.forEach { embeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value.toByteArray())) }
         //==============================================
         //Dates & Time
         //==============================================
@@ -807,7 +809,11 @@ abstract class JdsEntity : IJdsEntity {
 
             JdsFieldType.DOUBLE -> doubleValues[fieldId]?.value = value as Double?
 
-            JdsFieldType.SHORT -> shortValues[fieldId]?.value = value as Short?
+            JdsFieldType.SHORT -> shortValues[fieldId]?.value = when (value) {
+                is Short? -> value
+                is Int -> value.toShort()
+                else -> null
+            }
 
             JdsFieldType.LONG -> longValues[fieldId]?.value = when (value) {
                 is Long? -> value
@@ -822,9 +828,10 @@ abstract class JdsEntity : IJdsEntity {
                 else -> null
             }
 
-            JdsFieldType.UUID -> uuidValues[fieldId]?.value  = when (value) {
+            JdsFieldType.UUID -> uuidValues[fieldId]?.value = when (value) {
+                is ByteArray? -> value.toUuid()
                 is String -> UUID.fromString(value)
-                is UUID? -> value as UUID?
+                is UUID? -> value
                 else -> null
             }
 
@@ -1247,7 +1254,7 @@ abstract class JdsEntity : IJdsEntity {
             return enumStringProperties[fieldId]?.value.toString()
         if (integerValues.containsKey(fieldId))
             return integerValues[fieldId]?.value?.toInt()
-        if(uuidValues.containsKey(fieldId))
+        if (uuidValues.containsKey(fieldId))
             return uuidValues[fieldId]?.value
         if (enumProperties.containsKey(fieldId))
             return enumProperties[fieldId]?.value?.ordinal
@@ -1365,7 +1372,6 @@ abstract class JdsEntity : IJdsEntity {
     }
 
 
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -1389,7 +1395,7 @@ abstract class JdsEntity : IJdsEntity {
         private fun standardiseLength(dest: String, append: String): String {
             val appendLength = append.length //e.g 5
             val substringIndex = dest.length - appendLength //e.g 36
-            return "${dest.subSequence(0, substringIndex)}${append}"
+            return "${dest.subSequence(0, substringIndex)}$append"
         }
 
         override fun readExternal(objectInput: ObjectInput) {

@@ -71,8 +71,25 @@ data class JdsStoreShort(@get:JsonProperty("k") @set:JsonProperty("k") var key: 
  * @param key the [field][JdsField] [ID][JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreUuid(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: UUID? = null)
+data class JdsStoreUuid(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: ByteArray? = null) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
+        other as JdsStoreUuid
+
+        if (key != other.key) return false
+        if (!Arrays.equals(value, other.value)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = key.hashCode()
+        result = 31 * result + (value?.let { Arrays.hashCode(it) } ?: 0)
+        return result
+    }
+}
 
 /**
  * Used to store values of type in a portable manner

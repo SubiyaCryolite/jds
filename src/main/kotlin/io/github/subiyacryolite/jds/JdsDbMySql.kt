@@ -93,7 +93,7 @@ abstract class JdsDbMySql : JdsDb {
         JdsFieldType.DATE -> "DATE"
         JdsFieldType.DATE_TIME -> "DATETIME"
         JdsFieldType.SHORT -> "SMALLINT"
-        JdsFieldType.UUID -> "CHAR(36)"
+        JdsFieldType.UUID -> "BINARY(16)"
         JdsFieldType.LONG -> "BIGINT"
         JdsFieldType.STRING -> if (max == 0) "TEXT" else "VARCHAR($max)"
         JdsFieldType.BOOLEAN -> "BOOLEAN"

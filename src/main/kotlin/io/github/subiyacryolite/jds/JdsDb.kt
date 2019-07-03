@@ -148,7 +148,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         get() = implementation === JdsImplementation.TSQL
 
     val isMySqlDb: Boolean
-        get() = implementation === JdsImplementation.MYSQL
+        get() = implementation === JdsImplementation.MYSQL || implementation === JdsImplementation.MARIADB
 
     val isSqLiteDb: Boolean
         get() = implementation === JdsImplementation.SQLITE

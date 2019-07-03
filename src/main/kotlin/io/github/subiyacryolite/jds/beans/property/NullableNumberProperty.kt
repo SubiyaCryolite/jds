@@ -35,4 +35,8 @@ open class NullableNumberProperty<T : Number?>() : WritableValue<T>, Serializabl
     fun set(v : T?) {
         value = v
     }
+
+    override fun toString(): String {
+        return "NullableNumberProperty [value: $value]"
+    }
 }
