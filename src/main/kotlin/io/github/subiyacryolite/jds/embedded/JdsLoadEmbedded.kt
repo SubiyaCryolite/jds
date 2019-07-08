@@ -62,6 +62,8 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
         embeddedObject.floatValue.forEach { entity.populateProperties(JdsFieldType.FLOAT, it.key, it.value) }
         embeddedObject.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.INT_COLLECTION, parent.key, it) } }
         embeddedObject.integerValues.forEach { entity.populateProperties(JdsFieldType.INT, it.key, it.value) }
+        embeddedObject.shortValues.forEach { entity.populateProperties(JdsFieldType.SHORT, it.key, it.value) }
+        embeddedObject.uuidValues.forEach { entity.populateProperties(JdsFieldType.UUID, it.key, it.value) }
         embeddedObject.longCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.LONG_COLLECTION, parent.key, it) } }
         embeddedObject.longValues.forEach { entity.populateProperties(JdsFieldType.LONG, it.key, it.value) }
         embeddedObject.monthDayValues.forEach { entity.populateProperties(JdsFieldType.MONTH_DAY, it.key, it.value) }
