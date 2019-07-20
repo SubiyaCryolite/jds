@@ -1207,6 +1207,7 @@ abstract class JdsEntity : IJdsEntity {
                     it.setLong(1, jdsFieldEnum.field.id)
                     it.setInt(2, enum.ordinal)
                     it.setString(3, enum.name)
+                    it.setString(4, enum.toString())
                     it.addBatch()
                 }
             }

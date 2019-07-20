@@ -150,7 +150,7 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
 
     override fun populateRefEntity() = "INSERT INTO jds_ref_entity(id, name, caption, description) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption, description = EXCLUDED.description"
 
-    override fun populateRefEnum() = "INSERT INTO jds_ref_enum(field_id, seq, caption) VALUES(?, ?, ?) ON CONFLICT(field_id, seq) DO UPDATE SET caption = EXCLUDED.caption"
+    override fun populateRefEnum() = "INSERT INTO jds_ref_enum(field_id, seq, name, caption) VALUES(?, ?, ?, ?) ON CONFLICT(field_id, seq) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption"
 
     override fun mapParentToChild() = "INSERT INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
 

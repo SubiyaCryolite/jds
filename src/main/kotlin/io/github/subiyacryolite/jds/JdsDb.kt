@@ -137,7 +137,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_INTEGER_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_LONG_COLLECTION)
             prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DOUBLE_COLLECTION)
-            prepareDatabaseComponent(connection, JdsComponentType.STORED_PROCEDURE, JdsComponent.POP_STORE_DATE_TIME_COLLECTION)
         }
     }
 
@@ -245,7 +244,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsComponent.POP_STORE_BOOLEAN -> executeSqlFromString(connection, createPopJdsStoreBoolean())
             JdsComponent.POP_STORE_DATE -> executeSqlFromString(connection, createPopJdsStoreDate())
             JdsComponent.POP_STORE_DATE_TIME -> executeSqlFromString(connection, createPopJdsStoreDateTime())
-            JdsComponent.POP_STORE_DATE_TIME_COLLECTION -> executeSqlFromString(connection, createPopDateTimeCollection())
             JdsComponent.POP_STORE_DOUBLE -> executeSqlFromString(connection, createPopJdsStoreDouble())
             JdsComponent.POP_STORE_DOUBLE_COLLECTION -> executeSqlFromString(connection, createPopDoubleCollection())
             JdsComponent.POP_STORE_DURATION -> executeSqlFromString(connection, createPopJdsStoreDuration())
@@ -851,7 +849,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      * SQL call to save reference enum values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefEnum() = "{call jds_pop_ref_enum(?,?,?)}"
+    internal open fun populateRefEnum() = "{call jds_pop_ref_enum(?,?,?,?)}"
 
     /**
      * Variable to facilitate in-line rows in Oracle
@@ -957,7 +955,8 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getDataType(JdsFieldType.LONG)
         columns["seq"] = getDataType(JdsFieldType.INT)
-        columns["caption"] = getDataType(JdsFieldType.STRING, 64)
+        columns["name"] = getDataType(JdsFieldType.STRING, 128)
+        columns["caption"] = getDataType(JdsFieldType.STRING, 128)
         return createOrAlterProc("jds_pop_ref_enum", "jds_ref_enum", columns, uniqueColumns, false)
     }
 
@@ -987,12 +986,6 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val columns = storeCommonColumns
         columns["value"] = getDataType(JdsFieldType.DATE_TIME)
         return createOrAlterProc("jds_pop_date_time", "jds_str_date_time", columns, storeUniqueColumns, false)
-    }
-
-    private fun createPopDateTimeCollection(): String {
-        val columns = storeCommonColumns
-        columns["value"] = getDataType(JdsFieldType.DATE_TIME)
-        return createOrAlterProc("jds_pop_date_time_col", "jds_str_date_time_col", columns, storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDouble(): String {
