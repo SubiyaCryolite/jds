@@ -21,7 +21,7 @@ apply plugin: "org.jetbrains.dokka"
 apply plugin: "io.codearte.nexus-staging"
 
 group = "io.github.subiyacryolite"
-version = "12.0.1-SNAPSHOT"
+version = "12.0.2-SNAPSHOT"
 archivesBaseName = project.name
 description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"

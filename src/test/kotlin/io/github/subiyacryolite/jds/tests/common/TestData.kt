@@ -40,7 +40,7 @@ object TestData {
             thirdAddress.provinceOrState = "Copperbelt"
             thirdAddress.streetName = "West Street"
             thirdAddress.timeOfEntry = ZonedDateTime.now().minusDays(3).toLocalTime()
-            thirdAddress.primaryAddress = PrimaryAddress.NO
+            thirdAddress.primaryAddress = null
 
             val addressBook = AddressBook()
             addressBook.overview.uuid = "testGuid0001"

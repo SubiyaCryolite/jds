@@ -22,7 +22,7 @@ data class Address(
         private val _provinceOrState: StringProperty = SimpleStringProperty(""),
         private val _country: StringProperty = SimpleStringProperty(""),
         private val _entryUuid: ObjectProperty<UUID> = SimpleObjectProperty(UUID.randomUUID()),
-        private val _primaryAddress: ObjectProperty<PrimaryAddress> = SimpleObjectProperty(PrimaryAddress.NO),
+        private val _primaryAddress: ObjectProperty<PrimaryAddress?> = SimpleObjectProperty(null),
         private val _timeOfEntry: ObjectProperty<LocalTime> = SimpleObjectProperty(LocalTime.now())
 ) : JdsEntity() {
 
@@ -43,7 +43,7 @@ data class Address(
         get() = _entryUuid.get()
         set(value) = _entryUuid.set(value)
 
-    var primaryAddress: PrimaryAddress
+    var primaryAddress: PrimaryAddress?
         get() = _primaryAddress.get()
         set(value) = _primaryAddress.set(value)
 
