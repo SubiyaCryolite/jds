@@ -64,16 +64,16 @@ class JdsFieldEnum<T : Enum<T>>() : Externalizable {
      * @param ordinal
      * @return
      */
-    fun valueOf(ordinal: Int): T {
-        return values.first { it.ordinal == ordinal }
+    fun valueOf(ordinal: Int): T? {
+        return values.firstOrNull { it.ordinal == ordinal }
     }
 
     /**
      * @param name
      * @return
      */
-    fun valueOf(name: String): T {
-        return values.first { it.name == name }
+    fun valueOf(name: String): T? {
+        return values.firstOrNull { it.name == name }
     }
 
     /**

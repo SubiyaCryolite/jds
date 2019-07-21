@@ -101,11 +101,11 @@ abstract class JdsEntity : IJdsEntity {
     internal val longCollections: HashMap<Long, MutableCollection<Long>> = HashMap()
     @get:JsonIgnore
     internal val integerCollections: HashMap<Long, MutableCollection<Int>> = HashMap()
-    //enumProperties
+    //enumProperties - enums can be null, enum collections cannot (skip unknown entries)
     @get:JsonIgnore
-    internal val enumProperties: HashMap<Long, WritableValue<Enum<*>>> = HashMap()
+    internal val enumProperties: HashMap<Long, WritableValue<Enum<*>?>> = HashMap()
     @get:JsonIgnore
-    internal val enumStringProperties: HashMap<Long, WritableValue<Enum<*>>> = HashMap()
+    internal val enumStringProperties: HashMap<Long, WritableValue<Enum<*>?>> = HashMap()
     @get:JsonIgnore
     internal val enumCollections: HashMap<Long, MutableCollection<Enum<*>>> = HashMap()
     @get:JsonIgnore
@@ -263,13 +263,13 @@ abstract class JdsEntity : IJdsEntity {
     }
 
     @JvmName("mapEnum")
-    protected fun <T : Enum<T>> map(field: JdsField, property: WritableValue<T>) {
+    protected fun <T : Enum<T>?> map(field: JdsField, property: WritableValue<T>) {
         if (field.type != JdsFieldType.ENUM && field.type != JdsFieldType.ENUM_STRING)
             throw RuntimeException("Incorrect type supplied for field [$field]")
         if (field.type == JdsFieldType.ENUM)
-            enumProperties[field.id] = property as WritableValue<Enum<*>>
+            enumProperties[field.id] = property as WritableValue<Enum<*>?>
         else
-            enumStringProperties[field.id] = property as WritableValue<Enum<*>>
+            enumStringProperties[field.id] = property as WritableValue<Enum<*>?>
         field.bind()
         mapField(overview.entityId, field.id)
         mapEnums(overview.entityId, field.id)
@@ -561,13 +561,13 @@ abstract class JdsEntity : IJdsEntity {
         putLongs(longCollections, objectInputStream.readObject() as Map<Long, List<Long>>)
         putIntegers(integerCollections, objectInputStream.readObject() as Map<Long, List<Int>>)
         //enumProperties
-        putEnum(enumProperties, objectInputStream.readObject() as Map<Long, Enum<*>>)
-        putEnum(enumStringProperties, objectInputStream.readObject() as Map<Long, Enum<*>>)
+        putEnum(enumProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
+        putEnum(enumStringProperties, objectInputStream.readObject() as Map<Long, Enum<*>?>)
         putEnums(enumCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
         putEnums(enumStringCollections, objectInputStream.readObject() as Map<Long, List<Enum<*>>>)
     }
 
-    private fun serializeEnums(input: Map<Long, WritableValue<Enum<*>>>): Map<Long, Enum<*>> =
+    private fun serializeEnums(input: Map<Long, WritableValue<Enum<*>?>>): Map<Long, Enum<*>?> =
             input.entries.associateBy({ it.key }, { it.value.value })
 
     private fun serializeBlobs(input: Map<Long, WritableValue<ByteArray?>>): Map<Long, WritableValue<ByteArray?>> =
@@ -659,7 +659,7 @@ abstract class JdsEntity : IJdsEntity {
     private fun putEnums(destination: Map<Long, MutableCollection<Enum<*>>>, source: Map<Long, List<Enum<*>>>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.addAll(entry.value) }
 
-    private fun putEnum(destination: Map<Long, WritableValue<Enum<*>>>, source: Map<Long, Enum<*>>) =
+    private fun putEnum(destination: Map<Long, WritableValue<Enum<*>?>>, source: Map<Long, Enum<*>?>) =
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = (entry.value) }
 
     private fun putObjects(destination: Map<JdsFieldEntity<*>, MutableCollection<JdsEntity>>, source: Map<JdsFieldEntity<*>, List<JdsEntity>>) =
@@ -705,6 +705,7 @@ abstract class JdsEntity : IJdsEntity {
             source.entries.filter { entry -> destination.containsKey(entry.key) }.forEach { entry -> destination[entry.key]?.value = entry.value }
 
     /**
+     * Implementation ignores null values by default on the assumption that nullable values have default values of null
      * @param embeddedObject
      */
     internal fun assign(embeddedObject: JdsEmbeddedObject) {
@@ -746,8 +747,8 @@ abstract class JdsEntity : IJdsEntity {
         //==============================================
         //Enums
         //==============================================
-        enumProperties.entries.forEach { embeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value.ordinal)) }
-        enumStringProperties.entries.forEach { embeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value.name)) }
+        enumProperties.entries.forEach { embeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
+        enumStringProperties.entries.forEach { embeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value?.name)) }
         enumCollections.entries.forEach { embeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
         enumStringCollections.entries.forEach { embeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, toStringCollection(it.value))) }
         //==============================================
@@ -850,6 +851,7 @@ abstract class JdsEntity : IJdsEntity {
 
             JdsFieldType.INT_COLLECTION -> integerCollections[fieldId]?.add(value as Int)
 
+            //Enums may be null
             JdsFieldType.ENUM -> enumProperties.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null)
@@ -859,12 +861,14 @@ abstract class JdsEntity : IJdsEntity {
                     })
             }
 
+            //Enums may be null
             JdsFieldType.ENUM_STRING -> enumProperties.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null && value is String)
                     it.value.value = fieldEnum.valueOf(value)
             }
 
+            //Enum collections should NOT accept nulls. Unknown properties should be skipped
             JdsFieldType.ENUM_COLLECTION -> enumCollections.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
@@ -880,12 +884,14 @@ abstract class JdsEntity : IJdsEntity {
                 }
             }
 
+            //Enum collections should NOT accept nulls. Unknown properties should be skipped
             JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollections.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
                     val enumStr = value.toString()
                     val enumVal = fieldEnum.valueOf(enumStr)
-                    it.value.add(enumVal)
+                    if (enumVal != null)
+                        it.value.add(enumVal)
                 }
             }
 
@@ -1114,8 +1120,9 @@ abstract class JdsEntity : IJdsEntity {
                 innerObjects.add(entity)
             }
             objectValues.filter { it.key.field.id == fieldId }.forEach {
-                if (it.value.value == null)
+                if (it.value.value == null) {
                     it.value.value = jdsDb.classes[entityId]!!.getDeclaredConstructor().newInstance()
+                }
                 it.value.value.overview.uuid = uuid
                 it.value.value.overview.editVersion = editVersion
                 uuids.add(JdsEntityComposite(uuid, editVersion))
@@ -1166,8 +1173,9 @@ abstract class JdsEntity : IJdsEntity {
     internal fun populateRefEnumRefEntityEnum(jdsDb: JdsDb, connection: Connection, entityId: Long) {
         populateRefEnum(jdsDb, connection, getEnums(overview.entityId))
         populateRefEntityEnum(jdsDb, connection, entityId, getEnums(overview.entityId))
-        if (jdsDb.options.isLoggingOutput)
+        if (jdsDb.options.isLoggingOutput) {
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
+        }
     }
 
     /**
@@ -1269,8 +1277,9 @@ abstract class JdsEntity : IJdsEntity {
      */
     override fun registerFields(jdsTable: JdsTable) {
         getFields(overview.entityId).forEach {
-            if (!JdsSchema.isIgnoredType(it))
+            if (!JdsSchema.isIgnoredType(it)) {
                 jdsTable.registerField(it)
+            }
         }
     }
 
@@ -1356,8 +1365,9 @@ abstract class JdsEntity : IJdsEntity {
      * Internal helper function that works with all nested objects
      */
     fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity> = sequence {
-        if (includeThisEntity)
+        if (includeThisEntity) {
             yield(this@JdsEntity)
+        }
         objectValues.values.forEach { objectProperty -> yieldAll(objectProperty.value.getNestedEntities()) }
         objectCollections.values.forEach { objectCollection -> objectCollection.forEach { entity -> yieldAll(entity.getNestedEntities()) } }
     }
@@ -1365,9 +1375,10 @@ abstract class JdsEntity : IJdsEntity {
     /**
      * Internal helper function that works with all nested objects
      */
-    fun getNestedEntities(collection: MutableCollection<JdsEntity>, includeThisEntity: Boolean = true) {
-        if (includeThisEntity)
+    private fun getNestedEntities(collection: MutableCollection<JdsEntity>, includeThisEntity: Boolean = true) {
+        if (includeThisEntity) {
             collection.add(this@JdsEntity)
+        }
         objectValues.values.forEach { it.value.getNestedEntities(collection) }
         objectCollections.values.forEach { it -> it.forEach { it.getNestedEntities(collection) } }
     }
