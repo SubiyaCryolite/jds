@@ -13,4 +13,6 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-class NullableDoubleProperty : NullableNumberProperty<Double>()
+import javafx.beans.property.SimpleObjectProperty
+
+class NullableDoubleProperty : SimpleObjectProperty<Double?>()

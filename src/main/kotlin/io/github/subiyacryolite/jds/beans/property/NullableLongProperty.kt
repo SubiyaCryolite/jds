@@ -13,4 +13,22 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-class NullableLongProperty : NullableNumberProperty<Long>()
+import javafx.beans.value.WritableValue
+import java.io.Serializable
+
+data class NullableLongProperty(private var _value: Long? = null) : WritableValue<Long?>, Serializable {
+
+    fun get(): Long? = value
+
+    fun set(v: Long?) {
+        value = v
+    }
+
+    override fun setValue(value: Long?) {
+        _value = value
+    }
+
+    override fun getValue(): Long? {
+        return _value
+    }
+}

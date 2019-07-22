@@ -13,4 +13,22 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-class NullableIntegerProperty : NullableNumberProperty<Int>()
+import javafx.beans.value.WritableValue
+import java.io.Serializable
+
+data class NullableIntegerProperty(private var _value: Int? = null) : WritableValue<Int?>, Serializable {
+
+    fun get(): Int? = value
+
+    fun set(v: Int?) {
+        value = v
+    }
+
+    override fun setValue(value: Int?) {
+        _value = value
+    }
+
+    override fun getValue(): Int? {
+        return _value
+    }
+}

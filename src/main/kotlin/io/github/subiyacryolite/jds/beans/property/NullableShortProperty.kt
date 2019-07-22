@@ -13,4 +13,22 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-class NullableShortProperty : NullableNumberProperty<Short>()
+import javafx.beans.value.WritableValue
+import java.io.Serializable
+
+data class NullableShortProperty(private var _value: Short? = null) : WritableValue<Short?>, Serializable {
+
+    fun get(): Short? = value
+
+    fun set(v: Short?) {
+        value = v
+    }
+
+    override fun setValue(value: Short?) {
+        _value = value
+    }
+
+    override fun getValue(): Short? {
+        return _value
+    }
+}
