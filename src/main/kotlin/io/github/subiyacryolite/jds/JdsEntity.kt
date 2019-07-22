@@ -842,8 +842,9 @@ abstract class JdsEntity : IJdsEntity {
             JdsFieldType.DOUBLE -> doubleValues[fieldId]?.value = value as Double?
 
             JdsFieldType.SHORT -> shortValues[fieldId]?.value = when (value) {
-                is Short? -> value
+                is Double -> value.toShort()
                 is Int -> value.toShort()
+                is Short? -> value
                 else -> null
             }
 
