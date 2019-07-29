@@ -25,7 +25,15 @@ import java.util.*
  * @param key the [field][JdsField]] [ID][JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreBlob(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: ByteArray? = null) {
+data class JdsStoreBlob(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: ByteArray? = null
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -47,31 +55,63 @@ data class JdsStoreBlob(@get:JsonProperty("k") @set:JsonProperty("k") var key: L
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreBoolean(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Int? = null)
+data class JdsStoreBoolean(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Int? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreDouble(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Double? = null)
+data class JdsStoreDouble(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Double? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreShort(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Short? = null)
+data class JdsStoreShort(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Short? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreUuid(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: ByteArray? = null) {
+data class JdsStoreUuid(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: ByteArray? = null
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -93,158 +133,334 @@ data class JdsStoreUuid(@get:JsonProperty("k") @set:JsonProperty("k") var key: L
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreDoubleCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Double> = ArrayList())
+data class JdsStoreDoubleCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Double> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreEnum(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Int? = null)
+data class JdsStoreEnum(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Int? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreEnumString(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStoreEnumString(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: String? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreEnumCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Int> = ArrayList())
+data class JdsStoreEnumCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Int> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreEnumStringCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<String> = ArrayList())
+data class JdsStoreEnumStringCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<String> = ArrayList()
+)
 
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreInteger(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Int? = null)
+data class JdsStoreInteger(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Int? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreIntegerCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Int> = ArrayList())
+data class JdsStoreIntegerCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Int> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreLong(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Long? = null)
+data class JdsStoreLong(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Long? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreZonedDateTime(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Long? = null)
+data class JdsStoreZonedDateTime(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Long? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreLongCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Long> = ArrayList())
+data class JdsStoreLongCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Long> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreTime(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Long? = null)
+data class JdsStoreTime(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Long? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreString(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStoreString(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: String? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreStringCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<String> = ArrayList())
+data class JdsStoreStringCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<String> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreFloat(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Float? = null)
+data class JdsStoreFloat(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Float? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreFloatCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Float> = ArrayList())
+data class JdsStoreFloatCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Float> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreDateTime(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Timestamp? = null)
+data class JdsStoreDateTime(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Timestamp? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param values the corresponding value
  */
-data class JdsStoreDateTimeCollection(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var values: MutableCollection<Timestamp> = ArrayList())
+data class JdsStoreDateTimeCollection(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var values: MutableCollection<Timestamp> = ArrayList()
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreDate(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Timestamp? = null)
+data class JdsStoreDate(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Timestamp? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreDuration(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: Long? = null)
+data class JdsStoreDuration(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: Long? = null
+)
 
 /**
  * Used to store values of type in a portable manner
  * @param key the [field][JdsField]] [ID][JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreYearMonth(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStoreYearMonth(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: String? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStoreMonthDay(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStoreMonthDay(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: String? = null
+)
 
 /**
  * Used to store values of type in a portable manner
- * @param key the [field][JdsField] [ID][JdsField.id]
+ * @param key the value within [JdsField.id]
  * @param value the corresponding value
  */
-data class JdsStorePeriod(@get:JsonProperty("k") @set:JsonProperty("k") var key: Long = 0, @get:JsonProperty("v") @set:JsonProperty("v") var value: String? = null)
+data class JdsStorePeriod(
+        @get:JsonProperty("k")
+        @set:JsonProperty("k")
+        var key: Long = 0,
+
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
+        var value: String? = null
+)
 
 /**
  *
@@ -253,14 +469,28 @@ data class JdsStorePeriod(@get:JsonProperty("k") @set:JsonProperty("k") var key:
  * @param entityId entity id
  * @param fieldId field id
  */
-data class JdsEntityOverview(@get:JsonProperty("u") @set:JsonProperty("u") var uuid: String = "",
-                             @get:JsonProperty("ev") @set:JsonProperty("ev") var editVersion: Int = 0,
-                             @get:JsonProperty("e") @set:JsonProperty("e") var entityId: Long = 0,
-                             @get:JsonProperty("f") @set:JsonProperty("f") var fieldId: Long? = null)
+data class JdsEntityOverview(
+        @get:JsonProperty("u")
+        @set:JsonProperty("u")
+        var uuid: String = "",
 
-data class JdsEmbeddedContainer(@get:JsonProperty("e")
-                                val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()) {
+        @get:JsonProperty("ev")
+        @set:JsonProperty("ev")
+        var editVersion: Int = 0,
 
+        @get:JsonProperty("e")
+        @set:JsonProperty("e")
+        var entityId: Long = 0,
+
+        @get:JsonProperty("f")
+        @set:JsonProperty("f")
+        var fieldId: Long? = null
+)
+
+data class JdsEmbeddedContainer(
+        @get:JsonProperty("e")
+                                val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()
+) {
     /**
      * @param entities a collection of [JdsEntity] objects to store in a portable manner
      */

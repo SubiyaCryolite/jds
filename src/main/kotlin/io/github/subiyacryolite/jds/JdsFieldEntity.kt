@@ -13,46 +13,14 @@
  */
 package io.github.subiyacryolite.jds
 
-import java.io.Externalizable
-import java.io.IOException
-import java.io.ObjectInput
-import java.io.ObjectOutput
+import java.io.Serializable
 
-class JdsFieldEntity<T : IJdsEntity>(var entity: Class<out IJdsEntity>, var field: JdsField) : Externalizable {
+data class JdsFieldEntity<T : IJdsEntity>(
+        var entity: Class<out T>,
+        var field: JdsField
+) : Serializable {
 
-    @Throws(IOException::class)
-    override fun writeExternal(out: ObjectOutput) {
-        out.writeObject(entity)
-        out.writeObject(field)
-    }
-
-    @Throws(IOException::class, ClassNotFoundException::class)
-    override fun readExternal(input: ObjectInput) {
-        entity = input.readObject() as Class<T>
-        field = input.readObject() as JdsField
-    }
-
-    override fun toString(): String = "JdsFieldEntity{ field=$field, entity= $entity }"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as JdsFieldEntity<*>
-
-        if (entity != other.entity) return false
-        if (field != other.field) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = entity.hashCode()
-        result = 31 * result + field.hashCode()
-        return result
-    }
-
-    companion object {
+       companion object {
         private const val serialVersionUID = 20171109_0853L
     }
 }

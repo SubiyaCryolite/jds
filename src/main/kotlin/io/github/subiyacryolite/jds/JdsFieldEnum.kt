@@ -13,125 +13,37 @@
  */
 package io.github.subiyacryolite.jds
 
-import java.io.Externalizable
-import java.io.IOException
-import java.io.ObjectInput
-import java.io.ObjectOutput
+import java.io.Serializable
 import java.util.*
 import kotlin.collections.HashSet
 
 /**
  * Represents a jdsField enum in JDS
  */
-class JdsFieldEnum<T : Enum<T>>() : Externalizable {
-    lateinit var enumType: Class<T>
-    lateinit var field: JdsField
+data class JdsFieldEnum<T : Enum<T>>(
+        val enumType: Class<T>,
+        val field: JdsField,
+        val values: Set<T> = HashSet()
+) : Serializable {
 
-    var values: Set<T> = HashSet(0)
-        private set
+    constructor(enumType: Class<T>, field: JdsField, vararg values: T) : this(enumType, field, setOf(*values))
 
-    /**
-     * @param type
-     */
-    constructor(type: Class<T>) : this() {
-        this.enumType = type
-    }
-
-    /**
-     * @param type
-     * @param field
-     * @param values
-     */
-    constructor(type: Class<T>, field: JdsField, vararg values: T) : this(type) {
-        this.field = field
-        this.values = setOf(*values)
-        bind()
-    }
-
-    /**
-     *
-     */
-    private fun bind() {
-        if (!enums.containsKey(field.id))
+    init {
+        if (!enums.containsKey(field.id)) {
             enums[field.id] = this
+        }
     }
 
-    override fun toString(): String {
-        return "JdsFieldEnum{ jdsField= $field , values=$values }"
-    }
-
-    /**
-     * @param ordinal
-     * @return
-     */
     fun valueOf(ordinal: Int): T? {
         return values.firstOrNull { it.ordinal == ordinal }
     }
 
-    /**
-     * @param name
-     * @return
-     */
     fun valueOf(name: String): T? {
         return values.firstOrNull { it.name == name }
     }
 
-    /**
-     * @param out
-     * @throws IOException
-     */
-    @Throws(IOException::class)
-    override fun writeExternal(out: ObjectOutput) {
-        out.writeObject(enumType)
-        out.writeObject(field)
-        out.writeObject(values)
-    }
-
-    /**
-     * @param input
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    @Throws(IOException::class, ClassNotFoundException::class)
-    override fun readExternal(input: ObjectInput) {
-        enumType = input.readObject() as Class<T>
-        field = input.readObject() as JdsField
-        values = input.readObject() as Set<T>
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as JdsFieldEnum<*>
-
-        if (enumType != other.enumType) return false
-        if (field != other.field) return false
-        if (values != other.values) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = enumType.hashCode()
-        result = 31 * result + field.hashCode()
-        result = 31 * result + values.hashCode()
-        return result
-    }
-
-    companion object : Externalizable {
-
+    companion object : Serializable {
         private const val serialVersionUID = 20171109_0853L
-
         val enums: HashMap<Long, JdsFieldEnum<*>> = HashMap()
-
-        override fun readExternal(objectInput: ObjectInput) {
-            enums.clear()
-            enums.putAll(objectInput.readObject() as Map<Long, JdsFieldEnum<*>>)
-        }
-
-        override fun writeExternal(objectOutput: ObjectOutput) {
-            objectOutput.writeObject(enums)
-        }
     }
 }

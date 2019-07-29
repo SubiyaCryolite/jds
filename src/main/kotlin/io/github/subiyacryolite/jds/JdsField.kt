@@ -18,51 +18,25 @@ import java.io.Externalizable
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
+import java.io.Serializable
 import java.util.*
 
 /**
  * Represents a jdsField in JDS
  */
-data class JdsField(var id: Long = 0,
-                    var name: String = "",
-                    var type: JdsFieldType = JdsFieldType.STRING,
-                    var description: String = "") : Externalizable {
+data class JdsField(
+        var id: Long = 0,
+        var name: String = "",
+        var type: JdsFieldType = JdsFieldType.STRING,
+        var description: String = ""
+) : Serializable {
 
     internal fun bind() {
         values[this.id] = this
     }
 
-    @Throws(IOException::class)
-    override fun writeExternal(output: ObjectOutput) {
-        output.writeLong(id)
-        output.writeUTF(name)
-        output.writeUTF(description)
-        output.writeObject(type)
-    }
-
-    @Throws(IOException::class, ClassNotFoundException::class)
-    override fun readExternal(input: ObjectInput) {
-        id = input.readLong()
-        name = input.readUTF()
-        description = input.readUTF()
-        type = input.readObject() as JdsFieldType
-    }
-
-    companion object : Externalizable {
+    companion object : Serializable {
         private const val serialVersionUID = 20171109_0853L
-
         val values = HashMap<Long, JdsField>()
-        val NULL = JdsField()
-
-        @Throws(IOException::class, ClassNotFoundException::class)
-        override fun readExternal(objectInput: ObjectInput) {
-            values.clear()
-            values.putAll(objectInput.readObject() as Map<Long, JdsField>)
-        }
-
-        @Throws(IOException::class)
-        override fun writeExternal(objectOutput: ObjectOutput) {
-            objectOutput.writeObject(values)
-        }
     }
 }
