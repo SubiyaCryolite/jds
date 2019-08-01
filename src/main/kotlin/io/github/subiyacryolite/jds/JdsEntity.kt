@@ -279,8 +279,7 @@ abstract class JdsEntity : IJdsEntity {
         mapField(overview.entityId, field.id)
     }
 
-    @JvmName("mapEnum")
-    protected fun <T : Enum<T>> map(field: JdsField, property: WritableValue<T?>) {
+    private fun <T : Enum<T>> map(field: JdsField, property: WritableValue<T?>) {
         if (field.type != JdsFieldType.ENUM && field.type != JdsFieldType.ENUM_STRING) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
@@ -294,6 +293,7 @@ abstract class JdsEntity : IJdsEntity {
         mapEnums(overview.entityId, field.id)
     }
 
+    @JvmName("mapEnum")
     protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, property: WritableValue<T?>) = map(fieldEnum.field, property)
 
     @JvmName("mapStrings")
@@ -356,8 +356,7 @@ abstract class JdsEntity : IJdsEntity {
         mapField(overview.entityId, field.id)
     }
 
-    @JvmName("mapEnums")
-    protected fun <T : Enum<T>> map(field: JdsField, property: MutableCollection<T>) {
+    private fun <T : Enum<T>> map(field: JdsField, property: MutableCollection<T>) {
         if (field.type != JdsFieldType.ENUM_COLLECTION && field.type != JdsFieldType.ENUM_STRING_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
@@ -375,6 +374,7 @@ abstract class JdsEntity : IJdsEntity {
      * @param fieldEnum
      * @param properties
      */
+    @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, properties: MutableCollection<T>) = map(fieldEnum.field, properties)
 
     /**
