@@ -13,6 +13,22 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.WritableValue
+import java.io.Serializable
 
-class NullableDoubleProperty : SimpleObjectProperty<Double?>()
+data class NullableDoubleProperty(private var _value: Double? = null) : WritableValue<Double?>, Serializable {
+
+    fun get(): Double? = value
+
+    fun set(v: Double?) {
+        value = v
+    }
+
+    override fun setValue(value: Double?) {
+        _value = value
+    }
+
+    override fun getValue(): Double? {
+        return _value
+    }
+}

@@ -442,20 +442,16 @@ class JdsSave(private val jdsDb: JdsDb,
     @Throws(Exception::class)
     private fun saveEnums(jdsEntity: JdsEntity) = try {
         val upsert = regularStatementOrCall(onSaveEventArguments, jdsDb.saveEnum())
-        jdsEntity.enumProperties.forEach { (jdsFieldEnum, value2) ->
+        jdsEntity.enumValues.forEach { (jdsFieldEnum, value2) ->
             val value = value2.value
             upsert.setString(1, jdsEntity.overview.uuid)
             upsert.setInt(2, jdsEntity.overview.editVersion)
             upsert.setLong(3, jdsFieldEnum)
-            upsert.setObject(4, when (value == null) {
-                true -> null
-                false -> value!!.ordinal
-            }
-            )
+            upsert.setObject(4, value?.ordinal            )
             upsert.addBatch()
         }
         val upsertEnumString = regularStatementOrCall(onSaveEventArguments, jdsDb.saveEnumString())
-        jdsEntity.enumStringProperties.forEach { (jdsFieldEnum, value2) ->
+        jdsEntity.stringEnumValues.forEach { (jdsFieldEnum, value2) ->
             val value = value2.value
             upsertEnumString.setString(1, jdsEntity.overview.uuid)
             upsertEnumString.setInt(2, jdsEntity.overview.editVersion)

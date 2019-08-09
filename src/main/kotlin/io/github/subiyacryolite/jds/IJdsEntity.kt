@@ -13,9 +13,7 @@
  */
 package io.github.subiyacryolite.jds;
 
-import java.io.Externalizable
-
-interface IJdsEntity : Externalizable {
+interface IJdsEntity {
     val overview: IJdsOverview
     fun registerFields(jdsTable: JdsTable)
 }

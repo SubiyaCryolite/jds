@@ -13,7 +13,9 @@
  */
 package io.github.subiyacryolite.jds;
 
-interface IJdsOverview {
+import java.io.Serializable
+
+interface IJdsOverview:Serializable {
 
       /**
      * The unique identifier of this record
