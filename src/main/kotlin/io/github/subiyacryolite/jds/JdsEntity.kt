@@ -710,17 +710,17 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             JdsFieldType.STRING_COLLECTION -> stringCollections[fieldId]?.add(value as String)
 
             JdsFieldType.ZONED_DATE_TIME -> when (value) {
-                is Long -> zonedDateTimeValues[fieldId]?.value = (ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault()))
-                is Timestamp -> zonedDateTimeValues[fieldId]?.value = (value.let { ZonedDateTime.ofInstant(it.toInstant(), ZoneOffset.systemDefault()) })
-                is String -> zonedDateTimeValues[fieldId]?.value = (value.let { it.toZonedDateTime() })
-                is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = (value.let { it.atZoneSameInstant(ZoneId.systemDefault()) })
+                is Long -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
+                is Timestamp -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault())
+                is String -> zonedDateTimeValues[fieldId]?.value = value.toZonedDateTime()
+                is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = value.atZoneSameInstant(ZoneId.systemDefault())
             }
 
             JdsFieldType.DATE -> when (value) {
                 is Timestamp -> localDateValues[fieldId]?.value = (value.toLocalDateTime().toLocalDate())
                 is LocalDate -> localDateValues[fieldId]?.value = (value)
                 is String -> localDateValues[fieldId]?.value = (value.toLocalDate())
-                else -> localDateValues[fieldId]?.value = (LocalDate.now())
+                else -> localDateValues[fieldId]?.value = null
             }
 
             JdsFieldType.TIME -> when (value) {
@@ -734,15 +734,15 @@ abstract class JdsEntity : IJdsEntity, Serializable {
                 else -> Duration.ofNanos(value as Long)
             })
 
-            JdsFieldType.MONTH_DAY -> monthDayValues[fieldId]?.value = (value as String).let { MonthDay.parse(it) }
+            JdsFieldType.MONTH_DAY -> monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
 
-            JdsFieldType.YEAR_MONTH -> yearMonthValues[fieldId]?.value = (value as String).let { YearMonth.parse(it) }
+            JdsFieldType.YEAR_MONTH -> yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
 
-            JdsFieldType.PERIOD -> periodValues[fieldId]?.value = (value as String).let { Period.parse(it) }
+            JdsFieldType.PERIOD -> periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
 
-            JdsFieldType.DATE_TIME -> localDateTimeValues[fieldId]?.value = (value as Timestamp).let { it.toLocalDateTime() }
+            JdsFieldType.DATE_TIME -> localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
 
-            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeCollections[fieldId]?.add((value as Timestamp).let { it.toLocalDateTime() })
+            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
 
             JdsFieldType.BLOB -> when (value) {
                 is ByteArray -> blobValues[fieldId]?.value = value
