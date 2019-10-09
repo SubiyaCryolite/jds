@@ -513,7 +513,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param embeddedObject
      */
     @Throws(Exception::class)
-    internal fun assign(embeddedObject: JdsEmbeddedObject) {
+    internal fun assign(embeddedObject: JdsEmbeddedObject) = try {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
@@ -582,6 +582,9 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             eo.init(it.value)
             embeddedObject.entityOverviews.add(eo)
         }
+    } catch (ex: Exception) {
+        System.err.println("Error during property assignment")
+        ex.fillInStackTrace()
     }
 
     private fun safeLocalDateTime(value: Temporal?): Timestamp? {
