@@ -489,11 +489,12 @@ data class JdsEntityOverview(
 
 data class JdsEmbeddedContainer(
         @get:JsonProperty("e")
-                                val embeddedObjects: MutableList<JdsEmbeddedObject> = ArrayList()
+        val embeddedObjects: MutableCollection<JdsEmbeddedObject> = ArrayList()
 ) {
     /**
      * @param entities a collection of [JdsEntity] objects to store in a portable manner
      */
+    @Throws(Exception::class)
     constructor(entities: Iterable<JdsEntity>) : this() {
         entities.forEach {
             val classHasAnnotation = it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)

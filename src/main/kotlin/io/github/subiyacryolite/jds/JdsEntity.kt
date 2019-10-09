@@ -512,6 +512,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * Implementation ignores null values by default on the assumption that nullable values have default values of null
      * @param embeddedObject
      */
+    @Throws(Exception::class)
     internal fun assign(embeddedObject: JdsEmbeddedObject) {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
@@ -525,11 +526,11 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             embeddedObject.booleanValues.add(JdsStoreBoolean(it.key, input))
         }
         stringValues.entries.forEach { embeddedObject.stringValues.add(JdsStoreString(it.key, it.value.value)) }
-        floatValues.entries.forEach { embeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value?.toFloat())) }
-        doubleValues.entries.forEach { embeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value?.toDouble())) }
-        shortValues.entries.forEach { embeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value?.toShort())) }
-        longValues.entries.forEach { embeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value?.toLong())) }
-        integerValues.entries.forEach { embeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value?.toInt())) }
+        floatValues.entries.forEach { embeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value)) }
+        doubleValues.entries.forEach { embeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value)) }
+        shortValues.entries.forEach { embeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value)) }
+        longValues.entries.forEach { embeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value)) }
+        integerValues.entries.forEach { embeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value)) }
         uuidValues.entries.forEach { embeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value.toByteArray())) }
         //==============================================
         //Dates & Time

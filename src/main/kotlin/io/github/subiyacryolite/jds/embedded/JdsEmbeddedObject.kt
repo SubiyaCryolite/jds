@@ -111,6 +111,7 @@ data class JdsEmbeddedObject(@get:JsonProperty("o")
                              @get:JsonProperty("eo")
                              val entityOverviews: MutableList<JdsEmbeddedObject> = ArrayList()) {
 
+    @Throws(Exception::class)
     fun init(entity: JdsEntity) {
         entity.assign(this)
         overview = JdsEntityOverview(

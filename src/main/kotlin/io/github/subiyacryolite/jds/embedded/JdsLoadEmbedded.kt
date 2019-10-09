@@ -24,6 +24,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
      *
      * @return
      */
+    @Throws(Exception::class)
     override fun call(): List<T> {
         val output: MutableList<T> = ArrayList()
         container.forEach { element ->
@@ -41,6 +42,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
      * @param entity
      * @param embeddedObject
      */
+    @Throws(Exception::class)
     private fun populate(entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
         entity.overview.entityId = embeddedObject.overview.entityId
         entity.overview.uuid = embeddedObject.overview.uuid
