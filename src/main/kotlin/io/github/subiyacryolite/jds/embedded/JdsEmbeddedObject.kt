@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds.embedded
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.subiyacryolite.jds.IJdsEntity
 import io.github.subiyacryolite.jds.JdsEntity
 
 /**
@@ -112,7 +113,7 @@ data class JdsEmbeddedObject(@get:JsonProperty("o")
                              val entityOverviews: MutableList<JdsEmbeddedObject> = ArrayList()) {
 
     @Throws(Exception::class)
-    fun init(entity: JdsEntity) {
+    fun init(entity: IJdsEntity) {
         entity.assign(this)
         overview = JdsEntityOverview(
                 entity.overview.uuid,

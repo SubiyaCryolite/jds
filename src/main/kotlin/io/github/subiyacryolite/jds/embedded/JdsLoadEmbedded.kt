@@ -99,7 +99,8 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
                     it.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 it.value.value.overview.uuid = uuid
                 it.value.value.overview.editVersion = editVersion
-                populate(it.value.value, eo)
+                val jdsEntity = it.value.value as JdsEntity
+                populate(jdsEntity, eo)
             }
         }
     }

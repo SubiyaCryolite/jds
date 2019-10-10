@@ -13,7 +13,16 @@
  */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.embedded.JdsEmbeddedObject
+import javafx.beans.property.ObjectProperty
+import java.util.HashMap
+
 interface IJdsEntity {
     val overview: IJdsOverview
+    val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<out IJdsEntity>>
+    val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<IJdsEntity>>
     fun registerFields(jdsTable: JdsTable)
+    fun assign(jdsEmbeddedObject: JdsEmbeddedObject)
+    fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity>
+    fun getNestedEntities(collection: MutableCollection<JdsEntity>, includeThisEntity: Boolean = true)
 }
