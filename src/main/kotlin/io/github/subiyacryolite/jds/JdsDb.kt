@@ -529,9 +529,11 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
     private fun mapParentEntities(connection: Connection, parentEntities: List<Long>, entityCode: Long) = try {
         (if (supportsStatements) connection.prepareCall(mapParentToChild()) else connection.prepareStatement(mapParentToChild())).use { statement ->
             for (parentEntity in parentEntities) {
-                statement.setLong(1, parentEntity)
-                statement.setLong(2, entityCode)
-                statement.addBatch()
+                if (parentEntity != entityCode) {
+                    statement.setLong(1, parentEntity)
+                    statement.setLong(2, entityCode)
+                    statement.addBatch()
+                }
             }
             statement.executeBatch()
         }
