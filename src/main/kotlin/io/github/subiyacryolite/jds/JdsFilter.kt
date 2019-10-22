@@ -25,7 +25,7 @@ import java.util.concurrent.Callable
  * @param db
  * @param referenceType
  */
-class JdsFilter<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : AutoCloseable, Callable<MutableList<T>> {
+class JdsFilter<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : AutoCloseable, Callable<MutableCollection<T>> {
 
     private val blockParameters: LinkedList<LinkedList<Any>> = LinkedList()
     private val blockStrings: LinkedList<LinkedList<String>> = LinkedList()
@@ -103,7 +103,7 @@ class JdsFilter<T : JdsEntity>(private val db: JdsDb, private val referenceType:
      * @return
      */
     @Throws(Exception::class)
-    override fun call(): MutableList<T> {
+    override fun call(): MutableCollection<T> {
         val matchingFilterIds = ArrayList<String>()
         val sql = this.toQuery()
         try {

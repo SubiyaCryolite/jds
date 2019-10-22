@@ -29,88 +29,88 @@ data class JdsEmbeddedObject(@get:JsonProperty("o")
                              var fieldId: Long? = null,
 
                              @get:JsonProperty("blv")
-                             val blobValues: MutableList<JdsStoreBlob> = ArrayList(),
+                             val blobValues: MutableCollection<JdsStoreBlob> = ArrayList(),
 
                              @get:JsonProperty("bv")
-                             val booleanValues: MutableList<JdsStoreBoolean> = ArrayList(),
+                             val booleanValues: MutableCollection<JdsStoreBoolean> = ArrayList(),
 
                              @get:JsonProperty("dte")
-                             val dateValues: MutableList<JdsStoreDate> = ArrayList(),
+                             val dateValues: MutableCollection<JdsStoreDate> = ArrayList(),
 
                              @get:JsonProperty("md")
-                             val monthDayValues: MutableList<JdsStoreMonthDay> = ArrayList(),
+                             val monthDayValues: MutableCollection<JdsStoreMonthDay> = ArrayList(),
 
                              @get:JsonProperty("ym")
-                             val yearMonthValues: MutableList<JdsStoreYearMonth> = ArrayList(),
+                             val yearMonthValues: MutableCollection<JdsStoreYearMonth> = ArrayList(),
 
                              @get:JsonProperty("dv")
-                             val doubleValues: MutableList<JdsStoreDouble> = ArrayList(),
+                             val doubleValues: MutableCollection<JdsStoreDouble> = ArrayList(),
 
                              @get:JsonProperty("stc")
-                             val shortValues: MutableList<JdsStoreShort> = ArrayList(),
+                             val shortValues: MutableCollection<JdsStoreShort> = ArrayList(),
 
                              @get:JsonProperty("su")
-                             val uuidValues: MutableList<JdsStoreUuid> = ArrayList(),
+                             val uuidValues: MutableCollection<JdsStoreUuid> = ArrayList(),
 
                              @get:JsonProperty("dc")
-                             val doubleCollections: MutableList<JdsStoreDoubleCollection> = ArrayList(),
+                             val doubleCollections: MutableCollection<JdsStoreDoubleCollection> = ArrayList(),
 
                              @get:JsonProperty("iv")
-                             val integerValues: MutableList<JdsStoreInteger> = ArrayList(),
+                             val integerValues: MutableCollection<JdsStoreInteger> = ArrayList(),
 
                              @get:JsonProperty("ic")
-                             val integerCollections: MutableList<JdsStoreIntegerCollection> = ArrayList(),
+                             val integerCollections: MutableCollection<JdsStoreIntegerCollection> = ArrayList(),
 
                              @get:JsonProperty("lv")
-                             val longValues: MutableList<JdsStoreLong> = ArrayList(),
+                             val longValues: MutableCollection<JdsStoreLong> = ArrayList(),
 
                              @get:JsonProperty("lc")
-                             val longCollections: MutableList<JdsStoreLongCollection> = ArrayList(),
+                             val longCollections: MutableCollection<JdsStoreLongCollection> = ArrayList(),
 
                              @get:JsonProperty("sv")
-                             val stringValues: MutableList<JdsStoreString> = ArrayList(),
+                             val stringValues: MutableCollection<JdsStoreString> = ArrayList(),
 
                              @get:JsonProperty("sc")
-                             val stringCollections: MutableList<JdsStoreStringCollection> = ArrayList(),
+                             val stringCollections: MutableCollection<JdsStoreStringCollection> = ArrayList(),
 
                              @get:JsonProperty("fv")
-                             val floatValue: MutableList<JdsStoreFloat> = ArrayList(),
+                             val floatValue: MutableCollection<JdsStoreFloat> = ArrayList(),
 
                              @get:JsonProperty("fc")
-                             val floatCollections: MutableList<JdsStoreFloatCollection> = ArrayList(),
+                             val floatCollections: MutableCollection<JdsStoreFloatCollection> = ArrayList(),
 
                              @get:JsonProperty("dtv")
-                             val dateTimeValues: MutableList<JdsStoreDateTime> = ArrayList(),
+                             val dateTimeValues: MutableCollection<JdsStoreDateTime> = ArrayList(),
 
                              @get:JsonProperty("dtc")
-                             val dateTimeCollection: MutableList<JdsStoreDateTimeCollection> = ArrayList(),
+                             val dateTimeCollection: MutableCollection<JdsStoreDateTimeCollection> = ArrayList(),
 
                              @get:JsonProperty("zdt")
-                             val zonedDateTimeValues: MutableList<JdsStoreZonedDateTime> = ArrayList(),
+                             val zonedDateTimeValues: MutableCollection<JdsStoreZonedDateTime> = ArrayList(),
 
                              @get:JsonProperty("tv")
-                             val timeValues: MutableList<JdsStoreTime> = ArrayList(),
+                             val timeValues: MutableCollection<JdsStoreTime> = ArrayList(),
 
                              @get:JsonProperty("du")
-                             val durationValues: MutableList<JdsStoreDuration> = ArrayList(),
+                             val durationValues: MutableCollection<JdsStoreDuration> = ArrayList(),
 
                              @get:JsonProperty("pv")
-                             val periodValues: MutableList<JdsStorePeriod> = ArrayList(),
+                             val periodValues: MutableCollection<JdsStorePeriod> = ArrayList(),
 
                              @get:JsonProperty("ev")
-                             val enumValues: MutableList<JdsStoreEnum> = ArrayList(),
+                             val enumValues: MutableCollection<JdsStoreEnum> = ArrayList(),
 
                              @get:JsonProperty("es")
-                             val enumStringValues: MutableList<JdsStoreEnumString> = ArrayList(),
+                             val enumStringValues: MutableCollection<JdsStoreEnumString> = ArrayList(),
 
                              @get:JsonProperty("ec")
-                             val enumCollections: MutableList<JdsStoreEnumCollection> = ArrayList(),
+                             val enumCollections: MutableCollection<JdsStoreEnumCollection> = ArrayList(),
 
                              @get:JsonProperty("esc")
-                             val enumStringCollections: MutableList<JdsStoreEnumStringCollection> = ArrayList(),
+                             val enumStringCollections: MutableCollection<JdsStoreEnumStringCollection> = ArrayList(),
 
                              @get:JsonProperty("eo")
-                             val entityOverviews: MutableList<JdsEmbeddedObject> = ArrayList()) {
+                             val entityOverviews: MutableCollection<JdsEmbeddedObject> = ArrayList()) {
 
     @Throws(Exception::class)
     fun init(entity: IJdsEntity) {

@@ -18,15 +18,15 @@ import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import java.util.concurrent.Callable
 
-class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<List<T>> {
+class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private vararg val container: JdsEmbeddedContainer) : Callable<MutableCollection<T>> {
 
     /**
      *
      * @return
      */
     @Throws(Exception::class)
-    override fun call(): List<T> {
-        val output: MutableList<T> = ArrayList()
+    override fun call(): MutableCollection<T> {
+        val output: MutableCollection<T> = ArrayList()
         container.forEach { element ->
             element.embeddedObjects.forEach { innerElement ->
                 val instance = referenceType.getDeclaredConstructor().newInstance()

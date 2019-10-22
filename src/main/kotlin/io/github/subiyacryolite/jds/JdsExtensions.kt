@@ -138,7 +138,7 @@ object JdsExtensions {
      * @param entity
      * @param parentEntities
      */
-    fun determineParents(entity: Class<out IJdsEntity>, parentEntities: MutableList<Long>) {
+    fun determineParents(entity: Class<out IJdsEntity>, parentEntities: MutableCollection<Long>) {
         addAllToList(entity.superclass, parentEntities)
     }
 
@@ -146,7 +146,7 @@ object JdsExtensions {
      * @param superclass
      * @param parentEntities
      */
-    private fun addAllToList(superclass: Class<*>?, parentEntities: MutableList<Long>) {
+    private fun addAllToList(superclass: Class<*>?, parentEntities: MutableCollection<Long>) {
         if (superclass == null) return
         if (superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)) {
             val annotation = superclass.getAnnotation(JdsEntityAnnotation::class.java)

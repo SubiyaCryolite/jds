@@ -39,7 +39,7 @@ import kotlin.collections.ArrayList
  * @param filterBy
  * @param T
  */
-class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableList<T>> {
+class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: Class<T>, private val filterBy: JdsFilterBy) : Callable<MutableCollection<T>> {
 
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
     private var filterIds: Iterable<String> = emptyList()
@@ -79,7 +79,7 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
     }
 
     @Throws(Exception::class)
-    override fun call(): MutableList<T> {
+    override fun call(): MutableCollection<T> {
         val entitiesToLoad = ArrayList<JdsEntityComposite>()
         val annotation = referenceType.getAnnotation(JdsEntityAnnotation::class.java)
         val entityId = annotation.id
@@ -841,7 +841,7 @@ class JdsLoad<T : JdsEntity>(private val db: JdsDb, private val referenceType: C
      * @param filterUUIDs
      */
     @Throws(SQLException::class, ClassNotFoundException::class)
-    private fun prepareActionBatches(jdsDb: JdsDb, entityId: Long, entitiesToLoad: MutableList<JdsEntityComposite>, filterUUIDs: Iterable<String>) {
+    private fun prepareActionBatches(jdsDb: JdsDb, entityId: Long, entitiesToLoad: MutableCollection<JdsEntityComposite>, filterUUIDs: Iterable<String>) {
         val searchByType = filterUUIDs.none()
         jdsDb.dataSource.connection.use {
             if (searchByType) {
