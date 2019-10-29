@@ -112,7 +112,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
     internal val enumStringCollections: HashMap<Long, MutableCollection<Enum<*>>> = HashMap()
     //objects
     @get:JsonIgnore
-    override val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<out IJdsEntity>> = HashMap()
+    override val objectValues: HashMap<JdsFieldEntity<*>, WritableValue<out IJdsEntity>> = HashMap()
     //blobs
     @get:JsonIgnore
     internal val blobValues: HashMap<Long, WritableValue<ByteArray?>> = HashMap()
@@ -435,11 +435,11 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         return collection
     }
 
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, entity: T): ObjectProperty<T> {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, entity: T): WritableValue<T> {
         return map(fieldEntity, SimpleObjectProperty(entity))
     }
 
-    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: ObjectProperty<T>): ObjectProperty<T> {
+    protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: WritableValue<T>): WritableValue<T> {
         if (fieldEntity.field.type != JdsFieldType.ENTITY) {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
@@ -1172,7 +1172,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param parentUuid
      * @param objectCollection
      */
-    private fun standardizeObjectUuids(parentUuid: String, objectCollection: Iterable<ObjectProperty<out IJdsEntity>>) {
+    private fun standardizeObjectUuids(parentUuid: String, objectCollection: Iterable<WritableValue<out IJdsEntity>>) {
         objectCollection.forEach { entry ->
             entry.value.overview.uuid = standardiseLength(parentUuid, ":${entry.value.overview.entityId}")
             standardizeObjectUuids(entry.value.overview.uuid, entry.value.objectValues.values)
@@ -1200,7 +1200,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param version
      * @param objectCollection
      */
-    private fun standardizeObjectEditVersion(version: Int, objectCollection: Iterable<ObjectProperty<out IJdsEntity>>) {
+    private fun standardizeObjectEditVersion(version: Int, objectCollection: Iterable<WritableValue<out IJdsEntity>>) {
         objectCollection.forEach { objectProperty ->
             objectProperty.value.overview.editVersion = version
             standardizeObjectEditVersion(version, objectProperty.value.objectValues.values)
@@ -1289,11 +1289,21 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
         /**
          * Convenience method to help with [WritableValue] containers.
+         * Exposes [WritableValue.getValue] via a get() accessor.
+         * Specifically for non-nullable [String] properties
+         */
+        fun WritableValue<String?>.get(): String {
+            return this.value.orEmpty()
+        }
+
+        /**
+         * Convenience method to help with [WritableValue] containers.
          * Exposes [WritableValue.getValue] via a get() accessor
          */
         fun <T> WritableValue<T>.get(): T {
             return this.value
         }
+
         /**
          * Convenience method to help with [WritableValue] containers.
          * Exposes [WritableValue.setValue] via a set() modifier

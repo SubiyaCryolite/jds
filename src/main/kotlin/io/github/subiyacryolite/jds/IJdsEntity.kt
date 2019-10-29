@@ -14,12 +14,12 @@
 package io.github.subiyacryolite.jds;
 
 import io.github.subiyacryolite.jds.embedded.JdsEmbeddedObject
-import javafx.beans.property.ObjectProperty
-import java.util.HashMap
+import javafx.beans.value.WritableValue
+import java.util.*
 
 interface IJdsEntity {
     val overview: IJdsOverview
-    val objectValues: HashMap<JdsFieldEntity<*>, ObjectProperty<out IJdsEntity>>
+    val objectValues: HashMap<JdsFieldEntity<*>, WritableValue<out IJdsEntity>>
     val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<IJdsEntity>>
     fun registerFields(jdsTable: JdsTable)
     fun assign(jdsEmbeddedObject: JdsEmbeddedObject)
