@@ -24,9 +24,7 @@ import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.embedded.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
 import io.github.subiyacryolite.jds.utility.DeepCopy
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.beans.value.WritableValue
 import java.io.Externalizable
 import java.io.ObjectInput
@@ -131,38 +129,75 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         }
     }
 
-    @JvmName("mapNumeric")
-    protected fun map(field: JdsField, property: WritableValue<out Number?>): WritableValue<out Number?> {
-        if (
-                field.type != JdsFieldType.DOUBLE &&
-                field.type != JdsFieldType.INT &&
-                field.type != JdsFieldType.LONG &&
-                field.type != JdsFieldType.FLOAT &&
-                field.type != JdsFieldType.SHORT
-        ) {
+    @JvmName("mapShort")
+    protected fun map(field: JdsField, value: Short?) = map(field, SimpleObjectProperty(value))
+
+    @JvmName("mapShort")
+    protected fun map(field: JdsField, property: WritableValue<Short?>): WritableValue<Short?> {
+        if (field.type != JdsFieldType.SHORT) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        try {
-            if (field.type == JdsFieldType.SHORT) {
-                shortValues[field.id] = property as WritableValue<Short?>
-            }
-            if (field.type == JdsFieldType.DOUBLE) {
-                doubleValues[field.id] = property as WritableValue<Double?>
-            }
-            if (field.type == JdsFieldType.INT) {
-                integerValues[field.id] = property as WritableValue<Int?>
-            }
-            if (field.type == JdsFieldType.LONG) {
-                longValues[field.id] = property as WritableValue<Long?>
-            }
-            if (field.type == JdsFieldType.FLOAT) {
-                floatValues[field.id] = property as WritableValue<Float?>
-            }
-        } catch (ex: java.lang.Exception) {
-            throw RuntimeException("Incorrect numeric type supplied for field [$field]")
+        shortValues[mapField(overview.entityId, field.bind())] = property
+        return property
+    }
+
+    @JvmName("mapDouble")
+    protected fun map(field: JdsField, value: Double?) = map(field, SimpleObjectProperty(value))
+
+    @JvmName("mapDouble")
+    protected fun map(field: JdsField, value: DoubleProperty) = map(field, value as WritableValue<Double?>)
+
+    @JvmName("mapDouble")
+    protected fun map(field: JdsField, property: WritableValue<Double?>): WritableValue<Double?> {
+        if (field.type != JdsFieldType.DOUBLE) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        mapField(overview.entityId, field.id)
+        doubleValues[mapField(overview.entityId, field.bind())] = property
+        return property
+    }
+
+    @JvmName("mapInt")
+    protected fun map(field: JdsField, value: Int?) = map(field, SimpleObjectProperty(value))
+
+    @JvmName("mapInt")
+    protected fun map(field: JdsField, value: IntegerProperty) = map(field, value as WritableValue<Int?>)
+
+    @JvmName("mapInt")
+    protected fun map(field: JdsField, property: WritableValue<Int?>): WritableValue<Int?> {
+        if (field.type != JdsFieldType.INT) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+        integerValues[mapField(overview.entityId, field.bind())] = property
+        return property
+    }
+
+    @JvmName("mapLong")
+    protected fun map(field: JdsField, value: Long?) = map(field, SimpleObjectProperty(value))
+
+    @JvmName("mapLong")
+    protected fun map(field: JdsField, value: LongProperty) = map(field, value as WritableValue<Long?>)
+
+    @JvmName("mapLong")
+    protected fun map(field: JdsField, property: WritableValue<Long?>): WritableValue<Long?> {
+        if (field.type != JdsFieldType.LONG) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+        longValues[mapField(overview.entityId, field.bind())] = property
+        return property
+    }
+
+    @JvmName("mapFloat")
+    protected fun map(field: JdsField, value: Float?) = map(field, SimpleObjectProperty(value))
+
+    @JvmName("mapFloat")
+    protected fun map(field: JdsField, value: FloatProperty) = map(field, value as WritableValue<Float?>)
+
+    @JvmName("mapFloat")
+    protected fun map(field: JdsField, property: WritableValue<Float?>): WritableValue<Float?> {
+        if (field.type != JdsFieldType.FLOAT) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+        floatValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -174,9 +209,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.BOOLEAN) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        booleanValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        booleanValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -188,9 +221,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.UUID) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        uuidValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        uuidValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -202,9 +233,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.STRING) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        stringValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        stringValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -216,9 +245,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.DATE_TIME) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        localDateTimeValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        localDateTimeValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -230,9 +257,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.ZONED_DATE_TIME) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        zonedDateTimeValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        zonedDateTimeValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -244,9 +269,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.DATE) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        localDateValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        localDateValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -258,9 +281,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.TIME) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        localTimeValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        localTimeValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -272,9 +293,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.BLOB) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        blobValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        blobValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -286,9 +305,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.MONTH_DAY) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        monthDayValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        monthDayValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -300,9 +317,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.YEAR_MONTH) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        yearMonthValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        yearMonthValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -314,9 +329,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.PERIOD) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        periodValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        periodValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -328,9 +341,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.DURATION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        durationValues[field.id] = property
-        mapField(overview.entityId, field.id)
+        durationValues[mapField(overview.entityId, field.bind())] = property
         return property
     }
 
@@ -358,9 +369,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.STRING_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        stringCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        stringCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -369,9 +378,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.DATE_TIME_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        dateTimeCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        dateTimeCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -380,9 +387,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.FLOAT_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        floatCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        floatCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -391,9 +396,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.INT_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        integerCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        integerCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -402,9 +405,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.DOUBLE_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        doubleCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        doubleCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -413,9 +414,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         if (field.type != JdsFieldType.LONG_COLLECTION) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
-        field.bind()
-        longCollections[field.id] = collection
-        mapField(overview.entityId, field.id)
+        longCollections[mapField(overview.entityId, field.bind())] = collection
         return collection
     }
 
@@ -1269,12 +1268,14 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             objectOutput.writeObject(allEnums)
         }
 
-        protected fun mapField(entityId: Long, fieldId: Long) {
+        protected fun mapField(entityId: Long, fieldId: Long): Long {
             getFields(entityId).add(fieldId)
+            return fieldId
         }
 
-        protected fun mapEnums(entityId: Long, fieldId: Long) {
+        protected fun mapEnums(entityId: Long, fieldId: Long): Long {
             getEnums(entityId).add(fieldId)
+            return fieldId
         }
 
         private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }.toMutableList()
