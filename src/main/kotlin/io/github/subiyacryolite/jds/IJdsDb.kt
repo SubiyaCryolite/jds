@@ -72,15 +72,6 @@ interface IJdsDb {
     fun doesProcedureExist(connection: Connection, procedureName: String): Boolean
 
     /**
-     * Checks if the specified trigger exists the the database
-     *
-     * @param connection the connection to use
-     * @param triggerName the trigger to look up
-     * @return true if the specified trigger exists the the database
-     */
-    fun doesTriggerExist(connection: Connection, triggerName: String): Boolean
-
-    /**
      * Gets the correct syntax needed to add a new column to the underlying database implementation
      * @return the correct syntax needed to add a new column to the underlying database implementation
      */
@@ -96,7 +87,7 @@ interface IJdsDb {
     /**
      * Gets the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
      * @param fieldType the supplied [io.github.subiyacryolite.jds.JdsField]
-     * @param max the maximum length of the database type, applied against [io.github.subiyacryolite.jds.enums.JdsFieldType.STRING] and [io.github.subiyacryolite.jds.enums.JdsFieldType.BLOB] types
+     * @param max the maximum length of the database type, applied against [io.github.subiyacryolite.jds.enums.JdsFieldType.String] and [io.github.subiyacryolite.jds.enums.JdsFieldType.Blob] types
      * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.JdsField]
      */
     fun getDataType(fieldType: JdsFieldType, max: Int): String

@@ -29,7 +29,7 @@ class LegacyLoadAndSave : BaseTestConfig("Legacy load and save") {
     @Throws(Exception::class)
     private fun load(jdsDb: JdsDb) {
         val allAddressBooks = JdsLoad(jdsDb, Address::class.java).call() //load all entityVersions of type AddressBook
-        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, JdsFilterBy.UUID, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
+        val specificAddressBook = JdsLoad(jdsDb, Address::class.java, JdsFilterBy.Uuid, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
         System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
     }

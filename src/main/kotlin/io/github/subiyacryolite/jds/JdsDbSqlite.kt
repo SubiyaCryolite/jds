@@ -20,7 +20,7 @@ import java.sql.Connection
 /**
  * The SQLite implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
-abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
+abstract class JdsDbSqlite : JdsDb(JdsImplementation.SqLite, false) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;"
@@ -155,19 +155,19 @@ abstract class JdsDbSqlite : JdsDb(JdsImplementation.SQLITE, false) {
     override fun mapParentToChild() = "INSERT INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
 
     override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
-        JdsFieldType.FLOAT -> "REAL"
-        JdsFieldType.DOUBLE -> "DOUBLE"
-        JdsFieldType.ZONED_DATE_TIME -> "BIGINT"
-        JdsFieldType.TIME -> "INTEGER"
-        JdsFieldType.BLOB -> "BLOB"
-        JdsFieldType.INT -> "INTEGER"
-        JdsFieldType.SHORT -> "INTEGER"
-        JdsFieldType.UUID -> "TEXT"
-        JdsFieldType.DATE -> "TIMESTAMP"
-        JdsFieldType.DATE_TIME -> "TIMESTAMP"
-        JdsFieldType.LONG -> "BIGINT"
-        JdsFieldType.STRING -> "TEXT"
-        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        JdsFieldType.Float -> "REAL"
+        JdsFieldType.Double -> "DOUBLE"
+        JdsFieldType.ZonedDateTime -> "BIGINT"
+        JdsFieldType.Time -> "INTEGER"
+        JdsFieldType.Blob -> "BLOB"
+        JdsFieldType.Int -> "INTEGER"
+        JdsFieldType.Short -> "INTEGER"
+        JdsFieldType.Uuid -> "TEXT"
+        JdsFieldType.Date -> "TIMESTAMP"
+        JdsFieldType.DateTime -> "TIMESTAMP"
+        JdsFieldType.Long -> "BIGINT"
+        JdsFieldType.String -> "TEXT"
+        JdsFieldType.Boolean -> "BOOLEAN"
         else -> ""
     }
 

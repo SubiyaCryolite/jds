@@ -23,7 +23,7 @@ import java.util.*
 data class JdsField(
         var id: Long = 0,
         var name: String = "",
-        var type: JdsFieldType = JdsFieldType.STRING,
+        var type: JdsFieldType = JdsFieldType.String,
         var description: String = ""
 ) : Serializable {
 

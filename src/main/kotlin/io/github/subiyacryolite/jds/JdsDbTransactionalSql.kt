@@ -21,7 +21,7 @@ import java.util.*
 /**
  * The TSQL implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
-abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
+abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSql, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
@@ -35,15 +35,6 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
         val toReturn = getResult(connection, sql, arrayOf(procedureName, "P"))
-        return when (toReturn >= 1) {
-            true -> 1
-            false -> 0
-        }
-    }
-
-    override fun triggerExists(connection: Connection, triggerName: String): Int {
-        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        val toReturn = getResult(connection, sql, arrayOf(triggerName, "TR"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
@@ -101,19 +92,19 @@ abstract class JdsDbTransactionalSql : JdsDb(JdsImplementation.TSQL, true) {
     }
 
     override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
-        JdsFieldType.FLOAT -> "REAL"
-        JdsFieldType.DOUBLE -> "FLOAT"
-        JdsFieldType.ZONED_DATE_TIME -> "DATETIMEOFFSET(7)"
-        JdsFieldType.TIME -> "TIME(7)"
-        JdsFieldType.BLOB -> if (max == 0) "VARBINARY(MAX)" else "VARBINARY($max)"
-        JdsFieldType.INT -> "INTEGER"
-        JdsFieldType.SHORT -> "SMALLINT"
-        JdsFieldType.UUID -> "UNIQUEIDENTIFIER"
-        JdsFieldType.DATE -> "DATE"
-        JdsFieldType.DATE_TIME -> "DATETIME"
-        JdsFieldType.LONG -> "BIGINT"
-        JdsFieldType.STRING -> if (max == 0) "NVARCHAR(MAX)" else "NVARCHAR($max)"
-        JdsFieldType.BOOLEAN -> "BIT"
+        JdsFieldType.Float -> "REAL"
+        JdsFieldType.Double -> "FLOAT"
+        JdsFieldType.ZonedDateTime -> "DATETIMEOFFSET(7)"
+        JdsFieldType.Time -> "TIME(7)"
+        JdsFieldType.Blob -> if (max == 0) "VARBINARY(MAX)" else "VARBINARY($max)"
+        JdsFieldType.Int -> "INTEGER"
+        JdsFieldType.Short -> "SMALLINT"
+        JdsFieldType.Uuid -> "UNIQUEIDENTIFIER"
+        JdsFieldType.Date -> "DATE"
+        JdsFieldType.DateTime -> "DATETIME"
+        JdsFieldType.Long -> "BIGINT"
+        JdsFieldType.String -> if (max == 0) "NVARCHAR(MAX)" else "NVARCHAR($max)"
+        JdsFieldType.Boolean -> "BIT"
         else -> ""
     }
 

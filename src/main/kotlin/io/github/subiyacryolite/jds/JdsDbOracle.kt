@@ -21,7 +21,7 @@ import java.util.*
 /**
  * The Oracle implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
-abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
+abstract class JdsDbOracle : JdsDb(JdsImplementation.Oracle, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
@@ -80,19 +80,19 @@ abstract class JdsDbOracle : JdsDb(JdsImplementation.ORACLE, true) {
     }
 
     override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
-        JdsFieldType.FLOAT -> "BINARY_FLOAT"
-        JdsFieldType.DOUBLE -> "BINARY_DOUBLE"
-        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP WITH TIME ZONE"
-        JdsFieldType.TIME -> "NUMBER(19)"
-        JdsFieldType.BLOB -> "BLOB"
-        JdsFieldType.INT -> "NUMBER(10)"
-        JdsFieldType.SHORT -> "NUMBER(5)"
-        JdsFieldType.UUID -> "RAW(16)"
-        JdsFieldType.DATE -> "DATE"
-        JdsFieldType.DATE_TIME -> "TIMESTAMP"
-        JdsFieldType.LONG -> "NUMBER(19)"
-        JdsFieldType.STRING -> if (max == 0) "NCLOB" else "NVARCHAR2($max)"
-        JdsFieldType.BOOLEAN -> "NUMBER(1,0)"
+        JdsFieldType.Float -> "BINARY_FLOAT"
+        JdsFieldType.Double -> "BINARY_DOUBLE"
+        JdsFieldType.ZonedDateTime -> "TIMESTAMP WITH TIME ZONE"
+        JdsFieldType.Time -> "NUMBER(19)"
+        JdsFieldType.Blob -> "BLOB"
+        JdsFieldType.Int -> "NUMBER(10)"
+        JdsFieldType.Short -> "NUMBER(5)"
+        JdsFieldType.Uuid -> "RAW(16)"
+        JdsFieldType.Date -> "DATE"
+        JdsFieldType.DateTime -> "TIMESTAMP"
+        JdsFieldType.Long -> "NUMBER(19)"
+        JdsFieldType.String -> if (max == 0) "NCLOB" else "NVARCHAR2($max)"
+        JdsFieldType.Boolean -> "NUMBER(1,0)"
         else -> ""
     }
 

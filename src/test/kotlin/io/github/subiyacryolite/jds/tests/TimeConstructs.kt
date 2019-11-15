@@ -26,7 +26,7 @@ class TimeConstructs : BaseTestConfig("Time constructs") {
 
     @Throws(Exception::class)
     private fun load(jdsDb: JdsDb) {
-        val list = JdsLoad(jdsDb, TimeConstruct::class.java, JdsFilterBy.UUID, setOf("timeConstruct")).call() //load all entityVersions of type AddressBook with Entity Guids in range
+        val list = JdsLoad(jdsDb, TimeConstruct::class.java, JdsFilterBy.Uuid, setOf("timeConstruct")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         println("loaded entityVersions [$list]")
     }
 }

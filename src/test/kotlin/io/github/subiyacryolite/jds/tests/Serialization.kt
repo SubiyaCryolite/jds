@@ -2,6 +2,7 @@ package io.github.subiyacryolite.jds.tests
 
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.JdsDb
+import io.github.subiyacryolite.jds.JdsEntity.Companion.get
 import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
 import org.junit.jupiter.api.Test
 import java.io.*

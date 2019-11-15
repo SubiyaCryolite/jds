@@ -52,10 +52,8 @@ data class Address(
         set(value) = _streetName.set(value)
 
     var plotNumber: Short?
-        get() = _plotNumber.value
-        set(value) {
-            _plotNumber.value = value
-        }
+        get() = _plotNumber.get()
+        set(value) = _plotNumber.set(value)
 
     var area: String
         get() = _area.get()

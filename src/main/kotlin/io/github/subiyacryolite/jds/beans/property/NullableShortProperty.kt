@@ -13,22 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
-data class NullableShortProperty(private var _value: Short? = null) : WritableValue<Short?>, Serializable {
-
-    fun get(): Short? = value
-
-    fun set(v: Short?) {
-        value = v
-    }
-
-    override fun setValue(value: Short?) {
-        _value = value
-    }
-
-    override fun getValue(): Short? {
-        return _value
-    }
-}
+/**
+ * Class allowing for the wrapping and persistence of nullable [Short] values
+ * @param initialValue the initial value
+ */
+class NullableShortProperty(initialValue: Short? = null) : NullableProperty<Short?>(initialValue)

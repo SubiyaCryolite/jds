@@ -11,17 +11,37 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.github.subiyacryolite.jds.enums;
+package io.github.subiyacryolite.jds.beans.property
+
+import javafx.beans.value.WritableValue
+import java.io.Serializable
 
 /**
- * This enum contains the types of database components that JDS supports.
- * It is primarily used to lookup if a named instance of a {@link io.github.subiyacryolite.jds.enums.JdsComponent JdsComponent}
- * exists on the target database
+ * Base class allowing for the wrapping and persistence of nullable [Object] values
+ * @param _value the initial value
  */
-enum class JdsComponentType {
-    STORED_PROCEDURE,
-    TABLE,
-    TRIGGER,
-    INDEX,
-    VIEW
+abstract class NullableProperty<T>(private var _value: T) : WritableValue<T>, Serializable {
+
+    companion object {
+        private const val serialVersionUID = 20191115_2314L
+    }
+
+    override fun setValue(value: T) {
+        _value = value
+    }
+
+    override fun getValue(): T {
+        return _value
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NullableProperty<*>) return false
+        if (_value != other._value) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return _value?.hashCode() ?: 0
+    }
 }

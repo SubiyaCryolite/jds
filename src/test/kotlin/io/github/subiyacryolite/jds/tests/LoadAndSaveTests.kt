@@ -34,7 +34,7 @@ class LoadAndSaveTests : BaseTestConfig("Load and Save tests") {
     @Throws(ExecutionException::class, InterruptedException::class)
     private fun load(jdsDb: JdsDb) {
         val loadAllInstances = JdsLoad(jdsDb, Example::class.java)
-        val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, JdsFilterBy.UUID, setOf("instance3"))
+        val loadSpecificInstance = JdsLoad(jdsDb, Example::class.java, JdsFilterBy.Uuid, setOf("instance3"))
         val loadSortedInstances = JdsLoad(jdsDb, Example::class.java)
 
         val executorService = Executors.newFixedThreadPool(3)

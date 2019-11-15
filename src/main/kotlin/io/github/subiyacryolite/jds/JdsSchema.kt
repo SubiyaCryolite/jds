@@ -10,8 +10,8 @@ object JdsSchema {
      * @return
      */
     fun generateTable(jdsDb: JdsDb, tableName: String): String {
-        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.STRING, 36)
-        val uuidLocationVersionDataType = getDbDataType(jdsDb, JdsFieldType.INT)
+        val uuidDataType = getDbDataType(jdsDb, JdsFieldType.String, 36)
+        val uuidLocationVersionDataType = getDbDataType(jdsDb, JdsFieldType.Int)
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE ")
         stringBuilder.append(tableName)
@@ -33,9 +33,9 @@ object JdsSchema {
         //sort fields by ID to ensure correct insertion
         fields.sortedBy { it.id }.filterNot { isIgnoredType(it.type) }.sortedBy { it.name }.forEach {
             when (it.type) {
-                JdsFieldType.ENUM_COLLECTION -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
+                JdsFieldType.EnumCollection -> JdsFieldEnum.enums[it.id]!!.values.forEachIndexed { _, enum ->
                     val columnName = "${it.name}_${enum.ordinal}"
-                    val columnDataType = getDbDataType(jdsDb, JdsFieldType.BOOLEAN)
+                    val columnDataType = getDbDataType(jdsDb, JdsFieldType.Boolean)
                     collection[columnName] = "$columnName $columnDataType"
                     columnToFieldMap[columnName] = it
                     enumOrdinals[columnName] = enum.ordinal
@@ -50,16 +50,16 @@ object JdsSchema {
     }
 
     fun isIgnoredType(type: JdsFieldType) = when (type) {
-        JdsFieldType.BLOB,
-        JdsFieldType.ENTITY_COLLECTION,
-        JdsFieldType.FLOAT_COLLECTION,
-        JdsFieldType.INT_COLLECTION,
-        JdsFieldType.DOUBLE_COLLECTION,
-        JdsFieldType.LONG_COLLECTION,
-        JdsFieldType.STRING_COLLECTION,
-        JdsFieldType.ENUM_STRING_COLLECTION,
-        JdsFieldType.DATE_TIME_COLLECTION,
-        JdsFieldType.ENTITY -> true
+        JdsFieldType.Blob,
+        JdsFieldType.EntityCollection,
+        JdsFieldType.FloatCollection,
+        JdsFieldType.IntCollection,
+        JdsFieldType.DoubleCollection,
+        JdsFieldType.LongCollection,
+        JdsFieldType.StringCollection,
+        JdsFieldType.EnumStringCollection,
+        JdsFieldType.DateTimeCollection,
+        JdsFieldType.Entity -> true
         else -> false
     }
 
@@ -88,18 +88,18 @@ object JdsSchema {
      */
     @JvmOverloads
     fun getDbDataType(jdsDb: IJdsDb, fieldType: JdsFieldType, max: Int = 0): String = when (fieldType) {
-        JdsFieldType.ENTITY -> jdsDb.getDataType(JdsFieldType.STRING, 36)//act as a FK if you will
-        JdsFieldType.FLOAT -> jdsDb.getDataType(JdsFieldType.FLOAT)
-        JdsFieldType.DOUBLE -> jdsDb.getDataType(JdsFieldType.DOUBLE)
-        JdsFieldType.ZONED_DATE_TIME -> jdsDb.getDataType(JdsFieldType.ZONED_DATE_TIME)
-        JdsFieldType.TIME -> jdsDb.getDataType(JdsFieldType.TIME)
-        JdsFieldType.BLOB -> jdsDb.getDataType(JdsFieldType.BLOB, max)
-        JdsFieldType.ENUM_COLLECTION, JdsFieldType.BOOLEAN -> jdsDb.getDataType(JdsFieldType.BOOLEAN)
-        JdsFieldType.ENUM, JdsFieldType.INT -> jdsDb.getDataType(JdsFieldType.INT)
-        JdsFieldType.DATE_TIME -> jdsDb.getDataType(JdsFieldType.DATE_TIME)
-        JdsFieldType.DATE -> jdsDb.getDataType(JdsFieldType.DATE)
-        JdsFieldType.LONG, JdsFieldType.DURATION -> jdsDb.getDataType(JdsFieldType.LONG)
-        JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY, JdsFieldType.ENUM_STRING -> jdsDb.getDataType(JdsFieldType.STRING, max)
+        JdsFieldType.Entity -> jdsDb.getDataType(JdsFieldType.String, 36)//act as a FK if you will
+        JdsFieldType.Float -> jdsDb.getDataType(JdsFieldType.Float)
+        JdsFieldType.Double -> jdsDb.getDataType(JdsFieldType.Double)
+        JdsFieldType.ZonedDateTime -> jdsDb.getDataType(JdsFieldType.ZonedDateTime)
+        JdsFieldType.Time -> jdsDb.getDataType(JdsFieldType.Time)
+        JdsFieldType.Blob -> jdsDb.getDataType(JdsFieldType.Blob, max)
+        JdsFieldType.EnumCollection, JdsFieldType.Boolean -> jdsDb.getDataType(JdsFieldType.Boolean)
+        JdsFieldType.Enum, JdsFieldType.Int -> jdsDb.getDataType(JdsFieldType.Int)
+        JdsFieldType.DateTime -> jdsDb.getDataType(JdsFieldType.DateTime)
+        JdsFieldType.Date -> jdsDb.getDataType(JdsFieldType.Date)
+        JdsFieldType.Long, JdsFieldType.Duration -> jdsDb.getDataType(JdsFieldType.Long)
+        JdsFieldType.Period, JdsFieldType.String, JdsFieldType.YearMonth, JdsFieldType.MonthDay, JdsFieldType.EnumString -> jdsDb.getDataType(JdsFieldType.String, max)
         else -> "invalid"
     }
 

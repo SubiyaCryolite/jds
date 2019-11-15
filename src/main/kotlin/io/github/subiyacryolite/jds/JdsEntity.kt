@@ -134,7 +134,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapShort")
     protected fun map(field: JdsField, property: WritableValue<Short?>): WritableValue<Short?> {
-        if (field.type != JdsFieldType.SHORT) {
+        if (field.type != JdsFieldType.Short) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         shortValues[mapField(overview.entityId, field.bind())] = property
@@ -149,7 +149,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDouble")
     protected fun map(field: JdsField, property: WritableValue<Double?>): WritableValue<Double?> {
-        if (field.type != JdsFieldType.DOUBLE) {
+        if (field.type != JdsFieldType.Double) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         doubleValues[mapField(overview.entityId, field.bind())] = property
@@ -164,7 +164,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapInt")
     protected fun map(field: JdsField, property: WritableValue<Int?>): WritableValue<Int?> {
-        if (field.type != JdsFieldType.INT) {
+        if (field.type != JdsFieldType.Int) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         integerValues[mapField(overview.entityId, field.bind())] = property
@@ -179,7 +179,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapLong")
     protected fun map(field: JdsField, property: WritableValue<Long?>): WritableValue<Long?> {
-        if (field.type != JdsFieldType.LONG) {
+        if (field.type != JdsFieldType.Long) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         longValues[mapField(overview.entityId, field.bind())] = property
@@ -194,7 +194,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapFloat")
     protected fun map(field: JdsField, property: WritableValue<Float?>): WritableValue<Float?> {
-        if (field.type != JdsFieldType.FLOAT) {
+        if (field.type != JdsFieldType.Float) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         floatValues[mapField(overview.entityId, field.bind())] = property
@@ -206,7 +206,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapBoolean")
     protected fun map(field: JdsField, property: WritableValue<Boolean?>): WritableValue<Boolean?> {
-        if (field.type != JdsFieldType.BOOLEAN) {
+        if (field.type != JdsFieldType.Boolean) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         booleanValues[mapField(overview.entityId, field.bind())] = property
@@ -218,7 +218,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapUuid")
     protected fun map(field: JdsField, property: WritableValue<UUID?>): WritableValue<UUID?> {
-        if (field.type != JdsFieldType.UUID) {
+        if (field.type != JdsFieldType.Uuid) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         uuidValues[mapField(overview.entityId, field.bind())] = property
@@ -230,7 +230,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapString")
     protected fun map(field: JdsField, property: WritableValue<String?>): WritableValue<String?> {
-        if (field.type != JdsFieldType.STRING) {
+        if (field.type != JdsFieldType.String) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         stringValues[mapField(overview.entityId, field.bind())] = property
@@ -242,7 +242,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDateTime")
     protected fun map(field: JdsField, property: WritableValue<LocalDateTime?>): WritableValue<LocalDateTime?> {
-        if (field.type != JdsFieldType.DATE_TIME) {
+        if (field.type != JdsFieldType.DateTime) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         localDateTimeValues[mapField(overview.entityId, field.bind())] = property
@@ -254,7 +254,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapZonedDateTime")
     protected fun map(field: JdsField, property: WritableValue<ZonedDateTime?>): WritableValue<ZonedDateTime?> {
-        if (field.type != JdsFieldType.ZONED_DATE_TIME) {
+        if (field.type != JdsFieldType.ZonedDateTime) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         zonedDateTimeValues[mapField(overview.entityId, field.bind())] = property
@@ -266,7 +266,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDate")
     protected fun map(field: JdsField, property: WritableValue<LocalDate?>): WritableValue<LocalDate?> {
-        if (field.type != JdsFieldType.DATE) {
+        if (field.type != JdsFieldType.Date) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         localDateValues[mapField(overview.entityId, field.bind())] = property
@@ -278,7 +278,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapTime")
     protected fun map(field: JdsField, property: WritableValue<LocalTime?>): WritableValue<LocalTime?> {
-        if (field.type != JdsFieldType.TIME) {
+        if (field.type != JdsFieldType.Time) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         localTimeValues[mapField(overview.entityId, field.bind())] = property
@@ -290,7 +290,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapBlob")
     protected fun map(field: JdsField, property: WritableValue<ByteArray?>): WritableValue<ByteArray?> {
-        if (field.type != JdsFieldType.BLOB) {
+        if (field.type != JdsFieldType.Blob) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         blobValues[mapField(overview.entityId, field.bind())] = property
@@ -302,7 +302,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapMonthDay")
     protected fun map(field: JdsField, property: WritableValue<MonthDay?>): WritableValue<MonthDay?> {
-        if (field.type != JdsFieldType.MONTH_DAY) {
+        if (field.type != JdsFieldType.MonthDay) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         monthDayValues[mapField(overview.entityId, field.bind())] = property
@@ -314,7 +314,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapYearMonth")
     protected fun map(field: JdsField, property: WritableValue<YearMonth?>): WritableValue<YearMonth?> {
-        if (field.type != JdsFieldType.YEAR_MONTH) {
+        if (field.type != JdsFieldType.YearMonth) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         yearMonthValues[mapField(overview.entityId, field.bind())] = property
@@ -326,7 +326,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapPeriod")
     protected fun map(field: JdsField, property: WritableValue<Period?>): WritableValue<Period?> {
-        if (field.type != JdsFieldType.PERIOD) {
+        if (field.type != JdsFieldType.Period) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         periodValues[mapField(overview.entityId, field.bind())] = property
@@ -338,7 +338,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDuration")
     protected fun map(field: JdsField, property: WritableValue<Duration?>): WritableValue<Duration?> {
-        if (field.type != JdsFieldType.DURATION) {
+        if (field.type != JdsFieldType.Duration) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         durationValues[mapField(overview.entityId, field.bind())] = property
@@ -350,10 +350,10 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapEnum")
     protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, property: WritableValue<T?>): WritableValue<T?> {
-        if (fieldEnum.field.type != JdsFieldType.ENUM && fieldEnum.field.type != JdsFieldType.ENUM_STRING) {
+        if (fieldEnum.field.type != JdsFieldType.Enum && fieldEnum.field.type != JdsFieldType.EnumString) {
             throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
         }
-        if (fieldEnum.field.type == JdsFieldType.ENUM) {
+        if (fieldEnum.field.type == JdsFieldType.Enum) {
             enumValues[fieldEnum.field.id] = property as WritableValue<Enum<*>?>
         } else {
             stringEnumValues[fieldEnum.field.id] = property as WritableValue<Enum<*>?>
@@ -366,7 +366,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapStrings")
     protected fun map(field: JdsField, collection: MutableCollection<String>): MutableCollection<String> {
-        if (field.type != JdsFieldType.STRING_COLLECTION) {
+        if (field.type != JdsFieldType.StringCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         stringCollections[mapField(overview.entityId, field.bind())] = collection
@@ -375,7 +375,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDateTimes")
     protected fun map(field: JdsField, collection: MutableCollection<LocalDateTime>): MutableCollection<LocalDateTime> {
-        if (field.type != JdsFieldType.DATE_TIME_COLLECTION) {
+        if (field.type != JdsFieldType.DateTimeCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         dateTimeCollections[mapField(overview.entityId, field.bind())] = collection
@@ -384,7 +384,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapFloats")
     protected fun map(field: JdsField, collection: MutableCollection<Float>): MutableCollection<Float> {
-        if (field.type != JdsFieldType.FLOAT_COLLECTION) {
+        if (field.type != JdsFieldType.FloatCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         floatCollections[mapField(overview.entityId, field.bind())] = collection
@@ -393,7 +393,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapIntegers")
     protected fun map(field: JdsField, collection: MutableCollection<Int>): MutableCollection<Int> {
-        if (field.type != JdsFieldType.INT_COLLECTION) {
+        if (field.type != JdsFieldType.IntCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         integerCollections[mapField(overview.entityId, field.bind())] = collection
@@ -402,7 +402,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapDoubles")
     protected fun map(field: JdsField, collection: MutableCollection<Double>): MutableCollection<Double> {
-        if (field.type != JdsFieldType.DOUBLE_COLLECTION) {
+        if (field.type != JdsFieldType.DoubleCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         doubleCollections[mapField(overview.entityId, field.bind())] = collection
@@ -411,7 +411,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapLongs")
     protected fun map(field: JdsField, collection: MutableCollection<Long>): MutableCollection<Long> {
-        if (field.type != JdsFieldType.LONG_COLLECTION) {
+        if (field.type != JdsFieldType.LongCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
         longCollections[mapField(overview.entityId, field.bind())] = collection
@@ -420,10 +420,10 @@ abstract class JdsEntity : IJdsEntity, Serializable {
 
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(fieldEnum: JdsFieldEnum<T>, collection: MutableCollection<T>): MutableCollection<T> {
-        if (fieldEnum.field.type != JdsFieldType.ENUM_COLLECTION && fieldEnum.field.type != JdsFieldType.ENUM_STRING_COLLECTION) {
+        if (fieldEnum.field.type != JdsFieldType.EnumCollection && fieldEnum.field.type != JdsFieldType.EnumStringCollection) {
             throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
         }
-        if (fieldEnum.field.type == JdsFieldType.ENUM_COLLECTION) {
+        if (fieldEnum.field.type == JdsFieldType.EnumCollection) {
             enumCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
         } else {
             enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
@@ -439,7 +439,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
     }
 
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, property: WritableValue<T>): WritableValue<T> {
-        if (fieldEntity.field.type != JdsFieldType.ENTITY) {
+        if (fieldEntity.field.type != JdsFieldType.Entity) {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
@@ -457,7 +457,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param collection
      */
     protected fun <T : IJdsEntity> map(fieldEntity: JdsFieldEntity<T>, collection: MutableCollection<T>): MutableCollection<T> {
-        if (fieldEntity.field.type != JdsFieldType.ENTITY_COLLECTION) {
+        if (fieldEntity.field.type != JdsFieldType.EntityCollection) {
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         }
         if (!objectCollections.containsKey(fieldEntity)) {
@@ -671,57 +671,57 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         initBackingPropertyIfNotDefined(fieldType, fieldId)
         when (fieldType) {
 
-            JdsFieldType.FLOAT -> floatValues[fieldId]?.value = when (value) {
+            JdsFieldType.Float -> floatValues[fieldId]?.value = when (value) {
                 is Double -> value.toFloat()
                 else -> value as Float?
             }
 
-            JdsFieldType.DOUBLE -> doubleValues[fieldId]?.value = value as Double?
+            JdsFieldType.Double -> doubleValues[fieldId]?.value = value as Double?
 
-            JdsFieldType.SHORT -> shortValues[fieldId]?.value = when (value) {
+            JdsFieldType.Short -> shortValues[fieldId]?.value = when (value) {
                 is Double -> value.toShort()
                 is Int -> value.toShort()
                 is Short? -> value
                 else -> null
             }
 
-            JdsFieldType.LONG -> longValues[fieldId]?.value = when (value) {
+            JdsFieldType.Long -> longValues[fieldId]?.value = when (value) {
                 is Long? -> value
                 is BigDecimal -> value.toLong() //Oracle
                 is Int -> value.toLong()
                 else -> null
             }
 
-            JdsFieldType.INT -> integerValues[fieldId]?.value = when (value) {
+            JdsFieldType.Int -> integerValues[fieldId]?.value = when (value) {
                 is Int? -> value
                 is BigDecimal -> value.toInt() //Oracle
                 else -> null
             }
 
-            JdsFieldType.UUID -> uuidValues[fieldId]?.value = when (value) {
+            JdsFieldType.Uuid -> uuidValues[fieldId]?.value = when (value) {
                 is ByteArray? -> value.toUuid()
                 is String -> UUID.fromString(value)
                 is UUID? -> value
                 else -> null
             }
 
-            JdsFieldType.BOOLEAN -> booleanValues[fieldId]?.value = when (value) {
+            JdsFieldType.Boolean -> booleanValues[fieldId]?.value = when (value) {
                 is Int -> value == 1
                 is Boolean? -> value
                 is BigDecimal -> value.intValueExact() == 1 //Oracle
                 else -> null
             }
 
-            JdsFieldType.DOUBLE_COLLECTION -> doubleCollections[fieldId]?.add(value as Double)
+            JdsFieldType.DoubleCollection -> doubleCollections[fieldId]?.add(value as Double)
 
-            JdsFieldType.FLOAT_COLLECTION -> floatCollections[fieldId]?.add(value as Float)
+            JdsFieldType.FloatCollection -> floatCollections[fieldId]?.add(value as Float)
 
-            JdsFieldType.LONG_COLLECTION -> longCollections[fieldId]?.add(value as Long)
+            JdsFieldType.LongCollection -> longCollections[fieldId]?.add(value as Long)
 
-            JdsFieldType.INT_COLLECTION -> integerCollections[fieldId]?.add(value as Int)
+            JdsFieldType.IntCollection -> integerCollections[fieldId]?.add(value as Int)
 
             //Enums may be null
-            JdsFieldType.ENUM -> enumValues.filter { it.key == fieldId }.forEach {
+            JdsFieldType.Enum -> enumValues.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
                     if (value != null) {
@@ -734,14 +734,14 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             }
 
             //Enums may be null
-            JdsFieldType.ENUM_STRING -> enumValues.filter { it.key == fieldId }.forEach {
+            JdsFieldType.EnumString -> enumValues.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null && value is String)
                     it.value.value = fieldEnum.valueOf(value)
             }
 
             //Enum collections should NOT accept nulls. Unknown collection should be skipped
-            JdsFieldType.ENUM_COLLECTION -> enumCollections.filter { it.key == fieldId }.forEach {
+            JdsFieldType.EnumCollection -> enumCollections.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
                     val enumValues = fieldEnum.values
@@ -757,7 +757,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             }
 
             //Enum collections should NOT accept nulls. Unknown collection should be skipped
-            JdsFieldType.ENUM_STRING_COLLECTION -> enumStringCollections.filter { it.key == fieldId }.forEach {
+            JdsFieldType.EnumStringCollection -> enumStringCollections.filter { it.key == fieldId }.forEach {
                 val fieldEnum = JdsFieldEnum.enums[it.key]
                 if (fieldEnum != null) {
                     val enumStr = value.toString()
@@ -767,46 +767,46 @@ abstract class JdsEntity : IJdsEntity, Serializable {
                 }
             }
 
-            JdsFieldType.STRING -> stringValues[fieldId]?.value = (value as String?)
+            JdsFieldType.String -> stringValues[fieldId]?.value = (value as String?)
 
-            JdsFieldType.STRING_COLLECTION -> stringCollections[fieldId]?.add(value as String)
+            JdsFieldType.StringCollection -> stringCollections[fieldId]?.add(value as String)
 
-            JdsFieldType.ZONED_DATE_TIME -> when (value) {
+            JdsFieldType.ZonedDateTime -> when (value) {
                 is Long -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
                 is Timestamp -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault())
                 is String -> zonedDateTimeValues[fieldId]?.value = value.toZonedDateTime()
                 is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = value.atZoneSameInstant(ZoneId.systemDefault())
             }
 
-            JdsFieldType.DATE -> when (value) {
+            JdsFieldType.Date -> when (value) {
                 is Timestamp -> localDateValues[fieldId]?.value = (value.toLocalDateTime().toLocalDate())
                 is LocalDate -> localDateValues[fieldId]?.value = (value)
                 is String -> localDateValues[fieldId]?.value = (value.toLocalDate())
                 else -> localDateValues[fieldId]?.value = null
             }
 
-            JdsFieldType.TIME -> when (value) {
+            JdsFieldType.Time -> when (value) {
                 is Long -> localTimeValues[fieldId]?.value = (LocalTime.MIN.plusNanos(value))
                 is LocalTime -> localTimeValues[fieldId]?.value = (value)
                 is String -> localTimeValues[fieldId]?.value = (value.toLocalTime())
             }
 
-            JdsFieldType.DURATION -> durationValues[fieldId]?.value = (when (value) {
+            JdsFieldType.Duration -> durationValues[fieldId]?.value = (when (value) {
                 is BigDecimal -> Duration.ofNanos(value.longValueExact())//Oracle
                 else -> Duration.ofNanos(value as Long)
             })
 
-            JdsFieldType.MONTH_DAY -> monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
+            JdsFieldType.MonthDay -> monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
 
-            JdsFieldType.YEAR_MONTH -> yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
+            JdsFieldType.YearMonth -> yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
 
-            JdsFieldType.PERIOD -> periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
+            JdsFieldType.Period -> periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
 
-            JdsFieldType.DATE_TIME -> localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
+            JdsFieldType.DateTime -> localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
 
-            JdsFieldType.DATE_TIME_COLLECTION -> dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
+            JdsFieldType.DateTimeCollection -> dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
 
-            JdsFieldType.BLOB -> when (value) {
+            JdsFieldType.Blob -> when (value) {
                 is ByteArray -> blobValues[fieldId]?.value = value
                 null -> blobValues[fieldId]?.value = ByteArray(0)//Oracle
             }
@@ -822,79 +822,79 @@ abstract class JdsEntity : IJdsEntity, Serializable {
     private fun initBackingPropertyIfNotDefined(fieldType: JdsFieldType, fieldId: Long) {
         when (fieldType) {
 
-            JdsFieldType.STRING -> if (!stringValues.containsKey(fieldId))
+            JdsFieldType.String -> if (!stringValues.containsKey(fieldId))
                 stringValues[fieldId] = SimpleStringProperty("")
 
-            JdsFieldType.DOUBLE_COLLECTION -> if (!doubleCollections.containsKey(fieldId))
+            JdsFieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId))
                 doubleCollections[fieldId] = ArrayList()
 
-            JdsFieldType.FLOAT_COLLECTION -> if (!floatCollections.containsKey(fieldId))
+            JdsFieldType.FloatCollection -> if (!floatCollections.containsKey(fieldId))
                 floatCollections[fieldId] = ArrayList()
 
-            JdsFieldType.LONG_COLLECTION -> if (!longCollections.containsKey(fieldId))
+            JdsFieldType.LongCollection -> if (!longCollections.containsKey(fieldId))
                 longCollections[fieldId] = ArrayList()
 
-            JdsFieldType.INT_COLLECTION -> if (!integerCollections.containsKey(fieldId))
+            JdsFieldType.IntCollection -> if (!integerCollections.containsKey(fieldId))
                 integerCollections[fieldId] = ArrayList()
 
-            JdsFieldType.STRING_COLLECTION -> if (!stringCollections.containsKey(fieldId))
+            JdsFieldType.StringCollection -> if (!stringCollections.containsKey(fieldId))
                 stringCollections[fieldId] = ArrayList()
 
-            JdsFieldType.DATE_TIME_COLLECTION -> if (!dateTimeCollections.containsKey(fieldId))
+            JdsFieldType.DateTimeCollection -> if (!dateTimeCollections.containsKey(fieldId))
                 dateTimeCollections[fieldId] = ArrayList()
 
-            JdsFieldType.ENUM_COLLECTION -> if (!enumCollections.containsKey(fieldId))
+            JdsFieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId))
                 enumCollections[fieldId] = ArrayList()
 
-            JdsFieldType.ZONED_DATE_TIME -> if (!zonedDateTimeValues.containsKey(fieldId))
+            JdsFieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId))
                 zonedDateTimeValues[fieldId] = SimpleObjectProperty<Temporal?>()
 
-            JdsFieldType.DATE -> if (!localDateValues.containsKey(fieldId))
+            JdsFieldType.Date -> if (!localDateValues.containsKey(fieldId))
                 localDateValues[fieldId] = SimpleObjectProperty<Temporal?>()
 
-            JdsFieldType.TIME -> if (!localTimeValues.containsKey(fieldId))
+            JdsFieldType.Time -> if (!localTimeValues.containsKey(fieldId))
                 localTimeValues[fieldId] = SimpleObjectProperty<Temporal?>()
 
-            JdsFieldType.DURATION -> if (!durationValues.containsKey(fieldId))
+            JdsFieldType.Duration -> if (!durationValues.containsKey(fieldId))
                 durationValues[fieldId] = SimpleObjectProperty<Duration?>()
 
-            JdsFieldType.MONTH_DAY -> if (!monthDayValues.containsKey(fieldId))
+            JdsFieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId))
                 monthDayValues[fieldId] = SimpleObjectProperty<MonthDay?>()
 
-            JdsFieldType.YEAR_MONTH -> if (!yearMonthValues.containsKey(fieldId))
+            JdsFieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId))
                 yearMonthValues[fieldId] = SimpleObjectProperty<Temporal?>()
 
-            JdsFieldType.PERIOD -> if (!periodValues.containsKey(fieldId))
+            JdsFieldType.Period -> if (!periodValues.containsKey(fieldId))
                 periodValues[fieldId] = SimpleObjectProperty<Period?>()
 
-            JdsFieldType.DATE_TIME -> if (!localDateTimeValues.containsKey(fieldId))
+            JdsFieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId))
                 localDateTimeValues[fieldId] = SimpleObjectProperty<Temporal>()
 
-            JdsFieldType.BLOB -> if (!blobValues.containsKey(fieldId))
+            JdsFieldType.Blob -> if (!blobValues.containsKey(fieldId))
                 blobValues[fieldId] = SimpleBlobProperty(byteArrayOf())
 
-            JdsFieldType.ENUM -> if (!enumValues.containsKey(fieldId))
+            JdsFieldType.Enum -> if (!enumValues.containsKey(fieldId))
                 enumValues[fieldId] = SimpleObjectProperty()
 
-            JdsFieldType.FLOAT -> if (!floatValues.containsKey(fieldId))
+            JdsFieldType.Float -> if (!floatValues.containsKey(fieldId))
                 floatValues[fieldId] = NullableFloatProperty()
 
-            JdsFieldType.DOUBLE -> if (!doubleValues.containsKey(fieldId))
+            JdsFieldType.Double -> if (!doubleValues.containsKey(fieldId))
                 doubleValues[fieldId] = NullableDoubleProperty()
 
-            JdsFieldType.SHORT -> if (!shortValues.containsKey(fieldId))
+            JdsFieldType.Short -> if (!shortValues.containsKey(fieldId))
                 shortValues[fieldId] = NullableShortProperty()
 
-            JdsFieldType.LONG -> if (!longValues.containsKey(fieldId))
+            JdsFieldType.Long -> if (!longValues.containsKey(fieldId))
                 longValues[fieldId] = NullableLongProperty()
 
-            JdsFieldType.INT -> if (!integerValues.containsKey(fieldId))
+            JdsFieldType.Int -> if (!integerValues.containsKey(fieldId))
                 integerValues[fieldId] = NullableIntegerProperty()
 
-            JdsFieldType.UUID -> if (!uuidValues.containsKey(fieldId))
+            JdsFieldType.Uuid -> if (!uuidValues.containsKey(fieldId))
                 uuidValues[fieldId] = SimpleObjectProperty<UUID?>()
 
-            JdsFieldType.BOOLEAN -> if (!booleanValues.containsKey(fieldId))
+            JdsFieldType.Boolean -> if (!booleanValues.containsKey(fieldId))
                 booleanValues[fieldId] = NullableBooleanProperty()
         }
 

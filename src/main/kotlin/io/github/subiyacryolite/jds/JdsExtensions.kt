@@ -68,9 +68,9 @@ object JdsExtensions {
      */
     fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input?.toOffsetDateTime())
-            JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
+            JdsImplementation.TSql -> this.setString(value, input?.toSqlStringFormat())
+            JdsImplementation.Postgres -> this.setObject(value, input?.toOffsetDateTime())
+            JdsImplementation.MySql, JdsImplementation.Oracle, JdsImplementation.MariaDb -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
             else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
         }
     }
@@ -81,9 +81,9 @@ object JdsExtensions {
      * @return
      */
     fun ResultSet.getZonedDateTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
-        JdsImplementation.TSQL -> this.getString(column)
-        JdsImplementation.POSTGRES -> this.getObject(column, java.time.OffsetDateTime::class.java)
-        JdsImplementation.MYSQL, JdsImplementation.ORACLE, JdsImplementation.MARIADB -> this.getTimestamp(column)
+        JdsImplementation.TSql -> this.getString(column)
+        JdsImplementation.Postgres -> this.getObject(column, java.time.OffsetDateTime::class.java)
+        JdsImplementation.MySql, JdsImplementation.Oracle, JdsImplementation.MariaDb -> this.getTimestamp(column)
         else -> this.getLong(column)
     }
 
@@ -94,8 +94,8 @@ object JdsExtensions {
      */
     fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input)
+            JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
+            JdsImplementation.Postgres -> this.setObject(value, input)
             else -> this.setObject(value, input?.toNanoOfDay())
         }
     }
@@ -105,8 +105,8 @@ object JdsExtensions {
      * @param jdsDb
      */
     fun ResultSet.getLocalTime(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
-        JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.getString(column)
-        JdsImplementation.POSTGRES -> this.getObject(column, LocalTime::class.java)
+        JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.getString(column)
+        JdsImplementation.Postgres -> this.getObject(column, LocalTime::class.java)
         else -> this.getLong(column)
     }
 
@@ -118,8 +118,8 @@ object JdsExtensions {
      */
     fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, jdsDb: JdsDb) {
         when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.MYSQL, JdsImplementation.MARIADB -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.POSTGRES -> this.setObject(value, input)
+            JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
+            JdsImplementation.Postgres -> this.setObject(value, input)
             else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
         }
     }
@@ -129,8 +129,8 @@ object JdsExtensions {
      * @param jdsDb
      */
     fun ResultSet.getLocalDate(column: String, jdsDb: JdsDb): Any = when (jdsDb.implementation) {
-        JdsImplementation.TSQL -> this.getString(column)
-        JdsImplementation.POSTGRES -> this.getObject(column, LocalDate::class.java)
+        JdsImplementation.TSql -> this.getString(column)
+        JdsImplementation.Postgres -> this.getObject(column, LocalDate::class.java)
         else -> this.getTimestamp(column)//Oracle, Sqlite, maria,sql
     }
 

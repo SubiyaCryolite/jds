@@ -135,7 +135,7 @@ data class JdsTable(var name: String = "",
             val updateColumns = LinkedList<String>() //maintain order
             columnNames.forEach {
                 val field = columnToFieldMap[it]!!
-                val value = when (field.type == JdsFieldType.ENUM_COLLECTION) {
+                val value = when (field.type == JdsFieldType.EnumCollection) {
                     true -> entity.getReportAtomicValue(field.id, enumOrdinals[it]!!)
                     false -> entity.getReportAtomicValue(field.id, 0)
                 }
@@ -217,16 +217,16 @@ data class JdsTable(var name: String = "",
 
         val insertColumns = LinkedList<String>()
         val delimiter = when (jdsDb.implementation) {
-            JdsImplementation.TSQL, JdsImplementation.ORACLE -> " "
+            JdsImplementation.TSql, JdsImplementation.Oracle -> " "
             else -> "ADD COLUMN "
         }
         val prefix = when (jdsDb.implementation) {
-            JdsImplementation.TSQL -> "ADD "
-            JdsImplementation.ORACLE -> "ADD ("
+            JdsImplementation.TSql -> "ADD "
+            JdsImplementation.Oracle -> "ADD ("
             else -> "ADD COLUMN "
         }
         val suffix = when (jdsDb.implementation) {
-            JdsImplementation.ORACLE -> ")"
+            JdsImplementation.Oracle -> ")"
             else -> ""
         }
 
@@ -258,11 +258,11 @@ data class JdsTable(var name: String = "",
 
         if (jdsDb.supportsStatements && (!jdsDb.doesProcedureExist(connection, storedProcedureName) || foundChanges)) {
             val tableColumns = generateNativeColumnTypes(jdsDb, columnToFieldMap)
-            tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.STRING, 128)
-            tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.INT)
+            tableColumns["uuid"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.String, 128)
+            tableColumns["edit_version"] = JdsSchema.getDbDataType(jdsDb, JdsFieldType.Int)
 
             //MySQL && MariaDB don't support CREATE OR ALTER. Old definitions must be dropped first
-            if (setOf(JdsImplementation.MARIADB, JdsImplementation.MYSQL).contains(jdsDb.implementation))
+            if (setOf(JdsImplementation.MariaDb, JdsImplementation.MySql).contains(jdsDb.implementation))
                 connection.prepareStatement("DROP PROCEDURE IF EXISTS $storedProcedureName").use { it.executeUpdate() }
 
             val createOrAlteredProcedureSQL = jdsDb.createOrAlterProc(storedProcedureName, name, tableColumns, setOf("uuid", "edit_version"), tableColumns.count() <= 2)
@@ -344,7 +344,7 @@ data class JdsTable(var name: String = "",
      * @implNote Use the recommended style for each DB Engine to ensure optimal performance
      */
     internal fun deleteOldRecords(jdsDb: JdsDb) = when (jdsDb.implementation) {
-        JdsImplementation.TSQL -> {
+        JdsImplementation.TSql -> {
             when (jdsDb.options.isWritingLatestEntityVersion) {
                 true -> "DELETE $name FROM $name report_table\n" +
                         "INNER JOIN jds_entity_live_version live_records\n" +
@@ -361,7 +361,7 @@ data class JdsTable(var name: String = "",
                         "WHERE live_records.uuid IS NULL"
             }
         }
-        JdsImplementation.POSTGRES -> {
+        JdsImplementation.Postgres -> {
             when (jdsDb.options.isWritingLatestEntityVersion) {
                 true -> "DELETE FROM $name AS report_table\n" +
                         "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +
@@ -376,7 +376,7 @@ data class JdsTable(var name: String = "",
                         "                 GROUP BY eo.uuid)"
             }
         }
-        JdsImplementation.MARIADB, JdsImplementation.MYSQL -> {
+        JdsImplementation.MariaDb, JdsImplementation.MySql -> {
             when (jdsDb.options.isWritingLatestEntityVersion) {
                 true -> "DELETE report_table FROM $name report_table\n" +
                         "LEFT JOIN jds_entity_live_version live_records ON live_records.uuid = report_table.uuid\n" +
@@ -392,7 +392,7 @@ data class JdsTable(var name: String = "",
                         "WHERE live_records.uuid IS NULL"
             }
         }
-        JdsImplementation.ORACLE, JdsImplementation.SQLITE -> {
+        JdsImplementation.Oracle, JdsImplementation.SqLite -> {
             when (jdsDb.options.isWritingLatestEntityVersion) {
                 true -> "DELETE FROM $name\n" +
                         "WHERE NOT EXISTS(SELECT *\n" +

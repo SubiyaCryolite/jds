@@ -13,22 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
-data class NullableDoubleProperty(private var _value: Double? = null) : WritableValue<Double?>, Serializable {
-
-    fun get(): Double? = value
-
-    fun set(v: Double?) {
-        value = v
-    }
-
-    override fun setValue(value: Double?) {
-        _value = value
-    }
-
-    override fun getValue(): Double? {
-        return _value
-    }
-}
+/**
+ * Class allowing for the wrapping and persistence of nullable [Double] values
+ * @param initialValue the initial value
+ */
+class NullableDoubleProperty(initialValue: Double? = null) : NullableProperty<Double?>(initialValue)

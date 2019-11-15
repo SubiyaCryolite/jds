@@ -13,9 +13,9 @@
  */
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.enums.JdsComponent
-import io.github.subiyacryolite.jds.enums.JdsComponent.*
 import io.github.subiyacryolite.jds.enums.JdsFieldType
+import io.github.subiyacryolite.jds.enums.JdsTableComponent
+import io.github.subiyacryolite.jds.enums.JdsTableComponent.*
 
 /**
  * Class used to look up the datastore of Jds Field Types
@@ -29,27 +29,26 @@ object JdsTableLookup {
      * @param fieldType the requested jdsField type
      * @return the table that stores the requested jdsField type
      */
-    private fun getComponentForFieldType(fieldType: JdsFieldType): JdsComponent {
+    private fun getComponentForFieldType(fieldType: JdsFieldType): JdsTableComponent {
         when (fieldType) {
-            JdsFieldType.FLOAT -> return STORE_FLOAT
-            JdsFieldType.DOUBLE -> return STORE_DOUBLE
-            JdsFieldType.FLOAT_COLLECTION -> return STORE_FLOAT
-            JdsFieldType.INT_COLLECTION -> return STORE_INTEGER
-            JdsFieldType.DOUBLE_COLLECTION -> return STORE_DOUBLE
-            JdsFieldType.LONG_COLLECTION -> return STORE_LONG
-            JdsFieldType.STRING_COLLECTION -> return STORE_TEXT
-            JdsFieldType.DATE_TIME_COLLECTION -> return STORE_DATE_TIME
-            JdsFieldType.ENUM_COLLECTION -> return STORE_INTEGER
-            JdsFieldType.ZONED_DATE_TIME -> return STORE_ZONED_DATE_TIME
-            JdsFieldType.TIME -> return STORE_TIME
-            JdsFieldType.BLOB -> return STORE_BLOB
-            JdsFieldType.BOOLEAN -> return STORE_BOOLEAN
-            JdsFieldType.ENUM, JdsFieldType.INT -> return STORE_INTEGER
-            JdsFieldType.DATE_TIME -> return STORE_DATE_TIME
-            JdsFieldType.DATE -> return STORE_DATE
-            JdsFieldType.LONG, JdsFieldType.DURATION -> return STORE_LONG
-            JdsFieldType.PERIOD, JdsFieldType.STRING, JdsFieldType.YEAR_MONTH, JdsFieldType.MONTH_DAY -> return STORE_TEXT
-            else -> return NULL
+            JdsFieldType.Long, JdsFieldType.Duration -> return StoreLong
+            JdsFieldType.Enum, JdsFieldType.Int -> return StoreInteger
+            JdsFieldType.Period, JdsFieldType.String, JdsFieldType.YearMonth, JdsFieldType.MonthDay -> return StoreText
+            JdsFieldType.FloatCollection -> return StoreFloat
+            JdsFieldType.IntCollection -> return StoreInteger
+            JdsFieldType.DoubleCollection -> return StoreDouble
+            JdsFieldType.LongCollection -> return StoreLong
+            JdsFieldType.StringCollection -> return StoreText
+            JdsFieldType.DateTimeCollection -> return StoreDateTime
+            JdsFieldType.EnumCollection -> return StoreInteger
+            JdsFieldType.ZonedDateTime -> return StoreZonedDateTime
+            JdsFieldType.Float -> return StoreFloat
+            JdsFieldType.Double -> return StoreDouble
+            JdsFieldType.Time -> return StoreTime
+            JdsFieldType.Blob -> return StoreBlob
+            JdsFieldType.Boolean -> return StoreBoolean
+            JdsFieldType.DateTime -> return StoreDateTime
+            else-> return StoreDate
         }
     }
 

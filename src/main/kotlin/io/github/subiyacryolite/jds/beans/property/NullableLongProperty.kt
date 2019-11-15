@@ -13,22 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
-data class NullableLongProperty(private var _value: Long? = null) : WritableValue<Long?>, Serializable {
-
-    fun get(): Long? = value
-
-    fun set(v: Long?) {
-        value = v
-    }
-
-    override fun setValue(value: Long?) {
-        _value = value
-    }
-
-    override fun getValue(): Long? {
-        return _value
-    }
-}
+/**
+ * Class allowing for the wrapping and persistence of nullable [Long] values
+ * @param initialValue the initial value
+ */
+class NullableLongProperty(initialValue: Long? = null) : NullableProperty<Long?>(initialValue)

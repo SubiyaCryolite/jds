@@ -21,7 +21,7 @@ import java.util.*
 /**
  * The PostgreSQL implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
-abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
+abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.Postgres, true) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?"
@@ -80,19 +80,19 @@ abstract class JdsDbPostgreSql : JdsDb(JdsImplementation.POSTGRES, true) {
     }
 
     override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
-        JdsFieldType.FLOAT -> "REAL"
-        JdsFieldType.DOUBLE -> "FLOAT"
-        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP WITH TIME ZONE"
-        JdsFieldType.TIME -> "TIME WITHOUT TIME ZONE"
-        JdsFieldType.BLOB -> "BYTEA"
-        JdsFieldType.INT -> "INTEGER"
-        JdsFieldType.SHORT -> "SMALLINT"
-        JdsFieldType.UUID -> "UUID"
-        JdsFieldType.DATE -> "DATE"
-        JdsFieldType.DATE_TIME -> "TIMESTAMP WITHOUT TIME ZONE"
-        JdsFieldType.LONG -> "BIGINT"
-        JdsFieldType.STRING -> if (max == 0) "TEXT" else "VARCHAR($max)"
-        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        JdsFieldType.Float -> "REAL"
+        JdsFieldType.Double -> "FLOAT"
+        JdsFieldType.ZonedDateTime -> "TIMESTAMP WITH TIME ZONE"
+        JdsFieldType.Time -> "TIME WITHOUT TIME ZONE"
+        JdsFieldType.Blob -> "BYTEA"
+        JdsFieldType.Int -> "INTEGER"
+        JdsFieldType.Short -> "SMALLINT"
+        JdsFieldType.Uuid -> "UUID"
+        JdsFieldType.Date -> "DATE"
+        JdsFieldType.DateTime -> "TIMESTAMP WITHOUT TIME ZONE"
+        JdsFieldType.Long -> "BIGINT"
+        JdsFieldType.String -> if (max == 0) "TEXT" else "VARCHAR($max)"
+        JdsFieldType.Boolean -> "BOOLEAN"
         else -> ""
     }
 

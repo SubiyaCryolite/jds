@@ -13,22 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
-data class NullableFloatProperty(private var _value: Float? = null) : WritableValue<Float?>, Serializable {
-
-    fun get(): Float? = value
-
-    fun set(v: Float?) {
-        value = v
-    }
-
-    override fun setValue(value: Float?) {
-        _value = value
-    }
-
-    override fun getValue(): Float? {
-        return _value
-    }
-}
+/**
+ * Class allowing for the wrapping and persistence of nullable [Float] values
+ * @param initialValue the initial value
+ */
+class NullableFloatProperty(initialValue: Float? = null) : NullableProperty<Float?>(initialValue)

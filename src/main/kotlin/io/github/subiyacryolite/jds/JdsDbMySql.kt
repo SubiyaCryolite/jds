@@ -25,7 +25,7 @@ abstract class JdsDbMySql : JdsDb {
 
     constructor(implementation: JdsImplementation, supportsStatements: Boolean) : super(implementation, supportsStatements)
 
-    constructor() : this(JdsImplementation.MYSQL, true)
+    constructor() : this(JdsImplementation.MySql, true)
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
@@ -84,19 +84,19 @@ abstract class JdsDbMySql : JdsDb {
     }
 
     override fun getDataTypeImpl(fieldType: JdsFieldType, max: Int): String = when (fieldType) {
-        JdsFieldType.FLOAT -> "FLOAT"
-        JdsFieldType.DOUBLE -> "DOUBLE"
-        JdsFieldType.ZONED_DATE_TIME -> "TIMESTAMP"
-        JdsFieldType.TIME -> "TIME"
-        JdsFieldType.BLOB -> "BLOB"
-        JdsFieldType.INT -> "INT"
-        JdsFieldType.DATE -> "DATE"
-        JdsFieldType.DATE_TIME -> "DATETIME"
-        JdsFieldType.SHORT -> "SMALLINT"
-        JdsFieldType.UUID -> "BINARY(16)"
-        JdsFieldType.LONG -> "BIGINT"
-        JdsFieldType.STRING -> if (max == 0) "TEXT" else "VARCHAR($max)"
-        JdsFieldType.BOOLEAN -> "BOOLEAN"
+        JdsFieldType.Float -> "FLOAT"
+        JdsFieldType.Double -> "DOUBLE"
+        JdsFieldType.ZonedDateTime -> "TIMESTAMP"
+        JdsFieldType.Time -> "TIME"
+        JdsFieldType.Blob -> "BLOB"
+        JdsFieldType.Int -> "INT"
+        JdsFieldType.Date -> "DATE"
+        JdsFieldType.DateTime -> "DATETIME"
+        JdsFieldType.Short -> "SMALLINT"
+        JdsFieldType.Uuid -> "BINARY(16)"
+        JdsFieldType.Long -> "BIGINT"
+        JdsFieldType.String -> if (max == 0) "TEXT" else "VARCHAR($max)"
+        JdsFieldType.Boolean -> "BOOLEAN"
         else -> ""
     }
 

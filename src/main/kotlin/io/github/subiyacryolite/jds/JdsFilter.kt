@@ -37,12 +37,12 @@ class JdsFilter<T : JdsEntity>(private val db: JdsDb, private val referenceType:
     private val filterColumn: String
         get() {
             return when (filterBy) {
-                JdsFilterBy.UUID -> "uuid"
-                JdsFilterBy.UUID_LOCATION -> "uuid_location"
+                JdsFilterBy.Uuid -> "uuid"
+                JdsFilterBy.UuidLocation -> "uuid_location"
             }
         }
 
-    constructor(jdsDb: JdsDb, referenceType: Class<T>) : this(jdsDb, referenceType, JdsFilterBy.UUID)
+    constructor(jdsDb: JdsDb, referenceType: Class<T>) : this(jdsDb, referenceType, JdsFilterBy.Uuid)
 
     init {
         val classHasAnnotation = referenceType.isAnnotationPresent(JdsEntityAnnotation::class.java)
@@ -181,7 +181,7 @@ class JdsFilter<T : JdsEntity>(private val db: JdsDb, private val referenceType:
      * @param value
      */
     private fun isLob(field: JdsField): Boolean {
-        return field.type === JdsFieldType.STRING || field.type === JdsFieldType.BLOB
+        return field.type === JdsFieldType.String || field.type === JdsFieldType.Blob
     }
 
     /**

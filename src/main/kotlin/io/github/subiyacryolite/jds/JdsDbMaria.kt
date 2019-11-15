@@ -18,4 +18,4 @@ import io.github.subiyacryolite.jds.enums.JdsImplementation
 /**
  * The MariaDb implementation of [io.github.subiyacryolite.jds.JdsDb]
  */
-abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MARIADB, true)
+abstract class JdsDbMaria : JdsDbMySql(JdsImplementation.MariaDb, true)

@@ -13,61 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
 /**
- * Created by ifunga on 18/06/2017.
- * This class was designed to store binary values in a backing byte array. The byte array can also be read as an input stream
+ * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
+ * @param initialValue the initial value
  */
-open class BlobProperty : WritableValue<ByteArray?>, Serializable {
-
-    private var bytes: ByteArray? = null
-
-    /**
-     * Constructor
-     *
-     * @param value byte array input
-     */
-    constructor(value: ByteArray?) {
-        set(value)
-    }
-
-    /**
-     * Acquire the blob as an array of bytes
-     *
-     * @return the blob as an array of bytes
-     */
-    fun get(): ByteArray? {
-        return bytes
-    }
-
-    /**
-     * Set the blob
-     *
-     * @param bytes the blob as an array of bytes
-     */
-    fun set(bytes: ByteArray?) {
-        this.bytes = bytes
-    }
-
-    /**
-     * Determine if the blob is empty
-     *
-     * @return true if the blob is empty
-     */
-    val isEmpty: Boolean
-        get() = bytes == null || bytes!!.isEmpty()
-
-    override fun setValue(value: ByteArray?) {
-        set(value)
-    }
-
-    override fun getValue(): ByteArray? {
-        return get()
-    }
-
-    companion object {
-        private const val serialVersionUID = 20171109_0853L
-    }
-}
+open class BlobProperty(initialValue: ByteArray? = null) : NullableProperty<ByteArray?>(initialValue)

@@ -13,22 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
-import java.io.Serializable
-
-data class NullableBooleanProperty(private var _value: Boolean? = null) : WritableValue<Boolean?>, Serializable {
-
-    fun get(): Boolean? = value
-
-    fun set(v: Boolean?) {
-        value = v
-    }
-
-    override fun setValue(value: Boolean?) {
-        _value = value
-    }
-
-    override fun getValue(): Boolean? {
-        return _value
-    }
-}
+/**
+ * Class allowing for the wrapping and persistence of nullable [Boolean] values
+ * @param initialValue the initial value
+ */
+class NullableBooleanProperty(initialValue: Boolean? = null) : NullableProperty<Boolean?>(initialValue)
