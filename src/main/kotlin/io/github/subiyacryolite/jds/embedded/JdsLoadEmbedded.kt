@@ -30,7 +30,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
         container.forEach { element ->
             element.embeddedObjects.forEach { innerElement ->
                 val instance = referenceType.getDeclaredConstructor().newInstance()
-                populate(instance, innerElement)
+                populate(db, instance, innerElement)
                 output.add(instance)
             }
         }
@@ -43,40 +43,40 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
      * @param embeddedObject
      */
     @Throws(Exception::class)
-    private fun populate(entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
+    private fun populate(jdsDb: JdsDb, entity: JdsEntity, embeddedObject: JdsEmbeddedObject) {
         entity.overview.entityId = embeddedObject.overview.entityId
         entity.overview.uuid = embeddedObject.overview.uuid
         entity.overview.editVersion = embeddedObject.overview.editVersion
         //==============================================
-        embeddedObject.blobValues.forEach { entity.populateProperties(JdsFieldType.Blob, it.key, it.value) }
-        embeddedObject.booleanValues.forEach { entity.populateProperties(JdsFieldType.Boolean, it.key, it.value) }
-        embeddedObject.dateValues.forEach { entity.populateProperties(JdsFieldType.Date, it.key, it.value) }
-        embeddedObject.dateTimeCollection.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.DateTimeCollection, parent.key, it) } }
-        embeddedObject.dateTimeValues.forEach { entity.populateProperties(JdsFieldType.DateTime, it.key, it.value) }
-        embeddedObject.doubleCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.DoubleCollection, parent.key, it) } }
-        embeddedObject.doubleValues.forEach { entity.populateProperties(JdsFieldType.Double, it.key, it.value) }
-        embeddedObject.durationValues.forEach { entity.populateProperties(JdsFieldType.Duration, it.key, it.value) }
-        embeddedObject.enumCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.EnumCollection, parent.key, it) } }
-        embeddedObject.enumStringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.EnumStringCollection, parent.key, it) } }
-        embeddedObject.enumValues.forEach { entity.populateProperties(JdsFieldType.Enum, it.key, it.value) }
-        embeddedObject.enumStringValues.forEach { entity.populateProperties(JdsFieldType.EnumString, it.key, it.value) }
-        embeddedObject.floatCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.FloatCollection, parent.key, it) } }
-        embeddedObject.floatValue.forEach { entity.populateProperties(JdsFieldType.Float, it.key, it.value) }
-        embeddedObject.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.IntCollection, parent.key, it) } }
-        embeddedObject.integerValues.forEach { entity.populateProperties(JdsFieldType.Int, it.key, it.value) }
-        embeddedObject.shortValues.forEach { entity.populateProperties(JdsFieldType.Short, it.key, it.value) }
-        embeddedObject.uuidValues.forEach { entity.populateProperties(JdsFieldType.Uuid, it.key, it.value) }
-        embeddedObject.longCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.LongCollection, parent.key, it) } }
-        embeddedObject.longValues.forEach { entity.populateProperties(JdsFieldType.Long, it.key, it.value) }
-        embeddedObject.monthDayValues.forEach { entity.populateProperties(JdsFieldType.MonthDay, it.key, it.value) }
-        embeddedObject.periodValues.forEach { entity.populateProperties(JdsFieldType.Period, it.key, it.value) }
-        embeddedObject.stringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(JdsFieldType.StringCollection, parent.key, it) } }
-        embeddedObject.stringValues.forEach { entity.populateProperties(JdsFieldType.String, it.key, it.value) }
-        embeddedObject.timeValues.forEach { entity.populateProperties(JdsFieldType.Time, it.key, it.value) }
-        embeddedObject.yearMonthValues.forEach { entity.populateProperties(JdsFieldType.YearMonth, it.key, it.value) }
-        embeddedObject.zonedDateTimeValues.forEach { entity.populateProperties(JdsFieldType.ZonedDateTime, it.key, it.value) }
+        embeddedObject.blobValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Blob, it.key, it.value) }
+        embeddedObject.booleanValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Boolean, it.key, it.value) }
+        embeddedObject.dateValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Date, it.key, it.value) }
+        embeddedObject.dateTimeCollection.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.DateTimeCollection, parent.key, it) } }
+        embeddedObject.dateTimeValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.DateTime, it.key, it.value) }
+        embeddedObject.doubleCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.DoubleCollection, parent.key, it) } }
+        embeddedObject.doubleValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Double, it.key, it.value) }
+        embeddedObject.durationValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Duration, it.key, it.value) }
+        embeddedObject.enumCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.EnumCollection, parent.key, it) } }
+        embeddedObject.enumStringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.EnumStringCollection, parent.key, it) } }
+        embeddedObject.enumValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Enum, it.key, it.value) }
+        embeddedObject.enumStringValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.EnumString, it.key, it.value) }
+        embeddedObject.floatCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.FloatCollection, parent.key, it) } }
+        embeddedObject.floatValue.forEach { entity.populateProperties(jdsDb, JdsFieldType.Float, it.key, it.value) }
+        embeddedObject.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.IntCollection, parent.key, it) } }
+        embeddedObject.integerValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Int, it.key, it.value) }
+        embeddedObject.shortValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Short, it.key, it.value) }
+        embeddedObject.uuidValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Uuid, it.key, it.value) }
+        embeddedObject.longCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.LongCollection, parent.key, it) } }
+        embeddedObject.longValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Long, it.key, it.value) }
+        embeddedObject.monthDayValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.MonthDay, it.key, it.value) }
+        embeddedObject.periodValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Period, it.key, it.value) }
+        embeddedObject.stringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(jdsDb, JdsFieldType.StringCollection, parent.key, it) } }
+        embeddedObject.stringValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.String, it.key, it.value) }
+        embeddedObject.timeValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.Time, it.key, it.value) }
+        embeddedObject.yearMonthValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.YearMonth, it.key, it.value) }
+        embeddedObject.zonedDateTimeValues.forEach { entity.populateProperties(jdsDb, JdsFieldType.ZonedDateTime, it.key, it.value) }
         //==============================================
-        embeddedObject.entityOverviews.forEach { populateObjects(entity, db, it.overview.fieldId, it.overview.entityId, it.overview.uuid, it.overview.editVersion, it) }
+        embeddedObject.entityOverviews.forEach { populateObjects(entity, jdsDb, it.overview.fieldId, it.overview.entityId, it.overview.uuid, it.overview.editVersion, it) }
     }
 
     private fun populateObjects(entity: JdsEntity, jdsDb: JdsDb, fieldId: Long?, entityId: Long, uuid: String, editVersion: Int, eo: JdsEmbeddedObject) {
@@ -87,7 +87,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
                 val innerEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 innerEntity.overview.uuid = uuid
                 innerEntity.overview.editVersion = editVersion
-                populate(innerEntity, eo)
+                populate(jdsDb, innerEntity, eo)
                 it.value.add(innerEntity)
             }
         }
@@ -100,7 +100,7 @@ class JdsLoadEmbedded<T : JdsEntity>(private val db: JdsDb, private val referenc
                 it.value.value.overview.uuid = uuid
                 it.value.value.overview.editVersion = editVersion
                 val jdsEntity = it.value.value as JdsEntity
-                populate(jdsEntity, eo)
+                populate(jdsDb, jdsEntity, eo)
             }
         }
     }

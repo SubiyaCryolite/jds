@@ -22,7 +22,7 @@ interface IJdsEntity {
     val objectValues: HashMap<JdsFieldEntity<*>, WritableValue<out IJdsEntity>>
     val objectCollections: HashMap<JdsFieldEntity<*>, MutableCollection<IJdsEntity>>
     fun registerFields(jdsTable: JdsTable)
-    fun assign(jdsEmbeddedObject: JdsEmbeddedObject)
+    fun assign(jdsDb: JdsDb, jdsEmbeddedObject: JdsEmbeddedObject)
     fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<JdsEntity>
     fun getNestedEntities(collection: MutableCollection<JdsEntity>, includeThisEntity: Boolean = true)
 }

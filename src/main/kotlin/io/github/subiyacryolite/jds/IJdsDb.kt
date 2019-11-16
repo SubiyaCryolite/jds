@@ -57,19 +57,19 @@ interface IJdsDb {
      * Checks if the specified table exists the the database
      *
      * @param connection the connection to use
-     * @param tableName the table to look up
+     * @param name the table to look up
      * @return true if the specified table exists the the database
      */
-    fun doesTableExist(connection: Connection, tableName: String): Boolean
+    fun doesTableExist(connection: Connection, name: String): Boolean
 
     /**
      * Checks if the specified procedure exists the the database
      *
      * @param connection the connection to use
-     * @param procedureName the procedure to look up
+     * @param name the procedure to look up
      * @return true if the specified procedure exists the the database
      */
-    fun doesProcedureExist(connection: Connection, procedureName: String): Boolean
+    fun doesProcedureExist(connection: Connection, name: String): Boolean
 
     /**
      * Gets the correct syntax needed to add a new column to the underlying database implementation

@@ -15,7 +15,7 @@ class CustomReport : BaseTestConfig("Custom reports and shared connections") {
     override fun testImpl(jdsDb: JdsDb) {
         val customTable = JdsTable()
         customTable.name = "address_specific"
-        customTable.registerEntity(Address::class.java)
+        customTable.registerEntity(Address::class.java,false)
         customTable.registerFields(Fields.AREA_NAME, Fields.CITY_NAME)
 
         val crtAddress = JdsTable(Address::class.java)

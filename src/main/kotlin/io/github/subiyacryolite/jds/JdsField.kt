@@ -24,6 +24,7 @@ data class JdsField(
         var id: Long = 0,
         var name: String = "",
         var type: JdsFieldType = JdsFieldType.String,
+        var sensitive: Boolean = false,
         var description: String = ""
 ) : Serializable {
 

@@ -70,7 +70,7 @@ abstract class BaseTestConfig(private val testName: String) {
 
         private fun initJds(jdsDb: JdsDb) {
             jdsDb.init()
-            jdsDb.options.isLoggingOutput = true
+            jdsDb.options.logOutput = true
             initialiseJdsClasses(jdsDb)
         }
 

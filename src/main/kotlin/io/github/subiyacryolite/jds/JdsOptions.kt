@@ -6,17 +6,17 @@ data class JdsOptions(
         /**
          * A value indicating whether JDS should print internal log information
          */
-        var isLoggingOutput: Boolean = false,
+        var logOutput: Boolean = false,
 
         /**
          * Indicates whether JDS is persisting values to the EAV jds_str_* tables
          */
-        var isWritingValuesToEavTables: Boolean = true,
+        var writeValuesToEavTables: Boolean = true,
 
         /**
          * Indicates whether JDS is persisting collections to the EAV jds_str_*_col tables
          */
-        var isWritingCollectionsToEavTables: Boolean = true,
+        var writeCollectionsToEavTables: Boolean = true,
 
         /**
          * Indicates if load operations should initialise java primitive types
@@ -36,22 +36,36 @@ data class JdsOptions(
         /**
          * Indicates if JDS should write to custom reporting tables
          */
-        var isWritingToReportingTables: Boolean = true,
+        var writeToTransposedTables: Boolean = true,
 
         /**
          * Indicates if JDS should write parent to child entity bindings. This is necessary when saving in EAV mode, and can be skipped to save hard-drive space when using nested portable containers persisted in a format such as JSON
          */
-        var isWritingEntityBindings: Boolean = true,
+        var writeEntityBindings: Boolean = true,
 
         /**
          * Indicates if JDS should delete old data from report tables after every save. For bulk saves you can disable this
          * property and manually call [deleteOldDataFromReportTables][JdsDb.deleteOldDataFromReportTables] from [JdsDb][JdsDb]
          */
-        var isDeletingOldDataFromReportTablesAfterSave: Boolean = true,
+        var deleteOutdatedTransposeDataPostSave: Boolean = true,
 
         /**
          * Indicates if JDS is writing the latest version to the jds_entity_live_version table
          */
-        var isWritingLatestEntityVersion: Boolean = true,
+        var writeLatestEntityVersion: Boolean = true,
 
-        var isWritingToOverviewTable: Boolean = true) : Serializable
+        /**
+         * Indicates id JDS is writing data to the overview table
+         */
+        var writeOverviewInformation: Boolean = true,
+
+        /**
+         * Indicates if values bound to [JdsField's][JdsField] marked as sensitive are populated on load
+         */
+        var populateSensitiveData: Boolean = true,
+
+        /**
+         * Indicates if values bound to [JdsField's][JdsField] marked as sensitive are written on save
+         */
+        var saveSensitiveData: Boolean = true
+) : Serializable

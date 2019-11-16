@@ -70,7 +70,7 @@ data class JdsTable(var name: String = "",
      * @param registerFields
      */
     @JvmOverloads
-    fun registerEntity(entityClass: Class<out IJdsEntity>, registerFields: Boolean = false) {
+    fun registerEntity(entityClass: Class<out IJdsEntity>, registerFields: Boolean) {
         val annotatedClass = entityClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         val annotatedParent = entityClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
         if (annotatedClass || annotatedParent) {
@@ -208,9 +208,9 @@ data class JdsTable(var name: String = "",
         val tableFields = JdsField.values.filter { fields.contains(it.value.id) }.map { it.value }
         val createColumnsSql = JdsSchema.generateColumns(jdsDb, tableFields, columnToFieldMap, enumOrdinals)
         if (!jdsDb.doesTableExist(connection, name)) {
-            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use {
-                it.executeUpdate()
-                if (jdsDb.options.isLoggingOutput)
+            connection.prepareStatement(JdsSchema.generateTable(jdsDb, name)).use { statement ->
+                statement.executeUpdate()
+                if (jdsDb.options.logOutput)
                     println("Created $name")
             }
         }
@@ -345,7 +345,7 @@ data class JdsTable(var name: String = "",
      */
     internal fun deleteOldRecords(jdsDb: JdsDb) = when (jdsDb.implementation) {
         JdsImplementation.TSql -> {
-            when (jdsDb.options.isWritingLatestEntityVersion) {
+            when (jdsDb.options.writeLatestEntityVersion) {
                 true -> "DELETE $name FROM $name report_table\n" +
                         "INNER JOIN jds_entity_live_version live_records\n" +
                         "ON live_records.uuid = report_table.uuid\n" +
@@ -362,7 +362,7 @@ data class JdsTable(var name: String = "",
             }
         }
         JdsImplementation.Postgres -> {
-            when (jdsDb.options.isWritingLatestEntityVersion) {
+            when (jdsDb.options.writeLatestEntityVersion) {
                 true -> "DELETE FROM $name AS report_table\n" +
                         "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +
                         "WHERE report_table.edit_version = live_records.edit_version\n" +
@@ -377,7 +377,7 @@ data class JdsTable(var name: String = "",
             }
         }
         JdsImplementation.MariaDb, JdsImplementation.MySql -> {
-            when (jdsDb.options.isWritingLatestEntityVersion) {
+            when (jdsDb.options.writeLatestEntityVersion) {
                 true -> "DELETE report_table FROM $name report_table\n" +
                         "LEFT JOIN jds_entity_live_version live_records ON live_records.uuid = report_table.uuid\n" +
                         "AND live_records.edit_version = report_table.edit_version\n" +
@@ -393,7 +393,7 @@ data class JdsTable(var name: String = "",
             }
         }
         JdsImplementation.Oracle, JdsImplementation.SqLite -> {
-            when (jdsDb.options.isWritingLatestEntityVersion) {
+            when (jdsDb.options.writeLatestEntityVersion) {
                 true -> "DELETE FROM $name\n" +
                         "WHERE NOT EXISTS(SELECT *\n" +
                         "FROM jds_entity_live_version\n" +

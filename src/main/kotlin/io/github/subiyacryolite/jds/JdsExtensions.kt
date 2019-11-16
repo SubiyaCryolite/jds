@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
 import io.github.subiyacryolite.jds.enums.JdsImplementation
+import javafx.beans.value.WritableValue
 import java.nio.ByteBuffer
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -23,6 +24,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.Temporal
 import java.util.*
 
 
@@ -66,13 +68,11 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, jdsDb: JdsDb) {
-        when (jdsDb.implementation) {
-            JdsImplementation.TSql -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.Postgres -> this.setObject(value, input?.toOffsetDateTime())
-            JdsImplementation.MySql, JdsImplementation.Oracle, JdsImplementation.MariaDb -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
-            else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
-        }
+    fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, jdsDb: JdsDb) = when (jdsDb.implementation) {
+        JdsImplementation.TSql -> this.setString(value, input?.toSqlStringFormat())
+        JdsImplementation.Postgres -> this.setObject(value, input?.toOffsetDateTime())
+        JdsImplementation.MySql, JdsImplementation.Oracle, JdsImplementation.MariaDb -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
+        else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
     }
 
     /**
@@ -92,12 +92,10 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, jdsDb: JdsDb) {
-        when (jdsDb.implementation) {
-            JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.Postgres -> this.setObject(value, input)
-            else -> this.setObject(value, input?.toNanoOfDay())
-        }
+    fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, jdsDb: JdsDb) = when (jdsDb.implementation) {
+        JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
+        JdsImplementation.Postgres -> this.setObject(value, input)
+        else -> this.setObject(value, input?.toNanoOfDay())
     }
 
     /**
@@ -116,12 +114,10 @@ object JdsExtensions {
      * @param input
      * @param jdsDb
      */
-    fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, jdsDb: JdsDb) {
-        when (jdsDb.implementation) {
-            JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-            JdsImplementation.Postgres -> this.setObject(value, input)
-            else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
-        }
+    fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, jdsDb: JdsDb) = when (jdsDb.implementation) {
+        JdsImplementation.TSql, JdsImplementation.MySql, JdsImplementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
+        JdsImplementation.Postgres -> this.setObject(value, input)
+        else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
     }
 
     /**
@@ -132,6 +128,39 @@ object JdsExtensions {
         JdsImplementation.TSql -> this.getString(column)
         JdsImplementation.Postgres -> this.getObject(column, LocalDate::class.java)
         else -> this.getTimestamp(column)//Oracle, Sqlite, maria,sql
+    }
+
+    /**
+     * Extension method which filters the map of fields which are persisted to disk.
+     * When sensitive data is not being saved, fields marked as sensitive will be excluded
+     */
+    @JvmName("filterTemporalValue")
+    internal fun Map<Long, WritableValue<out Temporal?>>.filterSensitiveFields(jdsDb: JdsDb): Map<Long, WritableValue<out Temporal?>> = if (jdsDb.options.saveSensitiveData) {
+        this
+    } else {
+        this.filter { !JdsField.values[it.key]!!.sensitive }//only save fields which aren't sensitive
+    }
+
+    /**
+     * Extension method which filters the map of fields which are persisted to disk.
+     * When sensitive data is not being saved, fields marked as sensitive will be excluded
+     */
+    @JvmName("filterValue")
+    internal fun <T> Map<Long, WritableValue<T>>.filterSensitiveFields(jdsDb: JdsDb): Map<Long, WritableValue<T>> = if (jdsDb.options.saveSensitiveData) {
+        this
+    } else {
+        this.filter { !JdsField.values[it.key]!!.sensitive }//only save fields which aren't sensitive
+    }
+
+    /**
+     * Extension method which filters the map of fields which are persisted to disk.
+     * When sensitive data is not being saved, fields marked as sensitive will be excluded
+     */
+    @JvmName("filterCollection")
+    internal fun <T> Map<Long, MutableCollection<T>>.filterSensitiveFields(jdsDb: JdsDb): Map<Long, MutableCollection<T>> = if (jdsDb.options.saveSensitiveData) {
+        this
+    } else {
+        this.filter { !JdsField.values[it.key]!!.sensitive }
     }
 
     /**

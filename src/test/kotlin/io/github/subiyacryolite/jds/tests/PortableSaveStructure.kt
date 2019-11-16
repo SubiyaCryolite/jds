@@ -1,15 +1,15 @@
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
-import io.github.subiyacryolite.jds.tests.common.TestData
-import io.github.subiyacryolite.jds.tests.entities.AddressBook
-import io.github.subiyacryolite.jds.tests.entities.Example
-import io.github.subiyacryolite.jds.tests.entities.TimeConstruct
 import io.github.subiyacryolite.jds.JdsDb
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.embedded.JdsEmbeddedContainer
 import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
 import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
+import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
+import io.github.subiyacryolite.jds.tests.common.TestData
+import io.github.subiyacryolite.jds.tests.entities.AddressBook
+import io.github.subiyacryolite.jds.tests.entities.Example
+import io.github.subiyacryolite.jds.tests.entities.TimeConstruct
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -45,7 +45,7 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         //fire-up JDS
         initialiseSqLiteBackend()
 
-        val saveEmbedded = JdsSaveEmbedded(entity)
+        val saveEmbedded = JdsSaveEmbedded(jdsDb, entity)
         val embeddedObject = saveEmbedded.call()
 
 

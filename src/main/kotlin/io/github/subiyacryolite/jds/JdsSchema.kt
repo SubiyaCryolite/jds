@@ -91,6 +91,7 @@ object JdsSchema {
         JdsFieldType.Entity -> jdsDb.getDataType(JdsFieldType.String, 36)//act as a FK if you will
         JdsFieldType.Float -> jdsDb.getDataType(JdsFieldType.Float)
         JdsFieldType.Double -> jdsDb.getDataType(JdsFieldType.Double)
+        JdsFieldType.Uuid -> jdsDb.getDataType(JdsFieldType.Uuid)
         JdsFieldType.ZonedDateTime -> jdsDb.getDataType(JdsFieldType.ZonedDateTime)
         JdsFieldType.Time -> jdsDb.getDataType(JdsFieldType.Time)
         JdsFieldType.Blob -> jdsDb.getDataType(JdsFieldType.Blob, max)
@@ -98,6 +99,7 @@ object JdsSchema {
         JdsFieldType.Enum, JdsFieldType.Int -> jdsDb.getDataType(JdsFieldType.Int)
         JdsFieldType.DateTime -> jdsDb.getDataType(JdsFieldType.DateTime)
         JdsFieldType.Date -> jdsDb.getDataType(JdsFieldType.Date)
+        JdsFieldType.Short -> jdsDb.getDataType(JdsFieldType.Short)
         JdsFieldType.Long, JdsFieldType.Duration -> jdsDb.getDataType(JdsFieldType.Long)
         JdsFieldType.Period, JdsFieldType.String, JdsFieldType.YearMonth, JdsFieldType.MonthDay, JdsFieldType.EnumString -> jdsDb.getDataType(JdsFieldType.String, max)
         else -> "invalid"

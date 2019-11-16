@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.github.subiyacryolite.jds.JdsExtensions.filterSensitiveFields
 import io.github.subiyacryolite.jds.JdsExtensions.toByteArray
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalDate
 import io.github.subiyacryolite.jds.JdsExtensions.toLocalTime
@@ -574,11 +575,11 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param jdsEmbeddedObject
      */
     @Throws(Exception::class)
-    override fun assign(jdsEmbeddedObject: JdsEmbeddedObject) {
+    override fun assign(jdsDb: JdsDb, jdsEmbeddedObject: JdsEmbeddedObject) {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
-        booleanValues.entries.forEach {
+        booleanValues.filterSensitiveFields(jdsDb).forEach {
             val input = when (it.value.value) {
                 true -> 1
                 false -> 0
@@ -586,46 +587,46 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             }
             jdsEmbeddedObject.booleanValues.add(JdsStoreBoolean(it.key, input))
         }
-        stringValues.entries.forEach { jdsEmbeddedObject.stringValues.add(JdsStoreString(it.key, it.value.value)) }
-        floatValues.entries.forEach { jdsEmbeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value)) }
-        doubleValues.entries.forEach { jdsEmbeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value)) }
-        shortValues.entries.forEach { jdsEmbeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value)) }
-        longValues.entries.forEach { jdsEmbeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value)) }
-        integerValues.entries.forEach { jdsEmbeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value)) }
-        uuidValues.entries.forEach { jdsEmbeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value.toByteArray())) }
+        stringValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.stringValues.add(JdsStoreString(it.key, it.value.value)) }
+        floatValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.floatValue.add(JdsStoreFloat(it.key, it.value.value)) }
+        doubleValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.doubleValues.add(JdsStoreDouble(it.key, it.value.value)) }
+        shortValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.shortValues.add(JdsStoreShort(it.key, it.value.value)) }
+        longValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.longValues.add(JdsStoreLong(it.key, it.value.value)) }
+        integerValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.integerValues.add(JdsStoreInteger(it.key, it.value.value)) }
+        uuidValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.uuidValues.add(JdsStoreUuid(it.key, it.value.value.toByteArray())) }
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeValues.entries.forEach { jdsEmbeddedObject.zonedDateTimeValues.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
-        localTimeValues.entries.forEach { jdsEmbeddedObject.timeValues.add(JdsStoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
-        durationValues.entries.forEach { jdsEmbeddedObject.durationValues.add(JdsStoreDuration(it.key, it.value.value?.toNanos())) }
-        localDateTimeValues.entries.forEach { jdsEmbeddedObject.dateTimeValues.add(JdsStoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
-        localDateValues.entries.forEach { jdsEmbeddedObject.dateValues.add(JdsStoreDate(it.key, safeLocalDate(it.value.value))) }
-        monthDayValues.entries.forEach { jdsEmbeddedObject.monthDayValues.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
-        yearMonthValues.entries.forEach { jdsEmbeddedObject.yearMonthValues.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
-        periodValues.entries.forEach { jdsEmbeddedObject.periodValues.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
+        zonedDateTimeValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.zonedDateTimeValues.add(JdsStoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
+        localTimeValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.timeValues.add(JdsStoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
+        durationValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.durationValues.add(JdsStoreDuration(it.key, it.value.value?.toNanos())) }
+        localDateTimeValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.dateTimeValues.add(JdsStoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
+        localDateValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.dateValues.add(JdsStoreDate(it.key, safeLocalDate(it.value.value))) }
+        monthDayValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.monthDayValues.add(JdsStoreMonthDay(it.key, it.value.value?.toString())) }
+        yearMonthValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.yearMonthValues.add(JdsStoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
+        periodValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.periodValues.add(JdsStorePeriod(it.key, it.value.value?.toString())) }
         //==============================================
         //BLOB
         //==============================================
-        blobValues.entries.forEach {
+        blobValues.filterSensitiveFields(jdsDb).forEach {
             jdsEmbeddedObject.blobValues.add(JdsStoreBlob(it.key, it.value.value ?: ByteArray(0)))
         }
         //==============================================
         //Enums
         //==============================================
-        enumValues.entries.forEach { jdsEmbeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
-        stringEnumValues.entries.forEach { jdsEmbeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value?.name)) }
-        enumCollections.entries.forEach { jdsEmbeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
-        enumStringCollections.entries.forEach { jdsEmbeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, toStringCollection(it.value))) }
+        enumValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.enumValues.add(JdsStoreEnum(it.key, it.value.value?.ordinal)) }
+        stringEnumValues.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.enumStringValues.add(JdsStoreEnumString(it.key, it.value.value?.name)) }
+        enumCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.enumCollections.add(JdsStoreEnumCollection(it.key, toIntCollection(it.value))) }
+        enumStringCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.enumStringCollections.add(JdsStoreEnumStringCollection(it.key, toStringCollection(it.value))) }
         //==============================================
         //ARRAYS
         //==============================================
-        stringCollections.entries.forEach { jdsEmbeddedObject.stringCollections.add(JdsStoreStringCollection(it.key, it.value)) }
-        dateTimeCollections.entries.forEach { jdsEmbeddedObject.dateTimeCollection.add(JdsStoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
-        floatCollections.entries.forEach { jdsEmbeddedObject.floatCollections.add(JdsStoreFloatCollection(it.key, it.value)) }
-        doubleCollections.entries.forEach { jdsEmbeddedObject.doubleCollections.add(JdsStoreDoubleCollection(it.key, it.value)) }
-        longCollections.entries.forEach { jdsEmbeddedObject.longCollections.add(JdsStoreLongCollection(it.key, it.value)) }
-        integerCollections.entries.forEach { jdsEmbeddedObject.integerCollections.add(JdsStoreIntegerCollection(it.key, it.value)) }
+        stringCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.stringCollections.add(JdsStoreStringCollection(it.key, it.value)) }
+        dateTimeCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.dateTimeCollection.add(JdsStoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
+        floatCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.floatCollections.add(JdsStoreFloatCollection(it.key, it.value)) }
+        doubleCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.doubleCollections.add(JdsStoreDoubleCollection(it.key, it.value)) }
+        longCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.longCollections.add(JdsStoreLongCollection(it.key, it.value)) }
+        integerCollections.filterSensitiveFields(jdsDb).forEach { jdsEmbeddedObject.integerCollections.add(JdsStoreIntegerCollection(it.key, it.value)) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -633,14 +634,14 @@ abstract class JdsEntity : IJdsEntity, Serializable {
             mutableCollection.forEach { iJdsEntity ->
                 val embeddedObject = JdsEmbeddedObject()
                 embeddedObject.fieldId = fieldEntity.field.id
-                embeddedObject.init(iJdsEntity)
+                embeddedObject.init(jdsDb, iJdsEntity)
                 jdsEmbeddedObject.entityOverviews.add(embeddedObject)
             }
         }
         objectValues.forEach { (fieldEntity, objectProperty) ->
             val embeddedObject = JdsEmbeddedObject()
             embeddedObject.fieldId = fieldEntity.field.id
-            embeddedObject.init(objectProperty.value)
+            embeddedObject.init(jdsDb, objectProperty.value)
             jdsEmbeddedObject.entityOverviews.add(embeddedObject)
         }
     }
@@ -666,9 +667,15 @@ abstract class JdsEntity : IJdsEntity, Serializable {
      * @param fieldId
      * @param value
      */
-    internal fun populateProperties(fieldType: JdsFieldType, fieldId: Long, value: Any?) {
-        //what happens when you supply an unknown field ID? Create an empty container and throw it in regardless, this way compatibility isnt broken
+    internal fun populateProperties(jdsDb: JdsDb, fieldType: JdsFieldType, fieldId: Long, value: Any?) {
         initBackingPropertyIfNotDefined(fieldType, fieldId)
+
+        if (!jdsDb.options.populateSensitiveData) {
+            if (JdsField.values[fieldId]!!.sensitive) {
+                return
+            }
+        }
+
         when (fieldType) {
 
             JdsFieldType.Float -> floatValues[fieldId]?.value = when (value) {
@@ -847,25 +854,25 @@ abstract class JdsEntity : IJdsEntity, Serializable {
                 enumCollections[fieldId] = ArrayList()
 
             JdsFieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId))
-                zonedDateTimeValues[fieldId] = SimpleObjectProperty<Temporal?>()
+                zonedDateTimeValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.Date -> if (!localDateValues.containsKey(fieldId))
-                localDateValues[fieldId] = SimpleObjectProperty<Temporal?>()
+                localDateValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.Time -> if (!localTimeValues.containsKey(fieldId))
-                localTimeValues[fieldId] = SimpleObjectProperty<Temporal?>()
+                localTimeValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.Duration -> if (!durationValues.containsKey(fieldId))
-                durationValues[fieldId] = SimpleObjectProperty<Duration?>()
+                durationValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId))
-                monthDayValues[fieldId] = SimpleObjectProperty<MonthDay?>()
+                monthDayValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId))
-                yearMonthValues[fieldId] = SimpleObjectProperty<Temporal?>()
+                yearMonthValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.Period -> if (!periodValues.containsKey(fieldId))
-                periodValues[fieldId] = SimpleObjectProperty<Period?>()
+                periodValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId))
                 localDateTimeValues[fieldId] = SimpleObjectProperty<Temporal>()
@@ -892,7 +899,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
                 integerValues[fieldId] = NullableIntegerProperty()
 
             JdsFieldType.Uuid -> if (!uuidValues.containsKey(fieldId))
-                uuidValues[fieldId] = SimpleObjectProperty<UUID?>()
+                uuidValues[fieldId] = SimpleObjectProperty()
 
             JdsFieldType.Boolean -> if (!booleanValues.containsKey(fieldId))
                 booleanValues[fieldId] = NullableBooleanProperty()
@@ -996,7 +1003,7 @@ abstract class JdsEntity : IJdsEntity, Serializable {
     ) {
         populateRefEnum(jdsDb, connection, getEnums(overview.entityId))
         populateRefEntityEnum(jdsDb, connection, entityId, getEnums(overview.entityId))
-        if (jdsDb.options.isLoggingOutput) {
+        if (jdsDb.options.logOutput) {
             System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
         }
     }

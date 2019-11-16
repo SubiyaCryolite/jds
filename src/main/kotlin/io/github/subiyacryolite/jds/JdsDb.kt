@@ -191,9 +191,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         when (jdsTableComponent) {
             JdsTableComponent.EntityBinding -> createBindEntityBinding(connection)
             JdsTableComponent.EntityLiveVersion -> executeSqlFromString(connection, createEntityLiveVersionTable())
-            JdsTableComponent.EntityOverview -> {
-                createRefEntityOverview(connection)
-            }
+            JdsTableComponent.EntityOverview -> createRefEntityOverview(connection)
             JdsTableComponent.RefEntities -> createStoreEntities(connection)
             JdsTableComponent.RefEntityEnums -> createBindEntityEnums(connection)
             JdsTableComponent.RefEntityField -> createBindEntityFields(connection)
@@ -230,7 +228,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             JdsTableComponent.StoreTextCollection -> executeSqlFromString(connection, createStoreTextCollection())
             JdsTableComponent.StoreTime -> executeSqlFromString(connection, createStoreTime())
             JdsTableComponent.StoreYearMonth -> executeSqlFromString(connection, createStoreYearMonth())
-            else -> executeSqlFromString(connection, createStoreZonedDateTime())
+            JdsTableComponent.StoreZonedDateTime -> executeSqlFromString(connection, createStoreZonedDateTime())
         }
     }
 
@@ -281,19 +279,16 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         }
     }
 
-    override fun doesTableExist(connection: Connection, tableName: String): Boolean {
-        val answer = tableExists(connection, tableName)
-        return answer == 1
+    override fun doesTableExist(connection: Connection, name: String): Boolean {
+        return tableExists(connection, name) == 1
     }
 
-    override fun doesProcedureExist(connection: Connection, procedureName: String): Boolean {
-        val answer = procedureExists(connection, procedureName)
-        return answer == 1
+    override fun doesProcedureExist(connection: Connection, name: String): Boolean {
+        return procedureExists(connection, name) == 1
     }
 
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
-        val answer = columnExists(connection, tableName, columnName)
-        return answer == 1
+        return columnExists(connection, tableName, columnName) == 1
     }
 
     internal fun getResult(connection: Connection, sql: String, params: Array<String>): Int {
@@ -322,8 +317,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      */
     internal fun executeSqlFromFile(connection: Connection, fileName: String) = try {
         Thread.currentThread().contextClassLoader.getResourceAsStream(fileName).use { inputStream ->
-            val innerSql = fileToString(inputStream)
-            executeSqlFromString(connection, innerSql)
+            executeSqlFromString(connection, fileToString(inputStream))
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -345,16 +339,16 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
      */
     @Throws(Exception::class)
     private fun fileToString(inputStream: InputStream?): String {
-        val bufferedInputStream = BufferedInputStream(inputStream!!)
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        var result = bufferedInputStream.read()
-        while (result != -1) {
-            byteArrayOutputStream.write(result.toByte().toInt())
-            result = bufferedInputStream.read()
+        BufferedInputStream(inputStream!!).use { bufferedInputStream ->
+            ByteArrayOutputStream().use { byteArrayOutputStream ->
+                var result = bufferedInputStream.read()
+                while (result != -1) {
+                    byteArrayOutputStream.write(result.toByte().toInt())
+                    result = bufferedInputStream.read()
+                }
+                return byteArrayOutputStream.toString()
+            }
         }
-        byteArrayOutputStream.close()
-        bufferedInputStream.close()
-        return byteArrayOutputStream.toString()
     }
 
     /**
@@ -552,7 +546,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
             statement.setString(3, caption)
             statement.setString(4, description)
             statement.executeUpdate()
-            if (options.isLoggingOutput)
+            if (options.logOutput)
                 println("Mapped Entity [$name - $id]")
         }
     } catch (ex: Exception) {
@@ -594,7 +588,7 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         connection.autoCommit = true
-                        if (options.isLoggingOutput)
+                        if (options.logOutput)
                             println("Mapped Entity [${entityAnnotation.name}]")
                     }
                 } catch (ex: Exception) {
@@ -1107,70 +1101,70 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         val tableName = "jds_str_boolean"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Boolean)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Boolean)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDate(): String {
         val tableName = "jds_str_date"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Date)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Date)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTime(): String {
         val tableName = "jds_str_date_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTimeCollection(): String {
         val tableName = "jds_str_date_time_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDouble(): String {
         val tableName = "jds_str_double"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDoubleCollection(): String {
         val tableName = "jds_str_double_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDuration(): String {
         val tableName = "jds_str_duration"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnum(): String {
         val tableName = "jds_str_enum"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumString(): String {
         val tableName = "jds_str_enum_string"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumCollection(): String {
         val tableName = "jds_str_enum_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumStringCollection(): String {
@@ -1179,112 +1173,112 @@ abstract class JdsDb(val implementation: JdsImplementation, val supportsStatemen
         uniqueColumns["${tableName}_u"] = "uuid, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), uniqueColumns, LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), uniqueColumns, LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreFloat(): String {
         val tableName = "jds_str_float"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreShort(): String {
         val tableName = "jds_str_short"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Short)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Short)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreUuid(): String {
         val tableName = "jds_str_uuid"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Uuid)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Uuid)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreFloatCollection(): String {
         val tableName = "jds_str_float_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreInteger(): String {
         val tableName = "jds_str_integer"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreIntegerCollection(): String {
         val tableName = "jds_str_integer_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLong(): String {
         val tableName = "jds_str_long"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLongCollection(): String {
         val tableName = "jds_str_long_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreMonthDay(): String {
         val tableName = "jds_str_month_day"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStorePeriod(): String {
         val tableName = "jds_str_period"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreText(): String {
         val tableName = "jds_str_text"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreTextCollection(): String {
         val tableName = "jds_str_text_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreTime(): String {
         val tableName = "jds_str_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.Time)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.Time)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreYearMonth(): String {
         val tableName = "jds_str_year_month"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreZonedDateTime(): String {
         val tableName = "jds_str_zoned_date_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("uuid, edit_version" to "$dimensionTable(uuid, edit_version)")
-        return createTable(tableName,  getStoreColumns("value" to getDataType(JdsFieldType.ZonedDateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return createTable(tableName, getStoreColumns("value" to getDataType(JdsFieldType.ZonedDateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     fun deleteOldDataFromReportTables(connection: Connection) {

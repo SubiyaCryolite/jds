@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds.embedded
 
+import io.github.subiyacryolite.jds.JdsDb
 import io.github.subiyacryolite.jds.JdsEntity
 import java.util.concurrent.Callable
 
@@ -20,9 +21,9 @@ import java.util.concurrent.Callable
  * A helper class to transform [JdsEntity] objects or collections in a portable format that can be serialized to JSON, XML, YAML or any other format of choice
  * @param entities a collection of entities to represent in a portable matter
  */
-class JdsSaveEmbedded(private val entities: Iterable<JdsEntity>) : Callable<JdsEmbeddedContainer> {
+class JdsSaveEmbedded(private val jdsDb: JdsDb, private val entities: Iterable<JdsEntity>) : Callable<JdsEmbeddedContainer> {
 
     override fun call(): JdsEmbeddedContainer {
-        return JdsEmbeddedContainer(entities)
+        return JdsEmbeddedContainer(jdsDb, entities)
     }
 }

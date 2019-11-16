@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds.embedded
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.subiyacryolite.jds.JdsDb
 import io.github.subiyacryolite.jds.JdsEntity
 import io.github.subiyacryolite.jds.JdsField
 import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
@@ -487,25 +488,29 @@ data class JdsEntityOverview(
         var fieldId: Long? = null
 )
 
+/**
+ * @param embeddedObjects
+ */
 data class JdsEmbeddedContainer(
         @get:JsonProperty("e")
         val embeddedObjects: MutableCollection<JdsEmbeddedObject> = ArrayList()
 ) {
     /**
-     * @param entities a collection of [JdsEntity] objects to store in a portable manner
+     * @param jdsDb an instance of [JdsDb]
+     * @param entities a collection of [JdsEntity] objects to store in the embedded format
      */
     @Throws(Exception::class)
-    constructor(entities: Iterable<JdsEntity>) : this() {
-        entities.forEach {
-            val classHasAnnotation = it.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
-            val superclassHasAnnotation = it.javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+    constructor(jdsDb: JdsDb, entities: Iterable<JdsEntity>) : this() {
+        entities.forEach { entity ->
+            val classHasAnnotation = entity.javaClass.isAnnotationPresent(JdsEntityAnnotation::class.java)
+            val superclassHasAnnotation = entity.javaClass.superclass.isAnnotationPresent(JdsEntityAnnotation::class.java)
             if (classHasAnnotation || superclassHasAnnotation) {
                 val embeddedObject = JdsEmbeddedObject()
                 embeddedObject.fieldId = null
-                embeddedObject.init(it)
+                embeddedObject.init(jdsDb, entity)
                 embeddedObjects.add(embeddedObject)
             } else {
-                throw RuntimeException("You must annotate the class [" + it.javaClass.canonicalName + "] or its parent with [" + JdsEntityAnnotation::class.java + "]")
+                throw RuntimeException("You must annotate the class [${entity.javaClass.canonicalName}] or its parent with [${JdsEntityAnnotation::class.java}]")
             }
         }
     }
