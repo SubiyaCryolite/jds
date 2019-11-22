@@ -49,7 +49,7 @@ data class JdsStoreBlob(
 
     override fun hashCode(): Int {
         var result = key.hashCode()
-        result = 31 * result + (value?.let { Arrays.hashCode(it) } ?: 0)
+        result = 31 * result + (value?.contentHashCode() ?: 0)
         return result
     }
 }
