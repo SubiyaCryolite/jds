@@ -1137,84 +1137,6 @@ abstract class JdsEntity : IJdsEntity, Serializable {
     }
 
     /**
-     * Ensures child entities have ids that link them to their parent.
-     * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
-     * @param pattern The pattern to set for each nested entity
-     */
-    @JvmOverloads
-    fun standardizeUUIDs(pattern: String = overview.uuid) {
-        standardizeObjectUuids(pattern, objectValues.values)
-        standardizeCollectionUuids(pattern, objectCollections.values)
-    }
-
-    /**
-     * Ensures child entities have edit versions that match their parents
-     * For frequent refreshes/imports from different sources this is necessary to prevent duplicate entries of the same data
-     * @param version The version to set for each nested entity
-     */
-    @JvmOverloads
-    fun standardizeEditVersion(version: Int = overview.editVersion) {
-        standardizeObjectEditVersion(version, objectValues.values)
-        standardizeCollectionEditVersion(version, objectCollections.values)
-    }
-
-    /**
-     * Ensures child entities have ids that link them to their parent.
-     * @param parentUuid
-     * @param objectArrayCollection
-     */
-    private fun standardizeCollectionUuids(parentUuid: String, objectArrayCollection: Iterable<MutableCollection<out IJdsEntity>>) {
-        objectArrayCollection.forEach {
-            it.forEachIndexed { sequence, entry ->
-                entry.overview.uuid = standardiseLength(parentUuid, ":${entry.overview.entityId}:$sequence")
-                standardizeObjectUuids(entry.overview.uuid, entry.objectValues.values)
-                standardizeCollectionUuids(entry.overview.uuid, entry.objectCollections.values)
-            }
-        }
-    }
-
-    /**
-     * Ensures child entities have ids that link them to their parent.
-     * @param parentUuid
-     * @param objectCollection
-     */
-    private fun standardizeObjectUuids(parentUuid: String, objectCollection: Iterable<WritableValue<out IJdsEntity>>) {
-        objectCollection.forEach { entry ->
-            entry.value.overview.uuid = standardiseLength(parentUuid, ":${entry.value.overview.entityId}")
-            standardizeObjectUuids(entry.value.overview.uuid, entry.value.objectValues.values)
-            standardizeCollectionUuids(entry.value.overview.uuid, entry.value.objectCollections.values)
-        }
-    }
-
-    /**
-     * Ensures child entities have ids that link them to their parent.
-     * @param version
-     * @param objectArrayCollection
-     */
-    private fun standardizeCollectionEditVersion(version: Int, objectArrayCollection: Iterable<MutableCollection<out IJdsEntity>>) {
-        objectArrayCollection.forEach {
-            it.forEach { entry ->
-                entry.overview.editVersion = version
-                standardizeObjectEditVersion(version, entry.objectValues.values)
-                standardizeCollectionEditVersion(version, entry.objectCollections.values)
-            }
-        }
-    }
-
-    /**
-     * Ensures child entities have ids that link them to their parent.
-     * @param version
-     * @param objectCollection
-     */
-    private fun standardizeObjectEditVersion(version: Int, objectCollection: Iterable<WritableValue<out IJdsEntity>>) {
-        objectCollection.forEach { objectProperty ->
-            objectProperty.value.overview.editVersion = version
-            standardizeObjectEditVersion(version, objectProperty.value.objectValues.values)
-            standardizeCollectionEditVersion(version, objectProperty.value.objectCollections.values)
-        }
-    }
-
-    /**
      * Internal helper function that works with all nested objects
      */
     override fun getNestedEntities(includeThisEntity: Boolean): Sequence<JdsEntity> = sequence {
@@ -1256,12 +1178,6 @@ abstract class JdsEntity : IJdsEntity, Serializable {
         private const val serialVersionUID = 20180106_2125L
         private val allFields = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
         private val allEnums = ConcurrentHashMap<Long, LinkedHashSet<Long>>()
-
-        private fun standardiseLength(dest: String, append: String): String {
-            val appendLength = append.length //e.g 5
-            val substringIndex = dest.length - appendLength //e.g 36
-            return "${dest.subSequence(0, substringIndex)}$append"
-        }
 
         override fun readExternal(objectInput: ObjectInput) {
             allFields.clear()
