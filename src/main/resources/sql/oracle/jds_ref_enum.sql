@@ -1,5 +1,5 @@
 CREATE TABLE jds_ref_enum (
-  field_id NUMBER(19),
+  field_id NUMBER(10),
   seq      NUMBER(10),
   name     NVARCHAR2(128),
   caption  NVARCHAR2(128),

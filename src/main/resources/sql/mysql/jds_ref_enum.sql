@@ -1,6 +1,6 @@
 CREATE TABLE jds_ref_enum (
-  field_id BIGINT,
-  seq      INT,
+  field_id INTEGER,
+  seq      INTEGER,
   name     VARCHAR(128),
   caption  VARCHAR(128),
   PRIMARY KEY (field_id, seq),

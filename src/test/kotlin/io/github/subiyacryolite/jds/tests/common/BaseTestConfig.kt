@@ -1,77 +1,86 @@
+/**
+ * Jenesis Data Store Copyright (c) 2017 Ifunga Ndana. All rights reserved.
+ *
+ * 1. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 2. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name Jenesis Data Store nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package io.github.subiyacryolite.jds.tests.common
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.github.subiyacryolite.jds.JdsDb
+import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.tests.connectivity.*
 import io.github.subiyacryolite.jds.tests.entities.*
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 
-
-/**
- * Created by ifunga on 08/04/2017.
- */
 abstract class BaseTestConfig(private val testName: String) {
 
     companion object {
         const val DOUBLE_DELTA = 1e-15
         const val FLOAT_DELTA = 1e-2f
 
-        fun initialiseSqLiteBackend(): JdsDb {
-            val jdsDb = JdsDbSqliteImplementation()
+        fun initialiseSqLiteBackend(): DbContext {
+            val jdsDb = SqliteDbContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
-        fun initialisePostgeSqlBackend(): JdsDb {
-            val jdsDb = JdsDbPostgreSqlmplementation()
+        fun initialisePostgeSqlBackend(): DbContext {
+            val jdsDb = PostGreSqlmplementationContext()
             initJds(jdsDb)
             return jdsDb
         }
 
-        fun initialiseTSqlBackend(): JdsDb {
-            val jdsDb = JdsDbTransactionalSqllmplementation()
+        fun initialiseTSqlBackend(): DbContext {
+            val jdsDb = TransactionalSqlContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
-        fun initialiseMysqlBackend(): JdsDb {
-            val jdsDb = JdsDbMySqlImplementation()
+        fun initialiseMysqlBackend(): DbContext {
+            val jdsDb = MySqlContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
-        fun initialiseMariaDbBackend(): JdsDb {
-            val jdsDb = JdsDbMariaImplementation()
+        fun initialiseMariaDbBackend(): DbContext {
+            val jdsDb = MariaDbContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
-        fun initialiseOracleBackend(): JdsDb {
-            val jdsDb = JdsDbOracleImplementation()
+        fun initialiseOracleBackend(): DbContext {
+            val jdsDb = OracleContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
-        private fun initialiseJdsClasses(jdsDb: JdsDb) {
-            jdsDb.map(EntityA::class.java)
-            jdsDb.map(EntityB::class.java)
-            jdsDb.map(EntityC::class.java)
-            jdsDb.map(Example::class.java)
-            jdsDb.map(Address::class.java)
-            jdsDb.map(AddressBook::class.java)
-            jdsDb.map(TimeConstruct::class.java)
-            jdsDb.map(Login::class.java)
+        private fun initialiseJdsClasses(dbContext: DbContext) {
+            dbContext.map(EntityA::class.java)
+            dbContext.map(EntityB::class.java)
+            dbContext.map(EntityC::class.java)
+            dbContext.map(Example::class.java)
+            dbContext.map(Address::class.java)
+            dbContext.map(AddressBook::class.java)
+            dbContext.map(TimeConstruct::class.java)
+            dbContext.map(Login::class.java)
         }
 
-        private fun initJds(jdsDb: JdsDb) {
-            jdsDb.init()
-            jdsDb.options.logOutput = true
-            initialiseJdsClasses(jdsDb)
+        private fun initJds(dbContext: DbContext) {
+            dbContext.init()
+            dbContext.options.logOutput = true
+            initialiseJdsClasses(dbContext)
         }
 
         private val logger = LoggerFactory.getLogger(BaseTestConfig::class.java)
@@ -115,12 +124,12 @@ abstract class BaseTestConfig(private val testName: String) {
         }
     }
 
-    fun test(jdsDb: JdsDb) {
-        logger.info("JDS (${jdsDb.implementation}) :: $testName")
-        testImpl(jdsDb)
+    fun test(dbContext: DbContext) {
+        logger.info("JDS (${dbContext.implementation}) :: $testName")
+        testImpl(dbContext)
     }
 
-    protected abstract fun testImpl(jdsDb: JdsDb)
+    protected abstract fun testImpl(dbContext: DbContext)
 
     @Test
     @Throws(Exception::class)

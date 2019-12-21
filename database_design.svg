@@ -502,7 +502,7 @@
       <text x="649.8014" y="2844.9863" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">field_id:id</text>
       <path fill="none" d="M1487.735 2227.5669 L1218.1562 1256.451" clip-path="url(#clipPath2)"/>
       <path d="M1215.214 1245.8518 L1212.6423 1259.0194 L1224.2051 1255.8097 Z" clip-path="url(#clipPath2)" stroke="none"/>
-      <text x="1210.9796" y="1741.4417" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">parent_uuid, parent_edit_version:uuid, edit_version</text>
+      <text x="1210.9796" y="1741.4417" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">parent_id, parent_edit_version:uuid, edit_version</text>
       <path fill="none" d="M1649.8304 218.6797 L1235.8022 1117.8848" clip-path="url(#clipPath2)"/>
       <path d="M1231.2018 1127.8766 L1241.6705 1119.4858 L1230.7705 1114.4672 Z" clip-path="url(#clipPath2)" stroke="none"/>
       <text x="1342.0142" y="677.996" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">uuid, edit_version:uuid, edit_version</text>
@@ -550,7 +550,7 @@
       <text x="833.2604" y="3088.4751" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">field_id:id</text>
       <path fill="none" d="M1498.118 2227.5847 L1228.5366 1256.4592" clip-path="url(#clipPath2)"/>
       <path d="M1225.5944 1245.86 L1223.0227 1259.0276 L1234.5854 1255.8179 Z" clip-path="url(#clipPath2)" stroke="none"/>
-      <text x="1230.3578" y="1741.4417" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">child_uuid, child_edit_version:uuid, edit_version</text>
+      <text x="1230.3578" y="1741.4417" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">child_id, child_edit_version:uuid, edit_version</text>
       <path fill="none" d="M160.0284 1286.0212 L1110.5957 1195.755" clip-path="url(#clipPath2)"/>
       <path d="M1121.5465 1194.7152 L1109.0331 1189.8765 L1110.1674 1201.8226 Z" clip-path="url(#clipPath2)" stroke="none"/>
       <text x="542.2666" y="1245.084" clip-path="url(#clipPath2)" fill="rgb(187,187,187)" font-family="sans-serif" stroke="none" xml:space="preserve">uuid, edit_version:uuid, edit_version</text>

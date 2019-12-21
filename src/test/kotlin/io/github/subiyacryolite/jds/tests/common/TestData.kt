@@ -1,8 +1,20 @@
+/**
+ * Jenesis Data Store Copyright (c) 2017 Ifunga Ndana. All rights reserved.
+ *
+ * 1. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 2. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name Jenesis Data Store nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package io.github.subiyacryolite.jds.tests.common
 
-import io.github.subiyacryolite.jds.tests.constants.PrimaryAddress
 import io.github.subiyacryolite.jds.tests.entities.*
-import io.github.subiyacryolite.jds.JdsEntity
+import io.github.subiyacryolite.jds.Entity
 import java.time.*
 import java.util.ArrayList
 
@@ -10,40 +22,40 @@ object TestData {
     val addressBook: AddressBook
         get() {
             val primaryAddress = Address()
-            primaryAddress.overview.uuid = "primaryAddress" //custom uuid
+            primaryAddress.overview.id = "primaryAddress" //custom uuid
             primaryAddress.area = "Norte Broad"
             primaryAddress.city = "Livingstone"
             primaryAddress.country = "Zambia"
             primaryAddress.plotNumber = null
             primaryAddress.provinceOrState = "Southern"
             primaryAddress.streetName = "East Street"
-            primaryAddress.timeOfEntry = LocalTime.now()
-            primaryAddress.primaryAddress = PrimaryAddress.YES
+            primaryAddress.timeOfEntry = LocalDateTime.now()
+            primaryAddress.primaryAddress = true
 
             val secondAddress = Address()
-            secondAddress.overview.uuid = "secondAddress"
+            secondAddress.overview.id = "secondAddress"
             secondAddress.area = "Roma"
             secondAddress.city = "Lusaka"
             secondAddress.country = "Zambia"
             secondAddress.plotNumber = 2
             secondAddress.provinceOrState = "Lusaka"
             secondAddress.streetName = "West Street"
-            secondAddress.timeOfEntry = ZonedDateTime.now().minusMonths(2).toLocalTime()
-            secondAddress.primaryAddress = PrimaryAddress.NO
+            secondAddress.timeOfEntry = LocalDateTime.now().minusMonths(2)
+            secondAddress.primaryAddress = false
 
             val thirdAddress = Address()
-            thirdAddress.overview.uuid = "thirdAddress"
+            thirdAddress.overview.id = "thirdAddress"
             thirdAddress.area = "Riverdale"
             thirdAddress.city = "Ndola"
             thirdAddress.country = "Zambia"
             thirdAddress.plotNumber = 9
             thirdAddress.provinceOrState = "Copperbelt"
             thirdAddress.streetName = "West Street"
-            thirdAddress.timeOfEntry = ZonedDateTime.now().minusDays(3).toLocalTime()
+            thirdAddress.timeOfEntry = LocalDateTime.now().minusDays(3)
             thirdAddress.primaryAddress = null
 
             val addressBook = AddressBook()
-            addressBook.overview.uuid = "testGuid0001"
+            addressBook.overview.id = "testGuid0001"
             addressBook.addresses.add(primaryAddress)
             addressBook.addresses.add(secondAddress)
             addressBook.addresses.add(thirdAddress)
@@ -53,7 +65,7 @@ object TestData {
     val timeConstruct: TimeConstruct
         get() {
             val timeConstruct = TimeConstruct()
-            timeConstruct.overview.uuid = "timeConstruct"
+            timeConstruct.overview.id = "timeConstruct"
             timeConstruct.duration = Duration.ofDays(2).minusHours(4)
             timeConstruct.monthDay = MonthDay.of(Month.JULY, 1)
             timeConstruct.yearMonth = YearMonth.of(1991, Month.OCTOBER)
@@ -61,21 +73,21 @@ object TestData {
             return timeConstruct;
         }
 
-    val inheritanceCollection: List<JdsEntity>
+    val inheritanceCollection: List<Entity>
         get() {
-            val collection = ArrayList<JdsEntity>()
+            val collection = ArrayList<Entity>()
 
             val entitya = EntityA()
-            entitya.overview.uuid = "entityA"
+            entitya.overview.id = "entityA"
             entitya.entityAValue = "entity A - ValueA"
 
             val entityb = EntityB()
-            entityb.overview.uuid = "entityB"
+            entityb.overview.id = "entityB"
             entityb.entityAValue = "entity B - Value A"
             entityb.entityBValue = "entity B - Value B"
 
             val entityc = EntityC()
-            entityc.overview.uuid = "entityC"
+            entityc.overview.id = "entityC"
             entityc.entityAValue = "entity C - Value A"
             entityc.entityBValue = "entity C - Value B"
             entityc.entityCValue = "entity C - Value C"
@@ -100,7 +112,7 @@ object TestData {
             instance1.doubleField = 777.666
             instance1.floatField = 5555.4444f
             instance1.booleanField = true
-            instance1.overview.uuid = "instance1"
+            instance1.overview.id = "instance1"
 
             val instance2 = Example()
             instance2.stringField = "Two"
@@ -113,7 +125,7 @@ object TestData {
             instance2.doubleField = 444.333
             instance2.floatField = 2222.1111f
             instance2.booleanField = false
-            instance2.overview.uuid = "instance2"
+            instance2.overview.id = "instance2"
 
             val instance3 = Example()
             instance3.stringField = "Three"
@@ -126,7 +138,7 @@ object TestData {
             instance3.doubleField = 444.555
             instance3.floatField = 5555.6666f
             instance3.booleanField = true
-            instance3.overview.uuid = "instance3"
+            instance3.overview.id = "instance3"
 
             val instance4 = Example()
             instance4.stringField = "Four"
@@ -139,7 +151,7 @@ object TestData {
             instance4.doubleField = 100.22
             instance4.floatField = 1000.0f
             instance4.booleanField = false
-            instance4.overview.uuid = "instance4"
+            instance4.overview.id = "instance4"
 
             val allInstances = ArrayList<Example>()
             allInstances.add(instance1)

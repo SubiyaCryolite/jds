@@ -1,5 +1,5 @@
 CREATE TABLE jds_ref_enum (
-  field_id BIGINT,
+  field_id INTEGER,
   seq      INTEGER,
   name     NVARCHAR(128),
   caption  NVARCHAR(128),

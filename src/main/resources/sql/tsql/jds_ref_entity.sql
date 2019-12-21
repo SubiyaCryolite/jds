@@ -1,8 +1,5 @@
 CREATE TABLE jds_ref_entity (
-  id          BIGINT,
+  id          INTEGER PRIMARY KEY,
   name        NVARCHAR(64),
-  caption     NVARCHAR(64),
-  description NVARCHAR(256),
-  parent      BIT,
-  PRIMARY KEY (id)
+  description NVARCHAR(256)
 );

@@ -1,9 +1,9 @@
 CREATE TABLE jds_entity_overview
 (
-  uuid           NVARCHAR2(36),
+  id           NVARCHAR2(36),
   edit_version   NUMBER(10),
-  entity_id      NUMBER(19),
-  PRIMARY KEY (uuid, edit_version),
+  entity_id      NUMBER(10),
+  PRIMARY KEY (id, edit_version),
   FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
   ON DELETE CASCADE
 )

@@ -1,49 +1,38 @@
+/**
+ * Jenesis Data Store Copyright (c) 2017 Ifunga Ndana. All rights reserved.
+ *
+ * 1. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 2. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name Jenesis Data Store nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package io.github.subiyacryolite.jds.tests.entities
 
-import io.github.subiyacryolite.jds.JdsEntity
-import io.github.subiyacryolite.jds.annotations.JdsEntityAnnotation
+import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
 import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
-import io.github.subiyacryolite.jds.tests.constants.Enums
 import io.github.subiyacryolite.jds.tests.constants.Fields
-import io.github.subiyacryolite.jds.tests.constants.PrimaryAddress
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
-import java.time.LocalTime
-import java.util.*
+import java.time.LocalDateTime
 
-@JdsEntityAnnotation(id = 1, name = "address")
-data class Address(
-        private val _streetName: StringProperty = SimpleStringProperty(""),
-        private val _plotNumber: NullableShortProperty = NullableShortProperty(),
-        private val _area: StringProperty = SimpleStringProperty(""),
-        private val _city: StringProperty = SimpleStringProperty(""),
-        private val _provinceOrState: StringProperty = SimpleStringProperty(""),
-        private val _country: StringProperty = SimpleStringProperty(""),
-        private val _entryUuid: ObjectProperty<UUID> = SimpleObjectProperty(UUID.randomUUID()),
-        private val _primaryAddress: ObjectProperty<PrimaryAddress?> = SimpleObjectProperty(null),
-        private val _timeOfEntry: ObjectProperty<LocalTime> = SimpleObjectProperty(LocalTime.now())
-) : JdsEntity() {
+@EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
+class Address : Entity() {
 
-    init {
-        map(Fields.ENTRY_UUID, _entryUuid)
-        map(Fields.STREET_NAME, _streetName)
-        map(Fields.PLOT_NUMBER, _plotNumber)
-        map(Fields.AREA_NAME, _area)
-        map(Fields.CITY_NAME, _city)
-        map(Fields.COUNTRY_NAME, _country)
-        map(Fields.PROVINCE_NAME, _provinceOrState)
-        map(Fields.TIME_OF_ENTRY, _timeOfEntry)
-        map(Enums.PRIMARY_ADDRESS_ENUM, _primaryAddress)
-        map(Enums.PRIMARY_ADDRESS_ENUM_STRING, _primaryAddress)
-    }
+    private val _streetName = map(Fields.StreetName, "")
+    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty())
+    private val _area = map(Fields.ResidentialArea, "")
+    private val _city = map(Fields.City, "")
+    private val _provinceOrState = map(Fields.ProvinceOrState, "")
+    private val _country = map(Fields.Country, "")
+    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty(null))
+    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now())
 
-    var entryUuid: UUID
-        get() = _entryUuid.get()
-        set(value) = _entryUuid.set(value)
-
-    var primaryAddress: PrimaryAddress?
+    var primaryAddress: Boolean?
         get() = _primaryAddress.get()
         set(value) = _primaryAddress.set(value)
 
@@ -71,7 +60,7 @@ data class Address(
         get() = _country.get()
         set(value) = _country.set(value)
 
-    var timeOfEntry: LocalTime
-        get() = _timeOfEntry.get()
-        set(timeOfEntry) = _timeOfEntry.set(timeOfEntry)
+    var timeOfEntry: LocalDateTime
+        get() = _timestamp.get()!!
+        set(timeOfEntry) = _timestamp.set(timeOfEntry)
 }

@@ -1,9 +1,9 @@
 CREATE TABLE jds_entity_overview
 (
-  uuid           TEXT,
+  id           TEXT,
   edit_version   INTEGER,
-  entity_id      BIGINT,
-  PRIMARY KEY (uuid, edit_version),
+  entity_id      INTEGER,
+  PRIMARY KEY (id, edit_version),
   FOREIGN KEY (entity_id) REFERENCES jds_ref_entity (id)
     ON DELETE CASCADE
     DEFERRABLE INITIALLY DEFERRED

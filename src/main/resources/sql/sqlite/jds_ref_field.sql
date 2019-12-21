@@ -1,10 +1,9 @@
 CREATE TABLE jds_ref_field (
-  id           BIGINT,
+  id           INTEGER PRIMARY KEY,
   caption      TEXT,
   description  TEXT,
-  type_ordinal INTEGER,
-  PRIMARY KEY (id),
-  FOREIGN KEY (type_ordinal) REFERENCES jds_ref_field_type (ordinal)
+  field_type_ordinal INTEGER,
+  FOREIGN KEY (field_type_ordinal) REFERENCES jds_ref_field_type (ordinal)
     ON DELETE CASCADE
     DEFERRABLE INITIALLY DEFERRED --we use REPLACE INTO, so hopefully this maintains integrity
 );

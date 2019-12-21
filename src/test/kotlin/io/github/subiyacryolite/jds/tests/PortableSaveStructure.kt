@@ -1,70 +1,82 @@
+/**
+ * Jenesis Data Store Copyright (c) 2017 Ifunga Ndana. All rights reserved.
+ *
+ * 1. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 2. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 3. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name Jenesis Data Store nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.JdsDb
-import io.github.subiyacryolite.jds.JdsEntity
-import io.github.subiyacryolite.jds.embedded.JdsEmbeddedContainer
-import io.github.subiyacryolite.jds.embedded.JdsLoadEmbedded
-import io.github.subiyacryolite.jds.embedded.JdsSaveEmbedded
+import io.github.subiyacryolite.jds.context.DbContext
+import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.portable.PortableContainer
+import io.github.subiyacryolite.jds.portable.LoadPortable
+import io.github.subiyacryolite.jds.portable.SavePortable
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.tests.entities.AddressBook
 import io.github.subiyacryolite.jds.tests.entities.Example
 import io.github.subiyacryolite.jds.tests.entities.TimeConstruct
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class PortableSaveStructure : BaseTestConfig("Portable save structures") {
 
     @Throws(Exception::class)
-    override fun testImpl(jdsDb: JdsDb) {
-        addressBook(jdsDb)
-        timeConstruct(jdsDb)
-        example(jdsDb)
+    override fun testImpl(dbContext: DbContext) {
+        addressBook(dbContext)
+        timeConstruct(dbContext)
+        example(dbContext)
     }
 
     @Test
     @Throws(Exception::class)
-    fun addressBook(jdsDb: JdsDb) {
-        testPortableSave(jdsDb, Arrays.asList(TestData.addressBook), AddressBook::class.java)
+    fun addressBook(dbContext: DbContext) {
+        testPortableSave(dbContext, listOf(TestData.addressBook), AddressBook::class.java)
     }
 
     @Test
     @Throws(Exception::class)
-    fun timeConstruct(jdsDb: JdsDb) {
-        testPortableSave(jdsDb, Arrays.asList(TestData.timeConstruct), TimeConstruct::class.java)
+    fun timeConstruct(dbContext: DbContext) {
+        testPortableSave(dbContext, listOf(TestData.timeConstruct), TimeConstruct::class.java)
     }
 
     @Test
     @Throws(Exception::class)
-    fun example(jdsDb: JdsDb) {
-        testPortableSave(jdsDb, TestData.collection, Example::class.java)
+    fun example(dbContext: DbContext) {
+        testPortableSave(dbContext, TestData.collection, Example::class.java)
     }
 
     @Throws(Exception::class)
-    private fun testPortableSave(jdsDb: JdsDb, entity: Collection<JdsEntity>, clazz: Class<out JdsEntity>) {
+    private fun testPortableSave(dbContext: DbContext, entity: Collection<Entity>, clazz: Class<out Entity>) {
         //fire-up JDS
         initialiseSqLiteBackend()
 
-        val saveEmbedded = JdsSaveEmbedded(jdsDb, entity)
+        val saveEmbedded = SavePortable(dbContext, entity)
         val embeddedObject = saveEmbedded.call()
 
 
         val outputJds = objectMapper.writeValueAsString(embeddedObject)
         val outputReg = objectMapper.writeValueAsString(entity)
         println("================ Object Reg JSON ================")
-        println("$outputReg")
+        println(outputReg)
         println("================ Object JDS JSON ================")
-        println("$outputJds")
+        println(outputJds)
 
 
-        val embeddedObjectFromJson = objectMapper.readValue(outputJds, JdsEmbeddedContainer::class.java)
+        val embeddedObjectFromJson = objectMapper.readValue(outputJds, PortableContainer::class.java)
         val isTheSame = embeddedObjectFromJson == embeddedObject
         println("Is the same? = $isTheSame")
 
-        val loadEmbeddedA = JdsLoadEmbedded(jdsDb, clazz, embeddedObject)
+        val loadEmbeddedA = LoadPortable(dbContext, clazz, embeddedObject)
         val loadedEntityA = loadEmbeddedA.call()
 
-        val loadEmbeddedB = JdsLoadEmbedded(jdsDb, clazz, embeddedObjectFromJson)
+        val loadEmbeddedB = LoadPortable(dbContext, clazz, embeddedObjectFromJson)
         val loadedEntityB = loadEmbeddedB.call()
 
         val stringRepresentation1 = entity.toString()
