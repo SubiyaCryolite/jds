@@ -26,7 +26,6 @@ import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentMap
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
@@ -80,7 +79,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
 
     @Throws(Exception::class)
     override fun call(): MutableCollection<T> {
-        val entitiesToLoad = ArrayList<CompositeKey>()
+        val entitiesToLoad = HashSet<CompositeKey>()
         val annotation = referenceType.getAnnotation(EntityAnnotation::class.java)
         val entityId = annotation.id
         prepareActionBatches(entityId, entitiesToLoad, filterIds)
@@ -101,7 +100,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                 compositeKeys.chunked(MaxBatchSize).forEach { compositeKeyBatch ->
                     val questionsString = prepareParameterSequence(compositeKeyBatch.size)
 
-                    val getOverviewRecords = """
+                    val overviewSql = """
                         SELECT
                           repo.id,
                           repo.edit_version,
@@ -116,7 +115,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                             ON repo.id = latest.id AND repo.edit_version = latest.edit_version
                     """.trimIndent()
 
-                    connection.prepareStatement(getOverviewRecords).use { preparedStatement ->
+                    connection.prepareStatement(overviewSql).use { overviewStatement ->
                         //create sql to populate fields
                         val populateEmbeddedAndArrayObjects = """
                             SELECT child.* FROM jds_entity_binding child JOIN jds_entity_overview parent ON parent.id IN $questionsString 
@@ -155,7 +154,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
 
                         //work in batches to not break prepared statement
                         compositeKeyBatch.forEachIndexed { index, compositeKey ->
-                            preparedStatement.setString(index + 1, compositeKey.id)
+                            overviewStatement.setString(index + 1, compositeKey.id)
                             populateEmbeddedAndArrayObjectsStmt.setString(index + 1, compositeKey.id)
                             //===========================================================
                             blobStatement.setString(index + 1, compositeKey.id)
@@ -188,7 +187,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                         }
                         //catch embedded/pre-created objects objects as well
                         if (dbContext.options.initialisePrimitives || dbContext.options.initialiseDatesAndTimes || dbContext.options.initialiseObjects) {
-                            createEntities(entities, preparedStatement)
+                            createEntities(entities, overviewStatement)
                             entities.filterIsInstance(LoadListener::class.java).forEach { it.onPreLoad(EventArguments(connection)) }
                             //all entities have been initialised, now we populate them
                             if (dbContext.options.writeValuesToEavTables) {
@@ -240,8 +239,8 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
         }
     }
 
-    private fun <T : Entity> createEntities(entities: MutableCollection<T>, entityLookUp: PreparedStatement) {
-        entityLookUp.executeQuery().use { resultSet ->
+    private fun <T : Entity> createEntities(entities: MutableCollection<T>, statement: PreparedStatement) {
+        statement.executeQuery().use { resultSet ->
             while (resultSet.next()) {
                 val entityId = resultSet.getInt("entity_id")
                 val id = resultSet.getString("id")
@@ -258,7 +257,6 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
     }
 
     /**
-     * @param jdsDb
      * @param entities
      * @param preparedStatement
      * @throws SQLException
@@ -845,9 +843,10 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
             if (searchByType) {
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy
-                val loadAllByTypeSql = "SELECT eo.id, eo.edit_version FROM jds_entity_overview eo WHERE eo.entity_id IN (SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?)"
+                val loadAllByTypeSql = "SELECT eo.id, eo.edit_version FROM jds_entity_overview eo WHERE eo.entity_id IN (SELECT ? UNION SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?)"
                 it.prepareStatement(loadAllByTypeSql).use { statement ->
-                    statement.setInt(1, entityId)
+                    statement.setInt(1, entityId)//base instances
+                    statement.setInt(2, entityId)//derived instances
                     statement.executeQuery().use { resultSet ->
                         while (resultSet.next())
                             entitiesToLoad.add(CompositeKey(resultSet.getString("id"), resultSet.getInt("edit_version")))

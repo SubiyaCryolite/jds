@@ -13,18 +13,19 @@
  */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
-import io.github.subiyacryolite.jds.tests.entities.EntityA
-import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
+import io.github.subiyacryolite.jds.context.DbContext
+import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
+import io.github.subiyacryolite.jds.tests.entities.EntityA
+import org.junit.jupiter.api.Test
 import java.util.*
 import java.util.concurrent.Executors
 
 class BulkSaveAndLoad : BaseTestConfig("Bulk insert and load (10,000 EAV records)") {
 
     @Throws(Exception::class)
-    override fun testImpl(dbContext: DbContext){
+    override fun testImpl(dbContext: DbContext) {
         save(dbContext)
         load(dbContext)
     }
@@ -46,6 +47,12 @@ class BulkSaveAndLoad : BaseTestConfig("Bulk insert and load (10,000 EAV records
     @Throws(Exception::class)
     private fun load(dbContext: DbContext) {
         val entityAs = Load(dbContext, EntityA::class.java)
-        println("All A's [${entityAs.call()}]")
+        val payload = entityAs.call()
+        println("All A's (${payload.size}): $payload")
+    }
+
+    @Test
+    fun testPostGreSql() {
+        load(initialisePostgeSqlBackend())
     }
 }
