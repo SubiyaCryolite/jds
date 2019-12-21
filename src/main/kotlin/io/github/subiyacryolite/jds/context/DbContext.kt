@@ -196,17 +196,17 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         when (tableComponent) {
             TableComponent.EntityBinding -> executeSqlFromString(connection, createEntityBinding())
             TableComponent.EntityLiveVersion -> executeSqlFromString(connection, createEntityLiveVersionTable())
-            TableComponent.EntityOverview -> createRefEntityOverview(connection)
-            TableComponent.RefEntities -> createStoreEntities(connection)
-            TableComponent.RefEntityEnums -> createBindEntityEnums(connection)
-            TableComponent.RefEntityField -> createBindEntityFields(connection)
-            TableComponent.RefEnumValues -> createRefEnumValues(connection)
+            TableComponent.EntityOverview -> executeSqlFromString(connection, createRefEntityOverview())
+            TableComponent.RefEntities -> executeSqlFromString(connection, createStoreEntities())
+            TableComponent.RefEntityEnums -> executeSqlFromString(connection, createBindEntityEnums())
+            TableComponent.RefEntityField -> executeSqlFromString(connection, createBindEntityFields())
+            TableComponent.RefEnumValues -> executeSqlFromString(connection, createRefEnumValues())
             TableComponent.RefFieldTypes -> {
-                createRefFieldTypes(connection)
+                executeSqlFromString(connection, createRefFieldTypes())
                 populateFieldTypes(connection)
             }
-            TableComponent.RedFields -> createRefFields(connection)
-            TableComponent.RefInheritance -> createRefInheritance(connection)
+            TableComponent.RedFields -> executeSqlFromString(connection, createRefFields())
+            TableComponent.RefInheritance -> executeSqlFromString(connection, createRefInheritance())
             TableComponent.StoreBlob -> executeSqlFromString(connection, createStoreBlob())
             TableComponent.StoreBoolean -> executeSqlFromString(connection, createStoreBoolean())
             TableComponent.StoreDate -> executeSqlFromString(connection, createStoreDate())
@@ -463,53 +463,6 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     protected fun createStoreLong(connection: Connection) = executeSqlFromString(connection, createStoreLong())
 
     /**
-     * Database specific SQL used to create the schema that stores entity
-     * definitions
-     */
-    protected abstract fun createStoreEntities(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores enum
-     * definitions
-     */
-    protected abstract fun createRefEnumValues(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores inheritance information
-     */
-    protected abstract fun createRefInheritance(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores field
-     * definitions
-     */
-    protected abstract fun createRefFields(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores field type
-     * definitions
-     */
-    protected abstract fun createRefFieldTypes(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores entity
-     * binding information
-     */
-    protected abstract fun createBindEntityFields(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores entity to
-     * enum binding information
-     */
-    protected abstract fun createBindEntityEnums(connection: Connection)
-
-    /**
-     * Database specific SQL used to create the schema that stores entity
-     * overview
-     */
-    protected abstract fun createRefEntityOverview(connection: Connection)
-
-    /**
      * @param connection     the SQL connection to use for DB operations
      * @param parentEntities a collection of parent classes
      * @param entityCode     the value representing the entity
@@ -597,13 +550,13 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     private fun populateFieldTypes(connection: Connection) {
-        connection.prepareStatement("INSERT INTO jds_ref_field_type(ordinal, caption) VALUES(?,?)").use {
-            FieldType.values().forEach { ft ->
-                it.setInt(1, ft.ordinal)
-                it.setString(2, ft.name)
-                it.addBatch()
+        connection.prepareStatement("INSERT INTO jds_ref_field_type(ordinal, caption) VALUES(?,?)").use { statement ->
+            FieldType.values().forEach { fieldType ->
+                statement.setInt(1, fieldType.ordinal)
+                statement.setString(2, fieldType.name)
+                statement.addBatch()
             }
-            it.executeBatch()
+            statement.executeBatch()
         }
     }
 
@@ -1253,7 +1206,8 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val tableName = "jds_str_text_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        val sql=createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        return sql
     }
 
     private fun createStoreTime(): String {
@@ -1288,11 +1242,116 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         )
         val uniqueColumns = linkedMapOf("${tableName}_uk" to "parent_id, parent_edit_version, child_id, child_edit_version")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        //foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "jds_entity_overview (id, edit_version)")
-        //foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_id, child_edit_version" to "jds_entity_overview (id, edit_version)")
-        val sql=createTable(tableName, columns, uniqueColumns, HashMap(), foreignKeys)
-        return sql
+        if (implementation != Implementation.TSql) {
+            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "jds_entity_overview (id, edit_version)")
+            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_id, child_edit_version" to "jds_entity_overview (id, edit_version)")
+        }
+        return createTable(tableName, columns, uniqueColumns, HashMap(), foreignKeys)
     }
+
+    private fun createRefEntityOverview(): String {
+        val tableName = "jds_entity_overview"
+        val columns = linkedMapOf(
+                "id" to getDataTypeImpl(FieldType.String, 36),
+                "edit_version" to getDataTypeImpl(FieldType.Int),
+                "entity_id" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_entity_overview_uk" to "id, edit_version")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createStoreEntities(): String {
+        val tableName = "jds_ref_entity"
+        val columns = linkedMapOf(
+                "id" to getDataTypeImpl(FieldType.Int),
+                "name" to getDataTypeImpl(FieldType.String, 64),
+                "description" to getDataTypeImpl(FieldType.String, 256)
+        )
+        val primaryKey = linkedMapOf("jds_ref_entity_pk" to "id")
+        return createTable(tableName, columns, HashMap(), primaryKey, LinkedHashMap())
+    }
+
+    private fun createRefEnumValues(): String {
+        val tableName = "jds_ref_enum"
+        val columns = linkedMapOf(
+                "field_id" to getDataTypeImpl(FieldType.Int),
+                "seq" to getDataTypeImpl(FieldType.Int),
+                "name" to getDataTypeImpl(FieldType.String, 128),
+                "caption" to getDataTypeImpl(FieldType.String, 128)
+        )
+        val primaryKey = linkedMapOf("jds_ref_enum_pk" to "field_id, seq")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createRefFields(): String {
+        val tableName = "jds_ref_field"
+        val columns = linkedMapOf(
+                "id" to getDataTypeImpl(FieldType.Int),
+                "caption" to getDataTypeImpl(FieldType.String, 64),
+                "description" to getDataTypeImpl(FieldType.String, 256),
+                "field_type_ordinal" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_ref_field_pk" to "id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_type_ordinal" to "jds_ref_field_type (ordinal)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createRefFieldTypes(): String {
+        val tableName = "jds_ref_field_type"
+        val columns = linkedMapOf(
+                "ordinal" to getDataTypeImpl(FieldType.Int),
+                "caption" to getDataTypeImpl(FieldType.String, 64)
+        )
+        val primaryKey = linkedMapOf("jds_ref_field_type_pk" to "ordinal")
+        return createTable(tableName, columns, HashMap(), primaryKey, LinkedHashMap())
+    }
+
+    private fun createBindEntityFields(): String {
+        val tableName = "jds_ref_entity_field"
+        val columns = linkedMapOf(
+                "entity_id" to getDataTypeImpl(FieldType.Int),
+                "field_id" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_ref_entity_field_pk" to "entity_id, field_id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createBindEntityEnums(): String {
+        val tableName = "jds_ref_entity_enum"
+        val columns = linkedMapOf(
+                "entity_id" to getDataTypeImpl(FieldType.Int),
+                "field_id" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_ref_entity_enum_pk" to "entity_id, field_id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createRefInheritance(): String {
+        val tableName = "jds_ref_entity_inheritance"
+        val columns = linkedMapOf(
+                "parent_entity_id" to getDataTypeImpl(FieldType.Int),
+                "child_entity_id" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_ref_entity_inheritance_pk" to "parent_entity_id, child_entity_id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        if (implementation != Implementation.TSql) {
+            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_entity_id" to "jds_ref_entity (id)")
+            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_entity_id" to "jds_ref_entity (id)")
+        }
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
 
     fun deleteOldDataFromReportTables(connection: Connection) {
         tables.forEach {

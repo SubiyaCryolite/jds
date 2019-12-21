@@ -43,38 +43,6 @@ abstract class OracleContext : DbContext(Implementation.Oracle, true) {
         return getResult(connection, sql, arrayOf(tableName.toUpperCase(), columnName.toUpperCase()))
     }
 
-    override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity.sql")
-    }
-
-    override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_enum.sql")
-    }
-
-    override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_field.sql")
-    }
-
-    override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_field_type.sql")
-    }
-
-    override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_field.sql")
-    }
-
-    override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_enum.sql")
-    }
-
-    override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_entity_overview.sql")
-    }
-
-    override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/oracle/jds_ref_entity_inheritance.sql")
-    }
-
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {
         FieldType.Float -> "BINARY_FLOAT"
         FieldType.Double -> "BINARY_DOUBLE"

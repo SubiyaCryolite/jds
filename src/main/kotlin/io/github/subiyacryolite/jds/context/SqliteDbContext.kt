@@ -46,38 +46,6 @@ abstract class SqliteDbContext : DbContext(Implementation.SqLite, false) {
         }
     }
 
-    override fun createStoreEntities(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity.sql")
-    }
-
-    override fun createRefEnumValues(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_enum.sql")
-    }
-
-    override fun createRefFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_field.sql")
-    }
-
-    override fun createRefFieldTypes(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_field_type.sql")
-    }
-
-    override fun createBindEntityFields(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_field.sql")
-    }
-
-    override fun createBindEntityEnums(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_enum.sql")
-    }
-
-    override fun createRefEntityOverview(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_entity_overview.sql")
-    }
-
-    override fun createRefInheritance(connection: Connection) {
-        executeSqlFromFile(connection, "sql/sqlite/jds_ref_entity_inheritance.sql")
-    }
-
     override fun saveEntityLiveVersion() = "INSERT INTO jds_entity_live_version(id) VALUES(?) ON CONFLICT(id) DO NOTHING;"
 
     override fun saveString() = "INSERT INTO jds_str_text(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
