@@ -20,7 +20,7 @@ import java.sql.Connection
 /**
  * The SQLite implementation of [io.github.subiyacryolite.jds.DbContext]
  */
-abstract class SqliteDbContext : DbContext(Implementation.SqLite, false) {
+abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;"

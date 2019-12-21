@@ -31,13 +31,13 @@ abstract class BaseTestConfig(private val testName: String) {
         const val FLOAT_DELTA = 1e-2f
 
         fun initialiseSqLiteBackend(): DbContext {
-            val jdsDb = SqliteDbContextImplementation()
+            val jdsDb = SqLiteDbContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }
 
         fun initialisePostgeSqlBackend(): DbContext {
-            val jdsDb = PostGreSqlmplementationContext()
+            val jdsDb = PostGreSqlContextImplementation()
             initJds(jdsDb)
             return jdsDb
         }

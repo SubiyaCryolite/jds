@@ -21,7 +21,7 @@ import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class PostGreSqlmplementationContext : PostGreSqlContext() {
+class PostGreSqlContextImplementation : PostGreSqlContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource

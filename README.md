@@ -405,11 +405,12 @@ data class AddressBook(
 
 ### 1.2.1 Initialising the database
 
-In order to use JDS you will need an instance of DbContext. Your instance of DbContext will have to extend one of the following classes: - DbContextMySql;
- - DbContextPostgreSql;
- - DbContextTransactionalSql;
- - DbContextOracle; or
- - DbContextSqlite
+In order to use JDS you will need an instance of DbContext. Your instance of DbContext will have to extend one of the following classes: 
+ - MariaDbContext;
+ - MySqlContext;
+ - OracleContext;
+ - SqLiteDbContext; or
+ - TransactionalSqlContext
 
 After this you must override the **dataSource** property.
 
@@ -422,13 +423,13 @@ These samples use [HikariCP](https://github.com/brettwooldridge/HikariCP) to pro
 ```kotlin
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.subiyacryolite.jds.DbContextPostgreSql
+import io.github.subiyacryolite.jds.context.PostGreSqlContext
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class DbContextPostgreSqlmplementation : DbContextPostgreSql() {
+class PostGreSqlContextImplementation : PostGreSqlContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource
@@ -456,13 +457,13 @@ class DbContextPostgreSqlmplementation : DbContextPostgreSql() {
 ```kotlin
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.subiyacryolite.jds.DbContextMySql
+import io.github.subiyacryolite.jds.context.MySqlContext
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class DbContextMySqlImplementation : DbContextMySql() {
+class MySqlContextImplementation : MySqlContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource
@@ -490,13 +491,13 @@ class DbContextMySqlImplementation : DbContextMySql() {
 ```kotlin
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.subiyacryolite.jds.DbContextMaria
+import io.github.subiyacryolite.jds.context.MariaDbContext
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class DbContextMariaImplementation : DbContextMaria() {
+class MariaDbContextImplementation : MariaDbContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource
@@ -525,13 +526,13 @@ class DbContextMariaImplementation : DbContextMaria() {
 ```kotlin
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.subiyacryolite.jds.DbContextTransactionalSql
+import io.github.subiyacryolite.jds.context.TransactionalSqlContext
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class DbContextTransactionalSqllmplementation : DbContextTransactionalSql() {
+class TransactionalSqlContextImplementation : TransactionalSqlContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource
@@ -544,8 +545,8 @@ class DbContextTransactionalSqllmplementation : DbContextTransactionalSql() {
         hikariConfig.maximumPoolSize = properties["maximumPoolSize"].toString().toInt()
         hikariConfig.username = properties["username"].toString()
         hikariConfig.password = properties["password"].toString()
-        hikariConfig.dataSourceProperties = properties //additional props
         hikariConfig.jdbcUrl = "jdbc:sqlserver://${properties["dbUrl"]}\\${properties["dbInstance"]};databaseName=${properties["dbName"]}"
+        hikariConfig.dataSourceProperties = properties //additional props
         hikariDataSource = HikariDataSource(hikariConfig)
     }
 
@@ -559,13 +560,13 @@ class DbContextTransactionalSqllmplementation : DbContextTransactionalSql() {
 ```kotlin
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.subiyacryolite.jds.DbContextOracle
+import io.github.subiyacryolite.jds.context.OracleContext
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
 import javax.sql.DataSource
 
-class DbContextOracleImplementation : DbContextOracle() {
+class OracleContextImplementation : OracleContext() {
 
     private val properties: Properties = Properties()
     private val hikariDataSource: DataSource
@@ -591,14 +592,13 @@ class DbContextOracleImplementation : DbContextOracle() {
 #### Sqlite Example
 
 ```kotlin
-import io.github.subiyacryolite.jds.DbContextSqlite
+import io.github.subiyacryolite.jds.context.SqLiteDbContext
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
 import java.io.File
-import java.sql.DriverManager
 import javax.sql.DataSource
 
-class DbContextSqliteImplementation : DbContextSqlite() {
+class SqLiteDbContextImplementation : SqLiteDbContext() {
 
     private val sqLiteDataSource: DataSource
 

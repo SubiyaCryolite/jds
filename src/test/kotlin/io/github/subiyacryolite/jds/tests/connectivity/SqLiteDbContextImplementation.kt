@@ -13,13 +13,13 @@
  */
 package io.github.subiyacryolite.jds.tests.connectivity
 
-import io.github.subiyacryolite.jds.context.SqliteDbContext
+import io.github.subiyacryolite.jds.context.SqLiteDbContext
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.sql.DataSource
 
-class SqliteDbContextImplementation : SqliteDbContext() {
+class SqLiteDbContextImplementation : SqLiteDbContext() {
 
     private val sqLiteDataSource: DataSource
 
