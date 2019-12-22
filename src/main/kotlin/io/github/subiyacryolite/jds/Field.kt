@@ -19,13 +19,18 @@ import java.util.*
 
 /**
  * Represents a jdsField in JDS
+ * @param id the unique field identifier
+ * @param name the fields name
+ * @param type the fields type
+ * @param description a description of the field
+ * @param sensitive an indication if the field is of sensitive nature or not.
  */
 data class Field(
         var id: Int = 0,
         var name: String = "",
         var type: FieldType = FieldType.String,
-        var sensitive: Boolean = false,
-        var description: String = ""
+        var description: String = "",
+        var sensitive: Boolean = false
 ) : Serializable {
 
     internal fun bind(): Int {

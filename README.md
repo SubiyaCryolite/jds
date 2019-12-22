@@ -9,7 +9,7 @@
 
 Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. JDS has two main aims:
 
- - To allow for the rapid creation and modification of Java and/or Kotlin classes in order to facilitate rapid development; and
+ - To allow for the rapid creation and modification of Java and/or Kotlin classes in order to facilitate rapid development
  - To provide a flexible data store framework to persist data against: (a) an EAV based database or (b) serialized JSON.
 
 The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their addition and/or removal. Fields, Objects and Collection types can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
@@ -46,14 +46,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>14.0.1-SNAPSHOT</version>
+    <version>14.0.2-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:14.0.1-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:14.0.2-SNAPSHOT'
 ```
 
 # Dependencies
