@@ -40,6 +40,6 @@ data class Field(
 
     companion object : Serializable {
         private const val serialVersionUID = 20171109_0853L
-        val values = HashMap<Int, Field>()
+        internal val values = HashMap<Int, Field>()
     }
 }

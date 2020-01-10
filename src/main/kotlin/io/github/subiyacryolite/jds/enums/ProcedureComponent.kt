@@ -50,6 +50,11 @@ enum class ProcedureComponent(val component: String) {
     /**
      *
      */
+    PopRefFieldEntity("jds_pop_ref_field_entity"),
+
+    /**
+     *
+     */
     PopRefEntityInheritance("jds_pop_ref_entity_inheritance"),
 
     /**

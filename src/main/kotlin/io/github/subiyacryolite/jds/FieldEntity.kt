@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds
 
 import java.io.Serializable
+import java.util.HashMap
 
 data class FieldEntity<T : IEntity>(
         var entity: Class<out T>,
@@ -22,5 +23,6 @@ data class FieldEntity<T : IEntity>(
 
        companion object {
         private const val serialVersionUID = 20171109_0853L
+        internal val values = HashMap<Int, FieldEntity<*>>()
     }
 }

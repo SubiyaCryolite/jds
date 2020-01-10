@@ -108,6 +108,8 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun populateRefEntityField() = "INSERT INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"
 
+    override fun populateRefFieldEntity() = "INSERT INTO jds_ref_field_entity(field_id, entity_id) VALUES(?, ?) ON CONFLICT(field_id, entity_id) DO NOTHING"
+
     override fun populateRefField() = "INSERT INTO jds_ref_field(id, caption, description, field_type_ordinal) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET caption = EXCLUDED.caption, description = EXCLUDED.description, field_type_ordinal = EXCLUDED.field_type_ordinal"
 
     override fun populateRefEntityEnum() = "INSERT INTO jds_ref_entity_enum(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"

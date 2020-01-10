@@ -46,13 +46,8 @@ class Filter<T : Entity>(private val dbContext: DbContext, private val reference
     constructor(dbContext: DbContext, referenceType: Class<T>) : this(dbContext, referenceType, FilterBy.Id)
 
     init {
-        val classHasAnnotation = referenceType.isAnnotationPresent(EntityAnnotation::class.java)
-        val superclassHasAnnotation = referenceType.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-        if (classHasAnnotation || superclassHasAnnotation) {
-            val je = when (classHasAnnotation) {
-                true -> referenceType.getAnnotation(EntityAnnotation::class.java)
-                false -> referenceType.superclass.getAnnotation(EntityAnnotation::class.java)
-            }
+        val je = Entity.getEntityAnnotation(referenceType)
+        if (je!=null) {
             entityId = je.id
         } else
             throw IllegalArgumentException("You must annotate the class [" + referenceType.canonicalName + "] or its parent with [" + EntityAnnotation::class.java + "]")

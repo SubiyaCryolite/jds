@@ -76,6 +76,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         prepareJdsComponent(connection, TableComponent.EntityOverview)
         prepareJdsComponent(connection, TableComponent.EntityBinding)
         prepareJdsComponent(connection, TableComponent.RefEntityField)
+        prepareJdsComponent(connection, TableComponent.RefFieldEntity)
         prepareJdsComponent(connection, TableComponent.RefEntityEnums)
         prepareJdsComponent(connection, TableComponent.StoreText)
         prepareJdsComponent(connection, TableComponent.StoreTextCollection)
@@ -129,6 +130,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
             prepareJdsComponent(connection, ProcedureComponent.PopEntityOverview)
             prepareJdsComponent(connection, ProcedureComponent.PopEntityBinding)
             prepareJdsComponent(connection, ProcedureComponent.PopRefEntityField)
+            prepareJdsComponent(connection, ProcedureComponent.PopRefFieldEntity)
             prepareJdsComponent(connection, ProcedureComponent.PopRefEntityEnum)
             prepareJdsComponent(connection, ProcedureComponent.PopRefEntity)
             prepareJdsComponent(connection, ProcedureComponent.PopRefEnum)
@@ -168,7 +170,8 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
      * implementation details
      */
     private fun prepareJdsComponent(connection: Connection, tableComponent: TableComponent) {
-        if (!doesTableExist(connection, tableComponent.component)) {
+        val tableExists = doesTableExist(connection, tableComponent.component)
+        if (!tableExists) {
             initiateDatabaseComponent(connection, tableComponent)
         }
     }
@@ -200,6 +203,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
             TableComponent.RefEntities -> executeSqlFromString(connection, createStoreEntities())
             TableComponent.RefEntityEnums -> executeSqlFromString(connection, createBindEntityEnums())
             TableComponent.RefEntityField -> executeSqlFromString(connection, createBindEntityFields())
+            TableComponent.RefFieldEntity -> executeSqlFromString(connection, createBindFieldEntities())
             TableComponent.RefEnumValues -> executeSqlFromString(connection, createRefEnumValues())
             TableComponent.RefFieldTypes -> {
                 executeSqlFromString(connection, createRefFieldTypes())
@@ -251,6 +255,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
             ProcedureComponent.PopRefEntity -> executeSqlFromString(connection, createPopJdsRefEntity())
             ProcedureComponent.PopRefEntityEnum -> executeSqlFromString(connection, createPopJdsRefEntityEnum())
             ProcedureComponent.PopRefEntityField -> executeSqlFromString(connection, createPopJdsRefEntityField())
+            ProcedureComponent.PopRefFieldEntity -> executeSqlFromString(connection, createPopJdsRefFieldEntity())
             ProcedureComponent.PopRefEntityInheritance -> executeSqlFromString(connection, createPopJdsRefEntityInheritance())
             ProcedureComponent.PopRefEnum -> executeSqlFromString(connection, createPopJdsRefEnum())
             ProcedureComponent.PopRefField -> executeSqlFromString(connection, createPopJdsRefField())
@@ -285,15 +290,15 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     override fun doesTableExist(connection: Connection, name: String): Boolean {
-        return tableExists(connection, name) == 1
+        return tableExists(connection, name) > 0
     }
 
     override fun doesProcedureExist(connection: Connection, name: String): Boolean {
-        return procedureExists(connection, name) == 1
+        return procedureExists(connection, name) > 0
     }
 
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
-        return columnExists(connection, tableName, columnName) == 1
+        return columnExists(connection, tableName, columnName) > 0
     }
 
     internal fun getResult(connection: Connection, sql: String, params: Array<String>): Int {
@@ -328,12 +333,18 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         ex.printStackTrace(System.err)
     }
 
-    private fun executeSqlFromString(connection: Connection, sql: String) = try {
-        connection.prepareStatement(sql).use { it.executeUpdate() }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
+    private fun executeSqlFromString(connection: Connection, sql: String) {
+        try {
+            connection.autoCommit = false
+            connection.prepareStatement(sql).use { statement -> statement.executeUpdate() }
+            connection.commit()
+        } catch (ex: Exception) {
+            connection.rollback()
+            ex.printStackTrace(System.err)
+        } finally {
+            connection.autoCommit = true
+        }
     }
-
 
     /**
      * Method to read contents of a file to a String variable
@@ -515,13 +526,8 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     fun map(entity: Class<out Entity>) {
-        val classHasAnnotation = entity.isAnnotationPresent(EntityAnnotation::class.java)
-        val superclassHasAnnotation = entity.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-        if (classHasAnnotation || superclassHasAnnotation) {
-            val entityAnnotation = when (classHasAnnotation) {
-                true -> entity.getAnnotation(EntityAnnotation::class.java)
-                false -> entity.superclass.getAnnotation(EntityAnnotation::class.java)
-            }
+        val entityAnnotation = Entity.getEntityAnnotation(entity)
+        if (entityAnnotation != null) {
             if (!classes.containsKey(entityAnnotation.id)) {
                 classes[entityAnnotation.id] = entity
                 //do the thing
@@ -763,6 +769,11 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     internal open fun populateRefEntityField() = "{call jds_pop_ref_entity_field(?, ?)}"
 
     /**
+     *
+     */
+    internal open fun populateRefFieldEntity() = "{call jds_pop_ref_field_entity(?, ?)}"
+
+    /**
      * SQL call to map field names and descriptions
      * @return the default or overridden SQL statement for this operation
      */
@@ -882,6 +893,14 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["entity_id"] = getDataType(FieldType.Int)
         columns["field_id"] = getDataType(FieldType.Int)
         return createOrAlterProc("jds_pop_ref_entity_field", "jds_ref_entity_field", columns, uniqueColumns, true)
+    }
+
+    private fun createPopJdsRefFieldEntity(): String {
+        val uniqueColumns = setOf("field_id","entity_id")
+        val columns = LinkedHashMap<String, String>()
+        columns["field_id"] = getDataType(FieldType.Int)
+        columns["entity_id"] = getDataType(FieldType.Int)
+        return createOrAlterProc("jds_pop_ref_field_entity", "jds_ref_field_entity", columns, uniqueColumns, true)
     }
 
     private fun createPopJdsRefEntityInheritance(): String {
@@ -1206,7 +1225,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val tableName = "jds_str_text_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        val sql=createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
+        val sql = createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
         return sql
     }
 
@@ -1318,6 +1337,19 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
                 "field_id" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("jds_ref_entity_field_pk" to "entity_id, field_id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createBindFieldEntities(): String {
+        val tableName = "jds_ref_field_entity"
+        val columns = linkedMapOf(
+                "field_id" to getDataTypeImpl(FieldType.Int),
+                "entity_id" to getDataTypeImpl(FieldType.Int)
+        )
+        val primaryKey = linkedMapOf("jds_ref_field_entity_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
         foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")

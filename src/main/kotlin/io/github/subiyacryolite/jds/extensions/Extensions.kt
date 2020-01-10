@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds.extensions
 
+import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.IEntity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
@@ -179,8 +180,8 @@ object Extensions {
      */
     private fun addAllToList(superclass: Class<*>?, parentEntities: MutableCollection<Int>) {
         if (superclass == null) return
-        if (superclass.isAnnotationPresent(EntityAnnotation::class.java)) {
-            val annotation = superclass.getAnnotation(EntityAnnotation::class.java)
+        val annotation= Entity.getEntityAnnotation(superclass)
+        if (annotation!=null) {
             parentEntities.add(annotation.id)
             addAllToList(superclass.superclass, parentEntities)
         }

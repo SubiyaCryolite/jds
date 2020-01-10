@@ -13,12 +13,13 @@
  */
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.extensions.*
-import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
 import io.github.subiyacryolite.jds.events.EventArguments
+import io.github.subiyacryolite.jds.extensions.setLocalDate
+import io.github.subiyacryolite.jds.extensions.setLocalTime
+import io.github.subiyacryolite.jds.extensions.setZonedDateTime
 import java.io.Serializable
 import java.sql.Connection
 import java.sql.Timestamp
@@ -50,13 +51,8 @@ data class Table(var name: String = "",
      * @param entity
      */
     constructor(entity: Class<out IEntity>) : this() {
-        val annotatedClass = entity.isAnnotationPresent(EntityAnnotation::class.java)
-        val annotatedParent = entity.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-        if (annotatedClass || annotatedParent) {
-            val entityAnnotation = when (annotatedClass) {
-                true -> entity.getAnnotation(EntityAnnotation::class.java)
-                false -> entity.superclass.getAnnotation(EntityAnnotation::class.java)
-            }
+        val entityAnnotation = Entity.getEntityAnnotation(entity)
+        if (entityAnnotation != null) {
             name = entityAnnotation.name
             registerEntity(entity, true)
         }
@@ -70,13 +66,8 @@ data class Table(var name: String = "",
      */
     @JvmOverloads
     fun registerEntity(entityClass: Class<out IEntity>, registerFields: Boolean) {
-        val annotatedClass = entityClass.isAnnotationPresent(EntityAnnotation::class.java)
-        val annotatedParent = entityClass.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-        if (annotatedClass || annotatedParent) {
-            val entityAnnotation = when (annotatedClass) {
-                true -> entityClass.getAnnotation(EntityAnnotation::class.java)
-                false -> entityClass.superclass.getAnnotation(EntityAnnotation::class.java)
-            }
+        val entityAnnotation = Entity.getEntityAnnotation(entityClass)
+        if (entityAnnotation != null) {
             entities.add(entityAnnotation.id)
             if (registerFields) {
                 val entity = entityClass.getDeclaredConstructor().newInstance()

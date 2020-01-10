@@ -54,6 +54,11 @@ enum class TableComponent(val component: String, val alias: String) {
     /**
      *
      */
+    RefFieldEntity("jds_ref_field_entity", "bfe"),
+
+    /**
+     *
+     */
     RefEnumValues("jds_ref_enum", "env"),
 
     /**

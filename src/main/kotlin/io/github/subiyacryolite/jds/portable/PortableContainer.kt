@@ -14,9 +14,9 @@
 package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.context.DbContext
 import java.util.*
 
 /**
@@ -33,9 +33,8 @@ data class PortableContainer(
     @Throws(Exception::class)
     constructor(dbContext: DbContext, entities: Iterable<Entity>) : this() {
         entities.forEach { entity ->
-            val classHasAnnotation = entity.javaClass.isAnnotationPresent(EntityAnnotation::class.java)
-            val superclassHasAnnotation = entity.javaClass.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-            if (classHasAnnotation || superclassHasAnnotation) {
+            val validClass = Entity.getEntityAnnotation(entity.javaClass)
+            if (validClass != null) {
                 val embeddedObject = PortableEntity()
                 embeddedObject.fieldId = null
                 embeddedObject.init(dbContext, entity)

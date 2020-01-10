@@ -14,12 +14,12 @@
 package io.github.subiyacryolite.jds
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.github.subiyacryolite.jds.extensions.*
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
-import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.enums.FieldType
+import io.github.subiyacryolite.jds.extensions.*
+import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import javafx.beans.property.*
 import javafx.beans.value.WritableValue
@@ -34,7 +34,6 @@ import java.time.*
 import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayList
 
 /**
@@ -113,16 +112,11 @@ abstract class Entity : IEntity, Serializable {
     internal val blobValues: HashMap<Int, WritableValue<ByteArray?>> = HashMap()
 
     init {
-        val classHasAnnotation = javaClass.isAnnotationPresent(EntityAnnotation::class.java)
-        val superclassHasAnnotation = javaClass.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-        if (classHasAnnotation || superclassHasAnnotation) {
-            val entityAnnotation = when (classHasAnnotation) {
-                true -> javaClass.getAnnotation(EntityAnnotation::class.java)
-                false -> javaClass.superclass.getAnnotation(EntityAnnotation::class.java)
-            }
+        val entityAnnotation = getEntityAnnotation(javaClass)
+        if (entityAnnotation != null) {
             overview.entityId = entityAnnotation.id
         } else {
-            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its parent with [" + EntityAnnotation::class.java + "]")
+            throw RuntimeException("You must annotate the class [" + javaClass.canonicalName + "] or its immediate parent with [" + EntityAnnotation::class.java + "]")
         }
     }
 
@@ -440,7 +434,8 @@ abstract class Entity : IEntity, Serializable {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
-            fieldEntity.field.bind()
+            bindFieldIdToEntity(fieldEntity)
+
             objectValues[fieldEntity] = property
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
@@ -458,13 +453,19 @@ abstract class Entity : IEntity, Serializable {
             throw RuntimeException("Please supply a valid type for JdsFieldEntity")
         }
         if (!objectCollections.containsKey(fieldEntity)) {
-            fieldEntity.field.bind()
+            bindFieldIdToEntity(fieldEntity)
+
             objectCollections[fieldEntity] = collection as MutableCollection<IEntity>
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
             throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
         }
         return collection
+    }
+
+    private fun <T : IEntity> bindFieldIdToEntity(fieldEntity: FieldEntity<T>) {
+        fieldEntity.field.bind()
+        FieldEntity.values[fieldEntity.field.id] = fieldEntity
     }
 
     /**
@@ -964,21 +965,36 @@ abstract class Entity : IEntity, Serializable {
     ) = try {
         (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefField()) else connection.prepareStatement(dbContext.populateRefField())).use { populateRefField ->
             (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefEntityField()) else connection.prepareStatement(dbContext.populateRefEntityField())).use { populateRefEntityField ->
-                getFields(overview.entityId).forEach {
-                    val lookup = Field.values[it]!!
-                    //1. map this jdsField to the jdsField dictionary
-                    populateRefField.setInt(1, lookup.id)
-                    populateRefField.setString(2, lookup.name)
-                    populateRefField.setString(3, lookup.description)
-                    populateRefField.setInt(4, lookup.type.ordinal)
-                    populateRefField.addBatch()
-                    //2. map this jdsField ID to the entity type
-                    populateRefEntityField.setInt(1, entityId)
-                    populateRefEntityField.setInt(2, lookup.id)
-                    populateRefEntityField.addBatch()
+                (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefFieldEntity()) else connection.prepareStatement(dbContext.populateRefFieldEntity())).use { populateRefFieldEntity ->
+                    getFields(overview.entityId).forEach { fieldId ->
+                        val field = Field.values[fieldId]!!
+                        //1. map this jdsField to the jdsField dictionary
+                        populateRefField.setInt(1, field.id)
+                        populateRefField.setString(2, field.name)
+                        populateRefField.setString(3, field.description)
+                        populateRefField.setInt(4, field.type.ordinal)
+                        populateRefField.addBatch()
+                        //2. map this jdsField ID to the entity type
+                        populateRefEntityField.setInt(1, entityId)
+                        populateRefEntityField.setInt(2, field.id)
+                        populateRefEntityField.addBatch()
+                        //3. zzzzzzzzzz
+                        if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
+                            val fieldEntity = FieldEntity.values[field.id]
+                            if (fieldEntity != null) {
+                                val entity = getEntityAnnotation(fieldEntity.entity)
+                                if (entity != null) {
+                                    populateRefFieldEntity.setInt(1, field.id)
+                                    populateRefFieldEntity.setInt(2, entity.id)
+                                    populateRefFieldEntity.addBatch()
+                                }
+                            }
+                        }
+                    }
+                    populateRefField.executeBatch()
+                    populateRefEntityField.executeBatch()
+                    populateRefFieldEntity.executeBatch()
                 }
-                populateRefField.executeBatch()
-                populateRefEntityField.executeBatch()
             }
         }
     } catch (ex: Exception) {
@@ -1185,6 +1201,19 @@ abstract class Entity : IEntity, Serializable {
         override fun writeExternal(objectOutput: ObjectOutput) {
             objectOutput.writeObject(allFields)
             objectOutput.writeObject(allEnums)
+        }
+
+        internal fun getEntityAnnotation(clazz: Class<*>): EntityAnnotation? {
+            val attemptOne = clazz.isAnnotationPresent(EntityAnnotation::class.java)
+            if (attemptOne) {
+                return clazz.getAnnotation(EntityAnnotation::class.java)
+            } else {
+                val attemptTwo = clazz.superclass.isAnnotationPresent(EntityAnnotation::class.java)
+                if (attemptTwo) {
+                    clazz.superclass.getAnnotation(EntityAnnotation::class.java)
+                }
+            }
+            return null
         }
 
         protected fun mapField(entityId: Int, fieldId: Int): Int {
