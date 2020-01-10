@@ -14,14 +14,14 @@
 package io.github.subiyacryolite.jds
 
 import java.io.Serializable
-import java.util.HashMap
+import java.util.*
 
 data class FieldEntity<T : IEntity>(
         var entity: Class<out T>,
         var field: Field
 ) : Serializable {
 
-       companion object {
+    companion object {
         private const val serialVersionUID = 20171109_0853L
         internal val values = HashMap<Int, FieldEntity<*>>()
     }

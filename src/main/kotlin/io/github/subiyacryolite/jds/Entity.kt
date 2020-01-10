@@ -1208,7 +1208,7 @@ abstract class Entity : IEntity, Serializable {
             if (attemptOne) {
                 return clazz.getAnnotation(EntityAnnotation::class.java)
             } else {
-                val attemptTwo = clazz.superclass.isAnnotationPresent(EntityAnnotation::class.java)
+                val attemptTwo = clazz.superclass !== null && clazz.superclass.isAnnotationPresent(EntityAnnotation::class.java)
                 if (attemptTwo) {
                     clazz.superclass.getAnnotation(EntityAnnotation::class.java)
                 }
