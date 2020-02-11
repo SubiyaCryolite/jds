@@ -31,14 +31,14 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
         freeCompilerArgs = ["-Xjsr305=strict"]
     }
 }
 
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
         freeCompilerArgs = ["-Xjsr305=strict"]
     }
 }
@@ -51,7 +51,6 @@ repositories {
 }
 
 dependencies {
-    implementation "org.openjfx:javafx-base:11:win"/*We specify win though in reality all we care about is JavaFX bean classes. There are no OS dependencies*/
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"

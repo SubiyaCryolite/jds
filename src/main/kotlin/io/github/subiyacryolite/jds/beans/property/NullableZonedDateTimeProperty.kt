@@ -19,4 +19,4 @@ import java.time.ZonedDateTime
  * Class allowing for the wrapping and persistence of nullable [ZonedDateTime] values
  * @param initialValue the initial value
  */
-class NullableZonedDateTimeProperty(initialValue: ZonedDateTime? = null) : NullableProperty<ZonedDateTime?>(initialValue)
+class NullableZonedDateTimeProperty(initialValue: ZonedDateTime? = null) : ObjectProperty<ZonedDateTime?>(initialValue)

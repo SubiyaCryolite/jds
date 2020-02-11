@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Double] values
  * @param initialValue the initial value
  */
-class NullableDoubleProperty(initialValue: Double? = null) : NullableProperty<Double?>(initialValue)
+class NullableDoubleProperty(initialValue: Double? = null) : ObjectProperty<Double?>(initialValue)

@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Int] values
  * @param initialValue the initial value
  */
-class NullableIntegerProperty(initialValue: Int? = null) : NullableProperty<Int?>(initialValue)
+class NullableIntegerProperty(initialValue: Int? = null) : ObjectProperty<Int?>(initialValue)

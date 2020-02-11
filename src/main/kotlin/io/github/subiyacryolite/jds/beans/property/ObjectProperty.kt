@@ -13,14 +13,13 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import javafx.beans.value.WritableValue
 import java.io.Serializable
 
 /**
  * Base class allowing for the wrapping and persistence of nullable [Object] values
  * @param _value the initial value
  */
-abstract class NullableProperty<T>(private var _value: T) : WritableValue<T>, Serializable {
+abstract class ObjectProperty<T>(private var _value: T) : WritableProperty<T>, Serializable {
 
     companion object {
         private const val serialVersionUID = 20191115_2314L
@@ -36,7 +35,7 @@ abstract class NullableProperty<T>(private var _value: T) : WritableValue<T>, Se
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is NullableProperty<*>) return false
+        if (other !is ObjectProperty<*>) return false
         if (_value != other._value) return false
         return true
     }
