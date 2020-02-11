@@ -13,8 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import java.time.YearMonth
+
 /**
- * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
+ * Class allowing for the wrapping and persistence of [YearMonth] values
  * @param initialValue the initial value
  */
-class SimpleBlobProperty(initialValue: ByteArray) : BlobProperty(initialValue)
+class YearMonthProperty(initialValue: YearMonth = YearMonth.now()) : ObjectProperty<YearMonth>(initialValue)

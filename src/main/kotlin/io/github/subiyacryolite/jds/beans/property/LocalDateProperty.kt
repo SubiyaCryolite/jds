@@ -13,38 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import java.io.Serializable
+import java.time.LocalDate
 
 /**
- * Base class allowing for the wrapping and persistence of nullable [Object] values
- * @param property the initial value
+ * Class allowing for the wrapping and persistence of [LocalDate] values
+ * @param initialValue the initial value
  */
-open class ObjectProperty<T>(private var property: T) : WritableProperty<T>, Serializable {
-
-    companion object {
-        private const val serialVersionUID = 20191115_2314L
-    }
-
-    override fun getValue(): T {
-        return property
-    }
-
-    override fun setValue(value: T) {
-        property = value
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ObjectProperty<*>) return false
-        if (value != other.value) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return value?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "Property(value=$value)"
-    }
-}
+class LocalDateProperty(initialValue: LocalDate = LocalDate.now()) : ObjectProperty<LocalDate>(initialValue)
