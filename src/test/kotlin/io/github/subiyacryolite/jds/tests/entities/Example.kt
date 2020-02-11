@@ -15,14 +15,14 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.DoubleProperty
+import io.github.subiyacryolite.jds.beans.property.FloatProperty
+import io.github.subiyacryolite.jds.beans.property.LongProperty
 import io.github.subiyacryolite.jds.beans.property.NullableIntegerProperty
 import io.github.subiyacryolite.jds.events.EventArguments
 import io.github.subiyacryolite.jds.events.LoadListener
 import io.github.subiyacryolite.jds.events.SaveListener
 import io.github.subiyacryolite.jds.tests.constants.Fields
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleFloatProperty
-import javafx.beans.property.SimpleLongProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -36,10 +36,10 @@ class Example : Entity(), LoadListener, SaveListener {
     private val _dateField = map(Fields.Date, LocalDate.now())
     private val _dateTimeField = map(Fields.DateTime, LocalDateTime.now())
     private val _zonedDateTimeField = map(Fields.ZonedDateTime, ZonedDateTime.now())
-    private val _longField = map(Fields.Long, SimpleLongProperty(0))
+    private val _longField = map(Fields.Long, LongProperty(0))
     private val _intField = map(Fields.Int, NullableIntegerProperty())
-    private val _doubleField = map(Fields.Double, SimpleDoubleProperty(0.0))
-    private val _floatField = map(Fields.Float, SimpleFloatProperty(0f))
+    private val _doubleField = map(Fields.Double, DoubleProperty(0.0))
+    private val _floatField = map(Fields.Float, FloatProperty(0f))
     private val _booleanField = map(Fields.Boolean, false)
     private val _blobField = map(Fields.Blob, ByteArray(0))
 
@@ -48,23 +48,23 @@ class Example : Entity(), LoadListener, SaveListener {
         set(stringField) = _stringField.set(stringField)
 
     var timeField: LocalTime
-        get() = _timeField.get()!!
+        get() = _timeField.get()
         set(dateField) = _timeField.set(dateField)
 
     var dateField: LocalDate
-        get() = _dateField.get()!!
+        get() = _dateField.get()
         set(dateField) = _dateField.set(dateField)
 
     var dateTimeField: LocalDateTime
-        get() = _dateTimeField.get()!!
+        get() = _dateTimeField.get()
         set(dateTimeField) = _dateTimeField.set(dateTimeField)
 
     var zonedDateTimeField: ZonedDateTime
-        get() = _zonedDateTimeField.get()!!
+        get() = _zonedDateTimeField.get()
         set(zonedDateTimeField) = _zonedDateTimeField.set(zonedDateTimeField)
 
     var longField: Long
-        get() = _longField.get()!!
+        get() = _longField.get()
         set(longField) = _longField.set(longField)
 
     var intField: Int?
@@ -72,19 +72,19 @@ class Example : Entity(), LoadListener, SaveListener {
         set(intField) = _intField.set(intField)
 
     var doubleField: Double
-        get() = _doubleField.get()!!
+        get() = _doubleField.get()
         set(doubleField) = _doubleField.set(doubleField)
 
     var floatField: Float
-        get() = _floatField.get()!!
+        get() = _floatField.get()
         set(floatField) = _floatField.set(floatField)
 
     var booleanField: Boolean
-        get() = _booleanField.get()!!
+        get() = _booleanField.get()
         set(booleanField) = _booleanField.set(booleanField)
 
     var blobField: ByteArray
-        get() = _blobField.get()!!
+        get() = _blobField.get()
         set(booleanField) = _blobField.set(booleanField)
 
     override fun onPreSave(eventArguments: EventArguments) {

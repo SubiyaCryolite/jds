@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Long] values
  * @param initialValue the initial value
  */
-class LongProperty(initialValue: Long = 0) : ObjectProperty<Long>(initialValue)
+class LongProperty(initialValue: Long = 0) : NullableLongProperty(initialValue) {
+
+    override fun getValue(): Long {
+        return super.getValue()!!
+    }
+}

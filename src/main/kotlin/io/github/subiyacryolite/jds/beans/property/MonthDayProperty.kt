@@ -19,4 +19,9 @@ import java.time.MonthDay
  * Class allowing for the wrapping and persistence of [MonthDay] values
  * @param initialValue the initial value
  */
-class MonthDayProperty(initialValue: MonthDay = MonthDay.now()) : ObjectProperty<MonthDay>(initialValue)
+class MonthDayProperty(initialValue: MonthDay = MonthDay.now()) : NullableMonthDayProperty(initialValue) {
+
+    override fun getValue(): MonthDay {
+        return super.getValue()!!
+    }
+}

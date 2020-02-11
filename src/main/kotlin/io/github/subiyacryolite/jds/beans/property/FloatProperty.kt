@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Float] values
  * @param initialValue the initial value
  */
-class FloatProperty(initialValue: Float = 0.0f) : ObjectProperty<Float>(initialValue)
+class FloatProperty(initialValue: Float = 0.0f) : NullableFloatProperty(initialValue) {
+
+    override fun getValue(): Float {
+        return super.getValue()!!
+    }
+}

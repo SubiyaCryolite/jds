@@ -19,4 +19,9 @@ import java.time.Period
  * Class allowing for the wrapping and persistence of [Period] values
  * @param initialValue the initial value
  */
-class PeriodProperty(initialValue: Period = Period.ZERO) : ObjectProperty<Period>(initialValue)
+class PeriodProperty(initialValue: Period = Period.ZERO) : NullablePeriodProperty(initialValue) {
+
+    override fun getValue(): Period {
+        return super.getValue()!!
+    }
+}

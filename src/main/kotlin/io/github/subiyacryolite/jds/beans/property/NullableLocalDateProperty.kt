@@ -18,4 +18,4 @@ import java.time.LocalDate
  * Class allowing for the wrapping and persistence of nullable [LocalDate] values
  * @param initialValue the initial value
  */
-class NullableLocalDateProperty(initialValue: LocalDate? = null) : ObjectProperty<LocalDate?>(initialValue)
+open class NullableLocalDateProperty(initialValue: LocalDate? = null) : ObjectProperty<LocalDate?>(initialValue)

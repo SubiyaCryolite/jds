@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Short] values
  * @param initialValue the initial value
  */
-class ShortProperty(initialValue: Short = 0) : ObjectProperty<Short>(initialValue)
+class ShortProperty(initialValue: Short = 0) : NullableShortProperty(initialValue) {
+
+    override fun getValue(): Short {
+        return super.getValue()!!
+    }
+}

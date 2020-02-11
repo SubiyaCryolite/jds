@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [String] values
  * @param initialValue the initial value
  */
-class StringProperty(initialValue: String = "") : ObjectProperty<String>(initialValue)
+class StringProperty(initialValue: String = "")  : NullableStringProperty(initialValue) {
+
+    override fun getValue(): String {
+        return super.getValue()!!
+    }
+}

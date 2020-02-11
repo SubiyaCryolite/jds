@@ -19,4 +19,4 @@ import java.util.*
  * Class allowing for the wrapping and persistence of nullable [UUID] values
  * @param initialValue the initial value
  */
-class NullableUuidProperty(initialValue: UUID? = null) : ObjectProperty<UUID?>(initialValue)
+open class NullableUuidProperty(initialValue: UUID? = null) : ObjectProperty<UUID?>(initialValue)

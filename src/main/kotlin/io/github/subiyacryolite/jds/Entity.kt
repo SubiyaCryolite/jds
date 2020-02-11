@@ -14,6 +14,30 @@
 package io.github.subiyacryolite.jds
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.github.subiyacryolite.jds.Validate.validateBlob
+import io.github.subiyacryolite.jds.Validate.validateBoolean
+import io.github.subiyacryolite.jds.Validate.validateDate
+import io.github.subiyacryolite.jds.Validate.validateDateTime
+import io.github.subiyacryolite.jds.Validate.validateDateTimeCollection
+import io.github.subiyacryolite.jds.Validate.validateDouble
+import io.github.subiyacryolite.jds.Validate.validateDoubleCollection
+import io.github.subiyacryolite.jds.Validate.validateDuration
+import io.github.subiyacryolite.jds.Validate.validateEnum
+import io.github.subiyacryolite.jds.Validate.validateFloat
+import io.github.subiyacryolite.jds.Validate.validateFloatCollection
+import io.github.subiyacryolite.jds.Validate.validateInt
+import io.github.subiyacryolite.jds.Validate.validateIntCollection
+import io.github.subiyacryolite.jds.Validate.validateLong
+import io.github.subiyacryolite.jds.Validate.validateLongCollection
+import io.github.subiyacryolite.jds.Validate.validateMonthDay
+import io.github.subiyacryolite.jds.Validate.validatePeriod
+import io.github.subiyacryolite.jds.Validate.validateShort
+import io.github.subiyacryolite.jds.Validate.validateString
+import io.github.subiyacryolite.jds.Validate.validateStringCollection
+import io.github.subiyacryolite.jds.Validate.validateTime
+import io.github.subiyacryolite.jds.Validate.validateUuid
+import io.github.subiyacryolite.jds.Validate.validateYearMonth
+import io.github.subiyacryolite.jds.Validate.validateZonedDateTime
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
@@ -21,8 +45,6 @@ import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.extensions.*
 import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.utility.DeepCopy
-import javafx.beans.property.*
-import javafx.beans.value.WritableValue
 import java.io.Externalizable
 import java.io.ObjectInput
 import java.io.ObjectOutput
@@ -44,43 +66,43 @@ abstract class Entity : IEntity, Serializable {
     @set:JsonIgnore
     @get:JsonIgnore
     final override var overview: IOverview = Overview()
-    //time constructs
+    //temporals
     @get:JsonIgnore
-    internal val localDateTimeValues: HashMap<Int, WritableValue<out Temporal?>> = HashMap()
+    internal val localDateTimeValues: HashMap<Int, WritableProperty<LocalDateTime?>> = HashMap()
     @get:JsonIgnore
-    internal val zonedDateTimeValues: HashMap<Int, WritableValue<out Temporal?>> = HashMap()
+    internal val zonedDateTimeValues: HashMap<Int, WritableProperty<ZonedDateTime?>> = HashMap()
     @get:JsonIgnore
-    internal val localDateValues: HashMap<Int, WritableValue<out Temporal?>> = HashMap()
+    internal val localDateValues: HashMap<Int, WritableProperty<LocalDate?>> = HashMap()
     @get:JsonIgnore
-    internal val localTimeValues: HashMap<Int, WritableValue<out Temporal?>> = HashMap()
+    internal val localTimeValues: HashMap<Int, WritableProperty<LocalTime?>> = HashMap()
     @get:JsonIgnore
-    internal val monthDayValues: HashMap<Int, WritableValue<MonthDay?>> = HashMap()
+    internal val monthDayValues: HashMap<Int, WritableProperty<MonthDay?>> = HashMap()
     @get:JsonIgnore
-    internal val yearMonthValues: HashMap<Int, WritableValue<out Temporal?>> = HashMap()
+    internal val yearMonthValues: HashMap<Int, WritableProperty<YearMonth?>> = HashMap()
     @get:JsonIgnore
-    internal val periodValues: HashMap<Int, WritableValue<Period?>> = HashMap()
+    internal val periodValues: HashMap<Int, WritableProperty<Period?>> = HashMap()
     @get:JsonIgnore
-    internal val durationValues: HashMap<Int, WritableValue<Duration?>> = HashMap()
+    internal val durationValues: HashMap<Int, WritableProperty<Duration?>> = HashMap()
     //strings
     @get:JsonIgnore
-    internal val stringValues: HashMap<Int, WritableValue<String?>> = HashMap()
+    internal val stringValues: HashMap<Int, WritableProperty<String?>> = HashMap()
     //boolean
     @get:JsonIgnore
-    internal val booleanValues: HashMap<Int, WritableValue<Boolean?>> = HashMap()
+    internal val booleanValues: HashMap<Int, WritableProperty<Boolean?>> = HashMap()
     //numeric
     @get:JsonIgnore
-    internal val shortValues: HashMap<Int, WritableValue<Short?>> = HashMap()
+    internal val shortValues: HashMap<Int, WritableProperty<Short?>> = HashMap()
     @get:JsonIgnore
-    internal val floatValues: HashMap<Int, WritableValue<Float?>> = HashMap()
+    internal val floatValues: HashMap<Int, WritableProperty<Float?>> = HashMap()
     @get:JsonIgnore
-    internal val doubleValues: HashMap<Int, WritableValue<Double?>> = HashMap()
+    internal val doubleValues: HashMap<Int, WritableProperty<Double?>> = HashMap()
     @get:JsonIgnore
-    internal val longValues: HashMap<Int, WritableValue<Long?>> = HashMap()
+    internal val longValues: HashMap<Int, WritableProperty<Long?>> = HashMap()
     @get:JsonIgnore
-    internal val integerValues: HashMap<Int, WritableValue<Int?>> = HashMap()
+    internal val integerValues: HashMap<Int, WritableProperty<Int?>> = HashMap()
     @get:JsonIgnore
-    internal val uuidValues: HashMap<Int, WritableValue<UUID?>> = HashMap()
-    //arrays
+    internal val uuidValues: HashMap<Int, WritableProperty<UUID?>> = HashMap()
+    //collections
     @get:JsonIgnore
     override val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
     @get:JsonIgnore
@@ -95,21 +117,21 @@ abstract class Entity : IEntity, Serializable {
     internal val longCollections: HashMap<Int, MutableCollection<Long>> = HashMap()
     @get:JsonIgnore
     internal val integerCollections: HashMap<Int, MutableCollection<Int>> = HashMap()
-    //enumValues - enums can be null, enum collections cannot (skip unknown entries)
+    //enums
     @get:JsonIgnore
-    internal val enumValues: HashMap<Int, WritableValue<Enum<*>?>> = HashMap()
+    internal val enumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
     @get:JsonIgnore
-    internal val stringEnumValues: HashMap<Int, WritableValue<Enum<*>?>> = HashMap()
+    internal val stringEnumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
     @get:JsonIgnore
     internal val enumCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
     @get:JsonIgnore
     internal val enumStringCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
     //objects
     @get:JsonIgnore
-    override val objectValues: HashMap<FieldEntity<*>, WritableValue<out IEntity>> = HashMap()
+    override val objectValues: HashMap<FieldEntity<*>, WritableProperty<out IEntity>> = HashMap()
     //blobs
     @get:JsonIgnore
-    internal val blobValues: HashMap<Int, WritableValue<ByteArray?>> = HashMap()
+    internal val blobValues: HashMap<Int, WritableProperty<ByteArray?>> = HashMap()
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -121,233 +143,266 @@ abstract class Entity : IEntity, Serializable {
     }
 
     @JvmName("mapShort")
-    protected fun map(field: Field, value: Short?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapShort")
-    protected fun map(field: Field, property: WritableValue<Short?>): WritableValue<Short?> {
-        if (field.type != FieldType.Short) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        shortValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Short): WritableProperty<Short> {
+        validateShort(field)
+        val property = ShortProperty(value)
+        shortValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Short?>
         return property
+    }
+
+    @JvmName("mapNullableShort")
+    protected fun map(field: Field, property: WritableProperty<Short?>): WritableProperty<Short?> {
+        validateShort(field)
+        return shortValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDouble")
-    protected fun map(field: Field, value: Double?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapDouble")
-    protected fun map(field: Field, value: DoubleProperty) = map(field, value as WritableValue<Double?>)
-
-    @JvmName("mapDouble")
-    protected fun map(field: Field, property: WritableValue<Double?>): WritableValue<Double?> {
-        if (field.type != FieldType.Double) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        doubleValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Double): WritableProperty<Double> {
+        validateDouble(field)
+        val property = DoubleProperty(value)
+        doubleValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Double?>
         return property
     }
 
-    @JvmName("mapInt")
-    protected fun map(field: Field, value: Int?) = map(field, SimpleObjectProperty(value))
+    @JvmName("mapNullableDouble")
+    protected fun map(field: Field, property: WritableProperty<Double?>): WritableProperty<Double?> {
+        validateDouble(field)
+        return doubleValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
+    }
 
     @JvmName("mapInt")
-    protected fun map(field: Field, value: IntegerProperty) = map(field, value as WritableValue<Int?>)
-
-    @JvmName("mapInt")
-    protected fun map(field: Field, property: WritableValue<Int?>): WritableValue<Int?> {
-        if (field.type != FieldType.Int) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        integerValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Int): WritableProperty<Int> {
+        validateInt(field)
+        val property = IntegerProperty(value)
+        integerValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Int?>
         return property
     }
 
-    @JvmName("mapLong")
-    protected fun map(field: Field, value: Long?) = map(field, SimpleObjectProperty(value))
+    @JvmName("mapNullableInt")
+    protected fun map(field: Field, property: WritableProperty<Int?>): WritableProperty<Int?> {
+        validateInt(field)
+        return integerValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
+    }
 
     @JvmName("mapLong")
-    protected fun map(field: Field, value: LongProperty) = map(field, value as WritableValue<Long?>)
-
-    @JvmName("mapLong")
-    protected fun map(field: Field, property: WritableValue<Long?>): WritableValue<Long?> {
-        if (field.type != FieldType.Long) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        longValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Long): WritableProperty<Long> {
+        validateLong(field)
+        val property = LongProperty(value)
+        longValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Long?>
         return property
     }
 
-    @JvmName("mapFloat")
-    protected fun map(field: Field, value: Float?) = map(field, SimpleObjectProperty(value))
+    @JvmName("mapNullableLong")
+    protected fun map(field: Field, property: WritableProperty<Long?>): WritableProperty<Long?> {
+        validateLong(field)
+        return longValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
+    }
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: FloatProperty) = map(field, value as WritableValue<Float?>)
-
-    @JvmName("mapFloat")
-    protected fun map(field: Field, property: WritableValue<Float?>): WritableValue<Float?> {
-        if (field.type != FieldType.Float) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        floatValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Float): WritableProperty<Float> {
+        validateFloat(field)
+        val property = FloatProperty(value)
+        floatValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Float?>
         return property
+    }
+
+    @JvmName("mapNullableFloat")
+    protected fun map(field: Field, property: WritableProperty<Float?>): WritableProperty<Float?> {
+        validateFloat(field)
+        return floatValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapBoolean")
-    protected fun map(field: Field, value: Boolean?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapBoolean")
-    protected fun map(field: Field, property: WritableValue<Boolean?>): WritableValue<Boolean?> {
-        if (field.type != FieldType.Boolean) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        booleanValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Boolean): WritableProperty<Boolean> {
+        validateBoolean(field)
+        val property = BooleanProperty(value)
+        booleanValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Boolean?>
         return property
+    }
+
+    @JvmName("mapNullableBoolean")
+    protected fun map(field: Field, property: WritableProperty<Boolean?>): WritableProperty<Boolean?> {
+        validateBoolean(field)
+        return booleanValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapUuid")
-    protected fun map(field: Field, value: UUID?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapUuid")
-    protected fun map(field: Field, property: WritableValue<UUID?>): WritableValue<UUID?> {
-        if (field.type != FieldType.Uuid) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        uuidValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: UUID): WritableProperty<UUID> {
+        validateUuid(field)
+        val property = UuidProperty(value)
+        uuidValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<UUID?>
         return property
+    }
+
+    @JvmName("mapNullableUuid")
+    protected fun map(field: Field, property: WritableProperty<UUID?>): WritableProperty<UUID?> {
+        validateUuid(field)
+        return uuidValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapString")
-    protected fun map(field: Field, value: String?) = map(field, SimpleStringProperty(value))
-
-    @JvmName("mapString")
-    protected fun map(field: Field, property: WritableValue<String?>): WritableValue<String?> {
-        if (field.type != FieldType.String) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        stringValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: String): WritableProperty<String> {
+        validateString(field)
+        val property = StringProperty(value)
+        stringValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<String?>
         return property
+    }
+
+    @JvmName("mapNullableString")
+    protected fun map(field: Field, property: WritableProperty<String?>): WritableProperty<String?> {
+        validateString(field)
+        return stringValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDateTime")
-    protected fun map(field: Field, value: LocalDateTime?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapDateTime")
-    protected fun map(field: Field, property: WritableValue<LocalDateTime?>): WritableValue<LocalDateTime?> {
-        if (field.type != FieldType.DateTime) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        localDateTimeValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: LocalDateTime): WritableProperty<LocalDateTime> {
+        validateDateTime(field)
+        val property = LocalDateTimeProperty(value)
+        localDateTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalDateTime?>
         return property
+    }
+
+    @JvmName("mapNullableDateTime")
+    protected fun map(field: Field, property: WritableProperty<LocalDateTime?>): WritableProperty<LocalDateTime?> {
+        validateDateTime(field)
+        return localDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, value: ZonedDateTime?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, property: WritableValue<ZonedDateTime?>): WritableValue<ZonedDateTime?> {
-        if (field.type != FieldType.ZonedDateTime) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        zonedDateTimeValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: ZonedDateTime): WritableProperty<ZonedDateTime> {
+        validateZonedDateTime(field)
+        val property = ZonedDateTimeProperty(value)
+        zonedDateTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<ZonedDateTime?>
         return property
+    }
+
+    @JvmName("mapNullableZonedDateTime")
+    protected fun map(field: Field, property: WritableProperty<ZonedDateTime?>): WritableProperty<ZonedDateTime?> {
+        validateZonedDateTime(field)
+        return zonedDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDate")
-    protected fun map(field: Field, value: LocalDate?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapDate")
-    protected fun map(field: Field, property: WritableValue<LocalDate?>): WritableValue<LocalDate?> {
-        if (field.type != FieldType.Date) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        localDateValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: LocalDate): WritableProperty<LocalDate> {
+        validateDate(field)
+        val property = LocalDateProperty(value)
+        localDateValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalDate?>
         return property
+    }
+
+    @JvmName("mapNullableDate")
+    protected fun map(field: Field, property: WritableProperty<LocalDate?>): WritableProperty<LocalDate?> {
+        validateDate(field)
+        return localDateValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapTime")
-    protected fun map(field: Field, value: LocalTime?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapTime")
-    protected fun map(field: Field, property: WritableValue<LocalTime?>): WritableValue<LocalTime?> {
-        if (field.type != FieldType.Time) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        localTimeValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: LocalTime): WritableProperty<LocalTime> {
+        validateTime(field)
+        val property = LocalTimeProperty(value)
+        localTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalTime?>
         return property
+    }
+
+    @JvmName("mapNullableTime")
+    protected fun map(field: Field, property: WritableProperty<LocalTime?>): WritableProperty<LocalTime?> {
+        validateTime(field)
+        return localTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapBlob")
-    protected fun map(field: Field, value: ByteArray?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapBlob")
-    protected fun map(field: Field, property: WritableValue<ByteArray?>): WritableValue<ByteArray?> {
-        if (field.type != FieldType.Blob) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        blobValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: ByteArray): WritableProperty<ByteArray> {
+        validateBlob(field)
+        val property = BlobProperty(value)
+        blobValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<ByteArray?>
         return property
+    }
+
+    @JvmName("mapNullableBlob")
+    protected fun map(field: Field, property: WritableProperty<ByteArray?>): WritableProperty<ByteArray?> {
+        validateBlob(field)
+        return blobValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapMonthDay")
-    protected fun map(field: Field, value: MonthDay?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapMonthDay")
-    protected fun map(field: Field, property: WritableValue<MonthDay?>): WritableValue<MonthDay?> {
-        if (field.type != FieldType.MonthDay) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        monthDayValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: MonthDay): WritableProperty<MonthDay> {
+        validateMonthDay(field)
+        val property = MonthDayProperty(value)
+        monthDayValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<MonthDay?>
         return property
+    }
+
+    @JvmName("mapNullableMonthDay")
+    protected fun map(field: Field, property: WritableProperty<MonthDay?>): WritableProperty<MonthDay?> {
+        validateMonthDay(field)
+        return monthDayValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapYearMonth")
-    protected fun map(field: Field, value: YearMonth?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapYearMonth")
-    protected fun map(field: Field, property: WritableValue<YearMonth?>): WritableValue<YearMonth?> {
-        if (field.type != FieldType.YearMonth) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        yearMonthValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: YearMonth): WritableProperty<YearMonth> {
+        validateMonthDay(field)
+        val property = YearMonthProperty(value)
+        yearMonthValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<YearMonth?>
         return property
+    }
+
+    @JvmName("mapNullableYearMonth")
+    protected fun map(field: Field, property: WritableProperty<YearMonth?>): WritableProperty<YearMonth?> {
+        validateYearMonth(field)
+        return yearMonthValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapPeriod")
-    protected fun map(field: Field, value: Period?) = map(field, SimpleObjectProperty(value))
-
-    @JvmName("mapPeriod")
-    protected fun map(field: Field, property: WritableValue<Period?>): WritableValue<Period?> {
-        if (field.type != FieldType.Period) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        periodValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Period): WritableProperty<Period> {
+        validateMonthDay(field)
+        val property = PeriodProperty(value)
+        periodValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Period?>
         return property
     }
 
-    @JvmName("mapDuration")
-    protected fun map(field: Field, value: Duration?) = map(field, SimpleObjectProperty(value))
+    @JvmName("mapNullablePeriod")
+    protected fun map(field: Field, property: WritableProperty<Period?>): WritableProperty<Period?> {
+        validatePeriod(field)
+        return periodValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
+    }
 
     @JvmName("mapDuration")
-    protected fun map(field: Field, property: WritableValue<Duration?>): WritableValue<Duration?> {
-        if (field.type != FieldType.Duration) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        durationValues[mapField(overview.entityId, field.bind())] = property
+    protected fun map(field: Field, value: Duration): WritableProperty<Duration> {
+        validateMonthDay(field)
+        val property = DurationProperty(value)
+        durationValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Duration?>
         return property
     }
 
-    @JvmName("mapEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T?) = map(fieldEnum, SimpleObjectProperty(value))
+    @JvmName("mapNullableDuration")
+    protected fun map(field: Field, property: WritableProperty<Duration?>): WritableProperty<Duration?> {
+        validateDuration(field)
+        return durationValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
+    }
 
-    @JvmName("mapEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableValue<T?>): WritableValue<T?> {
-        if (fieldEnum.field.type != FieldType.Enum && fieldEnum.field.type != FieldType.EnumString) {
-            throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
-        }
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T) = map(fieldEnum, ObjectProperty(value))
+
+    @JvmName("mapNullableEnum")
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T?>): WritableProperty<T?> {
+        validateEnum(fieldEnum.field)
         if (fieldEnum.field.type == FieldType.Enum) {
-            enumValues[fieldEnum.field.id] = property as WritableValue<Enum<*>?>
+            enumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
         } else {
-            stringEnumValues[fieldEnum.field.id] = property as WritableValue<Enum<*>?>
+            stringEnumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
+        }
+        fieldEnum.field.bind()
+        mapField(overview.entityId, fieldEnum.field.id)
+        mapEnums(overview.entityId, fieldEnum.field.id)
+        return property
+    }
+
+    @JvmName("mapEnum")
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T>): WritableProperty<T> {
+        validateEnum(fieldEnum.field)
+        if (fieldEnum.field.type == FieldType.Enum) {
+            enumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
+        } else {
+            stringEnumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
         }
         fieldEnum.field.bind()
         mapField(overview.entityId, fieldEnum.field.id)
@@ -357,56 +412,38 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapStrings")
     protected fun map(field: Field, collection: MutableCollection<String>): MutableCollection<String> {
-        if (field.type != FieldType.StringCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        stringCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateStringCollection(field)
+        return stringCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapDateTimes")
     protected fun map(field: Field, collection: MutableCollection<LocalDateTime>): MutableCollection<LocalDateTime> {
-        if (field.type != FieldType.DateTimeCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        dateTimeCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateDateTimeCollection(field)
+        return dateTimeCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapFloats")
     protected fun map(field: Field, collection: MutableCollection<Float>): MutableCollection<Float> {
-        if (field.type != FieldType.FloatCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        floatCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateFloatCollection(field)
+        return floatCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapIntegers")
     protected fun map(field: Field, collection: MutableCollection<Int>): MutableCollection<Int> {
-        if (field.type != FieldType.IntCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        integerCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateIntCollection(field)
+        return integerCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapDoubles")
     protected fun map(field: Field, collection: MutableCollection<Double>): MutableCollection<Double> {
-        if (field.type != FieldType.DoubleCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        doubleCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateDoubleCollection(field)
+        return doubleCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapLongs")
     protected fun map(field: Field, collection: MutableCollection<Long>): MutableCollection<Long> {
-        if (field.type != FieldType.LongCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-        longCollections[mapField(overview.entityId, field.bind())] = collection
-        return collection
+        validateLongCollection(field)
+        return longCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
     @JvmName("mapEnums")
@@ -425,23 +462,23 @@ abstract class Entity : IEntity, Serializable {
         return collection
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T): WritableValue<T> {
-        return map(fieldEntity, SimpleObjectProperty(entity))
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T): WritableProperty<T> {
+        return map(fieldEntity, ObjectProperty(entity))
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, property: WritableValue<T>): WritableValue<T> {
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, WritableProperty: WritableProperty<T>): WritableProperty<T> {
         if (fieldEntity.field.type != FieldType.Entity) {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
 
-            objectValues[fieldEntity] = property
+            objectValues[fieldEntity] = WritableProperty
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
-            throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
+            throw RuntimeException("You can only bind a class to one WritableProperty. This class is already bound to one object or object array")
         }
-        return property
+        return WritableProperty
     }
 
     /**
@@ -458,7 +495,7 @@ abstract class Entity : IEntity, Serializable {
             objectCollections[fieldEntity] = collection as MutableCollection<IEntity>
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
-            throw RuntimeException("You can only bind a class to one property. This class is already bound to one object or object array")
+            throw RuntimeException("You can only bind a class to one WritableProperty. This class is already bound to one object or object array")
         }
         return collection
     }
@@ -635,10 +672,10 @@ abstract class Entity : IEntity, Serializable {
                 jdsPortableEntity.entityOverviews.add(embeddedObject)
             }
         }
-        objectValues.forEach { (fieldEntity, objectProperty) ->
+        objectValues.forEach { (fieldEntity, objectWritableProperty) ->
             val embeddedObject = PortableEntity()
             embeddedObject.fieldId = fieldEntity.field.id
-            embeddedObject.init(dbContext, objectProperty.value)
+            embeddedObject.init(dbContext, objectWritableProperty.value)
             jdsPortableEntity.entityOverviews.add(embeddedObject)
         }
     }
@@ -665,7 +702,7 @@ abstract class Entity : IEntity, Serializable {
      * @param value
      */
     internal fun populateProperties(dbContext: DbContext, fieldType: FieldType, fieldId: Int, value: Any?) {
-        initBackingPropertyIfNotDefined(fieldType, fieldId)
+        initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
 
         if (!dbContext.options.populateSensitiveData) {
             if (Field.values[fieldId]!!.sensitive) {
@@ -821,85 +858,85 @@ abstract class Entity : IEntity, Serializable {
     }
 
     /**
-     * This method enforces forward compatibility by ensuring that every property is present even if the field is not defined or known locally
+     * This method enforces forward compatibility by ensuring that every WritableProperty is present even if the field is not defined or known locally
      */
-    private fun initBackingPropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
+    private fun initBackingWritablePropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
         when (fieldType) {
-
-            FieldType.String -> if (!stringValues.containsKey(fieldId))
-                stringValues[fieldId] = SimpleStringProperty("")
-
-            FieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId))
+            FieldType.String -> if (!stringValues.containsKey(fieldId)) {
+                stringValues[fieldId] = NullableStringProperty()
+            }
+            FieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId)) {
                 doubleCollections[fieldId] = ArrayList()
-
-            FieldType.FloatCollection -> if (!floatCollections.containsKey(fieldId))
+            }
+            FieldType.FloatCollection -> if (!floatCollections.containsKey(fieldId)) {
                 floatCollections[fieldId] = ArrayList()
-
-            FieldType.LongCollection -> if (!longCollections.containsKey(fieldId))
+            }
+            FieldType.LongCollection -> if (!longCollections.containsKey(fieldId)) {
                 longCollections[fieldId] = ArrayList()
-
-            FieldType.IntCollection -> if (!integerCollections.containsKey(fieldId))
+            }
+            FieldType.IntCollection -> if (!integerCollections.containsKey(fieldId)) {
                 integerCollections[fieldId] = ArrayList()
-
-            FieldType.StringCollection -> if (!stringCollections.containsKey(fieldId))
+            }
+            FieldType.StringCollection -> if (!stringCollections.containsKey(fieldId)) {
                 stringCollections[fieldId] = ArrayList()
-
-            FieldType.DateTimeCollection -> if (!dateTimeCollections.containsKey(fieldId))
+            }
+            FieldType.DateTimeCollection -> if (!dateTimeCollections.containsKey(fieldId)) {
                 dateTimeCollections[fieldId] = ArrayList()
-
-            FieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId))
+            }
+            FieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId)) {
                 enumCollections[fieldId] = ArrayList()
-
-            FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId))
-                zonedDateTimeValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Date -> if (!localDateValues.containsKey(fieldId))
-                localDateValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Time -> if (!localTimeValues.containsKey(fieldId))
-                localTimeValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Duration -> if (!durationValues.containsKey(fieldId))
-                durationValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId))
-                monthDayValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId))
-                yearMonthValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Period -> if (!periodValues.containsKey(fieldId))
-                periodValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId))
-                localDateTimeValues[fieldId] = SimpleObjectProperty<Temporal>()
-
-            FieldType.Blob -> if (!blobValues.containsKey(fieldId))
-                blobValues[fieldId] = SimpleBlobProperty(byteArrayOf())
-
-            FieldType.Enum -> if (!enumValues.containsKey(fieldId))
-                enumValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Float -> if (!floatValues.containsKey(fieldId))
+            }
+            FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
+                zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()
+            }
+            FieldType.Date -> if (!localDateValues.containsKey(fieldId)) {
+                localDateValues[fieldId] = NullableLocalDateProperty()
+            }
+            FieldType.Time -> if (!localTimeValues.containsKey(fieldId)) {
+                localTimeValues[fieldId] = NullableLocalTimeProperty()
+            }
+            FieldType.Duration -> if (!durationValues.containsKey(fieldId)) {
+                durationValues[fieldId] = NullableDurationProperty()
+            }
+            FieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId)) {
+                monthDayValues[fieldId] = NullableMonthDayProperty()
+            }
+            FieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId)) {
+                yearMonthValues[fieldId] = NullableYearMonthProperty()
+            }
+            FieldType.Period -> if (!periodValues.containsKey(fieldId)) {
+                periodValues[fieldId] = NullablePeriodProperty()
+            }
+            FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId)) {
+                localDateTimeValues[fieldId] = NullableLocalDateTimeProperty()
+            }
+            FieldType.Blob -> if (!blobValues.containsKey(fieldId)) {
+                blobValues[fieldId] = NullableBlobProperty(byteArrayOf())
+            }
+            FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
+                enumValues[fieldId] = NullableEnumProperty()
+            }
+            FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
-
-            FieldType.Double -> if (!doubleValues.containsKey(fieldId))
+            }
+            FieldType.Double -> if (!doubleValues.containsKey(fieldId)) {
                 doubleValues[fieldId] = NullableDoubleProperty()
-
-            FieldType.Short -> if (!shortValues.containsKey(fieldId))
+            }
+            FieldType.Short -> if (!shortValues.containsKey(fieldId)) {
                 shortValues[fieldId] = NullableShortProperty()
-
-            FieldType.Long -> if (!longValues.containsKey(fieldId))
+            }
+            FieldType.Long -> if (!longValues.containsKey(fieldId)) {
                 longValues[fieldId] = NullableLongProperty()
-
-            FieldType.Int -> if (!integerValues.containsKey(fieldId))
+            }
+            FieldType.Int -> if (!integerValues.containsKey(fieldId)) {
                 integerValues[fieldId] = NullableIntegerProperty()
-
-            FieldType.Uuid -> if (!uuidValues.containsKey(fieldId))
-                uuidValues[fieldId] = SimpleObjectProperty()
-
-            FieldType.Boolean -> if (!booleanValues.containsKey(fieldId))
+            }
+            FieldType.Uuid -> if (!uuidValues.containsKey(fieldId)) {
+                uuidValues[fieldId] = NullableUuidProperty()
+            }
+            FieldType.Boolean -> if (!booleanValues.containsKey(fieldId)) {
                 booleanValues[fieldId] = NullableBooleanProperty()
+            }
         }
 
     }
@@ -1155,7 +1192,7 @@ abstract class Entity : IEntity, Serializable {
         if (includeThisEntity) {
             yield(this@Entity)
         }
-        objectValues.values.forEach { objectProperty -> yieldAll(objectProperty.value.getNestedEntities()) }
+        objectValues.values.forEach { objectWritableProperty -> yieldAll(objectWritableProperty.value.getNestedEntities()) }
         objectCollections.values.forEach { objectCollection -> objectCollection.forEach { entity -> yieldAll(entity.getNestedEntities()) } }
     }
 
@@ -1236,29 +1273,30 @@ abstract class Entity : IEntity, Serializable {
 
         private fun getEnums(entityId: Int) = allEnums.getOrPut(entityId) { LinkedHashSet() }
 
-        /**
-         * Convenience method to help with [WritableValue] containers.
-         * Exposes [WritableValue.getValue] via a get() accessor.
-         * Specifically for non-nullable [String] properties
-         */
-        fun WritableValue<String?>.get(): String {
-            return this.value.orEmpty()
-        }
-
-        /**
-         * Convenience method to help with [WritableValue] containers.
-         * Exposes [WritableValue.getValue] via a get() accessor
-         */
-        fun <T> WritableValue<T>.get(): T {
+        fun <T> WritableProperty<T>.get(): T {
             return this.value
         }
 
-        /**
-         * Convenience method to help with [WritableValue] containers.
-         * Exposes [WritableValue.setValue] via a set() modifier
-         */
-        fun <T> WritableValue<T>.set(value: T) {
+        fun <T> WritableProperty<T>.set(value: T) {
             this.value = value
         }
+
+        fun WritableProperty<String?>.get(): String = this.value.orEmpty()
+
+        fun WritableProperty<Long?>.get(): Long = this.value!!
+
+        fun WritableProperty<Short?>.get(): Short = this.value!!
+
+        fun WritableProperty<Double?>.get(): Double = this.value!!
+
+        fun WritableProperty<LocalDate?>.get(): LocalDate = this.value!!
+
+        fun WritableProperty<LocalDateTime?>.get(): LocalDateTime = this.value!!
+
+        fun WritableProperty<LocalTime?>.get(): LocalTime = this.value!!
+
+        fun WritableProperty<Period?>.get(): Period = this.value!!
+
+        fun WritableProperty<YearMonth?>.get(): YearMonth = this.value!!
     }
 }

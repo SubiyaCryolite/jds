@@ -13,24 +13,22 @@
  */
 package io.github.subiyacryolite.jds.tests.entities
 
-import io.github.subiyacryolite.jds.tests.constants.Enums
-import io.github.subiyacryolite.jds.tests.enums.Right
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import javafx.beans.property.SimpleListProperty
-import javafx.collections.FXCollections
+import io.github.subiyacryolite.jds.tests.constants.Enums
+import io.github.subiyacryolite.jds.tests.enums.Right
 
 @EntityAnnotation(name = "Login", id = 7900)
 class Login : Entity() {
 
-    private val _rights = SimpleListProperty<Right>(FXCollections.observableArrayList())
+    private val _rights = ArrayList<Right>()
 
     init {
         map(Enums.Rights, _rights)
     }
 
     var rights: MutableList<Right>
-        get() = _rights.get()
+        get() = _rights
         set(value) {
             _rights.clear()
             _rights.addAll(value)

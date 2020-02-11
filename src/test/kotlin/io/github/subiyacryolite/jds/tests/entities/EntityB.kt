@@ -15,12 +15,13 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.StringProperty
 import io.github.subiyacryolite.jds.enums.FieldType
-import javafx.beans.property.SimpleStringProperty
 
 @EntityAnnotation(id = 1001, name = "entityb")
 open class EntityB : EntityA() {
-    private val _field = SimpleStringProperty("C")
+
+    private val _field = StringProperty("C")
 
     init {
         map(ENTITY_B_FIELD, _field)

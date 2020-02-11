@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Short] values
  * @param initialValue the initial value
  */
-class NullableShortProperty(initialValue: Short? = null) : ObjectProperty<Short?>(initialValue)
+open class NullableShortProperty(initialValue: Short? = null) : ObjectProperty<Short?>(initialValue)

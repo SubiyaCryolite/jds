@@ -13,14 +13,14 @@
  */
 package io.github.subiyacryolite.jds;
 
+import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.portable.PortableEntity
-import javafx.beans.value.WritableValue
 import java.util.*
 
 interface IEntity {
     val overview: IOverview
-    val objectValues: HashMap<FieldEntity<*>, WritableValue<out IEntity>>
+    val objectValues: HashMap<FieldEntity<*>, WritableProperty<out IEntity>>
     val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>>
     fun registerFields(table: Table)
     fun assign(dbContext: DbContext, jdsPortableEntity: PortableEntity)

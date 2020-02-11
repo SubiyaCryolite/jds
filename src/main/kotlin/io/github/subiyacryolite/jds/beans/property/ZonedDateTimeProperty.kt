@@ -19,4 +19,9 @@ import java.time.ZonedDateTime
  * Class allowing for the wrapping and persistence of [ZonedDateTime] values
  * @param initialValue the initial value
  */
-class ZonedDateTimeProperty(initialValue: ZonedDateTime = ZonedDateTime.now()) : ObjectProperty<ZonedDateTime>(initialValue)
+class ZonedDateTimeProperty(initialValue: ZonedDateTime = ZonedDateTime.now()) : NullableZonedDateTimeProperty(initialValue) {
+
+    override fun getValue(): ZonedDateTime {
+        return super.getValue()!!
+    }
+}

@@ -13,19 +13,18 @@
  */
 package io.github.subiyacryolite.jds.tests.entities
 
-import io.github.subiyacryolite.jds.tests.constants.Fields
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import javafx.beans.property.SimpleObjectProperty
-
+import io.github.subiyacryolite.jds.beans.property.*
+import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.*
 
 @EntityAnnotation(name = "TimeConstruct", id = 8000)
 class TimeConstruct : Entity() {
-    private val _period = SimpleObjectProperty(Period.ZERO)
-    private val _duration = SimpleObjectProperty(Duration.ZERO)
-    private val _monthDay = SimpleObjectProperty(MonthDay.of(Month.APRIL, 14))
-    private val _yearMonth = SimpleObjectProperty(YearMonth.of(1991, 7))
+    private val _period = PeriodProperty(Period.ZERO)
+    private val _duration = DurationProperty(Duration.ZERO)
+    private val _monthDay = MonthDayProperty(MonthDay.of(Month.APRIL, 14))
+    private val _yearMonth = ObjectProperty(YearMonth.of(1991, 7))
 
     init {
         map(Fields.Period, _period)
@@ -35,7 +34,7 @@ class TimeConstruct : Entity() {
     }
 
     var period: Period
-        get() = _period.value
+        get() = _period.get()
         set(value) = _period.set(value)
 
     var duration: Duration

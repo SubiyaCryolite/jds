@@ -13,13 +13,11 @@
  */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
+import io.github.subiyacryolite.jds.beans.property.BlobProperty
 import io.github.subiyacryolite.jds.context.DbContext
-import io.github.subiyacryolite.jds.Entity.Companion.get
-import io.github.subiyacryolite.jds.beans.property.SimpleBlobProperty
+import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import org.junit.jupiter.api.Test
 import java.io.*
-import java.util.*
 
 class Serialization : BaseTestConfig("Serialization") {
 
@@ -39,12 +37,12 @@ class Serialization : BaseTestConfig("Serialization") {
 
     @Test
     fun testBlobSerialization() {
-        val simpleBlobProperty = SimpleBlobProperty(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
+        val simpleBlobProperty = BlobProperty(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
         val canonicalName = simpleBlobProperty.javaClass.canonicalName
         serialize(simpleBlobProperty, canonicalName)
         val out = deserialize(canonicalName, simpleBlobProperty.javaClass)
-        System.out.printf("pre %s\n", Arrays.toString(simpleBlobProperty.get()))
-        System.out.printf("post %s\n", Arrays.toString(out!!.get()))
+        System.out.printf("pre %s\n", simpleBlobProperty.get().contentToString())
+        System.out.printf("post %s\n", out!!.get().contentToString())
     }
 
     private fun <T> serialize(objectToSerialize: T?, fileName: String?) {

@@ -19,4 +19,9 @@ import java.time.LocalTime
  * Class allowing for the wrapping and persistence of [LocalTime] values
  * @param initialValue the initial value
  */
-class LocalTimeProperty(initialValue: LocalTime = LocalTime.now()) : ObjectProperty<LocalTime>(initialValue)
+class LocalTimeProperty(initialValue: LocalTime = LocalTime.now()) : NullableLocalTimeProperty(initialValue) {
+
+    override fun getValue(): LocalTime {
+        return super.getValue()!!
+    }
+}

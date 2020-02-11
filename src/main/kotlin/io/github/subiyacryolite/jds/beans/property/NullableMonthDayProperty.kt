@@ -19,4 +19,4 @@ import java.time.MonthDay
  * Class allowing for the wrapping and persistence of nullable [MonthDay] values
  * @param initialValue the initial value
  */
-class NullableMonthDayProperty(initialValue: MonthDay? = null) : ObjectProperty<MonthDay?>(initialValue)
+open class NullableMonthDayProperty(initialValue: MonthDay? = null) : ObjectProperty<MonthDay?>(initialValue)

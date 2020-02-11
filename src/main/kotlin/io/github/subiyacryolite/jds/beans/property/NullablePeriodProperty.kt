@@ -19,4 +19,4 @@ import java.time.Period
  * Class allowing for the wrapping and persistence of nullable [Period] values
  * @param initialValue the initial value
  */
-class NullablePeriodProperty(initialValue: Period? = null) : ObjectProperty<Period?>(initialValue)
+open class NullablePeriodProperty(initialValue: Period? = null) : ObjectProperty<Period?>(initialValue)

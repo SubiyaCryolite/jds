@@ -18,4 +18,9 @@ import java.time.LocalDateTime
  * Class allowing for the wrapping and persistence of [LocalDateTime] values
  * @param initialValue the initial value
  */
-class LocalDateTimeProperty(initialValue: LocalDateTime = LocalDateTime.now()) : ObjectProperty<LocalDateTime>(initialValue)
+class LocalDateTimeProperty(initialValue: LocalDateTime = LocalDateTime.now()) : NullableLocalDateTimeProperty(initialValue) {
+
+    override fun getValue(): LocalDateTime {
+        return super.getValue()!!
+    }
+}

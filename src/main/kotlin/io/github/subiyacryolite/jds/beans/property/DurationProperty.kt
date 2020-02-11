@@ -19,4 +19,9 @@ import java.time.Duration
  * Class allowing for the wrapping and persistence of [Duration] values
  * @param initialValue the initial value
  */
-class DurationProperty(initialValue: Duration = Duration.ZERO) : ObjectProperty<Duration>(initialValue)
+class DurationProperty(initialValue: Duration = Duration.ZERO) : NullableDurationProperty(initialValue) {
+
+    override fun getValue(): Duration {
+        return super.getValue()!!
+    }
+}

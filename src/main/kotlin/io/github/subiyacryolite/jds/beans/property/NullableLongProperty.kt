@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Long] values
  * @param initialValue the initial value
  */
-class NullableLongProperty(initialValue: Long? = null) : ObjectProperty<Long?>(initialValue)
+open class NullableLongProperty(initialValue: Long? = null) : ObjectProperty<Long?>(initialValue)

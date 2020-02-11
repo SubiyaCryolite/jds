@@ -16,5 +16,4 @@ public interface WritableProperty<T> {
      *            The new value
      */
     void setValue(T value);
-
 }

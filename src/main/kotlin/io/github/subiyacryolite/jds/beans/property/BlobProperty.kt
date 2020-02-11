@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
  * @param initialValue the initial value
  */
-class BlobProperty(initialValue: ByteArray) : ObjectProperty<ByteArray>(initialValue)
+class BlobProperty(initialValue: ByteArray) : NullableBlobProperty(initialValue) {
+
+    override fun getValue(): ByteArray {
+        return super.getValue()!!
+    }
+}

@@ -22,8 +22,4 @@ class BooleanProperty(initialValue: Boolean = false) : NullableBooleanProperty(i
     override fun getValue(): Boolean {
         return super.getValue()!!
     }
-
-    fun setValue(value: Boolean) {
-        super.setValue(value)
-    }
 }

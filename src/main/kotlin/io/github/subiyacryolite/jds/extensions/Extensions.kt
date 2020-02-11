@@ -16,10 +16,9 @@ package io.github.subiyacryolite.jds.extensions
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.IEntity
-import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.Implementation
-import javafx.beans.value.WritableValue
 import java.nio.ByteBuffer
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -131,7 +130,7 @@ fun ResultSet.getLocalDate(column: String, dbContext: DbContext): Any = when (db
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterTemporalValue")
-internal fun Map<Int, WritableValue<out Temporal?>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableValue<out Temporal?>> = if (dbContext.options.saveSensitiveData) {
+internal fun Map<Int, WritableProperty<out Temporal?>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableProperty<out Temporal?>> = if (dbContext.options.saveSensitiveData) {
     this
 } else {
     this.filter { !Field.values[it.key]!!.sensitive }//only save fields which aren't sensitive
@@ -142,7 +141,7 @@ internal fun Map<Int, WritableValue<out Temporal?>>.filterSensitiveFields(dbCont
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterValue")
-internal fun <T> Map<Int, WritableValue<T>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableValue<T>> = if (dbContext.options.saveSensitiveData) {
+internal fun <T> Map<Int, WritableProperty<T>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableProperty<T>> = if (dbContext.options.saveSensitiveData) {
     this
 } else {
     this.filter { !Field.values[it.key]!!.sensitive }//only save fields which aren't sensitive
@@ -180,8 +179,8 @@ object Extensions {
      */
     private fun addAllToList(superclass: Class<*>?, parentEntities: MutableCollection<Int>) {
         if (superclass == null) return
-        val annotation= Entity.getEntityAnnotation(superclass)
-        if (annotation!=null) {
+        val annotation = Entity.getEntityAnnotation(superclass)
+        if (annotation != null) {
             parentEntities.add(annotation.id)
             addAllToList(superclass.superclass, parentEntities)
         }

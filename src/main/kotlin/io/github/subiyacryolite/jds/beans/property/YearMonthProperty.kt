@@ -19,4 +19,9 @@ import java.time.YearMonth
  * Class allowing for the wrapping and persistence of [YearMonth] values
  * @param initialValue the initial value
  */
-class YearMonthProperty(initialValue: YearMonth = YearMonth.now()) : ObjectProperty<YearMonth>(initialValue)
+class YearMonthProperty(initialValue: YearMonth = YearMonth.now()) : NullableYearMonthProperty(initialValue) {
+
+    override fun getValue(): YearMonth {
+        return super.getValue()!!
+    }
+}

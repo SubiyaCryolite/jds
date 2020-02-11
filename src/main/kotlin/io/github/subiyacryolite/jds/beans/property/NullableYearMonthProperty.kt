@@ -19,4 +19,4 @@ import java.time.YearMonth
  * Class allowing for the wrapping and persistence of nullable [YearMonth] values
  * @param initialValue the initial value
  */
-class NullableYearMonthProperty(initialValue: YearMonth? = null) : ObjectProperty<YearMonth?>(initialValue)
+open class NullableYearMonthProperty(initialValue: YearMonth? = null) : ObjectProperty<YearMonth?>(initialValue)

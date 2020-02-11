@@ -19,4 +19,4 @@ import java.time.Duration
  * Class allowing for the wrapping and persistence of nullable [Duration] values
  * @param initialValue the initial value
  */
-class NullableDurationProperty(initialValue: Duration? = null) : ObjectProperty<Duration?>(initialValue)
+open class NullableDurationProperty(initialValue: Duration? = null) : ObjectProperty<Duration?>(initialValue)

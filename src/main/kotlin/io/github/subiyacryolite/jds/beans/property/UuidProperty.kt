@@ -19,4 +19,9 @@ import java.util.*
  * Class allowing for the wrapping and persistence of [UUID] values
  * @param initialValue the initial value
  */
-class UuidProperty(initialValue: UUID = UUID.randomUUID()) : ObjectProperty<UUID>(initialValue)
+class UuidProperty(initialValue: UUID = UUID.randomUUID())  : NullableUuidProperty(initialValue) {
+
+    override fun getValue(): UUID {
+        return super.getValue()!!
+    }
+}
