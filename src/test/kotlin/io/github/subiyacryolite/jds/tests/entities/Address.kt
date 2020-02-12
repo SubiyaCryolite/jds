@@ -16,8 +16,11 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.BooleanProperty
+import io.github.subiyacryolite.jds.beans.property.EnumProperty
 import io.github.subiyacryolite.jds.beans.property.ShortProperty
+import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.tests.constants.Fields
+import io.github.subiyacryolite.jds.tests.enums.Right
 import java.time.LocalDateTime
 
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")

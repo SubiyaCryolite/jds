@@ -296,7 +296,7 @@ abstract class Entity : IEntity, Serializable {
     }
 
     @JvmName("mapNullableEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T) = map(fieldEnum, ObjectProperty(value))
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T) = map(fieldEnum, EnumProperty(value))
 
     @JvmName("mapNullableEnum")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T?>): WritableProperty<T?> {
@@ -848,7 +848,7 @@ abstract class Entity : IEntity, Serializable {
                 blobValues[fieldId] = BlobProperty(byteArrayOf())
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = EnumProperty()
+                enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = FloatProperty()
@@ -1243,6 +1243,8 @@ abstract class Entity : IEntity, Serializable {
         fun WritableProperty<Boolean?>.get(): Boolean = this.value!!
 
         fun WritableProperty<ByteArray?>.get(): ByteArray = this.value!!
+
+        fun WritableProperty<UUID?>.get(): UUID = this.value!!
 
         fun WritableProperty<Enum<*>?>.get(): Enum<*> = this.value!!
     }

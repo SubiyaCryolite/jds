@@ -24,7 +24,7 @@ class TimeConstruct : Entity() {
     private val _period = PeriodProperty(Period.ZERO)
     private val _duration = DurationProperty(Duration.ZERO)
     private val _monthDay = MonthDayProperty(MonthDay.of(Month.APRIL, 14))
-    private val _yearMonth = ObjectProperty(YearMonth.of(1991, 7))
+    private val _yearMonth = YearMonthProperty(YearMonth.of(1991, 7))
 
     init {
         map(Fields.Period, _period)
