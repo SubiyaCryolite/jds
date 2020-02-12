@@ -145,6 +145,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapShort")
     protected fun map(field: Field, value: Short) = map(field, ShortProperty(value))
 
+    @JvmName("mapShort")
+    protected fun map(field: Field, property: WritableProperty<Short>): WritableProperty<Short> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Short?>)
+        return property
+    }
+
     @JvmName("mapNullableShort")
     protected fun map(field: Field, property: WritableProperty<Short?>): WritableProperty<Short?> {
         validateShort(field)
@@ -154,6 +161,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapDouble")
     protected fun map(field: Field, value: Double) = map(field, DoubleProperty(value))
 
+    @JvmName("mapDouble")
+    protected fun map(field: Field, property: WritableProperty<Double>): WritableProperty<Double> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Double?>)
+        return property
+    }
+
     @JvmName("mapNullableDouble")
     protected fun map(field: Field, property: WritableProperty<Double?>): WritableProperty<Double?> {
         validateDouble(field)
@@ -162,6 +176,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapInt")
     protected fun map(field: Field, value: Int) = map(field, IntegerProperty(value))
+
+    @JvmName("mapInt")
+    protected fun map(field: Field, property: WritableProperty<Int>): WritableProperty<Int> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Int?>)
+        return property
+    }
 
     @JvmName("mapNullableInt")
     protected fun map(field: Field, property: WritableProperty<Int?>): WritableProperty<Int?> {
@@ -174,8 +195,8 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapLong")
     protected fun map(field: Field, property: WritableProperty<Long>): WritableProperty<Long> {
-        validateFloat(field)
-        longValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Long?>
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Long?>)
         return property
     }
 
@@ -186,10 +207,12 @@ abstract class Entity : IEntity, Serializable {
     }
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: Float): WritableProperty<Float> {
-        validateFloat(field)
-        val property = FloatProperty(value)
-        floatValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Float?>
+    protected fun map(field: Field, value: Float) = map(field, FloatProperty(value))
+
+    @JvmName("mapFloat")
+    protected fun map(field: Field, property: WritableProperty<Float>): WritableProperty<Float> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Float?>)
         return property
     }
 
@@ -202,6 +225,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapBoolean")
     protected fun map(field: Field, value: Boolean) = map(field, BooleanProperty(value))
 
+    @JvmName("mapBoolean")
+    protected fun map(field: Field, property: WritableProperty<Boolean>): WritableProperty<Boolean> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Boolean?>)
+        return property
+    }
+
     @JvmName("mapNullableBoolean")
     protected fun map(field: Field, property: WritableProperty<Boolean?>): WritableProperty<Boolean?> {
         validateBoolean(field)
@@ -210,6 +240,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapUuid")
     protected fun map(field: Field, value: UUID) = map(field, UuidProperty(value))
+
+    @JvmName("mapUuid")
+    protected fun map(field: Field, property: WritableProperty<UUID>): WritableProperty<UUID> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<UUID?>)
+        return property
+    }
 
     @JvmName("mapNullableUuid")
     protected fun map(field: Field, property: WritableProperty<UUID?>): WritableProperty<UUID?> {
@@ -220,6 +257,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapString")
     protected fun map(field: Field, value: String) = map(field, StringProperty(value))
 
+    @JvmName("mapString")
+    protected fun map(field: Field, property: WritableProperty<String>): WritableProperty<String> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<String?>)
+        return property
+    }
+
     @JvmName("mapNullableString")
     protected fun map(field: Field, property: WritableProperty<String?>): WritableProperty<String?> {
         validateString(field)
@@ -228,6 +272,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapDateTime")
     protected fun map(field: Field, value: LocalDateTime) = map(field, LocalDateTimeProperty(value))
+
+    @JvmName("mapDateTime")
+    protected fun map(field: Field, property: WritableProperty<LocalDateTime>): WritableProperty<LocalDateTime> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<LocalDateTime?>)
+        return property
+    }
 
     @JvmName("mapNullableDateTime")
     protected fun map(field: Field, property: WritableProperty<LocalDateTime?>): WritableProperty<LocalDateTime?> {
@@ -238,6 +289,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapZonedDateTime")
     protected fun map(field: Field, value: ZonedDateTime) = map(field, ZonedDateTimeProperty(value))
 
+    @JvmName("mapZonedDateTime")
+    protected fun map(field: Field, property: WritableProperty<ZonedDateTime>): WritableProperty<ZonedDateTime> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<ZonedDateTime?>)
+        return property
+    }
+
     @JvmName("mapNullableZonedDateTime")
     protected fun map(field: Field, property: WritableProperty<ZonedDateTime?>): WritableProperty<ZonedDateTime?> {
         validateZonedDateTime(field)
@@ -246,6 +304,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapDate")
     protected fun map(field: Field, value: LocalDate) = map(field, LocalDateProperty(value))
+
+    @JvmName("mapDate")
+    protected fun map(field: Field, property: WritableProperty<LocalDate>): WritableProperty<LocalDate> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<LocalDate?>)
+        return property
+    }
 
     @JvmName("mapNullableDate")
     protected fun map(field: Field, property: WritableProperty<LocalDate?>): WritableProperty<LocalDate?> {
@@ -256,6 +321,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapTime")
     protected fun map(field: Field, value: LocalTime) = map(field, LocalTimeProperty(value))
 
+    @JvmName("mapTime")
+    protected fun map(field: Field, property: WritableProperty<LocalTime>): WritableProperty<LocalTime> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<LocalTime?>)
+        return property
+    }
+
     @JvmName("mapNullableTime")
     protected fun map(field: Field, property: WritableProperty<LocalTime?>): WritableProperty<LocalTime?> {
         validateTime(field)
@@ -264,6 +336,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapBlob")
     protected fun map(field: Field, value: ByteArray) = map(field, BlobProperty(value))
+
+    @JvmName("mapBlob")
+    protected fun map(field: Field, property: WritableProperty<ByteArray>): WritableProperty<ByteArray> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<ByteArray?>)
+        return property
+    }
 
     @JvmName("mapNullableBlob")
     protected fun map(field: Field, property: WritableProperty<ByteArray?>): WritableProperty<ByteArray?> {
@@ -274,6 +353,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapMonthDay")
     protected fun map(field: Field, value: MonthDay) = map(field, MonthDayProperty(value))
 
+    @JvmName("mapMonthDay")
+    protected fun map(field: Field, property: WritableProperty<MonthDay>): WritableProperty<MonthDay> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<MonthDay?>)
+        return property
+    }
+
     @JvmName("mapNullableMonthDay")
     protected fun map(field: Field, property: WritableProperty<MonthDay?>): WritableProperty<MonthDay?> {
         validateMonthDay(field)
@@ -282,6 +368,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapYearMonth")
     protected fun map(field: Field, value: YearMonth) = map(field, YearMonthProperty(value))
+
+    @JvmName("mapYearMonth")
+    protected fun map(field: Field, property: WritableProperty<YearMonth>): WritableProperty<YearMonth> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<YearMonth?>)
+        return property
+    }
 
     @JvmName("mapNullableYearMonth")
     protected fun map(field: Field, property: WritableProperty<YearMonth?>): WritableProperty<YearMonth?> {
@@ -292,6 +385,13 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapPeriod")
     protected fun map(field: Field, value: Period) = map(field, PeriodProperty(value))
 
+    @JvmName("mapPeriod")
+    protected fun map(field: Field, property: WritableProperty<Period>): WritableProperty<Period> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Period?>)
+        return property
+    }
+
     @JvmName("mapNullablePeriod")
     protected fun map(field: Field, property: WritableProperty<Period?>): WritableProperty<Period?> {
         validatePeriod(field)
@@ -300,6 +400,13 @@ abstract class Entity : IEntity, Serializable {
 
     @JvmName("mapDuration")
     protected fun map(field: Field, value: Duration) = map(field, DurationProperty(value))
+
+    @JvmName("mapDuration")
+    protected fun map(field: Field, property: WritableProperty<Duration>): WritableProperty<Duration> {
+        @Suppress("UNCHECKED_CAST")
+        map(field, property as WritableProperty<Duration?>)
+        return property
+    }
 
     @JvmName("mapNullableDuration")
     protected fun map(field: Field, property: WritableProperty<Duration?>): WritableProperty<Duration?> {
@@ -809,7 +916,7 @@ abstract class Entity : IEntity, Serializable {
     private fun initBackingWritablePropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
         when (fieldType) {
             FieldType.String -> if (!stringValues.containsKey(fieldId)) {
-                stringValues[fieldId] = StringProperty()
+                stringValues[fieldId] = NullableStringProperty()
             }
             FieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId)) {
                 doubleCollections[fieldId] = ArrayList()
@@ -833,55 +940,55 @@ abstract class Entity : IEntity, Serializable {
                 enumCollections[fieldId] = ArrayList()
             }
             FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
-                zonedDateTimeValues[fieldId] = ZonedDateTimeProperty()
+                zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()
             }
             FieldType.Date -> if (!localDateValues.containsKey(fieldId)) {
-                localDateValues[fieldId] = LocalDateProperty()
+                localDateValues[fieldId] = ObjectProperty<LocalDate?>(null)
             }
             FieldType.Time -> if (!localTimeValues.containsKey(fieldId)) {
-                localTimeValues[fieldId] = LocalTimeProperty()
+                localTimeValues[fieldId] = NullableLocalTimeProperty()
             }
             FieldType.Duration -> if (!durationValues.containsKey(fieldId)) {
-                durationValues[fieldId] = DurationProperty()
+                durationValues[fieldId] = NullableDurationProperty()
             }
             FieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId)) {
-                monthDayValues[fieldId] = MonthDayProperty()
+                monthDayValues[fieldId] = NullableMonthDayProperty()
             }
             FieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId)) {
-                yearMonthValues[fieldId] = YearMonthProperty()
+                yearMonthValues[fieldId] = NullableYearMonthProperty()
             }
             FieldType.Period -> if (!periodValues.containsKey(fieldId)) {
                 periodValues[fieldId] = NullablePeriodProperty()
             }
             FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId)) {
-                localDateTimeValues[fieldId] = LocalDateTimeProperty()
+                localDateTimeValues[fieldId] = NullableLocalDateTimeProperty()
             }
             FieldType.Blob -> if (!blobValues.containsKey(fieldId)) {
-                blobValues[fieldId] = BlobProperty(byteArrayOf())
+                blobValues[fieldId] = NullableBlobProperty()
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
+                enumValues[fieldId] = NullableEnumProperty()
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
             }
             FieldType.Double -> if (!doubleValues.containsKey(fieldId)) {
-                doubleValues[fieldId] = DoubleProperty()
+                doubleValues[fieldId] = NullableDoubleProperty()
             }
             FieldType.Short -> if (!shortValues.containsKey(fieldId)) {
-                shortValues[fieldId] = ShortProperty()
+                shortValues[fieldId] = NullableShortProperty()
             }
             FieldType.Long -> if (!longValues.containsKey(fieldId)) {
-                longValues[fieldId] = LongProperty()
+                longValues[fieldId] = NullableLongProperty()
             }
             FieldType.Int -> if (!integerValues.containsKey(fieldId)) {
-                integerValues[fieldId] = IntegerProperty()
+                integerValues[fieldId] = NullableIntegerProperty()
             }
             FieldType.Uuid -> if (!uuidValues.containsKey(fieldId)) {
-                uuidValues[fieldId] = UuidProperty()
+                uuidValues[fieldId] = NullableUuidProperty()
             }
             FieldType.Boolean -> if (!booleanValues.containsKey(fieldId)) {
-                booleanValues[fieldId] = BooleanProperty()
+                booleanValues[fieldId] = NullableBooleanProperty()
             }
         }
 

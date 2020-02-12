@@ -34,7 +34,7 @@ class Example : Entity(), LoadListener, SaveListener {
     private val _dateTimeField = map(Fields.DateTime, LocalDateTime.now())
     private val _zonedDateTimeField = map(Fields.ZonedDateTime, ZonedDateTime.now())
     private val _longField = map(Fields.Long, 0L)
-    private val _intField = map(Fields.Int, IntegerProperty())
+    private val _intField = map(Fields.Int, NullableIntegerProperty())
     private val _doubleField = map(Fields.Double, 0.0)
     private val _floatField = map(Fields.Float, 0f)
     private val _booleanField = map(Fields.Boolean, false)

@@ -15,24 +15,21 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.BooleanProperty
-import io.github.subiyacryolite.jds.beans.property.EnumProperty
-import io.github.subiyacryolite.jds.beans.property.ShortProperty
-import io.github.subiyacryolite.jds.beans.property.WritableProperty
+import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
+import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
 import io.github.subiyacryolite.jds.tests.constants.Fields
-import io.github.subiyacryolite.jds.tests.enums.Right
 import java.time.LocalDateTime
 
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
 class Address : Entity() {
 
     private val _streetName = map(Fields.StreetName, "")
-    private val _plotNumber = map(Fields.PlotNumber, ShortProperty())
+    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty())
     private val _area = map(Fields.ResidentialArea, "")
     private val _city = map(Fields.City, "")
     private val _provinceOrState = map(Fields.ProvinceOrState, "")
     private val _country = map(Fields.Country, "")
-    private val _primaryAddress = map(Fields.PrimaryAddress, BooleanProperty(null))
+    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty())
     private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now())
 
     var primaryAddress: Boolean?
