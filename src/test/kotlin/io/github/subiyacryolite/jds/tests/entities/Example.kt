@@ -15,10 +15,7 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.DoubleProperty
-import io.github.subiyacryolite.jds.beans.property.FloatProperty
-import io.github.subiyacryolite.jds.beans.property.LongProperty
-import io.github.subiyacryolite.jds.beans.property.NullableIntegerProperty
+import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.events.EventArguments
 import io.github.subiyacryolite.jds.events.LoadListener
 import io.github.subiyacryolite.jds.events.SaveListener
@@ -36,10 +33,10 @@ class Example : Entity(), LoadListener, SaveListener {
     private val _dateField = map(Fields.Date, LocalDate.now())
     private val _dateTimeField = map(Fields.DateTime, LocalDateTime.now())
     private val _zonedDateTimeField = map(Fields.ZonedDateTime, ZonedDateTime.now())
-    private val _longField = map(Fields.Long, LongProperty(0))
-    private val _intField = map(Fields.Int, NullableIntegerProperty())
-    private val _doubleField = map(Fields.Double, DoubleProperty(0.0))
-    private val _floatField = map(Fields.Float, FloatProperty(0f))
+    private val _longField = map(Fields.Long, 0L)
+    private val _intField = map(Fields.Int, IntegerProperty())
+    private val _doubleField = map(Fields.Double, 0.0)
+    private val _floatField = map(Fields.Float, 0f)
     private val _booleanField = map(Fields.Boolean, false)
     private val _blobField = map(Fields.Blob, ByteArray(0))
 

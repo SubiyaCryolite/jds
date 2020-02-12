@@ -84,29 +84,6 @@ class Delete(private val dbContext: DbContext, private val ids: Iterable<String>
 
 
     companion object {
-
         private const val DELETE_SQL = "DELETE FROM jds_entity_overview WHERE id = ?"
-
-        /**
-         * @param dbContext
-         * @param entities
-         * @throws Exception
-         */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("JdsDelete(db, entityVersions).call()", "io.github.subiyacryolite.jds.JdsDelete"))
-        @Throws(Exception::class)
-        fun delete(dbContext: DbContext, entities: Collection<Entity>) {
-            Delete(dbContext, entities).call()
-        }
-
-        /**
-         * @param dbContext
-         * @param entities
-         * @throws Exception
-         */
-        @Deprecated("please refer to <a href=\"https://github.com/SubiyaCryolite/Jenesis-Data-Store\"> the readme</a> for the most up to date CRUD approach", ReplaceWith("delete(db, listOf(*entityVersions))", "io.github.subiyacryolite.jds.JdsDelete.Companion.delete", "java.util.Arrays"))
-        @Throws(Exception::class)
-        fun delete(dbContext: DbContext, vararg entities: Entity) {
-            delete(dbContext, listOf(*entities))
-        }
     }
 }

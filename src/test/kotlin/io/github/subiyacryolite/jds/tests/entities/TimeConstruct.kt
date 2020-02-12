@@ -38,15 +38,15 @@ class TimeConstruct : Entity() {
         set(value) = _period.set(value)
 
     var duration: Duration
-        get() = _duration.value
+        get() = _duration.get()
         set(value) = _duration.set(value)
 
     var monthDay: MonthDay
-        get() = _monthDay.value
+        get() = _monthDay.get()
         set(value) = _monthDay.set(value)
 
     var yearMonth: YearMonth
-        get() = _yearMonth.value
+        get() = _yearMonth.get()
         set(value) = _yearMonth.set(value)
 
     override fun toString(): String {

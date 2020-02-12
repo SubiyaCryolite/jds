@@ -16,12 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.MonthDay
 
 /**
- * Class allowing for the wrapping and persistence of [MonthDay] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [MonthDay] values
+ * @param value the backing value
  */
-class MonthDayProperty(initialValue: MonthDay = MonthDay.now()) : NullableMonthDayProperty(initialValue) {
-
-    override fun getValue(): MonthDay {
-        return super.getValue()!!
-    }
-}
+data class MonthDayProperty(override var value: MonthDay? = null) : WritableProperty<MonthDay?>

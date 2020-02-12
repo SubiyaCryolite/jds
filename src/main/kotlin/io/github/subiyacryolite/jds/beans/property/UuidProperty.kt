@@ -16,12 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.util.*
 
 /**
- * Class allowing for the wrapping and persistence of [UUID] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [UUID] values
+ * @param value the backing value
  */
-class UuidProperty(initialValue: UUID = UUID.randomUUID())  : NullableUuidProperty(initialValue) {
-
-    override fun getValue(): UUID {
-        return super.getValue()!!
-    }
-}
+data class UuidProperty(override var value: UUID? = null) : WritableProperty<UUID?>

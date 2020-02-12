@@ -64,7 +64,6 @@ data class Table(var name: String = "",
      * @param entityClass
      * @param registerFields
      */
-    @JvmOverloads
     fun registerEntity(entityClass: Class<out IEntity>, registerFields: Boolean) {
         val entityAnnotation = Entity.getEntityAnnotation(entityClass)
         if (entityAnnotation != null) {

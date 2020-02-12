@@ -41,8 +41,8 @@ class Serialization : BaseTestConfig("Serialization") {
         val canonicalName = simpleBlobProperty.javaClass.canonicalName
         serialize(simpleBlobProperty, canonicalName)
         val out = deserialize(canonicalName, simpleBlobProperty.javaClass)
-        System.out.printf("pre %s\n", simpleBlobProperty.get().contentToString())
-        System.out.printf("post %s\n", out!!.get().contentToString())
+        System.out.printf("pre %s\n", simpleBlobProperty.value?.contentToString())
+        System.out.printf("post %s\n", out!!.value?.contentToString())
     }
 
     private fun <T> serialize(objectToSerialize: T?, fileName: String?) {

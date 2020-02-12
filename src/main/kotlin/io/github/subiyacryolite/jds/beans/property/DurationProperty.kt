@@ -16,12 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.Duration
 
 /**
- * Class allowing for the wrapping and persistence of [Duration] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [Duration] values
+ * @param value the backing value
  */
-class DurationProperty(initialValue: Duration = Duration.ZERO) : NullableDurationProperty(initialValue) {
-
-    override fun getValue(): Duration {
-        return super.getValue()!!
-    }
-}
+data class DurationProperty(override var value: Duration? = null) : WritableProperty<Duration?>

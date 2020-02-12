@@ -1,19 +1,7 @@
-package io.github.subiyacryolite.jds.beans.property;
+package io.github.subiyacryolite.jds.beans.property
 
-public interface WritableProperty<T> {
+import java.io.Serializable
 
-    /**
-     * Get the wrapped value.
-     *
-     * @return The current value
-     */
-    T getValue();
-
-    /**
-     * Set the wrapped value.
-     *
-     * @param value
-     *            The new value
-     */
-    void setValue(T value);
+interface WritableProperty<T> : Serializable {
+    var value: T
 }

@@ -16,12 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.Period
 
 /**
- * Class allowing for the wrapping and persistence of [Period] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [Period] values
+ * @param value the backing value
  */
-class PeriodProperty(initialValue: Period = Period.ZERO) : NullablePeriodProperty(initialValue) {
-
-    override fun getValue(): Period {
-        return super.getValue()!!
-    }
-}
+data class PeriodProperty(override var value: Period? = null) : WritableProperty<Period?>

@@ -15,11 +15,6 @@ package io.github.subiyacryolite.jds.beans.property
 
 /**
  * Class allowing for the wrapping and persistence of binary values within a backing [Enum]
- * @param initialValue the initial value
+ * @param value the backing value
  */
-class EnumProperty(initialValue: Enum<*>)  : NullableEnumProperty(initialValue) {
-
-    override fun getValue(): Enum<*> {
-        return super.getValue()!!
-    }
-}
+data class EnumProperty(override var value: Enum<*>? = null) : WritableProperty<Enum<*>?>

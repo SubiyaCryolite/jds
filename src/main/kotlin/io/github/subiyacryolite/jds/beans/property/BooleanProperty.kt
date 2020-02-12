@@ -14,12 +14,7 @@
 package io.github.subiyacryolite.jds.beans.property
 
 /**
- * Class allowing for the wrapping and persistence of [Boolean] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [Boolean] values
+ * @param value the backing value
  */
-class BooleanProperty(initialValue: Boolean = false) : NullableBooleanProperty(initialValue) {
-
-    override fun getValue(): Boolean {
-        return super.getValue()!!
-    }
-}
+data class BooleanProperty(override var value: Boolean? = null) : WritableProperty<Boolean?>

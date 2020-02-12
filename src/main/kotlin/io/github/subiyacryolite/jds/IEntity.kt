@@ -20,7 +20,7 @@ import java.util.*
 
 interface IEntity {
     val overview: IOverview
-    val objectValues: HashMap<FieldEntity<*>, WritableProperty<out IEntity>>
+    val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>>
     val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>>
     fun registerFields(table: Table)
     fun assign(dbContext: DbContext, jdsPortableEntity: PortableEntity)

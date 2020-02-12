@@ -95,8 +95,7 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
         entity.objectValues.filter { it.key.field.id == fieldId }.forEach {
             val referenceClass = dbContext.classes[entityId]
             if (referenceClass != null) {
-                if (it.value.value == null)
-                    it.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                it.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 it.value.value.overview.id = id
                 it.value.value.overview.editVersion = editVersion
                 val jdsEntity = it.value.value as Entity

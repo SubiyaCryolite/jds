@@ -128,7 +128,7 @@ abstract class Entity : IEntity, Serializable {
     internal val enumStringCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
     //objects
     @get:JsonIgnore
-    override val objectValues: HashMap<FieldEntity<*>, WritableProperty<out IEntity>> = HashMap()
+    override val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
     //blobs
     @get:JsonIgnore
     internal val blobValues: HashMap<Int, WritableProperty<ByteArray?>> = HashMap()
@@ -143,243 +143,159 @@ abstract class Entity : IEntity, Serializable {
     }
 
     @JvmName("mapShort")
-    protected fun map(field: Field, value: Short): WritableProperty<Short> {
-        validateShort(field)
-        val property = ShortProperty(value)
-        shortValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Short?>
-        return property
-    }
+    protected fun map(field: Field, value: Short) = map(field, ShortProperty(value))
 
-    @JvmName("mapNullableShort")
+    @JvmName("mapShort")
     protected fun map(field: Field, property: WritableProperty<Short?>): WritableProperty<Short?> {
         validateShort(field)
         return shortValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDouble")
-    protected fun map(field: Field, value: Double): WritableProperty<Double> {
-        validateDouble(field)
-        val property = DoubleProperty(value)
-        doubleValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Double?>
-        return property
-    }
+    protected fun map(field: Field, value: Double) = map(field, DoubleProperty(value))
 
-    @JvmName("mapNullableDouble")
+    @JvmName("mapDouble")
     protected fun map(field: Field, property: WritableProperty<Double?>): WritableProperty<Double?> {
         validateDouble(field)
         return doubleValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapInt")
-    protected fun map(field: Field, value: Int): WritableProperty<Int> {
-        validateInt(field)
-        val property = IntegerProperty(value)
-        integerValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Int?>
-        return property
-    }
+    protected fun map(field: Field, value: Int) = map(field, IntegerProperty(value))
 
-    @JvmName("mapNullableInt")
+    @JvmName("mapInt")
     protected fun map(field: Field, property: WritableProperty<Int?>): WritableProperty<Int?> {
         validateInt(field)
         return integerValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapLong")
-    protected fun map(field: Field, value: Long): WritableProperty<Long> {
-        validateLong(field)
-        val property = LongProperty(value)
-        longValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Long?>
-        return property
-    }
+    protected fun map(field: Field, value: Long) = map(field, LongProperty(value))
 
-    @JvmName("mapNullableLong")
+    @JvmName("mapLong")
     protected fun map(field: Field, property: WritableProperty<Long?>): WritableProperty<Long?> {
         validateLong(field)
         return longValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: Float): WritableProperty<Float> {
-        validateFloat(field)
-        val property = FloatProperty(value)
-        floatValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Float?>
-        return property
-    }
+    protected fun map(field: Field, value: Float) = map(field, FloatProperty(value))
 
-    @JvmName("mapNullableFloat")
+    @JvmName("mapFloat")
     protected fun map(field: Field, property: WritableProperty<Float?>): WritableProperty<Float?> {
         validateFloat(field)
         return floatValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapBoolean")
-    protected fun map(field: Field, value: Boolean): WritableProperty<Boolean> {
-        validateBoolean(field)
-        val property = BooleanProperty(value)
-        booleanValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Boolean?>
-        return property
-    }
+    protected fun map(field: Field, value: Boolean) = map(field, BooleanProperty(value))
 
-    @JvmName("mapNullableBoolean")
+    @JvmName("mapBoolean")
     protected fun map(field: Field, property: WritableProperty<Boolean?>): WritableProperty<Boolean?> {
         validateBoolean(field)
         return booleanValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapUuid")
-    protected fun map(field: Field, value: UUID): WritableProperty<UUID> {
-        validateUuid(field)
-        val property = UuidProperty(value)
-        uuidValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<UUID?>
-        return property
-    }
+    protected fun map(field: Field, value: UUID) = map(field, UuidProperty(value))
 
-    @JvmName("mapNullableUuid")
+    @JvmName("mapUuid")
     protected fun map(field: Field, property: WritableProperty<UUID?>): WritableProperty<UUID?> {
         validateUuid(field)
         return uuidValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapString")
-    protected fun map(field: Field, value: String): WritableProperty<String> {
-        validateString(field)
-        val property = StringProperty(value)
-        stringValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<String?>
-        return property
-    }
+    protected fun map(field: Field, value: String) = map(field, StringProperty(value))
 
-    @JvmName("mapNullableString")
+    @JvmName("mapString")
     protected fun map(field: Field, property: WritableProperty<String?>): WritableProperty<String?> {
         validateString(field)
         return stringValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDateTime")
-    protected fun map(field: Field, value: LocalDateTime): WritableProperty<LocalDateTime> {
-        validateDateTime(field)
-        val property = LocalDateTimeProperty(value)
-        localDateTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalDateTime?>
-        return property
-    }
+    protected fun map(field: Field, value: LocalDateTime) = map(field, LocalDateTimeProperty(value))
 
-    @JvmName("mapNullableDateTime")
+    @JvmName("mapDateTime")
     protected fun map(field: Field, property: WritableProperty<LocalDateTime?>): WritableProperty<LocalDateTime?> {
         validateDateTime(field)
         return localDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, value: ZonedDateTime): WritableProperty<ZonedDateTime> {
-        validateZonedDateTime(field)
-        val property = ZonedDateTimeProperty(value)
-        zonedDateTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<ZonedDateTime?>
-        return property
-    }
+    protected fun map(field: Field, value: ZonedDateTime) = map(field, ZonedDateTimeProperty(value))
 
-    @JvmName("mapNullableZonedDateTime")
+    @JvmName("mapZonedDateTime")
     protected fun map(field: Field, property: WritableProperty<ZonedDateTime?>): WritableProperty<ZonedDateTime?> {
         validateZonedDateTime(field)
         return zonedDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDate")
-    protected fun map(field: Field, value: LocalDate): WritableProperty<LocalDate> {
-        validateDate(field)
-        val property = LocalDateProperty(value)
-        localDateValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalDate?>
-        return property
-    }
+    protected fun map(field: Field, value: LocalDate) = map(field, LocalDateProperty(value))
 
-    @JvmName("mapNullableDate")
+    @JvmName("mapDate")
     protected fun map(field: Field, property: WritableProperty<LocalDate?>): WritableProperty<LocalDate?> {
         validateDate(field)
         return localDateValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapTime")
-    protected fun map(field: Field, value: LocalTime): WritableProperty<LocalTime> {
-        validateTime(field)
-        val property = LocalTimeProperty(value)
-        localTimeValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<LocalTime?>
-        return property
-    }
+    protected fun map(field: Field, value: LocalTime) = map(field, LocalTimeProperty(value))
 
-    @JvmName("mapNullableTime")
+    @JvmName("mapTime")
     protected fun map(field: Field, property: WritableProperty<LocalTime?>): WritableProperty<LocalTime?> {
         validateTime(field)
         return localTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapBlob")
-    protected fun map(field: Field, value: ByteArray): WritableProperty<ByteArray> {
-        validateBlob(field)
-        val property = BlobProperty(value)
-        blobValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<ByteArray?>
-        return property
-    }
+    protected fun map(field: Field, value: ByteArray) = map(field, BlobProperty(value))
 
-    @JvmName("mapNullableBlob")
+    @JvmName("mapBlob")
     protected fun map(field: Field, property: WritableProperty<ByteArray?>): WritableProperty<ByteArray?> {
         validateBlob(field)
         return blobValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapMonthDay")
-    protected fun map(field: Field, value: MonthDay): WritableProperty<MonthDay> {
-        validateMonthDay(field)
-        val property = MonthDayProperty(value)
-        monthDayValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<MonthDay?>
-        return property
-    }
+    protected fun map(field: Field, value: MonthDay) = map(field, MonthDayProperty(value))
 
-    @JvmName("mapNullableMonthDay")
+    @JvmName("mapMonthDay")
     protected fun map(field: Field, property: WritableProperty<MonthDay?>): WritableProperty<MonthDay?> {
         validateMonthDay(field)
         return monthDayValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapYearMonth")
-    protected fun map(field: Field, value: YearMonth): WritableProperty<YearMonth> {
-        validateMonthDay(field)
-        val property = YearMonthProperty(value)
-        yearMonthValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<YearMonth?>
-        return property
-    }
+    protected fun map(field: Field, value: YearMonth) = map(field, YearMonthProperty(value))
 
-    @JvmName("mapNullableYearMonth")
+    @JvmName("mapYearMonth")
     protected fun map(field: Field, property: WritableProperty<YearMonth?>): WritableProperty<YearMonth?> {
         validateYearMonth(field)
         return yearMonthValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapPeriod")
-    protected fun map(field: Field, value: Period): WritableProperty<Period> {
-        validateMonthDay(field)
-        val property = PeriodProperty(value)
-        periodValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Period?>
-        return property
-    }
+    protected fun map(field: Field, value: Period) = map(field, PeriodProperty(value))
 
-    @JvmName("mapNullablePeriod")
+    @JvmName("mapPeriod")
     protected fun map(field: Field, property: WritableProperty<Period?>): WritableProperty<Period?> {
         validatePeriod(field)
         return periodValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapDuration")
-    protected fun map(field: Field, value: Duration): WritableProperty<Duration> {
-        validateMonthDay(field)
-        val property = DurationProperty(value)
-        durationValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Duration?>
-        return property
-    }
+    protected fun map(field: Field, value: Duration) = map(field, DurationProperty(value))
 
-    @JvmName("mapNullableDuration")
+    @JvmName("mapDuration")
     protected fun map(field: Field, property: WritableProperty<Duration?>): WritableProperty<Duration?> {
         validateDuration(field)
         return durationValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
+    @JvmName("mapNullableEnum")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T) = map(fieldEnum, ObjectProperty(value))
 
     @JvmName("mapNullableEnum")
@@ -466,19 +382,18 @@ abstract class Entity : IEntity, Serializable {
         return map(fieldEntity, ObjectProperty(entity))
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, WritableProperty: WritableProperty<T>): WritableProperty<T> {
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, property: WritableProperty<T>): WritableProperty<T> {
         if (fieldEntity.field.type != FieldType.Entity) {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
-
-            objectValues[fieldEntity] = WritableProperty
+            objectValues[fieldEntity] = property as WritableProperty<IEntity>
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
             throw RuntimeException("You can only bind a class to one WritableProperty. This class is already bound to one object or object array")
         }
-        return WritableProperty
+        return property
     }
 
     /**
@@ -491,7 +406,6 @@ abstract class Entity : IEntity, Serializable {
         }
         if (!objectCollections.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
-
             objectCollections[fieldEntity] = collection as MutableCollection<IEntity>
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
@@ -703,155 +617,175 @@ abstract class Entity : IEntity, Serializable {
      */
     internal fun populateProperties(dbContext: DbContext, fieldType: FieldType, fieldId: Int, value: Any?) {
         initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
-
         if (!dbContext.options.populateSensitiveData) {
             if (Field.values[fieldId]!!.sensitive) {
                 return
             }
         }
-
         when (fieldType) {
-
-            FieldType.Float -> floatValues[fieldId]?.value = when (value) {
-                is Double -> value.toFloat()
-                else -> value as Float?
+            FieldType.Float -> {
+                floatValues[fieldId]?.value = when (value) {
+                    is Double -> value.toFloat()
+                    else -> value as Float?
+                }
             }
-
-            FieldType.Double -> doubleValues[fieldId]?.value = value as Double?
-
-            FieldType.Short -> shortValues[fieldId]?.value = when (value) {
-                is Double -> value.toShort()
-                is Int -> value.toShort()
-                is Short? -> value
-                else -> null
+            FieldType.Double -> {
+                doubleValues[fieldId]?.value = value as Double?
             }
-
-            FieldType.Long -> longValues[fieldId]?.value = when (value) {
-                is Long? -> value
-                is BigDecimal -> value.toLong() //Oracle
-                is Int -> value.toLong()
-                else -> null
+            FieldType.Short -> {
+                shortValues[fieldId]?.value = when (value) {
+                    is Double -> value.toShort()
+                    is Int -> value.toShort()
+                    is Short? -> value
+                    else -> null
+                }
             }
-
-            FieldType.Int -> integerValues[fieldId]?.value = when (value) {
-                is Int? -> value
-                is BigDecimal -> value.toInt() //Oracle
-                else -> null
+            FieldType.Long -> {
+                longValues[fieldId]?.value = when (value) {
+                    is Long? -> value
+                    is BigDecimal -> value.toLong() //Oracle
+                    is Int -> value.toLong()
+                    else -> null
+                }
             }
-
-            FieldType.Uuid -> uuidValues[fieldId]?.value = when (value) {
-                is ByteArray? -> value.toUuid()
-                is String -> UUID.fromString(value)
-                is UUID? -> value
-                else -> null
+            FieldType.Int -> {
+                integerValues[fieldId]?.value = when (value) {
+                    is Int? -> value
+                    is BigDecimal -> value.toInt() //Oracle
+                    else -> null
+                }
             }
-
-            FieldType.Boolean -> booleanValues[fieldId]?.value = when (value) {
-                is Int -> value == 1
-                is Boolean? -> value
-                is BigDecimal -> value.intValueExact() == 1 //Oracle
-                else -> null
+            FieldType.Uuid -> {
+                uuidValues[fieldId]?.value = when (value) {
+                    is ByteArray? -> value.toUuid()
+                    is String -> UUID.fromString(value)
+                    is UUID? -> value
+                    else -> null
+                }
             }
-
-            FieldType.DoubleCollection -> doubleCollections[fieldId]?.add(value as Double)
-
-            FieldType.FloatCollection -> floatCollections[fieldId]?.add(value as Float)
-
-            FieldType.LongCollection -> longCollections[fieldId]?.add(value as Long)
-
-            FieldType.IntCollection -> integerCollections[fieldId]?.add(value as Int)
-
-            //Enums may be null
-            FieldType.Enum -> enumValues.filter { it.key == fieldId }.forEach {
-                val fieldEnum = FieldEnum.enums[it.key]
-                if (fieldEnum != null) {
-                    if (value != null) {
-                        it.value.value = (when (value) {
-                            is BigDecimal -> fieldEnum.valueOf(value.intValueExact())
-                            else -> fieldEnum.valueOf(value as Int)
-                        })
+            FieldType.Boolean -> {
+                booleanValues[fieldId]?.value = when (value) {
+                    is Int -> value == 1
+                    is Boolean? -> value
+                    is BigDecimal -> value.intValueExact() == 1 //Oracle
+                    else -> null
+                }
+            }
+            FieldType.DoubleCollection -> {
+                doubleCollections[fieldId]?.add(value as Double)
+            }
+            FieldType.FloatCollection -> {
+                floatCollections[fieldId]?.add(value as Float)
+            }
+            FieldType.LongCollection -> {
+                longCollections[fieldId]?.add(value as Long)
+            }
+            FieldType.IntCollection -> {
+                integerCollections[fieldId]?.add(value as Int)
+            }
+            FieldType.Enum -> {
+                enumValues.filter { it.key == fieldId }.forEach {
+                    val fieldEnum = FieldEnum.enums[it.key]
+                    if (fieldEnum != null) {
+                        if (value != null) {
+                            it.value.value = (when (value) {
+                                is BigDecimal -> fieldEnum.valueOf(value.intValueExact())
+                                else -> fieldEnum.valueOf(value as Int)
+                            })
+                        }
                     }
                 }
             }
-
-            //Enums may be null
-            FieldType.EnumString -> enumValues.filter { it.key == fieldId }.forEach {
-                val fieldEnum = FieldEnum.enums[it.key]
-                if (fieldEnum != null && value is String)
-                    it.value.value = fieldEnum.valueOf(value)
+            FieldType.EnumString -> {
+                enumValues.filter { it.key == fieldId }.forEach {
+                    val fieldEnum = FieldEnum.enums[it.key]
+                    if (fieldEnum != null && value is String)
+                        it.value.value = fieldEnum.valueOf(value)
+                }
             }
-
-            //Enum collections should NOT accept nulls. Unknown collection should be skipped
-            FieldType.EnumCollection -> enumCollections.filter { it.key == fieldId }.forEach {
-                val fieldEnum = FieldEnum.enums[it.key]
-                if (fieldEnum != null) {
-                    val enumValues = fieldEnum.values
-                    val ordinal = when (value) {
-                        is Int -> value
-                        is BigDecimal -> value.intValueExact()
-                        else -> enumValues.size
-                    }
-                    if (ordinal < enumValues.size) {
-                        it.value.add(enumValues.find { enumValue -> enumValue.ordinal == ordinal }!!)
+            FieldType.EnumCollection -> {
+                //Enum collections should NOT accept nulls. Unknown collection should be skipped
+                enumCollections.filter { it.key == fieldId }.forEach {
+                    val fieldEnum = FieldEnum.enums[it.key]
+                    if (fieldEnum != null) {
+                        val enumValues = fieldEnum.values
+                        val ordinal = when (value) {
+                            is Int -> value
+                            is BigDecimal -> value.intValueExact()
+                            else -> enumValues.size
+                        }
+                        if (ordinal < enumValues.size) {
+                            it.value.add(enumValues.find { enumValue -> enumValue.ordinal == ordinal }!!)
+                        }
                     }
                 }
             }
-
-            //Enum collections should NOT accept nulls. Unknown collection should be skipped
-            FieldType.EnumStringCollection -> enumStringCollections.filter { it.key == fieldId }.forEach {
-                val fieldEnum = FieldEnum.enums[it.key]
-                if (fieldEnum != null) {
-                    val enumStr = value.toString()
-                    val enumVal = fieldEnum.valueOf(enumStr)
-                    if (enumVal != null)
-                        it.value.add(enumVal)
+            FieldType.EnumStringCollection -> {
+                //Enum collections should NOT accept nulls. Unknown collection should be skipped
+                enumStringCollections.filter { it.key == fieldId }.forEach {
+                    val fieldEnum = FieldEnum.enums[it.key]
+                    if (fieldEnum != null) {
+                        val enumStr = value.toString()
+                        val enumVal = fieldEnum.valueOf(enumStr)
+                        if (enumVal != null)
+                            it.value.add(enumVal)
+                    }
                 }
             }
-
-            FieldType.String -> stringValues[fieldId]?.value = (value as String?)
-
-            FieldType.StringCollection -> stringCollections[fieldId]?.add(value as String)
-
-            FieldType.ZonedDateTime -> when (value) {
-                is Long -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
-                is Timestamp -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault())
-                is String -> zonedDateTimeValues[fieldId]?.value = value.toZonedDateTime()
-                is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = value.atZoneSameInstant(ZoneId.systemDefault())
+            FieldType.String -> {
+                stringValues[fieldId]?.value = (value as String?)
             }
-
-            FieldType.Date -> when (value) {
-                is Timestamp -> localDateValues[fieldId]?.value = (value.toLocalDateTime().toLocalDate())
-                is LocalDate -> localDateValues[fieldId]?.value = (value)
-                is String -> localDateValues[fieldId]?.value = (value.toLocalDate())
-                else -> localDateValues[fieldId]?.value = null
+            FieldType.StringCollection -> {
+                stringCollections[fieldId]?.add(value as String)
             }
-
-            FieldType.Time -> when (value) {
-                is Long -> localTimeValues[fieldId]?.value = (LocalTime.MIN.plusNanos(value))
-                is LocalTime -> localTimeValues[fieldId]?.value = (value)
-                is String -> localTimeValues[fieldId]?.value = (value.toLocalTime())
+            FieldType.ZonedDateTime -> {
+                when (value) {
+                    is Long -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
+                    is Timestamp -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault())
+                    is String -> zonedDateTimeValues[fieldId]?.value = value.toZonedDateTime()
+                    is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = value.atZoneSameInstant(ZoneId.systemDefault())
+                }
             }
-
-            FieldType.Duration -> durationValues[fieldId]?.value = (when (value) {
-                is BigDecimal -> Duration.ofNanos(value.longValueExact())//Oracle
-                else -> Duration.ofNanos(value as Long)
-            })
-
-            FieldType.MonthDay -> monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
-
-            FieldType.YearMonth -> yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
-
-            FieldType.Period -> periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
-
-            FieldType.DateTime -> localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
-
-            FieldType.DateTimeCollection -> dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
-
+            FieldType.Date -> {
+                when (value) {
+                    is Timestamp -> localDateValues[fieldId]?.value = (value.toLocalDateTime().toLocalDate())
+                    is LocalDate -> localDateValues[fieldId]?.value = (value)
+                    is String -> localDateValues[fieldId]?.value = (value.toLocalDate())
+                    else -> localDateValues[fieldId]?.value = null
+                }
+            }
+            FieldType.Time -> {
+                when (value) {
+                    is Long -> localTimeValues[fieldId]?.value = (LocalTime.MIN.plusNanos(value))
+                    is LocalTime -> localTimeValues[fieldId]?.value = (value)
+                    is String -> localTimeValues[fieldId]?.value = (value.toLocalTime())
+                }
+            }
+            FieldType.Duration -> {
+                durationValues[fieldId]?.value = (when (value) {
+                    is BigDecimal -> Duration.ofNanos(value.longValueExact())//Oracle
+                    else -> Duration.ofNanos(value as Long)
+                })
+            }
+            FieldType.MonthDay -> {
+                monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
+            }
+            FieldType.YearMonth -> {
+                yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
+            }
+            FieldType.Period -> {
+                periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
+            }
+            FieldType.DateTime -> {
+                localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
+            }
+            FieldType.DateTimeCollection -> {
+                dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
+            }
             FieldType.Blob -> when (value) {
                 is ByteArray -> blobValues[fieldId]?.value = value
                 null -> blobValues[fieldId]?.value = ByteArray(0)//Oracle
             }
-
             else -> {
             }
         }
@@ -863,7 +797,7 @@ abstract class Entity : IEntity, Serializable {
     private fun initBackingWritablePropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
         when (fieldType) {
             FieldType.String -> if (!stringValues.containsKey(fieldId)) {
-                stringValues[fieldId] = NullableStringProperty()
+                stringValues[fieldId] = StringProperty()
             }
             FieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId)) {
                 doubleCollections[fieldId] = ArrayList()
@@ -887,55 +821,55 @@ abstract class Entity : IEntity, Serializable {
                 enumCollections[fieldId] = ArrayList()
             }
             FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
-                zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()
+                zonedDateTimeValues[fieldId] = ZonedDateTimeProperty()
             }
             FieldType.Date -> if (!localDateValues.containsKey(fieldId)) {
-                localDateValues[fieldId] = NullableLocalDateProperty()
+                localDateValues[fieldId] = LocalDateProperty()
             }
             FieldType.Time -> if (!localTimeValues.containsKey(fieldId)) {
-                localTimeValues[fieldId] = NullableLocalTimeProperty()
+                localTimeValues[fieldId] = LocalTimeProperty()
             }
             FieldType.Duration -> if (!durationValues.containsKey(fieldId)) {
-                durationValues[fieldId] = NullableDurationProperty()
+                durationValues[fieldId] = DurationProperty()
             }
             FieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId)) {
-                monthDayValues[fieldId] = NullableMonthDayProperty()
+                monthDayValues[fieldId] = MonthDayProperty()
             }
             FieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId)) {
-                yearMonthValues[fieldId] = NullableYearMonthProperty()
+                yearMonthValues[fieldId] = YearMonthProperty()
             }
             FieldType.Period -> if (!periodValues.containsKey(fieldId)) {
-                periodValues[fieldId] = NullablePeriodProperty()
+                periodValues[fieldId] = PeriodProperty()
             }
             FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId)) {
-                localDateTimeValues[fieldId] = NullableLocalDateTimeProperty()
+                localDateTimeValues[fieldId] = LocalDateTimeProperty()
             }
             FieldType.Blob -> if (!blobValues.containsKey(fieldId)) {
-                blobValues[fieldId] = NullableBlobProperty(byteArrayOf())
+                blobValues[fieldId] = BlobProperty(byteArrayOf())
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = NullableEnumProperty()
+                enumValues[fieldId] = EnumProperty()
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
-                floatValues[fieldId] = NullableFloatProperty()
+                floatValues[fieldId] = FloatProperty()
             }
             FieldType.Double -> if (!doubleValues.containsKey(fieldId)) {
-                doubleValues[fieldId] = NullableDoubleProperty()
+                doubleValues[fieldId] = DoubleProperty()
             }
             FieldType.Short -> if (!shortValues.containsKey(fieldId)) {
-                shortValues[fieldId] = NullableShortProperty()
+                shortValues[fieldId] = ShortProperty()
             }
             FieldType.Long -> if (!longValues.containsKey(fieldId)) {
-                longValues[fieldId] = NullableLongProperty()
+                longValues[fieldId] = LongProperty()
             }
             FieldType.Int -> if (!integerValues.containsKey(fieldId)) {
-                integerValues[fieldId] = NullableIntegerProperty()
+                integerValues[fieldId] = IntegerProperty()
             }
             FieldType.Uuid -> if (!uuidValues.containsKey(fieldId)) {
-                uuidValues[fieldId] = NullableUuidProperty()
+                uuidValues[fieldId] = UuidProperty()
             }
             FieldType.Boolean -> if (!booleanValues.containsKey(fieldId)) {
-                booleanValues[fieldId] = NullableBooleanProperty()
+                booleanValues[fieldId] = BooleanProperty()
             }
         }
 
@@ -973,12 +907,9 @@ abstract class Entity : IEntity, Serializable {
                 compositeKeys.add(CompositeKey(id, editVersion))
             }
             objectValues.filter { it.key.field.id == fieldId }.forEach {
-                if (it.value.value == null) {
-                    it.value.value = dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance()
-                }
+                it.value.set(dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance())
                 it.value.value.overview.id = id
                 it.value.value.overview.editVersion = editVersion
-
                 val jdsEntity = it.value.value as Entity
                 innerObjects.add(jdsEntity)
 
@@ -1116,52 +1047,52 @@ abstract class Entity : IEntity, Serializable {
      */
     fun getReportAtomicValue(fieldId: Int, ordinal: Int): Any? {
         if (localDateTimeValues.containsKey(fieldId)) {
-            return localDateTimeValues[fieldId]!!.value as LocalDateTime?
+            return localDateTimeValues[fieldId]?.value
         }
         if (zonedDateTimeValues.containsKey(fieldId)) {
-            return zonedDateTimeValues[fieldId]!!.value as ZonedDateTime?
+            return zonedDateTimeValues[fieldId]?.value
         }
         if (localDateValues.containsKey(fieldId)) {
-            return localDateValues[fieldId]!!.value as LocalDate?
+            return localDateValues[fieldId]?.value
         }
         if (localTimeValues.containsKey(fieldId)) {
-            return localTimeValues[fieldId]!!.value as LocalTime?
+            return localTimeValues[fieldId]?.value
         }
         if (monthDayValues.containsKey(fieldId)) {
-            return (monthDayValues[fieldId]!!.value as MonthDay).toString()
+            return monthDayValues[fieldId]?.value.toString()
         }
         if (yearMonthValues.containsKey(fieldId)) {
-            return yearMonthValues[fieldId]!!.value.toString()
+            return yearMonthValues[fieldId]?.value.toString()
         }
         if (periodValues.containsKey(fieldId)) {
-            return periodValues[fieldId]!!.value.toString()
+            return periodValues[fieldId]?.value.toString()
         }
         if (durationValues.containsKey(fieldId)) {
-            return durationValues[fieldId]!!.value?.toNanos()
+            return durationValues[fieldId]?.value?.toNanos()
         }
         if (stringValues.containsKey(fieldId)) {
-            return stringValues[fieldId]!!.value
+            return stringValues[fieldId]?.value
         }
         if (floatValues.containsKey(fieldId)) {
-            return floatValues[fieldId]?.value?.toFloat()
+            return floatValues[fieldId]?.value
         }
         if (doubleValues.containsKey(fieldId)) {
-            return doubleValues[fieldId]?.value?.toDouble()
+            return doubleValues[fieldId]?.value
         }
         if (shortValues.containsKey(fieldId)) {
-            return shortValues[fieldId]?.value?.toShort()
+            return shortValues[fieldId]?.value
         }
         if (booleanValues.containsKey(fieldId)) {
             return booleanValues[fieldId]?.value
         }
         if (longValues.containsKey(fieldId)) {
-            return longValues[fieldId]?.value?.toLong()
+            return longValues[fieldId]?.value
         }
         if (stringEnumValues.containsKey(fieldId)) {
             return stringEnumValues[fieldId]?.value.toString()
         }
         if (integerValues.containsKey(fieldId)) {
-            return integerValues[fieldId]?.value?.toInt()
+            return integerValues[fieldId]?.value
         }
         if (uuidValues.containsKey(fieldId)) {
             return uuidValues[fieldId]?.value
@@ -1289,14 +1220,30 @@ abstract class Entity : IEntity, Serializable {
 
         fun WritableProperty<Double?>.get(): Double = this.value!!
 
+        fun WritableProperty<Float?>.get(): Float = this.value!!
+
+        fun WritableProperty<Int?>.get(): Int = this.value!!
+
         fun WritableProperty<LocalDate?>.get(): LocalDate = this.value!!
 
         fun WritableProperty<LocalDateTime?>.get(): LocalDateTime = this.value!!
+
+        fun WritableProperty<ZonedDateTime?>.get(): ZonedDateTime = this.value!!
 
         fun WritableProperty<LocalTime?>.get(): LocalTime = this.value!!
 
         fun WritableProperty<Period?>.get(): Period = this.value!!
 
+        fun WritableProperty<Duration?>.get(): Duration = this.value!!
+
+        fun WritableProperty<MonthDay?>.get(): MonthDay = this.value!!
+
         fun WritableProperty<YearMonth?>.get(): YearMonth = this.value!!
+
+        fun WritableProperty<Boolean?>.get(): Boolean = this.value!!
+
+        fun WritableProperty<ByteArray?>.get(): ByteArray = this.value!!
+
+        fun WritableProperty<Enum<*>?>.get(): Enum<*> = this.value!!
     }
 }

@@ -15,12 +15,7 @@
 import java.time.LocalDateTime
 
 /**
- * Class allowing for the wrapping and persistence of [LocalDateTime] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [LocalDateTime] values
+ * @param value the backing value
  */
-class LocalDateTimeProperty(initialValue: LocalDateTime = LocalDateTime.now()) : NullableLocalDateTimeProperty(initialValue) {
-
-    override fun getValue(): LocalDateTime {
-        return super.getValue()!!
-    }
-}
+data class LocalDateTimeProperty(override var value: LocalDateTime? = null) : WritableProperty<LocalDateTime?>

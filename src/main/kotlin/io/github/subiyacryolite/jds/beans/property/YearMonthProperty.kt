@@ -16,12 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.YearMonth
 
 /**
- * Class allowing for the wrapping and persistence of [YearMonth] values
- * @param initialValue the initial value
+ * Class allowing for the wrapping and persistence of nullable [YearMonth] values
+ * @param value the backing value
  */
-class YearMonthProperty(initialValue: YearMonth = YearMonth.now()) : NullableYearMonthProperty(initialValue) {
-
-    override fun getValue(): YearMonth {
-        return super.getValue()!!
-    }
-}
+data class YearMonthProperty(override var value: YearMonth? = null) : WritableProperty<YearMonth?>
