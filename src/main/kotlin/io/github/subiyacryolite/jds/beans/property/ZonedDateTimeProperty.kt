@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.ZonedDateTime
 
 /**
- * Class allowing for the wrapping and persistence of nullable [ZonedDateTime] values
+ * Class allowing for the wrapping and persistence of [ZonedDateTime] values
  * @param value the backing value
  */
 class ZonedDateTimeProperty(value: ZonedDateTime = ZonedDateTime.now()) : ObjectProperty<ZonedDateTime>(value)

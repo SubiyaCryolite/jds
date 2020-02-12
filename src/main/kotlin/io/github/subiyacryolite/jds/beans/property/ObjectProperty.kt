@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds.beans.property
 
 /**
- * Base class allowing for the wrapping and persistence of nullable [Object] values
+ * Base class allowing for the wrapping and persistence of [Object] values
  * @param value the initial value
  */
 open class ObjectProperty<T>(override var value: T) : WritableProperty<T>{

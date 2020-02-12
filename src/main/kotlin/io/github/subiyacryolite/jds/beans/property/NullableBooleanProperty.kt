@@ -13,10 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import java.time.Period
-
 /**
- * Class allowing for the wrapping and persistence of [Period] values
+ * Class allowing for the wrapping and persistence of [Boolean] values
  * @param value the backing value
  */
-class PeriodProperty(value: Period = Period.ZERO) : ObjectProperty<Period>(value)
+class NullableBooleanProperty(value: Boolean? = null) : ObjectProperty<Boolean?>(value)

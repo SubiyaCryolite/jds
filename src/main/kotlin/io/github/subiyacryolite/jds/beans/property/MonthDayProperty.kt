@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.MonthDay
 
 /**
- * Class allowing for the wrapping and persistence of nullable [MonthDay] values
+ * Class allowing for the wrapping and persistence of [MonthDay] values
  * @param value the backing value
  */
 class MonthDayProperty(value: MonthDay = MonthDay.now()) : ObjectProperty<MonthDay>(value)

@@ -14,7 +14,7 @@
 package io.github.subiyacryolite.jds.beans.property
 
 /**
- * Class allowing for the wrapping and persistence of nullable [Double] values
+ * Class allowing for the wrapping and persistence of [Double] values
  * @param value the backing value
  */
 class DoubleProperty(value: Double = 0.0) : ObjectProperty<Double>(value)

@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.LocalDateTime
 
 /**
- * Class allowing for the wrapping and persistence of nullable [LocalDateTime] values
+ * Class allowing for the wrapping and persistence of [LocalDateTime] values
  * @param value the backing value
  */
 class LocalDateTimeProperty(value: LocalDateTime = LocalDateTime.now()) : ObjectProperty<LocalDateTime>(value)

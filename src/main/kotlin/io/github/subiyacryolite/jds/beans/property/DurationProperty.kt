@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.beans.property
 import java.time.Duration
 
 /**
- * Class allowing for the wrapping and persistence of nullable [Duration] values
+ * Class allowing for the wrapping and persistence of [Duration] values
  * @param value the backing value
  */
 class DurationProperty(value: Duration = Duration.ZERO) : ObjectProperty<Duration>(value)

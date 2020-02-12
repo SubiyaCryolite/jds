@@ -13,10 +13,8 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import java.time.Period
-
 /**
- * Class allowing for the wrapping and persistence of [Period] values
- * @param value the backing value
+ * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
+ * @param value the initial value
  */
-class PeriodProperty(value: Period = Period.ZERO) : ObjectProperty<Period>(value)
+class NullableBlobProperty(value: ByteArray? = null) : ObjectProperty<ByteArray?>(value)
