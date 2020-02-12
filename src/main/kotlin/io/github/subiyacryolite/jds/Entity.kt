@@ -967,7 +967,10 @@ abstract class Entity : IEntity, Serializable {
                 blobValues[fieldId] = NullableBlobProperty()
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = NullableEnumProperty()
+                enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
+            }
+            FieldType.EnumString -> if (!stringEnumValues.containsKey(fieldId)) {
+                stringEnumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
