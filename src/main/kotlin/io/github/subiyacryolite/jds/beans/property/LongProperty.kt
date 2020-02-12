@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Long] values
  * @param value the backing value
  */
-data class LongProperty(override var value: Long? = null) : WritableProperty<Long?>
+class LongProperty(value: Long = 0L) : ObjectProperty<Long>(value)

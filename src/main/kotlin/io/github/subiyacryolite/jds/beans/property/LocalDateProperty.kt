@@ -18,4 +18,4 @@ import java.time.LocalDate
  * Class allowing for the wrapping and persistence of nullable [LocalDate] values
  * @param value the backing value
  */
-data class LocalDateProperty(override var value: LocalDate? = null) : WritableProperty<LocalDate?>
+class LocalDateProperty(value: LocalDate = LocalDate.now()) : ObjectProperty<LocalDate>(value)

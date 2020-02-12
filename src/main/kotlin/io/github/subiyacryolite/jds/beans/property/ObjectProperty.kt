@@ -17,4 +17,22 @@ package io.github.subiyacryolite.jds.beans.property
  * Base class allowing for the wrapping and persistence of nullable [Object] values
  * @param value the initial value
  */
-data class ObjectProperty<T>(override var value: T) : WritableProperty<T>
+open class ObjectProperty<T>(override var value: T) : WritableProperty<T>{
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ObjectProperty<*>) return false
+
+        if (value != other.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value?.hashCode() ?: 0
+    }
+
+    override fun toString(): String {
+        return "ObjectProperty(value=$value)"
+    }
+}

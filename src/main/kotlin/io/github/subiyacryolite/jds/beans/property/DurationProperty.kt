@@ -19,4 +19,4 @@ import java.time.Duration
  * Class allowing for the wrapping and persistence of nullable [Duration] values
  * @param value the backing value
  */
-data class DurationProperty(override var value: Duration? = null) : WritableProperty<Duration?>
+class DurationProperty(value: Duration = Duration.ZERO) : ObjectProperty<Duration>(value)

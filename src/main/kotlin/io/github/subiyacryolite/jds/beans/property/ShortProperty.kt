@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [Short] values
  * @param value the backing value
  */
-data class ShortProperty(override var value: Short? = null) : WritableProperty<Short?>
+class ShortProperty(value: Short = 0) : ObjectProperty<Short>(value)

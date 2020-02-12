@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of nullable [String] values
  * @param value the backing value
  */
-data class StringProperty(override var value: String? = null) : WritableProperty<String?>
+class StringProperty(value: String = "") : ObjectProperty<String>(value)

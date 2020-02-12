@@ -19,4 +19,4 @@ import java.util.*
  * Class allowing for the wrapping and persistence of nullable [UUID] values
  * @param value the backing value
  */
-data class UuidProperty(override var value: UUID? = null) : WritableProperty<UUID?>
+class UuidProperty(value: UUID = UUID.randomUUID()) : ObjectProperty<UUID>(value)
