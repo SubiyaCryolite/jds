@@ -145,7 +145,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapShort")
     protected fun map(field: Field, value: Short) = map(field, ShortProperty(value))
 
-    @JvmName("mapShort")
+    @JvmName("mapNullableShort")
     protected fun map(field: Field, property: WritableProperty<Short?>): WritableProperty<Short?> {
         validateShort(field)
         return shortValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -154,7 +154,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapDouble")
     protected fun map(field: Field, value: Double) = map(field, DoubleProperty(value))
 
-    @JvmName("mapDouble")
+    @JvmName("mapNullableDouble")
     protected fun map(field: Field, property: WritableProperty<Double?>): WritableProperty<Double?> {
         validateDouble(field)
         return doubleValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -163,7 +163,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapInt")
     protected fun map(field: Field, value: Int) = map(field, IntegerProperty(value))
 
-    @JvmName("mapInt")
+    @JvmName("mapNullableInt")
     protected fun map(field: Field, property: WritableProperty<Int?>): WritableProperty<Int?> {
         validateInt(field)
         return integerValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -173,15 +173,27 @@ abstract class Entity : IEntity, Serializable {
     protected fun map(field: Field, value: Long) = map(field, LongProperty(value))
 
     @JvmName("mapLong")
+    protected fun map(field: Field, property: WritableProperty<Long>): WritableProperty<Long> {
+        validateFloat(field)
+        longValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Long?>
+        return property
+    }
+
+    @JvmName("mapNullableLong")
     protected fun map(field: Field, property: WritableProperty<Long?>): WritableProperty<Long?> {
         validateLong(field)
         return longValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
     }
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: Float) = map(field, FloatProperty(value))
+    protected fun map(field: Field, value: Float): WritableProperty<Float> {
+        validateFloat(field)
+        val property = FloatProperty(value)
+        floatValues[mapField(overview.entityId, field.bind())] = property as WritableProperty<Float?>
+        return property
+    }
 
-    @JvmName("mapFloat")
+    @JvmName("mapNullableFloat")
     protected fun map(field: Field, property: WritableProperty<Float?>): WritableProperty<Float?> {
         validateFloat(field)
         return floatValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -190,7 +202,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapBoolean")
     protected fun map(field: Field, value: Boolean) = map(field, BooleanProperty(value))
 
-    @JvmName("mapBoolean")
+    @JvmName("mapNullableBoolean")
     protected fun map(field: Field, property: WritableProperty<Boolean?>): WritableProperty<Boolean?> {
         validateBoolean(field)
         return booleanValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -199,7 +211,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapUuid")
     protected fun map(field: Field, value: UUID) = map(field, UuidProperty(value))
 
-    @JvmName("mapUuid")
+    @JvmName("mapNullableUuid")
     protected fun map(field: Field, property: WritableProperty<UUID?>): WritableProperty<UUID?> {
         validateUuid(field)
         return uuidValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -208,7 +220,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapString")
     protected fun map(field: Field, value: String) = map(field, StringProperty(value))
 
-    @JvmName("mapString")
+    @JvmName("mapNullableString")
     protected fun map(field: Field, property: WritableProperty<String?>): WritableProperty<String?> {
         validateString(field)
         return stringValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -217,7 +229,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapDateTime")
     protected fun map(field: Field, value: LocalDateTime) = map(field, LocalDateTimeProperty(value))
 
-    @JvmName("mapDateTime")
+    @JvmName("mapNullableDateTime")
     protected fun map(field: Field, property: WritableProperty<LocalDateTime?>): WritableProperty<LocalDateTime?> {
         validateDateTime(field)
         return localDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -226,7 +238,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapZonedDateTime")
     protected fun map(field: Field, value: ZonedDateTime) = map(field, ZonedDateTimeProperty(value))
 
-    @JvmName("mapZonedDateTime")
+    @JvmName("mapNullableZonedDateTime")
     protected fun map(field: Field, property: WritableProperty<ZonedDateTime?>): WritableProperty<ZonedDateTime?> {
         validateZonedDateTime(field)
         return zonedDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -235,7 +247,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapDate")
     protected fun map(field: Field, value: LocalDate) = map(field, LocalDateProperty(value))
 
-    @JvmName("mapDate")
+    @JvmName("mapNullableDate")
     protected fun map(field: Field, property: WritableProperty<LocalDate?>): WritableProperty<LocalDate?> {
         validateDate(field)
         return localDateValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -244,7 +256,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapTime")
     protected fun map(field: Field, value: LocalTime) = map(field, LocalTimeProperty(value))
 
-    @JvmName("mapTime")
+    @JvmName("mapNullableTime")
     protected fun map(field: Field, property: WritableProperty<LocalTime?>): WritableProperty<LocalTime?> {
         validateTime(field)
         return localTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -253,7 +265,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapBlob")
     protected fun map(field: Field, value: ByteArray) = map(field, BlobProperty(value))
 
-    @JvmName("mapBlob")
+    @JvmName("mapNullableBlob")
     protected fun map(field: Field, property: WritableProperty<ByteArray?>): WritableProperty<ByteArray?> {
         validateBlob(field)
         return blobValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -262,7 +274,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapMonthDay")
     protected fun map(field: Field, value: MonthDay) = map(field, MonthDayProperty(value))
 
-    @JvmName("mapMonthDay")
+    @JvmName("mapNullableMonthDay")
     protected fun map(field: Field, property: WritableProperty<MonthDay?>): WritableProperty<MonthDay?> {
         validateMonthDay(field)
         return monthDayValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -271,7 +283,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapYearMonth")
     protected fun map(field: Field, value: YearMonth) = map(field, YearMonthProperty(value))
 
-    @JvmName("mapYearMonth")
+    @JvmName("mapNullableYearMonth")
     protected fun map(field: Field, property: WritableProperty<YearMonth?>): WritableProperty<YearMonth?> {
         validateYearMonth(field)
         return yearMonthValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -280,7 +292,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapPeriod")
     protected fun map(field: Field, value: Period) = map(field, PeriodProperty(value))
 
-    @JvmName("mapPeriod")
+    @JvmName("mapNullablePeriod")
     protected fun map(field: Field, property: WritableProperty<Period?>): WritableProperty<Period?> {
         validatePeriod(field)
         return periodValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -289,7 +301,7 @@ abstract class Entity : IEntity, Serializable {
     @JvmName("mapDuration")
     protected fun map(field: Field, value: Duration) = map(field, DurationProperty(value))
 
-    @JvmName("mapDuration")
+    @JvmName("mapNullableDuration")
     protected fun map(field: Field, property: WritableProperty<Duration?>): WritableProperty<Duration?> {
         validateDuration(field)
         return durationValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -839,7 +851,7 @@ abstract class Entity : IEntity, Serializable {
                 yearMonthValues[fieldId] = YearMonthProperty()
             }
             FieldType.Period -> if (!periodValues.containsKey(fieldId)) {
-                periodValues[fieldId] = PeriodProperty()
+                periodValues[fieldId] = NullablePeriodProperty()
             }
             FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId)) {
                 localDateTimeValues[fieldId] = LocalDateTimeProperty()
@@ -851,7 +863,7 @@ abstract class Entity : IEntity, Serializable {
                 enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
-                floatValues[fieldId] = FloatProperty()
+                floatValues[fieldId] = NullableFloatProperty()
             }
             FieldType.Double -> if (!doubleValues.containsKey(fieldId)) {
                 doubleValues[fieldId] = DoubleProperty()
@@ -1204,48 +1216,6 @@ abstract class Entity : IEntity, Serializable {
 
         private fun getEnums(entityId: Int) = allEnums.getOrPut(entityId) { LinkedHashSet() }
 
-        fun <T> WritableProperty<T>.get(): T {
-            return this.value
-        }
-
-        fun <T> WritableProperty<T>.set(value: T) {
-            this.value = value
-        }
-
-        fun WritableProperty<String?>.get(): String = this.value.orEmpty()
-
-        fun WritableProperty<Long?>.get(): Long = this.value!!
-
-        fun WritableProperty<Short?>.get(): Short = this.value!!
-
-        fun WritableProperty<Double?>.get(): Double = this.value!!
-
-        fun WritableProperty<Float?>.get(): Float = this.value!!
-
-        fun WritableProperty<Int?>.get(): Int = this.value!!
-
-        fun WritableProperty<LocalDate?>.get(): LocalDate = this.value!!
-
-        fun WritableProperty<LocalDateTime?>.get(): LocalDateTime = this.value!!
-
-        fun WritableProperty<ZonedDateTime?>.get(): ZonedDateTime = this.value!!
-
-        fun WritableProperty<LocalTime?>.get(): LocalTime = this.value!!
-
-        fun WritableProperty<Period?>.get(): Period = this.value!!
-
-        fun WritableProperty<Duration?>.get(): Duration = this.value!!
-
-        fun WritableProperty<MonthDay?>.get(): MonthDay = this.value!!
-
-        fun WritableProperty<YearMonth?>.get(): YearMonth = this.value!!
-
-        fun WritableProperty<Boolean?>.get(): Boolean = this.value!!
-
-        fun WritableProperty<ByteArray?>.get(): ByteArray = this.value!!
-
-        fun WritableProperty<UUID?>.get(): UUID = this.value!!
-
-        fun WritableProperty<Enum<*>?>.get(): Enum<*> = this.value!!
+        fun WritableProperty<String?>.getOrEmpty(): String = this.value.orEmpty()
     }
 }
