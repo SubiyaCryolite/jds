@@ -33,8 +33,32 @@ class NonExisting : BaseTestConfig("Load non-existing items") {
     }
 
     @Test
-    fun localTestPostgreSql() {
+    fun postGreSql() {
         testPostgreSql()
     }
 
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
+    }
 }

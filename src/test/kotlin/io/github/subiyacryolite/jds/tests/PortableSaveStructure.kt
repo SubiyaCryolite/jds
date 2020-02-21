@@ -90,4 +90,34 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         val equal = stringRepresentation1 == stringRepresentation2
         println("Equal? $equal")
     }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
+    }
 }

@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class LegacyValidation : BaseTestConfig("Legacy validation") {
 
@@ -83,5 +84,35 @@ class LegacyValidation : BaseTestConfig("Legacy validation") {
         assertEquals(srcA.doubleField, srcB.doubleField, DOUBLE_DELTA, "DoubleField " + srcA.overview.id)
         assertEquals(srcA.longField, srcB.longField, "LongField " + srcA.overview.id)
         assertEquals(srcA.booleanField, srcB.booleanField, "BooleanField " + srcA.overview.id)
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

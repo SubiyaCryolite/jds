@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
 import io.github.subiyacryolite.jds.enums.FilterBy
+import org.junit.jupiter.api.Test
 
 class TimeConstructs : BaseTestConfig("Time constructs") {
 
@@ -40,5 +41,35 @@ class TimeConstructs : BaseTestConfig("Time constructs") {
     private fun load(dbContext: DbContext) {
         val list = Load(dbContext, TimeConstruct::class.java, FilterBy.Id, setOf("timeConstruct")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         println("loaded entityVersions [$list]")
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

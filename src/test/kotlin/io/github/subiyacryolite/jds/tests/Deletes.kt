@@ -17,6 +17,7 @@ import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Delete
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
 class Deletes : BaseTestConfig("Deletes") {
@@ -28,5 +29,35 @@ class Deletes : BaseTestConfig("Deletes") {
         while (!process.isDone)
             Thread.sleep(16)
         println("Deleted successfully?  ${process.get()}")
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

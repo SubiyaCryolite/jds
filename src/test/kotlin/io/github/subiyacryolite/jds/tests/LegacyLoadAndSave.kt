@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
 import io.github.subiyacryolite.jds.enums.FilterBy
+import org.junit.jupiter.api.Test
 
 class LegacyLoadAndSave : BaseTestConfig("Legacy load and save") {
 
@@ -42,5 +43,35 @@ class LegacyLoadAndSave : BaseTestConfig("Legacy load and save") {
         val specificAddressBook = Load(dbContext, Address::class.java, FilterBy.Id, setOf("primaryAddress")).call() //load all entityVersions of type AddressBook with Entity Guids in range
         System.out.printf("All entityVersions [%s]\n", allAddressBooks)
         System.out.printf("Specific entityVersions [%s]\n", specificAddressBook)
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

@@ -21,6 +21,7 @@ import io.github.subiyacryolite.jds.tests.entities.EntityC
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
+import org.junit.jupiter.api.Test
 
 class Inheritance : BaseTestConfig("Inheritance") {
 
@@ -44,5 +45,35 @@ class Inheritance : BaseTestConfig("Inheritance") {
         System.out.printf("All A s [%s]\n", entityAs.call())
         System.out.printf("All B s [%s]\n", entityBs.call())
         System.out.printf("All C s [%s]\n", entityCs.call())
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

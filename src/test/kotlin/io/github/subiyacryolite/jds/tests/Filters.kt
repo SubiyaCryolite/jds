@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.tests.constants.Fields
 import io.github.subiyacryolite.jds.tests.entities.Address
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Filter
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
 class Filters : BaseTestConfig("Load filters") {
@@ -29,5 +30,35 @@ class Filters : BaseTestConfig("Load filters") {
         while (!process.isDone)
             Thread.sleep(16)
         println(process.get())
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Save
 import io.github.subiyacryolite.jds.Table
+import org.junit.jupiter.api.Test
 
 class CustomReportJson : BaseTestConfig("Custom reports from json") {
 
@@ -30,5 +31,35 @@ class CustomReportJson : BaseTestConfig("Custom reports from json") {
 
         val jdsSave = Save(dbContext, TestData.addressBook)
         jdsSave.call()
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

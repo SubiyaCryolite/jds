@@ -8,6 +8,7 @@ import io.github.subiyacryolite.jds.tests.entities.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Save
 import io.github.subiyacryolite.jds.Table
+import org.junit.jupiter.api.Test
 
 class CustomReport : BaseTestConfig("Custom reports and shared connections") {
 
@@ -51,5 +52,35 @@ class CustomReport : BaseTestConfig("Custom reports and shared connections") {
 
         val saveInheritedObjects = Save(dbContext, TestData.inheritanceCollection)
         saveInheritedObjects.call()
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

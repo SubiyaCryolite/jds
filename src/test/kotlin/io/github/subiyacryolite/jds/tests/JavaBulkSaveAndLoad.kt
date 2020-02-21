@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.tests.entities.EntityA
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
+import org.junit.jupiter.api.Test
 
 import java.sql.SQLException
 import java.util.ArrayList
@@ -50,5 +51,35 @@ class JavaBulkSaveAndLoad : BaseTestConfig("Java - Bulk Load Save") {
     private fun load(dbContext: DbContext) {
         val entityAs = Load(dbContext, EntityA::class.java)
         println("All A's [" + entityAs.call() + "]")
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }

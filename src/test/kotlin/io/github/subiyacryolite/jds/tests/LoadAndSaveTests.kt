@@ -20,6 +20,7 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.Save
 import io.github.subiyacryolite.jds.enums.FilterBy
+import org.junit.jupiter.api.Test
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
@@ -67,5 +68,35 @@ class LoadAndSaveTests : BaseTestConfig("Load and Save tests") {
         println(sortedInstances)
 
         println("DONE")
+    }
+
+    @Test
+    fun postGreSql() {
+        testPostgreSql()
+    }
+
+    @Test
+    fun sqlLite() {
+        testSqLite()
+    }
+
+    @Test
+    fun mariaDb() {
+        testMariaDb()
+    }
+
+    @Test
+    fun mySql() {
+        testMySql()
+    }
+
+    @Test
+    fun oracle() {
+        testOracle()
+    }
+
+    @Test
+    fun transactionalSql() {
+        testTransactionalSql()
     }
 }
