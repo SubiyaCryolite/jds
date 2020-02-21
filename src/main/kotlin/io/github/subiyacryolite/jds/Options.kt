@@ -67,5 +67,10 @@ data class Options(
         /**
          * Indicates if values bound to [JdsField's][Field] marked as sensitive are written on save
          */
-        var saveSensitiveData: Boolean = true
+        var saveSensitiveData: Boolean = true,
+
+        /**
+         *
+         */
+        var alternateCodesDelimiter: String = "|"
 ) : Serializable

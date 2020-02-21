@@ -46,79 +46,81 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
         }
     }
 
-    override fun saveEntityLiveVersion() = "INSERT INTO jds_entity_live_version(id) VALUES(?) ON CONFLICT(id) DO NOTHING;"
+    override fun saveEntityLiveVersion() = "INSERT INTO ${dbObjectPrefix}entity_live_version(id) VALUES(?) ON CONFLICT(id) DO NOTHING;"
 
-    override fun saveString() = "INSERT INTO jds_str_text(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveString() = "INSERT INTO ${dbObjectPrefix}str_text(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveBoolean() = "INSERT INTO jds_str_boolean(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveBoolean() = "INSERT INTO ${dbObjectPrefix}str_boolean(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveLong() = "INSERT INTO jds_str_long(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveLong() = "INSERT INTO ${dbObjectPrefix}str_long(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDouble() = "INSERT INTO jds_str_double(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDouble() = "INSERT INTO ${dbObjectPrefix}str_double(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveFloat() = "INSERT INTO jds_str_float(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveFloat() = "INSERT INTO ${dbObjectPrefix}str_float(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveShort() = "INSERT INTO jds_str_short(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveShort() = "INSERT INTO ${dbObjectPrefix}str_short(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveUuid() = "INSERT INTO jds_str_uuid(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveUuid() = "INSERT INTO ${dbObjectPrefix}str_uuid(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveInteger() = "INSERT INTO jds_str_integer(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveInteger() = "INSERT INTO ${dbObjectPrefix}str_integer(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDateTime() = "INSERT INTO jds_str_date_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDateTime() = "INSERT INTO ${dbObjectPrefix}str_date_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveTime() = "INSERT INTO jds_str_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveTime() = "INSERT INTO ${dbObjectPrefix}str_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveBlob() = "INSERT INTO jds_str_blob(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveBlob() = "INSERT INTO ${dbObjectPrefix}str_blob(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveZonedDateTime() = "INSERT INTO jds_str_zoned_date_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveZonedDateTime() = "INSERT INTO ${dbObjectPrefix}str_zoned_date_time(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDate() = "INSERT INTO jds_str_date(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDate() = "INSERT INTO ${dbObjectPrefix}str_date(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveEnum() = "INSERT INTO jds_str_enum(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveEnum() = "INSERT INTO ${dbObjectPrefix}str_enum(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveEnumString() = "INSERT INTO jds_str_enum_string(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveEnumString() = "INSERT INTO ${dbObjectPrefix}str_enum_string(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveMonthDay() = "INSERT INTO jds_str_month_day(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveMonthDay() = "INSERT INTO ${dbObjectPrefix}str_month_day(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveYearMonth() = "INSERT INTO jds_str_year_month(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveYearMonth() = "INSERT INTO ${dbObjectPrefix}str_year_month(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun savePeriod() = "INSERT INTO jds_str_period(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun savePeriod() = "INSERT INTO ${dbObjectPrefix}str_period(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDuration() = "INSERT INTO jds_str_duration(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDuration() = "INSERT INTO ${dbObjectPrefix}str_duration(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveEnumCollections() = "INSERT INTO jds_str_enum_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveEnumCollections() = "INSERT INTO ${dbObjectPrefix}str_enum_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveEnumStringCollections() = "INSERT INTO jds_str_enum_string_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveEnumStringCollections() = "INSERT INTO ${dbObjectPrefix}str_enum_string_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDateTimeCollections() = "INSERT INTO jds_str_date_time_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDateTimeCollections() = "INSERT INTO ${dbObjectPrefix}str_date_time_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveFloatCollections() = "INSERT INTO jds_str_float_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveFloatCollections() = "INSERT INTO ${dbObjectPrefix}str_float_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveIntegerCollections() = "INSERT INTO jds_str_integer_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveIntegerCollections() = "INSERT INTO ${dbObjectPrefix}str_integer_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveDoubleCollections() = "INSERT INTO jds_str_double_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveDoubleCollections() = "INSERT INTO ${dbObjectPrefix}str_double_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveLongCollections() = "INSERT INTO jds_str_long_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveLongCollections() = "INSERT INTO ${dbObjectPrefix}str_long_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveStringCollections() = "INSERT INTO jds_str_text_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+    override fun saveStringCollections() = "INSERT INTO ${dbObjectPrefix}str_text_col(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
-    override fun saveOverview() = "INSERT INTO jds_entity_overview(id, edit_version, entity_id) VALUES(?, ?, ?) ON CONFLICT(id, edit_version) DO UPDATE SET entity_id = EXCLUDED.entity_id"
+    override fun saveOverview() = "INSERT INTO ${dbObjectPrefix}entity_overview(id, edit_version, entity_id) VALUES(?, ?, ?) ON CONFLICT(id, edit_version) DO UPDATE SET entity_id = EXCLUDED.entity_id"
 
-    override fun saveEntityBindings() = "INSERT INTO jds_entity_binding(parent_id, parent_edit_version, child_id, child_edit_version, child_attribute_id) VALUES(?, ?, ?, ?, ?) ON CONFLICT(parent_id, parent_edit_version, child_id, child_edit_version) DO UPDATE SET child_attribute_id = EXCLUDED.child_attribute_id"
+    override fun saveEntityBindings() = "INSERT INTO ${dbObjectPrefix}entity_binding(parent_id, parent_edit_version, child_id, child_edit_version, child_attribute_id) VALUES(?, ?, ?, ?, ?) ON CONFLICT(parent_id, parent_edit_version, child_id, child_edit_version) DO UPDATE SET child_attribute_id = EXCLUDED.child_attribute_id"
 
-    override fun populateRefEntityField() = "INSERT INTO jds_ref_entity_field(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"
+    override fun populateRefEntityField() = "INSERT INTO ${dbObjectPrefix}ref_entity_field(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"
 
-    override fun populateRefFieldEntity() = "INSERT INTO jds_ref_field_entity(field_id, entity_id) VALUES(?, ?) ON CONFLICT(field_id, entity_id) DO NOTHING"
+    override fun populateRefFieldEntity() = "INSERT INTO ${dbObjectPrefix}ref_field_entity(field_id, entity_id) VALUES(?, ?) ON CONFLICT(field_id, entity_id) DO NOTHING"
 
-    override fun populateRefField() = "INSERT INTO jds_ref_field(id, caption, description, field_type_ordinal) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET caption = EXCLUDED.caption, description = EXCLUDED.description, field_type_ordinal = EXCLUDED.field_type_ordinal"
+    override fun populateRefField() = "INSERT INTO ${dbObjectPrefix}ref_field(id, caption, description, field_type_ordinal) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET caption = EXCLUDED.caption, description = EXCLUDED.description, field_type_ordinal = EXCLUDED.field_type_ordinal"
 
-    override fun populateRefEntityEnum() = "INSERT INTO jds_ref_entity_enum(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"
+    override fun populateRefEntityEnum() = "INSERT INTO ${dbObjectPrefix}ref_entity_enum(entity_id, field_id) VALUES(?, ?) ON CONFLICT(entity_id, field_id) DO NOTHING"
 
-    override fun populateRefEntity() = "INSERT INTO jds_ref_entity(id, name, caption, description) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption, description = EXCLUDED.description"
+    override fun populateRefEntity() = "INSERT INTO ${dbObjectPrefix}ref_entity(id, name, caption, description) VALUES(?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption, description = EXCLUDED.description"
 
-    override fun populateRefEnum() = "INSERT INTO jds_ref_enum(field_id, seq, name, caption) VALUES(?, ?, ?, ?) ON CONFLICT(field_id, seq) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption"
+    override fun populateRefEnum() = "INSERT INTO ${dbObjectPrefix}ref_enum(field_id, seq, name, caption) VALUES(?, ?, ?, ?) ON CONFLICT(field_id, seq) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption"
 
-    override fun mapParentToChild() = "INSERT INTO jds_ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
+    override fun populateFieldDictionary() = "INSERT INTO ${dbObjectPrefix}field_dictionary(entity_id, field_id, property_name) VALUES(?, ?, ?) ON CONFLICT(entity_id, field_id) DO UPDATE SET property_name = EXCLUDED.property_name"
+
+    override fun mapParentToChild() = "INSERT INTO ${dbObjectPrefix}ref_entity_inheritance(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {
         FieldType.Float -> "REAL"
@@ -141,11 +143,13 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
         return "CREATE INDEX $indexName ON $tableName($columnName);"
     }
 
-    override fun createOrAlterProc(procedureName: String,
-                                   tableName: String,
-                                   columns: Map<String, String>,
-                                   uniqueColumns: Collection<String>,
-                                   doNothingOnConflict: Boolean): String {
+    override fun createOrAlterProc(
+            procedureName: String,
+            tableName: String,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean
+    ): String {
         return ""
     }
 }

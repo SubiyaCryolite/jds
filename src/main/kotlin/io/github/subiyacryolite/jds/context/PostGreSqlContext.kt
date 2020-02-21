@@ -21,7 +21,39 @@ import java.util.*
 /**
  * The PostgreSQL implementation of [io.github.subiyacryolite.jds.DbContext]
  */
-abstract class PostGreSqlContext : DbContext(Implementation.Postgres, true) {
+abstract class PostGreSqlContext : DbContext(Implementation.Postgres, true, "jds.") {
+
+    override fun prepareImplementation(connection: Connection) {
+        createSchemaIfNotExists(connection)
+    }
+
+    private fun createSchemaIfNotExists(connection: Connection) {
+        if (!doesSchemaExist(connection)) {
+            createSchema(connection)
+        }
+    }
+
+    private fun doesSchemaExist(connection: Connection): Boolean {
+        connection.prepareStatement("SELECT EXISTS(SELECT meta.schema_name FROM information_schema.schemata meta WHERE meta.schema_name = ? AND meta.catalog_name=?)").use { statement ->
+            statement.setString(1, "jds")
+            statement.setString(2, connection.catalog)
+            statement.executeQuery().use { resultSet ->
+                while (resultSet.next()) {
+                    return resultSet.getBoolean(1)
+                }
+            }
+        }
+        return false
+    }
+
+    private fun createSchema(connection: Connection) {
+        connection.prepareStatement("CREATE SCHEMA jds").use { statement ->
+            statement.executeUpdate()
+        }
+        connection.prepareStatement("COMMENT ON SCHEMA jds IS 'Holds all jds DB objects';").use { statement ->
+            statement.executeUpdate()
+        }
+    }
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ?"

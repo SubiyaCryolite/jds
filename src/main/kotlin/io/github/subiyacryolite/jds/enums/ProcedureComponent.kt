@@ -20,185 +20,185 @@ enum class ProcedureComponent(val component: String) {
     /**
      *
      */
-    PopEntityBinding("jds_pop_entity_binding"),
+    PopEntityBinding("pop_entity_binding"),
 
     /**
      *
      */
-    PopEntityLiveVersion("jds_pop_entity_live_version"),
+    PopEntityLiveVersion("pop_entity_live_version"),
 
     /**
      *
      */
-    PopEntityOverview("jds_pop_entity_overview"),
+    PopEntityOverview("pop_entity_overview"),
 
     /**
      *
      */
-    PopRefEntity("jds_pop_ref_entity"),
+    PopRefEntity("pop_ref_entity"),
 
     /**
      *
      */
-    PopRefEntityEnum("jds_pop_ref_entity_enum"),
+    PopRefEntityEnum("pop_ref_entity_enum"),
 
     /**
      *
      */
-    PopRefEntityField("jds_pop_ref_entity_field"),
+    PopRefEntityField("pop_ref_entity_field"),
 
     /**
      *
      */
-    PopRefFieldEntity("jds_pop_ref_field_entity"),
+    PopRefFieldEntity("pop_ref_field_entity"),
 
     /**
      *
      */
-    PopRefEntityInheritance("jds_pop_ref_entity_inheritance"),
+    PopRefEntityInheritance("pop_ref_entity_inheritance"),
 
     /**
      *
      */
-    PopRefEnum("jds_pop_ref_enum"),
+    PopRefEnum("pop_ref_enum"),
 
     /**
      *
      */
-    PopRefField("jds_pop_ref_field"),
+    PopRefField("pop_ref_field"),
 
     /**
      *
      */
-    PopStoreBlob("jds_pop_blob"),
+    PopStoreBlob("pop_blob"),
 
     /**
      *
      */
-    PopStoreBoolean("jds_pop_boolean"),
+    PopStoreBoolean("pop_boolean"),
 
     /**
      *
      */
-    PopStoreDate("jds_pop_date"),
+    PopStoreDate("pop_date"),
 
     /**
      *
      */
-    PopStoreDateTime("jds_pop_date_time"),
+    PopStoreDateTime("pop_date_time"),
 
     /**
      *
      */
-    PopStoreDouble("jds_pop_double"),
+    PopStoreDouble("pop_double"),
 
     /**
      *
      */
-    PopStoreDoubleCollection("jds_pop_double_col"),
+    PopStoreDoubleCollection("pop_double_col"),
 
     /**
      *
      */
-    PopStoreDuration("jds_pop_duration"),
+    PopStoreDuration("pop_duration"),
 
     /**
      *
      */
-    PopStoreEnum("jds_pop_enum"),
+    PopStoreEnum("pop_enum"),
 
     /**
      *
      */
-    PopStoreEnumString("jds_pop_enum_string"),
+    PopStoreEnumString("pop_enum_string"),
 
     /**
      *
      */
-    PopStoreEnumCollection("jds_pop_enum_col"),
+    PopStoreEnumCollection("pop_enum_col"),
 
     /**
      *
      */
-    PopStoreEnumStringCollection("jds_pop_enum_string_col"),
+    PopStoreEnumStringCollection("pop_enum_string_col"),
 
     /**
      *
      */
-    PopStoreFloat("jds_pop_float"),
+    PopStoreFloat("pop_float"),
 
     /**
      *
      */
-    PopStoreShort("jds_pop_short"),
+    PopStoreShort("pop_short"),
 
     /**
      *
      */
-    PopStoreUuid("jds_pop_uuid"),
+    PopStoreUuid("pop_uuid"),
 
     /**
      *
      */
-    PopStoreFloatCollection("jds_pop_float_col"),
+    PopStoreFloatCollection("pop_float_col"),
 
     /**
      *
      */
-    PopStoreInteger("jds_pop_integer"),
+    PopStoreInteger("pop_integer"),
 
     /**
      *
      */
-    PopStoreIntegerCollection("jds_pop_integer_col"),
+    PopStoreIntegerCollection("pop_integer_col"),
 
     /**
      *
      */
-    PopStoreLong("jds_pop_long"),
+    PopStoreLong("pop_long"),
 
     /**
      *
      */
-    PopStoreLongCollection("jds_pop_long_col"),
+    PopStoreLongCollection("pop_long_col"),
 
     /**
      *
      */
-    PopStoreMonthDay("jds_pop_month_day"),
+    PopStoreMonthDay("pop_month_day"),
 
     /**
      *
      */
-    PopStoreMonthYear("jds_pop_month_year"),
+    PopStoreMonthYear("pop_month_year"),
 
     /**
      *
      */
-    PopStorePeriod("jds_pop_period"),
+    PopStorePeriod("pop_period"),
 
     /**
      *
      */
-    PopStoreText("jds_pop_text"),
+    PopStoreText("pop_text"),
 
     /**
      *
      */
-    PopStoreTextCollection("jds_pop_text_col"),
+    PopStoreTextCollection("pop_text_col"),
 
     /**
      *
      */
-    PopStoreTime("jds_pop_time"),
+    PopStoreTime("pop_time"),
 
     /**
      *
      */
-    PopStoreYearMonth("jds_pop_year_month"),
+    PopStoreYearMonth("pop_year_month"),
 
     /**
      *
      */
-    PopStoreZonedDateTime("jds_pop_zoned_date_time")
+    PopStoreZonedDateTime("pop_zoned_date_time")
 }

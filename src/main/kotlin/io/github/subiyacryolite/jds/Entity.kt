@@ -143,10 +143,10 @@ abstract class Entity : IEntity, Serializable {
     }
 
     @JvmName("mapShort")
-    protected fun map(field: Field, value: Short) = map(field, ShortProperty(value))
+    protected fun map(field: Field, value: Short, propertyName: String="", alternateCodes: String="") = map(field, ShortProperty(value))
 
     @JvmName("mapShort")
-    protected fun map(field: Field, property: WritableProperty<Short>): WritableProperty<Short> {
+    protected fun map(field: Field, property: WritableProperty<Short>, propertyName: String="", alternateCodes: String=""): WritableProperty<Short> {
         @Suppress("UNCHECKED_CAST")
         map(field, property as WritableProperty<Short?>)
         return property

@@ -24,193 +24,193 @@ enum class TableComponent(val component: String, val alias: String) {
     /**
      *
      */
-    EntityBinding("jds_entity_binding", "eb"),
+    EntityBinding("entity_binding", "eb"),
 
     /**
      *
      */
-    EntityLiveVersion("jds_entity_live_version","elv"),
+    EntityLiveVersion("entity_live_version","elv"),
 
     /**
      *
      */
-    EntityOverview("jds_entity_overview", "entityOverviews"),
+    EntityOverview("entity_overview", "entityOverviews"),
 
     /**
      *
      */
-    RefEntities("jds_ref_entity", "et"),
+    RefEntities("ref_entity", "et"),
 
     /**
      *
      */
-    RefEntityEnums("jds_ref_entity_enum", "bee"),
+    RefEntityEnums("ref_entity_enum", "bee"),
 
     /**
      *
      */
-    RefEntityField("jds_ref_entity_field", "bef"),
+    RefEntityField("ref_entity_field", "bef"),
 
     /**
      *
      */
-    RefFieldEntity("jds_ref_field_entity", "bfe"),
+    RefFieldEntity("ref_field_entity", "bfe"),
 
     /**
      *
      */
-    RefEnumValues("jds_ref_enum", "env"),
+    RefEnumValues("ref_enum", "env"),
 
     /**
      *
      */
-    RefFieldTypes("jds_ref_field_type", "ft"),
+    RefFieldTypes("ref_field_type", "ft"),
 
     /**
      *
      */
-    RedFields("jds_ref_field", "fd"),
+    RedFields("ref_field", "fd"),
 
     /**
      *
      */
-    RefInheritance("jds_ref_entity_inheritance", "ri"),
+    RefInheritance("ref_entity_inheritance", "ri"),
 
     /**
      *
      */
-    StoreBlob("jds_str_blob", "sb"),
+    StoreBlob("str_blob", "sb"),
 
     /**
      *
      */
-    StoreBoolean("jds_str_boolean", "sbn"),
+    StoreBoolean("str_boolean", "sbn"),
 
     /**
      *
      */
-    StoreDate("jds_str_date", "sdd"),
+    StoreDate("str_date", "sdd"),
 
     /**
      *
      */
-    StoreDateTime("jds_str_date_time", "sdt"),
+    StoreDateTime("str_date_time", "sdt"),
 
     /**
      *
      */
-    StoreDateTimeCollection("jds_str_date_time_col", "sdt"),
+    StoreDateTimeCollection("str_date_time_col", "sdt"),
 
     /**
      *
      */
-    StoreDouble("jds_str_double", "sd"),
+    StoreDouble("str_double", "sd"),
 
     /**
      *
      */
-    StoreDoubleCollection("jds_str_double_col", "sdc"),
+    StoreDoubleCollection("str_double_col", "sdc"),
 
     /**
      *
      */
-    StoreDuration("jds_str_duration", "sd"),
+    StoreDuration("str_duration", "sd"),
 
     /**
      *
      */
-    StoreEnum("jds_str_enum", "se"),
+    StoreEnum("str_enum", "se"),
 
     /**
      *
      */
-    StoreEnumString("jds_str_enum_string", "ses"),
+    StoreEnumString("str_enum_string", "ses"),
 
     /**
      *
      */
-    StoreEnumCollection("jds_str_enum_col", "sec"),
+    StoreEnumCollection("str_enum_col", "sec"),
 
     /**
      *
      */
-    StoreEnumStringCollection("jds_str_enum_string_col", "sesc"),
+    StoreEnumStringCollection("str_enum_string_col", "sesc"),
 
     /**
      *
      */
-    StoreShort("jds_str_short", "sst"),
+    StoreShort("str_short", "sst"),
 
     /**
      *
      */
-    StoreFloat("jds_str_float", "sf"),
+    StoreFloat("str_float", "sf"),
 
     /**
      *
      */
-    StoreUuid("jds_str_uuid", "su"),
+    StoreUuid("str_uuid", "su"),
 
     /**
      *
      */
-    StoreFloatCollection("jds_str_float_col", "sfc"),
+    StoreFloatCollection("str_float_col", "sfc"),
 
     /**
      *
      */
-    StoreInteger("jds_str_integer", "si"),
+    StoreInteger("str_integer", "si"),
 
     /**
      *
      */
-    StoreIntegerCollection("jds_str_integer_col", "sic"),
+    StoreIntegerCollection("str_integer_col", "sic"),
     /**
      *
      */
-    StoreLong("jds_str_long", "sl"),
+    StoreLong("str_long", "sl"),
 
     /**
      *
      */
-    StoreLongCollection("jds_str_long_col", "slc"),
+    StoreLongCollection("str_long_col", "slc"),
 
     /**
      *
      */
-    StoreMonthDay("jds_str_month_day", "monthDayValues"),
+    StoreMonthDay("str_month_day", "monthDayValues"),
 
     /**
      *
      */
-    StorePeriod("jds_str_period", "sp"),
+    StorePeriod("str_period", "sp"),
     /**
      *
      */
     /**
      *
      */
-    StoreText("jds_str_text", "st"),
+    StoreText("str_text", "st"),
 
     /**
      *
      */
-    StoreTextCollection("jds_str_text_col", "stc"),
+    StoreTextCollection("str_text_col", "stc"),
 
     /**
      *
      */
-    StoreTime("jds_str_time", "stt"),
+    StoreTime("str_time", "stt"),
 
     /**
      *
      */
-    StoreYearMonth("jds_str_year_month", "yearMonthValues"),
+    StoreYearMonth("str_year_month", "yearMonthValues"),
 
     /**
      *
      */
-    StoreZonedDateTime("jds_str_zoned_date_time", "szdt");
+    StoreZonedDateTime("str_zoned_date_time", "szdt");
 
     override fun toString(): String {
         return name

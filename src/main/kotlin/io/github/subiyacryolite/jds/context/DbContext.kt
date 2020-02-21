@@ -13,10 +13,7 @@
  */
 package io.github.subiyacryolite.jds.context
 
-import io.github.subiyacryolite.jds.Entity
-import io.github.subiyacryolite.jds.Field
-import io.github.subiyacryolite.jds.Options
-import io.github.subiyacryolite.jds.Table
+import io.github.subiyacryolite.jds.*
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
@@ -41,7 +38,11 @@ import kotlin.collections.LinkedHashMap
  * @param implementation
  * @param supportsStatements
  */
-abstract class DbContext(val implementation: Implementation, val supportsStatements: Boolean) : IDbContext, Serializable {
+abstract class DbContext(
+        val implementation: Implementation,
+        val supportsStatements: Boolean,
+        val dbObjectPrefix: String = "jds_"
+) : IDbContext, Serializable {
 
     val classes = ConcurrentHashMap<Int, Class<out Entity>>()
     val tables = HashSet<Table>()
@@ -52,7 +53,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
      * Initialise JDS base tables
      */
     @JvmOverloads
-    fun init(dimensionTable: String = "jds_entity_overview") {
+    fun init(dimensionTable: String = "${dbObjectPrefix}entity_overview") {
         try {
             this.dimensionTable = dimensionTable
             dataSource.connection.use { connection ->
@@ -68,6 +69,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
      * Initialise core database components
      */
     private fun prepareJdsComponents(connection: Connection) {
+        prepareImplementation(connection)
         prepareJdsComponent(connection, TableComponent.RefEntities)
         prepareJdsComponent(connection, TableComponent.RefFieldTypes)
         prepareJdsComponent(connection, TableComponent.RedFields)
@@ -161,6 +163,14 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
 
     val isPosgreSqlDb: Boolean
         get() = implementation === Implementation.Postgres
+
+    /**
+     * Allow each unique DB implementation to perform unique steps
+     * For example the creation of Schemas in Postgres or Namespaces in SQL server
+     */
+    open internal fun prepareImplementation(connection: Connection){
+
+    }
 
     /**
      * Delegates the creation of custom database components depending on the
@@ -290,15 +300,15 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     override fun doesTableExist(connection: Connection, name: String): Boolean {
-        return tableExists(connection, name) > 0
+        return tableExists(connection, "${dbObjectPrefix}${name}") > 0
     }
 
     override fun doesProcedureExist(connection: Connection, name: String): Boolean {
-        return procedureExists(connection, name) > 0
+        return procedureExists(connection, "${dbObjectPrefix}${name}") > 0
     }
 
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
-        return columnExists(connection, tableName, columnName) > 0
+        return columnExists(connection, "${dbObjectPrefix}${tableName}", columnName) > 0
     }
 
     internal fun getResult(connection: Connection, sql: String, params: Array<String>): Int {
@@ -541,6 +551,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description)
                         jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
+                        FieldDictionary.update(this, connection)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         connection.autoCommit = true
@@ -556,7 +567,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     private fun populateFieldTypes(connection: Connection) {
-        connection.prepareStatement("INSERT INTO jds_ref_field_type(ordinal, caption) VALUES(?,?)").use { statement ->
+        connection.prepareStatement("INSERT INTO ${dbObjectPrefix}ref_field_type(ordinal, caption) VALUES(?,?)").use { statement ->
             FieldType.values().forEach { fieldType ->
                 statement.setInt(1, fieldType.ordinal)
                 statement.setString(2, fieldType.name)
@@ -566,242 +577,248 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         }
     }
 
-    internal open fun saveEntityLiveVersion() = "{call jds_pop_entity_live_version(?)}"
+    internal open fun saveEntityLiveVersion() = "{call ${dbObjectPrefix}pop_entity_live_version(?)}"
 
-    internal open fun saveMonthDay() = "{call jds_pop_month_day(?, ?, ?, ?)}"
+    internal open fun saveMonthDay() = "{call ${dbObjectPrefix}pop_month_day(?, ?, ?, ?)}"
 
-    internal open fun saveYearMonth() = "{call jds_pop_year_month(?, ?, ?, ?)}"
+    internal open fun saveYearMonth() = "{call ${dbObjectPrefix}pop_year_month(?, ?, ?, ?)}"
 
-    internal open fun savePeriod() = "{call jds_pop_period(?, ?, ?, ?)}"
+    internal open fun savePeriod() = "{call ${dbObjectPrefix}pop_period(?, ?, ?, ?)}"
 
-    internal open fun saveDuration() = "{call jds_pop_duration(?, ?, ?, ?)}"
+    internal open fun saveDuration() = "{call ${dbObjectPrefix}pop_duration(?, ?, ?, ?)}"
 
     /**
      * SQL call to save blob values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveBlob() = "{call jds_pop_blob(?, ?, ?, ?)}"
+    internal open fun saveBlob() = "{call ${dbObjectPrefix}pop_blob(?, ?, ?, ?)}"
 
     /**
      * SQL call to save boolean values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveBoolean() = "{call jds_pop_boolean(?, ?, ?, ?)}"
+    internal open fun saveBoolean() = "{call ${dbObjectPrefix}pop_boolean(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTime() = "{call jds_pop_date_time(?, ?, ?, ?)}"
+    internal open fun saveDateTime() = "{call ${dbObjectPrefix}pop_date_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTimeCollection() = "{call jds_pop_date_time_col(?, ?, ?, ?, ?)}"
+    internal open fun saveDateTimeCollection() = "{call ${dbObjectPrefix}pop_date_time_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save double values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDouble() = "{call jds_pop_double(?, ?, ?, ?)}"
+    internal open fun saveDouble() = "{call ${dbObjectPrefix}pop_double(?, ?, ?, ?)}"
 
     /**
      * SQL call to save double values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDoubleCollection() = "{call jds_pop_double_col(?, ?, ?, ?, ?)}"
+    internal open fun saveDoubleCollection() = "{call ${dbObjectPrefix}pop_double_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloat() = "{call jds_pop_float(?, ?, ?, ?)}"
+    internal open fun saveFloat() = "{call ${dbObjectPrefix}pop_float(?, ?, ?, ?)}"
 
     /**
      * SQL call to save short values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveShort() = "{call jds_pop_short(?, ?, ?, ?)}"
+    internal open fun saveShort() = "{call ${dbObjectPrefix}pop_short(?, ?, ?, ?)}"
 
     /**
      * SQL call to save short values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveUuid() = "{call jds_pop_uuid(?, ?, ?, ?)}"
+    internal open fun saveUuid() = "{call ${dbObjectPrefix}pop_uuid(?, ?, ?, ?)}"
 
     /**
      * SQL call to save float values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloatCollection() = "{call jds_pop_float_col(?, ?, ?, ?, ?)}"
+    internal open fun saveFloatCollection() = "{call ${dbObjectPrefix}pop_float_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveInteger() = "{call jds_pop_integer(?, ?, ?, ?)}"
+    internal open fun saveInteger() = "{call ${dbObjectPrefix}pop_integer(?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveIntegerCollection() = "{call jds_pop_integer_col(?, ?, ?, ?, ?)}"
+    internal open fun saveIntegerCollection() = "{call ${dbObjectPrefix}pop_integer_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLong() = "{call jds_pop_long(?, ?, ?, ?)}"
+    internal open fun saveLong() = "{call ${dbObjectPrefix}pop_long(?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLongCollection() = "{call jds_pop_long_col(?, ?, ?, ?, ?)}"
+    internal open fun saveLongCollection() = "{call ${dbObjectPrefix}pop_long_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save text values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveString() = "{call jds_pop_text(?, ?, ?, ?)}"
+    internal open fun saveString() = "{call ${dbObjectPrefix}pop_text(?, ?, ?, ?)}"
 
     /**
      * SQL call to save text values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveStringCollection() = "{call jds_pop_text_col(?, ?, ?, ?, ?)}"
+    internal open fun saveStringCollection() = "{call ${dbObjectPrefix}pop_text_col(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to save time values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveTime() = "{call jds_pop_time(?, ?, ?, ?)}"
+    internal open fun saveTime() = "{call ${dbObjectPrefix}pop_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveZonedDateTime() = "{call jds_pop_zoned_date_time(?, ?, ?, ?)}"
+    internal open fun saveZonedDateTime() = "{call ${dbObjectPrefix}pop_zoned_date_time(?, ?, ?, ?)}"
 
     /**
      * SQL call to save enum values as ordinal int values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnum() = "{call jds_pop_enum(?, ?, ?, ?)}"
+    internal open fun saveEnum() = "{call ${dbObjectPrefix}pop_enum(?, ?, ?, ?)}"
 
     /**
      * QL call to save enum values as string values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumString() = "{call jds_pop_enum_string(?, ?, ?, ?)}"
+    internal open fun saveEnumString() = "{call ${dbObjectPrefix}pop_enum_string(?, ?, ?, ?)}"
 
     /**
      * SQL call to save date values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDate() = "{call jds_pop_date(?, ?, ?, ?)}"
+    internal open fun saveDate() = "{call ${dbObjectPrefix}pop_date(?, ?, ?, ?)}"
 
     /**
      * SQL call to save enum collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumCollections() = "{call jds_pop_enum_col(?, ?, ?, ?)}"
+    internal open fun saveEnumCollections() = "{call ${dbObjectPrefix}pop_enum_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save enum string collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEnumStringCollections() = "{call jds_pop_enum_string_col(?, ?, ?, ?)}"
+    internal open fun saveEnumStringCollections() = "{call ${dbObjectPrefix}pop_enum_string_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save date time collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDateTimeCollections() = "{call jds_pop_date_time_col(?, ?, ?, ?)}"
+    internal open fun saveDateTimeCollections() = "{call ${dbObjectPrefix}pop_date_time_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save float collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveFloatCollections() = "{call jds_pop_float_col(?, ?, ?, ?)}"
+    internal open fun saveFloatCollections() = "{call ${dbObjectPrefix}pop_float_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save integer collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveIntegerCollections() = "{call jds_pop_integer_col(?, ?, ?, ?)}"
+    internal open fun saveIntegerCollections() = "{call ${dbObjectPrefix}pop_integer_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save double collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveDoubleCollections() = "{call jds_pop_double_col(?, ?, ?, ?)}"
+    internal open fun saveDoubleCollections() = "{call ${dbObjectPrefix}pop_double_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save long collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveLongCollections() = "{call jds_pop_long_col(?, ?, ?, ?)}"
+    internal open fun saveLongCollections() = "{call ${dbObjectPrefix}pop_long_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save string collections
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveStringCollections() = "{call jds_pop_text_col(?, ?, ?, ?)}"
+    internal open fun saveStringCollections() = "{call ${dbObjectPrefix}pop_text_col(?, ?, ?, ?)}"
 
     /**
      * SQL call to save entity overview values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveOverview() = "{call jds_pop_entity_overview(?, ?, ?)}"
+    internal open fun saveOverview() = "{call ${dbObjectPrefix}pop_entity_overview(?, ?, ?)}"
 
     /**
      * SQL call to save entity overview values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun saveEntityBindings() = "{call jds_pop_entity_binding(?, ?, ?, ?, ?)}"
+    internal open fun saveEntityBindings() = "{call ${dbObjectPrefix}pop_entity_binding(?, ?, ?, ?, ?)}"
 
     /**
      * SQL call to bind fieldIds to entityVersions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefEntityField() = "{call jds_pop_ref_entity_field(?, ?)}"
+    internal open fun populateRefEntityField() = "{call ${dbObjectPrefix}pop_ref_entity_field(?, ?)}"
 
     /**
      *
      */
-    internal open fun populateRefFieldEntity() = "{call jds_pop_ref_field_entity(?, ?)}"
+    internal open fun populateRefFieldEntity() = "{call ${dbObjectPrefix}pop_ref_field_entity(?, ?)}"
 
     /**
      * SQL call to map field names and descriptions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefField() = "{call jds_pop_ref_field(?, ?, ?, ?)}"
+    internal open fun populateRefField() = "{call ${dbObjectPrefix}pop_ref_field(?, ?, ?, ?)}"
 
     /**
      * SQL call to bind enumProperties to entityVersions
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefEntityEnum() = "{call jds_pop_ref_entity_enum(?,?)}"
+    internal open fun populateRefEntityEnum() = "{call ${dbObjectPrefix}pop_ref_entity_enum(?,?)}"
 
     /**
      * SQL call to map parents to child entities
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun mapParentToChild() = "{call jds_pop_ref_entity_inheritance(?, ?)}"
+    internal open fun mapParentToChild() = "{call ${dbObjectPrefix}pop_ref_entity_inheritance(?, ?)}"
 
     /**
      * SQL call to map class names
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefEntity() = "{call jds_pop_ref_entity(?, ?, ?)}"
+    internal open fun populateRefEntity() = "{call ${dbObjectPrefix}pop_ref_entity(?, ?, ?)}"
 
     /**
      * SQL call to save reference enum values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateRefEnum() = "{call jds_pop_ref_enum(?, ?, ?, ?)}"
+    internal open fun populateRefEnum() = "{call ${dbObjectPrefix}pop_ref_enum(?, ?, ?, ?)}"
+
+    /**
+     * SQL call to update the field dictionary property
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun populateFieldDictionary() = "{call ${dbObjectPrefix}pop_field_dictionary(?, ?, ?)}"
 
     /**
      * Variable to facilitate in-line rows in Oracle
@@ -858,7 +875,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["child_id"] = getDataType(FieldType.String, 36)
         columns["child_edit_version"] = getDataType(FieldType.Int)
         columns["child_attribute_id"] = getDataType(FieldType.Long)
-        return createOrAlterProc("jds_pop_entity_binding", "jds_entity_binding", columns, uniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_entity_binding", "${dbObjectPrefix}entity_binding", columns, uniqueColumns, false)
     }
 
     private fun createPopJdsEntityOverview(): String {
@@ -867,7 +884,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["id"] = getDataType(FieldType.String, 36)
         columns["edit_version"] = getDataType(FieldType.Int)
         columns["entity_id"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_entity_overview", "jds_entity_overview", columns, uniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_entity_overview", "${dbObjectPrefix}entity_overview", columns, uniqueColumns, false)
     }
 
     private fun createPopJdsRefEntity(): String {
@@ -876,7 +893,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["id"] = getDataType(FieldType.Int)
         columns["name"] = getDataType(FieldType.String, 64)
         columns["description"] = getDataType(FieldType.String, 256)
-        return createOrAlterProc("jds_pop_ref_entity", "jds_ref_entity", columns, uniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_entity", "${dbObjectPrefix}ref_entity", columns, uniqueColumns, false)
     }
 
     private fun createPopJdsRefEntityEnum(): String {
@@ -884,7 +901,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getDataType(FieldType.Int)
         columns["field_id"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_ref_entity_enum", "jds_ref_entity_enum", columns, uniqueColumns, true)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_entity_enum", "${dbObjectPrefix}ref_entity_enum", columns, uniqueColumns, true)
     }
 
     private fun createPopJdsRefEntityField(): String {
@@ -892,15 +909,15 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getDataType(FieldType.Int)
         columns["field_id"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_ref_entity_field", "jds_ref_entity_field", columns, uniqueColumns, true)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_entity_field", "${dbObjectPrefix}ref_entity_field", columns, uniqueColumns, true)
     }
 
     private fun createPopJdsRefFieldEntity(): String {
-        val uniqueColumns = setOf("field_id","entity_id")
+        val uniqueColumns = setOf("field_id", "entity_id")
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getDataType(FieldType.Int)
         columns["entity_id"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_ref_field_entity", "jds_ref_field_entity", columns, uniqueColumns, true)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_field_entity", "${dbObjectPrefix}ref_field_entity", columns, uniqueColumns, true)
     }
 
     private fun createPopJdsRefEntityInheritance(): String {
@@ -908,7 +925,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val columns = LinkedHashMap<String, String>()
         columns["parent_entity_id"] = getDataType(FieldType.Int)
         columns["child_entity_id"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_ref_entity_inheritance", "jds_ref_entity_inheritance", columns, uniqueColumns, true)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_entity_inheritance", "${dbObjectPrefix}ref_entity_inheritance", columns, uniqueColumns, true)
     }
 
     private fun createPopJdsRefEnum(): String {
@@ -918,7 +935,7 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["seq"] = getDataType(FieldType.Int)
         columns["name"] = getDataType(FieldType.String, 128)
         columns["caption"] = getDataType(FieldType.String, 128)
-        return createOrAlterProc("jds_pop_ref_enum", "jds_ref_enum", columns, uniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_enum", "${dbObjectPrefix}ref_enum", columns, uniqueColumns, false)
     }
 
     private fun createPopJdsRefField(): String {
@@ -928,126 +945,126 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         columns["caption"] = getDataType(FieldType.String, 64)
         columns["description"] = getDataType(FieldType.String, 256)
         columns["field_type_ordinal"] = getDataType(FieldType.Int)
-        return createOrAlterProc("jds_pop_ref_field", "jds_ref_field", columns, uniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_ref_field", "${dbObjectPrefix}ref_field", columns, uniqueColumns, false)
     }
 
     private fun createPopJdsStoreBlob(): String {
-        return createOrAlterProc("jds_pop_blob", "jds_str_blob", getStoreColumns("value" to getDataType(FieldType.Blob)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_blob", "${dbObjectPrefix}str_blob", getStoreColumns("value" to getDataType(FieldType.Blob)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreBoolean(): String {
-        return createOrAlterProc("jds_pop_boolean", "jds_str_boolean", getStoreColumns("value" to getDataType(FieldType.Boolean)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_boolean", "${dbObjectPrefix}str_boolean", getStoreColumns("value" to getDataType(FieldType.Boolean)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDateTime(): String {
-        return createOrAlterProc("jds_pop_date_time", "jds_str_date_time", getStoreColumns("value" to getDataType(FieldType.DateTime)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_date_time", "${dbObjectPrefix}str_date_time", getStoreColumns("value" to getDataType(FieldType.DateTime)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDouble(): String {
-        return createOrAlterProc("jds_pop_double", "jds_str_double", getStoreColumns("value" to getDataType(FieldType.Double)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_double", "${dbObjectPrefix}str_double", getStoreColumns("value" to getDataType(FieldType.Double)), storeUniqueColumns, false)
     }
 
     private fun createPopDoubleCollection(): String {
-        return createOrAlterProc("jds_pop_double_col", "jds_str_double_col", getStoreColumns("value" to getDataType(FieldType.Double)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_double_col", "${dbObjectPrefix}str_double_col", getStoreColumns("value" to getDataType(FieldType.Double)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreFloat(): String {
-        return createOrAlterProc("jds_pop_float", "jds_str_float", getStoreColumns("value" to getDataType(FieldType.Float)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_float", "${dbObjectPrefix}str_float", getStoreColumns("value" to getDataType(FieldType.Float)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreShort(): String {
-        return createOrAlterProc("jds_pop_short", "jds_str_short", getStoreColumns("value" to getDataType(FieldType.Short)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_short", "${dbObjectPrefix}str_short", getStoreColumns("value" to getDataType(FieldType.Short)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreUuid(): String {
-        return createOrAlterProc("jds_pop_uuid", "jds_str_uuid", getStoreColumns("value" to getDataType(FieldType.Uuid)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_uuid", "${dbObjectPrefix}str_uuid", getStoreColumns("value" to getDataType(FieldType.Uuid)), storeUniqueColumns, false)
     }
 
     private fun createPopFloatCollection(): String {
-        return createOrAlterProc("jds_pop_float_col", "jds_str_float_col", getStoreColumns("value" to getDataType(FieldType.Float)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_float_col", "${dbObjectPrefix}str_float_col", getStoreColumns("value" to getDataType(FieldType.Float)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreInteger(): String {
-        return createOrAlterProc("jds_pop_integer", "jds_str_integer", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_integer", "${dbObjectPrefix}str_integer", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
     }
 
     private fun createPopIntegerCollection(): String {
-        return createOrAlterProc("jds_pop_integer_col", "jds_str_integer_col", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_integer_col", "${dbObjectPrefix}str_integer_col", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreLong(): String {
-        return createOrAlterProc("jds_pop_long", "jds_str_long", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_long", "${dbObjectPrefix}str_long", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
     }
 
     private fun createPopLongCollection(): String {
-        return createOrAlterProc("jds_pop_long_col", "jds_str_long_col", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_long_col", "${dbObjectPrefix}str_long_col", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreText(): String {
-        return createOrAlterProc("jds_pop_text", "jds_str_text", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_text", "${dbObjectPrefix}str_text", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopTextCollection(): String {
-        return createOrAlterProc("jds_pop_text_col", "jds_str_text_col", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_text_col", "${dbObjectPrefix}str_text_col", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreEnum(): String {
-        return createOrAlterProc("jds_pop_enum", "jds_str_enum", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_enum", "${dbObjectPrefix}str_enum", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreEnumString(): String {
-        return createOrAlterProc("jds_pop_enum_string", "jds_str_enum_string", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_enum_string", "${dbObjectPrefix}str_enum_string", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopEnumCollection(): String {
-        return createOrAlterProc("jds_pop_enum_col", "jds_str_enum_col", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_enum_col", "${dbObjectPrefix}str_enum_col", getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
     }
 
     private fun createPopEnumStringCollection(): String {
-        return createOrAlterProc("jds_pop_enum_string_col", "jds_str_enum_string_col", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_enum_string_col", "${dbObjectPrefix}str_enum_string_col", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreTime(): String {
-        return createOrAlterProc("jds_pop_time", "jds_str_time", getStoreColumns("value" to getDataType(FieldType.Time)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_time", "${dbObjectPrefix}str_time", getStoreColumns("value" to getDataType(FieldType.Time)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDate(): String {
-        return createOrAlterProc("jds_pop_date", "jds_str_date", getStoreColumns("value" to getDataType(FieldType.Date)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_date", "${dbObjectPrefix}str_date", getStoreColumns("value" to getDataType(FieldType.Date)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreDuration(): String {
-        return createOrAlterProc("jds_pop_duration", "jds_str_duration", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_duration", "${dbObjectPrefix}str_duration", getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStorePeriod(): String {
-        return createOrAlterProc("jds_pop_period", "jds_str_period", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_period", "${dbObjectPrefix}str_period", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsMonthYear(): String {
-        return createOrAlterProc("jds_pop_month_year", "jds_str_month_year", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_month_year", "${dbObjectPrefix}str_month_year", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsMonthDay(): String {
-        return createOrAlterProc("jds_pop_month_day", "jds_str_month_day", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_month_day", "${dbObjectPrefix}str_month_day", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsYearMonth(): String {
-        return createOrAlterProc("jds_pop_year_month", "jds_str_year_month", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_year_month", "${dbObjectPrefix}str_year_month", getStoreColumns("value" to getDataType(FieldType.String)), storeUniqueColumns, false)
     }
 
     private fun createPopJdsStoreZonedDateTime(): String {
-        return createOrAlterProc("jds_pop_zoned_date_time", "jds_str_zoned_date_time", getStoreColumns("value" to getDataType(FieldType.ZonedDateTime)), storeUniqueColumns, false)
+        return createOrAlterProc("${dbObjectPrefix}pop_zoned_date_time", "${dbObjectPrefix}str_zoned_date_time", getStoreColumns("value" to getDataType(FieldType.ZonedDateTime)), storeUniqueColumns, false)
     }
 
     private fun createPopEntityLiveVersion(): String {
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getDataType(FieldType.String, 36)
         //don't include edit_version column, a separate SQL statement updates that column
-        return createOrAlterProc("jds_pop_entity_live_version", "jds_entity_live_version", columns, setOf("id"), false)
+        return createOrAlterProc("${dbObjectPrefix}pop_entity_live_version", "${dbObjectPrefix}entity_live_version", columns, setOf("id"), false)
     }
 
     private fun createEntityLiveVersionTable(): String {
-        val tableName = "jds_entity_live_version"
+        val tableName = "${dbObjectPrefix}entity_live_version"
         val columns = LinkedHashMap<String, String>()
         columns["id"] = getDataType(FieldType.String, 36)
         columns["edit_version"] = getDataType(FieldType.Int)
@@ -1059,84 +1076,84 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     private fun createStoreBlob(): String {
-        val tableName = "jds_str_blob"
+        val tableName = "${dbObjectPrefix}str_blob"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Blob)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreBoolean(): String {
-        val tableName = "jds_str_boolean"
+        val tableName = "${dbObjectPrefix}str_boolean"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Boolean)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDate(): String {
-        val tableName = "jds_str_date"
+        val tableName = "${dbObjectPrefix}str_date"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Date)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTime(): String {
-        val tableName = "jds_str_date_time"
+        val tableName = "${dbObjectPrefix}str_date_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDateTimeCollection(): String {
-        val tableName = "jds_str_date_time_col"
+        val tableName = "${dbObjectPrefix}str_date_time_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDouble(): String {
-        val tableName = "jds_str_double"
+        val tableName = "${dbObjectPrefix}str_double"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDoubleCollection(): String {
-        val tableName = "jds_str_double_col"
+        val tableName = "${dbObjectPrefix}str_double_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreDuration(): String {
-        val tableName = "jds_str_duration"
+        val tableName = "${dbObjectPrefix}str_duration"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnum(): String {
-        val tableName = "jds_str_enum"
+        val tableName = "${dbObjectPrefix}str_enum"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumString(): String {
-        val tableName = "jds_str_enum_string"
+        val tableName = "${dbObjectPrefix}str_enum_string"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumCollection(): String {
-        val tableName = "jds_str_enum_col"
+        val tableName = "${dbObjectPrefix}str_enum_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreEnumStringCollection(): String {
-        val tableName = "jds_str_enum_string_col"//Oracle length
+        val tableName = "${dbObjectPrefix}str_enum_string_col"//Oracle length
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${tableName}_u"] = "id, edit_version, field_id"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -1145,84 +1162,84 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     private fun createStoreFloat(): String {
-        val tableName = "jds_str_float"
+        val tableName = "${dbObjectPrefix}str_float"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreShort(): String {
-        val tableName = "jds_str_short"
+        val tableName = "${dbObjectPrefix}str_short"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Short)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreUuid(): String {
-        val tableName = "jds_str_uuid"
+        val tableName = "${dbObjectPrefix}str_uuid"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Uuid)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreFloatCollection(): String {
-        val tableName = "jds_str_float_col"
+        val tableName = "${dbObjectPrefix}str_float_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreInteger(): String {
-        val tableName = "jds_str_integer"
+        val tableName = "${dbObjectPrefix}str_integer"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreIntegerCollection(): String {
-        val tableName = "jds_str_integer_col"
+        val tableName = "${dbObjectPrefix}str_integer_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLong(): String {
-        val tableName = "jds_str_long"
+        val tableName = "${dbObjectPrefix}str_long"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreLongCollection(): String {
-        val tableName = "jds_str_long_col"
+        val tableName = "${dbObjectPrefix}str_long_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreMonthDay(): String {
-        val tableName = "jds_str_month_day"
+        val tableName = "${dbObjectPrefix}str_month_day"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStorePeriod(): String {
-        val tableName = "jds_str_period"
+        val tableName = "${dbObjectPrefix}str_period"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreText(): String {
-        val tableName = "jds_str_text"
+        val tableName = "${dbObjectPrefix}str_text"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreTextCollection(): String {
-        val tableName = "jds_str_text_col"
+        val tableName = "${dbObjectPrefix}str_text_col"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         val sql = createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
@@ -1230,28 +1247,28 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
     }
 
     private fun createStoreTime(): String {
-        val tableName = "jds_str_time"
+        val tableName = "${dbObjectPrefix}str_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.Time)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreYearMonth(): String {
-        val tableName = "jds_str_year_month"
+        val tableName = "${dbObjectPrefix}str_year_month"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createStoreZonedDateTime(): String {
-        val tableName = "jds_str_zoned_date_time"
+        val tableName = "${dbObjectPrefix}str_zoned_date_time"
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${tableName}_f"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
         return createTable(tableName, getStoreColumns("value" to getDataType(FieldType.ZonedDateTime)), getStoreUniqueColumns(tableName), LinkedHashMap(), foreignKeys)
     }
 
     private fun createEntityBinding(): String {
-        val tableName = "jds_entity_binding"
+        val tableName = "${dbObjectPrefix}entity_binding"
         val columns = linkedMapOf(
                 "parent_id" to getDataTypeImpl(FieldType.String, 36),
                 "parent_edit_version" to getDataTypeImpl(FieldType.Int),
@@ -1262,124 +1279,124 @@ abstract class DbContext(val implementation: Implementation, val supportsStateme
         val uniqueColumns = linkedMapOf("${tableName}_uk" to "parent_id, parent_edit_version, child_id, child_edit_version")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         if (implementation != Implementation.TSql) {
-            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "jds_entity_overview (id, edit_version)")
-            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_id, child_edit_version" to "jds_entity_overview (id, edit_version)")
+            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "${dbObjectPrefix}entity_overview (id, edit_version)")
+            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_id, child_edit_version" to "${dbObjectPrefix}entity_overview (id, edit_version)")
         }
         return createTable(tableName, columns, uniqueColumns, HashMap(), foreignKeys)
     }
 
     private fun createRefEntityOverview(): String {
-        val tableName = "jds_entity_overview"
+        val tableName = "${dbObjectPrefix}entity_overview"
         val columns = linkedMapOf(
                 "id" to getDataTypeImpl(FieldType.String, 36),
                 "edit_version" to getDataTypeImpl(FieldType.Int),
                 "entity_id" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_entity_overview_uk" to "id, edit_version")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}entity_overview_uk" to "id, edit_version")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "${dbObjectPrefix}ref_entity (id)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createStoreEntities(): String {
-        val tableName = "jds_ref_entity"
+        val tableName = "${dbObjectPrefix}ref_entity"
         val columns = linkedMapOf(
                 "id" to getDataTypeImpl(FieldType.Int),
                 "name" to getDataTypeImpl(FieldType.String, 64),
                 "description" to getDataTypeImpl(FieldType.String, 256)
         )
-        val primaryKey = linkedMapOf("jds_ref_entity_pk" to "id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_entity_pk" to "id")
         return createTable(tableName, columns, HashMap(), primaryKey, LinkedHashMap())
     }
 
     private fun createRefEnumValues(): String {
-        val tableName = "jds_ref_enum"
+        val tableName = "${dbObjectPrefix}ref_enum"
         val columns = linkedMapOf(
                 "field_id" to getDataTypeImpl(FieldType.Int),
                 "seq" to getDataTypeImpl(FieldType.Int),
                 "name" to getDataTypeImpl(FieldType.String, 128),
                 "caption" to getDataTypeImpl(FieldType.String, 128)
         )
-        val primaryKey = linkedMapOf("jds_ref_enum_pk" to "field_id, seq")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_enum_pk" to "field_id, seq")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_id" to "${dbObjectPrefix}ref_field (id)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefFields(): String {
-        val tableName = "jds_ref_field"
+        val tableName = "${dbObjectPrefix}ref_field"
         val columns = linkedMapOf(
                 "id" to getDataTypeImpl(FieldType.Int),
                 "caption" to getDataTypeImpl(FieldType.String, 64),
                 "description" to getDataTypeImpl(FieldType.String, 256),
                 "field_type_ordinal" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_ref_field_pk" to "id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_field_pk" to "id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_type_ordinal" to "jds_ref_field_type (ordinal)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("field_type_ordinal" to "${dbObjectPrefix}ref_field_type (ordinal)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefFieldTypes(): String {
-        val tableName = "jds_ref_field_type"
+        val tableName = "${dbObjectPrefix}ref_field_type"
         val columns = linkedMapOf(
                 "ordinal" to getDataTypeImpl(FieldType.Int),
                 "caption" to getDataTypeImpl(FieldType.String, 64)
         )
-        val primaryKey = linkedMapOf("jds_ref_field_type_pk" to "ordinal")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_field_type_pk" to "ordinal")
         return createTable(tableName, columns, HashMap(), primaryKey, LinkedHashMap())
     }
 
     private fun createBindEntityFields(): String {
-        val tableName = "jds_ref_entity_field"
+        val tableName = "${dbObjectPrefix}ref_entity_field"
         val columns = linkedMapOf(
                 "entity_id" to getDataTypeImpl(FieldType.Int),
                 "field_id" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_ref_entity_field_pk" to "entity_id, field_id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_entity_field_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
-        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "${dbObjectPrefix}ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "${dbObjectPrefix}ref_field (id)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createBindFieldEntities(): String {
-        val tableName = "jds_ref_field_entity"
+        val tableName = "${dbObjectPrefix}ref_field_entity"
         val columns = linkedMapOf(
                 "field_id" to getDataTypeImpl(FieldType.Int),
                 "entity_id" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_ref_field_entity_pk" to "entity_id, field_id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_field_entity_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
-        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "${dbObjectPrefix}ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "${dbObjectPrefix}ref_field (id)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createBindEntityEnums(): String {
-        val tableName = "jds_ref_entity_enum"
+        val tableName = "${dbObjectPrefix}ref_entity_enum"
         val columns = linkedMapOf(
                 "entity_id" to getDataTypeImpl(FieldType.Int),
                 "field_id" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_ref_entity_enum_pk" to "entity_id, field_id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_entity_enum_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "jds_ref_entity (id)")
-        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "jds_ref_field (id)")
+        foreignKeys["${tableName}_fk_1"] = linkedMapOf("entity_id" to "${dbObjectPrefix}ref_entity (id)")
+        foreignKeys["${tableName}_fk_2"] = linkedMapOf("field_id" to "${dbObjectPrefix}ref_field (id)")
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefInheritance(): String {
-        val tableName = "jds_ref_entity_inheritance"
+        val tableName = "${dbObjectPrefix}ref_entity_inheritance"
         val columns = linkedMapOf(
                 "parent_entity_id" to getDataTypeImpl(FieldType.Int),
                 "child_entity_id" to getDataTypeImpl(FieldType.Int)
         )
-        val primaryKey = linkedMapOf("jds_ref_entity_inheritance_pk" to "parent_entity_id, child_entity_id")
+        val primaryKey = linkedMapOf("${dbObjectPrefix}ref_entity_inheritance_pk" to "parent_entity_id, child_entity_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         if (implementation != Implementation.TSql) {
-            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_entity_id" to "jds_ref_entity (id)")
-            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_entity_id" to "jds_ref_entity (id)")
+            foreignKeys["${tableName}_fk_1"] = linkedMapOf("parent_entity_id" to "${dbObjectPrefix}ref_entity (id)")
+            foreignKeys["${tableName}_fk_2"] = linkedMapOf("child_entity_id" to "${dbObjectPrefix}ref_entity (id)")
         }
         return createTable(tableName, columns, HashMap(), primaryKey, foreignKeys)
     }
