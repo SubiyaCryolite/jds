@@ -23,6 +23,6 @@ data class AddressBook(
 ) : Entity() {
 
     init {
-        map(Entities.Addresses, addresses)
+        map(Entities.Addresses, addresses,"addresses")
     }
 }

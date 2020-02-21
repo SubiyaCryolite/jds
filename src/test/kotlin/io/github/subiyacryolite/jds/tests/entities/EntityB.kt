@@ -21,18 +21,18 @@ import io.github.subiyacryolite.jds.enums.FieldType
 @EntityAnnotation(id = 1001, name = "entityb")
 open class EntityB : EntityA() {
 
-    private val _field = StringProperty("C")
+    private val _field = StringProperty("B")
 
     init {
-        map(ENTITY_B_FIELD, _field)
+        map(ENTITY_B_FIELD, _field,"fieldB")
     }
 
-    var entityBValue: String
+    var fieldB: String
         get() = _field.get()
         set(s) = _field.set(s)
 
     override fun toString(): String {
-        return "{ EntityB { FieldA = $entityAValue, FieldB = $entityBValue } }"
+        return "{ EntityB { FieldA = $fieldA, FieldB = $fieldB } }"
     }
 
     companion object {

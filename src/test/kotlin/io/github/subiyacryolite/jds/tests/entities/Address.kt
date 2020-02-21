@@ -23,14 +23,14 @@ import java.time.LocalDateTime
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
 class Address : Entity() {
 
-    private val _streetName = map(Fields.StreetName, "")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty())
-    private val _area = map(Fields.ResidentialArea, "")
-    private val _city = map(Fields.City, "")
-    private val _provinceOrState = map(Fields.ProvinceOrState, "")
-    private val _country = map(Fields.Country, "")
-    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty())
-    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now())
+    private val _streetName = map(Fields.StreetName, "","streetName")
+    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty(),"plotNumber")
+    private val _area = map(Fields.ResidentialArea, "area")
+    private val _city = map(Fields.City, "city")
+    private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
+    private val _country = map(Fields.Country, "country")
+    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty(),"primaryAddress")
+    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(),"timestamp")
 
     var primaryAddress: Boolean?
         get() = _primaryAddress.get()

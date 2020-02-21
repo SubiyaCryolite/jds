@@ -9,16 +9,20 @@ object FieldDictionary {
     internal val dictionary: ConcurrentHashMap<Int, HashSet<Pair<Int, String>>> = ConcurrentHashMap()
 
     fun addEntityField(entityId: Int, fieldId: Int, propertyName: String) {
-        addEntityField(entityId, Pair(fieldId, propertyName))
+        if (Entity.initialising) {
+            addEntityField(entityId, Pair(fieldId, propertyName))
+        }
     }
 
-    fun addEntityField(entityId: Int, triple: Pair<Int, String>) {
-        val dict = dictionary.getOrPut(entityId) { HashSet() }
-        dict.add(triple)
+    fun addEntityField(entityId: Int, pair: Pair<Int, String>) {
+        if (Entity.initialising) {
+            val dict = dictionary.getOrPut(entityId) { HashSet() }
+            dict.add(pair)
+        }
     }
 
     fun update(dbContext: DbContext, connection: Connection) {
-        connection.prepareStatement(dbContext.populateFieldDictionary()).use { statement ->
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateFieldDictionary()) else connection.prepareStatement(dbContext.populateFieldDictionary())).use { statement ->
             dictionary.forEach { (entityId, fieldProperties) ->
                 fieldProperties.forEach { fieldProperty ->
                     statement.setInt(1, entityId)

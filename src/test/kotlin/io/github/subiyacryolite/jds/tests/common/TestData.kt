@@ -79,18 +79,18 @@ object TestData {
 
             val entitya = EntityA()
             entitya.overview.id = "entityA"
-            entitya.entityAValue = "entity A - ValueA"
+            entitya.fieldA = "entity A - ValueA"
 
             val entityb = EntityB()
             entityb.overview.id = "entityB"
-            entityb.entityAValue = "entity B - Value A"
-            entityb.entityBValue = "entity B - Value B"
+            entityb.fieldA = "entity B - Value A"
+            entityb.fieldB = "entity B - Value B"
 
             val entityc = EntityC()
             entityc.overview.id = "entityC"
-            entityc.entityAValue = "entity C - Value A"
-            entityc.entityBValue = "entity C - Value B"
-            entityc.entityCValue = "entity C - Value C"
+            entityc.fieldA = "entity C - Value A"
+            entityc.fieldB = "entity C - Value B"
+            entityc.fieldC = "entity C - Value C"
 
             collection.add(entitya)
             collection.add(entityb)

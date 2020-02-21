@@ -25,15 +25,15 @@ open class EntityA : Entity() {
     private val _field = StringProperty("A")
 
     init {
-        map(ENTITY_A_FIELD, _field)
+        map(ENTITY_A_FIELD, _field,"fieldA")
     }
 
-    var entityAValue: String
+    var fieldA: String
         get() = _field.get()
         set(value) = _field.set(value)
 
     override fun toString(): String {
-        return "{ EntityA { FieldA = $entityAValue } }"
+        return "{ EntityA { FieldA = $fieldA } }"
     }
 
     companion object {

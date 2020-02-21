@@ -583,6 +583,7 @@ abstract class DbContext(
                 classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
+                    Entity.initialising = true
                     dataSource.connection.use { connection ->
                         connection.autoCommit = false
                         val parentEntities = HashSet<Int>()
@@ -601,6 +602,8 @@ abstract class DbContext(
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
+                } finally {
+                    Entity.initialising = false
                 }
             }
         } else
@@ -1406,5 +1409,6 @@ abstract class DbContext(
     companion object {
 
         private val storeUniqueColumns = setOf("id", "edit_version", "field_id")
+
     }
 }

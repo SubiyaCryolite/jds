@@ -24,15 +24,15 @@ class EntityC : EntityB() {
     private val _field = StringProperty("C")
 
     init {
-        map(ENTITY_C_FIELD, _field)
+        map(ENTITY_C_FIELD, _field, "fieldC")
     }
 
-    var entityCValue: String
+    var fieldC: String
         get() = _field.get()
         set(s) = _field.set(s)
 
     override fun toString(): String {
-        return "{ EntityC { FieldA = $entityAValue, FieldB = $entityBValue, FieldC = $entityCValue } }"
+        return "{ EntityC { FieldA = $fieldA, FieldB = $fieldB, FieldC = $fieldC } }"
     }
 
     companion object {
