@@ -28,11 +28,6 @@ abstract class OracleContext : DbContext(Implementation.Oracle, true) {
         return getResult(connection, sql, arrayOf(tableName.toUpperCase()))
     }
 
-    override fun viewExists(connection: Connection, viewName: String): Int {
-        val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('VIEW') AND object_name = ?"
-        return getResult(connection, sql, arrayOf(viewName.toUpperCase()))
-    }
-
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?"
         return getResult(connection, sql, arrayOf(procedureName.toUpperCase()))

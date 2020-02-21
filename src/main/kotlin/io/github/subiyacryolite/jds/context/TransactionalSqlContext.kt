@@ -21,7 +21,7 @@ import java.util.*
 /**
  * The TSQL implementation of [io.github.subiyacryolite.jds.DbContext]
  */
-abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true) {
+abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true,"jds_","dbo") {
 
     override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
@@ -35,15 +35,6 @@ abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true) {
     override fun procedureExists(connection: Connection, procedureName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
         val toReturn = getResult(connection, sql, arrayOf(procedureName, "P"))
-        return when (toReturn >= 1) {
-            true -> 1
-            false -> 0
-        }
-    }
-
-    override fun viewExists(connection: Connection, viewName: String): Int {
-        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        val toReturn = getResult(connection, sql, arrayOf(viewName, "V"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0

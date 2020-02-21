@@ -37,11 +37,6 @@ abstract class MySqlContext : DbContext {
         return getResult(connection, sql, arrayOf(connection.catalog, procedureName))
     }
 
-    override fun viewExists(connection: Connection, viewName: String): Int {
-        val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, viewName))
-    }
-
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         val sql = "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?"
         return getResult(connection, sql, arrayOf(connection.catalog, tableName, columnName))
