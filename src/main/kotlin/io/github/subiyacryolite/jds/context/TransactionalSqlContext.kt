@@ -41,7 +41,7 @@ abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "j
             statement.setString(2, connection.catalog)
             statement.executeQuery().use { resultSet ->
                 while (resultSet.next()) {
-                    return resultSet.getInt(1)>0
+                    return resultSet.getInt(1) > 0
                 }
             }
         }
@@ -98,11 +98,13 @@ abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "j
         return "CREATE INDEX $indexName ON $tableName($columnName);"
     }
 
-    override fun createOrAlterProc(procedureName: String,
-                                   tableName: String,
-                                   columns: Map<String, String>,
-                                   uniqueColumns: Collection<String>,
-                                   doNothingOnConflict: Boolean): String {
+    override fun createOrAlterProc(
+            procedureName: String,
+            tableName: String,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean
+    ): String {
         val sqlBuilder = StringBuilder()
 
         sqlBuilder.append("CREATE OR ALTER PROCEDURE $procedureName(")

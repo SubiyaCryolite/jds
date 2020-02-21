@@ -97,11 +97,13 @@ abstract class PostGreSqlContext : DbContext(Implementation.PostGreSql, true, "j
         return "CREATE INDEX $indexName ON $tableName($columnName);"
     }
 
-    override fun createOrAlterProc(procedureName: String,
-                                   tableName: String,
-                                   columns: Map<String, String>,
-                                   uniqueColumns: Collection<String>,
-                                   doNothingOnConflict: Boolean): String {
+    override fun createOrAlterProc(
+            procedureName: String,
+            tableName: String,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean
+    ): String {
         val sqlBuilder = StringBuilder()
 
         sqlBuilder.append("CREATE OR REPLACE FUNCTION $procedureName(")
