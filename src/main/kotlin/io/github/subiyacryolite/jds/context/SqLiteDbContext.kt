@@ -24,8 +24,12 @@ import java.sql.Connection
 abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun tableExists(connection: Connection, table: Table): Int {
+        return tableExists(connection, "$objectPrefix${table.component}")
+    }
+
+    override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(name) AS Result FROM sqlite_master WHERE type='table' AND name=?;"
-        return getResult(connection, sql, arrayOf("$objectPrefix${table.component}"))
+        return getResult(connection, sql, arrayOf(tableName))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {

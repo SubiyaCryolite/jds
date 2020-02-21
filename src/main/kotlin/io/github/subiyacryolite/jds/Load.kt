@@ -105,11 +105,11 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                           repo.id,
                           repo.edit_version,
                           entity_id
-                        FROM jds_entity_overview repo
+                        FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityOverview)} repo
                           JOIN (SELECT
                                   id,
                                   max(edit_version) AS edit_version
-                                FROM jds_entity_overview
+                                FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityOverview)}
                                 WHERE id IN $questionsString
                                 GROUP BY id) latest
                             ON repo.id = latest.id AND repo.edit_version = latest.edit_version
@@ -118,38 +118,38 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                     connection.prepareStatement(overviewSql).use { overviewStatement ->
                         //create sql to populate fields
                         val populateEmbeddedAndArrayObjects = """
-                            SELECT child.* FROM jds_entity_binding child JOIN jds_entity_overview parent ON parent.id IN $questionsString 
+                            SELECT child.* FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityBinding)} child JOIN ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityOverview)} parent ON parent.id IN $questionsString 
                                 AND parent.id = child.parent_id 
                                 AND parent.edit_version = child.parent_edit_version;
                         """.trimIndent()
 
-                        val blobStatement = connection.prepareStatement("SELECT * FROM jds_str_blob WHERE id IN $questionsString")
-                        val booleanStatement = connection.prepareStatement("SELECT * FROM jds_str_boolean WHERE id IN $questionsString")
-                        val dateStatement = connection.prepareStatement("SELECT * FROM jds_str_date WHERE id IN $questionsString")
-                        val dateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time WHERE id IN $questionsString")
-                        val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_date_time_col WHERE id IN $questionsString")
-                        val doubleStatement = connection.prepareStatement("SELECT * FROM jds_str_double WHERE id IN $questionsString")
-                        val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_double_col WHERE id IN $questionsString")
-                        val durationStatement = connection.prepareStatement("SELECT * FROM jds_str_duration WHERE id IN $questionsString")
-                        val enumStatement = connection.prepareStatement("SELECT * FROM jds_str_enum WHERE id IN $questionsString")
-                        val enumStringStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string WHERE id IN $questionsString")
-                        val enumCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_col WHERE id IN $questionsString")
-                        val enumStringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_enum_string_col WHERE id IN $questionsString")
-                        val floatStatement = connection.prepareStatement("SELECT * FROM jds_str_float WHERE id IN $questionsString")
-                        val floatCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_float_col WHERE id IN $questionsString")
-                        val intStatement = connection.prepareStatement("SELECT * FROM jds_str_integer WHERE id IN $questionsString")
-                        val shortStatement = connection.prepareStatement("SELECT * FROM jds_str_short WHERE id IN $questionsString")
-                        val uuidStatement = connection.prepareStatement("SELECT * FROM jds_str_uuid WHERE id IN $questionsString")
-                        val intCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_integer_col WHERE id IN $questionsString")
-                        val longStatement = connection.prepareStatement("SELECT * FROM jds_str_long WHERE id IN $questionsString")
-                        val longCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_long_col WHERE id IN $questionsString")
-                        val monthDayStatement = connection.prepareStatement("SELECT * FROM jds_str_month_day WHERE id IN $questionsString")
-                        val periodStatement = connection.prepareStatement("SELECT * FROM jds_str_period WHERE id IN $questionsString")
-                        val stringStatement = connection.prepareStatement("SELECT * FROM jds_str_text WHERE id IN $questionsString")
-                        val stringCollectionStatement = connection.prepareStatement("SELECT * FROM jds_str_text_col WHERE id IN $questionsString")
-                        val timeStatement = connection.prepareStatement("SELECT * FROM jds_str_time WHERE id IN $questionsString")
-                        val yearMonthStatement = connection.prepareStatement("SELECT * FROM jds_str_year_month WHERE id IN $questionsString")
-                        val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM jds_str_zoned_date_time WHERE id IN $questionsString")
+                        val blobStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreBlob)} WHERE id IN $questionsString")
+                        val booleanStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreBoolean)} WHERE id IN $questionsString")
+                        val dateStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDate)} WHERE id IN $questionsString")
+                        val dateTimeStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDateTime)} WHERE id IN $questionsString")
+                        val dateTimeCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDateTimeCollection)} WHERE id IN $questionsString")
+                        val doubleStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDouble)} WHERE id IN $questionsString")
+                        val doubleCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDoubleCollection)} WHERE id IN $questionsString")
+                        val durationStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreDuration)} WHERE id IN $questionsString")
+                        val enumStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreEnum)} WHERE id IN $questionsString")
+                        val enumStringStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreEnumString)} WHERE id IN $questionsString")
+                        val enumCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreEnumCollection)} WHERE id IN $questionsString")
+                        val enumStringCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreEnumStringCollection)} WHERE id IN $questionsString")
+                        val floatStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreFloat)} WHERE id IN $questionsString")
+                        val floatCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreFloatCollection)} WHERE id IN $questionsString")
+                        val intStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreInteger)} WHERE id IN $questionsString")
+                        val shortStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreShort)} WHERE id IN $questionsString")
+                        val uuidStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreUuid)} WHERE id IN $questionsString")
+                        val intCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreIntegerCollection)} WHERE id IN $questionsString")
+                        val longStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreLong)} WHERE id IN $questionsString")
+                        val longCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreLongCollection)} WHERE id IN $questionsString")
+                        val monthDayStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreMonthDay)} WHERE id IN $questionsString")
+                        val periodStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StorePeriod)} WHERE id IN $questionsString")
+                        val stringStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreText)} WHERE id IN $questionsString")
+                        val stringCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreTextCollection)} WHERE id IN $questionsString")
+                        val timeStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreTime)} WHERE id IN $questionsString")
+                        val yearMonthStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreYearMonth)} WHERE id IN $questionsString")
+                        val zonedDateTimeStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreZonedDateTime)} WHERE id IN $questionsString")
                         val populateEmbeddedAndArrayObjectsStmt = connection.prepareStatement(populateEmbeddedAndArrayObjects)
 
                         //work in batches to not break prepared statement
@@ -843,7 +843,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
             if (searchByType) {
                 //if no ids supplied we are looking for all instances of the entity.
                 //load ALL entityVersions in the in heirarchy
-                val loadAllByTypeSql = "SELECT eo.id, eo.edit_version FROM jds_entity_overview eo WHERE eo.entity_id IN (SELECT ? UNION SELECT child_entity_id FROM jds_ref_entity_inheritance WHERE parent_entity_id = ?)"
+                val loadAllByTypeSql = "SELECT eo.id, eo.edit_version FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityOverview)} eo WHERE eo.entity_id IN (SELECT ? UNION SELECT child_entity_id FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityInheritance)} WHERE parent_entity_id = ?)"
                 it.prepareStatement(loadAllByTypeSql).use { statement ->
                     statement.setInt(1, entityId)//base instances
                     statement.setInt(2, entityId)//derived instances
@@ -854,7 +854,7 @@ class Load<T : Entity>(private val dbContext: DbContext, private val referenceTy
                 }
             } else {
                 //load all in filter
-                val loadByUuidSql = "SELECT id, edit_version FROM jds_entity_overview WHERE id IN (${parametize(filterUUIDs)})"
+                val loadByUuidSql = "SELECT id, edit_version FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityOverview)} WHERE id IN (${parametize(filterUUIDs)})"
                 it.prepareStatement(loadByUuidSql).use { statement ->
                     filterUUIDs.forEachIndexed { index, filterValue ->
                         statement.setString(index + 1, filterValue)

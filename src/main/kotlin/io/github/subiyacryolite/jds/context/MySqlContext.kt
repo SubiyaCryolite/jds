@@ -30,8 +30,12 @@ abstract class MySqlContext : DbContext {
     constructor() : this(Implementation.MySql, true)
 
     override fun tableExists(connection: Connection, table: Table): Int {
+        return tableExists(connection, "$objectPrefix${table.component}")
+    }
+
+    override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix${table.component}"))
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName))
     }
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {

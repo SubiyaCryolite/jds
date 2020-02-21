@@ -18,6 +18,7 @@ import io.github.subiyacryolite.jds.tests.entities.Example
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Load
 import io.github.subiyacryolite.jds.enums.FilterBy
+import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
 
 class NonExisting : BaseTestConfig("Load non-existing items") {
@@ -30,4 +31,10 @@ class NonExisting : BaseTestConfig("Load non-existing items") {
             Thread.sleep(16)
         println(process.get())
     }
+
+    @Test
+    fun localTestPostgreSql() {
+        testPostgreSql()
+    }
+
 }

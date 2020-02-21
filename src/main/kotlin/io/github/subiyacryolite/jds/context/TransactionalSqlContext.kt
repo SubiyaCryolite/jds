@@ -23,29 +23,58 @@ import java.util.*
 /**
  * The TSQL implementation of [io.github.subiyacryolite.jds.DbContext]
  */
-abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true,"jds_","dbo") {
+abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "jds.", "jds") {
+
+    override fun prepareImplementation(connection: Connection) {
+        createSchemaIfNotExists(connection)
+    }
+
+    private fun createSchemaIfNotExists(connection: Connection) {
+        if (!doesSchemaExist(connection)) {
+            createSchema(connection)
+        }
+    }
+
+    private fun doesSchemaExist(connection: Connection): Boolean {
+        connection.prepareStatement("SELECT EXISTS(SELECT schema_name FROM information_schema.schemata WHERE schema_name = ? AND catalog_name=?)").use { statement ->
+            statement.setString(1, schema)
+            statement.setString(2, connection.catalog)
+            statement.executeQuery().use { resultSet ->
+                while (resultSet.next()) {
+                    return resultSet.getBoolean(1)
+                }
+            }
+        }
+        return false
+    }
+
+    private fun createSchema(connection: Connection) {
+        connection.prepareStatement("CREATE SCHEMA $schema").use { statement ->
+            statement.executeUpdate()
+        }
+    }
 
     override fun tableExists(connection: Connection, table: Table): Int {
-        val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
-        val toReturn = getResult(connection, sql, arrayOf(table.component))
-        return when (toReturn >= 1) {
-            true -> 1
-            false -> 0
-        }
+        return tableExists(connection, table.component)
+    }
+
+    override fun tableExists(connection: Connection, tableName: String): Int {
+        val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, schema, tableName))
     }
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {
-        val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        val toReturn = getResult(connection, sql, arrayOf(procedure.component, "P"))
-        return when (toReturn >= 1) {
-            true -> 1
-            false -> 0
-        }
+        return procedureExists(connection, procedure.component)
+    }
+
+    override fun procedureExists(connection: Connection, procedureName: String): Int {
+        val sql = "SELECT COUNT(*) AS Result FROM information_schema.routines WHERE ROUTINE_CATALOG = ? and ROUTINE_SCHEMA = ? and ROUTINE_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, schema, procedureName))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
-        val sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = ? and TABLE_NAME = ? and COLUMN_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, tableName, columnName))
+        val sql = "SELECT COUNT(COLUMN_NAME) AS Result from INFORMATION_SCHEMA.columns WHERE TABLE_CATALOG = ? and TABLE_SCHEMA = ? AND TABLE_NAME = ? and COLUMN_NAME = ?"
+        return getResult(connection, sql, arrayOf(connection.catalog, schema, tableName, columnName))
     }
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {

@@ -310,8 +310,16 @@ abstract class DbContext(
         return tableExists(connection, table) > 0
     }
 
+    override fun doesTableExist(connection: Connection, tableName: String): Boolean {
+        return tableExists(connection, tableName) > 0
+    }
+
     override fun doesProcedureExist(connection: Connection, procedure: Procedure): Boolean {
         return procedureExists(connection, procedure) > 0
+    }
+
+    override fun doesProcedureExist(connection: Connection, procedureName: String): Boolean {
+        return procedureExists(connection, procedureName) > 0
     }
 
     override fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean {
@@ -393,11 +401,15 @@ abstract class DbContext(
      */
     abstract fun tableExists(connection: Connection, table: Table): Int
 
-    fun createOrAlterProc(procedure: Procedure,
-                          table: Table,
-                          columns: Map<String, String>,
-                          uniqueColumns: Collection<String>,
-                          doNothingOnConflict: Boolean): String {
+    abstract fun tableExists(connection: Connection, tableName: String): Int
+
+    fun createOrAlterProc(
+            procedure: Procedure,
+            table: Table,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean
+    ): String {
         return createOrAlterProc(getName(procedure), getName(table), columns, uniqueColumns, doNothingOnConflict)
     }
 
@@ -408,11 +420,23 @@ abstract class DbContext(
      * @param uniqueColumns
      * @param doNothingOnConflict
      */
-    abstract override fun createOrAlterProc(procedureName: String,
-                                            tableName: String,
-                                            columns: Map<String, String>,
-                                            uniqueColumns: Collection<String>,
-                                            doNothingOnConflict: Boolean): String
+    abstract override fun createOrAlterProc(
+            procedureName: String,
+            tableName: String,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean
+    ): String
+
+    private fun createTable(
+            table: Table,
+            columns: HashMap<String, String>,
+            uniqueColumns: HashMap<String, String> = HashMap(),
+            primaryKeys: HashMap<String, String> = HashMap(),
+            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap()
+    ): String {
+        return createTable(getName(table), columns, uniqueColumns, primaryKeys, foreignKeys)
+    }
 
     /**
      * @param tableName
@@ -421,12 +445,12 @@ abstract class DbContext(
      * @param primaryKeys LinkedHashMap<constraintName -> constraintColumns>
      * @param foreignKeys LinkedHashMap<constraintName -> LinkedHashMap< LocalColumns -> ReferenceTable(ReferenceColumns)>>
      */
-    protected fun createTable(
+    private fun createTable(
             tableName: String,
             columns: HashMap<String, String>,
-            uniqueColumns: HashMap<String, String>,
-            primaryKeys: HashMap<String, String>,
-            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>>
+            uniqueColumns: HashMap<String, String> = HashMap(),
+            primaryKeys: HashMap<String, String> = HashMap(),
+            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap()
     ): String {
         val sqlBuilder = StringBuilder()
         sqlBuilder.append("CREATE TABLE $tableName(\n")
@@ -473,6 +497,15 @@ abstract class DbContext(
      * @return 1 if the specified procedure exists in the database
      */
     open fun procedureExists(connection: Connection, procedure: Procedure): Int = 0
+
+    /**
+     * Internal checks to see if the specified procedure exists in the database
+     *
+     * @param connection the connection to use
+     * @param procedureName the procedure to look up
+     * @return 1 if the specified procedure exists in the database
+     */
+    open fun procedureExists(connection: Connection, procedureName: String): Int = 0
 
     /**
      * Internal checks to see if the specified column exists in the database
@@ -575,7 +608,7 @@ abstract class DbContext(
     }
 
     private fun populateFieldTypes(connection: Connection) {
-        connection.prepareStatement("INSERT INTO ${objectPrefix}field_type(ordinal, caption) VALUES(?,?)").use { statement ->
+        connection.prepareStatement("INSERT INTO ${getName(Table.FieldType)}(ordinal, caption) VALUES(?,?)").use { statement ->
             FieldType.values().forEach { fieldType ->
                 statement.setInt(1, fieldType.ordinal)
                 statement.setString(2, fieldType.name)
@@ -605,7 +638,7 @@ abstract class DbContext(
      * SQL call to save boolean values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateStoreBoolean() = "{call ${getName(Procedure.StoreBoolean)}((?, ?, ?, ?)}"
+    internal open fun populateStoreBoolean() = "{call ${getName(Procedure.StoreBoolean)}(?, ?, ?, ?)}"
 
     /**
      * SQL call to save datetime values
@@ -641,7 +674,7 @@ abstract class DbContext(
      * SQL call to save integer values
      * @return the default or overridden SQL statement for this operation
      */
-    internal open fun populateStoreInteger() = "{call${getName(Procedure.StoreInteger)}(?, ?, ?, ?)}"
+    internal open fun populateStoreInteger() = "{call ${getName(Procedure.StoreInteger)}(?, ?, ?, ?)}"
 
     /**
      * SQL call to save long values
@@ -809,11 +842,11 @@ abstract class DbContext(
         else -> "string_value"
     }
 
-    private fun getName(table: Table): String {
+    internal fun getName(table: Table): String {
         return "${objectPrefix}${table.component}"
     }
 
-    private fun getName(procedure: Procedure): String {
+    internal fun getName(procedure: Procedure): String {
         return "${objectPrefix}${procedure.component}"
     }
 
@@ -1049,6 +1082,10 @@ abstract class DbContext(
         return createOrAlterProc(Procedure.EntityLive, Table.EntityLive, columns, setOf("id"), false)
     }
 
+    private fun getDimensionTableFk(objectName: String): LinkedHashMap<String, LinkedHashMap<String, String>> {
+        return linkedMapOf("${objectName}_jds_fk" to linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)"))
+    }
+
     private fun createEntityLive(): String {
         val objectName = Table.EntityLive.component
         val columns = LinkedHashMap<String, String>()
@@ -1056,202 +1093,144 @@ abstract class DbContext(
         columns["edit_version"] = getDataType(FieldType.Int)
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${objectName}_jds_uk"] = "id"
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", columns, uniqueColumns, LinkedHashMap(), foreignKeys)
+        return createTable(Table.EntityLive, columns, uniqueColumns, LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreBlob(): String {
         val objectName = Table.StoreBlob.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Blob)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreBlob, getStoreColumns("value" to getDataType(FieldType.Blob)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreBoolean(): String {
         val objectName = Table.StoreBoolean.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Boolean)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreBoolean, getStoreColumns("value" to getDataType(FieldType.Boolean)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDate(): String {
         val objectName = Table.StoreDate.component
-        val tableName =
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Date)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDate, getStoreColumns("value" to getDataType(FieldType.Date)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDateTime(): String {
         val objectName = Table.StoreDateTime.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDateTime, getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDateTimeCollection(): String {
         val objectName = Table.StoreDateTimeCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDateTimeCollection, getStoreColumns("value" to getDataType(FieldType.DateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDouble(): String {
         val objectName = Table.StoreDouble.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDouble, getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDoubleCollection(): String {
         val objectName = Table.StoreDoubleCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDoubleCollection, getStoreColumns("value" to getDataType(FieldType.Double)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreDuration(): String {
         val objectName = Table.StoreDuration.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreDuration, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreEnum(): String {
         val objectName = Table.StoreEnum.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreEnum, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreEnumString(): String {
         val objectName = Table.StoreEnumString.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreEnumString, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreEnumCollection(): String {
         val objectName = Table.StoreEnumCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreEnumCollection, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreEnumStringCollection(): String {
         val objectName = Table.StoreEnumStringCollection.component
         val uniqueColumns = LinkedHashMap<String, String>()
         uniqueColumns["${objectName}_u"] = "id, edit_version, field_id"
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), uniqueColumns, LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreEnumStringCollection, getStoreColumns("value" to getDataType(FieldType.String)), uniqueColumns, LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreFloat(): String {
-        val objectName = Table.StoreFloatCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        val objectName = Table.StoreFloat.component
+        return createTable(Table.StoreFloat, getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreShort(): String {
         val objectName = Table.StoreShort.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Short)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreShort, getStoreColumns("value" to getDataType(FieldType.Short)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreUuid(): String {
         val objectName = Table.StoreUuid.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Uuid)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreUuid, getStoreColumns("value" to getDataType(FieldType.Uuid)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreFloatCollection(): String {
         val objectName = Table.StoreFloatCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreFloatCollection, getStoreColumns("value" to getDataType(FieldType.Float)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreInteger(): String {
         val objectName = Table.StoreInteger.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreInteger, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreIntegerCollection(): String {
         val objectName = Table.StoreIntegerCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreIntegerCollection, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreLong(): String {
         val objectName = Table.StoreLong.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreLong, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreLongCollection(): String {
         val objectName = Table.StoreLongCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreLongCollection, getStoreColumns("value" to getDataType(FieldType.Long)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreMonthDay(): String {
         val objectName = Table.StoreMonthDay.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreMonthDay, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStorePeriod(): String {
         val objectName = Table.StorePeriod.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StorePeriod, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreText(): String {
         val objectName = Table.StoreText.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreText, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreTextCollection(): String {
         val objectName = Table.StoreTextCollection.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        val sql = createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
-        return sql
+        return createTable(Table.StoreTextCollection, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreTime(): String {
         val objectName = Table.StoreTime.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.Time)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreTime, getStoreColumns("value" to getDataType(FieldType.Time)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreYearMonth(): String {
         val objectName = Table.StoreYearMonth.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreYearMonth, getStoreColumns("value" to getDataType(FieldType.String)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreZonedDateTime(): String {
         val objectName = Table.StoreZonedDateTime.component
-        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk"] = linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)")
-        return createTable("${objectPrefix}${objectName}", getStoreColumns("value" to getDataType(FieldType.ZonedDateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), foreignKeys)
+        return createTable(Table.StoreZonedDateTime, getStoreColumns("value" to getDataType(FieldType.ZonedDateTime)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createEntityBinding(): String {
@@ -1266,10 +1245,10 @@ abstract class DbContext(
         val uniqueColumns = linkedMapOf("${objectName}_uk" to "parent_id, parent_edit_version, child_id, child_edit_version")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         if (implementation != Implementation.TSql) {
-            foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "${objectPrefix}${Table.EntityOverview.component} (id, edit_version)")
-            foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("child_id, child_edit_version" to "${objectPrefix}${Table.EntityOverview.component} (id, edit_version)")
+            foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("parent_id, parent_edit_version" to "${getName(Table.EntityOverview)} (id, edit_version)")
+            foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("child_id, child_edit_version" to "${getName(Table.EntityOverview)} (id, edit_version)")
         }
-        return createTable("${objectPrefix}${objectName}", columns, uniqueColumns, HashMap(), foreignKeys)
+        return createTable(Table.EntityBinding, columns, uniqueColumns, HashMap(), foreignKeys)
     }
 
     private fun createRefEntityOverview(): String {
@@ -1282,7 +1261,7 @@ abstract class DbContext(
         val primaryKey = linkedMapOf("${objectName}_pk" to "id, edit_version")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.EntityOverview, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createFieldDictionary(): String {
@@ -1295,7 +1274,7 @@ abstract class DbContext(
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.FieldDictionary, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createStoreEntities(): String {
@@ -1306,7 +1285,7 @@ abstract class DbContext(
                 "description" to getDataTypeImpl(FieldType.String, 256)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "id")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, LinkedHashMap())
+        return createTable(Table.Entity, columns, HashMap(), primaryKey, LinkedHashMap())
     }
 
     private fun createRefEnumValues(): String {
@@ -1320,7 +1299,7 @@ abstract class DbContext(
         val primaryKey = linkedMapOf("${objectName}_pk" to "field_id, seq")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.Enum, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefFields(): String {
@@ -1334,7 +1313,7 @@ abstract class DbContext(
         val primaryKey = linkedMapOf("${objectName}_pk" to "id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("field_type_ordinal" to "${objectPrefix}${Table.FieldType.component} (ordinal)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.Field, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefFieldTypes(): String {
@@ -1344,7 +1323,7 @@ abstract class DbContext(
                 "caption" to getDataTypeImpl(FieldType.String, 64)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "ordinal")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, LinkedHashMap())
+        return createTable(Table.FieldType, columns, HashMap(), primaryKey, LinkedHashMap())
     }
 
     private fun createBindEntityFields(): String {
@@ -1357,7 +1336,7 @@ abstract class DbContext(
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
         foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.EntityField, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createBindFieldEntities(): String {
@@ -1370,7 +1349,7 @@ abstract class DbContext(
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
         foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.FieldEntity, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createBindEntityEnums(): String {
@@ -1383,7 +1362,7 @@ abstract class DbContext(
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
         foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.EntityEnum, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefInheritance(): String {
@@ -1398,7 +1377,7 @@ abstract class DbContext(
             foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("parent_entity_id" to "${getName(Table.Entity)} (id)")
             foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("child_entity_id" to "${getName(Table.Entity)} (id)")
         }
-        return createTable("${objectPrefix}${objectName}", columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(Table.EntityInheritance, columns, HashMap(), primaryKey, foreignKeys)
     }
 
 

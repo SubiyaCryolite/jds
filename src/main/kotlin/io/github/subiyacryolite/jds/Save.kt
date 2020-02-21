@@ -122,9 +122,15 @@ class Save(
                     entity.onPostSave(postSaveEventArguments)
                 postSaveEvent?.onSave(entity, preSaveEventArguments, postSaveEventArguments, connection)
             }
-            preSaveEventArguments.use { it.execute() }
-            onSaveEventArguments.use { it.execute() }
-            postSaveEventArguments.use { it.execute() }
+            preSaveEventArguments.use { eventArguments ->
+                eventArguments.execute()
+            }
+            onSaveEventArguments.use { eventArguments ->
+                eventArguments.execute()
+            }
+            postSaveEventArguments.use { eventArguments ->
+                eventArguments.execute()
+            }
         } catch (ex: Exception) {
             ex.printStackTrace(System.err)
         }
@@ -153,7 +159,7 @@ class Save(
 
         val saveOverview = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityOverview())
         val saveLiveVersion = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityLive())
-        val updateLiveVersion = regularStatement(onSaveEventArguments, "UPDATE jds_entity_live_version SET edit_version = ? WHERE id = ? AND (edit_version < ? OR edit_version IS NULL)")
+        val updateLiveVersion = regularStatement(onSaveEventArguments, "UPDATE ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.EntityLive)} SET edit_version = ? WHERE id = ? AND (edit_version < ? OR edit_version IS NULL)")
 
         entities.forEach { entity ->
             if (dbContext.options.writeOverviewInformation) {

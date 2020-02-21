@@ -26,8 +26,12 @@ import java.util.*
 abstract class OracleContext : DbContext(Implementation.Oracle, true) {
 
     override fun tableExists(connection: Connection, table: Table): Int {
+        return tableExists(connection, "$objectPrefix${table.component}")
+    }
+
+    override fun tableExists(connection: Connection, tableName: String): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
-        return getResult(connection, sql, arrayOf("$objectPrefix${table.component}"))
+        return getResult(connection, sql, arrayOf(connection.catalog, tableName))
     }
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {
