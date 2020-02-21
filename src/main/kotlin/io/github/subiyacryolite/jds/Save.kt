@@ -151,8 +151,8 @@ class Save(
     @Throws(Exception::class)
     private fun saveOverview(entities: Iterable<Entity>) = try {
 
-        val saveOverview = regularStatementOrCall(onSaveEventArguments, dbContext.saveOverview())
-        val saveLiveVersion = regularStatementOrCall(onSaveEventArguments, dbContext.saveEntityLiveVersion())
+        val saveOverview = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityOverview())
+        val saveLiveVersion = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityLive())
         val updateLiveVersion = regularStatement(onSaveEventArguments, "UPDATE jds_entity_live_version SET edit_version = ? WHERE id = ? AND (edit_version < ? OR edit_version IS NULL)")
 
         entities.forEach { entity ->
@@ -185,7 +185,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveBlobs(jdsEntity: Entity) = try {
-        val saveBlob = regularStatementOrCall(onSaveEventArguments, dbContext.saveBlob())
+        val saveBlob = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreBlob())
         jdsEntity.blobValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveBlob.setString(1, jdsEntity.overview.id)
             saveBlob.setInt(2, jdsEntity.overview.editVersion)
@@ -202,7 +202,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveBooleans(jdsEntity: Entity) = try {
-        val saveBoolean = regularStatementOrCall(onSaveEventArguments, dbContext.saveBoolean())
+        val saveBoolean = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreBoolean())
         jdsEntity.booleanValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveBoolean.setString(1, jdsEntity.overview.id)
             saveBoolean.setInt(2, jdsEntity.overview.editVersion)
@@ -218,7 +218,7 @@ class Save(
      * @param jdsEntity
      */
     private fun saveIntegers(jdsEntity: Entity) = try {
-        val saveInteger = regularStatementOrCall(onSaveEventArguments, dbContext.saveInteger())
+        val saveInteger = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreInteger())
         jdsEntity.integerValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveInteger.setString(1, jdsEntity.overview.id)
             saveInteger.setInt(2, jdsEntity.overview.editVersion)
@@ -234,7 +234,7 @@ class Save(
      * @param jdsEntity
      */
     private fun saveFloats(jdsEntity: Entity) = try {
-        val saveFloat = regularStatementOrCall(onSaveEventArguments, dbContext.saveFloat())
+        val saveFloat = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreFloat())
         jdsEntity.floatValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveFloat.setString(1, jdsEntity.overview.id)
             saveFloat.setInt(2, jdsEntity.overview.editVersion)
@@ -250,7 +250,7 @@ class Save(
      * @param jdsEntity
      */
     private fun saveShorts(jdsEntity: Entity) = try {
-        val saveShort = regularStatementOrCall(onSaveEventArguments, dbContext.saveShort())
+        val saveShort = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreShort())
         jdsEntity.shortValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveShort.setString(1, jdsEntity.overview.id)
             saveShort.setInt(2, jdsEntity.overview.editVersion)
@@ -266,7 +266,7 @@ class Save(
      * @param jdsEntity
      */
     private fun saveUuids(jdsEntity: Entity) = try {
-        val saveUuid = regularStatementOrCall(onSaveEventArguments, dbContext.saveUuid())
+        val saveUuid = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreUuid())
         jdsEntity.uuidValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveUuid.setString(1, jdsEntity.overview.id)
             saveUuid.setInt(2, jdsEntity.overview.editVersion)
@@ -286,7 +286,7 @@ class Save(
      * @param jdsEntity
      */
     private fun saveDoubles(jdsEntity: Entity) = try {
-        val saveDouble = regularStatementOrCall(onSaveEventArguments, dbContext.saveDouble())
+        val saveDouble = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDouble())
         jdsEntity.doubleValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveDouble.setString(1, jdsEntity.overview.id)
             saveDouble.setInt(2, jdsEntity.overview.editVersion)
@@ -303,7 +303,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveLongs(jdsEntity: Entity) = try {
-        val saveLong = regularStatementOrCall(onSaveEventArguments, dbContext.saveLong())
+        val saveLong = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreLong())
         jdsEntity.longValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveLong.setString(1, jdsEntity.overview.id)
             saveLong.setInt(2, jdsEntity.overview.editVersion)
@@ -320,7 +320,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveStrings(jdsEntity: Entity) = try {
-        val saveString = regularStatementOrCall(onSaveEventArguments, dbContext.saveString())
+        val saveString = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreText())
         jdsEntity.stringValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveString.setString(1, jdsEntity.overview.id)
             saveString.setInt(2, jdsEntity.overview.editVersion)
@@ -337,10 +337,10 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveDateConstructs(jdsEntity: Entity) = try {
-        val saveMonthDay = regularStatementOrCall(onSaveEventArguments, dbContext.saveMonthDay())
-        val saveYearMonth = regularStatementOrCall(onSaveEventArguments, dbContext.saveYearMonth())
-        val savePeriod = regularStatementOrCall(onSaveEventArguments, dbContext.savePeriod())
-        val saveDuration = regularStatementOrCall(onSaveEventArguments, dbContext.saveDuration())
+        val saveMonthDay = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreMonthDay())
+        val saveYearMonth = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreYearMonth())
+        val savePeriod = regularStatementOrCall(onSaveEventArguments, dbContext.populateStorePeriod())
+        val saveDuration = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDuration())
 
         jdsEntity.monthDayValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             saveMonthDay.setString(1, jdsEntity.overview.id)
@@ -382,8 +382,8 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveLocalDates(jdsEntity: Entity) = try {
-        val saveLocalDateTime = regularStatementOrCall(onSaveEventArguments, dbContext.saveDateTime())
-        val saveLocalDate = regularStatementOrCall(onSaveEventArguments, dbContext.saveDate())
+        val saveLocalDateTime = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDateTime())
+        val saveLocalDate = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDate())
         jdsEntity.localDateTimeValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             val localDateTime = writableValue.value as LocalDateTime?
             saveLocalDateTime.setString(1, jdsEntity.overview.id)
@@ -409,7 +409,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveLocalTime(jdsEntity: Entity) = try {
-        val saveLocalTime = regularStatementOrCall(onSaveEventArguments, dbContext.saveTime())
+        val saveLocalTime = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreTime())
         jdsEntity.localTimeValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             val localTime = writableValue.value as LocalTime?
             saveLocalTime.setString(1, jdsEntity.overview.id)
@@ -427,7 +427,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveZonedDateTimes(jdsEntity: Entity) = try {
-        val saveZonedDateTime = regularStatementOrCall(onSaveEventArguments, dbContext.saveZonedDateTime())
+        val saveZonedDateTime = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreZonedDateTime())
         jdsEntity.zonedDateTimeValues.filterSensitiveFields(dbContext).forEach { (fieldId, writableValue) ->
             val zonedDateTime = writableValue.value as ZonedDateTime?
             saveZonedDateTime.setString(1, jdsEntity.overview.id)
@@ -445,7 +445,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveEnums(jdsEntity: Entity) = try {
-        val saveEnum = regularStatementOrCall(onSaveEventArguments, dbContext.saveEnum())
+        val saveEnum = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreEnum())
         jdsEntity.enumValues.filterSensitiveFields(dbContext).forEach { (jdsFieldEnum, writableValue) ->
             val value = writableValue.value
             saveEnum.setString(1, jdsEntity.overview.id)
@@ -454,7 +454,7 @@ class Save(
             saveEnum.setObject(4, value?.ordinal)
             saveEnum.addBatch()
         }
-        val saveStringEnum = regularStatementOrCall(onSaveEventArguments, dbContext.saveEnumString())
+        val saveStringEnum = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreEnumString())
         jdsEntity.stringEnumValues.filterSensitiveFields(dbContext).forEach { (jdsFieldEnum, writableValue) ->
             val value = writableValue.value
             saveStringEnum.setString(1, jdsEntity.overview.id)
@@ -473,7 +473,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveDateTimeCollections(jdsEntity: Entity) = try {
-        val saveDateTimeCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveDateTimeCollections())
+        val saveDateTimeCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDateTimeCollection())
         jdsEntity.dateTimeCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveDateTimeCollection.setString(1, jdsEntity.overview.id)
@@ -492,7 +492,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveFloatCollections(jdsEntity: Entity) = try {
-        val saveFloatCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveFloatCollections())
+        val saveFloatCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreFloatCollection())
         jdsEntity.floatCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveFloatCollection.setString(1, jdsEntity.overview.id)
@@ -511,7 +511,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveIntegerCollections(jdsEntity: Entity) = try {
-        val saveIntegerCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveIntegerCollections())
+        val saveIntegerCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreIntegerCollection())
         jdsEntity.integerCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveIntegerCollection.setString(1, jdsEntity.overview.id)
@@ -530,7 +530,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveDoubleCollections(jdsEntity: Entity) = try {
-        val saveDoubleCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveDoubleCollections())
+        val saveDoubleCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreDoubleCollection())
         jdsEntity.doubleCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveDoubleCollection.setString(1, jdsEntity.overview.id)
@@ -549,7 +549,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveLongCollections(jdsEntity: Entity) = try {
-        val saveLongCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveLongCollections())
+        val saveLongCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreLongCollection())
         jdsEntity.longCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveLongCollection.setString(1, jdsEntity.overview.id)
@@ -568,7 +568,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveStringCollections(jdsEntity: Entity) = try {
-        val saveStringCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveStringCollections())
+        val saveStringCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreTextCollection())
         jdsEntity.stringCollections.filterSensitiveFields(dbContext).forEach { (fieldId, collection) ->
             collection.forEach { value ->
                 saveStringCollection.setString(1, jdsEntity.overview.id)
@@ -588,7 +588,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveEnumCollections(jdsEntity: Entity) = try {
-        val saveEnumCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveEnumCollections())
+        val saveEnumCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreEnumCollection())
         jdsEntity.enumCollections.filterSensitiveFields(dbContext).forEach { (jdsFieldEnum, collection) ->
             collection.forEach { anEnum ->
                 saveEnumCollection.setString(1, jdsEntity.overview.id)
@@ -598,7 +598,7 @@ class Save(
                 saveEnumCollection.addBatch()
             }
         }
-        val saveStringEnumCollection = regularStatementOrCall(onSaveEventArguments, dbContext.saveEnumStringCollections())
+        val saveStringEnumCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreEnumStringCollection())
         jdsEntity.enumStringCollections.filterSensitiveFields(dbContext).forEach { (jdsFieldEnum, collection) ->
             collection.forEach { anEnum ->
                 saveStringEnumCollection.setString(1, jdsEntity.overview.id)
@@ -618,7 +618,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveObjectArrayBindings(parentEntity: Entity) = try {
-        val saveObjectArrayBinding = regularStatementOrCall(onSaveEventArguments, dbContext.saveEntityBindings())
+        val saveObjectArrayBinding = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityBinding())
         parentEntity.objectCollections.forEach { (fieldEntity, entityCollection) ->
             entityCollection.forEach {
                 saveObjectArrayBinding.setString(1, parentEntity.overview.id)
@@ -639,7 +639,7 @@ class Save(
      */
     @Throws(Exception::class)
     private fun saveObjectBindings(parentEntity: Entity) = try {
-        val saveObjectBinding = regularStatementOrCall(onSaveEventArguments, dbContext.saveEntityBindings())
+        val saveObjectBinding = regularStatementOrCall(onSaveEventArguments, dbContext.populateEntityBinding())
         parentEntity.objectValues.forEach { (fieldEntity, v) ->
             saveObjectBinding.setString(1, parentEntity.overview.id)
             saveObjectBinding.setInt(2, parentEntity.overview.editVersion)

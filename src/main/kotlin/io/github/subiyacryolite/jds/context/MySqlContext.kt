@@ -15,6 +15,8 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
+import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 import java.util.*
 
@@ -27,19 +29,19 @@ abstract class MySqlContext : DbContext {
 
     constructor() : this(Implementation.MySql, true)
 
-    override fun tableExists(connection: Connection, tableName: String): Int {
+    override fun tableExists(connection: Connection, table: Table): Int {
         val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, tableName))
+        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix${table.component}"))
     }
 
-    override fun procedureExists(connection: Connection, procedureName: String): Int {
+    override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = ? AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, procedureName))
+        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix${procedure.component}"))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         val sql = "SELECT 1 AS Result FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, tableName, columnName))
+        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix$tableName", columnName))
     }
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {

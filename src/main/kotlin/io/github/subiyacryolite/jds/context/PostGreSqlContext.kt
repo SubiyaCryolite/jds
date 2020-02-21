@@ -15,6 +15,8 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
+import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 import java.util.*
 
@@ -55,14 +57,14 @@ abstract class PostGreSqlContext : DbContext(Implementation.PostGreSql, true, "j
         }
     }
 
-    override fun tableExists(connection: Connection, tableName: String): Int {
+    override fun tableExists(connection: Connection, table: Table): Int {
         val sql = "SELECT COUNT(*) AS Result FROM information_schema.tables WHERE table_catalog = ? AND table_name = ? and table_schema = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, tableName, schema))
+        return getResult(connection, sql, arrayOf(connection.catalog, table.component, schema))
     }
 
-    override fun procedureExists(connection: Connection, procedureName: String): Int {
+    override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? and routine_name = ? and routine_schema = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, procedureName, schema))
+        return getResult(connection, sql, arrayOf(connection.catalog, procedure.component, schema))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {

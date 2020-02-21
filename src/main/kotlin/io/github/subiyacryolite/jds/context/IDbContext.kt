@@ -14,6 +14,8 @@
 package io.github.subiyacryolite.jds.context;
 
 import io.github.subiyacryolite.jds.enums.FieldType
+import io.github.subiyacryolite.jds.enums.Procedure
+import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 import java.sql.SQLException
 import javax.sql.DataSource
@@ -57,19 +59,19 @@ interface IDbContext {
      * Checks if the specified table exists the the database
      *
      * @param connection the connection to use
-     * @param name the table to look up
+     * @param table the table to look up
      * @return true if the specified table exists the the database
      */
-    fun doesTableExist(connection: Connection, name: String): Boolean
+    fun doesTableExist(connection: Connection, table: Table): Boolean
 
     /**
      * Checks if the specified procedure exists the the database
      *
      * @param connection the connection to use
-     * @param name the procedure to look up
+     * @param Procedure the procedure to look up
      * @return true if the specified procedure exists the the database
      */
-    fun doesProcedureExist(connection: Connection, name: String): Boolean
+    fun doesProcedureExist(connection: Connection, Procedure: Procedure): Boolean
 
     /**
      * Gets the correct syntax needed to add a new column to the underlying database implementation

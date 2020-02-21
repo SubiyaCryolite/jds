@@ -1053,9 +1053,9 @@ abstract class Entity : IEntity, Serializable {
             connection: Connection,
             entityId: Int
     ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefField()) else connection.prepareStatement(dbContext.populateRefField())).use { populateRefField ->
-            (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefEntityField()) else connection.prepareStatement(dbContext.populateRefEntityField())).use { populateRefEntityField ->
-                (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefFieldEntity()) else connection.prepareStatement(dbContext.populateRefFieldEntity())).use { populateRefFieldEntity ->
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateField()) else connection.prepareStatement(dbContext.populateField())).use { populateRefField ->
+            (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityField()) else connection.prepareStatement(dbContext.populateEntityField())).use { populateRefEntityField ->
+                (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateFieldEntity()) else connection.prepareStatement(dbContext.populateFieldEntity())).use { populateRefFieldEntity ->
                     getFields(overview.entityId).forEach { fieldId ->
                         val field = Field.values[fieldId]!!
                         //1. map this jdsField to the jdsField dictionary
@@ -1124,7 +1124,7 @@ abstract class Entity : IEntity, Serializable {
             entityId: Int,
             fieldIds: Set<Int>
     ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefEntityEnum()) else connection.prepareStatement(dbContext.populateRefEntityEnum())).use {
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityEnum()) else connection.prepareStatement(dbContext.populateEntityEnum())).use {
             for (fieldId in fieldIds) {
                 val jdsFieldEnum = FieldEnum.enums[fieldId]!!
                 it.setInt(1, entityId)
@@ -1145,7 +1145,7 @@ abstract class Entity : IEntity, Serializable {
      */
     @Synchronized
     private fun populateRefEnum(dbContext: DbContext, connection: Connection, fieldIds: Set<Int>) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateRefEnum()) else connection.prepareStatement(dbContext.populateRefEnum())).use {
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEnum()) else connection.prepareStatement(dbContext.populateEnum())).use {
             for (fieldId in fieldIds) {
                 val jdsFieldEnum = FieldEnum.enums[fieldId]!!
                 jdsFieldEnum.values.forEach { enum ->

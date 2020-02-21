@@ -16,189 +16,194 @@ package io.github.subiyacryolite.jds.enums
 /**
  * @param component the component name
  */
-enum class ProcedureComponent(val component: String) {
+enum class Procedure(val component: String) {
     /**
      *
      */
-    PopEntityBinding("pop_entity_binding"),
+    EntityBinding("pop_${Table.EntityBinding.component}"),
 
     /**
      *
      */
-    PopEntityLiveVersion("pop_entity_live_version"),
+    EntityLive("pop_${Table.EntityLive.component}"),
 
     /**
      *
      */
-    PopEntityOverview("pop_entity_overview"),
+    EntityOverview("pop_${Table.EntityOverview.component}"),
 
     /**
      *
      */
-    PopRefEntity("pop_ref_entity"),
+    Entity("pop_${Table.Entity.component}"),
 
     /**
      *
      */
-    PopRefEntityEnum("pop_ref_entity_enum"),
+    EntityEnum("pop_${Table.EntityEnum.component}"),
 
     /**
      *
      */
-    PopRefEntityField("pop_ref_entity_field"),
+    EntityField("pop_${Table.EntityField.component}"),
 
     /**
      *
      */
-    PopRefFieldEntity("pop_ref_field_entity"),
+    FieldEntity("pop_${Table.FieldEntity.component}"),
 
     /**
      *
      */
-    PopRefEntityInheritance("pop_ref_entity_inheritance"),
+    EntityInheritance("pop_${Table.EntityInheritance.component}"),
 
     /**
      *
      */
-    PopRefEnum("pop_ref_enum"),
+    Enum("pop${Table.Enum.component}"),
 
     /**
      *
      */
-    PopRefField("pop_ref_field"),
+    Field("pop_${Table.Field.component}"),
 
     /**
      *
      */
-    PopStoreBlob("pop_blob"),
+    FieldDictionary("pop_${Table.FieldDictionary.component}"),
 
     /**
      *
      */
-    PopStoreBoolean("pop_boolean"),
+    StoreBlob("pop_${Table.StoreBlob.component}"),
 
     /**
      *
      */
-    PopStoreDate("pop_date"),
+    StoreBoolean("pop_${Table.StoreBoolean.component}"),
 
     /**
      *
      */
-    PopStoreDateTime("pop_date_time"),
+    StoreDate("pop_${Table.StoreDate.component}"),
 
     /**
      *
      */
-    PopStoreDouble("pop_double"),
+    StoreDateTime("pop_${Table.StoreDateTime.component}"),
 
     /**
      *
      */
-    PopStoreDoubleCollection("pop_double_col"),
+    StoreDouble("pop_${Table.StoreDouble.component}"),
 
     /**
      *
      */
-    PopStoreDuration("pop_duration"),
+    StoreDoubleCollection("pop_${Table.StoreDoubleCollection.component}"),
 
     /**
      *
      */
-    PopStoreEnum("pop_enum"),
+    StoreDuration("pop_${Table.StoreDuration.component}"),
 
     /**
      *
      */
-    PopStoreEnumString("pop_enum_string"),
+    StoreEnum("pop_${Table.StoreEnum.component}"),
 
     /**
      *
      */
-    PopStoreEnumCollection("pop_enum_col"),
+    StoreEnumString("pop_${Table.StoreEnumString.component}"),
 
     /**
      *
      */
-    PopStoreEnumStringCollection("pop_enum_string_col"),
+    StoreEnumCollection("pop_${Table.StoreEnumCollection.component}"),
 
     /**
      *
      */
-    PopStoreFloat("pop_float"),
+    StoreEnumStringCollection("pop_${Table.StoreEnumStringCollection.component}"),
 
     /**
      *
      */
-    PopStoreShort("pop_short"),
+    StoreDateTimeCollection("pop_${Table.StoreDateTimeCollection.component}"),
 
     /**
      *
      */
-    PopStoreUuid("pop_uuid"),
+    StoreFloat("pop_${Table.StoreFloat.component}"),
 
     /**
      *
      */
-    PopStoreFloatCollection("pop_float_col"),
+    StoreShort("pop_${Table.StoreShort.component}"),
 
     /**
      *
      */
-    PopStoreInteger("pop_integer"),
+    StoreUuid("pop_${Table.StoreUuid.component}"),
 
     /**
      *
      */
-    PopStoreIntegerCollection("pop_integer_col"),
+    StoreFloatCollection("pop_${Table.StoreFloatCollection.component}"),
 
     /**
      *
      */
-    PopStoreLong("pop_long"),
+    StoreInteger("pop_${Table.StoreInteger.component}"),
 
     /**
      *
      */
-    PopStoreLongCollection("pop_long_col"),
+    StoreIntegerCollection("pop_${Table.StoreIntegerCollection.component}"),
 
     /**
      *
      */
-    PopStoreMonthDay("pop_month_day"),
+    StoreLong("pop_${Table.StoreLong.component}"),
 
     /**
      *
      */
-    PopStoreMonthYear("pop_month_year"),
+    StoreLongCollection("pop_${Table.StoreLongCollection.component}"),
 
     /**
      *
      */
-    PopStorePeriod("pop_period"),
+    StoreMonthDay("pop_${Table.StoreMonthDay.component}"),
 
     /**
      *
      */
-    PopStoreText("pop_text"),
+    StorePeriod("pop_${Table.StorePeriod.component}"),
 
     /**
      *
      */
-    PopStoreTextCollection("pop_text_col"),
+    StoreText("pop_${Table.StoreText.component}"),
 
     /**
      *
      */
-    PopStoreTime("pop_time"),
+    StoreTextCollection("pop_${Table.StoreTextCollection.component}"),
 
     /**
      *
      */
-    PopStoreYearMonth("pop_year_month"),
+    StoreTime("pop_${Table.StoreTime.component}"),
 
     /**
      *
      */
-    PopStoreZonedDateTime("pop_zoned_date_time")
+    StoreYearMonth("pop_${Table.StoreYearMonth.component}"),
+
+    /**
+     *
+     */
+    StoreZonedDateTime("pop_${Table.StoreZonedDateTime.component}")
 }

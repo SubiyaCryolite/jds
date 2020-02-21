@@ -350,7 +350,7 @@ data class Table(var name: String = "",
                         "WHERE live_records.uuid IS NULL"
             }
         }
-        Implementation.Postgres -> {
+        Implementation.PostGreSql -> {
             when (dbContext.options.writeLatestEntityVersion) {
                 true -> "DELETE FROM $name AS report_table\n" +
                         "WHERE NOT EXISTS ( SELECT * from jds_entity_live_version AS live_records\n" +

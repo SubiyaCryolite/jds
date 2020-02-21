@@ -65,7 +65,7 @@ fun UUID?.toByteArray(): ByteArray? = if (this == null) {
  */
 fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, dbContext: DbContext) = when (dbContext.implementation) {
     Implementation.TSql -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.Postgres -> this.setObject(value, input?.toOffsetDateTime())
+    Implementation.PostGreSql -> this.setObject(value, input?.toOffsetDateTime())
     Implementation.MySql, Implementation.Oracle, Implementation.MariaDb -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
     else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
 }
@@ -77,7 +77,7 @@ fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, dbCont
  */
 fun ResultSet.getZonedDateTime(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
     Implementation.TSql -> this.getString(column)
-    Implementation.Postgres -> this.getObject(column, java.time.OffsetDateTime::class.java)
+    Implementation.PostGreSql -> this.getObject(column, java.time.OffsetDateTime::class.java)
     Implementation.MySql, Implementation.Oracle, Implementation.MariaDb -> this.getTimestamp(column)
     else -> this.getLong(column)
 }
@@ -89,7 +89,7 @@ fun ResultSet.getZonedDateTime(column: String, dbContext: DbContext): Any = when
  */
 fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, dbContext: DbContext) = when (dbContext.implementation) {
     Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.Postgres -> this.setObject(value, input)
+    Implementation.PostGreSql -> this.setObject(value, input)
     else -> this.setObject(value, input?.toNanoOfDay())
 }
 
@@ -99,7 +99,7 @@ fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, dbContext: DbC
  */
 fun ResultSet.getLocalTime(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
     Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.getString(column)
-    Implementation.Postgres -> this.getObject(column, LocalTime::class.java)
+    Implementation.PostGreSql -> this.getObject(column, LocalTime::class.java)
     else -> this.getLong(column)
 }
 
@@ -111,7 +111,7 @@ fun ResultSet.getLocalTime(column: String, dbContext: DbContext): Any = when (db
  */
 fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, dbContext: DbContext) = when (dbContext.implementation) {
     Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.Postgres -> this.setObject(value, input)
+    Implementation.PostGreSql -> this.setObject(value, input)
     else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
 }
 
@@ -121,7 +121,7 @@ fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, dbContext: DbC
  */
 fun ResultSet.getLocalDate(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
     Implementation.TSql -> this.getString(column)
-    Implementation.Postgres -> this.getObject(column, LocalDate::class.java)
+    Implementation.PostGreSql -> this.getObject(column, LocalDate::class.java)
     else -> this.getTimestamp(column)//Oracle, Sqlite, maria,sql
 }
 

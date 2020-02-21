@@ -15,6 +15,8 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
+import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 import java.util.*
 
@@ -23,18 +25,18 @@ import java.util.*
  */
 abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true,"jds_","dbo") {
 
-    override fun tableExists(connection: Connection, tableName: String): Int {
+    override fun tableExists(connection: Connection, table: Table): Int {
         val sql = "SELECT COUNT(*) AS Result FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
-        val toReturn = getResult(connection, sql, arrayOf(tableName))
+        val toReturn = getResult(connection, sql, arrayOf(table.component))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0
         }
     }
 
-    override fun procedureExists(connection: Connection, procedureName: String): Int {
+    override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "SELECT COUNT(*) AS Result FROM sysobjects WHERE NAME = ? AND XTYPE = ?"
-        val toReturn = getResult(connection, sql, arrayOf(procedureName, "P"))
+        val toReturn = getResult(connection, sql, arrayOf(procedure.component, "P"))
         return when (toReturn >= 1) {
             true -> 1
             false -> 0

@@ -15,6 +15,8 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
+import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 import java.util.*
 
@@ -23,19 +25,19 @@ import java.util.*
  */
 abstract class OracleContext : DbContext(Implementation.Oracle, true) {
 
-    override fun tableExists(connection: Connection, tableName: String): Int {
+    override fun tableExists(connection: Connection, table: Table): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('TABLE') AND object_name = ?"
-        return getResult(connection, sql, arrayOf(tableName.toUpperCase()))
+        return getResult(connection, sql, arrayOf("$objectPrefix${table.component}"))
     }
 
-    override fun procedureExists(connection: Connection, procedureName: String): Int {
+    override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "SELECT COUNT(*) AS Result FROM all_objects WHERE object_type IN ('PROCEDURE') AND object_name = ?"
-        return getResult(connection, sql, arrayOf(procedureName.toUpperCase()))
+        return getResult(connection, sql, arrayOf("$objectPrefix${procedure.component}"))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {
         val sql = "SELECT COUNT(COLUMN_NAME) AS Result FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?"
-        return getResult(connection, sql, arrayOf(tableName.toUpperCase(), columnName.toUpperCase()))
+        return getResult(connection, sql, arrayOf("$objectPrefix$tableName", columnName))
     }
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {

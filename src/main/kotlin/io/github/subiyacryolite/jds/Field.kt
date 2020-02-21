@@ -30,7 +30,7 @@ data class Field(
         var name: String = "",
         var type: FieldType = FieldType.String,
         var description: String = "",
-        var alternateCodes: Collection<String> = emptyList(),
+        var alternateCodes: Map<String, String> = emptyMap(),
         var sensitive: Boolean = false
 ) : Serializable {
 

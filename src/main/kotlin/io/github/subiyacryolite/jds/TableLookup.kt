@@ -14,8 +14,8 @@
 package io.github.subiyacryolite.jds
 
 import io.github.subiyacryolite.jds.enums.FieldType
-import io.github.subiyacryolite.jds.enums.TableComponent
-import io.github.subiyacryolite.jds.enums.TableComponent.*
+import io.github.subiyacryolite.jds.enums.Table
+import io.github.subiyacryolite.jds.enums.Table.*
 
 /**
  * Class used to look up the datastore of Jds Field Types
@@ -28,7 +28,7 @@ object TableLookup {
      * @param fieldType the requested jdsField type
      * @return the table that stores the requested jdsField type
      */
-    private fun getComponentForFieldType(fieldType: FieldType): TableComponent {
+    private fun getComponentForFieldType(fieldType: FieldType): Table {
         when (fieldType) {
             FieldType.Long, FieldType.Duration -> return StoreLong
             FieldType.Enum, FieldType.Int -> return StoreInteger

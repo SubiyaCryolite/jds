@@ -30,7 +30,7 @@ enum class Implementation {
     /**
      *
      */
-    Postgres,
+    PostGreSql,
 
     /**
      *

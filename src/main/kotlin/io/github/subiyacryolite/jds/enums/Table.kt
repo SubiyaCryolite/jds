@@ -20,7 +20,13 @@ package io.github.subiyacryolite.jds.enums;
  * @param component the component name
  * @param alias the component alias
  */
-enum class TableComponent(val component: String, val alias: String) {
+enum class Table(val component: String, val alias: String) {
+
+    /**
+     *
+     */
+    FieldDictionary("field_dictionary", "f"),
+    
     /**
      *
      */
@@ -29,52 +35,52 @@ enum class TableComponent(val component: String, val alias: String) {
     /**
      *
      */
-    EntityLiveVersion("entity_live_version","elv"),
+    EntityLive("entity_live","elv"),
 
     /**
      *
      */
-    EntityOverview("entity_overview", "entityOverviews"),
+    EntityOverview("entity_overview", "eo"),
 
     /**
      *
      */
-    RefEntities("ref_entity", "et"),
+    Entity("entity", "et"),
 
     /**
      *
      */
-    RefEntityEnums("ref_entity_enum", "bee"),
+    EntityEnum("entity_enum", "bee"),
 
     /**
      *
      */
-    RefEntityField("ref_entity_field", "bef"),
+    EntityField("entity_field", "bef"),
 
     /**
      *
      */
-    RefFieldEntity("ref_field_entity", "bfe"),
+    FieldEntity("field_entity", "bfe"),
 
     /**
      *
      */
-    RefEnumValues("ref_enum", "env"),
+    Enum("enum", "env"),
 
     /**
      *
      */
-    RefFieldTypes("ref_field_type", "ft"),
+    FieldType("field_type", "ft"),
 
     /**
      *
      */
-    RedFields("ref_field", "fd"),
+    Field("field", "f"),
 
     /**
      *
      */
-    RefInheritance("ref_entity_inheritance", "ri"),
+    EntityInheritance("entity_inheritance", "ei"),
 
     /**
      *
