@@ -19,4 +19,4 @@ import java.time.YearMonth
  * Class allowing for the wrapping and persistence of [YearMonth] values
  * @param value the backing value
  */
-class YearMonthProperty(value: YearMonth = YearMonth.now()) : ObjectProperty<YearMonth>(value)
+data class YearMonthProperty(override var value: YearMonth = YearMonth.now()) : WritableProperty<YearMonth>

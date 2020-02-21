@@ -130,10 +130,14 @@ fun ResultSet.getLocalDate(column: String, dbContext: DbContext): Any = when (db
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterTemporalValue")
-internal fun Map<Int, WritableProperty<out Temporal?>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableProperty<out Temporal?>> = if (dbContext.options.saveSensitiveData) {
+internal fun Map<Int, WritableProperty<out Temporal?>>.filterIgnored(dbContext: DbContext): Map<Int, WritableProperty<out Temporal?>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
-    this.filter { !Field.values[it.key]!!.sensitive }//only save fields which aren't sensitive
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
 }
 
 /**
@@ -141,10 +145,14 @@ internal fun Map<Int, WritableProperty<out Temporal?>>.filterSensitiveFields(dbC
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterValue")
-internal fun <T> Map<Int, WritableProperty<T>>.filterSensitiveFields(dbContext: DbContext): Map<Int, WritableProperty<T>> = if (dbContext.options.saveSensitiveData) {
+internal fun <T> Map<Int, WritableProperty<T>>.filterIgnored(dbContext: DbContext): Map<Int, WritableProperty<T>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
-    this.filter { !Field.values[it.key]!!.sensitive }//only save fields which aren't sensitive
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
 }
 
 /**
@@ -152,10 +160,14 @@ internal fun <T> Map<Int, WritableProperty<T>>.filterSensitiveFields(dbContext: 
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterCollection")
-internal fun <T> Map<Int, MutableCollection<T>>.filterSensitiveFields(dbContext: DbContext): Map<Int, MutableCollection<T>> = if (dbContext.options.saveSensitiveData) {
+internal fun <T> Map<Int, MutableCollection<T>>.filterIgnored(dbContext: DbContext): Map<Int, MutableCollection<T>>  = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
-    this.filter { !Field.values[it.key]!!.sensitive }
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
 }
 
 object Extensions {

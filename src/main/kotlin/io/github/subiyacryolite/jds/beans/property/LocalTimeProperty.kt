@@ -19,4 +19,4 @@ import java.time.LocalTime
  * Class allowing for the wrapping and persistence of [LocalTime] values
  * @param value the backing value
  */
-class LocalTimeProperty(value: LocalTime = LocalTime.now()) : ObjectProperty<LocalTime>(value)
+data class LocalTimeProperty(override var value: LocalTime = LocalTime.now()) : WritableProperty<LocalTime>

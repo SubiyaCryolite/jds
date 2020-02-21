@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Float] values
  * @param value the backing value
  */
-class NullableFloatProperty(value: Float? = null) : ObjectProperty<Float?>(value)
+data class NullableFloatProperty(override var value: Float? = null) : WritableProperty<Float?>

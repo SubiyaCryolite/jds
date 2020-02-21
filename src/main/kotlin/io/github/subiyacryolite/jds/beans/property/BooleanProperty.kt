@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Boolean] values
  * @param value the backing value
  */
-class BooleanProperty(value: Boolean = false) : ObjectProperty<Boolean>(value)
+data class BooleanProperty(override var value: Boolean = false) : WritableProperty<Boolean>

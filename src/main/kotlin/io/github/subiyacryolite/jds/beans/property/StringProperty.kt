@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [String] values
  * @param value the backing value
  */
-class StringProperty(value: String = "") : ObjectProperty<String>(value)
+data class StringProperty(override var value: String = "") : WritableProperty<String>

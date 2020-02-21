@@ -85,17 +85,27 @@ enum class Table(val component: String, val alias: String) {
     /**
      *
      */
-    StoreBlob("str_blob", "sb"),
+    FieldTag("field_tag", "ft"),
 
     /**
      *
      */
-    StoreBoolean("str_boolean", "sbn"),
+    FieldAlternateCode("field_alternate_code", "fac"),
 
     /**
      *
      */
-    StoreDate("str_date", "sdd"),
+    StoreBlob("str_blob", "sbl"),
+
+    /**
+     *
+     */
+    StoreBoolean("str_boolean", "sbo"),
+
+    /**
+     *
+     */
+    StoreDate("str_date", "sda"),
 
     /**
      *
@@ -110,7 +120,7 @@ enum class Table(val component: String, val alias: String) {
     /**
      *
      */
-    StoreDouble("str_double", "sd"),
+    StoreDouble("str_double", "sdo"),
 
     /**
      *

@@ -19,4 +19,4 @@ import java.util.*
  * Class allowing for the wrapping and persistence of [UUID] values
  * @param value the backing value
  */
-class UuidProperty(value: UUID = UUID.randomUUID()) : ObjectProperty<UUID>(value)
+data class UuidProperty(override var value: UUID = UUID.randomUUID()) : WritableProperty<UUID>

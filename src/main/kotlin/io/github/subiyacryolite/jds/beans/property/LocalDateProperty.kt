@@ -18,4 +18,4 @@ import java.time.LocalDate
  * Class allowing for the wrapping and persistence of [LocalDate] values
  * @param value the backing value
  */
-class LocalDateProperty(value: LocalDate = LocalDate.now()) : ObjectProperty<LocalDate>(value)
+data class LocalDateProperty(override var value: LocalDate = LocalDate.now()) : WritableProperty<LocalDate>

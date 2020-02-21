@@ -60,17 +60,8 @@ data class Options(
         var writeOverviewInformation: Boolean = true,
 
         /**
-         * Indicates if values bound to [JdsField's][Field] marked as sensitive are populated on load
+         * A collection of tags to ignore when both saving and loading (use to filter out fields tagged as "Sensitive" for example)
          */
-        var populateSensitiveData: Boolean = true,
+        var ignoreTags: Set<String> = emptySet()
 
-        /**
-         * Indicates if values bound to [JdsField's][Field] marked as sensitive are written on save
-         */
-        var saveSensitiveData: Boolean = true,
-
-        /**
-         *
-         */
-        var alternateCodesDelimiter: String = "|"
 ) : Serializable

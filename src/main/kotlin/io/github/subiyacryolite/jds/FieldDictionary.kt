@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 object FieldDictionary {
 
-    internal val dictionary: ConcurrentHashMap<Int, HashSet<Pair<Int, String>>> = ConcurrentHashMap()
+    private val dictionary: ConcurrentHashMap<Int, HashSet<Pair<Int, String>>> = ConcurrentHashMap()
 
     fun addEntityField(entityId: Int, fieldId: Int, propertyName: String) {
         if (Entity.initialising) {
@@ -22,7 +22,7 @@ object FieldDictionary {
     }
 
     fun update(dbContext: DbContext, connection: Connection) {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateFieldDictionary()) else connection.prepareStatement(dbContext.populateFieldDictionary())).use { statement ->
+        dbContext.getCallOrStatement(connection,dbContext.populateFieldDictionary()).use { statement ->
             dictionary.forEach { (entityId, fieldProperties) ->
                 fieldProperties.forEach { fieldProperty ->
                     statement.setInt(1, entityId)

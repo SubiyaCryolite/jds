@@ -29,10 +29,12 @@ import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
 
-data class Table(var name: String = "",
+data class Table(
+        var name: String = "",
                  var entities: TreeSet<Int> = TreeSet(),
                  var fields: TreeSet<Int> = TreeSet(),
-                 var isStoringLiveRecordsOnly: Boolean = true) : Serializable {
+                 var isStoringLiveRecordsOnly: Boolean = true
+) : Serializable {
 
     private val columnToFieldMap = LinkedHashMap<String, Field>()
     private val enumOrdinals = HashMap<String, Int>()

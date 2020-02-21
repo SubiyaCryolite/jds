@@ -19,4 +19,4 @@ import java.time.ZonedDateTime
  * Class allowing for the wrapping and persistence of [ZonedDateTime] values
  * @param value the backing value
  */
-class ZonedDateTimeProperty(value: ZonedDateTime = ZonedDateTime.now()) : ObjectProperty<ZonedDateTime>(value)
+data class ZonedDateTimeProperty(override var value: ZonedDateTime = ZonedDateTime.now()) : WritableProperty<ZonedDateTime>

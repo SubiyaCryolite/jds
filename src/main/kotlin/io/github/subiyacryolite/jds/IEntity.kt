@@ -16,9 +16,10 @@ package io.github.subiyacryolite.jds;
 import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.portable.PortableEntity
+import java.io.Serializable
 import java.util.*
 
-interface IEntity {
+interface IEntity :Serializable{
     val overview: IOverview
     val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>>
     val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>>

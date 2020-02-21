@@ -19,4 +19,4 @@ import java.time.Period
  * Class allowing for the wrapping and persistence of [Period] values
  * @param value the backing value
  */
-class NullablePeriodProperty(value: Period? = null) : ObjectProperty<Period?>(value)
+data class NullablePeriodProperty(override var value: Period? = null) : WritableProperty<Period?>

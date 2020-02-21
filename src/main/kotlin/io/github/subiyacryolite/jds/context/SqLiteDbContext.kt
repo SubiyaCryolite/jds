@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
 import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 
@@ -126,6 +127,10 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
     override fun populateFieldDictionary() = "INSERT INTO ${getName(Table.FieldDictionary)}(entity_id, field_id, property_name) VALUES(?, ?, ?) ON CONFLICT(entity_id, field_id) DO UPDATE SET property_name = EXCLUDED.property_name"
 
     override fun populateEntityInheritance() = "INSERT INTO ${getName(Table.EntityInheritance)}(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
+
+    override fun populateFieldTag() = "INSERT INTO ${getName(Table.FieldTag)}(field_id, tag) VALUES(?, ?) ON CONFLICT(field_id) DO UPDATE SET tag = EXCLUDED.tag"
+
+    override fun populateFieldAlternateCode()  = "INSERT INTO ${getName(Table.FieldAlternateCode)}(field_id, alternate_code, value) VALUES(?, ?, ?) ON CONFLICT(field_id, alternate_code) DO UPDATE SET value = EXCLUDED.value"
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {
         FieldType.Float -> "REAL"

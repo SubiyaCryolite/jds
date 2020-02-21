@@ -75,6 +75,16 @@ enum class Procedure(val component: String) {
     /**
      *
      */
+    FieldTag("pop_${Table.FieldTag.component}"),
+
+    /**
+     *
+     */
+    FieldAlternateCode("pop_${Table.FieldAlternateCode.component}"),
+
+    /**
+     *
+     */
     StoreBlob("pop_${Table.StoreBlob.component}"),
 
     /**

@@ -24,4 +24,4 @@ data class Overview(
         override var entityId: Int = 0,
         override var id: String = UUID.randomUUID().toString(),
         override var editVersion: Int = 0
-) : IOverview, Serializable
+) : IOverview

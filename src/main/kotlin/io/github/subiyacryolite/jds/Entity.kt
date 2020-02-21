@@ -62,7 +62,7 @@ import kotlin.collections.ArrayList
  * This class allows for all mapping operations in JDS, it also uses
  * [IOverview] to store overview data
  */
-abstract class Entity : IEntity, Serializable {
+abstract class Entity : IEntity {
     @set:JsonIgnore
     @get:JsonIgnore
     final override var overview: IOverview = Overview()
@@ -674,7 +674,7 @@ abstract class Entity : IEntity, Serializable {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
-        booleanValues.filterSensitiveFields(dbContext).forEach {
+        booleanValues.filterIgnored(dbContext).forEach {
             val input = when (it.value.value) {
                 true -> 1
                 false -> 0
@@ -682,46 +682,46 @@ abstract class Entity : IEntity, Serializable {
             }
             jdsPortableEntity.booleanValues.add(StoreBoolean(it.key, input))
         }
-        stringValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.stringValues.add(StoreString(it.key, it.value.value)) }
-        floatValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.floatValue.add(StoreFloat(it.key, it.value.value)) }
-        doubleValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.doubleValues.add(StoreDouble(it.key, it.value.value)) }
-        shortValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.shortValues.add(StoreShort(it.key, it.value.value)) }
-        longValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.longValues.add(StoreLong(it.key, it.value.value)) }
-        integerValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.integerValues.add(StoreInteger(it.key, it.value.value)) }
-        uuidValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.uuidValues.add(StoreUuid(it.key, it.value.value.toByteArray())) }
+        stringValues.filterIgnored(dbContext).forEach { jdsPortableEntity.stringValues.add(StoreString(it.key, it.value.value)) }
+        floatValues.filterIgnored(dbContext).forEach { jdsPortableEntity.floatValue.add(StoreFloat(it.key, it.value.value)) }
+        doubleValues.filterIgnored(dbContext).forEach { jdsPortableEntity.doubleValues.add(StoreDouble(it.key, it.value.value)) }
+        shortValues.filterIgnored(dbContext).forEach { jdsPortableEntity.shortValues.add(StoreShort(it.key, it.value.value)) }
+        longValues.filterIgnored(dbContext).forEach { jdsPortableEntity.longValues.add(StoreLong(it.key, it.value.value)) }
+        integerValues.filterIgnored(dbContext).forEach { jdsPortableEntity.integerValues.add(StoreInteger(it.key, it.value.value)) }
+        uuidValues.filterIgnored(dbContext).forEach { jdsPortableEntity.uuidValues.add(StoreUuid(it.key, it.value.value.toByteArray())) }
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.zonedDateTimeValues.add(StoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
-        localTimeValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.timeValues.add(StoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
-        durationValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.durationValues.add(StoreDuration(it.key, it.value.value?.toNanos())) }
-        localDateTimeValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.dateTimeValues.add(StoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
-        localDateValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.dateValues.add(StoreDate(it.key, safeLocalDate(it.value.value))) }
-        monthDayValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.monthDayValues.add(StoreMonthDay(it.key, it.value.value?.toString())) }
-        yearMonthValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.yearMonthValues.add(StoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
-        periodValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.periodValues.add(StorePeriod(it.key, it.value.value?.toString())) }
+        zonedDateTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.zonedDateTimeValues.add(StoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
+        localTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.timeValues.add(StoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
+        durationValues.filterIgnored(dbContext).forEach { jdsPortableEntity.durationValues.add(StoreDuration(it.key, it.value.value?.toNanos())) }
+        localDateTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.dateTimeValues.add(StoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
+        localDateValues.filterIgnored(dbContext).forEach { jdsPortableEntity.dateValues.add(StoreDate(it.key, safeLocalDate(it.value.value))) }
+        monthDayValues.filterIgnored(dbContext).forEach { jdsPortableEntity.monthDayValues.add(StoreMonthDay(it.key, it.value.value?.toString())) }
+        yearMonthValues.filterIgnored(dbContext).forEach { jdsPortableEntity.yearMonthValues.add(StoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
+        periodValues.filterIgnored(dbContext).forEach { jdsPortableEntity.periodValues.add(StorePeriod(it.key, it.value.value?.toString())) }
         //==============================================
         //BLOB
         //==============================================
-        blobValues.filterSensitiveFields(dbContext).forEach {
+        blobValues.filterIgnored(dbContext).forEach {
             jdsPortableEntity.blobValues.add(StoreBlob(it.key, it.value.value ?: ByteArray(0)))
         }
         //==============================================
         //Enums
         //==============================================
-        enumValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.enumValues.add(StoreEnum(it.key, it.value.value?.ordinal)) }
-        stringEnumValues.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.enumStringValues.add(StoreEnumString(it.key, it.value.value?.name)) }
-        enumCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.enumCollections.add(StoreEnumCollection(it.key, toIntCollection(it.value))) }
-        enumStringCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.enumStringCollections.add(StoreEnumStringCollection(it.key, toStringCollection(it.value))) }
+        enumValues.filterIgnored(dbContext).forEach { jdsPortableEntity.enumValues.add(StoreEnum(it.key, it.value.value?.ordinal)) }
+        stringEnumValues.filterIgnored(dbContext).forEach { jdsPortableEntity.enumStringValues.add(StoreEnumString(it.key, it.value.value?.name)) }
+        enumCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.enumCollections.add(StoreEnumCollection(it.key, toIntCollection(it.value))) }
+        enumStringCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.enumStringCollections.add(StoreEnumStringCollection(it.key, toStringCollection(it.value))) }
         //==============================================
         //ARRAYS
         //==============================================
-        stringCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.stringCollections.add(StoreStringCollection(it.key, it.value)) }
-        dateTimeCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.dateTimeCollection.add(StoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
-        floatCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.floatCollections.add(StoreFloatCollection(it.key, it.value)) }
-        doubleCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(it.key, it.value)) }
-        longCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.longCollections.add(StoreLongCollection(it.key, it.value)) }
-        integerCollections.filterSensitiveFields(dbContext).forEach { jdsPortableEntity.integerCollections.add(StoreIntegerCollection(it.key, it.value)) }
+        stringCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.stringCollections.add(StoreStringCollection(it.key, it.value)) }
+        dateTimeCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.dateTimeCollection.add(StoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
+        floatCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.floatCollections.add(StoreFloatCollection(it.key, it.value)) }
+        doubleCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(it.key, it.value)) }
+        longCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.longCollections.add(StoreLongCollection(it.key, it.value)) }
+        integerCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.integerCollections.add(StoreIntegerCollection(it.key, it.value)) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -763,12 +763,13 @@ abstract class Entity : IEntity, Serializable {
      * @param value
      */
     internal fun populateProperties(dbContext: DbContext, fieldType: FieldType, fieldId: Int, value: Any?) {
-        initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
-        if (!dbContext.options.populateSensitiveData) {
-            if (Field.values[fieldId]!!.sensitive) {
-                return
-            }
+
+        if (dbContext.options.ignoreTags.any { tag -> Field.values[fieldId]!!.tags.contains(tag) }) {
+            return
         }
+
+        initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
+
         when (fieldType) {
             FieldType.Float -> {
                 floatValues[fieldId]?.value = when (value) {
@@ -1081,37 +1082,68 @@ abstract class Entity : IEntity, Serializable {
             connection: Connection,
             entityId: Int
     ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateField()) else connection.prepareStatement(dbContext.populateField())).use { populateRefField ->
-            (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityField()) else connection.prepareStatement(dbContext.populateEntityField())).use { populateRefEntityField ->
-                (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateFieldEntity()) else connection.prepareStatement(dbContext.populateFieldEntity())).use { populateRefFieldEntity ->
-                    getFields(overview.entityId).forEach { fieldId ->
-                        val field = Field.values[fieldId]!!
-                        //1. map this jdsField to the jdsField dictionary
-                        populateRefField.setInt(1, field.id)
-                        populateRefField.setString(2, field.name)
-                        populateRefField.setString(3, field.description)
-                        populateRefField.setInt(4, field.type.ordinal)
-                        populateRefField.addBatch()
-                        //2. map this jdsField ID to the entity type
-                        populateRefEntityField.setInt(1, entityId)
-                        populateRefEntityField.setInt(2, field.id)
-                        populateRefEntityField.addBatch()
-                        //3. zzzzzzzzzz
-                        if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
-                            val fieldEntity = FieldEntity.values[field.id]
-                            if (fieldEntity != null) {
-                                val entity = getEntityAnnotation(fieldEntity.entity)
-                                if (entity != null) {
-                                    populateRefFieldEntity.setInt(1, field.id)
-                                    populateRefFieldEntity.setInt(2, entity.id)
-                                    populateRefFieldEntity.addBatch()
+        connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldTag)} WHERE field_id = ?").use { clearFieldTag ->
+            connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldAlternateCode)} WHERE field_id = ?").use { clearFieldAlternateCode ->
+                dbContext.getCallOrStatement(connection, dbContext.populateField()).use { populateField ->
+                    dbContext.getCallOrStatement(connection, dbContext.populateEntityField()).use { populateEntityField ->
+                        dbContext.getCallOrStatement(connection, dbContext.populateFieldEntity()).use { populateFieldEntity ->
+                            dbContext.getCallOrStatement(connection, dbContext.populateFieldTag()).use { populateFieldTag ->
+                                dbContext.getCallOrStatement(connection, dbContext.populateFieldAlternateCode()).use { populateFieldAlternateCode ->
+                                    getFields(overview.entityId).forEach { fieldId ->
+                                        val field = Field.values.getValue(fieldId)
+
+                                        clearFieldTag.setInt(1, field.id)
+                                        clearFieldTag.addBatch()
+
+                                        clearFieldAlternateCode.setInt(1, field.id)
+                                        clearFieldAlternateCode.addBatch()
+
+                                        populateField.setInt(1, field.id)
+                                        populateField.setString(2, field.name)
+                                        populateField.setString(3, field.description)
+                                        populateField.setInt(4, field.type.ordinal)
+                                        populateField.addBatch()
+
+                                        populateEntityField.setInt(1, entityId)
+                                        populateEntityField.setInt(2, field.id)
+                                        populateEntityField.addBatch()
+
+                                        field.tags.forEach { tag ->
+                                            populateFieldTag.setInt(1, field.id)
+                                            populateFieldTag.setString(2, tag)
+                                            populateFieldTag.addBatch()
+                                        }
+
+                                        field.alternateCodes.forEach { (alternateCode, value) ->
+                                            populateFieldAlternateCode.setInt(1, field.id)
+                                            populateFieldAlternateCode.setString(2, alternateCode)
+                                            populateFieldAlternateCode.setString(3, value)
+                                            populateFieldAlternateCode.addBatch()
+                                        }
+
+                                        if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
+                                            val fieldEntity = FieldEntity.values[field.id]
+                                            if (fieldEntity != null) {
+                                                val entityAnnotation = getEntityAnnotation(fieldEntity.entity)
+                                                if (entityAnnotation != null) {
+                                                    populateFieldEntity.setInt(1, field.id)
+                                                    populateFieldEntity.setInt(2, entityAnnotation.id)
+                                                    populateFieldEntity.addBatch()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    clearFieldTag.executeBatch()
+                                    clearFieldAlternateCode.executeBatch()
+                                    populateField.executeBatch()
+                                    populateEntityField.executeBatch()
+                                    populateFieldTag.executeBatch()
+                                    populateFieldAlternateCode.executeBatch()
+                                    populateFieldEntity.executeBatch()
                                 }
                             }
                         }
                     }
-                    populateRefField.executeBatch()
-                    populateRefEntityField.executeBatch()
-                    populateRefFieldEntity.executeBatch()
                 }
             }
         }

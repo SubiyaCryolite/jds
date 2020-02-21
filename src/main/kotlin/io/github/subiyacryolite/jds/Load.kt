@@ -37,7 +37,11 @@ import kotlin.collections.ArrayList
  * @param filterBy
  * @param T
  */
-class Load<T : Entity>(private val dbContext: DbContext, private val referenceType: Class<T>, private val filterBy: FilterBy) : Callable<MutableCollection<T>> {
+class Load<T : Entity>(
+        private val dbContext: DbContext,
+        private val referenceType: Class<T>,
+        private val filterBy: FilterBy
+) : Callable<MutableCollection<T>> {
 
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
     private var filterIds: Iterable<String> = emptyList()

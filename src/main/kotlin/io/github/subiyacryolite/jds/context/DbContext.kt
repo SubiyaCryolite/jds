@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.Serializable
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -113,6 +114,8 @@ abstract class DbContext(
         prepareJdsComponent(connection, Table.StoreBoolean)
         prepareJdsComponent(connection, Table.StoreUuid)
         prepareJdsComponent(connection, Table.EntityLive)
+        prepareJdsComponent(connection, Table.FieldTag)
+        prepareJdsComponent(connection, Table.FieldAlternateCode)
         if (supportsStatements) {
             prepareJdsComponent(connection, Procedure.StoreBoolean)
             prepareJdsComponent(connection, Procedure.StoreBlob)
@@ -152,6 +155,8 @@ abstract class DbContext(
             prepareJdsComponent(connection, Procedure.StoreLongCollection)
             prepareJdsComponent(connection, Procedure.StoreDoubleCollection)
             prepareJdsComponent(connection, Procedure.FieldDictionary)
+            prepareJdsComponent(connection, Procedure.FieldTag)
+            prepareJdsComponent(connection, Procedure.FieldAlternateCode)
         }
     }
 
@@ -228,6 +233,8 @@ abstract class DbContext(
             Table.Field -> executeSqlFromString(connection, createRefFields())
             Table.EntityInheritance -> executeSqlFromString(connection, createRefInheritance())
             Table.FieldDictionary -> executeSqlFromString(connection, createFieldDictionary())
+            Table.FieldTag -> executeSqlFromString(connection, createFieldTag())
+            Table.FieldAlternateCode -> executeSqlFromString(connection, createFieldAlternateCode())
             Table.StoreBlob -> executeSqlFromString(connection, createStoreBlob())
             Table.StoreBoolean -> executeSqlFromString(connection, createStoreBoolean())
             Table.StoreDate -> executeSqlFromString(connection, createStoreDate())
@@ -277,6 +284,8 @@ abstract class DbContext(
             Procedure.Enum -> executeSqlFromString(connection, createPopEnum())
             Procedure.Field -> executeSqlFromString(connection, createPopField())
             Procedure.FieldDictionary -> executeSqlFromString(connection, createPopFieldDictionary())
+            Procedure.FieldAlternateCode -> executeSqlFromString(connection, createPopFieldAlternateCode())
+            Procedure.FieldTag -> executeSqlFromString(connection, createPopFieldTag())
             Procedure.StoreBlob -> executeSqlFromString(connection, createPopStoreBlob())
             Procedure.StoreBoolean -> executeSqlFromString(connection, createPopStoreBoolean())
             Procedure.StoreDate -> executeSqlFromString(connection, createPopStoreDate())
@@ -303,6 +312,14 @@ abstract class DbContext(
             Procedure.StoreTime -> executeSqlFromString(connection, createPopStoreTime())
             Procedure.StoreYearMonth -> executeSqlFromString(connection, createPopYearMonth())
             Procedure.StoreZonedDateTime -> executeSqlFromString(connection, createPopStoreZonedDateTime())
+        }
+    }
+
+    internal fun getCallOrStatement(connection: Connection,sql: String):PreparedStatement{
+        return if(supportsStatements){
+            connection.prepareCall(sql)
+        }else{
+            connection.prepareStatement(sql)
         }
     }
 
@@ -830,6 +847,18 @@ abstract class DbContext(
     internal open fun populateFieldDictionary() = "{call ${getName(Procedure.FieldDictionary)}(?, ?, ?)}"
 
     /**
+     * SQL call to update the field dictionary property
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun populateFieldTag() = "{call ${getName(Procedure.FieldTag)}(?, ?)}"
+
+    /**
+     * SQL call to update the field dictionary property
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun populateFieldAlternateCode() = "{call ${getName(Procedure.FieldAlternateCode)}(?, ?, ?)}"
+
+    /**
      * Variable to facilitate in-line rows in Oracle
      */
     protected val logSqlSource = when (isOracleDb) {
@@ -970,8 +999,25 @@ abstract class DbContext(
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getDataType(FieldType.Int)
         columns["field_id"] = getDataType(FieldType.Int)
-        columns["property_name"] = getDataType(FieldType.String, 64)
+        columns["property_name"] = getDataType(FieldType.String, 48)
         return createOrAlterProc(Procedure.FieldDictionary, Table.FieldDictionary, columns, uniqueColumns, false)
+    }
+
+    private fun createPopFieldAlternateCode(): String {
+        val uniqueColumns = setOf("field_id", "alternate_code")
+        val columns = LinkedHashMap<String, String>()
+        columns["field_id"] = getDataType(FieldType.Int)
+        columns["alternate_code"] = getDataType(FieldType.String,16)
+        columns["value"] = getDataType(FieldType.String, 48)
+        return createOrAlterProc(Procedure.FieldAlternateCode, Table.FieldAlternateCode, columns, uniqueColumns, false)
+    }
+
+    private fun createPopFieldTag(): String {
+        val uniqueColumns = setOf("field_id")
+        val columns = LinkedHashMap<String, String>()
+        columns["field_id"] = getDataType(FieldType.Int)
+        columns["tag"] = getDataType(FieldType.String,16)
+        return createOrAlterProc(Procedure.FieldTag, Table.FieldTag, columns, uniqueColumns, false)
     }
 
     private fun createPopStoreBlob(): String {
@@ -1272,12 +1318,38 @@ abstract class DbContext(
         val columns = linkedMapOf(
                 "entity_id" to getDataTypeImpl(FieldType.Int),
                 "field_id" to getDataTypeImpl(FieldType.Int),
-                "property_name" to getDataTypeImpl(FieldType.String, 64)
+                "property_name" to getDataTypeImpl(FieldType.String, 48)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
+        foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
         return createTable(Table.FieldDictionary, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createFieldTag(): String {
+        val objectName = Table.FieldTag.component
+        val columns = linkedMapOf(
+                "field_id" to getDataTypeImpl(FieldType.Int),
+                "tag" to getDataTypeImpl(FieldType.String, 16)
+        )
+        val primaryKey = linkedMapOf("${objectName}_pk" to "field_id")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
+        return createTable(Table.FieldTag, columns, HashMap(), primaryKey, foreignKeys)
+    }
+
+    private fun createFieldAlternateCode(): String {
+        val objectName = Table.FieldAlternateCode.component
+        val columns = linkedMapOf(
+                "field_id" to getDataTypeImpl(FieldType.Int),
+                "alternate_code" to getDataTypeImpl(FieldType.String, 16),
+                "value" to getDataTypeImpl(FieldType.String, 48)
+        )
+        val primaryKey = linkedMapOf("${objectName}_pk" to "field_id, alternate_code")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
+        return createTable(Table.FieldAlternateCode, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createStoreEntities(): String {

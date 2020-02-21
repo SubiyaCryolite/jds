@@ -17,4 +17,4 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Int] values
  * @param value the backing value
  */
-class IntegerProperty(value: Int = 0) : ObjectProperty<Int>(value)
+data class IntegerProperty(override var value: Int = 0) : WritableProperty<Int>

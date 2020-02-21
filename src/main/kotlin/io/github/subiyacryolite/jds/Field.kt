@@ -23,7 +23,7 @@ import java.util.*
  * @param name the fields name
  * @param type the fields type
  * @param description a description of the field
- * @param sensitive an indication if the field is of sensitive nature or not.
+ * @param tags a set of tags that can be used to filter, populate, or ignore fields
  */
 data class Field(
         var id: Int = 0,
@@ -31,7 +31,7 @@ data class Field(
         var type: FieldType = FieldType.String,
         var description: String = "",
         var alternateCodes: Map<String, String> = emptyMap(),
-        var sensitive: Boolean = false
+        var tags: Set<String> = emptySet()
 ) : Serializable {
 
     internal fun bind(): Int {

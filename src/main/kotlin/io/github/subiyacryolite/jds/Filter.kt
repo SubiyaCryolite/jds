@@ -26,7 +26,11 @@ import java.util.concurrent.Callable
  * @param dbContext
  * @param referenceType
  */
-class Filter<T : Entity>(private val dbContext: DbContext, private val referenceType: Class<T>, private val filterBy: FilterBy) : AutoCloseable, Callable<MutableCollection<T>> {
+class Filter<T : Entity>(
+        private val dbContext: DbContext,
+        private val referenceType: Class<T>,
+        private val filterBy: FilterBy
+) : AutoCloseable, Callable<MutableCollection<T>> {
 
     private val blockParameters: LinkedList<LinkedList<Any>> = LinkedList()
     private val blockStrings: LinkedList<LinkedList<String>> = LinkedList()

@@ -17,4 +17,21 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
  * @param value the initial value
  */
-class NullableBlobProperty(value: ByteArray? = null) : ObjectProperty<ByteArray?>(value)
+data class NullableBlobProperty(override var value: ByteArray? = null) : WritableProperty<ByteArray?> {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is NullableBlobProperty) return false
+
+        if (value != null) {
+            if (other.value == null) return false
+            if (!value!!.contentEquals(other.value!!)) return false
+        } else if (other.value != null) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value?.contentHashCode() ?: 0
+    }
+}

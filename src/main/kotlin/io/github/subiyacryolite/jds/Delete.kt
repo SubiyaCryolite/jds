@@ -29,7 +29,10 @@ import java.util.concurrent.ConcurrentMap
  * @param dbContext
  * @param uuids
  */
-class Delete(private val dbContext: DbContext, private val ids: Iterable<String>) : Callable<Boolean> {
+class Delete(
+        private val dbContext: DbContext,
+        private val ids: Iterable<String>
+) : Callable<Boolean> {
 
     private val alternateConnections: ConcurrentMap<Int, Connection> = ConcurrentHashMap()
 

@@ -19,4 +19,4 @@ import java.time.MonthDay
  * Class allowing for the wrapping and persistence of [MonthDay] values
  * @param value the backing value
  */
-class MonthDayProperty(value: MonthDay = MonthDay.now()) : ObjectProperty<MonthDay>(value)
+data class MonthDayProperty(override var value: MonthDay = MonthDay.now()) : WritableProperty<MonthDay>
