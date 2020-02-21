@@ -60,7 +60,7 @@ enum class Procedure(val component: String) {
     /**
      *
      */
-    Enum("pop${Table.Enum.component}"),
+    Enum("pop_${Table.Enum.component}"),
 
     /**
      *
