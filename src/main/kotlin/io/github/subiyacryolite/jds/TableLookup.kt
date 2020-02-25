@@ -35,6 +35,7 @@ object TableLookup {
             FieldType.Period, FieldType.String, FieldType.YearMonth, FieldType.MonthDay -> return StoreText
             FieldType.FloatCollection -> return StoreFloat
             FieldType.IntCollection -> return StoreInteger
+            FieldType.UuidCollection -> return StoreUuid
             FieldType.DoubleCollection -> return StoreDouble
             FieldType.LongCollection -> return StoreLong
             FieldType.StringCollection -> return StoreText

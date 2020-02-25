@@ -63,6 +63,7 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
         portableEntity.floatCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.FloatCollection, parent.key, it) } }
         portableEntity.floatValue.forEach { entity.populateProperties(dbContext, FieldType.Float, it.key, it.value) }
         portableEntity.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.IntCollection, parent.key, it) } }
+        portableEntity.uuidCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.UuidCollection, parent.key, it) } }
         portableEntity.integerValues.forEach { entity.populateProperties(dbContext, FieldType.Int, it.key, it.value) }
         portableEntity.shortValues.forEach { entity.populateProperties(dbContext, FieldType.Short, it.key, it.value) }
         portableEntity.uuidValues.forEach { entity.populateProperties(dbContext, FieldType.Uuid, it.key, it.value) }

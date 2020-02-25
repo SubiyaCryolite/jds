@@ -15,7 +15,6 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
-import io.github.subiyacryolite.jds.enums.Procedure
 import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 
@@ -102,6 +101,8 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun populateStoreIntegerCollection() = "INSERT INTO ${getName(Table.StoreIntegerCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
+    override fun populateStoreUuidCollection() = "INSERT INTO ${getName(Table.StoreUuidCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
+
     override fun populateStoreDoubleCollection() = "INSERT INTO ${getName(Table.StoreDoubleCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
 
     override fun populateStoreLongCollection() = "INSERT INTO ${getName(Table.StoreLongCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
@@ -130,7 +131,7 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun populateFieldTag() = "INSERT INTO ${getName(Table.FieldTag)}(field_id, tag) VALUES(?, ?) ON CONFLICT(field_id) DO UPDATE SET tag = EXCLUDED.tag"
 
-    override fun populateFieldAlternateCode()  = "INSERT INTO ${getName(Table.FieldAlternateCode)}(field_id, alternate_code, value) VALUES(?, ?, ?) ON CONFLICT(field_id, alternate_code) DO UPDATE SET value = EXCLUDED.value"
+    override fun populateFieldAlternateCode() = "INSERT INTO ${getName(Table.FieldAlternateCode)}(field_id, alternate_code, value) VALUES(?, ?, ?) ON CONFLICT(field_id, alternate_code) DO UPDATE SET value = EXCLUDED.value"
 
     override fun getDataTypeImpl(fieldType: FieldType, max: Int): String = when (fieldType) {
         FieldType.Float -> "REAL"

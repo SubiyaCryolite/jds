@@ -113,6 +113,7 @@ abstract class DbContext(
         prepareJdsComponent(connection, Table.StoreMonthDay)
         prepareJdsComponent(connection, Table.StoreBoolean)
         prepareJdsComponent(connection, Table.StoreUuid)
+        prepareJdsComponent(connection, Table.StoreUuidCollection)
         prepareJdsComponent(connection, Table.EntityLive)
         prepareJdsComponent(connection, Table.FieldTag)
         prepareJdsComponent(connection, Table.FieldAlternateCode)
@@ -152,6 +153,7 @@ abstract class DbContext(
             prepareJdsComponent(connection, Procedure.StoreDateTimeCollection)
             prepareJdsComponent(connection, Procedure.StoreFloatCollection)
             prepareJdsComponent(connection, Procedure.StoreIntegerCollection)
+            prepareJdsComponent(connection, Procedure.StoreUuidCollection)
             prepareJdsComponent(connection, Procedure.StoreLongCollection)
             prepareJdsComponent(connection, Procedure.StoreDoubleCollection)
             prepareJdsComponent(connection, Procedure.FieldDictionary)
@@ -250,6 +252,7 @@ abstract class DbContext(
             Table.StoreFloat -> executeSqlFromString(connection, createStoreFloat())
             Table.StoreShort -> executeSqlFromString(connection, createStoreShort())
             Table.StoreUuid -> executeSqlFromString(connection, createStoreUuid())
+            Table.StoreUuidCollection -> executeSqlFromString(connection, createStoreUuidCollection())
             Table.StoreFloatCollection -> executeSqlFromString(connection, createStoreFloatCollection())
             Table.StoreInteger -> executeSqlFromString(connection, createStoreInteger())
             Table.StoreIntegerCollection -> executeSqlFromString(connection, createStoreIntegerCollection())
@@ -300,6 +303,7 @@ abstract class DbContext(
             Procedure.StoreFloat -> executeSqlFromString(connection, createPopStoreFloat())
             Procedure.StoreShort -> executeSqlFromString(connection, createPopStoreShort())
             Procedure.StoreUuid -> executeSqlFromString(connection, createPopStoreUuid())
+            Procedure.StoreUuidCollection -> executeSqlFromString(connection, createPopStoreUuidCollection())
             Procedure.StoreFloatCollection -> executeSqlFromString(connection, createPopFloatCollection())
             Procedure.StoreInteger -> executeSqlFromString(connection, createPopStoreInteger())
             Procedure.StoreIntegerCollection -> executeSqlFromString(connection, createPopIntegerCollection())
@@ -770,6 +774,12 @@ abstract class DbContext(
     internal open fun populateStoreIntegerCollection() = "{call ${getName(Procedure.StoreIntegerCollection)}(?, ?, ?, ?)}"
 
     /**
+     * SQL call to save uuid collections
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun populateStoreUuidCollection() = "{call ${getName(Procedure.StoreUuidCollection)}(?, ?, ?, ?)}"
+
+    /**
      * SQL call to save double collections
      * @return the default or overridden SQL statement for this operation
      */
@@ -1064,6 +1074,10 @@ abstract class DbContext(
         return createOrAlterProc(Procedure.StoreIntegerCollection, Table.StoreIntegerCollection, getStoreColumns("value" to getDataType(FieldType.Int)), storeUniqueColumns, false)
     }
 
+    private fun createPopStoreUuidCollection(): String {
+        return createOrAlterProc(Procedure.StoreUuidCollection, Table.StoreUuidCollection, getStoreColumns("value" to getDataType(FieldType.Uuid)), storeUniqueColumns, false)
+    }
+
     private fun createPopStoreLong(): String {
         return createOrAlterProc(Procedure.StoreLong, Table.StoreLong, getStoreColumns("value" to getDataType(FieldType.Long)), storeUniqueColumns, false)
     }
@@ -1235,6 +1249,11 @@ abstract class DbContext(
     private fun createStoreIntegerCollection(): String {
         val objectName = Table.StoreIntegerCollection.component
         return createTable(Table.StoreIntegerCollection, getStoreColumns("value" to getDataType(FieldType.Int)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
+    }
+
+    private fun createStoreUuidCollection(): String {
+        val objectName = Table.StoreUuidCollection.component
+        return createTable(Table.StoreUuidCollection, getStoreColumns("value" to getDataType(FieldType.Uuid)), getStoreUniqueColumns(objectName), LinkedHashMap(), getDimensionTableFk(objectName))
     }
 
     private fun createStoreLong(): String {

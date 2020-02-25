@@ -1,6 +1,5 @@
 package io.github.subiyacryolite.jds
 
-import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
 object Validate {
@@ -119,19 +118,20 @@ object Validate {
         }
     }
 
-    fun validateEnumStringCollection(field: Field) {
-        if (field.type != FieldType.EnumStringCollection) {
-            throw RuntimeException("Incorrect type supplied for field [$field]")
-        }
-    }
     fun validateEnumCollection(field: Field) {
-        if (field.type != FieldType.EnumCollection) {
+        if (field.type != FieldType.EnumCollection && field.type != FieldType.EnumStringCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
     }
 
     fun validateIntCollection(field: Field) {
         if (field.type != FieldType.IntCollection) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+    }
+
+    fun validateUuidCollection(field: Field) {
+        if (field.type != FieldType.UuidCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
     }

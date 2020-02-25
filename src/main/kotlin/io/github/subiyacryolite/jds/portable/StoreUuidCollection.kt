@@ -14,38 +14,14 @@
 package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.github.subiyacryolite.jds.Field
 import java.util.*
 
-/**
- * Used to store values of type in a portable manner
- * @param key the value within [Field.id]
- * @param value the corresponding value
- */
-data class StoreUuid(
-        @get:JsonProperty("k")
+data class StoreUuidCollection(
+        @get: JsonProperty("k")
         @set:JsonProperty("k")
         var key: Int = 0,
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var value: ByteArray? = null
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StoreUuid
-
-        if (key != other.key) return false
-        if (!Arrays.equals(value, other.value)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = key.hashCode()
-        result = 31 * result + (value?.let { it.contentHashCode() } ?: 0)
-        return result
-    }
-}
+        var values: MutableCollection<ByteArray> = ArrayList()
+)

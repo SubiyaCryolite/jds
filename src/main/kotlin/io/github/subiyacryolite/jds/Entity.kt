@@ -23,6 +23,7 @@ import io.github.subiyacryolite.jds.Validate.validateDouble
 import io.github.subiyacryolite.jds.Validate.validateDoubleCollection
 import io.github.subiyacryolite.jds.Validate.validateDuration
 import io.github.subiyacryolite.jds.Validate.validateEnum
+import io.github.subiyacryolite.jds.Validate.validateEnumCollection
 import io.github.subiyacryolite.jds.Validate.validateFloat
 import io.github.subiyacryolite.jds.Validate.validateFloatCollection
 import io.github.subiyacryolite.jds.Validate.validateInt
@@ -36,6 +37,7 @@ import io.github.subiyacryolite.jds.Validate.validateString
 import io.github.subiyacryolite.jds.Validate.validateStringCollection
 import io.github.subiyacryolite.jds.Validate.validateTime
 import io.github.subiyacryolite.jds.Validate.validateUuid
+import io.github.subiyacryolite.jds.Validate.validateUuidCollection
 import io.github.subiyacryolite.jds.Validate.validateYearMonth
 import io.github.subiyacryolite.jds.Validate.validateZonedDateTime
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
@@ -48,7 +50,6 @@ import io.github.subiyacryolite.jds.utility.DeepCopy
 import java.io.Externalizable
 import java.io.ObjectInput
 import java.io.ObjectOutput
-import java.io.Serializable
 import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.Timestamp
@@ -117,6 +118,8 @@ abstract class Entity : IEntity {
     internal val longCollections: HashMap<Int, MutableCollection<Long>> = HashMap()
     @get:JsonIgnore
     internal val integerCollections: HashMap<Int, MutableCollection<Int>> = HashMap()
+    @get:JsonIgnore
+    internal val uuidCollections: HashMap<Int, MutableCollection<UUID>> = HashMap()
     //enums
     @get:JsonIgnore
     internal val enumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
@@ -492,6 +495,13 @@ abstract class Entity : IEntity {
         return integerCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
+    @JvmName("mapUuids")
+    protected fun map(field: Field, collection: MutableCollection<UUID>, propertyName: String = ""): MutableCollection<UUID> {
+        validateUuidCollection(field)
+        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
+        return uuidCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    }
+
     @JvmName("mapDoubles")
     protected fun map(field: Field, collection: MutableCollection<Double>, propertyName: String = ""): MutableCollection<Double> {
         validateDoubleCollection(field)
@@ -516,6 +526,7 @@ abstract class Entity : IEntity {
         } else {
             enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
         }
+        validateEnumCollection(fieldEnum.field)
         fieldEnum.field.bind()
         FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
         mapField(overview.entityId, fieldEnum.field.id)
@@ -646,6 +657,9 @@ abstract class Entity : IEntity {
         integerCollections.clear()
         integerCollections.putAll(DeepCopy.clone(source.integerCollections)!!)
 
+        uuidCollections.clear()
+        uuidCollections.putAll(DeepCopy.clone(source.uuidCollections)!!)
+
         enumValues.clear()
         enumValues.putAll(DeepCopy.clone(source.enumValues)!!)
 
@@ -722,6 +736,7 @@ abstract class Entity : IEntity {
         doubleCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(it.key, it.value)) }
         longCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.longCollections.add(StoreLongCollection(it.key, it.value)) }
         integerCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.integerCollections.add(StoreIntegerCollection(it.key, it.value)) }
+        uuidCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.uuidCollections.add(StoreUuidCollection(it.key, toByteArrayCollection(it.value))) }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -739,6 +754,14 @@ abstract class Entity : IEntity {
             embeddedObject.init(dbContext, objectWritableProperty.value)
             jdsPortableEntity.entityOverviews.add(embeddedObject)
         }
+    }
+
+    private fun toByteArrayCollection(values: MutableCollection<UUID>): MutableCollection<ByteArray> {
+        val output = ArrayList<ByteArray>()
+        values.forEach { value ->
+            output.add(value.toByteArray()!!)
+        }
+        return output
     }
 
     private fun safeLocalDateTime(value: Temporal?): Timestamp? {
@@ -830,6 +853,15 @@ abstract class Entity : IEntity {
             }
             FieldType.IntCollection -> {
                 integerCollections[fieldId]?.add(value as Int)
+            }
+            FieldType.UuidCollection -> {
+                val uuid = when (value) {
+                    is ByteArray -> value.toUuid()!!
+                    is String -> UUID.fromString(value)
+                    is UUID -> value
+                    else -> UUID.fromString("00000000-0000-0000-0000-000000000000")
+                }
+                uuidCollections[fieldId]?.add(uuid)
             }
             FieldType.Enum -> {
                 enumValues.filter { it.key == fieldId }.forEach {
@@ -958,6 +990,9 @@ abstract class Entity : IEntity {
             }
             FieldType.IntCollection -> if (!integerCollections.containsKey(fieldId)) {
                 integerCollections[fieldId] = ArrayList()
+            }
+            FieldType.UuidCollection -> if (!uuidCollections.containsKey(fieldId)) {
+                uuidCollections[fieldId] = ArrayList()
             }
             FieldType.StringCollection -> if (!stringCollections.containsKey(fieldId)) {
                 stringCollections[fieldId] = ArrayList()

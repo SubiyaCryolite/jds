@@ -111,6 +111,7 @@ class Save(
                     saveLongCollections(entity)
                     saveDoubleCollections(entity)
                     saveIntegerCollections(entity)
+                    saveUuidCollections(entity)
                     saveFloatCollections(entity)
                     saveEnumCollections(entity)
                 }
@@ -525,6 +526,29 @@ class Save(
                 saveIntegerCollection.setInt(3, fieldId)
                 saveIntegerCollection.setObject(4, value) //primitives could be null, default value has meaning
                 saveIntegerCollection.addBatch()
+            }
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace(System.err)
+    }
+
+    /**
+     * @param jdsEntity
+     */
+    @Throws(Exception::class)
+    private fun saveUuidCollections(jdsEntity: Entity) = try {
+        val saveUuidCollection = regularStatementOrCall(onSaveEventArguments, dbContext.populateStoreUuidCollection())
+        jdsEntity.uuidCollections.filterIgnored(dbContext).forEach { (fieldId, collection) ->
+            collection.forEach { value ->
+                saveUuidCollection.setString(1, jdsEntity.overview.id)
+                saveUuidCollection.setInt(2, jdsEntity.overview.editVersion)
+                saveUuidCollection.setInt(3, fieldId)
+                if ((dbContext.isOracleDb || dbContext.isMySqlDb)) {
+                    saveUuidCollection.setObject(4, value.toByteArray())
+                } else {
+                    saveUuidCollection.setObject(4, value)
+                }
+                saveUuidCollection.addBatch()
             }
         }
     } catch (ex: Exception) {

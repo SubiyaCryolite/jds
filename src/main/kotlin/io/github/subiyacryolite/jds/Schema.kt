@@ -56,6 +56,7 @@ object Schema {
         FieldType.EntityCollection,
         FieldType.FloatCollection,
         FieldType.IntCollection,
+        FieldType.UuidCollection,
         FieldType.DoubleCollection,
         FieldType.LongCollection,
         FieldType.StringCollection,

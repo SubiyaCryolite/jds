@@ -175,6 +175,11 @@ enum class Procedure(val component: String) {
     /**
      *
      */
+    StoreUuidCollection("pop_${Table.StoreUuidCollection.component}"),
+
+    /**
+     *
+     */
     StoreLong("pop_${Table.StoreLong.component}"),
 
     /**

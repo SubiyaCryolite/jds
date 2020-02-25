@@ -19,7 +19,7 @@ import io.github.subiyacryolite.jds.portable.PortableEntity
 import java.io.Serializable
 import java.util.*
 
-interface IEntity :Serializable{
+interface IEntity : Serializable {
     val overview: IOverview
     val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>>
     val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>>

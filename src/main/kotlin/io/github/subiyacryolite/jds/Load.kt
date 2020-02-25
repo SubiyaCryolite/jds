@@ -145,6 +145,7 @@ class Load<T : Entity>(
                         val shortStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreShort)} WHERE id IN $questionsString")
                         val uuidStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreUuid)} WHERE id IN $questionsString")
                         val intCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreIntegerCollection)} WHERE id IN $questionsString")
+                        val uuidCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreUuidCollection)} WHERE id IN $questionsString")
                         val longStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreLong)} WHERE id IN $questionsString")
                         val longCollectionStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreLongCollection)} WHERE id IN $questionsString")
                         val monthDayStatement = connection.prepareStatement("SELECT * FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.StoreMonthDay)} WHERE id IN $questionsString")
@@ -213,6 +214,7 @@ class Load<T : Entity>(
                                 enumStringCollectionStatement.use { statement -> populateEnumStringCollection(entities, statement) }
                                 floatCollectionStatement.use { statement -> populateFloatCollection(entities, statement) }
                                 intCollectionStatement.use { statement -> populateIntegerCollection(entities, statement) }
+                                uuidCollectionStatement.use { statement -> populateUuidCollection(entities, statement) }
                                 longCollectionStatement.use { statement -> populateLongCollection(entities, statement) }
                                 stringCollectionStatement.use { statement -> populateStringCollection(entities, statement) }
                             }
@@ -489,6 +491,26 @@ class Load<T : Entity>(
                 val fieldId = resultSet.getInt("field_id")
                 optimalEntityLookup(entities, id, editVersion).forEach { jdsEntity ->
                     jdsEntity.populateProperties(dbContext, FieldType.IntCollection, fieldId, value)
+                }
+            }
+        }
+    }
+
+    /**
+     * @param entities
+     * @param preparedStatement
+     * @throws SQLException
+     */
+    @Throws(SQLException::class)
+    private fun <T : Entity> populateUuidCollection(entities: Collection<T>, preparedStatement: PreparedStatement) {
+        preparedStatement.executeQuery().use { resultSet ->
+            while (resultSet.next()) {
+                val id = resultSet.getString("id")
+                val editVersion = resultSet.getInt("edit_version")
+                val value = resultSet.getObject("value") //primitives can be null
+                val fieldId = resultSet.getInt("field_id")
+                optimalEntityLookup(entities, id, editVersion).forEach { jdsEntity ->
+                    jdsEntity.populateProperties(dbContext, FieldType.UuidCollection, fieldId, value)
                 }
             }
         }

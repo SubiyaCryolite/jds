@@ -181,6 +181,12 @@ enum class Table(val component: String, val alias: String) {
      *
      */
     StoreIntegerCollection("str_integer_col", "sic"),
+
+    /**
+     *
+     */
+    StoreUuidCollection("str_uuid_col", "suc"),
+
     /**
      *
      */

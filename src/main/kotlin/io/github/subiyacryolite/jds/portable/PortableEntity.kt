@@ -63,6 +63,9 @@ data class PortableEntity(
         @get:JsonProperty("ic")
         val integerCollections: MutableCollection<StoreIntegerCollection> = ArrayList(),
 
+        @get:JsonProperty("uc")
+        val uuidCollections: MutableCollection<StoreUuidCollection> = ArrayList(),
+
         @get:JsonProperty("lv")
         val longValues: MutableCollection<StoreLong> = ArrayList(),
 
