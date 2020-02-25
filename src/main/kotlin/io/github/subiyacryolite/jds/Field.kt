@@ -35,7 +35,14 @@ data class Field(
 ) : Serializable {
 
     internal fun bind(): Int {
-        values[this.id] = this
+        if (values.containsKey(this.id)) {
+            val existingField = values.getValue(this.id)
+            if (this != existingField) {
+                throw RuntimeException("The field id [${this.id}] is already bound to [${existingField}]")
+            }
+        } else {
+            values[this.id] = this
+        }
         return this.id
     }
 

@@ -188,6 +188,7 @@ class Load<T : Entity>(
                             yearMonthStatement.setString(index + 1, compositeKey.id)
                             shortStatement.setString(index + 1, compositeKey.id)
                             uuidStatement.setString(index + 1, compositeKey.id)
+                            uuidCollectionStatement.setString(index + 1, compositeKey.id)
                             zonedDateTimeStatement.setString(index + 1, compositeKey.id)
                         }
                         //catch embedded/pre-created objects objects as well
