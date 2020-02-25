@@ -534,8 +534,8 @@ abstract class Entity : IEntity {
         return collection
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T): WritableProperty<T> {
-        return map(fieldEntity, ObjectProperty(entity))
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T, propertyName: String = ""): WritableProperty<T> {
+        return map(fieldEntity, ObjectProperty(entity), propertyName)
     }
 
     protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, property: WritableProperty<T>, propertyName: String = ""): WritableProperty<T> {
