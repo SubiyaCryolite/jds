@@ -1390,21 +1390,36 @@ abstract class Entity : IEntity {
             objectOutput.writeObject(allEnums)
         }
 
-        internal fun getEntityAnnotation(clazz: Class<*>): EntityAnnotation? {
-            val attemptOne = clazz.isAnnotationPresent(EntityAnnotation::class.java)
-            if (attemptOne) {
-                return clazz.getAnnotation(EntityAnnotation::class.java)
-            } else {
-                val attemptTwo = clazz.superclass !== null && clazz.superclass.isAnnotationPresent(EntityAnnotation::class.java)
-                if (attemptTwo) {
-                    clazz.superclass.getAnnotation(EntityAnnotation::class.java)
+        internal fun getEntityAnnotation(clazz: Class<*>?): EntityAnnotation? {
+
+            var interfaceAnnotation: EntityAnnotation? = null
+            var classHit: EntityAnnotation? = null
+
+            clazz?.interfaces?.forEach { clazzInterface ->
+                val interfaceMatch = getEntityAnnotation(clazzInterface)
+                if (interfaceMatch != null) {
+                    interfaceAnnotation = interfaceMatch
+                    return@forEach
                 }
+            }
+
+            clazz?.declaredAnnotations?.forEach { annotation ->
+                if (annotation is EntityAnnotation) {
+                    classHit = annotation
+                    return@forEach
+                }
+            }
+
+            if (classHit != null) {
+                return classHit//prioritise classes
+            } else if (interfaceAnnotation != null) {
+                return interfaceAnnotation//then interfaces
             }
             return null
         }
 
         protected fun mapField(entityId: Int, fieldId: Int): Int {
-            if (Entity.initialising) {
+            if (initialising) {
                 getFields(entityId).add(fieldId)
             }
             return fieldId
