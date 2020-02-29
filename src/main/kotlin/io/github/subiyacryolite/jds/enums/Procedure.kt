@@ -80,6 +80,11 @@ enum class Procedure(val component: String) {
     /**
      *
      */
+    EntityTag("pop_${Table.EntityTag.component}"),
+
+    /**
+     *
+     */
     FieldAlternateCode("pop_${Table.FieldAlternateCode.component}"),
 
     /**

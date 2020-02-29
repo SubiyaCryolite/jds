@@ -1117,71 +1117,68 @@ abstract class Entity : IEntity {
             connection: Connection,
             entityId: Int
     ) = try {
-        connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldTag)} WHERE field_id = ?").use { clearFieldTag ->
-            connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldAlternateCode)} WHERE field_id = ?").use { clearFieldAlternateCode ->
-                dbContext.getCallOrStatement(connection, dbContext.populateField()).use { populateField ->
-                    dbContext.getCallOrStatement(connection, dbContext.populateEntityField()).use { populateEntityField ->
-                        dbContext.getCallOrStatement(connection, dbContext.populateFieldEntity()).use { populateFieldEntity ->
-                            dbContext.getCallOrStatement(connection, dbContext.populateFieldTag()).use { populateFieldTag ->
-                                dbContext.getCallOrStatement(connection, dbContext.populateFieldAlternateCode()).use { populateFieldAlternateCode ->
-                                    getFields(overview.entityId).forEach { fieldId ->
-                                        val field = Field.values.getValue(fieldId)
 
-                                        clearFieldTag.setInt(1, field.id)
-                                        clearFieldTag.addBatch()
+        val clearFieldTag = connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldTag)} WHERE field_id = ?")
+        val clearFieldAlternateCode = connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldAlternateCode)} WHERE field_id = ?")
+        val populateField = dbContext.getCallOrStatement(connection, dbContext.populateField())
+        val populateEntityField = dbContext.getCallOrStatement(connection, dbContext.populateEntityField())
+        val populateFieldEntity = dbContext.getCallOrStatement(connection, dbContext.populateFieldEntity())
+        val populateFieldTag = dbContext.getCallOrStatement(connection, dbContext.populateFieldTag())
+        val populateFieldAlternateCode = dbContext.getCallOrStatement(connection, dbContext.populateFieldAlternateCode())
 
-                                        clearFieldAlternateCode.setInt(1, field.id)
-                                        clearFieldAlternateCode.addBatch()
+        getFields(overview.entityId).forEach { fieldId ->
+            val field = Field.values.getValue(fieldId)
 
-                                        populateField.setInt(1, field.id)
-                                        populateField.setString(2, field.name)
-                                        populateField.setString(3, field.description)
-                                        populateField.setInt(4, field.type.ordinal)
-                                        populateField.addBatch()
+            clearFieldTag.setInt(1, field.id)
+            clearFieldTag.addBatch()
 
-                                        populateEntityField.setInt(1, entityId)
-                                        populateEntityField.setInt(2, field.id)
-                                        populateEntityField.addBatch()
+            clearFieldAlternateCode.setInt(1, field.id)
+            clearFieldAlternateCode.addBatch()
 
-                                        field.tags.forEach { tag ->
-                                            populateFieldTag.setInt(1, field.id)
-                                            populateFieldTag.setString(2, tag)
-                                            populateFieldTag.addBatch()
-                                        }
+            populateField.setInt(1, field.id)
+            populateField.setString(2, field.name)
+            populateField.setString(3, field.description)
+            populateField.setInt(4, field.type.ordinal)
+            populateField.addBatch()
 
-                                        field.alternateCodes.forEach { (alternateCode, value) ->
-                                            populateFieldAlternateCode.setInt(1, field.id)
-                                            populateFieldAlternateCode.setString(2, alternateCode)
-                                            populateFieldAlternateCode.setString(3, value)
-                                            populateFieldAlternateCode.addBatch()
-                                        }
+            populateEntityField.setInt(1, entityId)
+            populateEntityField.setInt(2, field.id)
+            populateEntityField.addBatch()
 
-                                        if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
-                                            val fieldEntity = FieldEntity.values[field.id]
-                                            if (fieldEntity != null) {
-                                                val entityAnnotation = getEntityAnnotation(fieldEntity.entity)
-                                                if (entityAnnotation != null) {
-                                                    populateFieldEntity.setInt(1, field.id)
-                                                    populateFieldEntity.setInt(2, entityAnnotation.id)
-                                                    populateFieldEntity.addBatch()
-                                                }
-                                            }
-                                        }
-                                    }
-                                    clearFieldTag.executeBatch()
-                                    clearFieldAlternateCode.executeBatch()
-                                    populateField.executeBatch()
-                                    populateEntityField.executeBatch()
-                                    populateFieldTag.executeBatch()
-                                    populateFieldAlternateCode.executeBatch()
-                                    populateFieldEntity.executeBatch()
-                                }
-                            }
-                        }
+            field.tags.forEach { tag ->
+                populateFieldTag.setInt(1, field.id)
+                populateFieldTag.setString(2, tag)
+                populateFieldTag.addBatch()
+            }
+
+            field.alternateCodes.forEach { (alternateCode, value) ->
+                populateFieldAlternateCode.setInt(1, field.id)
+                populateFieldAlternateCode.setString(2, alternateCode)
+                populateFieldAlternateCode.setString(3, value)
+                populateFieldAlternateCode.addBatch()
+            }
+
+            if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
+                val fieldEntity = FieldEntity.values[field.id]
+                if (fieldEntity != null) {
+                    val entityAnnotation = getEntityAnnotation(fieldEntity.entity)
+                    if (entityAnnotation != null) {
+                        populateFieldEntity.setInt(1, field.id)
+                        populateFieldEntity.setInt(2, entityAnnotation.id)
+                        populateFieldEntity.addBatch()
                     }
                 }
             }
         }
+
+        clearFieldTag.use { it.executeBatch() }
+        clearFieldAlternateCode.use { it.executeBatch() }
+        populateField.use { it.executeBatch() }
+        populateEntityField.use { it.executeBatch() }
+        populateFieldTag.use { it.executeBatch() }
+        populateFieldAlternateCode.use { it.executeBatch() }
+        populateFieldEntity.use { it.executeBatch() }
+
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }

@@ -129,7 +129,9 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun populateEntityInheritance() = "INSERT INTO ${getName(Table.EntityInheritance)}(parent_entity_id, child_entity_id) VALUES(?, ?) ON CONFLICT(parent_entity_id, child_entity_id) DO NOTHING"
 
-    override fun populateFieldTag() = "INSERT INTO ${getName(Table.FieldTag)}(field_id, tag) VALUES(?, ?) ON CONFLICT(field_id) DO UPDATE SET tag = EXCLUDED.tag"
+    override fun populateFieldTag() = "INSERT INTO ${getName(Table.FieldTag)}(field_id, tag) VALUES(?, ?) ON CONFLICT(field_id, tag) DO NOTHING"
+
+    override fun populateEntityTag() = "INSERT INTO ${getName(Table.EntityTag)}(entity_id, tag) VALUES(?, ?) ON CONFLICT(entity_id, tag) DO NOTHING"
 
     override fun populateFieldAlternateCode() = "INSERT INTO ${getName(Table.FieldAlternateCode)}(field_id, alternate_code, value) VALUES(?, ?, ?) ON CONFLICT(field_id, alternate_code) DO UPDATE SET value = EXCLUDED.value"
 

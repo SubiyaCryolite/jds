@@ -18,11 +18,13 @@ package io.github.subiyacryolite.jds.annotations
  * @param name
  * @param id
  * @param description
+ * @param tags
  */
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 @kotlin.annotation.Target(AnnotationTarget.CLASS)
 annotation class EntityAnnotation(
         val name: String = "",
         val id: Int = 1,
-        val description: String = ""
+        val description: String = "",
+        val tags: Array<String> = []
 )

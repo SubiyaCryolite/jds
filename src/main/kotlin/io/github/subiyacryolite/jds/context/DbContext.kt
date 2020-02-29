@@ -117,6 +117,7 @@ abstract class DbContext(
         prepareJdsComponent(connection, Table.EntityLive)
         prepareJdsComponent(connection, Table.FieldTag)
         prepareJdsComponent(connection, Table.FieldAlternateCode)
+        prepareJdsComponent(connection, Table.EntityTag)
         if (supportsStatements) {
             prepareJdsComponent(connection, Procedure.StoreBoolean)
             prepareJdsComponent(connection, Procedure.StoreBlob)
@@ -158,6 +159,7 @@ abstract class DbContext(
             prepareJdsComponent(connection, Procedure.StoreDoubleCollection)
             prepareJdsComponent(connection, Procedure.FieldDictionary)
             prepareJdsComponent(connection, Procedure.FieldTag)
+            prepareJdsComponent(connection, Procedure.EntityTag)
             prepareJdsComponent(connection, Procedure.FieldAlternateCode)
         }
     }
@@ -236,6 +238,7 @@ abstract class DbContext(
             Table.EntityInheritance -> executeSqlFromString(connection, createRefInheritance())
             Table.FieldDictionary -> executeSqlFromString(connection, createFieldDictionary())
             Table.FieldTag -> executeSqlFromString(connection, createFieldTag())
+            Table.EntityTag -> executeSqlFromString(connection, createEntityTag())
             Table.FieldAlternateCode -> executeSqlFromString(connection, createFieldAlternateCode())
             Table.StoreBlob -> executeSqlFromString(connection, createStoreBlob())
             Table.StoreBoolean -> executeSqlFromString(connection, createStoreBoolean())
@@ -289,6 +292,7 @@ abstract class DbContext(
             Procedure.FieldDictionary -> executeSqlFromString(connection, createPopFieldDictionary())
             Procedure.FieldAlternateCode -> executeSqlFromString(connection, createPopFieldAlternateCode())
             Procedure.FieldTag -> executeSqlFromString(connection, createPopFieldTag())
+            Procedure.EntityTag -> executeSqlFromString(connection, createPopEntityTag())
             Procedure.StoreBlob -> executeSqlFromString(connection, createPopStoreBlob())
             Procedure.StoreBoolean -> executeSqlFromString(connection, createPopStoreBoolean())
             Procedure.StoreDate -> executeSqlFromString(connection, createPopStoreDate())
@@ -319,10 +323,10 @@ abstract class DbContext(
         }
     }
 
-    internal fun getCallOrStatement(connection: Connection,sql: String):PreparedStatement{
-        return if(supportsStatements){
+    internal fun getCallOrStatement(connection: Connection, sql: String): PreparedStatement {
+        return if (supportsStatements) {
             connection.prepareCall(sql)
-        }else{
+        } else {
             connection.prepareStatement(sql)
         }
     }
@@ -449,14 +453,23 @@ abstract class DbContext(
             doNothingOnConflict: Boolean
     ): String
 
+    /**
+     * @param table
+     * @param columns LinkedHashMap<columnName -> columnType>
+     * @param uniqueColumns LinkedHashMap<constraintName -> constraintColumns>
+     * @param primaryKeys LinkedHashMap<constraintName -> constraintColumns>
+     * @param foreignKeys LinkedHashMap<constraintName -> LinkedHashMap< LocalColumns -> ReferenceTable(ReferenceColumns)>>
+     * @param indexes LinkedHashMap<constraintName -> index columns>
+     */
     private fun createTable(
             table: Table,
-            columns: HashMap<String, String>,
-            uniqueColumns: HashMap<String, String> = HashMap(),
-            primaryKeys: HashMap<String, String> = HashMap(),
-            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap()
+            columns: Map<String, String>,
+            uniqueColumns: Map<String, String> = HashMap(),
+            primaryKeys: Map<String, String> = HashMap(),
+            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
+            indexes: Map<String, String> = HashMap()
     ): String {
-        return createTable(getName(table), columns, uniqueColumns, primaryKeys, foreignKeys)
+        return createTable(getName(table), columns, uniqueColumns, primaryKeys, foreignKeys, indexes)
     }
 
     /**
@@ -465,13 +478,15 @@ abstract class DbContext(
      * @param uniqueColumns LinkedHashMap<constraintName -> constraintColumns>
      * @param primaryKeys LinkedHashMap<constraintName -> constraintColumns>
      * @param foreignKeys LinkedHashMap<constraintName -> LinkedHashMap< LocalColumns -> ReferenceTable(ReferenceColumns)>>
+     * @param indexes LinkedHashMap<constraintName -> index columns>
      */
     private fun createTable(
             tableName: String,
-            columns: HashMap<String, String>,
-            uniqueColumns: HashMap<String, String> = HashMap(),
-            primaryKeys: HashMap<String, String> = HashMap(),
-            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap()
+            columns: Map<String, String>,
+            uniqueColumns: Map<String, String> = HashMap(),
+            primaryKeys: Map<String, String> = HashMap(),
+            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
+            indexes: Map<String, String> = HashMap()
     ): String {
         val sqlBuilder = StringBuilder()
         sqlBuilder.append("CREATE TABLE $tableName(\n")
@@ -484,29 +499,42 @@ abstract class DbContext(
         }
         endingComponents.add(columnJoiner.toString())
 
-        if (uniqueColumns.isNotEmpty()) {
-            uniqueColumns.forEach { (constraintName, constrainColumns) ->
-                endingComponents.add("CONSTRAINT $constraintName UNIQUE ($constrainColumns)")
+        uniqueColumns.forEach { (constraintName, constrainColumns) ->
+            endingComponents.add("CONSTRAINT $constraintName UNIQUE ($constrainColumns)")
+        }
+
+        foreignKeys.forEach { (constraintName, columnBinding) ->
+            columnBinding.forEach { (localColumns, remoteTableColumn) ->
+                endingComponents.add("CONSTRAINT $constraintName FOREIGN KEY ($localColumns) REFERENCES $remoteTableColumn ON DELETE CASCADE")
             }
         }
 
-        if (foreignKeys.isNotEmpty()) {
-            foreignKeys.forEach { (constraintName, localColumnsRemoteTableColumns) ->
-                localColumnsRemoteTableColumns.forEach { (localColumns, remoteTableColumns) ->
-                    endingComponents.add("CONSTRAINT $constraintName FOREIGN KEY ($localColumns) REFERENCES $remoteTableColumns ON DELETE CASCADE")
-                }
-            }
-        }
-
-        if (primaryKeys.isNotEmpty()) {
-            primaryKeys.forEach { (_, constraintColumns) ->
-                endingComponents.add("PRIMARY KEY ($constraintColumns)")
-            }
+        primaryKeys.forEach { (_, constraintColumns) ->
+            endingComponents.add("PRIMARY KEY ($constraintColumns)")
         }
 
         sqlBuilder.append(endingComponents)
 
-        sqlBuilder.append(")")
+        sqlBuilder.append(");\n")
+
+        val indexJoiner = StringJoiner("\n")
+        if (implementation != Implementation.MySql && implementation != Implementation.MariaDb) {
+            //create index on foreign key columns
+            foreignKeys.forEach { (_, columnBinding) ->
+                columnBinding.forEach { (localColumns, _) ->
+                    if (!localColumns.contains(",")) {
+                        indexJoiner.add("CREATE INDEX ${tableName.replace("jds.", "")}_$localColumns ON $tableName($localColumns);")
+                    }
+                }
+            }
+        }
+
+        indexes.forEach { (t, u) ->
+            indexJoiner.add("CREATE INDEX $t ON $u;")
+        }
+
+        sqlBuilder.append(indexJoiner)
+
         return sqlBuilder.toString()
     }
 
@@ -572,15 +600,30 @@ abstract class DbContext(
      * @param id   the entity's id
      * @param name the entity's name
      * @param description a description of the entity
+     * @param tags a description of the entity
      */
-    private fun populateRefEntity(connection: Connection, id: Int, name: String, description: String) = try {
-        (if (supportsStatements) connection.prepareCall(populateEntity()) else connection.prepareStatement(populateEntity())).use { statement ->
-            statement.setInt(1, id)
-            statement.setString(2, name)
-            statement.setString(3, description)
-            statement.executeUpdate()
-            if (options.logOutput)
-                println("Mapped Entity [$name - $id]")
+    private fun populateRefEntity(connection: Connection, id: Int, name: String, description: String, tags: Array<String>) = try {
+        connection.prepareStatement("DELETE FROM ${getName(Table.EntityTag)} WHERE entity_id = ?").use { clearEntityTag ->
+            getCallOrStatement(connection, populateEntityTag()).use { populateEntityTag ->
+                getCallOrStatement(connection, populateEntity()).use { statement ->
+                    statement.setInt(1, id)
+                    statement.setString(2, name)
+                    statement.setString(3, description)
+                    statement.executeUpdate()
+                    if (options.logOutput)
+                        println("Mapped Entity [$name - $id]")
+
+                    clearEntityTag.setInt(1, id)
+                    clearEntityTag.executeUpdate()
+
+                    tags.forEach { tag ->
+                        populateEntityTag.setInt(1, id)
+                        populateEntityTag.setString(2, tag)
+                        populateEntityTag.addBatch()
+                    }
+                    populateEntityTag.executeBatch()
+                }
+            }
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -611,7 +654,7 @@ abstract class DbContext(
                         val jdsEntity = entity.getDeclaredConstructor().newInstance()
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         Extensions.determineParents(entity, parentEntities)
-                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description)
+                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description, entityAnnotation.tags)
                         jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
                         jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         FieldDictionary.update(this, connection)
@@ -857,10 +900,16 @@ abstract class DbContext(
     internal open fun populateFieldDictionary() = "{call ${getName(Procedure.FieldDictionary)}(?, ?, ?)}"
 
     /**
-     * SQL call to update the field dictionary property
+     * SQL call to update the field tag table
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun populateFieldTag() = "{call ${getName(Procedure.FieldTag)}(?, ?)}"
+
+    /**
+     * SQL call to update the entity tag table
+     * @return the default or overridden SQL statement for this operation
+     */
+    internal open fun populateEntityTag() = "{call ${getName(Procedure.EntityTag)}(?, ?)}"
 
     /**
      * SQL call to update the field dictionary property
@@ -1017,17 +1066,25 @@ abstract class DbContext(
         val uniqueColumns = setOf("field_id", "alternate_code")
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getDataType(FieldType.Int)
-        columns["alternate_code"] = getDataType(FieldType.String,16)
+        columns["alternate_code"] = getDataType(FieldType.String, 16)
         columns["value"] = getDataType(FieldType.String, 48)
         return createOrAlterProc(Procedure.FieldAlternateCode, Table.FieldAlternateCode, columns, uniqueColumns, false)
     }
 
     private fun createPopFieldTag(): String {
-        val uniqueColumns = setOf("field_id")
+        val uniqueColumns = setOf("field_id", "tag")
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getDataType(FieldType.Int)
-        columns["tag"] = getDataType(FieldType.String,16)
-        return createOrAlterProc(Procedure.FieldTag, Table.FieldTag, columns, uniqueColumns, false)
+        columns["tag"] = getDataType(FieldType.String, 16)
+        return createOrAlterProc(Procedure.FieldTag, Table.FieldTag, columns, uniqueColumns, true)
+    }
+
+    private fun createPopEntityTag(): String {
+        val uniqueColumns = setOf("entity_id", "tag")
+        val columns = LinkedHashMap<String, String>()
+        columns["entity_id"] = getDataType(FieldType.Int)
+        columns["tag"] = getDataType(FieldType.String, 16)
+        return createOrAlterProc(Procedure.EntityTag, Table.EntityTag, columns, uniqueColumns, true)
     }
 
     private fun createPopStoreBlob(): String {
@@ -1333,29 +1390,46 @@ abstract class DbContext(
     }
 
     private fun createFieldDictionary(): String {
-        val objectName = Table.FieldDictionary.component
+        val table = Table.FieldDictionary
+        val objectName = table.component
         val columns = linkedMapOf(
                 "entity_id" to getDataTypeImpl(FieldType.Int),
                 "field_id" to getDataTypeImpl(FieldType.Int),
                 "property_name" to getDataTypeImpl(FieldType.String, 48)
         )
-        val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
+        val uniqueColumns = linkedMapOf("${objectName}_u" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
         foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable(Table.FieldDictionary, columns, HashMap(), primaryKey, foreignKeys)
+        return createTable(table, columns, uniqueColumns, emptyMap(), foreignKeys)
     }
 
     private fun createFieldTag(): String {
-        val objectName = Table.FieldTag.component
+        val table = Table.FieldTag
+        val objectName = table.component
         val columns = linkedMapOf(
                 "field_id" to getDataTypeImpl(FieldType.Int),
                 "tag" to getDataTypeImpl(FieldType.String, 16)
         )
-        val primaryKey = linkedMapOf("${objectName}_pk" to "field_id")
+        val uniqueColumns = linkedMapOf("${objectName}_u" to "field_id, tag")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
         foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("field_id" to "${getName(Table.Field)} (id)")
-        return createTable(Table.FieldTag, columns, HashMap(), primaryKey, foreignKeys)
+        val indexes = mapOf("${objectName}_tag" to "${getName(table)}(tag)")
+        return createTable(table, columns, uniqueColumns, emptyMap(), foreignKeys, indexes)
+    }
+
+    private fun createEntityTag(): String {
+        val table = Table.EntityTag
+        val objectName = table.component
+        val columns = linkedMapOf(
+                "entity_id" to getDataTypeImpl(FieldType.Int),
+                "tag" to getDataTypeImpl(FieldType.String, 16)
+        )
+        val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, tag")
+        val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
+        foreignKeys["${objectName}_jds_fk_2"] = linkedMapOf("entity_id" to "${getName(Table.Entity)} (id)")
+        val indexes = mapOf("${objectName}_tag" to "${getName(table)}(tag)")
+        return createTable(table, columns, HashMap(), primaryKey, foreignKeys, indexes)
     }
 
     private fun createFieldAlternateCode(): String {

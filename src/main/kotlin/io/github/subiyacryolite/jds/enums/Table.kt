@@ -40,22 +40,27 @@ enum class Table(val component: String, val alias: String) {
     /**
      *
      */
-    EntityOverview("entity_overview", "eo"),
+    EntityOverview("entity_overview", "jeo"),
 
     /**
      *
      */
-    Entity("entity", "et"),
+    Entity("entity", "je"),
 
     /**
      *
      */
-    EntityEnum("entity_enum", "bee"),
+    EntityEnum("entity_enum", "jee"),
 
     /**
      *
      */
-    EntityField("entity_field", "bef"),
+    EntityField("entity_field", "jef"),
+
+    /**
+     *
+     */
+    EntityTag("entity_tag", "jet"),
 
     /**
      *

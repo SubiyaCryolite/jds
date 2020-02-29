@@ -18,13 +18,13 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.StringProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
-@EntityAnnotation(id = 1001, name = "entityb")
+@EntityAnnotation(id = 1001, name = "entityb", tags = ["entitya"])
 open class EntityB : EntityA() {
 
     private val _field = StringProperty("B")
 
     init {
-        map(ENTITY_B_FIELD, _field,"fieldB")
+        map(ENTITY_B_FIELD, _field, "fieldB")
     }
 
     var fieldB: String
@@ -36,6 +36,6 @@ open class EntityB : EntityA() {
     }
 
     companion object {
-        private val ENTITY_B_FIELD = Field(5001, "entity_b_field", FieldType.String)
+        private val ENTITY_B_FIELD = Field(5001, "entity_b_field", FieldType.String, "", alternateCodes = mapOf("FAKE:CODING:SYSA" to "FAKE:CODING:VAL:1", "FAKE:CODING:SYSB" to "FAKE:CODING:VAL:2"), tags = setOf("extends_entity_a"))
     }
 }

@@ -18,7 +18,7 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.StringProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
-@EntityAnnotation(id = 1002, name = "entityc")
+@EntityAnnotation(id = 1002, name = "entityc", tags = ["entitya", "entityb"])
 class EntityC : EntityB() {
 
     private val _field = StringProperty("C")
@@ -37,6 +37,6 @@ class EntityC : EntityB() {
 
     companion object {
 
-        private val ENTITY_C_FIELD = Field(5000, "entity_c_field", FieldType.String)
+        private val ENTITY_C_FIELD = Field(5000, "entity_c_field", FieldType.String, alternateCodes = emptyMap(), tags = setOf("extends_entity_a", "extends_entity_b"))
     }
 }
