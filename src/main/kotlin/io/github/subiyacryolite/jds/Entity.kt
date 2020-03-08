@@ -50,9 +50,7 @@ import io.github.subiyacryolite.jds.extensions.toByteArray
 import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.utility.DeepCopy
-import java.io.Externalizable
-import java.io.ObjectInput
-import java.io.ObjectOutput
+import java.io.Serializable
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
@@ -123,7 +121,7 @@ abstract class Entity : IEntity {
 
     //collections
     @get:JsonIgnore
-    override val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
+    internal val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
 
     @get:JsonIgnore
     internal val stringCollections: HashMap<Int, MutableCollection<String>> = HashMap()
@@ -164,7 +162,7 @@ abstract class Entity : IEntity {
 
     //objects
     @get:JsonIgnore
-    override val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
+    internal val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
 
     //blobs
     @get:JsonIgnore
@@ -725,10 +723,10 @@ abstract class Entity : IEntity {
 
     /**
      * Implementation ignores null values by default on the assumption that nullable values have default values of null
-     * @param jdsPortableEntity
+     * @param portableEntity
      */
     @Throws(Exception::class)
-    override fun assign(dbContext: DbContext, jdsPortableEntity: PortableEntity) {
+    override fun assign(dbContext: DbContext, portableEntity: PortableEntity) {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
@@ -738,125 +736,125 @@ abstract class Entity : IEntity {
                 false -> 0
                 else -> null
             }
-            jdsPortableEntity.booleanValues.add(StoreBoolean(entry.key, input))
+            portableEntity.booleanValues.add(StoreBoolean(entry.key, input))
         }
         stringValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.stringValues.add(StoreString(entry.key, entry.value.value))
+            portableEntity.stringValues.add(StoreString(entry.key, entry.value.value))
         }
         floatValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
+            portableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
         }
         doubleValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
+            portableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
         }
         shortValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
+            portableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
         }
         longValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
+            portableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
         }
         integerValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
+            portableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
         }
         uuidValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
+            portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
         }
         //==============================================
         //Dates & Time
         //==============================================
         zonedDateTimeValues.filterIgnored(dbContext).forEach { entry ->
             val zonedDateTime = entry.value.value as ZonedDateTime?
-            jdsPortableEntity.zonedDateTimeValues.add(StoreZonedDateTime(entry.key, zonedDateTime?.toInstant()?.toEpochMilli()))
+            portableEntity.zonedDateTimeValues.add(StoreZonedDateTime(entry.key, zonedDateTime?.toInstant()?.toEpochMilli()))
         }
         localTimeValues.filterIgnored(dbContext).forEach { entry ->
             val localTime = entry.value.value as LocalTime?
-            jdsPortableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
+            portableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
         }
         durationValues.filterIgnored(dbContext).forEach { entry ->
             val duration = entry.value.value
-            jdsPortableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
+            portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
         }
         localDateTimeValues.filterIgnored(dbContext).forEach { entry ->
             val localDateTime = entry.value.value as LocalDateTime?
-            jdsPortableEntity.dateTimeValues.add(StoreDateTime(entry.key, localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()))
+            portableEntity.dateTimeValues.add(StoreDateTime(entry.key, localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()))
         }
         localDateValues.filterIgnored(dbContext).forEach { entry ->
             val localDate = entry.value.value as LocalDate?
-            jdsPortableEntity.dateValues.add(StoreDate(entry.key, localDate?.toEpochDay()))
+            portableEntity.dateValues.add(StoreDate(entry.key, localDate?.toEpochDay()))
         }
         monthDayValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
+            portableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
         }
         yearMonthValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
+            portableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
         }
         periodValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
+            portableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
         }
         //==============================================
         //BLOB
         //==============================================
         blobValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
+            portableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
         }
         //==============================================
         //Enums
         //==============================================
         enumValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
+            portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
         }
         stringEnumValues.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
+            portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
         }
         enumCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
+            portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
         }
         enumStringCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
+            portableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
         }
         //==============================================
         //ARRAYS
         //==============================================
         stringCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
+            portableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
         }
         dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.dateTimeCollection.add(StoreDateTimeCollection(entry.key, toTimeStampCollection(entry.value)))
+            portableEntity.dateTimeCollection.add(StoreDateTimeCollection(entry.key, toTimeStampCollection(entry.value)))
         }
         floatCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
+            portableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
         }
         doubleCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
+            portableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
         }
         longCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
+            portableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
         }
         integerCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
+            portableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
         }
         shortCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
+            portableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
         }
         uuidCollections.filterIgnored(dbContext).forEach { entry ->
-            jdsPortableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
+            portableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
         }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
         objectCollections.forEach { (fieldEntity, mutableCollection) ->
-            mutableCollection.forEach { iJdsEntity ->
+            mutableCollection.forEach { entity ->
                 val embeddedObject = PortableEntity()
                 embeddedObject.fieldId = fieldEntity.field.id
-                embeddedObject.init(dbContext, iJdsEntity)
-                jdsPortableEntity.entityOverviews.add(embeddedObject)
+                embeddedObject.init(dbContext, entity)
+                portableEntity.entityOverviews.add(embeddedObject)
             }
         }
         objectValues.forEach { (fieldEntity, objectWritableProperty) ->
-            val embeddedObject = PortableEntity()
-            embeddedObject.fieldId = fieldEntity.field.id
-            embeddedObject.init(dbContext, objectWritableProperty.value)
-            jdsPortableEntity.entityOverviews.add(embeddedObject)
+            val embeddedPortableEntity = PortableEntity()
+            embeddedPortableEntity.fieldId = fieldEntity.field.id
+            embeddedPortableEntity.init(dbContext, objectWritableProperty.value)
+            portableEntity.entityOverviews.add(embeddedPortableEntity)
         }
     }
 
@@ -1070,7 +1068,7 @@ abstract class Entity : IEntity {
                 zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()
             }
             FieldType.Date -> if (!localDateValues.containsKey(fieldId)) {
-                localDateValues[fieldId] = ObjectProperty<LocalDate?>(null)
+                localDateValues[fieldId] = NullableLocalDateProperty()
             }
             FieldType.Time -> if (!localTimeValues.containsKey(fieldId)) {
                 localTimeValues[fieldId] = NullableLocalTimeProperty()
@@ -1094,10 +1092,10 @@ abstract class Entity : IEntity {
                 blobValues[fieldId] = NullableBlobProperty()
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
+                enumValues[fieldId] = ObjectProperty(null)
             }
             FieldType.EnumString -> if (!stringEnumValues.containsKey(fieldId)) {
-                stringEnumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
+                stringEnumValues[fieldId] = ObjectProperty(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
@@ -1339,25 +1337,15 @@ abstract class Entity : IEntity {
         return "JdsEntity(uuid=${overview.id},editVersion=${overview.editVersion},entityId=${overview.entityId})"
     }
 
-    companion object : Externalizable {
+    companion object : Serializable {
 
         private const val serialVersionUID = 20180106_2125L
+
         private val allFields = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
+
         private val allEnums = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
 
         internal var initialising: Boolean = false
-
-        override fun readExternal(objectInput: ObjectInput) {
-            allFields.clear()
-            allFields.putAll(objectInput.readObject() as Map<Int, LinkedHashSet<Int>>)
-            allEnums.clear()
-            allEnums.putAll(objectInput.readObject() as Map<Int, LinkedHashSet<Int>>)
-        }
-
-        override fun writeExternal(objectOutput: ObjectOutput) {
-            objectOutput.writeObject(allFields)
-            objectOutput.writeObject(allEnums)
-        }
 
         internal fun getEntityAnnotation(clazz: Class<*>?): EntityAnnotation? {
 

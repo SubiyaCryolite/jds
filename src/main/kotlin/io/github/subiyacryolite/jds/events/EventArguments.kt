@@ -5,32 +5,35 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 
 /**
- * @property connection
+ * @param connection the connection to use when invoking [execute]
+ * @param closeConnection indicates if the connection should be closed when invoking [close]
  */
-class EventArguments(private val connection: Connection) : Closeable {
+class EventArguments(
+        private val connection: Connection,
+        private val closeConnection: Boolean = true
+) : Closeable {
 
     private val statements: LinkedHashMap<String, PreparedStatement> = LinkedHashMap()
 
     /**
      * @param query
      */
-    @Synchronized
     @Throws(Exception::class)
     fun getOrAddStatement(query: String): PreparedStatement {
-        if (!statements.containsKey(query))
-        {       statements[query] = connection.prepareStatement(query)
-    }
+        if (!statements.containsKey(query)) {
+            statements[query] = connection.prepareStatement(query)
+        }
         return statements[query]!!
     }
 
     /**
      * @param query
      */
-    @Synchronized
     @Throws(Exception::class)
     fun getOrAddCall(query: String): PreparedStatement {
-        if (!statements.containsKey(query)){
-            statements[query] = connection.prepareCall(query)}
+        if (!statements.containsKey(query)) {
+            statements[query] = connection.prepareCall(query)
+        }
         return statements[query]!!
     }
 
@@ -38,14 +41,17 @@ class EventArguments(private val connection: Connection) : Closeable {
      * @param query
      * @param connection
      */
-    @Synchronized
     @Throws(Exception::class)
     fun getOrAddStatement(connection: Connection, query: String): PreparedStatement {
-        if (!statements.containsKey(query)){
-            statements[query] = connection.prepareStatement(query)}
+        if (!statements.containsKey(query)) {
+            statements[query] = connection.prepareStatement(query)
+        }
         return statements[query]!!
     }
 
+    /**
+     *
+     */
     fun execute() = try {
         connection.autoCommit = false
         for (statement in statements.values) {
@@ -64,6 +70,8 @@ class EventArguments(private val connection: Connection) : Closeable {
         for (statement in statements.values) {
             statement.close()
         }
-        connection.close()
+        if (closeConnection) {
+            connection.close()
+        }
     }
 }
