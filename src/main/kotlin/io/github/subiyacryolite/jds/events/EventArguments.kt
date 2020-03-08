@@ -18,7 +18,8 @@ class EventArguments(private val connection: Connection) : Closeable {
     @Throws(Exception::class)
     fun getOrAddStatement(query: String): PreparedStatement {
         if (!statements.containsKey(query))
-            statements[query] = connection.prepareStatement(query)
+        {       statements[query] = connection.prepareStatement(query)
+    }
         return statements[query]!!
     }
 
@@ -28,8 +29,8 @@ class EventArguments(private val connection: Connection) : Closeable {
     @Synchronized
     @Throws(Exception::class)
     fun getOrAddCall(query: String): PreparedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = connection.prepareCall(query)
+        if (!statements.containsKey(query)){
+            statements[query] = connection.prepareCall(query)}
         return statements[query]!!
     }
 
@@ -40,13 +41,12 @@ class EventArguments(private val connection: Connection) : Closeable {
     @Synchronized
     @Throws(Exception::class)
     fun getOrAddStatement(connection: Connection, query: String): PreparedStatement {
-        if (!statements.containsKey(query))
-            statements[query] = connection.prepareStatement(query)
+        if (!statements.containsKey(query)){
+            statements[query] = connection.prepareStatement(query)}
         return statements[query]!!
     }
 
-    @Throws(Exception::class)
-    internal fun execute() = try {
+    fun execute() = try {
         connection.autoCommit = false
         for (statement in statements.values) {
             statement.executeBatch()
@@ -64,5 +64,6 @@ class EventArguments(private val connection: Connection) : Closeable {
         for (statement in statements.values) {
             statement.close()
         }
+        connection.close()
     }
 }

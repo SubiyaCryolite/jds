@@ -16,9 +16,6 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
-import io.github.subiyacryolite.jds.events.EventArguments
-import io.github.subiyacryolite.jds.events.LoadListener
-import io.github.subiyacryolite.jds.events.SaveListener
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,7 +23,7 @@ import java.time.LocalTime
 import java.time.ZonedDateTime
 
 @EntityAnnotation(id = 3, name = "TypeClass")
-class Example : Entity(), LoadListener, SaveListener {
+class Example : Entity() {
 
     private val _stringField = map(Fields.String, "")
     private val _timeField = map(Fields.Time, LocalTime.now())
@@ -83,26 +80,6 @@ class Example : Entity(), LoadListener, SaveListener {
     var blobField: ByteArray
         get() = _blobField.get()
         set(booleanField) = _blobField.set(booleanField)
-
-    override fun onPreSave(eventArguments: EventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
-    }
-
-    override fun onPostSave(eventArguments: EventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
-    }
-
-    override fun onPreLoad(eventArguments: EventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
-    }
-
-    override fun onPostLoad(eventArguments: EventArguments) {
-        //Optional event i.e write to custom reporting tables, perform custom validation
-        //Queries can be batched i.e eventArguments.getOrAddStatement("Batched SQL to execute")
-    }
 
     override fun toString(): String {
         return "{" +
