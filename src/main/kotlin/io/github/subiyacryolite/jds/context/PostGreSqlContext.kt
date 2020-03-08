@@ -58,7 +58,7 @@ abstract class PostGreSqlContext : DbContext(Implementation.PostGreSql, true, "j
     }
 
     override fun tableExists(connection: Connection, table: Table): Int {
-        return tableExists(connection, table.component)
+        return tableExists(connection, table.table)
     }
 
     override fun tableExists(connection: Connection, tableName: String): Int {
@@ -68,7 +68,7 @@ abstract class PostGreSqlContext : DbContext(Implementation.PostGreSql, true, "j
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "select COUNT(*) AS Result from information_schema.routines where routine_catalog = ? AND routine_schema = ? AND routine_name = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, schema, procedure.component))
+        return getResult(connection, sql, arrayOf(connection.catalog, schema, procedure.procedure))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {

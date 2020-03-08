@@ -24,7 +24,7 @@ import java.sql.Connection
 abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 
     override fun tableExists(connection: Connection, table: Table): Int {
-        return tableExists(connection, "$objectPrefix${table.component}")
+        return tableExists(connection, "$objectPrefix${table.table}")
     }
 
     override fun tableExists(connection: Connection, tableName: String): Int {
@@ -50,66 +50,6 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
             return 0//doesn't exist
         }
     }
-
-    override fun populateEntityLive() = "INSERT INTO ${getName(Table.EntityLive)}(id) VALUES(?) ON CONFLICT(id) DO NOTHING;"
-
-    override fun populateStoreText() = "INSERT INTO ${getName(Table.StoreText)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreBoolean() = "INSERT INTO ${getName(Table.StoreBoolean)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreLong() = "INSERT INTO ${getName(Table.StoreLong)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDouble() = "INSERT INTO ${getName(Table.StoreDouble)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreFloat() = "INSERT INTO ${getName(Table.StoreFloat)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreShort() = "INSERT INTO ${getName(Table.StoreShort)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreUuid() = "INSERT INTO ${getName(Table.StoreUuid)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreInteger() = "INSERT INTO ${getName(Table.StoreInteger)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDateTime() = "INSERT INTO ${getName(Table.StoreDateTime)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreTime() = "INSERT INTO ${getName(Table.StoreTime)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreBlob() = "INSERT INTO ${getName(Table.StoreBlob)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreZonedDateTime() = "INSERT INTO ${getName(Table.StoreZonedDateTime)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDate() = "INSERT INTO ${getName(Table.StoreDate)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreEnum() = "INSERT INTO ${getName(Table.StoreEnum)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreEnumString() = "INSERT INTO ${getName(Table.StoreEnumString)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreMonthDay() = "INSERT INTO ${getName(Table.StoreMonthDay)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreYearMonth() = "INSERT INTO ${getName(Table.StoreYearMonth)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStorePeriod() = "INSERT INTO ${getName(Table.StorePeriod)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDuration() = "INSERT INTO ${getName(Table.StoreDuration)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreEnumCollection() = "INSERT INTO ${getName(Table.StoreEnumCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreEnumStringCollection() = "INSERT INTO ${getName(Table.StoreEnumStringCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDateTimeCollection() = "INSERT INTO ${getName(Table.StoreDateTimeCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreFloatCollection() = "INSERT INTO ${getName(Table.StoreFloatCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreIntegerCollection() = "INSERT INTO ${getName(Table.StoreIntegerCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreUuidCollection() = "INSERT INTO ${getName(Table.StoreUuidCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreDoubleCollection() = "INSERT INTO ${getName(Table.StoreDoubleCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreLongCollection() = "INSERT INTO ${getName(Table.StoreLongCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateStoreTextCollection() = "INSERT INTO ${getName(Table.StoreTextCollection)}(id, edit_version, field_id, value) VALUES(?, ?, ?, ?) ON CONFLICT(id, edit_version, field_id) DO UPDATE SET value = EXCLUDED.value;"
-
-    override fun populateEntityOverview() = "INSERT INTO ${getName(Table.EntityOverview)}(id, edit_version, entity_id) VALUES(?, ?, ?) ON CONFLICT(id, edit_version) DO UPDATE SET entity_id = EXCLUDED.entity_id"
 
     override fun populateEntityBinding() = "INSERT INTO ${getName(Table.EntityBinding)}(parent_id, parent_edit_version, child_id, child_edit_version, child_attribute_id) VALUES(?, ?, ?, ?, ?) ON CONFLICT(parent_id, parent_edit_version, child_id, child_edit_version) DO UPDATE SET child_attribute_id = EXCLUDED.child_attribute_id"
 

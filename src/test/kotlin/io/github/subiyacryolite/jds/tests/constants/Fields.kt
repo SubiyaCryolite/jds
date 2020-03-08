@@ -17,9 +17,9 @@ import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.enums.FieldType
 
 object Fields {
-    val StreetName = Field(1, "street_name", FieldType.String)
-    val PlotNumber = Field(2, "plot_number", FieldType.Short)
-    val ResidentialArea = Field(3, "residential_area", FieldType.String)
+    val StreetName = Field(1, "street_name", FieldType.String, description = "The street name of the address", tags = setOf("AddressInfo", "ClientInfo", "IdentifiableInfo"))
+    val PlotNumber = Field(2, "plot_number", FieldType.Short, "The street name of the address")
+    val ResidentialArea = Field(3, "area_name", FieldType.String, "The name of the area / neighbourhood")
     val ProvinceOrState = Field(4, "province_or_state", FieldType.String)
     val City = Field(5, "city", FieldType.String)
     val Country = Field(7, "country", FieldType.String)

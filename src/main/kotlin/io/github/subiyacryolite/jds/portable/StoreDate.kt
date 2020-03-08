@@ -29,5 +29,5 @@ data class StoreDate(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var value: Timestamp? = null
+        var value: Long? = null
 )

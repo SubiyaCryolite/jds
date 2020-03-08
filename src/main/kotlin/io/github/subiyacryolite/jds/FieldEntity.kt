@@ -22,7 +22,9 @@ data class FieldEntity<T : IEntity>(
 ) : Serializable {
 
     companion object {
+
         private const val serialVersionUID = 20171109_0853L
+
         internal val values = HashMap<Int, FieldEntity<*>>()
     }
 }

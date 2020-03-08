@@ -22,99 +22,102 @@ import io.github.subiyacryolite.jds.context.DbContext
  * Class used to represent [JdsEntity][Entity] objects in a portable manner
  */
 data class PortableEntity(
-        @get:JsonProperty("o")
-        @set:JsonProperty("o")
+        @get:JsonProperty("a")
+        @set:JsonProperty("a")
         var overview: EntityOverview = EntityOverview(),
 
-        @get:JsonProperty("f")
-        @set:JsonProperty("f")
+        @get:JsonProperty("b")
+        @set:JsonProperty("b")
         var fieldId: Int? = null,
 
-        @get:JsonProperty("blv")
+        @get:JsonProperty("c")
         val blobValues: MutableCollection<StoreBlob> = ArrayList(),
 
-        @get:JsonProperty("bv")
+        @get:JsonProperty("d")
         val booleanValues: MutableCollection<StoreBoolean> = ArrayList(),
 
-        @get:JsonProperty("dte")
+        @get:JsonProperty("e")
         val dateValues: MutableCollection<StoreDate> = ArrayList(),
 
-        @get:JsonProperty("md")
+        @get:JsonProperty("f")
         val monthDayValues: MutableCollection<StoreMonthDay> = ArrayList(),
 
-        @get:JsonProperty("ym")
+        @get:JsonProperty("g")
         val yearMonthValues: MutableCollection<StoreYearMonth> = ArrayList(),
 
-        @get:JsonProperty("dv")
+        @get:JsonProperty("h")
         val doubleValues: MutableCollection<StoreDouble> = ArrayList(),
 
-        @get:JsonProperty("stc")
+        @get:JsonProperty("i")
         val shortValues: MutableCollection<StoreShort> = ArrayList(),
 
-        @get:JsonProperty("su")
+        @get:JsonProperty("j")
         val uuidValues: MutableCollection<StoreUuid> = ArrayList(),
 
-        @get:JsonProperty("dc")
+        @get:JsonProperty("k")
         val doubleCollections: MutableCollection<StoreDoubleCollection> = ArrayList(),
 
-        @get:JsonProperty("iv")
+        @get:JsonProperty("l")
         val integerValues: MutableCollection<StoreInteger> = ArrayList(),
 
-        @get:JsonProperty("ic")
+        @get:JsonProperty("m")
         val integerCollections: MutableCollection<StoreIntegerCollection> = ArrayList(),
 
-        @get:JsonProperty("uc")
+        @get:JsonProperty("n")
+        val shortCollections: MutableCollection<StoreShortCollection> = ArrayList(),
+
+        @get:JsonProperty("o")
         val uuidCollections: MutableCollection<StoreUuidCollection> = ArrayList(),
 
-        @get:JsonProperty("lv")
+        @get:JsonProperty("p")
         val longValues: MutableCollection<StoreLong> = ArrayList(),
 
-        @get:JsonProperty("lc")
+        @get:JsonProperty("q")
         val longCollections: MutableCollection<StoreLongCollection> = ArrayList(),
 
-        @get:JsonProperty("sv")
+        @get:JsonProperty("r")
         val stringValues: MutableCollection<StoreString> = ArrayList(),
 
-        @get:JsonProperty("sc")
+        @get:JsonProperty("s")
         val stringCollections: MutableCollection<StoreStringCollection> = ArrayList(),
 
-        @get:JsonProperty("fv")
+        @get:JsonProperty("t")
         val floatValue: MutableCollection<StoreFloat> = ArrayList(),
 
-        @get:JsonProperty("fc")
+        @get:JsonProperty("u")
         val floatCollections: MutableCollection<StoreFloatCollection> = ArrayList(),
 
-        @get:JsonProperty("dtv")
+        @get:JsonProperty("v")
         val dateTimeValues: MutableCollection<StoreDateTime> = ArrayList(),
 
-        @get:JsonProperty("dtc")
+        @get:JsonProperty("w")
         val dateTimeCollection: MutableCollection<StoreDateTimeCollection> = ArrayList(),
 
-        @get:JsonProperty("zdt")
+        @get:JsonProperty("x")
         val zonedDateTimeValues: MutableCollection<StoreZonedDateTime> = ArrayList(),
 
-        @get:JsonProperty("tv")
+        @get:JsonProperty("y")
         val timeValues: MutableCollection<StoreTime> = ArrayList(),
 
-        @get:JsonProperty("du")
+        @get:JsonProperty("z")
         val durationValues: MutableCollection<StoreDuration> = ArrayList(),
 
-        @get:JsonProperty("pv")
+        @get:JsonProperty("a1")
         val periodValues: MutableCollection<StorePeriod> = ArrayList(),
 
-        @get:JsonProperty("ev")
+        @get:JsonProperty("b1")
         val enumValues: MutableCollection<StoreEnum> = ArrayList(),
 
-        @get:JsonProperty("es")
+        @get:JsonProperty("c1")
         val enumStringValues: MutableCollection<StoreEnumString> = ArrayList(),
 
-        @get:JsonProperty("ec")
+        @get:JsonProperty("d1")
         val enumCollections: MutableCollection<StoreEnumCollection> = ArrayList(),
 
-        @get:JsonProperty("esc")
+        @get:JsonProperty("e1")
         val enumStringCollections: MutableCollection<StoreEnumStringCollection> = ArrayList(),
 
-        @get:JsonProperty("eo")
+        @get:JsonProperty("f1")
         val entityOverviews: MutableCollection<PortableEntity> = ArrayList()
 ) {
 

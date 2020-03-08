@@ -55,7 +55,7 @@ abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "j
     }
 
     override fun tableExists(connection: Connection, table: Table): Int {
-        return tableExists(connection, table.component)
+        return tableExists(connection, table.table)
     }
 
     override fun tableExists(connection: Connection, tableName: String): Int {
@@ -64,7 +64,7 @@ abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "j
     }
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {
-        return procedureExists(connection, procedure.component)
+        return procedureExists(connection, procedure.procedure)
     }
 
     override fun procedureExists(connection: Connection, procedureName: String): Int {

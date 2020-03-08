@@ -23,8 +23,5 @@ interface IEntity : Serializable {
     val overview: IOverview
     val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>>
     val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>>
-    fun registerFields(table: Table)
     fun assign(dbContext: DbContext, jdsPortableEntity: PortableEntity)
-    fun getNestedEntities(includeThisEntity: Boolean = true): Sequence<Entity>
-    fun getNestedEntities(collection: MutableCollection<Entity>, includeThisEntity: Boolean = true)
 }

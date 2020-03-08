@@ -33,6 +33,7 @@ import io.github.subiyacryolite.jds.Validate.validateLongCollection
 import io.github.subiyacryolite.jds.Validate.validateMonthDay
 import io.github.subiyacryolite.jds.Validate.validatePeriod
 import io.github.subiyacryolite.jds.Validate.validateShort
+import io.github.subiyacryolite.jds.Validate.validateShortCollection
 import io.github.subiyacryolite.jds.Validate.validateString
 import io.github.subiyacryolite.jds.Validate.validateStringCollection
 import io.github.subiyacryolite.jds.Validate.validateTime
@@ -44,17 +45,17 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
-import io.github.subiyacryolite.jds.extensions.*
+import io.github.subiyacryolite.jds.extensions.filterIgnored
+import io.github.subiyacryolite.jds.extensions.toByteArray
+import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import java.io.Externalizable
 import java.io.ObjectInput
 import java.io.ObjectOutput
-import java.math.BigDecimal
 import java.sql.Connection
 import java.sql.Timestamp
 import java.time.*
-import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
@@ -67,71 +68,104 @@ abstract class Entity : IEntity {
     @set:JsonIgnore
     @get:JsonIgnore
     final override var overview: IOverview = Overview()
+
     //temporals
     @get:JsonIgnore
     internal val localDateTimeValues: HashMap<Int, WritableProperty<LocalDateTime?>> = HashMap()
+
     @get:JsonIgnore
     internal val zonedDateTimeValues: HashMap<Int, WritableProperty<ZonedDateTime?>> = HashMap()
+
     @get:JsonIgnore
     internal val localDateValues: HashMap<Int, WritableProperty<LocalDate?>> = HashMap()
+
     @get:JsonIgnore
     internal val localTimeValues: HashMap<Int, WritableProperty<LocalTime?>> = HashMap()
+
     @get:JsonIgnore
     internal val monthDayValues: HashMap<Int, WritableProperty<MonthDay?>> = HashMap()
+
     @get:JsonIgnore
     internal val yearMonthValues: HashMap<Int, WritableProperty<YearMonth?>> = HashMap()
+
     @get:JsonIgnore
     internal val periodValues: HashMap<Int, WritableProperty<Period?>> = HashMap()
+
     @get:JsonIgnore
     internal val durationValues: HashMap<Int, WritableProperty<Duration?>> = HashMap()
+
     //strings
     @get:JsonIgnore
     internal val stringValues: HashMap<Int, WritableProperty<String?>> = HashMap()
+
     //boolean
     @get:JsonIgnore
     internal val booleanValues: HashMap<Int, WritableProperty<Boolean?>> = HashMap()
+
     //numeric
     @get:JsonIgnore
     internal val shortValues: HashMap<Int, WritableProperty<Short?>> = HashMap()
+
     @get:JsonIgnore
     internal val floatValues: HashMap<Int, WritableProperty<Float?>> = HashMap()
+
     @get:JsonIgnore
     internal val doubleValues: HashMap<Int, WritableProperty<Double?>> = HashMap()
+
     @get:JsonIgnore
     internal val longValues: HashMap<Int, WritableProperty<Long?>> = HashMap()
+
     @get:JsonIgnore
     internal val integerValues: HashMap<Int, WritableProperty<Int?>> = HashMap()
+
     @get:JsonIgnore
     internal val uuidValues: HashMap<Int, WritableProperty<UUID?>> = HashMap()
+
     //collections
     @get:JsonIgnore
     override val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
+
     @get:JsonIgnore
     internal val stringCollections: HashMap<Int, MutableCollection<String>> = HashMap()
+
     @get:JsonIgnore
     internal val dateTimeCollections: HashMap<Int, MutableCollection<LocalDateTime>> = HashMap()
+
     @get:JsonIgnore
     internal val floatCollections: HashMap<Int, MutableCollection<Float>> = HashMap()
+
     @get:JsonIgnore
     internal val doubleCollections: HashMap<Int, MutableCollection<Double>> = HashMap()
+
     @get:JsonIgnore
     internal val longCollections: HashMap<Int, MutableCollection<Long>> = HashMap()
+
     @get:JsonIgnore
     internal val integerCollections: HashMap<Int, MutableCollection<Int>> = HashMap()
+
+    @get:JsonIgnore
+    internal val shortCollections: HashMap<Int, MutableCollection<Short>> = HashMap()
+
     @get:JsonIgnore
     internal val uuidCollections: HashMap<Int, MutableCollection<UUID>> = HashMap()
+
     //enums
     @get:JsonIgnore
     internal val enumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+
     @get:JsonIgnore
     internal val stringEnumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+
     @get:JsonIgnore
     internal val enumCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
+
     @get:JsonIgnore
     internal val enumStringCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
+
     //objects
     @get:JsonIgnore
     override val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
+
     //blobs
     @get:JsonIgnore
     internal val blobValues: HashMap<Int, WritableProperty<ByteArray?>> = HashMap()
@@ -495,6 +529,13 @@ abstract class Entity : IEntity {
         return integerCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
+    @JvmName("mapShorts")
+    protected fun map(field: Field, collection: MutableCollection<Short>, propertyName: String = ""): MutableCollection<Short> {
+        validateShortCollection(field)
+        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
+        return shortCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    }
+
     @JvmName("mapUuids")
     protected fun map(field: Field, collection: MutableCollection<UUID>, propertyName: String = ""): MutableCollection<UUID> {
         validateUuidCollection(field)
@@ -657,6 +698,9 @@ abstract class Entity : IEntity {
         integerCollections.clear()
         integerCollections.putAll(DeepCopy.clone(source.integerCollections)!!)
 
+        shortCollections.clear()
+        shortCollections.putAll(DeepCopy.clone(source.shortCollections)!!)
+
         uuidCollections.clear()
         uuidCollections.putAll(DeepCopy.clone(source.uuidCollections)!!)
 
@@ -688,55 +732,115 @@ abstract class Entity : IEntity {
         //==============================================
         //PRIMITIVES, also saved to array struct to streamline json
         //==============================================
-        booleanValues.filterIgnored(dbContext).forEach {
-            val input = when (it.value.value) {
+        booleanValues.filterIgnored(dbContext).forEach { entry ->
+            val input = when (entry.value.value) {
                 true -> 1
                 false -> 0
                 else -> null
             }
-            jdsPortableEntity.booleanValues.add(StoreBoolean(it.key, input))
+            jdsPortableEntity.booleanValues.add(StoreBoolean(entry.key, input))
         }
-        stringValues.filterIgnored(dbContext).forEach { jdsPortableEntity.stringValues.add(StoreString(it.key, it.value.value)) }
-        floatValues.filterIgnored(dbContext).forEach { jdsPortableEntity.floatValue.add(StoreFloat(it.key, it.value.value)) }
-        doubleValues.filterIgnored(dbContext).forEach { jdsPortableEntity.doubleValues.add(StoreDouble(it.key, it.value.value)) }
-        shortValues.filterIgnored(dbContext).forEach { jdsPortableEntity.shortValues.add(StoreShort(it.key, it.value.value)) }
-        longValues.filterIgnored(dbContext).forEach { jdsPortableEntity.longValues.add(StoreLong(it.key, it.value.value)) }
-        integerValues.filterIgnored(dbContext).forEach { jdsPortableEntity.integerValues.add(StoreInteger(it.key, it.value.value)) }
-        uuidValues.filterIgnored(dbContext).forEach { jdsPortableEntity.uuidValues.add(StoreUuid(it.key, it.value.value.toByteArray())) }
+        stringValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.stringValues.add(StoreString(entry.key, entry.value.value))
+        }
+        floatValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
+        }
+        doubleValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
+        }
+        shortValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
+        }
+        longValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
+        }
+        integerValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
+        }
+        uuidValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
+        }
         //==============================================
         //Dates & Time
         //==============================================
-        zonedDateTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.zonedDateTimeValues.add(StoreZonedDateTime(it.key, (it.value.value as ZonedDateTime?)?.toInstant()?.toEpochMilli())) }
-        localTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.timeValues.add(StoreTime(it.key, (it.value.value as LocalTime?)?.toNanoOfDay())) }
-        durationValues.filterIgnored(dbContext).forEach { jdsPortableEntity.durationValues.add(StoreDuration(it.key, it.value.value?.toNanos())) }
-        localDateTimeValues.filterIgnored(dbContext).forEach { jdsPortableEntity.dateTimeValues.add(StoreDateTime(it.key, safeLocalDateTime(it.value.value))) }
-        localDateValues.filterIgnored(dbContext).forEach { jdsPortableEntity.dateValues.add(StoreDate(it.key, safeLocalDate(it.value.value))) }
-        monthDayValues.filterIgnored(dbContext).forEach { jdsPortableEntity.monthDayValues.add(StoreMonthDay(it.key, it.value.value?.toString())) }
-        yearMonthValues.filterIgnored(dbContext).forEach { jdsPortableEntity.yearMonthValues.add(StoreYearMonth(it.key, (it.value.value as YearMonth?)?.toString())) }
-        periodValues.filterIgnored(dbContext).forEach { jdsPortableEntity.periodValues.add(StorePeriod(it.key, it.value.value?.toString())) }
+        zonedDateTimeValues.filterIgnored(dbContext).forEach { entry ->
+            val zonedDateTime = entry.value.value as ZonedDateTime?
+            jdsPortableEntity.zonedDateTimeValues.add(StoreZonedDateTime(entry.key, zonedDateTime?.toInstant()?.toEpochMilli()))
+        }
+        localTimeValues.filterIgnored(dbContext).forEach { entry ->
+            val localTime = entry.value.value as LocalTime?
+            jdsPortableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
+        }
+        durationValues.filterIgnored(dbContext).forEach { entry ->
+            val duration = entry.value.value
+            jdsPortableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
+        }
+        localDateTimeValues.filterIgnored(dbContext).forEach { entry ->
+            val localDateTime = entry.value.value as LocalDateTime?
+            jdsPortableEntity.dateTimeValues.add(StoreDateTime(entry.key, localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()))
+        }
+        localDateValues.filterIgnored(dbContext).forEach { entry ->
+            val localDate = entry.value.value as LocalDate?
+            jdsPortableEntity.dateValues.add(StoreDate(entry.key, localDate?.toEpochDay()))
+        }
+        monthDayValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
+        }
+        yearMonthValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
+        }
+        periodValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
+        }
         //==============================================
         //BLOB
         //==============================================
-        blobValues.filterIgnored(dbContext).forEach {
-            jdsPortableEntity.blobValues.add(StoreBlob(it.key, it.value.value ?: ByteArray(0)))
+        blobValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
         }
         //==============================================
         //Enums
         //==============================================
-        enumValues.filterIgnored(dbContext).forEach { jdsPortableEntity.enumValues.add(StoreEnum(it.key, it.value.value?.ordinal)) }
-        stringEnumValues.filterIgnored(dbContext).forEach { jdsPortableEntity.enumStringValues.add(StoreEnumString(it.key, it.value.value?.name)) }
-        enumCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.enumCollections.add(StoreEnumCollection(it.key, toIntCollection(it.value))) }
-        enumStringCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.enumStringCollections.add(StoreEnumStringCollection(it.key, toStringCollection(it.value))) }
+        enumValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
+        }
+        stringEnumValues.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
+        }
+        enumCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
+        }
+        enumStringCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
+        }
         //==============================================
         //ARRAYS
         //==============================================
-        stringCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.stringCollections.add(StoreStringCollection(it.key, it.value)) }
-        dateTimeCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.dateTimeCollection.add(StoreDateTimeCollection(it.key, toTimeStampCollection(it.value))) }
-        floatCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.floatCollections.add(StoreFloatCollection(it.key, it.value)) }
-        doubleCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(it.key, it.value)) }
-        longCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.longCollections.add(StoreLongCollection(it.key, it.value)) }
-        integerCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.integerCollections.add(StoreIntegerCollection(it.key, it.value)) }
-        uuidCollections.filterIgnored(dbContext).forEach { jdsPortableEntity.uuidCollections.add(StoreUuidCollection(it.key, toByteArrayCollection(it.value))) }
+        stringCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
+        }
+        dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.dateTimeCollection.add(StoreDateTimeCollection(entry.key, toTimeStampCollection(entry.value)))
+        }
+        floatCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
+        }
+        doubleCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
+        }
+        longCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
+        }
+        integerCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
+        }
+        shortCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
+        }
+        uuidCollections.filterIgnored(dbContext).forEach { entry ->
+            jdsPortableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
+        }
         //==============================================
         //EMBEDDED OBJECTS
         //==============================================
@@ -764,22 +868,6 @@ abstract class Entity : IEntity {
         return output
     }
 
-    private fun safeLocalDateTime(value: Temporal?): Timestamp? {
-        val localDateTime = value as LocalDateTime?
-        if (localDateTime != null) {
-            return Timestamp.valueOf(localDateTime)
-        }
-        return null
-    }
-
-    private fun safeLocalDate(value: Temporal?): Timestamp? {
-        val localDate = value as LocalDate?
-        if (localDate != null) {
-            return Timestamp.valueOf(localDate.atStartOfDay())
-        }
-        return null
-    }
-
     /**
      * @param fieldType
      * @param fieldId
@@ -795,50 +883,26 @@ abstract class Entity : IEntity {
 
         when (fieldType) {
             FieldType.Float -> {
-                floatValues[fieldId]?.value = when (value) {
-                    is Double -> value.toFloat()
-                    else -> value as Float?
-                }
+                floatValues[fieldId]?.value = value as Float?
             }
             FieldType.Double -> {
                 doubleValues[fieldId]?.value = value as Double?
             }
             FieldType.Short -> {
-                shortValues[fieldId]?.value = when (value) {
-                    is Double -> value.toShort()
-                    is Int -> value.toShort()
-                    is Short? -> value
-                    else -> null
-                }
+                shortValues[fieldId]?.value = value as Short?
             }
             FieldType.Long -> {
-                longValues[fieldId]?.value = when (value) {
-                    is Long? -> value
-                    is BigDecimal -> value.toLong() //Oracle
-                    is Int -> value.toLong()
-                    else -> null
-                }
+                longValues[fieldId]?.value = value as Long?
             }
             FieldType.Int -> {
-                integerValues[fieldId]?.value = when (value) {
-                    is Int? -> value
-                    is BigDecimal -> value.toInt() //Oracle
-                    else -> null
-                }
+                integerValues[fieldId]?.value = value as Int?
             }
             FieldType.Uuid -> {
-                uuidValues[fieldId]?.value = when (value) {
-                    is ByteArray? -> value.toUuid()
-                    is String -> UUID.fromString(value)
-                    is UUID? -> value
-                    else -> null
-                }
+                uuidValues[fieldId]?.value = (value as ByteArray?)?.toUuid()
             }
             FieldType.Boolean -> {
                 booleanValues[fieldId]?.value = when (value) {
                     is Int -> value == 1
-                    is Boolean? -> value
-                    is BigDecimal -> value.intValueExact() == 1 //Oracle
                     else -> null
                 }
             }
@@ -854,61 +918,59 @@ abstract class Entity : IEntity {
             FieldType.IntCollection -> {
                 integerCollections[fieldId]?.add(value as Int)
             }
+            FieldType.ShortCollection -> {
+                shortCollections[fieldId]?.add(value as Short)
+            }
             FieldType.UuidCollection -> {
-                val uuid = when (value) {
-                    is ByteArray -> value.toUuid()!!
-                    is String -> UUID.fromString(value)
-                    is UUID -> value
-                    else -> UUID.fromString("00000000-0000-0000-0000-000000000000")
-                }
-                uuidCollections[fieldId]?.add(uuid)
+                uuidCollections[fieldId]?.add((value as ByteArray).toUuid()!!)
             }
             FieldType.Enum -> {
-                enumValues.filter { it.key == fieldId }.forEach {
-                    val fieldEnum = FieldEnum.enums[it.key]
+                enumValues.filter { entry ->
+                    entry.key == fieldId
+                }.forEach { entry ->
+                    val fieldEnum = FieldEnum.enums[entry.key]
                     if (fieldEnum != null) {
                         if (value != null) {
-                            it.value.value = (when (value) {
-                                is BigDecimal -> fieldEnum.valueOf(value.intValueExact())
-                                else -> fieldEnum.valueOf(value as Int)
-                            })
+                            entry.value.value = fieldEnum.valueOf(value as Int)
                         }
                     }
                 }
             }
             FieldType.EnumString -> {
-                enumValues.filter { it.key == fieldId }.forEach {
-                    val fieldEnum = FieldEnum.enums[it.key]
-                    if (fieldEnum != null && value is String)
-                        it.value.value = fieldEnum.valueOf(value)
+                enumValues.filter { entry ->
+                    entry.key == fieldId
+                }.forEach { entry ->
+                    val fieldEnum = FieldEnum.enums[entry.key]
+                    if (fieldEnum != null)
+                        entry.value.value = fieldEnum.valueOf(value as String)
                 }
             }
             FieldType.EnumCollection -> {
                 //Enum collections should NOT accept nulls. Unknown collection should be skipped
-                enumCollections.filter { it.key == fieldId }.forEach {
-                    val fieldEnum = FieldEnum.enums[it.key]
+                enumCollections.filter { entry ->
+                    entry.key == fieldId
+                }.forEach { entry ->
+                    val fieldEnum = FieldEnum.enums[entry.key]
                     if (fieldEnum != null) {
                         val enumValues = fieldEnum.values
-                        val ordinal = when (value) {
-                            is Int -> value
-                            is BigDecimal -> value.intValueExact()
-                            else -> enumValues.size
-                        }
+                        val ordinal = value as Int
                         if (ordinal < enumValues.size) {
-                            it.value.add(enumValues.find { enumValue -> enumValue.ordinal == ordinal }!!)
+                            entry.value.add(enumValues.find { enumValue -> enumValue.ordinal == ordinal }!!)
                         }
                     }
                 }
             }
             FieldType.EnumStringCollection -> {
                 //Enum collections should NOT accept nulls. Unknown collection should be skipped
-                enumStringCollections.filter { it.key == fieldId }.forEach {
-                    val fieldEnum = FieldEnum.enums[it.key]
+                enumStringCollections.filter { entry ->
+                    entry.key == fieldId
+                }.forEach { entry ->
+                    val fieldEnum = FieldEnum.enums[entry.key]
                     if (fieldEnum != null) {
                         val enumStr = value.toString()
                         val enumVal = fieldEnum.valueOf(enumStr)
                         if (enumVal != null)
-                            it.value.add(enumVal)
+                            entry.value.add(enumVal)
                     }
                 }
             }
@@ -918,33 +980,34 @@ abstract class Entity : IEntity {
             FieldType.StringCollection -> {
                 stringCollections[fieldId]?.add(value as String)
             }
+            FieldType.DateTime -> {
+                localDateTimeValues[fieldId]?.value = (when (value) {
+                    is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                    else -> null
+                })
+            }
             FieldType.ZonedDateTime -> {
-                when (value) {
-                    is Long -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
-                    is Timestamp -> zonedDateTimeValues[fieldId]?.value = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.systemDefault())
-                    is String -> zonedDateTimeValues[fieldId]?.value = value.toZonedDateTime()
-                    is OffsetDateTime -> zonedDateTimeValues[fieldId]?.value = value.atZoneSameInstant(ZoneId.systemDefault())
+                zonedDateTimeValues[fieldId]?.value = when (value) {
+                    is Long -> ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                    else -> null
                 }
             }
             FieldType.Date -> {
-                when (value) {
-                    is Timestamp -> localDateValues[fieldId]?.value = (value.toLocalDateTime().toLocalDate())
-                    is LocalDate -> localDateValues[fieldId]?.value = (value)
-                    is String -> localDateValues[fieldId]?.value = (value.toLocalDate())
-                    else -> localDateValues[fieldId]?.value = null
+                localDateValues[fieldId]?.value = when (value) {
+                    is Long -> LocalDate.ofEpochDay(value)
+                    else -> null
                 }
             }
             FieldType.Time -> {
-                when (value) {
-                    is Long -> localTimeValues[fieldId]?.value = (LocalTime.MIN.plusNanos(value))
-                    is LocalTime -> localTimeValues[fieldId]?.value = (value)
-                    is String -> localTimeValues[fieldId]?.value = (value.toLocalTime())
+                localTimeValues[fieldId]?.value = when (value) {
+                    is Long -> LocalTime.ofNanoOfDay(value)
+                    else -> null
                 }
             }
             FieldType.Duration -> {
                 durationValues[fieldId]?.value = (when (value) {
-                    is BigDecimal -> Duration.ofNanos(value.longValueExact())//Oracle
-                    else -> Duration.ofNanos(value as Long)
+                    is Long -> Duration.ofNanos(value)
+                    else -> null
                 })
             }
             FieldType.MonthDay -> {
@@ -955,9 +1018,6 @@ abstract class Entity : IEntity {
             }
             FieldType.Period -> {
                 periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
-            }
-            FieldType.DateTime -> {
-                localDateTimeValues[fieldId]?.value = if (value is Timestamp) value.toLocalDateTime() else null
             }
             FieldType.DateTimeCollection -> {
                 dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
@@ -990,6 +1050,9 @@ abstract class Entity : IEntity {
             }
             FieldType.IntCollection -> if (!integerCollections.containsKey(fieldId)) {
                 integerCollections[fieldId] = ArrayList()
+            }
+            FieldType.ShortCollection -> if (!shortCollections.containsKey(fieldId)) {
+                shortCollections[fieldId] = ArrayList()
             }
             FieldType.UuidCollection -> if (!uuidCollections.containsKey(fieldId)) {
                 uuidCollections[fieldId] = ArrayList()
@@ -1080,7 +1143,9 @@ abstract class Entity : IEntity {
     ) {
         try {
             if (fieldId == null) return
-            objectCollections.filter { it.key.field.id == fieldId }.forEach { kvp ->
+            objectCollections.filter { entry ->
+                entry.key.field.id == fieldId
+            }.forEach { kvp ->
                 val entity = dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance()
                 entity.overview.id = id
                 entity.overview.editVersion = editVersion
@@ -1092,11 +1157,13 @@ abstract class Entity : IEntity {
 
                 compositeKeys.add(CompositeKey(id, editVersion))
             }
-            objectValues.filter { it.key.field.id == fieldId }.forEach {
-                it.value.set(dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance())
-                it.value.value.overview.id = id
-                it.value.value.overview.editVersion = editVersion
-                val jdsEntity = it.value.value as Entity
+            objectValues.filter { entry ->
+                entry.key.field.id == fieldId
+            }.forEach { entry ->
+                entry.value.set(dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance())
+                entry.value.value.overview.id = id
+                entry.value.value.overview.editVersion = editVersion
+                val jdsEntity = entry.value.value as Entity
                 innerObjects.add(jdsEntity)
 
                 compositeKeys.add(CompositeKey(id, editVersion))
@@ -1216,14 +1283,14 @@ abstract class Entity : IEntity {
             entityId: Int,
             fieldIds: Set<Int>
     ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityEnum()) else connection.prepareStatement(dbContext.populateEntityEnum())).use {
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityEnum()) else connection.prepareStatement(dbContext.populateEntityEnum())).use { statement ->
             for (fieldId in fieldIds) {
                 val jdsFieldEnum = FieldEnum.enums[fieldId]!!
-                it.setInt(1, entityId)
-                it.setInt(2, jdsFieldEnum.field.id)
-                it.addBatch()
+                statement.setInt(1, entityId)
+                statement.setInt(2, jdsFieldEnum.field.id)
+                statement.addBatch()
             }
-            it.executeBatch()
+            statement.executeBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
@@ -1236,122 +1303,27 @@ abstract class Entity : IEntity {
      * @param fieldIds the jdsField enum
      */
     @Synchronized
-    private fun populateRefEnum(dbContext: DbContext, connection: Connection, fieldIds: Set<Int>) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEnum()) else connection.prepareStatement(dbContext.populateEnum())).use {
+    private fun populateRefEnum(
+            dbContext: DbContext,
+            connection: Connection,
+            fieldIds: Set<Int>
+    ) = try {
+        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEnum()) else connection.prepareStatement(dbContext.populateEnum())).use { statement ->
             for (fieldId in fieldIds) {
                 val jdsFieldEnum = FieldEnum.enums[fieldId]!!
                 jdsFieldEnum.values.forEach { enum ->
-                    it.setInt(1, jdsFieldEnum.field.id)
-                    it.setInt(2, enum.ordinal)
-                    it.setString(3, enum.name)
-                    it.setString(4, enum.toString())
-                    it.addBatch()
+                    statement.setInt(1, jdsFieldEnum.field.id)
+                    statement.setInt(2, enum.ordinal)
+                    statement.setString(3, enum.name)
+                    statement.setString(4, enum.toString())
+                    statement.addBatch()
                 }
             }
-            it.executeBatch()
+            statement.executeBatch()
         }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
-
-    /**
-     * @param fieldId
-     * @param ordinal
-     * @return
-     */
-    fun getReportAtomicValue(fieldId: Int, ordinal: Int): Any? {
-        if (localDateTimeValues.containsKey(fieldId)) {
-            return localDateTimeValues[fieldId]?.value
-        }
-        if (zonedDateTimeValues.containsKey(fieldId)) {
-            return zonedDateTimeValues[fieldId]?.value
-        }
-        if (localDateValues.containsKey(fieldId)) {
-            return localDateValues[fieldId]?.value
-        }
-        if (localTimeValues.containsKey(fieldId)) {
-            return localTimeValues[fieldId]?.value
-        }
-        if (monthDayValues.containsKey(fieldId)) {
-            return monthDayValues[fieldId]?.value.toString()
-        }
-        if (yearMonthValues.containsKey(fieldId)) {
-            return yearMonthValues[fieldId]?.value.toString()
-        }
-        if (periodValues.containsKey(fieldId)) {
-            return periodValues[fieldId]?.value.toString()
-        }
-        if (durationValues.containsKey(fieldId)) {
-            return durationValues[fieldId]?.value?.toNanos()
-        }
-        if (stringValues.containsKey(fieldId)) {
-            return stringValues[fieldId]?.value
-        }
-        if (floatValues.containsKey(fieldId)) {
-            return floatValues[fieldId]?.value
-        }
-        if (doubleValues.containsKey(fieldId)) {
-            return doubleValues[fieldId]?.value
-        }
-        if (shortValues.containsKey(fieldId)) {
-            return shortValues[fieldId]?.value
-        }
-        if (booleanValues.containsKey(fieldId)) {
-            return booleanValues[fieldId]?.value
-        }
-        if (longValues.containsKey(fieldId)) {
-            return longValues[fieldId]?.value
-        }
-        if (stringEnumValues.containsKey(fieldId)) {
-            return stringEnumValues[fieldId]?.value.toString()
-        }
-        if (integerValues.containsKey(fieldId)) {
-            return integerValues[fieldId]?.value
-        }
-        if (uuidValues.containsKey(fieldId)) {
-            return uuidValues[fieldId]?.value
-        }
-        if (enumValues.containsKey(fieldId)) {
-            return enumValues[fieldId]?.value?.ordinal
-        }
-        enumCollections.filter { it.key == fieldId }.forEach { it -> it.value.filter { it.ordinal == ordinal }.forEach { _ -> return true } }
-        objectValues.filter { it.key.field.id == fieldId }.forEach { return it.value.value.overview.id }
-        return null
-    }
-
-    /**
-     * @param table
-     */
-    override fun registerFields(table: Table) {
-        getFields(overview.entityId).forEach {
-            if (!Schema.isIgnoredType(it)) {
-                table.registerField(it)
-            }
-        }
-    }
-
-    /**
-     * Internal helper function that works with all nested objects
-     */
-    override fun getNestedEntities(includeThisEntity: Boolean): Sequence<Entity> = sequence {
-        if (includeThisEntity) {
-            yield(this@Entity)
-        }
-        objectValues.values.forEach { objectWritableProperty -> yieldAll(objectWritableProperty.value.getNestedEntities()) }
-        objectCollections.values.forEach { objectCollection -> objectCollection.forEach { entity -> yieldAll(entity.getNestedEntities()) } }
-    }
-
-    /**
-     * Internal helper function that works with all nested objects
-     */
-    override fun getNestedEntities(collection: MutableCollection<Entity>, includeThisEntity: Boolean) {
-        if (includeThisEntity) {
-            collection.add(this@Entity)
-        }
-        objectValues.values.forEach { it.value.getNestedEntities(collection) }
-        objectCollections.values.forEach { it -> it.forEach { it.getNestedEntities(collection) } }
-    }
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -1436,7 +1408,5 @@ abstract class Entity : IEntity {
         private fun getFields(entityId: Int) = allFields.getOrPut(entityId) { LinkedHashSet() }
 
         private fun getEnums(entityId: Int) = allEnums.getOrPut(entityId) { LinkedHashSet() }
-
-        fun WritableProperty<String?>.getOrEmpty(): String = this.value.orEmpty()
     }
 }

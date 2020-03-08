@@ -13,8 +13,8 @@
  */
 package io.github.subiyacryolite.jds.portable
 
-import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
 import java.util.concurrent.Callable
 
@@ -48,64 +48,148 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
         entity.overview.id = portableEntity.overview.id
         entity.overview.editVersion = portableEntity.overview.editVersion
         //==============================================
-        portableEntity.blobValues.forEach { entity.populateProperties(dbContext, FieldType.Blob, it.key, it.value) }
-        portableEntity.booleanValues.forEach { entity.populateProperties(dbContext, FieldType.Boolean, it.key, it.value) }
-        portableEntity.dateValues.forEach { entity.populateProperties(dbContext, FieldType.Date, it.key, it.value) }
-        portableEntity.dateTimeCollection.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.DateTimeCollection, parent.key, it) } }
-        portableEntity.dateTimeValues.forEach { entity.populateProperties(dbContext, FieldType.DateTime, it.key, it.value) }
-        portableEntity.doubleCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.DoubleCollection, parent.key, it) } }
-        portableEntity.doubleValues.forEach { entity.populateProperties(dbContext, FieldType.Double, it.key, it.value) }
-        portableEntity.durationValues.forEach { entity.populateProperties(dbContext, FieldType.Duration, it.key, it.value) }
-        portableEntity.enumCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.EnumCollection, parent.key, it) } }
-        portableEntity.enumStringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.EnumStringCollection, parent.key, it) } }
-        portableEntity.enumValues.forEach { entity.populateProperties(dbContext, FieldType.Enum, it.key, it.value) }
-        portableEntity.enumStringValues.forEach { entity.populateProperties(dbContext, FieldType.EnumString, it.key, it.value) }
-        portableEntity.floatCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.FloatCollection, parent.key, it) } }
-        portableEntity.floatValue.forEach { entity.populateProperties(dbContext, FieldType.Float, it.key, it.value) }
-        portableEntity.integerCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.IntCollection, parent.key, it) } }
-        portableEntity.uuidCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.UuidCollection, parent.key, it) } }
-        portableEntity.integerValues.forEach { entity.populateProperties(dbContext, FieldType.Int, it.key, it.value) }
-        portableEntity.shortValues.forEach { entity.populateProperties(dbContext, FieldType.Short, it.key, it.value) }
-        portableEntity.uuidValues.forEach { entity.populateProperties(dbContext, FieldType.Uuid, it.key, it.value) }
-        portableEntity.longCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.LongCollection, parent.key, it) } }
-        portableEntity.longValues.forEach { entity.populateProperties(dbContext, FieldType.Long, it.key, it.value) }
-        portableEntity.monthDayValues.forEach { entity.populateProperties(dbContext, FieldType.MonthDay, it.key, it.value) }
-        portableEntity.periodValues.forEach { entity.populateProperties(dbContext, FieldType.Period, it.key, it.value) }
-        portableEntity.stringCollections.forEach { parent -> parent.values.forEach { entity.populateProperties(dbContext, FieldType.StringCollection, parent.key, it) } }
-        portableEntity.stringValues.forEach { entity.populateProperties(dbContext, FieldType.String, it.key, it.value) }
-        portableEntity.timeValues.forEach { entity.populateProperties(dbContext, FieldType.Time, it.key, it.value) }
-        portableEntity.yearMonthValues.forEach { entity.populateProperties(dbContext, FieldType.YearMonth, it.key, it.value) }
-        portableEntity.zonedDateTimeValues.forEach { entity.populateProperties(dbContext, FieldType.ZonedDateTime, it.key, it.value) }
+        portableEntity.blobValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Blob, kvp.key, kvp.value)
+        }
+        portableEntity.booleanValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Boolean, kvp.key, kvp.value)
+        }
+        portableEntity.dateValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Date, kvp.key, kvp.value)
+        }
+        portableEntity.doubleValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Double, kvp.key, kvp.value)
+        }
+        portableEntity.durationValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Duration, kvp.key, kvp.value)
+        }
+        portableEntity.dateTimeValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.DateTime, kvp.key, kvp.value)
+        }
+        portableEntity.floatValue.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Float, kvp.key, kvp.value)
+        }
+        portableEntity.integerValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Int, kvp.key, kvp.value)
+        }
+        portableEntity.shortValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Short, kvp.key, kvp.value)
+        }
+        portableEntity.uuidValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Uuid, kvp.key, kvp.value)
+        }
+        portableEntity.longValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Long, kvp.key, kvp.value)
+        }
+        portableEntity.monthDayValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.MonthDay, kvp.key, kvp.value)
+        }
+        portableEntity.periodValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Period, kvp.key, kvp.value)
+        }
+        portableEntity.stringValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.String, kvp.key, kvp.value)
+        }
+        portableEntity.timeValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Time, kvp.key, kvp.value)
+        }
+        portableEntity.yearMonthValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.YearMonth, kvp.key, kvp.value)
+        }
+        portableEntity.zonedDateTimeValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.ZonedDateTime, kvp.key, kvp.value)
+        }
+        portableEntity.enumValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.Enum, kvp.key, kvp.value)
+        }
+        portableEntity.enumStringValues.forEach { kvp ->
+            entity.populateProperties(dbContext, FieldType.EnumString, kvp.key, kvp.value)
+        }
+        portableEntity.dateTimeCollection.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.DateTimeCollection, collection.key, entry)
+            }
+        }
+        portableEntity.doubleCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.DoubleCollection, collection.key, entry)
+            }
+        }
+        portableEntity.enumCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.EnumCollection, collection.key, entry)
+            }
+        }
+        portableEntity.enumStringCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.EnumStringCollection, collection.key, entry)
+            }
+        }
+        portableEntity.floatCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.FloatCollection, collection.key, entry)
+            }
+        }
+        portableEntity.integerCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.IntCollection, collection.key, entry)
+            }
+        }
+        portableEntity.uuidCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.UuidCollection, collection.key, entry)
+            }
+        }
+        portableEntity.longCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.LongCollection, collection.key, entry)
+            }
+        }
+        portableEntity.stringCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.StringCollection, collection.key, entry)
+            }
+        }
         //==============================================
-        portableEntity.entityOverviews.forEach { populateObjects(entity, dbContext, it.overview.fieldId, it.overview.entityId, it.overview.id, it.overview.editVersion, it) }
+        portableEntity.entityOverviews.forEach { subEntities ->
+            populateObjects(entity, dbContext, subEntities.overview.fieldId, subEntities.overview.entityId, subEntities.overview.id, subEntities.overview.editVersion, subEntities)
+        }
     }
 
-    private fun populateObjects(entity: Entity, dbContext: DbContext, fieldId: Int?, entityId: Int, id: String, editVersion: Int, eo: PortableEntity) {
+    private fun populateObjects(
+            entity: Entity,
+            dbContext: DbContext,
+            fieldId: Int?,
+            entityId: Int,
+            id: String,
+            editVersion: Int,
+            portableEntity: PortableEntity
+    ) {
         if (fieldId == null) return
-        entity.objectCollections.filter { it.key.field.id == fieldId }.forEach {
+        entity.objectCollections.filter { entry ->
+            entry.key.field.id == fieldId
+        }.forEach { entry ->
             val referenceClass = dbContext.classes[entityId]
             if (referenceClass != null) {
-                val innerEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
-                innerEntity.overview.id = id
-                innerEntity.overview.editVersion = editVersion
-                populate(dbContext, innerEntity, eo)
-                it.value.add(innerEntity)
+                val subEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                subEntity.overview.id = id
+                subEntity.overview.editVersion = editVersion
+                populate(dbContext, subEntity, portableEntity)
+                entry.value.add(subEntity)
             }
         }
         //find existing elements
-        entity.objectValues.filter { it.key.field.id == fieldId }.forEach {
+        entity.objectValues.filter { entry ->
+            entry.key.field.id == fieldId
+        }.forEach { entry ->
             val referenceClass = dbContext.classes[entityId]
             if (referenceClass != null) {
-                it.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
-                it.value.value.overview.id = id
-                it.value.value.overview.editVersion = editVersion
-                val jdsEntity = it.value.value as Entity
-                populate(dbContext, jdsEntity, eo)
+                entry.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                entry.value.value.overview.id = id
+                entry.value.value.overview.editVersion = editVersion
+                val subEntity = entry.value.value as Entity
+                populate(dbContext, subEntity, portableEntity)
             }
         }
-    }
-
-    fun filterFunction(entity: Entity, eo: PortableEntity): Boolean {
-        return entity.overview.id == eo.overview.id && entity.overview.editVersion == eo.overview.editVersion
     }
 }

@@ -13,33 +13,16 @@
  */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.context.DbContext
+import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import org.junit.jupiter.api.Test
 
 class AllTests {
 
-    private val bulkSaveAndLoad = BulkSaveAndLoad()
-    private val customReport = CustomReport()
-    private val customReportJson = CustomReportJson()
-    private val inheritance = Inheritance()
-    private val legacyValidation = LegacyValidation()
-    private val legacyLoadAndSave = LegacyLoadAndSave()
-    private val nonExisting = NonExisting()
-    private val timeConstructs = TimeConstructs()
-    private val loadAndSaveTests = LoadAndSaveTests()
+    private val portableSaveStructure = PortableSaveStructure()
 
-    private fun runAllTests(dbContext: DbContext)
-    {
-        bulkSaveAndLoad.test(dbContext)
-        //customReport.test(jdsDb)
-        //customReportJson.test(jdsDb)
-        inheritance.test(dbContext)
-        legacyValidation.test(dbContext)
-        legacyLoadAndSave.test(dbContext)
-        nonExisting.test(dbContext)
-        timeConstructs.test(dbContext)
-        loadAndSaveTests.test(dbContext)
+    private fun runAllTests(dbContext: DbContext) {
+        portableSaveStructure.test(dbContext)
     }
 
     @Test

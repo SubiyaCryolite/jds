@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.Entity
-import io.github.subiyacryolite.jds.portable.PortableContainer
+import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.portable.LoadPortable
+import io.github.subiyacryolite.jds.portable.PortableContainer
 import io.github.subiyacryolite.jds.portable.SavePortable
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
@@ -30,7 +30,7 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
     @Throws(Exception::class)
     override fun testImpl(dbContext: DbContext) {
         addressBook(dbContext)
-        timeConstruct(dbContext)
+        //timeConstruct(dbContext)
         example(dbContext)
     }
 
@@ -54,40 +54,33 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
 
     @Throws(Exception::class)
     private fun testPortableSave(dbContext: DbContext, entity: Collection<Entity>, clazz: Class<out Entity>) {
-        //fire-up JDS
-        initialiseSqLiteBackend()
+        val portableContainer = SavePortable(dbContext, entity).call()
 
-        val saveEmbedded = SavePortable(dbContext, entity)
-        val embeddedObject = saveEmbedded.call()
-
-
-        val outputJds = objectMapper.writeValueAsString(embeddedObject)
+        val outputJds = objectMapper.writeValueAsString(portableContainer)
         val outputReg = objectMapper.writeValueAsString(entity)
+        println("")
+        println("")
         println("================ Object Reg JSON ================")
         println(outputReg)
         println("================ Object JDS JSON ================")
         println(outputJds)
+        println("")
 
+        val loadFromMemory = LoadPortable(dbContext, clazz, portableContainer)
+        val memoryPayload = loadFromMemory.call()
 
-        val embeddedObjectFromJson = objectMapper.readValue(outputJds, PortableContainer::class.java)
-        val isTheSame = embeddedObjectFromJson == embeddedObject
-        println("Is the same? = $isTheSame")
+        val portableContainerFromJson = objectMapper.readValue(outputJds, PortableContainer::class.java)
+        val loadFromJson = LoadPortable(dbContext, clazz, portableContainerFromJson)
+        val jsonPayload = loadFromJson.call()
 
-        val loadEmbeddedA = LoadPortable(dbContext, clazz, embeddedObject)
-        val loadedEntityA = loadEmbeddedA.call()
+        println("Original: $entity")
+        println("Memory instance  = $memoryPayload")
+        println("JSON instance= $jsonPayload")
 
-        val loadEmbeddedB = LoadPortable(dbContext, clazz, embeddedObjectFromJson)
-        val loadedEntityB = loadEmbeddedB.call()
+        val isTheSame = portableContainerFromJson == portableContainer
+        println("Is the same after deserialisation? $isTheSame")
 
-        val stringRepresentation1 = entity.toString()
-        val stringRepresentation2 = loadedEntityA.toString()
-        val stringRepresentation3 = loadedEntityB.toString()
-
-        println("Before = $stringRepresentation1")
-        println("After  = $stringRepresentation2")
-        println("After  FROM json = $stringRepresentation3")
-
-        val equal = stringRepresentation1 == stringRepresentation2
+        val equal = memoryPayload == jsonPayload
         println("Equal? $equal")
     }
 

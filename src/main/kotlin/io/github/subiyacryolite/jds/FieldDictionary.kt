@@ -14,7 +14,7 @@ object FieldDictionary {
         }
     }
 
-    fun addEntityField(entityId: Int, pair: Pair<Int, String>) {
+    private fun addEntityField(entityId: Int, pair: Pair<Int, String>) {
         if (Entity.initialising) {
             val dict = dictionary.getOrPut(entityId) { HashSet() }
             dict.add(pair)

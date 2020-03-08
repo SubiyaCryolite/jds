@@ -14,216 +14,70 @@
 package io.github.subiyacryolite.jds.enums
 
 /**
- * @param component the component name
+ * @param procedure the component name
  */
-enum class Procedure(val component: String) {
+enum class Procedure(val procedure: String) {
     /**
      *
      */
-    EntityBinding("pop_${Table.EntityBinding.component}"),
+    EntityBinding("pop_${Table.EntityBinding.table}"),
 
     /**
      *
      */
-    EntityLive("pop_${Table.EntityLive.component}"),
+    Entity("pop_${Table.Entity.table}"),
 
     /**
      *
      */
-    EntityOverview("pop_${Table.EntityOverview.component}"),
+    EntityEnum("pop_${Table.EntityEnum.table}"),
 
     /**
      *
      */
-    Entity("pop_${Table.Entity.component}"),
+    EntityField("pop_${Table.EntityField.table}"),
 
     /**
      *
      */
-    EntityEnum("pop_${Table.EntityEnum.component}"),
+    FieldEntity("pop_${Table.FieldEntity.table}"),
 
     /**
      *
      */
-    EntityField("pop_${Table.EntityField.component}"),
+    EntityInheritance("pop_${Table.EntityInheritance.table}"),
 
     /**
      *
      */
-    FieldEntity("pop_${Table.FieldEntity.component}"),
+    Enum("pop_${Table.Enum.table}"),
 
     /**
      *
      */
-    EntityInheritance("pop_${Table.EntityInheritance.component}"),
+    Field("pop_${Table.Field.table}"),
 
     /**
      *
      */
-    Enum("pop_${Table.Enum.component}"),
+    FieldDictionary("pop_${Table.FieldDictionary.table}"),
 
     /**
      *
      */
-    Field("pop_${Table.Field.component}"),
+    FieldTag("pop_${Table.FieldTag.table}"),
 
     /**
      *
      */
-    FieldDictionary("pop_${Table.FieldDictionary.component}"),
+    EntityTag("pop_${Table.EntityTag.table}"),
 
     /**
      *
      */
-    FieldTag("pop_${Table.FieldTag.component}"),
+    FieldAlternateCode("pop_${Table.FieldAlternateCode.table}");
 
-    /**
-     *
-     */
-    EntityTag("pop_${Table.EntityTag.component}"),
-
-    /**
-     *
-     */
-    FieldAlternateCode("pop_${Table.FieldAlternateCode.component}"),
-
-    /**
-     *
-     */
-    StoreBlob("pop_${Table.StoreBlob.component}"),
-
-    /**
-     *
-     */
-    StoreBoolean("pop_${Table.StoreBoolean.component}"),
-
-    /**
-     *
-     */
-    StoreDate("pop_${Table.StoreDate.component}"),
-
-    /**
-     *
-     */
-    StoreDateTime("pop_${Table.StoreDateTime.component}"),
-
-    /**
-     *
-     */
-    StoreDouble("pop_${Table.StoreDouble.component}"),
-
-    /**
-     *
-     */
-    StoreDoubleCollection("pop_${Table.StoreDoubleCollection.component}"),
-
-    /**
-     *
-     */
-    StoreDuration("pop_${Table.StoreDuration.component}"),
-
-    /**
-     *
-     */
-    StoreEnum("pop_${Table.StoreEnum.component}"),
-
-    /**
-     *
-     */
-    StoreEnumString("pop_${Table.StoreEnumString.component}"),
-
-    /**
-     *
-     */
-    StoreEnumCollection("pop_${Table.StoreEnumCollection.component}"),
-
-    /**
-     *
-     */
-    StoreEnumStringCollection("pop_${Table.StoreEnumStringCollection.component}"),
-
-    /**
-     *
-     */
-    StoreDateTimeCollection("pop_${Table.StoreDateTimeCollection.component}"),
-
-    /**
-     *
-     */
-    StoreFloat("pop_${Table.StoreFloat.component}"),
-
-    /**
-     *
-     */
-    StoreShort("pop_${Table.StoreShort.component}"),
-
-    /**
-     *
-     */
-    StoreUuid("pop_${Table.StoreUuid.component}"),
-
-    /**
-     *
-     */
-    StoreFloatCollection("pop_${Table.StoreFloatCollection.component}"),
-
-    /**
-     *
-     */
-    StoreInteger("pop_${Table.StoreInteger.component}"),
-
-    /**
-     *
-     */
-    StoreIntegerCollection("pop_${Table.StoreIntegerCollection.component}"),
-
-    /**
-     *
-     */
-    StoreUuidCollection("pop_${Table.StoreUuidCollection.component}"),
-
-    /**
-     *
-     */
-    StoreLong("pop_${Table.StoreLong.component}"),
-
-    /**
-     *
-     */
-    StoreLongCollection("pop_${Table.StoreLongCollection.component}"),
-
-    /**
-     *
-     */
-    StoreMonthDay("pop_${Table.StoreMonthDay.component}"),
-
-    /**
-     *
-     */
-    StorePeriod("pop_${Table.StorePeriod.component}"),
-
-    /**
-     *
-     */
-    StoreText("pop_${Table.StoreText.component}"),
-
-    /**
-     *
-     */
-    StoreTextCollection("pop_${Table.StoreTextCollection.component}"),
-
-    /**
-     *
-     */
-    StoreTime("pop_${Table.StoreTime.component}"),
-
-    /**
-     *
-     */
-    StoreYearMonth("pop_${Table.StoreYearMonth.component}"),
-
-    /**
-     *
-     */
-    StoreZonedDateTime("pop_${Table.StoreZonedDateTime.component}")
+    override fun toString(): String {
+        return procedure
+    }
 }

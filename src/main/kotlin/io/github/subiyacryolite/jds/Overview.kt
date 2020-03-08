@@ -13,7 +13,6 @@
  */
 package io.github.subiyacryolite.jds
 
-import java.io.Serializable
 import java.util.*
 
 /**

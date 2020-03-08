@@ -43,7 +43,9 @@ data class FieldEnum<T : Enum<T>>(
     }
 
     companion object : Serializable {
+
         private const val serialVersionUID = 20171109_0853L
+
         val enums: HashMap<Int, FieldEnum<*>> = HashMap()
     }
 }

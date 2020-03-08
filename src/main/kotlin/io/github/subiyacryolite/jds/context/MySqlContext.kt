@@ -30,7 +30,7 @@ abstract class MySqlContext : DbContext {
     constructor() : this(Implementation.MySql, true)
 
     override fun tableExists(connection: Connection, table: Table): Int {
-        return tableExists(connection, "$objectPrefix${table.component}")
+        return tableExists(connection, "$objectPrefix${table.table}")
     }
 
     override fun tableExists(connection: Connection, tableName: String): Int {
@@ -40,7 +40,7 @@ abstract class MySqlContext : DbContext {
 
     override fun procedureExists(connection: Connection, procedure: Procedure): Int {
         val sql = "SELECT 1 AS Result FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = ? AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME = ?"
-        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix${procedure.component}"))
+        return getResult(connection, sql, arrayOf(connection.catalog, "$objectPrefix${procedure.procedure}"))
     }
 
     override fun columnExists(connection: Connection, tableName: String, columnName: String): Int {

@@ -17,10 +17,10 @@ package io.github.subiyacryolite.jds.enums;
  * This enum contains all the components that make up the JDS framework on a target database.
  * Each enum contains the components name as well as an optional alias primarily used to create
  * joins that implement search [io.github.subiyacryolite.jds.Filter].
- * @param component the component name
+ * @param table the component name
  * @param alias the component alias
  */
-enum class Table(val component: String, val alias: String) {
+enum class Table(val table: String, val alias: String) {
 
     /**
      *
@@ -31,16 +31,6 @@ enum class Table(val component: String, val alias: String) {
      *
      */
     EntityBinding("entity_binding", "eb"),
-
-    /**
-     *
-     */
-    EntityLive("entity_live","elv"),
-
-    /**
-     *
-     */
-    EntityOverview("entity_overview", "jeo"),
 
     /**
      *
@@ -95,151 +85,9 @@ enum class Table(val component: String, val alias: String) {
     /**
      *
      */
-    FieldAlternateCode("field_alternate_code", "fac"),
-
-    /**
-     *
-     */
-    StoreBlob("str_blob", "sbl"),
-
-    /**
-     *
-     */
-    StoreBoolean("str_boolean", "sbo"),
-
-    /**
-     *
-     */
-    StoreDate("str_date", "sda"),
-
-    /**
-     *
-     */
-    StoreDateTime("str_date_time", "sdt"),
-
-    /**
-     *
-     */
-    StoreDateTimeCollection("str_date_time_col", "sdt"),
-
-    /**
-     *
-     */
-    StoreDouble("str_double", "sdo"),
-
-    /**
-     *
-     */
-    StoreDoubleCollection("str_double_col", "sdc"),
-
-    /**
-     *
-     */
-    StoreDuration("str_duration", "sd"),
-
-    /**
-     *
-     */
-    StoreEnum("str_enum", "se"),
-
-    /**
-     *
-     */
-    StoreEnumString("str_enum_string", "ses"),
-
-    /**
-     *
-     */
-    StoreEnumCollection("str_enum_col", "sec"),
-
-    /**
-     *
-     */
-    StoreEnumStringCollection("str_enum_string_col", "sesc"),
-
-    /**
-     *
-     */
-    StoreShort("str_short", "sst"),
-
-    /**
-     *
-     */
-    StoreFloat("str_float", "sf"),
-
-    /**
-     *
-     */
-    StoreUuid("str_uuid", "su"),
-
-    /**
-     *
-     */
-    StoreFloatCollection("str_float_col", "sfc"),
-
-    /**
-     *
-     */
-    StoreInteger("str_integer", "si"),
-
-    /**
-     *
-     */
-    StoreIntegerCollection("str_integer_col", "sic"),
-
-    /**
-     *
-     */
-    StoreUuidCollection("str_uuid_col", "suc"),
-
-    /**
-     *
-     */
-    StoreLong("str_long", "sl"),
-
-    /**
-     *
-     */
-    StoreLongCollection("str_long_col", "slc"),
-
-    /**
-     *
-     */
-    StoreMonthDay("str_month_day", "monthDayValues"),
-
-    /**
-     *
-     */
-    StorePeriod("str_period", "sp"),
-    /**
-     *
-     */
-    /**
-     *
-     */
-    StoreText("str_text", "st"),
-
-    /**
-     *
-     */
-    StoreTextCollection("str_text_col", "stc"),
-
-    /**
-     *
-     */
-    StoreTime("str_time", "stt"),
-
-    /**
-     *
-     */
-    StoreYearMonth("str_year_month", "yearMonthValues"),
-
-    /**
-     *
-     */
-    StoreZonedDateTime("str_zoned_date_time", "szdt");
+    FieldAlternateCode("field_alternate_code", "fac");
 
     override fun toString(): String {
-        return name
+        return table
     }
 }

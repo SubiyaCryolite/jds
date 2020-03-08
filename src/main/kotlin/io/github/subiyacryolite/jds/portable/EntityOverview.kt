@@ -14,8 +14,8 @@ data class EntityOverview(
         @set:JsonProperty("i")
         var id: String = "",
 
-        @get:JsonProperty("ev")
-        @set:JsonProperty("ev")
+        @get:JsonProperty("v")
+        @set:JsonProperty("v")
         var editVersion: Int = 0,
 
         @get:JsonProperty("e")

@@ -130,6 +130,12 @@ object Validate {
         }
     }
 
+    fun validateShortCollection(field: Field) {
+        if (field.type != FieldType.ShortCollection) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+    }
+
     fun validateUuidCollection(field: Field) {
         if (field.type != FieldType.UuidCollection) {
             throw RuntimeException("Incorrect type supplied for field [$field]")

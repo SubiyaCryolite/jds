@@ -7,34 +7,36 @@
 
 # Jenesis Data Store
 
-Jenesis Data Store (JDS) was created to help developers persist their classes to relational databases in a fast and reliable manner, without requiring them to design elaborate relational schemas. JDS has two main aims:
+Jenesis Data Store (JDS) was created to help developers persist data to a strongly-typed portable JSON format.
 
- - To allow for the rapid creation and modification of Java and/or Kotlin classes in order to facilitate rapid development
- - To provide a flexible data store framework to persist data against: (a) an EAV based database or (b) serialized JSON.
+JDS has four goals:
 
-The library eliminates the need to modify schemas once a class has been altered. It also eliminates all concerns regarding "breaking changes" in regards to fields and their addition and/or removal. Fields, Objects and Collection types can be added, modified or removed at will. Beyond that the libraries data is structured in a way to promote fast and efficient Data Mining queries that can be used to support the application in question or to feed into specialised analytic software.
+ - To allow for the rapid development of complex Java/Kotlin systems with stringent data definition / quality requirements
+ - To provide a flexible and reliable framework to persist and retrieve data against.
+ - To provide a robust, strongly-typed Field Dictionary.
+ - To leverage JSON as a datastore over EAV based paradigms.
 
-Put simply, JDS is useful for any developer that requires a flexible schema running on top of a traditional Relational Database.
+The library eliminates the need to modify schemas once a class has been altered.
+
+It also eliminates all concerns regarding "breaking changes" in regards to fields and their addition and/or removal.
+
+Put simply, JDS is useful for any developer that requires a flexible data store running on top of a Relational databases.
 
 JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses/BSD-3-Clause)
 
 # Design
 
-The concept behind JDS is quite simple. Extend a base “Entity” class, define strongly-typed “Fields” and then “Map” them against instances of the [WritableValue](https://openjfx.io/javadoc/11/javafx.base/javafx/beans/value/WritableValue.html) interface.
+The concept behind JDS is quite simple. Extend a base **Entity** class, define strongly-typed **Fields** and then **map** them against implementations of the **WritableProperty** interface.
 
 ## Features
 
 * Transparent persistence
-* Serialization of JavaFX bean _values_
 * Supports the persistence of NULL values for JVM primitive types
 * Full support for generics and inheritance
 * Easily integrates with new or existing databases
-* Save, Updates and Deletes cascade to child objects and collections
-* All saves and deletes are ACID (transaction based)
-* Eager Loading is applied to embedded objects as well as on collections
-* Supports a portable format that can be serialised to JSON to bypass EAV
+* Portable format which can be serialised to JSON allows for the flexibility of EAV without the drawbacks
 * Supports MySQL, T-SQL, PostgreSQL, Oracle 11G, MariaDB and SQLite
-* Underlying database implemented using the Star Schema
+* Supports a robust Field Dictonary allowing for metadata such as Tags and Alternate Coding to be applied to Fields and Entities.
 
 # Maven Central
 
@@ -46,19 +48,19 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>14.0.2-SNAPSHOT</version>
+    <version>18.0-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:14.0.2-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:18.0-SNAPSHOT'
 ```
 
 # Dependencies
 
-The library depends on Java 11. Both 64 and 32 bit variants should suffice. Both the Development Kit and Runtime can be downloaded from [here](https://adoptopenjdk.net/).
+The library depends on Java 1.8. Both 64 and 32 bit variants should suffice. Both the Development Kit and Runtime can be downloaded from [here](https://adoptopenjdk.net/).
 
 # Supported Databases
 
@@ -112,35 +114,39 @@ Entity IDs MUST be unique in your application, any value of type long is valid. 
 
 Fields are big part of the JDS framework. Each Field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every Field that you define can be one of the following types.
 
-| JDS Field Type       | Java Type                                  | Description                                                  |
-| -------------------- | ------------------------------------------ | ------------------------------------------------------------ |
-| DateTimeCollection   | Collection\<LocalDateTime\>                | Collection of type LocalDateTime                             |
-| DoubleCollection     | Collection\<Double\>                       | Collection of type Double                                    |
-| EntityCollection     | Collection\<Class\<? extends Entity\>\> | Collection of type Entity                                 |
-| FloatCollection      | Collection\<Float\>                        | Collection of type Float                                     |
-| IntCollection        | Collection\<Integer\>                      | Collection of type Integer                                   |
-| LongCollection       | Collection\<Long\>                         | Collection of type Long                                      |
-| StringCollection     | Collection\<String\>                       | Collection of type String                                    |
-| Blob                 | byte[] or InputStream                      | Blob values                                                  |
-| Boolean              | boolean / Boolean                          | Boolean values                                               |
-| Entity               | Class\<? extends Entity\>               | Object of type Entity                                     |
-| DateTime             | LocalDateTime                              | DateTime instances based on the host machines local timezone |
-| Date                 | LocalDate                                  | Local date instances                                         |
-| Double               | double / Double                            | Numeric double values                                        |
-| Duration             | Duration                                   | Object of type Duration                                      |
-| EnumCollection       | Collection\<Enum\>                         | Collection of type Enum                                      |
-| Enum                 | Enum                                       | Object of type Enum                                          |
-| Float                | float / Float                              | Numeric float values                                         |
-| Int                  | int / Integer                              | Numeric integer values                                       |
-| Long                 | long / Long                                | Numeric long values                                          |
-| MonthDay             | MonthDay                                   | Object of type MonthDay                                      |
-| Period               | Period                                     | Object of type Period                                        |
-| String               | String                                     | String values with no max limit                              |
-| Time                 | LocalTime                                  | Local time instances                                         |
-| YearMonth            | YearMonth                                  | Object of type YearMonth                                     |
-| ZonedDateTime        | ZonedDateTime                              | Zoned DateTime instances                                     |
+| JDS Field Type       | Java Type                                  | Description                                                   |
+| -------------------- | ------------------------------------------ | --------------------------------------------------------------|
+| DateTimeCollection   | Collection\<LocalDateTime\>                | Collection of type LocalDateTime                              |
+| DoubleCollection     | Collection\<Double\>                       | Collection of type Double                                     |
+| EntityCollection     | Collection\<Class\<? extends Entity\>\>    | Collection of type Entity                                     |
+| FloatCollection      | Collection\<Float\>                        | Collection of type Float                                      |
+| IntCollection        | Collection\<Integer\>                      | Collection of type Integer                                    |
+| ShortCollection      | Collection\<Short\>                        | Collection of type Short                                      |
+| LongCollection       | Collection\<Long\>                         | Collection of type Long                                       |
+| StringCollection     | Collection\<String\>                       | Collection of type String                                     |
+| UuidCollection       | Collection\<UUID\>                         | Collection of type UUID                                       |
+| Blob                 | byte[] or InputStream                      | Blob values                                                   |
+| Boolean              | boolean / Boolean                          | Boolean values                                                |
+| Entity               | Class\<? extends Entity\>                  | Object of type Entity                                         |
+| DateTime             | LocalDateTime                              | DateTime instances based on the host machines local timezone  |
+| Date                 | LocalDate                                  | Local date instances                                          |
+| Double               | double / Double                            | Numeric double values                                         |
+| Duration             | Duration                                   | Object of type Duration                                       |
+| EnumCollection       | Collection\<Enum\>                         | Collection of type Enum                                       |
+| Enum                 | Enum                                       | Object of type Enum                                           |
+| Float                | float / Float                              | Numeric float values                                          |
+| Int                  | int / Integer                              | Numeric integer values                                        |
+| Short                | short / Short                              | Numeric SHORT values                                          |
+| Long                 | long / Long                                | Numeric long values                                           |
+| MonthDay             | MonthDay                                   | Object of type MonthDay                                       |
+| Period               | Period                                     | Object of type Period                                         |
+| String               | String                                     | String values with no max limit                               |
+| Time                 | LocalTime                                  | Local time instances                                          |
+| YearMonth            | YearMonth                                  | Object of type YearMonth                                      |
+| ZonedDateTime        | ZonedDateTime                              | Zoned DateTime instances                                      |
+| Uuid                 | UUID                                       | UUID instances                                                |
 
-We recommend defining your Fields as static constants
+We recommend defining your Fields as **static constants**
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field;
@@ -158,11 +164,37 @@ object Fields {
 }
 ```
 
+Furthermore you can add descriptions, of up to **256 characters**, to each field
+
+```kotlin
+import io.github.subiyacryolite.jds.Field;
+import io.github.subiyacryolite.jds.enumProperties.FieldType;
+
+object Fields {
+    val StreetName = Field(1, "street_name", FieldType.String, "The street name of the address")
+    val PlotNumber = Field(2, "plot_number", FieldType.Int, "The street name of the address")
+    val Area = Field(3, "area_name", FieldType.String, "The name of the area / neighbourhood")
+    //...
+}
+```
+
+JDS also supports **Tags** which can be applied to each **Field** and **Entity** definitions. Tags are implemented as a set of strings, there is no limit on how many tags a field can have. This can be useful for categorising certain kinds of information
+
+```kotlin
+import io.github.subiyacryolite.jds.Field;
+import io.github.subiyacryolite.jds.enumProperties.FieldType;
+
+object Fields {
+    val StreetName = Field(1, "street_name", FieldType.String, description = "The street name of the address", tags = setOf("AddressInfo", "ClientInfo", "IdentifiableInfo"))
+    //...
+}
+```
+
 ### 1.1.3 Defining Enums
 
-Enums are an extension of Fields. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by Check Boxes, Radio Buttons or Combo Boxes in a UI. In this example we will define the type of an address as an enumerated value with the following options (YES, NO).
+Enums are an extension of **Fields**. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by Check Boxes, Radio Buttons or Combo Boxes in a UI. In this example we will define the type of an address as an enumerated value with the following options (YES, NO).
 
-First of all we'd have to define a standard Field of type Enum.
+First of all we'd have to define a standard Field of type **Enum**.
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field
@@ -202,74 +234,115 @@ Depending on the type of Field, JDS will require that you set you objects proper
 
 Kindly note that none of the JavaFX beans are serializable, however JDS supports serialization via the explicit implementation of Javas Externalizable interface. That said only Property values are serialized, not listeners or any other bean state.
 
-| JDS Field Type       | Container                                                                                                            | Java Mapping Call |Kotlin Mapping Call |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------ | ------------ |
-| DateTimeCollection   | [Collection\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                   | mapDateTimes          | map          |
-| DoubleCollection     | [Collection\<Double\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | mapDoubles          | map          |
-| EntityCollection     | [Collection\<Class\<? extends Entity\>\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)         | map          | map          |
-| FloatCollection      | [Collection\<Float\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                           | mapFloats          | map          |
-| IntCollection        | [Collection\<Integer\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                         | mapInts          | map          |
-| LongCollection       | [Collection\<Long\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                            | mapLongs          | map          |
-| StringCollection     | [Collection\<String\>](https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html)                          | mapStrings          | map          |
-| Boolean              | [WritableValue\<Boolean\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | mapBoolean          | map          |
-| Blob                 | [WritableValue\<ByteArray\>](https://static.javadoc.io/io.github.subiyacryolite/jds/3.4.3/javafx/beans/property/BlobProperty.html) | map          | map          |
-| Entity               | [Class\<? extends Entity\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)                       | map          | map          |
-| Date                 | [WritableValue\<LocalDate\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html)                     | mapDate          | map          |
-| DateTime             | [WritableValue\<LocalDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalDateTime.html)             | mapDateTime          | map          |
-| Double               | [WritableValue\<Double\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                | mapNumeric          | map          |
-| Duration             | [WritableValue\<Duration\>](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)                       | mapDuration          | map          |
-| Enum                 | [WritableValue\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                               | mapEnum          | map          |
-| EnumCollection       | [Collection\<Enum\>](https://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html)                                  | mapEnums          | map          |
-| Float                | [WritableValue\<Float\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                 | mapNumeric          | map          |
-| Int                  | [WritableValue\<Integer\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)               | mapNumeric          | map          |
-| Long                 | [WritableValue\<Long\>](https://docs.oracle.com/javafx/2/api/javafx/beans/value/WritableValue.html)                  | mapNumeric          | map          |
-| MonthDay             | [WritableValue\<MonthDay\>](https://docs.oracle.com/javase/8/docs/api/java/time/MonthDay.html)                       | mapMonthDay          | map          |
-| Period               | [WritableValue\<Period\>](https://docs.oracle.com/javase/8/docs/api/java/time/Period.html)                           | mapPeriod          | map          |
-| String               | [WritableValue\<String\>](https://docs.oracle.com/javafx/2/api/javafx/beans/property/StringProperty.html)            | mapString          | map          |
-| Time                 | [WritableValue\<LocalTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/LocalTime.html)                     | mapTime          | map          |
-| YearMonth            | [WritableValue\<YearMonth\>](https://docs.oracle.com/javase/8/docs/api/java/time/YearMonth.html)                     | mapYearMonth          | map          |
-| ZonedDateTime        | [WritableValue\<ZonedDateTime\>](https://docs.oracle.com/javase/8/docs/api/java/time/ZonedDateTime.html)             | mapZonedDateTime          | map          |
+| JDS Field Type       | Container                                                  | Java Mapping Call     |Kotlin Mapping Call |
+| -------------------- | -----------------------------------------------------------| --------------------- | ------------ |
+| DateTimeCollection   | MutableCollection\<LocalDateTime\>                         | mapDateTimes          | map          |
+| DoubleCollection     | MutableCollection\<Double\>                                | mapDoubles            | map          |
+| EntityCollection     | MutableCollection\<Class\<? extends Entity\>\>             | map                   | map          |
+| FloatCollection      | MutableCollection\<Float\>                                 | mapFloats             | map          |
+| IntCollection        | MutableCollection\<Integer\>                               | mapInts               | map          |
+| LongCollection       | MutableCollection\<Long\>                                  | mapLongs              | map          |
+| StringCollection     | MutableCollection\<String\>                                | mapStrings            | map          |
+| Boolean              | WritableProperty\<Boolean\>                                | mapBoolean            | map          |
+| Blob                 | WritableProperty\<ByteArray\>                              | map                   | map          |
+| Entity               | Class\<? extends Entity\>                                  | map                   | map          |
+| Date                 | WritableProperty\<LocalDate\>                              | mapDate               | map          |
+| DateTime             | WritableProperty\<LocalDateTime\>                          | mapDateTime           | map          |
+| Double               | WritableProperty\<Double\>                                 | mapNumeric            | map          |
+| Duration             | WritableProperty\<Duration\>                               | mapDuration           | map          |
+| Enum                 | WritableProperty\<Enum\>                                   | mapEnum               | map          |
+| EnumCollection       | Collection\<Enum\>                                         | mapEnums              | map          |
+| Float                | WritableProperty\<Float\>                                  | mapNumeric            | map          |
+| Int                  | WritableProperty\<Integer\>                                | mapNumeric            | map          |
+| Long                 | WritableProperty\<Long\>                                   | mapNumeric            | map          |
+| MonthDay             | WritableProperty\<MonthDay\>                               | mapMonthDay           | map          |
+| Period               | WritableProperty\<Period\>                                 | mapPeriod             | map          |
+| String               | WritableProperty\<String\>                                 | mapString             | map          |
+| Time                 | WritableProperty\<LocalTime\>                              | mapTime               | map          |
+| YearMonth            | WritableProperty\<YearMonth\>                              | mapYearMonth          | map          |
+| ZonedDateTime        | WritableProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Uuid                 | WritableProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
 
-**Note:** All supported primitive types (Boolean, Double, Float, Int, Long) can be persisted as nulls by providing your own implementation of WritableValue\<Number\> or using the helper classes: NullableBooleanProperty, NullableDoubleProperty, NullableFloatProperty, NullableIntegerProperty, NullableLongProperty and NullableNumberProperty.
+To simplify the mapping Process Jds has the followin helper classes defined:
 
-**Note:** JDS assumes that all primitive collection types will not contain null entries.
+ - Generic containers (Entities and Enums)
+     - ObjectProperty<T>
+ - Non null containers
+     - BlobProperty
+     - BooleanProperty
+     - DoubleProperty
+     - DurationProperty
+     - EnumProperty
+     - FloatProperty
+     - IntegerProperty
+     - LocalDateProperty
+     - LocalDateTimeProperty
+     - LocalTimeProperty
+     - LongProperty
+     - MonthDayProperty
+     - PeriodProperty
+     - ShortProperty
+     - StringProperty
+     - UuidProperty
+     - YearMonthProperty
+     - ZonedDateTimeProperty
+ - Nullable containers
+     - NullableBlobProperty
+     - NullableBooleanProperty
+     - NullableDoubleProperty
+     - NullableDurationProperty
+     - NullableEnumProperty
+     - NullableFloatProperty
+     - NullableIntegerProperty
+     - NullableLocalDateProperty
+     - NullableLocalDateTimeProperty
+     - NullableLocalTimeProperty
+     - NullableLongProperty
+     - NullableMonthDayProperty
+     - NullablePeriodProperty
+     - NullableShortProperty
+     - NullableStringProperty
+     - NullableUuidProperty
+     - NullableYearMonthProperty
+     - NullableZonedDateTimeProperty
+
+**Note:** JDS assumes that all collection types will **not** contain null entries.
+
+**Note:** Collection types can be of any valid type e.g. ArrayList, LinkedList, HashSet etc
 
 After your class and its properties have been defined you must map the property to its corresponding Field using the **map()** method. I recommend doing this in your primary constructor.
 
 The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
+Note that the example below has a 3rd parameter to the map method, this is the **Property Name** 
+ 
+The **Property Name** is used by the JDS **Field Dictionary** to know which **property** a particular **Field** is mapped to within an **Entity**.
+
+This is necessary as one **Field** definition may be mapped to a different property amongst different **Entities**.
+
+For example a **Field** called "FirstName" could be mapped to a property called "firstName" in one **Entity** and a property called "givenName" in another.
+
 ```kotlin
+package io.github.subiyacryolite.jds.tests.entities
+
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
 import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
 import io.github.subiyacryolite.jds.tests.constants.Fields
-import javafx.beans.property.*
-import javafx.beans.value.WritableValue
 import java.time.LocalDateTime
 
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-data class Address(
-        private val _streetName: StringProperty = SimpleStringProperty(""),
-        private val _plotNumber: NullableShortProperty = NullableShortProperty(),
-        private val _residentialArea: StringProperty = SimpleStringProperty(""),
-        private val _city: StringProperty = SimpleStringProperty(""),
-        private val _provinceOrState: StringProperty = SimpleStringProperty(""),
-        private val _country: StringProperty = SimpleStringProperty(""),
-        private val _primaryAddress: WritableValue<Boolean?> = NullableBooleanProperty(null),
-        private val _timestamp: ObjectProperty<LocalDateTime> = SimpleObjectProperty(LocalDateTime.now())
-) : Entity() {
+class Address : Entity() {
 
-    init {
-        map(Fields.StreetName, _streetName)
-        map(Fields.PlotNumber, _plotNumber)
-        map(Fields.ResidentialArea, _residentialArea)
-        map(Fields.City, _city)
-        map(Fields.Country, _country)
-        map(Fields.ProvinceOrState, _provinceOrState)
-        map(Fields.TimeStamp, _timestamp)
-        map(Fields.PrimaryAddress, _primaryAddress)
-    }
+    private val _streetName = map(Fields.StreetName, "", "streetName")
+    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty(), "plotNumber")
+    private val _area = map(Fields.ResidentialArea, "", "area")
+    private val _city = map(Fields.City, "", "city")
+    private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
+    private val _country = map(Fields.Country, "", "country")
+    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty(), "primaryAddress")
+    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(), "timestamp")
 
     var primaryAddress: Boolean?
         get() = _primaryAddress.get()
@@ -283,9 +356,9 @@ data class Address(
         get() = _plotNumber.get()
         set(value) = _plotNumber.set(value)
 
-    var residentialArea: String
-        get() = _residentialArea.get()
-        set(value) = _residentialArea.set(value)
+    var area: String
+        get() = _area.get()
+        set(value) = _area.set(value)
 
     var city: String
         get() = _city.get()
@@ -305,67 +378,11 @@ data class Address(
 }
 ```
 
-Alternatively you can use this shorthand to define and map your properties with one command. This approach returns a strongly typed instance of WritableValue determined by which value (e.g. "") or container (e.g. NullableShortProperty) you pass in an initial parameter.
-
-```kotlin
-import io.github.subiyacryolite.jds.Entity
-import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
-import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
-import io.github.subiyacryolite.jds.tests.constants.Fields
-import java.time.LocalDateTime
-
-@EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {
-
-    private val _streetName = map(Fields.StreetName, "")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty())
-    private val _residentialArea = map(Fields.ResidentialArea, "")
-    private val _city = map(Fields.City, "")
-    private val _provinceOrState = map(Fields.ProvinceOrState, "")
-    private val _country = map(Fields.Country, "")
-    private val _primaryAddress = map(Fields.TimeStamp, NullableBooleanProperty())
-    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now())
-
-    var primaryAddress: Boolean?
-        get() = _primaryAddress.get()
-        set(value) = _primaryAddress.set(value)
-
-    var streetName: String
-        get() = _streetName.get()
-        set(value) = _streetName.set(value)
-
-    var plotNumber: Short?
-        get() = _plotNumber.get()
-        set(value) = _plotNumber.set(value)
-
-    var residentialArea: String
-        get() = _residentialArea.get()
-        set(value) = _residentialArea.set(value)
-
-    var city: String
-        get() = _city.get()
-        set(value) = _city.set(value)
-
-    var provinceOrState: String
-        get() = _provinceOrState.get()
-        set(value) = _provinceOrState.set(value)
-
-    var country: String
-        get() = _country.get()
-        set(value) = _country.set(value)
-
-    var timeOfEntry: LocalDateTime
-        get() = _timestamp.get()!!
-        set(timeOfEntry) = _timestamp.set(timeOfEntry)
-}
-```
-
 ### 1.1.5 Binding Objects and Object Arrays
 
 JDS can also persist embedded objects and object arrays.
 
-All that's required is a valid **Entity** or **IEntity** subclass to be mapped to a Field of type **Entity** or **EntityCollection** .
+All that's required is a valid **Entity** or **IEntity** subclass to be mapped to a **Field** of type **Entity** or **EntityCollection** .
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field
@@ -373,7 +390,7 @@ import io.github.subiyacryolite.jds.enums.FieldType
 
 object Fields
 {
-    val Addresses = Field(23, "addresses", FieldType.EntityCollection)
+    val Addresses = Field(23, "addresses", FieldType.EntityCollection, "A collection of addresses")
 }
 ```
 
@@ -396,7 +413,7 @@ data class AddressBook(
 ) : Entity() {
 
     init {
-        map(Entities.Addresses, addresses)
+        map(Entities.Addresses, addresses, "addresses")
     }
 }
 ```
@@ -656,126 +673,11 @@ Once you have defined your class you can initialise them. A dynamic **id** is cr
     primaryAddress.primaryAddress = PrimaryAddress.YES
 ```
 
-### 1.2.4 Save
+### 1.2.4 Saving objects
+...
 
-The API has a single **save()** method within the class **Save**. The method can takes the following arguments: **Iterable\<Entity\> entities**, an optional **connection**, and an optional **SaveEvent**. Save extends **Callable** and thus can be wrapped in **Futures** and **Runnables**.
-
-```kotlin
-fun save() {
-      val jdsSave = Save(dbContext, listOf(addressBook))
-      jdsSave.call()
-}
-```
-
-### 1.2.5 Load
-
-The system currently has three variants of the **load()** method within the class **Load**. The first variant loads ALL the instances of a Entity class. The second variant loads ALL the instances of a Entity class with matching Entity Guids which are supplied by the user. The second variant adds an optional parameter "Comparator<? extends Entity>" which allows you to load a sorted collection. Load extends **Callable** and thus can be wrapped in **Futures** and **Runnables**.
-
-```kotlin
-fun load() {
-    val loadAllInstances = Load(dbContext, Example::class.java)
-    val loadSpecificInstance = Load(dbContext, Example::class.java, "instance3")
-    val loadSortedInstances = Load(dbContext, Example::class.java)
-
-    val executorService = Executors.newFixedThreadPool(3)
-    val loadAllInstances = executorService.submit(loadAllInstances)
-    val loadSpecificInstance = executorService.submit(loadSpecificInstance)
-    val loadSortedInstances = executorService.submit(loadSortedInstances)
-
-    while (!loadAllInstances.isDone)
-        Thread.sleep(16)
-    while (!loadSpecificInstance.isDone)
-        Thread.sleep(16)
-    while (!loadSortedInstances.isDone)
-        Thread.sleep(16)
-
-    val allInstances = loadAllInstances.get()
-    val specificInstance = loadSpecificInstance.get()
-    val sortedInstances = loadSortedInstances.get()
-
-    println(allInstances)
-    println(specificInstance)
-    println(sortedInstances)
-}
-```
-
-### 1.2.6 Load with Filter
-
-A filter mechanism is present. This feature is basic and is still **being refined**. An example as to how the Filter API can be used is shown below. The filter mechanism only works when JDS is persisting data in EAV mode
-
-```kotlin
-fun filter(){
-   val filter = Filter(dbContext, Address::class.java).between(Fields.PlotNumber, 1, 2).like(Fields.Country, "Zam").or().equals(Fields.Province, "Copperbelt")
-   val process = Executors.newSingleThreadExecutor().submit(filter)
-   while (!process.isDone)
-       Thread.sleep(16)
-   println(process.get())
-}
-```
-
-### 1.2.7 Delete
-
-You can delete by providing one or more JdsEntities.
-
-```kotlin
-fun delete() {
-    val delete =  Delete(dbContext, addressBook)
-    val process = Executors.newSingleThreadExecutor().submit(delete)
-    while (!process.isDone)
-        Thread.sleep(16)
-    println("Deleted successfully?  ${process.get()}")
-}
-```
-
-## 1.3 Schema Generation
-
-Starting with version 4 JDS can be set up to create Schemas to represent records in tabular format. These “Tables” pull predefined fields from one or more registered entities. On save and/or delete these tables are updated accordingly. Every Table must be registered to an instance of DbContext.
-
-Below is an example of a Table that will persist two specific fields from the Address entity type.
-
-```kotlin
-fun mapAndPrepareTablesWithSpecificFields(){
-
-    val customTable = Table()
-    customTable.name = "address_specific"
-    customTable.registerEntity(Address::class.java)
-    customTable.registerField(Fields.ResidentialArea)
-    customTable.registerField(Fields.City)
-    customTable.uniqueBy = FilterBy.ID
-
-    //register table
-    dbContext.mapTable(customTable)
-
-    //after all tables have been mapped call this function
-    dbContext.prepareTables()
-}
-```
-
-Below is an example of a Table that will persist **all the fields** in the Address entity type
-
-```kotlin
-fun mapAndPrepareTablesWithAllFields(){
-    val crtAddress = Table(Address::class.java, true)
-    customTable.isStoringLiveRecordsOnly = true
-
-    //register table
-    dbContext.mapTable(customTable)
-
-    //after all tables have been mapped call this function
-    dbContext.prepareTables()
-}
-```
-
-You can define your Tables in code or you may deserialize them in JSON format
-
-```json
-{
-  "name": "json_report",
-  "storingLiveRecordsOnly": true,
-  "entities": [1, 3],
-  "fields": [3, 5, 7, 4]
-}
-```
+### 1.2.5 Loading objects
+...
 
 ## 1.4 Backend Design
 
