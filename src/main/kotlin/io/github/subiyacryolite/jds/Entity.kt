@@ -467,7 +467,7 @@ abstract class Entity : IEntity {
     }
 
     @JvmName("mapNullableEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T, propertyName: String = "") = map(fieldEnum, EnumProperty(value), propertyName)
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T, propertyName: String = "") = map(fieldEnum, NullableEnumProperty(value), propertyName)
 
     @JvmName("mapNullableEnum")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T?>, propertyName: String = ""): WritableProperty<T?> {
@@ -1092,10 +1092,10 @@ abstract class Entity : IEntity {
                 blobValues[fieldId] = NullableBlobProperty()
             }
             FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = ObjectProperty(null)
+                enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.EnumString -> if (!stringEnumValues.containsKey(fieldId)) {
-                stringEnumValues[fieldId] = ObjectProperty(null)
+                stringEnumValues[fieldId]  = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
