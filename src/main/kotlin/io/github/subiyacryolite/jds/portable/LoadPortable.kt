@@ -135,6 +135,11 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
                 entity.populateProperties(dbContext, FieldType.IntCollection, collection.key, entry)
             }
         }
+        portableEntity.shortCollections.forEach { collection ->
+            collection.values.forEach { entry ->
+                entity.populateProperties(dbContext, FieldType.ShortCollection, collection.key, entry)
+            }
+        }
         portableEntity.uuidCollections.forEach { collection ->
             collection.values.forEach { entry ->
                 entity.populateProperties(dbContext, FieldType.UuidCollection, collection.key, entry)
