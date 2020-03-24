@@ -103,21 +103,6 @@ abstract class DbContext(
         }
     }
 
-    val isOracleDb: Boolean
-        get() = implementation === Implementation.Oracle
-
-    val isTransactionalSqlDb: Boolean
-        get() = implementation === Implementation.TSql
-
-    val isMySqlDb: Boolean
-        get() = implementation === Implementation.MySql || implementation === Implementation.MariaDb
-
-    val isSqLiteDb: Boolean
-        get() = implementation === Implementation.SqLite
-
-    val isPostGreSqlDb: Boolean
-        get() = implementation === Implementation.PostGreSql
-
     /**
      * Allow each unique DB implementation to perform unique steps
      * For example the creation of Schemas in Postgres or Namespaces in SQL server
@@ -619,22 +604,6 @@ abstract class DbContext(
      */
     internal open fun populateFieldAlternateCode() = "{call ${getName(Procedure.FieldAlternateCode)}(?, ?, ?)}"
 
-    /**
-     * Variable to facilitate in-line rows in Oracle
-     */
-    protected val logSqlSource = when (isOracleDb) {
-        true -> "SELECT ?, ?, ?, ? FROM DUAL"
-        else -> "SELECT ?, ?, ?, ?"
-    }
-
-    /**
-     * Variable to facilitate lookups for strings in Oracle
-     */
-    protected val oldStringValue = when (isOracleDb) {
-        true -> "dbms_lob.substr(string_value, dbms_lob.getlength(string_value), 1)"
-        else -> "string_value"
-    }
-
     internal fun getName(table: Table): String {
         return "${objectPrefix}${table.table}"
     }
@@ -783,7 +752,6 @@ abstract class DbContext(
     private fun getDimensionTableFk(objectName: String): LinkedHashMap<String, LinkedHashMap<String, String>> {
         return linkedMapOf("${objectName}_jds_fk" to linkedMapOf("id, edit_version" to "$dimensionTable(id, edit_version)"))
     }
-
 
     private fun createFieldDictionary(): String {
         val table = Table.FieldDictionary
@@ -955,10 +923,4 @@ abstract class DbContext(
      * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.Field]
      */
     protected abstract fun getDataTypeImpl(fieldType: FieldType, max: Int = 0): String
-
-    companion object {
-
-        private val storeUniqueColumns = setOf("id", "edit_version", "field_id")
-
-    }
 }

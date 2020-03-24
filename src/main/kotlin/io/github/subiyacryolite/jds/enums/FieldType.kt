@@ -49,5 +49,7 @@ enum class FieldType(val type: kotlin.Int) {
     Short(28),
     Uuid(29),
     UuidCollection(30),
-    ShortCollection(31);
+    ShortCollection(31),
+    MapIntKey(32),
+    MapStringKey(33),;
 }

@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Long] values
  * @param value the backing value
  */
-data class LongProperty(override var value: Long = 0L) : WritableProperty<Long>
+data class LongProperty(override var value: Long = 0L) : WritableProperty<Long> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

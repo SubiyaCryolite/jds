@@ -22,6 +22,7 @@ import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.tests.entities.AddressBook
 import io.github.subiyacryolite.jds.tests.entities.Example
+import io.github.subiyacryolite.jds.tests.entities.MapExample
 import io.github.subiyacryolite.jds.tests.entities.TimeConstruct
 import org.junit.jupiter.api.Test
 
@@ -30,8 +31,9 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
     @Throws(Exception::class)
     override fun testImpl(dbContext: DbContext) {
         addressBook(dbContext)
-        //timeConstruct(dbContext)
+        timeConstruct(dbContext)
         example(dbContext)
+        mapTests(dbContext)
     }
 
     @Test
@@ -50,6 +52,17 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
     @Throws(Exception::class)
     fun example(dbContext: DbContext) {
         testPortableSave(dbContext, TestData.collection, Example::class.java)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun mapTests(dbContext: DbContext) {
+        val mapExample = MapExample()
+        mapExample.intMap[5] = "Five"
+        mapExample.intMap[6] = "Six"
+        mapExample.stringMap["latitude"] = "50.0"
+        mapExample.stringMap["longitude"] = "50.0"
+        testPortableSave(dbContext, setOf(mapExample), MapExample::class.java)
     }
 
     @Throws(Exception::class)

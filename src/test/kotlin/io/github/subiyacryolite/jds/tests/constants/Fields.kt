@@ -43,4 +43,6 @@ object Fields {
     val MonthDay = Field(26, "month_day_field", FieldType.MonthDay)
     val YearMonth = Field(27, "year_month_field", FieldType.YearMonth)
     val Right = Field(28, "rights", FieldType.EnumCollection)
+    val IntMap = Field(29, "intMap", FieldType.MapIntKey)
+    val StringMap = Field(30, "stringMap", FieldType.MapStringKey)
 }

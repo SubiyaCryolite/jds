@@ -19,4 +19,9 @@ import java.time.Period
  * Class allowing for the wrapping and persistence of [Period] values
  * @param value the backing value
  */
-data class PeriodProperty(override var value: Period = Period.ZERO) : WritableProperty<Period>
+data class PeriodProperty(override var value: Period = Period.ZERO) : WritableProperty<Period> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

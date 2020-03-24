@@ -9,8 +9,7 @@ object DeepCopy {
      *
      */
     @Throws(IOException::class, ClassNotFoundException::class)
-    fun <T : Serializable> clone(source: T?): T? {
-        if (source == null) return null
+    fun <T> clone(source: T): T {
         ByteArrayOutputStream().use { byteArrayOutputStream ->
             ObjectOutputStream(byteArrayOutputStream).use { objectOutputStream ->
                 objectOutputStream.writeObject(source)

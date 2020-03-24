@@ -118,16 +118,20 @@ data class PortableEntity(
         val enumStringCollections: MutableCollection<StoreEnumStringCollection> = ArrayList(),
 
         @get:JsonProperty("f1")
-        val entityOverviews: MutableCollection<PortableEntity> = ArrayList()
+        val entityOverviews: MutableCollection<PortableEntity> = ArrayList(),
+
+        @get:JsonProperty("g1")
+        val mapIntKeyValues: MutableCollection<StoreMapIntKey> = ArrayList(),
+
+        @get:JsonProperty("h1")
+        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList()
 ) {
 
     @Throws(Exception::class)
     fun init(dbContext: DbContext, entity: IEntity) {
-        entity.assign(dbContext, this)
-        overview = EntityOverview(
-                entity.overview.id,
-                entity.overview.editVersion,
-                entity.overview.entityId,
-                fieldId)
+        if (entity is Entity) {
+            SavePortable.assign(entity, dbContext, this)
+        }
+        overview = EntityOverview(entity.overview.id, entity.overview.editVersion, entity.overview.entityId, fieldId)
     }
 }

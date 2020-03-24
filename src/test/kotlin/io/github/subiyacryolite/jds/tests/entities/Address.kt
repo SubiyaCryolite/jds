@@ -15,22 +15,32 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
-import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
+import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDateTime
 
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {
+data class Address(
+        private val _streetName: WritableProperty<String> = StringProperty(),
+        private val _plotNumber: WritableProperty<Short?> = NullableShortProperty(),
+        private val _area: WritableProperty<String> = StringProperty(),
+        private val _city: WritableProperty<String> = StringProperty(),
+        private val _provinceOrState: WritableProperty<String> = StringProperty(),
+        private val _country: WritableProperty<String> = StringProperty(),
+        private val _primaryAddress: WritableProperty<Boolean?> = NullableBooleanProperty(),
+        private val _timestamp: WritableProperty<LocalDateTime> = LocalDateTimeProperty()
+) : Entity() {
 
-    private val _streetName = map(Fields.StreetName, "", "streetName")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty(), "plotNumber")
-    private val _area = map(Fields.ResidentialArea, "", "area")
-    private val _city = map(Fields.City, "", "city")
-    private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
-    private val _country = map(Fields.Country, "", "country")
-    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty(), "primaryAddress")
-    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(), "timestamp")
+    init {
+        map(Fields.StreetName, _streetName, "streetName")
+        map(Fields.PlotNumber, _plotNumber, "plotNumber")
+        map(Fields.ResidentialArea, _area, "area")
+        map(Fields.City, _city, "city")
+        map(Fields.ProvinceOrState, _provinceOrState, "provinceOrState")
+        map(Fields.Country, _country, "country")
+        map(Fields.PrimaryAddress, _primaryAddress, "primaryAddress")
+        map(Fields.TimeStamp, _timestamp, "timestamp")
+    }
 
     var primaryAddress: Boolean?
         get() = _primaryAddress.get()

@@ -16,12 +16,13 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.StringProperty
+import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
-@EntityAnnotation(id = 1002, name = "entityc", tags = ["entitya", "entityb"])
-class EntityC : EntityB() {
-
-    private val _field = StringProperty("C")
+@EntityAnnotation(id = 5, name = "entityc", tags = ["entitya", "entityb"])
+data class EntityC(
+        private val _field: WritableProperty<String> = StringProperty("C")
+) : EntityB() {
 
     init {
         map(ENTITY_C_FIELD, _field, "fieldC")
@@ -29,11 +30,7 @@ class EntityC : EntityB() {
 
     var fieldC: String
         get() = _field.get()
-        set(s) = _field.set(s)
-
-    override fun toString(): String {
-        return "{ EntityC { FieldA = $fieldA, FieldB = $fieldB, FieldC = $fieldC } }"
-    }
+        set(value) = _field.set(value)
 
     companion object {
 

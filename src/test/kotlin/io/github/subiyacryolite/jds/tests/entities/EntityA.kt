@@ -17,15 +17,16 @@ import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.StringProperty
+import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
-@EntityAnnotation(id = 1000, name = "entitya")
-open class EntityA : Entity() {
-
-    private val _field = StringProperty("A")
+@EntityAnnotation(id = 3, name = "entitya")
+open class EntityA(
+        private val _field: WritableProperty<String> = StringProperty("A")
+) : Entity() {
 
     init {
-        map(ENTITY_A_FIELD, _field,"fieldA")
+        map(ENTITY_A_FIELD, _field, "fieldA")
     }
 
     var fieldA: String

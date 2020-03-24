@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of binary values within a backing [Enum]
  * @param value the backing value
  */
-data class EnumProperty<T: Enum<T>>(override var value: T) : WritableProperty<T>
+data class EnumProperty<T: Enum<T>>(override var value: T) : WritableProperty<T> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

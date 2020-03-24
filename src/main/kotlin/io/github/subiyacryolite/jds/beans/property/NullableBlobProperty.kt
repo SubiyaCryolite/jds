@@ -34,4 +34,8 @@ data class NullableBlobProperty(override var value: ByteArray? = null) : Writabl
     override fun hashCode(): Int {
         return value?.contentHashCode() ?: 0
     }
+
+    override fun toString(): String {
+        return "$value"
+    }
 }

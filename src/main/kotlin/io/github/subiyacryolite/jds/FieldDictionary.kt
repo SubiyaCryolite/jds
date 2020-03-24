@@ -22,7 +22,7 @@ object FieldDictionary {
     }
 
     fun update(dbContext: DbContext, connection: Connection) {
-        dbContext.getCallOrStatement(connection,dbContext.populateFieldDictionary()).use { statement ->
+        dbContext.getCallOrStatement(connection, dbContext.populateFieldDictionary()).use { statement ->
             dictionary.forEach { (entityId, fieldProperties) ->
                 fieldProperties.forEach { fieldProperty ->
                     statement.setInt(1, entityId)

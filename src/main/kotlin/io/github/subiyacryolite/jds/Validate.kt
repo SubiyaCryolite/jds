@@ -165,4 +165,16 @@ object Validate {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
     }
+
+    fun validateIntMap(field: Field) {
+        if (field.type != FieldType.MapIntKey) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+    }
+
+    fun validateStringMap(field: Field) {
+        if (field.type != FieldType.MapStringKey) {
+            throw RuntimeException("Incorrect type supplied for field [$field]")
+        }
+    }
 }

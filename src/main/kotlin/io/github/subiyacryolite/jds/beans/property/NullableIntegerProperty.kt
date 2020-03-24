@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Int] values
  * @param value the backing value
  */
-data class NullableIntegerProperty(override var value: Int? = null) : WritableProperty<Int?>
+data class NullableIntegerProperty(override var value: Int? = null) : WritableProperty<Int?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

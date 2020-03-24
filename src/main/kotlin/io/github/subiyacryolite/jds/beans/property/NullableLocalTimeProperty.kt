@@ -19,4 +19,9 @@ import java.time.LocalTime
  * Class allowing for the wrapping and persistence of [LocalTime] values
  * @param value the backing value
  */
-data class NullableLocalTimeProperty(override var value: LocalTime? = null) : WritableProperty<LocalTime?>
+data class NullableLocalTimeProperty(override var value: LocalTime? = null) : WritableProperty<LocalTime?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

@@ -22,20 +22,34 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
-@EntityAnnotation(id = 3, name = "TypeClass")
-class Example : Entity() {
+@EntityAnnotation(id = 6, name = "TypeClass")
+data class Example(
+        private val _stringField: WritableProperty<String> = StringProperty(),
+        private val _timeField: WritableProperty<LocalTime> = LocalTimeProperty(),
+        private val _dateField: WritableProperty<LocalDate> = LocalDateProperty(),
+        private val _dateTimeField: WritableProperty<LocalDateTime> = LocalDateTimeProperty(),
+        private val _zonedDateTimeField: WritableProperty<ZonedDateTime> = ZonedDateTimeProperty(),
+        private val _longField: WritableProperty<Long> = LongProperty(),
+        private val _intField: WritableProperty<Int?> = NullableIntegerProperty(),
+        private val _doubleField: WritableProperty<Double> = DoubleProperty(),
+        private val _floatField: WritableProperty<Float> = FloatProperty(),
+        private val _booleanField: WritableProperty<Boolean> = BooleanProperty(),
+        private val _blobField: WritableProperty<ByteArray> = BlobProperty(byteArrayOf(0, 1, 1, 1, 1, 0))
+) : Entity() {
 
-    private val _stringField = map(Fields.String, "")
-    private val _timeField = map(Fields.Time, LocalTime.now())
-    private val _dateField = map(Fields.Date, LocalDate.now())
-    private val _dateTimeField = map(Fields.DateTime, LocalDateTime.now())
-    private val _zonedDateTimeField = map(Fields.ZonedDateTime, ZonedDateTime.now())
-    private val _longField = map(Fields.Long, 0L)
-    private val _intField = map(Fields.Int, NullableIntegerProperty())
-    private val _doubleField = map(Fields.Double, 0.0)
-    private val _floatField = map(Fields.Float, 0f)
-    private val _booleanField = map(Fields.Boolean, false)
-    private val _blobField = map(Fields.Blob, ByteArray(0))
+    init {
+        map(Fields.String, _stringField)
+        map(Fields.Time, _timeField)
+        map(Fields.Date, _dateField)
+        map(Fields.DateTime, _dateTimeField)
+        map(Fields.ZonedDateTime, _zonedDateTimeField)
+        map(Fields.Long, _longField)
+        map(Fields.Int, _intField)
+        map(Fields.Double, _doubleField)
+        map(Fields.Float, _floatField)
+        map(Fields.Boolean, _booleanField)
+        map(Fields.Blob, _blobField)
+    }
 
     var stringField: String
         get() = _stringField.get()
@@ -80,20 +94,4 @@ class Example : Entity() {
     var blobField: ByteArray
         get() = _blobField.get()
         set(booleanField) = _blobField.set(booleanField)
-
-    override fun toString(): String {
-        return "{" +
-                ", overview = $overview" +
-                ", stringField = $stringField" +
-                ", dateField = $dateField" +
-                ", timeField = $timeField" +
-                ", dateTimeField = $dateTimeField" +
-                ", zonedDateTimeField = $zonedDateTimeField" +
-                ", longField = $longField" +
-                ", intField = $intField" +
-                ", doubleField = $doubleField" +
-                ", floatField = $floatField" +
-                ", blobField = $blobField" +
-                ", booleanField = $booleanField}"
-    }
 }

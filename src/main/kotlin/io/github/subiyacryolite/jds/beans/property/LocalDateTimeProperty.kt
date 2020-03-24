@@ -19,4 +19,9 @@ import java.time.LocalDateTime
  * Class allowing for the wrapping and persistence of [LocalDateTime] values
  * @param value the backing value
  */
-data class LocalDateTimeProperty(override var value: LocalDateTime = LocalDateTime.now()) : WritableProperty<LocalDateTime>
+data class LocalDateTimeProperty(override var value: LocalDateTime = LocalDateTime.now()) : WritableProperty<LocalDateTime> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

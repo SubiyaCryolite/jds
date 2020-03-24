@@ -18,29 +18,9 @@ import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.IEntity
 import io.github.subiyacryolite.jds.beans.property.WritableProperty
 import io.github.subiyacryolite.jds.context.DbContext
-import io.github.subiyacryolite.jds.enums.Implementation
 import java.nio.ByteBuffer
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.Temporal
 import java.util.*
-
-private fun ZonedDateTime.toSqlStringFormat(): String = this.format(Extensions.ZonedDateTimeFormat)
-
-private fun LocalTime.toSqlStringFormat(): String = this.format(Extensions.LocalTimeFormat)
-
-private fun LocalDate.toSqlStringFormat(): String = this.format(Extensions.LocalDateFormat)
-
-fun String.toZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(this, Extensions.ZonedDateTimeFormat)
-
-fun String.toLocalTime(): LocalTime = LocalTime.parse(this, Extensions.LocalTimeFormatReadOnly)
-
-fun String.toLocalDate(): LocalDate = LocalDate.parse(this, Extensions.LocalDateFormat)
 
 fun ByteArray?.toUuid(): UUID? = if (this == null) {
     null
@@ -56,73 +36,6 @@ fun UUID?.toByteArray(): ByteArray? = if (this == null) {
     byteBuffer.putLong(this.mostSignificantBits)
     byteBuffer.putLong(this.leastSignificantBits)
     byteBuffer.array()
-}
-
-/**
- * @param value
- * @param input
- * @param dbContext
- */
-fun PreparedStatement.setZonedDateTime(value: Int, input: ZonedDateTime?, dbContext: DbContext) = when (dbContext.implementation) {
-    Implementation.TSql -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.PostGreSql -> this.setObject(value, input?.toOffsetDateTime())
-    Implementation.MySql, Implementation.Oracle, Implementation.MariaDb -> this.setTimestamp(value, if (input != null) Timestamp.from(input.toInstant()) else null)
-    else -> this.setObject(value, input?.toInstant()?.toEpochMilli())
-}
-
-/**
- * @param column
- * @param dbContext
- * @return
- */
-fun ResultSet.getZonedDateTime(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
-    Implementation.TSql -> this.getString(column)
-    Implementation.PostGreSql -> this.getObject(column, java.time.OffsetDateTime::class.java)
-    Implementation.MySql, Implementation.Oracle, Implementation.MariaDb -> this.getTimestamp(column)
-    else -> this.getLong(column)
-}
-
-/**
- * @param value
- * @param input
- * @param dbContext
- */
-fun PreparedStatement.setLocalTime(value: Int, input: LocalTime?, dbContext: DbContext) = when (dbContext.implementation) {
-    Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.PostGreSql -> this.setObject(value, input)
-    else -> this.setObject(value, input?.toNanoOfDay())
-}
-
-/**
- * @param column
- * @param dbContext
- */
-fun ResultSet.getLocalTime(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
-    Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.getString(column)
-    Implementation.PostGreSql -> this.getObject(column, LocalTime::class.java)
-    else -> this.getLong(column)
-}
-
-
-/**
- * @param value
- * @param input
- * @param dbContext
- */
-fun PreparedStatement.setLocalDate(value: Int, input: LocalDate?, dbContext: DbContext) = when (dbContext.implementation) {
-    Implementation.TSql, Implementation.MySql, Implementation.MariaDb -> this.setString(value, input?.toSqlStringFormat())
-    Implementation.PostGreSql -> this.setObject(value, input)
-    else -> this.setTimestamp(value, if (input != null) Timestamp.valueOf(input.atStartOfDay()) else null) //Oracle, Sqlite
-}
-
-/**
- * @param column
- * @param dbContext
- */
-fun ResultSet.getLocalDate(column: String, dbContext: DbContext): Any = when (dbContext.implementation) {
-    Implementation.TSql -> this.getString(column)
-    Implementation.PostGreSql -> this.getObject(column, LocalDate::class.java)
-    else -> this.getTimestamp(column)//Oracle, Sqlite, maria,sql
 }
 
 /**
@@ -160,7 +73,29 @@ internal fun <T> Map<Int, WritableProperty<T>>.filterIgnored(dbContext: DbContex
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterCollection")
-internal fun <T> Map<Int, MutableCollection<T>>.filterIgnored(dbContext: DbContext): Map<Int, MutableCollection<T>>  = if (dbContext.options.ignoreTags.isEmpty()) {
+internal fun <T> Map<Int, MutableCollection<T>>.filterIgnored(dbContext: DbContext): Map<Int, MutableCollection<T>> = if (dbContext.options.ignoreTags.isEmpty()) {
+    this
+} else {
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
+}
+
+@JvmName("filterIntMap")
+internal fun Map<Int, MutableMap<Int, String>>.filterIgnored(dbContext: DbContext): Map<Int, MutableMap<Int, String>> = if (dbContext.options.ignoreTags.isEmpty()) {
+    this
+} else {
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
+}
+
+@JvmName("filterStringMap")
+internal fun Map<Int, MutableMap<String, String>>.filterIgnored(dbContext: DbContext): Map<Int, MutableMap<String, String>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
     this.filter { kvp ->
@@ -171,11 +106,6 @@ internal fun <T> Map<Int, MutableCollection<T>>.filterIgnored(dbContext: DbConte
 }
 
 object Extensions {
-
-    val LocalDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val ZonedDateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSS xxx")
-    val LocalTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSS")
-    val LocalTimeFormatReadOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("[HH:mm:ss.SSSSSSS][HH:mm:ss]")
 
     /**
      * @param entity

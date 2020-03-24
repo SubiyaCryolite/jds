@@ -28,6 +28,7 @@ import io.github.subiyacryolite.jds.Validate.validateFloat
 import io.github.subiyacryolite.jds.Validate.validateFloatCollection
 import io.github.subiyacryolite.jds.Validate.validateInt
 import io.github.subiyacryolite.jds.Validate.validateIntCollection
+import io.github.subiyacryolite.jds.Validate.validateIntMap
 import io.github.subiyacryolite.jds.Validate.validateLong
 import io.github.subiyacryolite.jds.Validate.validateLongCollection
 import io.github.subiyacryolite.jds.Validate.validateMonthDay
@@ -36,6 +37,7 @@ import io.github.subiyacryolite.jds.Validate.validateShort
 import io.github.subiyacryolite.jds.Validate.validateShortCollection
 import io.github.subiyacryolite.jds.Validate.validateString
 import io.github.subiyacryolite.jds.Validate.validateStringCollection
+import io.github.subiyacryolite.jds.Validate.validateStringMap
 import io.github.subiyacryolite.jds.Validate.validateTime
 import io.github.subiyacryolite.jds.Validate.validateUuid
 import io.github.subiyacryolite.jds.Validate.validateUuidCollection
@@ -47,7 +49,6 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.extensions.filterIgnored
 import io.github.subiyacryolite.jds.extensions.toByteArray
-import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.portable.*
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import java.io.Serializable
@@ -57,116 +58,125 @@ import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
  * [IOverview] to store overview data
  */
 abstract class Entity : IEntity {
+    
     @set:JsonIgnore
     @get:JsonIgnore
     final override var overview: IOverview = Overview()
 
     //temporals
     @get:JsonIgnore
-    internal val localDateTimeValues: HashMap<Int, WritableProperty<LocalDateTime?>> = HashMap()
+    internal val localDateTimeValues: MutableMap<Int, WritableProperty<LocalDateTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val zonedDateTimeValues: HashMap<Int, WritableProperty<ZonedDateTime?>> = HashMap()
+    internal val zonedDateTimeValues: MutableMap<Int, WritableProperty<ZonedDateTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val localDateValues: HashMap<Int, WritableProperty<LocalDate?>> = HashMap()
+    internal val localDateValues: MutableMap<Int, WritableProperty<LocalDate?>> = HashMap()
 
     @get:JsonIgnore
-    internal val localTimeValues: HashMap<Int, WritableProperty<LocalTime?>> = HashMap()
+    internal val localTimeValues: MutableMap<Int, WritableProperty<LocalTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val monthDayValues: HashMap<Int, WritableProperty<MonthDay?>> = HashMap()
+    internal val monthDayValues: MutableMap<Int, WritableProperty<MonthDay?>> = HashMap()
 
     @get:JsonIgnore
-    internal val yearMonthValues: HashMap<Int, WritableProperty<YearMonth?>> = HashMap()
+    internal val yearMonthValues: MutableMap<Int, WritableProperty<YearMonth?>> = HashMap()
 
     @get:JsonIgnore
-    internal val periodValues: HashMap<Int, WritableProperty<Period?>> = HashMap()
+    internal val periodValues: MutableMap<Int, WritableProperty<Period?>> = HashMap()
 
     @get:JsonIgnore
-    internal val durationValues: HashMap<Int, WritableProperty<Duration?>> = HashMap()
+    internal val durationValues: MutableMap<Int, WritableProperty<Duration?>> = HashMap()
 
     //strings
     @get:JsonIgnore
-    internal val stringValues: HashMap<Int, WritableProperty<String?>> = HashMap()
+    internal val stringValues: MutableMap<Int, WritableProperty<String?>> = HashMap()
 
     //boolean
     @get:JsonIgnore
-    internal val booleanValues: HashMap<Int, WritableProperty<Boolean?>> = HashMap()
+    internal val booleanValues: MutableMap<Int, WritableProperty<Boolean?>> = HashMap()
 
     //numeric
     @get:JsonIgnore
-    internal val shortValues: HashMap<Int, WritableProperty<Short?>> = HashMap()
+    internal val shortValues: MutableMap<Int, WritableProperty<Short?>> = HashMap()
 
     @get:JsonIgnore
-    internal val floatValues: HashMap<Int, WritableProperty<Float?>> = HashMap()
+    internal val floatValues: MutableMap<Int, WritableProperty<Float?>> = HashMap()
 
     @get:JsonIgnore
-    internal val doubleValues: HashMap<Int, WritableProperty<Double?>> = HashMap()
+    internal val doubleValues: MutableMap<Int, WritableProperty<Double?>> = HashMap()
 
     @get:JsonIgnore
-    internal val longValues: HashMap<Int, WritableProperty<Long?>> = HashMap()
+    internal val longValues: MutableMap<Int, WritableProperty<Long?>> = HashMap()
 
     @get:JsonIgnore
-    internal val integerValues: HashMap<Int, WritableProperty<Int?>> = HashMap()
+    internal val integerValues: MutableMap<Int, WritableProperty<Int?>> = HashMap()
 
     @get:JsonIgnore
-    internal val uuidValues: HashMap<Int, WritableProperty<UUID?>> = HashMap()
+    internal val uuidValues: MutableMap<Int, WritableProperty<UUID?>> = HashMap()
 
     //collections
     @get:JsonIgnore
-    internal val objectCollections: HashMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
+    internal val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
 
     @get:JsonIgnore
-    internal val stringCollections: HashMap<Int, MutableCollection<String>> = HashMap()
+    internal val stringCollections: MutableMap<Int, MutableCollection<String>> = HashMap()
 
     @get:JsonIgnore
-    internal val dateTimeCollections: HashMap<Int, MutableCollection<LocalDateTime>> = HashMap()
+    internal val dateTimeCollections: MutableMap<Int, MutableCollection<LocalDateTime>> = HashMap()
 
     @get:JsonIgnore
-    internal val floatCollections: HashMap<Int, MutableCollection<Float>> = HashMap()
+    internal val floatCollections: MutableMap<Int, MutableCollection<Float>> = HashMap()
 
     @get:JsonIgnore
-    internal val doubleCollections: HashMap<Int, MutableCollection<Double>> = HashMap()
+    internal val doubleCollections: MutableMap<Int, MutableCollection<Double>> = HashMap()
 
     @get:JsonIgnore
-    internal val longCollections: HashMap<Int, MutableCollection<Long>> = HashMap()
+    internal val longCollections: MutableMap<Int, MutableCollection<Long>> = HashMap()
 
     @get:JsonIgnore
-    internal val integerCollections: HashMap<Int, MutableCollection<Int>> = HashMap()
+    internal val integerCollections: MutableMap<Int, MutableCollection<Int>> = HashMap()
 
     @get:JsonIgnore
-    internal val shortCollections: HashMap<Int, MutableCollection<Short>> = HashMap()
+    internal val shortCollections: MutableMap<Int, MutableCollection<Short>> = HashMap()
 
     @get:JsonIgnore
-    internal val uuidCollections: HashMap<Int, MutableCollection<UUID>> = HashMap()
+    internal val uuidCollections: MutableMap<Int, MutableCollection<UUID>> = HashMap()
 
     //enums
     @get:JsonIgnore
-    internal val enumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+    internal val enumValues: MutableMap<Int, WritableProperty<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
-    internal val stringEnumValues: HashMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+    internal val stringEnumValues: MutableMap<Int, WritableProperty<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
-    internal val enumCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
+    internal val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
 
     @get:JsonIgnore
-    internal val enumStringCollections: HashMap<Int, MutableCollection<Enum<*>>> = HashMap()
+    internal val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
 
     //objects
     @get:JsonIgnore
-    internal val objectValues: HashMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
+    internal val objectValues: MutableMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
+
+    //maps
+    @get:JsonIgnore
+    internal val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap()
+
+    @get:JsonIgnore
+    internal val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap()
 
     //blobs
     @get:JsonIgnore
-    internal val blobValues: HashMap<Int, WritableProperty<ByteArray?>> = HashMap()
+    internal val blobValues: MutableMap<Int, WritableProperty<ByteArray?>> = HashMap()
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -555,6 +565,20 @@ abstract class Entity : IEntity {
         return longCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
     }
 
+    @JvmName("mapIntMap")
+    protected fun map(field: Field, map: MutableMap<Int, String>, propertyName: String = ""): MutableMap<Int, String> {
+        validateIntMap(field)
+        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
+        return mapIntKeyValues.getOrPut(mapField(overview.entityId, field.bind())) { map }
+    }
+
+    @JvmName("mapStringMap")
+    protected fun map(field: Field, map: MutableMap<String, String>, propertyName: String = ""): MutableMap<String, String> {
+        validateStringMap(field)
+        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
+        return mapStringKeyValues.getOrPut(mapField(overview.entityId, field.bind())) { map }
+    }
+
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
         if (fieldEnum.field.type != FieldType.EnumCollection && fieldEnum.field.type != FieldType.EnumStringCollection) {
@@ -628,405 +652,111 @@ abstract class Entity : IEntity {
         this.overview.entityId = source.overview.entityId
 
         localDateTimeValues.clear()
-        localDateTimeValues.putAll(DeepCopy.clone(source.localDateTimeValues)!!)
+        localDateTimeValues.putAll(DeepCopy.clone(source.localDateTimeValues))
 
         zonedDateTimeValues.clear()
-        zonedDateTimeValues.putAll(DeepCopy.clone(source.zonedDateTimeValues)!!)
+        zonedDateTimeValues.putAll(DeepCopy.clone(source.zonedDateTimeValues))
 
         localDateValues.clear()
-        localDateValues.putAll(DeepCopy.clone(source.localDateValues)!!)
+        localDateValues.putAll(DeepCopy.clone(source.localDateValues))
 
         localTimeValues.clear()
-        localTimeValues.putAll(DeepCopy.clone(source.localTimeValues)!!)
+        localTimeValues.putAll(DeepCopy.clone(source.localTimeValues))
 
         monthDayValues.clear()
-        monthDayValues.putAll(DeepCopy.clone(source.monthDayValues)!!)
+        monthDayValues.putAll(DeepCopy.clone(source.monthDayValues))
 
         yearMonthValues.clear()
-        yearMonthValues.putAll(DeepCopy.clone(source.yearMonthValues)!!)
+        yearMonthValues.putAll(DeepCopy.clone(source.yearMonthValues))
 
         periodValues.clear()
-        periodValues.putAll(DeepCopy.clone(source.periodValues)!!)
+        periodValues.putAll(DeepCopy.clone(source.periodValues))
 
         durationValues.clear()
-        durationValues.putAll(DeepCopy.clone(source.durationValues)!!)
+        durationValues.putAll(DeepCopy.clone(source.durationValues))
 
         stringValues.clear()
-        stringValues.putAll(DeepCopy.clone(source.stringValues)!!)
+        stringValues.putAll(DeepCopy.clone(source.stringValues))
 
         booleanValues.clear()
-        booleanValues.putAll(DeepCopy.clone(source.booleanValues)!!)
+        booleanValues.putAll(DeepCopy.clone(source.booleanValues))
 
         floatValues.clear()
-        floatValues.putAll(DeepCopy.clone(source.floatValues)!!)
+        floatValues.putAll(DeepCopy.clone(source.floatValues))
 
         doubleValues.clear()
-        doubleValues.putAll(DeepCopy.clone(source.doubleValues)!!)
+        doubleValues.putAll(DeepCopy.clone(source.doubleValues))
 
         shortValues.clear()
-        shortValues.putAll(DeepCopy.clone(source.shortValues)!!)
+        shortValues.putAll(DeepCopy.clone(source.shortValues))
 
         longValues.clear()
-        longValues.putAll(DeepCopy.clone(source.longValues)!!)
+        longValues.putAll(DeepCopy.clone(source.longValues))
 
         integerValues.clear()
-        integerValues.putAll(DeepCopy.clone(source.integerValues)!!)
+        integerValues.putAll(DeepCopy.clone(source.integerValues))
 
         uuidValues.clear()
-        uuidValues.putAll(DeepCopy.clone(source.uuidValues)!!)
+        uuidValues.putAll(DeepCopy.clone(source.uuidValues))
 
         objectCollections.clear()
-        objectCollections.putAll(DeepCopy.clone(source.objectCollections)!!)
+        objectCollections.putAll(DeepCopy.clone(source.objectCollections))
 
         stringCollections.clear()
-        stringCollections.putAll(DeepCopy.clone(source.stringCollections)!!)
+        stringCollections.putAll(DeepCopy.clone(source.stringCollections))
 
         dateTimeCollections.clear()
-        dateTimeCollections.putAll(DeepCopy.clone(source.dateTimeCollections)!!)
+        dateTimeCollections.putAll(DeepCopy.clone(source.dateTimeCollections))
 
         floatCollections.clear()
-        floatCollections.putAll(DeepCopy.clone(source.floatCollections)!!)
+        floatCollections.putAll(DeepCopy.clone(source.floatCollections))
 
         doubleCollections.clear()
-        doubleCollections.putAll(DeepCopy.clone(source.doubleCollections)!!)
+        doubleCollections.putAll(DeepCopy.clone(source.doubleCollections))
 
         longCollections.clear()
-        longCollections.putAll(DeepCopy.clone(source.longCollections)!!)
+        longCollections.putAll(DeepCopy.clone(source.longCollections))
 
         integerCollections.clear()
-        integerCollections.putAll(DeepCopy.clone(source.integerCollections)!!)
+        integerCollections.putAll(DeepCopy.clone(source.integerCollections))
 
         shortCollections.clear()
-        shortCollections.putAll(DeepCopy.clone(source.shortCollections)!!)
+        shortCollections.putAll(DeepCopy.clone(source.shortCollections))
 
         uuidCollections.clear()
-        uuidCollections.putAll(DeepCopy.clone(source.uuidCollections)!!)
+        uuidCollections.putAll(DeepCopy.clone(source.uuidCollections))
 
         enumValues.clear()
-        enumValues.putAll(DeepCopy.clone(source.enumValues)!!)
+        enumValues.putAll(DeepCopy.clone(source.enumValues))
 
         stringEnumValues.clear()
-        stringEnumValues.putAll(DeepCopy.clone(source.stringEnumValues)!!)
+        stringEnumValues.putAll(DeepCopy.clone(source.stringEnumValues))
 
         enumCollections.clear()
-        enumCollections.putAll(DeepCopy.clone(source.enumCollections)!!)
+        enumCollections.putAll(DeepCopy.clone(source.enumCollections))
 
         enumStringCollections.clear()
-        enumStringCollections.putAll(DeepCopy.clone(source.enumStringCollections)!!)
+        enumStringCollections.putAll(DeepCopy.clone(source.enumStringCollections))
 
         objectValues.clear()
-        objectValues.putAll(DeepCopy.clone(source.objectValues)!!)
+        objectValues.putAll(DeepCopy.clone(source.objectValues))
 
         blobValues.clear()
-        blobValues.putAll(DeepCopy.clone(source.blobValues)!!)
+        blobValues.putAll(DeepCopy.clone(source.blobValues))
+
+        mapStringKeyValues.clear()
+        mapStringKeyValues.putAll(DeepCopy.clone(source.mapStringKeyValues))
+
+        mapIntKeyValues.clear()
+        mapIntKeyValues.putAll(DeepCopy.clone(source.mapIntKeyValues))
     }
 
-    /**
-     * Implementation ignores null values by default on the assumption that nullable values have default values of null
-     * @param portableEntity
-     */
-    @Throws(Exception::class)
-    override fun assign(dbContext: DbContext, portableEntity: PortableEntity) {
-        //==============================================
-        //PRIMITIVES, also saved to array struct to streamline json
-        //==============================================
-        booleanValues.filterIgnored(dbContext).forEach { entry ->
-            val input = when (entry.value.value) {
-                true -> 1
-                false -> 0
-                else -> null
-            }
-            portableEntity.booleanValues.add(StoreBoolean(entry.key, input))
-        }
-        stringValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.stringValues.add(StoreString(entry.key, entry.value.value))
-        }
-        floatValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
-        }
-        doubleValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
-        }
-        shortValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
-        }
-        longValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
-        }
-        integerValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
-        }
-        uuidValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
-        }
-        //==============================================
-        //Dates & Time
-        //==============================================
-        zonedDateTimeValues.filterIgnored(dbContext).forEach { entry ->
-            val zonedDateTime = entry.value.value as ZonedDateTime?
-            portableEntity.zonedDateTimeValues.add(StoreZonedDateTime(entry.key, zonedDateTime?.toInstant()?.toEpochMilli()))
-        }
-        localTimeValues.filterIgnored(dbContext).forEach { entry ->
-            val localTime = entry.value.value as LocalTime?
-            portableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
-        }
-        durationValues.filterIgnored(dbContext).forEach { entry ->
-            val duration = entry.value.value
-            portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
-        }
-        localDateTimeValues.filterIgnored(dbContext).forEach { entry ->
-            val localDateTime = entry.value.value as LocalDateTime?
-            portableEntity.dateTimeValues.add(StoreDateTime(entry.key, localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()))
-        }
-        localDateValues.filterIgnored(dbContext).forEach { entry ->
-            val localDate = entry.value.value as LocalDate?
-            portableEntity.dateValues.add(StoreDate(entry.key, localDate?.toEpochDay()))
-        }
-        monthDayValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
-        }
-        yearMonthValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
-        }
-        periodValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
-        }
-        //==============================================
-        //BLOB
-        //==============================================
-        blobValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
-        }
-        //==============================================
-        //Enums
-        //==============================================
-        enumValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
-        }
-        stringEnumValues.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
-        }
-        enumCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
-        }
-        enumStringCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
-        }
-        //==============================================
-        //ARRAYS
-        //==============================================
-        stringCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
-        }
-        dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.dateTimeCollection.add(StoreDateTimeCollection(entry.key, toTimeStampCollection(entry.value)))
-        }
-        floatCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
-        }
-        doubleCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
-        }
-        longCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
-        }
-        integerCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
-        }
-        shortCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
-        }
-        uuidCollections.filterIgnored(dbContext).forEach { entry ->
-            portableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
-        }
-        //==============================================
-        //EMBEDDED OBJECTS
-        //==============================================
-        objectCollections.forEach { (fieldEntity, mutableCollection) ->
-            mutableCollection.forEach { entity ->
-                val embeddedObject = PortableEntity()
-                embeddedObject.fieldId = fieldEntity.field.id
-                embeddedObject.init(dbContext, entity)
-                portableEntity.entityOverviews.add(embeddedObject)
-            }
-        }
-        objectValues.forEach { (fieldEntity, objectWritableProperty) ->
-            val embeddedPortableEntity = PortableEntity()
-            embeddedPortableEntity.fieldId = fieldEntity.field.id
-            embeddedPortableEntity.init(dbContext, objectWritableProperty.value)
-            portableEntity.entityOverviews.add(embeddedPortableEntity)
-        }
-    }
-
-    private fun toByteArrayCollection(values: MutableCollection<UUID>): MutableCollection<ByteArray> {
-        val output = ArrayList<ByteArray>()
-        values.forEach { value ->
-            output.add(value.toByteArray()!!)
-        }
-        return output
-    }
-
-    /**
-     * @param fieldType
-     * @param fieldId
-     * @param value
-     */
-    internal fun populateProperties(dbContext: DbContext, fieldType: FieldType, fieldId: Int, value: Any?) {
-
+    internal fun populateProperty(dbContext: DbContext, fieldId: Int, fieldType: FieldType): Boolean {
         if (dbContext.options.ignoreTags.any { tag -> Field.values[fieldId]!!.tags.contains(tag) }) {
-            return
+            return false
         }
-
         initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
-
-        when (fieldType) {
-            FieldType.Float -> {
-                floatValues[fieldId]?.value = value as Float?
-            }
-            FieldType.Double -> {
-                doubleValues[fieldId]?.value = value as Double?
-            }
-            FieldType.Short -> {
-                shortValues[fieldId]?.value = value as Short?
-            }
-            FieldType.Long -> {
-                longValues[fieldId]?.value = value as Long?
-            }
-            FieldType.Int -> {
-                integerValues[fieldId]?.value = value as Int?
-            }
-            FieldType.Uuid -> {
-                uuidValues[fieldId]?.value = (value as ByteArray?)?.toUuid()
-            }
-            FieldType.Boolean -> {
-                booleanValues[fieldId]?.value = when (value) {
-                    is Int -> value == 1
-                    else -> null
-                }
-            }
-            FieldType.DoubleCollection -> {
-                doubleCollections[fieldId]?.add(value as Double)
-            }
-            FieldType.FloatCollection -> {
-                floatCollections[fieldId]?.add(value as Float)
-            }
-            FieldType.LongCollection -> {
-                longCollections[fieldId]?.add(value as Long)
-            }
-            FieldType.IntCollection -> {
-                integerCollections[fieldId]?.add(value as Int)
-            }
-            FieldType.ShortCollection -> {
-                shortCollections[fieldId]?.add(value as Short)
-            }
-            FieldType.UuidCollection -> {
-                uuidCollections[fieldId]?.add((value as ByteArray).toUuid()!!)
-            }
-            FieldType.Enum -> {
-                enumValues.filter { entry ->
-                    entry.key == fieldId
-                }.forEach { entry ->
-                    val fieldEnum = FieldEnum.enums[entry.key]
-                    if (fieldEnum != null) {
-                        if (value != null) {
-                            entry.value.value = fieldEnum.valueOf(value as Int)
-                        }
-                    }
-                }
-            }
-            FieldType.EnumString -> {
-                enumValues.filter { entry ->
-                    entry.key == fieldId
-                }.forEach { entry ->
-                    val fieldEnum = FieldEnum.enums[entry.key]
-                    if (fieldEnum != null)
-                        entry.value.value = fieldEnum.valueOf(value as String)
-                }
-            }
-            FieldType.EnumCollection -> {
-                //Enum collections should NOT accept nulls. Unknown collection should be skipped
-                enumCollections.filter { entry ->
-                    entry.key == fieldId
-                }.forEach { entry ->
-                    val fieldEnum = FieldEnum.enums[entry.key]
-                    if (fieldEnum != null) {
-                        val enumValues = fieldEnum.values
-                        val ordinal = value as Int
-                        if (ordinal < enumValues.size) {
-                            entry.value.add(enumValues.find { enumValue -> enumValue.ordinal == ordinal }!!)
-                        }
-                    }
-                }
-            }
-            FieldType.EnumStringCollection -> {
-                //Enum collections should NOT accept nulls. Unknown collection should be skipped
-                enumStringCollections.filter { entry ->
-                    entry.key == fieldId
-                }.forEach { entry ->
-                    val fieldEnum = FieldEnum.enums[entry.key]
-                    if (fieldEnum != null) {
-                        val enumStr = value.toString()
-                        val enumVal = fieldEnum.valueOf(enumStr)
-                        if (enumVal != null)
-                            entry.value.add(enumVal)
-                    }
-                }
-            }
-            FieldType.String -> {
-                stringValues[fieldId]?.value = (value as String?)
-            }
-            FieldType.StringCollection -> {
-                stringCollections[fieldId]?.add(value as String)
-            }
-            FieldType.DateTime -> {
-                localDateTimeValues[fieldId]?.value = (when (value) {
-                    is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
-                    else -> null
-                })
-            }
-            FieldType.ZonedDateTime -> {
-                zonedDateTimeValues[fieldId]?.value = when (value) {
-                    is Long -> ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
-                    else -> null
-                }
-            }
-            FieldType.Date -> {
-                localDateValues[fieldId]?.value = when (value) {
-                    is Long -> LocalDate.ofEpochDay(value)
-                    else -> null
-                }
-            }
-            FieldType.Time -> {
-                localTimeValues[fieldId]?.value = when (value) {
-                    is Long -> LocalTime.ofNanoOfDay(value)
-                    else -> null
-                }
-            }
-            FieldType.Duration -> {
-                durationValues[fieldId]?.value = (when (value) {
-                    is Long -> Duration.ofNanos(value)
-                    else -> null
-                })
-            }
-            FieldType.MonthDay -> {
-                monthDayValues[fieldId]?.value = if (value is String) MonthDay.parse(value) else null
-            }
-            FieldType.YearMonth -> {
-                yearMonthValues[fieldId]?.value = if (value is String) YearMonth.parse(value) else null
-            }
-            FieldType.Period -> {
-                periodValues[fieldId]?.value = if (value is String) Period.parse(value) else null
-            }
-            FieldType.DateTimeCollection -> {
-                dateTimeCollections[fieldId]?.add((value as Timestamp).toLocalDateTime())
-            }
-            FieldType.Blob -> when (value) {
-                is ByteArray -> blobValues[fieldId]?.value = value
-                null -> blobValues[fieldId]?.value = ByteArray(0)//Oracle
-            }
-            else -> {
-            }
-        }
+        return true
     }
 
     /**
@@ -1095,7 +825,7 @@ abstract class Entity : IEntity {
                 enumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.EnumString -> if (!stringEnumValues.containsKey(fieldId)) {
-                stringEnumValues[fieldId]  = ObjectProperty<Enum<*>?>(null)
+                stringEnumValues[fieldId] = ObjectProperty<Enum<*>?>(null)
             }
             FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
                 floatValues[fieldId] = NullableFloatProperty()
@@ -1117,6 +847,12 @@ abstract class Entity : IEntity {
             }
             FieldType.Boolean -> if (!booleanValues.containsKey(fieldId)) {
                 booleanValues[fieldId] = NullableBooleanProperty()
+            }
+            FieldType.MapIntKey -> if (!mapIntKeyValues.containsKey(fieldId)) {
+                mapIntKeyValues[fieldId] = HashMap()
+            }
+            FieldType.MapStringKey -> if (!mapStringKeyValues.containsKey(fieldId)) {
+                mapStringKeyValues[fieldId] = HashMap()
             }
         }
 
@@ -1147,12 +883,10 @@ abstract class Entity : IEntity {
                 val entity = dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance()
                 entity.overview.id = id
                 entity.overview.editVersion = editVersion
-
                 if (entity is IEntity) {
                     kvp.value.add(entity)
                 }
                 innerObjects.add(entity)
-
                 compositeKeys.add(CompositeKey(id, editVersion))
             }
             objectValues.filter { entry ->
@@ -1163,7 +897,6 @@ abstract class Entity : IEntity {
                 entry.value.value.overview.editVersion = editVersion
                 val jdsEntity = entry.value.value as Entity
                 innerObjects.add(jdsEntity)
-
                 compositeKeys.add(CompositeKey(id, editVersion))
             }
         } catch (ex: Exception) {
@@ -1323,20 +1056,6 @@ abstract class Entity : IEntity {
         ex.printStackTrace(System.err)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return javaClass.hashCode()
-    }
-
-    override fun toString(): String {
-        return "JdsEntity(uuid=${overview.id},editVersion=${overview.editVersion},entityId=${overview.entityId})"
-    }
-
     companion object : Serializable {
 
         private const val serialVersionUID = 20180106_2125L
@@ -1386,12 +1105,6 @@ abstract class Entity : IEntity {
             getEnums(entityId).add(fieldId)
             return fieldId
         }
-
-        private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }.toMutableList()
-
-        private fun toIntCollection(values: MutableCollection<Enum<*>>) = values.map { it.ordinal }.toMutableList()
-
-        private fun toStringCollection(values: MutableCollection<Enum<*>>) = values.map { it.name }.toMutableList()
 
         private fun getFields(entityId: Int) = allFields.getOrPut(entityId) { LinkedHashSet() }
 

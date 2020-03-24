@@ -19,4 +19,9 @@ import java.time.Duration
  * Class allowing for the wrapping and persistence of [Duration] values
  * @param value the backing value
  */
-data class NullableDurationProperty(override var value: Duration? = null) : WritableProperty<Duration?>
+data class NullableDurationProperty(override var value: Duration? = null) : WritableProperty<Duration?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

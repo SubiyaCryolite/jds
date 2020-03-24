@@ -18,23 +18,19 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.tests.constants.Enums
 import io.github.subiyacryolite.jds.tests.enums.Right
 
-@EntityAnnotation(name = "Login", id = 7900)
-class Login : Entity() {
-
-    private val _rights = ArrayList<Right>()
+@EntityAnnotation(name = "Login", id = 7)
+data class Login(
+        private val _rights: MutableCollection<Right> = ArrayList()
+) : Entity() {
 
     init {
         map(Enums.Rights, _rights)
     }
 
-    var rights: MutableList<Right>
+    var rights: MutableCollection<Right>
         get() = _rights
         set(value) {
             _rights.clear()
             _rights.addAll(value)
         }
-
-    override fun toString(): String {
-        return "Login(rights=$rights)"
-    }
 }

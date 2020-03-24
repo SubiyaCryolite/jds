@@ -19,12 +19,13 @@ import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.*
 
-@EntityAnnotation(name = "TimeConstruct", id = 8000)
-class TimeConstruct : Entity() {
-    private val _period = PeriodProperty(Period.ZERO)
-    private val _duration = DurationProperty(Duration.ZERO)
-    private val _monthDay = MonthDayProperty(MonthDay.of(Month.APRIL, 14))
-    private val _yearMonth = YearMonthProperty(YearMonth.of(1991, 7))
+@EntityAnnotation(name = "TimeConstruct", id = 9)
+data class TimeConstruct(
+        private val _period: WritableProperty<Period> = PeriodProperty(Period.ZERO),
+        private val _duration: WritableProperty<Duration> = DurationProperty(Duration.ZERO),
+        private val _monthDay: WritableProperty<MonthDay> = MonthDayProperty(MonthDay.of(Month.APRIL, 14)),
+        private val _yearMonth: WritableProperty<YearMonth> = YearMonthProperty(YearMonth.of(1991, 7))
+) : Entity() {
 
     init {
         map(Fields.Period, _period)
@@ -48,12 +49,4 @@ class TimeConstruct : Entity() {
     var yearMonth: YearMonth
         get() = _yearMonth.get()
         set(value) = _yearMonth.set(value)
-
-    override fun toString(): String {
-        return "{ period = $period" +
-                ", duration = $duration" +
-                ", monthDay = $monthDay" +
-                ", yearMonth = $yearMonth " +
-                "}"
-    }
 }

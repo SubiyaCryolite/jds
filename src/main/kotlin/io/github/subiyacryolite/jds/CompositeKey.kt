@@ -13,4 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
-internal data class CompositeKey(val id: String = "", val editVersion: Int = 0)
+internal data class CompositeKey(
+        val id: String = "",
+        val editVersion: Int = 0
+)

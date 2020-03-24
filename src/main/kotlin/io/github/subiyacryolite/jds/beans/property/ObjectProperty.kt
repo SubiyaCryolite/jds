@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Base class allowing for the wrapping and persistence of [Object] values
  * @param value the initial value
  */
-data class ObjectProperty<T>(override var value: T) : WritableProperty<T>
+data class ObjectProperty<T>(override var value: T) : WritableProperty<T> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

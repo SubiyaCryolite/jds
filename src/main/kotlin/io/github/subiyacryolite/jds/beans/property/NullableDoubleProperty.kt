@@ -17,4 +17,9 @@ package io.github.subiyacryolite.jds.beans.property
  * Class allowing for the wrapping and persistence of [Double] values
  * @param value the backing value
  */
-data class NullableDoubleProperty(override var value: Double? = null) : WritableProperty<Double?>
+data class NullableDoubleProperty(override var value: Double? = null) : WritableProperty<Double?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

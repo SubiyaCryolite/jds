@@ -19,4 +19,9 @@ import java.time.YearMonth
  * Class allowing for the wrapping and persistence of [YearMonth] values
  * @param value the backing value
  */
-data class NullableYearMonthProperty(override var value: YearMonth? = null) : WritableProperty<YearMonth?>
+data class NullableYearMonthProperty(override var value: YearMonth? = null) : WritableProperty<YearMonth?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

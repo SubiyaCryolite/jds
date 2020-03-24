@@ -18,74 +18,73 @@ package io.github.subiyacryolite.jds.enums;
  * Each enum contains the components name as well as an optional alias primarily used to create
  * joins that implement search [io.github.subiyacryolite.jds.Filter].
  * @param table the component name
- * @param alias the component alias
  */
-enum class Table(val table: String, val alias: String) {
+enum class Table(val table: String) {
 
     /**
      *
      */
-    FieldDictionary("field_dictionary", "f"),
-    
-    /**
-     *
-     */
-    EntityBinding("entity_binding", "eb"),
+    FieldDictionary("field_dictionary"),
 
     /**
      *
      */
-    Entity("entity", "je"),
+    EntityBinding("entity_binding"),
 
     /**
      *
      */
-    EntityEnum("entity_enum", "jee"),
+    Entity("entity"),
 
     /**
      *
      */
-    EntityField("entity_field", "jef"),
+    EntityEnum("entity_enum"),
 
     /**
      *
      */
-    EntityTag("entity_tag", "jet"),
+    EntityField("entity_field"),
 
     /**
      *
      */
-    FieldEntity("field_entity", "bfe"),
+    EntityTag("entity_tag"),
 
     /**
      *
      */
-    Enum("enum", "env"),
+    FieldEntity("field_entity"),
 
     /**
      *
      */
-    FieldType("field_type", "ft"),
+    Enum("enum"),
 
     /**
      *
      */
-    Field("field", "f"),
+    FieldType("field_type"),
 
     /**
      *
      */
-    EntityInheritance("entity_inheritance", "ei"),
+    Field("field"),
 
     /**
      *
      */
-    FieldTag("field_tag", "ft"),
+    EntityInheritance("entity_inheritance"),
 
     /**
      *
      */
-    FieldAlternateCode("field_alternate_code", "fac");
+    FieldTag("field_tag"),
+
+    /**
+     *
+     */
+    FieldAlternateCode("field_alternate_code");
 
     override fun toString(): String {
         return table

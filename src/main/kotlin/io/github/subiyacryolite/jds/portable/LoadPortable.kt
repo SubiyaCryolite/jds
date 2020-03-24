@@ -14,8 +14,11 @@
 package io.github.subiyacryolite.jds.portable
 
 import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.FieldEnum
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
+import io.github.subiyacryolite.jds.extensions.toUuid
+import java.time.*
 import java.util.concurrent.Callable
 
 class LoadPortable<T : Entity>(private val dbContext: DbContext, private val referenceType: Class<T>, private vararg val container: PortableContainer) : Callable<MutableCollection<T>> {
@@ -43,116 +46,291 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
      * @param portableEntity
      */
     @Throws(Exception::class)
-    private fun populate(dbContext: DbContext, entity: Entity, portableEntity: PortableEntity) {
+    private fun populate(
+            dbContext: DbContext,
+            entity: Entity,
+            portableEntity: PortableEntity
+    ) {
         entity.overview.entityId = portableEntity.overview.entityId
         entity.overview.id = portableEntity.overview.id
         entity.overview.editVersion = portableEntity.overview.editVersion
         //==============================================
-        portableEntity.blobValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Blob, kvp.key, kvp.value)
-        }
-        portableEntity.booleanValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Boolean, kvp.key, kvp.value)
-        }
-        portableEntity.dateValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Date, kvp.key, kvp.value)
-        }
-        portableEntity.doubleValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Double, kvp.key, kvp.value)
-        }
-        portableEntity.durationValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Duration, kvp.key, kvp.value)
-        }
-        portableEntity.dateTimeValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.DateTime, kvp.key, kvp.value)
-        }
-        portableEntity.floatValue.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Float, kvp.key, kvp.value)
-        }
-        portableEntity.integerValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Int, kvp.key, kvp.value)
-        }
-        portableEntity.shortValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Short, kvp.key, kvp.value)
-        }
-        portableEntity.uuidValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Uuid, kvp.key, kvp.value)
-        }
-        portableEntity.longValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Long, kvp.key, kvp.value)
-        }
-        portableEntity.monthDayValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.MonthDay, kvp.key, kvp.value)
-        }
-        portableEntity.periodValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Period, kvp.key, kvp.value)
-        }
-        portableEntity.stringValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.String, kvp.key, kvp.value)
-        }
-        portableEntity.timeValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Time, kvp.key, kvp.value)
-        }
-        portableEntity.yearMonthValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.YearMonth, kvp.key, kvp.value)
-        }
-        portableEntity.zonedDateTimeValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.ZonedDateTime, kvp.key, kvp.value)
-        }
-        portableEntity.enumValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.Enum, kvp.key, kvp.value)
-        }
-        portableEntity.enumStringValues.forEach { kvp ->
-            entity.populateProperties(dbContext, FieldType.EnumString, kvp.key, kvp.value)
-        }
-        portableEntity.dateTimeCollection.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.DateTimeCollection, collection.key, entry)
+        portableEntity.blobValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Blob)) {
+                entity.blobValues.getValue(fieldId).value = when (value) {
+                    is ByteArray -> value
+                    else -> null
+                }
             }
         }
-        portableEntity.doubleCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.DoubleCollection, collection.key, entry)
+        portableEntity.booleanValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Boolean)) {
+                entity.booleanValues.getValue(fieldId).value = when (value) {
+                    is Int -> value == 1
+                    else -> null
+                }
             }
         }
-        portableEntity.enumCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.EnumCollection, collection.key, entry)
+        portableEntity.dateValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Date)) {
+                entity.localDateValues.getValue(fieldId).value = when (value) {
+                    is Long -> LocalDate.ofEpochDay(value)
+                    else -> null
+                }
             }
         }
-        portableEntity.enumStringCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.EnumStringCollection, collection.key, entry)
+        portableEntity.doubleValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Double)) {
+                entity.doubleValues.getValue(fieldId).value = value
             }
         }
-        portableEntity.floatCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.FloatCollection, collection.key, entry)
+        portableEntity.durationValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Duration)) {
+                entity.durationValues.getValue(fieldId).value = when (value) {
+                    is Long -> Duration.ofNanos(value)
+                    else -> null
+                }
             }
         }
-        portableEntity.integerCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.IntCollection, collection.key, entry)
+        portableEntity.dateTimeValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.DateTime)) {
+                entity.localDateTimeValues.getValue(fieldId).value = when (value) {
+                    is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                    else -> null
+                }
             }
         }
-        portableEntity.shortCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.ShortCollection, collection.key, entry)
+        portableEntity.floatValue.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Float)) {
+                entity.floatValues.getValue(fieldId).value = value
             }
         }
-        portableEntity.uuidCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.UuidCollection, collection.key, entry)
+        portableEntity.integerValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Int)) {
+                entity.integerValues.getValue(fieldId).value = value
             }
         }
-        portableEntity.longCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.LongCollection, collection.key, entry)
+        portableEntity.shortValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Short)) {
+                entity.shortValues.getValue(fieldId).value = value
             }
         }
-        portableEntity.stringCollections.forEach { collection ->
-            collection.values.forEach { entry ->
-                entity.populateProperties(dbContext, FieldType.StringCollection, collection.key, entry)
+        portableEntity.uuidValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Uuid)) {
+                entity.uuidValues.getValue(fieldId).value = value?.toUuid()
+            }
+        }
+        portableEntity.longValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Long)) {
+                entity.longValues.getValue(fieldId).value = value
+            }
+        }
+        portableEntity.monthDayValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.MonthDay)) {
+                entity.monthDayValues.getValue(fieldId).value = when (value) {
+                    is String -> MonthDay.parse(value)
+                    else -> null
+                }
+            }
+        }
+        portableEntity.periodValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Period)) {
+                entity.periodValues.getValue(fieldId).value = when (value) {
+                    is String -> Period.parse(value)
+                    else -> null
+                }
+            }
+        }
+        portableEntity.stringValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.String)) {
+                entity.stringValues.getValue(fieldId).value = value
+            }
+        }
+        portableEntity.timeValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Time)) {
+                entity.localTimeValues.getValue(fieldId).value = when (value) {
+                    is Long -> LocalTime.ofNanoOfDay(value)
+                    else -> null
+                }
+            }
+        }
+        portableEntity.yearMonthValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.YearMonth)) {
+                entity.yearMonthValues.getValue(fieldId).value = when (value) {
+                    is String -> YearMonth.parse(value)
+                    else -> null
+                }
+            }
+        }
+        portableEntity.zonedDateTimeValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.ZonedDateTime)) {
+                entity.zonedDateTimeValues.getValue(fieldId).value = when (value) {
+                    is Long -> ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                    else -> null
+                }
+            }
+        }
+        portableEntity.enumValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.Enum)) {
+                val entry = entity.enumValues.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null && value != null) {
+                    entry.value = fieldEnum.valueOf(value)
+                }
+            }
+        }
+        portableEntity.enumStringValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.EnumString)) {
+                val entry = entity.stringEnumValues.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null && value != null) {
+                    entry.value = fieldEnum.valueOf(value)
+                }
+            }
+        }
+        portableEntity.dateTimeCollection.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.DateTimeCollection)) {
+                val dest = entity.dateTimeCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add((value).toLocalDateTime()) }
+            }
+        }
+        portableEntity.doubleCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.DoubleCollection)) {
+                val dest = entity.doubleCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.floatCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.FloatCollection)) {
+                val dest = entity.floatCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.integerCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.IntCollection)) {
+                val dest = entity.integerCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.shortCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.ShortCollection)) {
+                val dest = entity.shortCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.uuidCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.UuidCollection)) {
+                val dest = entity.uuidCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value.toUuid()!!) }
+            }
+        }
+        portableEntity.longCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.LongCollection)) {
+                val dest = entity.longCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.stringCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.StringCollection)) {
+                val dest = entity.stringCollections.getValue(fieldId)
+                collection.forEach { value -> dest.add(value) }
+            }
+        }
+        portableEntity.enumCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.EnumCollection)) {
+                val dest = entity.enumCollections.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null) {
+                    collection.forEach { enumOrdinal ->
+                        val enumValues = fieldEnum.values
+                        if (enumOrdinal < enumValues.size) {
+                            dest.add(enumValues.find { enumValue -> enumValue.ordinal == enumOrdinal }!!)
+                        }
+                    }
+                }
+            }
+        }
+        portableEntity.enumStringCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.EnumStringCollection)) {
+                val dest = entity.enumStringCollections.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null) {
+                    collection.forEach { enumString ->
+                        val enumVal = fieldEnum.valueOf(enumString)
+                        if (enumVal != null)
+                            dest.add(enumVal)
+                    }
+                }
+            }
+        }
+        portableEntity.mapIntKeyValues.forEach { field ->
+            val fieldId = field.key
+            if (entity.populateProperty(dbContext, fieldId, FieldType.MapIntKey)) {
+                entity.mapIntKeyValues.getValue(fieldId).putAll(field.values)
+            }
+        }
+        portableEntity.mapStringKeyValues.forEach { field ->
+            val fieldId = field.key
+            if (entity.populateProperty(dbContext, fieldId, FieldType.MapStringKey)) {
+                entity.mapStringKeyValues.getValue(fieldId).putAll(field.values)
             }
         }
         //==============================================

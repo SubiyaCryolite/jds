@@ -31,4 +31,8 @@ data class BlobProperty(override var value: ByteArray = ByteArray(0)) : Writable
     override fun hashCode(): Int {
         return value.contentHashCode()
     }
+
+    override fun toString(): String {
+        return "$value"
+    }
 }

@@ -11,15 +11,20 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.github.subiyacryolite.jds.beans.property
+package io.github.subiyacryolite.jds.tests.entities
 
-/**
- * Class allowing for the wrapping and persistence of [Boolean] values
- * @param value the backing value
- */
-data class NullableBooleanProperty(override var value: Boolean? = null) : WritableProperty<Boolean?> {
+import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.annotations.EntityAnnotation
+import io.github.subiyacryolite.jds.tests.constants.Fields
 
-    override fun toString(): String {
-        return "$value"
+@EntityAnnotation(id = 8, name = "map_example")
+data class MapExample(
+        val intMap: MutableMap<Int, String> = HashMap(),
+        val stringMap: MutableMap<String, String> = HashMap()
+) : Entity() {
+
+    init {
+        map(Fields.IntMap, intMap)
+        map(Fields.StringMap, stringMap)
     }
 }

@@ -19,4 +19,9 @@ import java.util.*
  * Class allowing for the wrapping and persistence of [UUID] values
  * @param value the backing value
  */
-data class NullableUuidProperty(override var value: UUID? = null) : WritableProperty<UUID?>
+data class NullableUuidProperty(override var value: UUID? = null) : WritableProperty<UUID?> {
+
+    override fun toString(): String {
+        return "$value"
+    }
+}

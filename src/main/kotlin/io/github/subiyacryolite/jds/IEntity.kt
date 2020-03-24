@@ -13,11 +13,8 @@
  */
 package io.github.subiyacryolite.jds;
 
-import io.github.subiyacryolite.jds.context.DbContext
-import io.github.subiyacryolite.jds.portable.PortableEntity
 import java.io.Serializable
 
 interface IEntity : Serializable {
     val overview: IOverview
-    fun assign(dbContext: DbContext, portableEntity: PortableEntity)
 }
