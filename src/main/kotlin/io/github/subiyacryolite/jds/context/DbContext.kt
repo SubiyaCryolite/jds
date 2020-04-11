@@ -503,9 +503,9 @@ abstract class DbContext(
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         Extensions.determineParents(entity, parentEntities)
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description, entityAnnotation.tags)
-                        jdsEntity.populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
-                        jdsEntity.populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
-                        FieldDictionary.update(this, connection)
+                        jdsEntity.populateRefFieldRefEntityField(this, connection)
+                        jdsEntity.populateRefEnumRefEntityEnum(this, connection)
+                        FieldDictionary.update(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
                         connection.autoCommit = true
@@ -720,7 +720,7 @@ abstract class DbContext(
         val columns = LinkedHashMap<String, String>()
         columns["entity_id"] = getDataType(FieldType.Int)
         columns["field_id"] = getDataType(FieldType.Int)
-        columns["property_name"] = getDataType(FieldType.String, 48)
+        columns["property_name"] = getDataType(FieldType.String, 64)
         return createOrAlterProc(Procedure.FieldDictionary, Table.FieldDictionary, columns, uniqueColumns, false)
     }
 
@@ -729,7 +729,7 @@ abstract class DbContext(
         val columns = LinkedHashMap<String, String>()
         columns["field_id"] = getDataType(FieldType.Int)
         columns["alternate_code"] = getDataType(FieldType.String, 16)
-        columns["value"] = getDataType(FieldType.String, 48)
+        columns["value"] = getDataType(FieldType.String, 64)
         return createOrAlterProc(Procedure.FieldAlternateCode, Table.FieldAlternateCode, columns, uniqueColumns, false)
     }
 
@@ -759,7 +759,7 @@ abstract class DbContext(
         val columns = linkedMapOf(
                 "entity_id" to getDataTypeImpl(FieldType.Int),
                 "field_id" to getDataTypeImpl(FieldType.Int),
-                "property_name" to getDataTypeImpl(FieldType.String, 48)
+                "property_name" to getDataTypeImpl(FieldType.String, 64)
         )
         val uniqueColumns = linkedMapOf("${objectName}_u" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -801,7 +801,7 @@ abstract class DbContext(
         val columns = linkedMapOf(
                 "field_id" to getDataTypeImpl(FieldType.Int),
                 "alternate_code" to getDataTypeImpl(FieldType.String, 16),
-                "value" to getDataTypeImpl(FieldType.String, 48)
+                "value" to getDataTypeImpl(FieldType.String, 64)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "field_id, alternate_code")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()

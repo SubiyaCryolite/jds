@@ -21,15 +21,13 @@ object FieldDictionary {
         }
     }
 
-    fun update(dbContext: DbContext, connection: Connection) {
+    fun update(dbContext: DbContext, connection: Connection, entityId: Int) {
         dbContext.getCallOrStatement(connection, dbContext.populateFieldDictionary()).use { statement ->
-            dictionary.forEach { (entityId, fieldProperties) ->
-                fieldProperties.forEach { fieldProperty ->
-                    statement.setInt(1, entityId)
-                    statement.setInt(2, fieldProperty.first)
-                    statement.setString(3, fieldProperty.second)
-                    statement.addBatch()
-                }
+            dictionary[entityId]?.forEach { (fieldId, propertyName) ->
+                statement.setInt(1, entityId)
+                statement.setInt(2, fieldId)
+                statement.setString(3, propertyName)
+                statement.addBatch()
             }
             statement.executeBatch()
         }

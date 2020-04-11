@@ -908,12 +908,10 @@ abstract class Entity : IEntity {
     /**
      * Binds all the fieldIds attached to an entity, updates the fieldIds dictionary
      * @param connection the SQL connection to use for DB operations
-     * @param entityId   the value representing the entity
      */
     internal fun populateRefFieldRefEntityField(
             dbContext: DbContext,
-            connection: Connection,
-            entityId: Int
+            connection: Connection
     ) = try {
 
         val clearFieldTag = connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldTag)} WHERE field_id = ?")
@@ -939,7 +937,7 @@ abstract class Entity : IEntity {
             populateField.setInt(4, field.type.ordinal)
             populateField.addBatch()
 
-            populateEntityField.setInt(1, entityId)
+            populateEntityField.setInt(1, overview.entityId)
             populateEntityField.setInt(2, field.id)
             populateEntityField.addBatch()
 
@@ -990,13 +988,12 @@ abstract class Entity : IEntity {
     @Synchronized
     internal fun populateRefEnumRefEntityEnum(
             dbContext: DbContext,
-            connection: Connection,
-            entityId: Int
+            connection: Connection
     ) {
         populateRefEnum(dbContext, connection, getEnums(overview.entityId))
-        populateRefEntityEnum(dbContext, connection, entityId, getEnums(overview.entityId))
+        populateRefEntityEnum(dbContext, connection, overview.entityId, getEnums(overview.entityId))
         if (dbContext.options.logOutput) {
-            System.out.printf("Mapped Enums for Entity[%s]\n", entityId)
+            System.out.printf("Mapped Enums for Entity[%s]\n", overview.entityId)
         }
     }
 
