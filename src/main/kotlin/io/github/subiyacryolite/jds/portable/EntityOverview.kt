@@ -1,6 +1,7 @@
 package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.subiyacryolite.jds.interfaces.IOverview
 
 /**
  *
@@ -25,4 +26,6 @@ data class EntityOverview(
         @get:JsonProperty("f")
         @set:JsonProperty("f")
         var fieldId: Int? = null
-)
+) {
+    constructor(overview: IOverview, fieldId: Int?) : this(overview.id, overview.editVersion, overview.entityId, fieldId)
+}

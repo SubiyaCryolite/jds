@@ -21,7 +21,11 @@ import io.github.subiyacryolite.jds.extensions.toUuid
 import java.time.*
 import java.util.concurrent.Callable
 
-class LoadPortable<T : Entity>(private val dbContext: DbContext, private val referenceType: Class<T>, private vararg val container: PortableContainer) : Callable<MutableCollection<T>> {
+class LoadPortable<T : Entity>(
+        private val dbContext: DbContext,
+        private val referenceType: Class<T>,
+        private vararg val container: PortableContainer
+) : Callable<MutableCollection<T>> {
 
     /**
      *
@@ -215,6 +219,17 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
                 }
             }
         }
+        portableEntity.codedEnumValues.forEach { field ->
+            val fieldId = field.key
+            val value = field.value
+            if (entity.populateProperty(dbContext, fieldId, FieldType.CodedEnum)) {
+                val entry = entity.codedEnumValues.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null && value != null) {
+                    entry.value = fieldEnum.codedValueOf(value)
+                }
+            }
+        }
         portableEntity.enumStringValues.forEach { field ->
             val fieldId = field.key
             val value = field.value
@@ -315,6 +330,21 @@ class LoadPortable<T : Entity>(private val dbContext: DbContext, private val ref
                 if (fieldEnum != null) {
                     collection.forEach { enumString ->
                         val enumVal = fieldEnum.valueOf(enumString)
+                        if (enumVal != null)
+                            dest.add(enumVal)
+                    }
+                }
+            }
+        }
+        portableEntity.codedEnumCollections.forEach { field ->
+            val fieldId = field.key
+            val collection = field.values
+            if (entity.populateProperty(dbContext, fieldId, FieldType.CodedEnumCollection)) {
+                val dest = entity.codedEnumCollections.getValue(fieldId)
+                val fieldEnum = FieldEnum.enums[fieldId]
+                if (fieldEnum != null) {
+                    collection.forEach { codedValue ->
+                        val enumVal = fieldEnum.codedValueOf(codedValue)
                         if (enumVal != null)
                             dest.add(enumVal)
                     }
