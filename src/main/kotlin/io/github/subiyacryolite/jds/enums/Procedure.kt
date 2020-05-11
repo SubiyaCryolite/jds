@@ -70,6 +70,11 @@ enum class Procedure(val procedure: String) {
     /**
      *
      */
+    FieldType("pop_${Table.FieldType.table}"),
+
+    /**
+     *
+     */
     EntityTag("pop_${Table.EntityTag.table}"),
 
     /**

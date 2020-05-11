@@ -124,13 +124,7 @@ data class PortableEntity(
         val mapIntKeyValues: MutableCollection<StoreMapIntKey> = ArrayList(),
 
         @get:JsonProperty("h1")
-        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList(),
-
-        @get:JsonProperty("i1")
-        val codedEnumCollections: MutableCollection<StoreIntegerCollection> = ArrayList(),
-
-        @get:JsonProperty("j1")
-        val codedEnumValues: MutableCollection<StoreInteger> = ArrayList()
+        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList()
 ) {
 
     @Throws(Exception::class)

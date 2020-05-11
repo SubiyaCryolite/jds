@@ -47,11 +47,9 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
-import io.github.subiyacryolite.jds.interfaces.ICodedEnum
 import io.github.subiyacryolite.jds.interfaces.IEntity
 import io.github.subiyacryolite.jds.interfaces.IOverview
 import io.github.subiyacryolite.jds.interfaces.Property
-import io.github.subiyacryolite.jds.utility.DeepCopy
 import java.io.Serializable
 import java.sql.Connection
 import java.time.*
@@ -155,16 +153,10 @@ abstract class Entity : IEntity {
     internal val enumValues: MutableMap<Int, Property<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
-    internal val codedEnumValues: MutableMap<Int, Property<ICodedEnum<*>?>> = HashMap()
-
-    @get:JsonIgnore
     internal val stringEnumValues: MutableMap<Int, Property<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
     internal val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
-
-    @get:JsonIgnore
-    internal val codedEnumCollections: MutableMap<Int, MutableCollection<ICodedEnum<*>>> = HashMap()
 
     @get:JsonIgnore
     internal val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
@@ -507,9 +499,6 @@ abstract class Entity : IEntity {
             FieldType.Enum -> {
                 enumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
             }
-            FieldType.CodedEnum -> {
-                codedEnumValues[fieldEnum.field.id] = property as Property<ICodedEnum<*>?>
-            }
             else -> {
                 stringEnumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
             }
@@ -595,17 +584,13 @@ abstract class Entity : IEntity {
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
         if (
                 fieldEnum.field.type != FieldType.EnumCollection &&
-                fieldEnum.field.type != FieldType.EnumStringCollection &&
-                fieldEnum.field.type != FieldType.CodedEnumCollection
+                fieldEnum.field.type != FieldType.EnumStringCollection
         ) {
             throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
         }
         when (fieldEnum.field.type) {
             FieldType.EnumCollection -> {
                 enumCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
-            }
-            FieldType.CodedEnumCollection -> {
-                codedEnumCollections[fieldEnum.field.id] = collection as MutableCollection<ICodedEnum<*>>
             }
             else -> {
                 enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
@@ -662,123 +647,6 @@ abstract class Entity : IEntity {
         FieldEntity.values[fieldEntity.field.id] = fieldEntity
     }
 
-    /**
-     * Copy values from matching fieldIds found in both objects
-     *
-     * @param source The entity to copy values from
-     * @param <T>    A valid JDSEntity
-    </T> */
-    fun <T : Entity> deepCopy(source: T) {
-        this.overview.id = source.overview.id
-        this.overview.editVersion = source.overview.editVersion
-        this.overview.entityId = source.overview.entityId
-
-        localDateTimeValues.clear()
-        localDateTimeValues.putAll(DeepCopy.clone(source.localDateTimeValues))
-
-        zonedDateTimeValues.clear()
-        zonedDateTimeValues.putAll(DeepCopy.clone(source.zonedDateTimeValues))
-
-        localDateValues.clear()
-        localDateValues.putAll(DeepCopy.clone(source.localDateValues))
-
-        localTimeValues.clear()
-        localTimeValues.putAll(DeepCopy.clone(source.localTimeValues))
-
-        monthDayValues.clear()
-        monthDayValues.putAll(DeepCopy.clone(source.monthDayValues))
-
-        yearMonthValues.clear()
-        yearMonthValues.putAll(DeepCopy.clone(source.yearMonthValues))
-
-        periodValues.clear()
-        periodValues.putAll(DeepCopy.clone(source.periodValues))
-
-        durationValues.clear()
-        durationValues.putAll(DeepCopy.clone(source.durationValues))
-
-        stringValues.clear()
-        stringValues.putAll(DeepCopy.clone(source.stringValues))
-
-        booleanValues.clear()
-        booleanValues.putAll(DeepCopy.clone(source.booleanValues))
-
-        floatValues.clear()
-        floatValues.putAll(DeepCopy.clone(source.floatValues))
-
-        doubleValues.clear()
-        doubleValues.putAll(DeepCopy.clone(source.doubleValues))
-
-        shortValues.clear()
-        shortValues.putAll(DeepCopy.clone(source.shortValues))
-
-        longValues.clear()
-        longValues.putAll(DeepCopy.clone(source.longValues))
-
-        integerValues.clear()
-        integerValues.putAll(DeepCopy.clone(source.integerValues))
-
-        uuidValues.clear()
-        uuidValues.putAll(DeepCopy.clone(source.uuidValues))
-
-        objectCollections.clear()
-        objectCollections.putAll(DeepCopy.clone(source.objectCollections))
-
-        stringCollections.clear()
-        stringCollections.putAll(DeepCopy.clone(source.stringCollections))
-
-        dateTimeCollections.clear()
-        dateTimeCollections.putAll(DeepCopy.clone(source.dateTimeCollections))
-
-        floatCollections.clear()
-        floatCollections.putAll(DeepCopy.clone(source.floatCollections))
-
-        doubleCollections.clear()
-        doubleCollections.putAll(DeepCopy.clone(source.doubleCollections))
-
-        longCollections.clear()
-        longCollections.putAll(DeepCopy.clone(source.longCollections))
-
-        integerCollections.clear()
-        integerCollections.putAll(DeepCopy.clone(source.integerCollections))
-
-        shortCollections.clear()
-        shortCollections.putAll(DeepCopy.clone(source.shortCollections))
-
-        uuidCollections.clear()
-        uuidCollections.putAll(DeepCopy.clone(source.uuidCollections))
-
-        enumValues.clear()
-        enumValues.putAll(DeepCopy.clone(source.enumValues))
-
-        codedEnumValues.clear()
-        codedEnumValues.putAll(DeepCopy.clone(source.codedEnumValues))
-
-        stringEnumValues.clear()
-        stringEnumValues.putAll(DeepCopy.clone(source.stringEnumValues))
-
-        enumCollections.clear()
-        enumCollections.putAll(DeepCopy.clone(source.enumCollections))
-
-        enumStringCollections.clear()
-        enumStringCollections.putAll(DeepCopy.clone(source.enumStringCollections))
-
-        codedEnumCollections.clear()
-        codedEnumCollections.putAll(DeepCopy.clone(source.codedEnumCollections))
-
-        objectValues.clear()
-        objectValues.putAll(DeepCopy.clone(source.objectValues))
-
-        blobValues.clear()
-        blobValues.putAll(DeepCopy.clone(source.blobValues))
-
-        mapStringKeyValues.clear()
-        mapStringKeyValues.putAll(DeepCopy.clone(source.mapStringKeyValues))
-
-        mapIntKeyValues.clear()
-        mapIntKeyValues.putAll(DeepCopy.clone(source.mapIntKeyValues))
-    }
-
     internal fun populateProperty(dbContext: DbContext, fieldId: Int, fieldType: FieldType): Boolean {
         if (dbContext.options.ignoreTags.any { tag -> Field.values[fieldId]!!.tags.contains(tag) }) {
             return false
@@ -821,9 +689,6 @@ abstract class Entity : IEntity {
             }
             FieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId)) {
                 enumCollections[fieldId] = ArrayList()
-            }
-            FieldType.CodedEnumCollection -> if (!enumStringCollections.containsKey(fieldId)) {
-                enumStringCollections[fieldId] = ArrayList()
             }
             FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
                 zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()

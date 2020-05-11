@@ -36,7 +36,7 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
 
     companion object {
 
-        private fun toByteArrayCollection(values: MutableCollection<UUID>): MutableCollection<ByteArray> {
+        private fun toByteArrayCollection(values: MutableCollection<UUID>): Collection<ByteArray> {
             val output = ArrayList<ByteArray>()
             values.forEach { value ->
                 output.add(value.toByteArray()!!)
@@ -44,14 +44,9 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
             return output
         }
 
-        private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }.toMutableList()
+        private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }
 
         private fun toIntCollection(values: MutableCollection<Enum<*>>) = values.map { it.ordinal }
-
-        @JvmName("toIntCollectionFromCodedEnum")
-        private fun toIntCollection(values: MutableCollection<ICodedEnum<*>>) = values.map { it.code }
-
-        private fun toStringCollection(values: MutableCollection<Enum<*>>) = values.map { it.name }.toMutableList()
 
         internal fun assign(entity: Entity, dbContext: DbContext, portableEntity: PortableEntity) {
             //==============================================
@@ -130,20 +125,11 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
             entity.enumValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
             }
-            entity.codedEnumValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.codedEnumValues.add(StoreInteger(entry.key, entry.value.value?.code))
-            }
             entity.stringEnumValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
             }
             entity.enumCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
-            }
-            entity.enumStringCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
-            }
-            entity.codedEnumCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.codedEnumCollections.add(StoreIntegerCollection(entry.key, toIntCollection(entry.value)))
             }
             //==============================================
             //ARRAYS

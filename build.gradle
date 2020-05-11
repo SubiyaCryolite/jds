@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.70"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.17"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
     }
@@ -26,7 +26,7 @@ description = "A dynamic, cross platform, high performance, ORM data-mapper. Des
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 project.ext.jacksonVersion = "2.10.1"
-project.ext.kotlinVersion = "1.3.70"
+project.ext.kotlinVersion = "1.3.72"
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 compileKotlin {

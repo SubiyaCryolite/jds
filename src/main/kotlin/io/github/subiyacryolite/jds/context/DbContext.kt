@@ -101,7 +101,9 @@ abstract class DbContext(
             prepareJdsComponent(connection, Procedure.FieldTag)
             prepareJdsComponent(connection, Procedure.EntityTag)
             prepareJdsComponent(connection, Procedure.FieldAlternateCode)
+            prepareJdsComponent(connection, Procedure.FieldType)
         }
+        populateFieldTypes(connection)
     }
 
     /**
@@ -152,10 +154,7 @@ abstract class DbContext(
             Table.EntityField -> executeSqlFromString(connection, createBindEntityFields())
             Table.FieldEntity -> executeSqlFromString(connection, createBindFieldEntities())
             Table.Enum -> executeSqlFromString(connection, createRefEnumValues())
-            Table.FieldType -> {
-                executeSqlFromString(connection, createRefFieldTypes())
-                populateFieldTypes(connection)
-            }
+            Table.FieldType ->       executeSqlFromString(connection, createRefFieldTypes())
             Table.Field -> executeSqlFromString(connection, createRefFields())
             Table.EntityInheritance -> executeSqlFromString(connection, createRefInheritance())
             Table.FieldDictionary -> executeSqlFromString(connection, createFieldDictionary())
@@ -184,6 +183,7 @@ abstract class DbContext(
             Procedure.FieldDictionary -> executeSqlFromString(connection, createPopFieldDictionary())
             Procedure.FieldAlternateCode -> executeSqlFromString(connection, createPopFieldAlternateCode())
             Procedure.FieldTag -> executeSqlFromString(connection, createPopFieldTag())
+            Procedure.FieldType -> executeSqlFromString(connection, createPopFieldType())
             Procedure.EntityTag -> executeSqlFromString(connection, createPopEntityTag())
         }
     }
@@ -524,7 +524,7 @@ abstract class DbContext(
     }
 
     private fun populateFieldTypes(connection: Connection) {
-        connection.prepareStatement("INSERT INTO ${getName(Table.FieldType)}(ordinal, caption) VALUES(?,?)").use { statement ->
+        getCallOrStatement(connection, populateFieldType()).use { statement ->
             FieldType.values().forEach { fieldType ->
                 statement.setInt(1, fieldType.ordinal)
                 statement.setString(2, fieldType.name)
@@ -580,6 +580,8 @@ abstract class DbContext(
      * @return the default or overridden SQL statement for this operation
      */
     internal open fun populateEnum() = "{call ${getName(Procedure.Enum)}(?, ?, ?, ?)}"
+
+    internal open fun populateFieldType() = "{call ${getName(Procedure.FieldType)}(?, ?)}"
 
     /**
      * SQL call to update the field dictionary property
@@ -740,6 +742,14 @@ abstract class DbContext(
         columns["field_id"] = getDataType(FieldType.Int)
         columns["tag"] = getDataType(FieldType.String, 16)
         return createOrAlterProc(Procedure.FieldTag, Table.FieldTag, columns, uniqueColumns, true)
+    }
+
+    private fun createPopFieldType(): String {
+        val uniqueColumns = setOf("ordinal")
+        val columns = LinkedHashMap<String, String>()
+        columns["ordinal"] = getDataType(FieldType.Int)
+        columns["caption"] = getDataType(FieldType.String, 64)
+        return createOrAlterProc(Procedure.FieldType, Table.FieldType, columns, uniqueColumns, true)
     }
 
     private fun createPopEntityTag(): String {

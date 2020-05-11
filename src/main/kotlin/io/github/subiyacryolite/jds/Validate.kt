@@ -65,7 +65,7 @@ object Validate {
     }
 
     fun validateEnum(field: Field) {
-        if (field.type != FieldType.Enum && field.type != FieldType.EnumString) {
+        if (field.type != FieldType.Enum && field.type != FieldType.EnumString ) {
             throw RuntimeException("Incorrect type supplied for field [$field]")
         }
     }

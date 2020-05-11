@@ -15,7 +15,7 @@ package io.github.subiyacryolite.jds.extensions
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
-import io.github.subiyacryolite.jds.IEntity
+import io.github.subiyacryolite.jds.interfaces.IEntity
 import io.github.subiyacryolite.jds.interfaces.Property
 import io.github.subiyacryolite.jds.context.DbContext
 import java.nio.ByteBuffer

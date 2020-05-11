@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.enums.Implementation
+import io.github.subiyacryolite.jds.enums.Procedure
 import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 
@@ -64,6 +65,8 @@ abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
     override fun populateEntity() = "INSERT INTO ${getName(Table.Entity)}(id, name, description) VALUES(?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description"
 
     override fun populateEnum() = "INSERT INTO ${getName(Table.Enum)}(field_id, seq, name, caption) VALUES(?, ?, ?, ?) ON CONFLICT(field_id, seq) DO UPDATE SET name = EXCLUDED.name, caption = EXCLUDED.caption"
+
+    override fun populateFieldType() =  "INSERT INTO ${getName(Table.FieldType)}(ordinal, caption) VALUES(?, ?) ON CONFLICT(ordinal) DO UPDATE SET caption = EXCLUDED.caption"
 
     override fun populateFieldDictionary() = "INSERT INTO ${getName(Table.FieldDictionary)}(entity_id, field_id, property_name) VALUES(?, ?, ?) ON CONFLICT(entity_id, field_id) DO UPDATE SET property_name = EXCLUDED.property_name"
 

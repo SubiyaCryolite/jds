@@ -20,10 +20,8 @@ import io.github.subiyacryolite.jds.portable.PortableContainer
 import io.github.subiyacryolite.jds.portable.SavePortable
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
-import io.github.subiyacryolite.jds.tests.entities.AddressBook
-import io.github.subiyacryolite.jds.tests.entities.Example
-import io.github.subiyacryolite.jds.tests.entities.MapExample
-import io.github.subiyacryolite.jds.tests.entities.TimeConstruct
+import io.github.subiyacryolite.jds.tests.entities.*
+import io.github.subiyacryolite.jds.tests.enums.Right
 import org.junit.jupiter.api.Test
 
 class PortableSaveStructure : BaseTestConfig("Portable save structures") {
@@ -34,6 +32,7 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         timeConstruct(dbContext)
         example(dbContext)
         mapTests(dbContext)
+        enumTests(dbContext)
     }
 
     @Test
@@ -63,6 +62,15 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         mapExample.stringMap["latitude"] = "50.0"
         mapExample.stringMap["longitude"] = "50.0"
         testPortableSave(dbContext, setOf(mapExample), MapExample::class.java)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun enumTests(dbContext: DbContext) {
+        val login = Login()
+        login.rights.add(Right.CreateUser)
+        login.rights.add(Right.DeleteUser)
+        testPortableSave(dbContext, setOf(login), Login::class.java)
     }
 
     @Throws(Exception::class)
