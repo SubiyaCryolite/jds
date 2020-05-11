@@ -17,7 +17,6 @@ import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.extensions.filterIgnored
 import io.github.subiyacryolite.jds.extensions.toByteArray
-import io.github.subiyacryolite.jds.interfaces.ICodedEnum
 import java.sql.Timestamp
 import java.time.*
 import java.util.*
