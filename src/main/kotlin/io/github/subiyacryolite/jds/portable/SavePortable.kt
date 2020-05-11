@@ -17,6 +17,7 @@ import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.extensions.filterIgnored
 import io.github.subiyacryolite.jds.extensions.toByteArray
+import io.github.subiyacryolite.jds.interfaces.ICodedEnum
 import java.sql.Timestamp
 import java.time.*
 import java.util.*
@@ -45,7 +46,10 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
 
         private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }.toMutableList()
 
-        private fun toIntCollection(values: MutableCollection<Enum<*>>) = values.map { it.ordinal }.toMutableList()
+        private fun toIntCollection(values: MutableCollection<Enum<*>>) = values.map { it.ordinal }
+
+        @JvmName("toIntCollectionFromCodedEnum")
+        private fun toIntCollection(values: MutableCollection<ICodedEnum<*>>) = values.map { it.code }
 
         private fun toStringCollection(values: MutableCollection<Enum<*>>) = values.map { it.name }.toMutableList()
 
@@ -126,6 +130,9 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
             entity.enumValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
             }
+            entity.codedEnumValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.codedEnumValues.add(StoreInteger(entry.key, entry.value.value?.code))
+            }
             entity.stringEnumValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
             }
@@ -134,6 +141,9 @@ class SavePortable(private val dbContext: DbContext, private val entities: Itera
             }
             entity.enumStringCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
+            }
+            entity.codedEnumCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.codedEnumCollections.add(StoreIntegerCollection(entry.key, toIntCollection(entry.value)))
             }
             //==============================================
             //ARRAYS
