@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Base class allowing for the wrapping and persistence of [Object] values
  * @param value the initial value
  */
-data class ObjectProperty<T>(override var value: T) : Property<T>
+data class ObjectProperty<T>(override var value: T) : IProperty<T>

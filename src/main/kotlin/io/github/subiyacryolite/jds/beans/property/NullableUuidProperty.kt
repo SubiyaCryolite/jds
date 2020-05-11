@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.util.*
 
 /**
  * Class allowing for the wrapping and persistence of [UUID] values
  * @param value the backing value
  */
-data class NullableUuidProperty(override var value: UUID? = null) : Property<UUID?>
+data class NullableUuidProperty(override var value: UUID? = null) : IProperty<UUID?>

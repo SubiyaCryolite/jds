@@ -48,14 +48,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>18.0-SNAPSHOT</version>
+    <version>19.1-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:18.0-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:19.1-SNAPSHOT'
 ```
 
 # Dependencies
@@ -230,9 +230,7 @@ Behind the scenes these Enums will be stored as either:
 
 ### 1.1.4 Binding Properties
 
-Depending on the type of Field, JDS will require that you set you objects properties to one of the following JavaFX bean container types.
-
-Kindly note that none of the JavaFX beans are serializable, however JDS supports serialization via the explicit implementation of Javas Externalizable interface. That said only Property values are serialized, not listeners or any other bean state.
+Depending on the type of Field, JDS will require that you set you objects properties to one of the following IProperty container types.
 
 | JDS Field Type       | Container                                                  | Java Mapping Call     |Kotlin Mapping Call |
 | -------------------- | -----------------------------------------------------------| --------------------- | ------------ |
@@ -243,27 +241,27 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 | IntCollection        | MutableCollection\<Integer\>                               | mapInts               | map          |
 | LongCollection       | MutableCollection\<Long\>                                  | mapLongs              | map          |
 | StringCollection     | MutableCollection\<String\>                                | mapStrings            | map          |
-| Boolean              | Property\<Boolean\>                                | mapBoolean            | map          |
-| Blob                 | Property\<ByteArray\>                              | map                   | map          |
+| Boolean              | IProperty\<Boolean\>                                | mapBoolean            | map          |
+| Blob                 | IProperty\<ByteArray\>                              | map                   | map          |
 | Entity               | Class\<? extends Entity\>                                  | map                   | map          |
-| Date                 | Property\<LocalDate\>                              | mapDate               | map          |
-| DateTime             | Property\<LocalDateTime\>                          | mapDateTime           | map          |
-| Double               | Property\<Double\>                                 | mapNumeric            | map          |
-| Duration             | Property\<Duration\>                               | mapDuration           | map          |
-| Enum                 | Property\<Enum\>                                   | mapEnum               | map          |
+| Date                 | IProperty\<LocalDate\>                              | mapDate               | map          |
+| DateTime             | IProperty\<LocalDateTime\>                          | mapDateTime           | map          |
+| Double               | IProperty\<Double\>                                 | mapNumeric            | map          |
+| Duration             | IProperty\<Duration\>                               | mapDuration           | map          |
+| Enum                 | IProperty\<Enum\>                                   | mapEnum               | map          |
 | EnumCollection       | Collection\<Enum\>                                         | mapEnums              | map          |
-| Float                | Property\<Float\>                                  | mapNumeric            | map          |
-| Int                  | Property\<Integer\>                                | mapNumeric            | map          |
-| Long                 | Property\<Long\>                                   | mapNumeric            | map          |
-| MonthDay             | Property\<MonthDay\>                               | mapMonthDay           | map          |
-| Period               | Property\<Period\>                                 | mapPeriod             | map          |
-| String               | Property\<String\>                                 | mapString             | map          |
-| Time                 | Property\<LocalTime\>                              | mapTime               | map          |
-| YearMonth            | Property\<YearMonth\>                              | mapYearMonth          | map          |
-| ZonedDateTime        | Property\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
-| Uuid                 | Property\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Float                | IProperty\<Float\>                                  | mapNumeric            | map          |
+| Int                  | IProperty\<Integer\>                                | mapNumeric            | map          |
+| Long                 | IProperty\<Long\>                                   | mapNumeric            | map          |
+| MonthDay             | IProperty\<MonthDay\>                               | mapMonthDay           | map          |
+| Period               | IProperty\<Period\>                                 | mapPeriod             | map          |
+| String               | IProperty\<String\>                                 | mapString             | map          |
+| Time                 | IProperty\<LocalTime\>                              | mapTime               | map          |
+| YearMonth            | IProperty\<YearMonth\>                              | mapYearMonth          | map          |
+| ZonedDateTime        | IProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Uuid                 | IProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
 
-To simplify the mapping Process Jds has the followin helper classes defined:
+To simplify the mapping Process Jds has the following helper classes defined:
 
  - Generic containers (Entities and Enums)
      - ObjectProperty<T>

@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.time.YearMonth
 
 /**
  * Class allowing for the wrapping and persistence of [YearMonth] values
  * @param value the backing value
  */
-data class NullableYearMonthProperty(override var value: YearMonth? = null) : Property<YearMonth?>
+data class NullableYearMonthProperty(override var value: YearMonth? = null) : IProperty<YearMonth?>

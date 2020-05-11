@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.time.Period
 
 /**
  * Class allowing for the wrapping and persistence of [Period] values
  * @param value the backing value
  */
-data class NullablePeriodProperty(override var value: Period? = null) : Property<Period?>
+data class NullablePeriodProperty(override var value: Period? = null) : IProperty<Period?>

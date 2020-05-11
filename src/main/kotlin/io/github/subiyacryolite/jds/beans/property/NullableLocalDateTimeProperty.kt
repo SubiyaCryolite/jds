@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.time.LocalDateTime
 
 /**
  * Class allowing for the wrapping and persistence of [LocalDateTime] values
  * @param value the backing value
  */
-data class NullableLocalDateTimeProperty(override var value: LocalDateTime? = null) : Property<LocalDateTime?>
+data class NullableLocalDateTimeProperty(override var value: LocalDateTime? = null) : IProperty<LocalDateTime?>

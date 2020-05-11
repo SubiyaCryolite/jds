@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Long] values
  * @param value the backing value
  */
-data class LongProperty(override var value: Long = 0L) : Property<Long>
+data class LongProperty(override var value: Long = 0L) : IProperty<Long>

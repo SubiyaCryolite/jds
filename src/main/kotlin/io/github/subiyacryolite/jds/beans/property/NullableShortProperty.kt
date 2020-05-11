@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Short] values
  * @param value the backing value
  */
-data class NullableShortProperty(override var value: Short? = null) : Property<Short?>
+data class NullableShortProperty(override var value: Short? = null) : IProperty<Short?>

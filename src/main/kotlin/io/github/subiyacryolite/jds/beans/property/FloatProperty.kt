@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Float] values
  * @param value the backing value
  */
-data class FloatProperty(override var value: Float = 0.0f) : Property<Float>
+data class FloatProperty(override var value: Float = 0.0f) : IProperty<Float>

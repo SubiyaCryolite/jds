@@ -2,7 +2,7 @@ package io.github.subiyacryolite.jds.interfaces
 
 import java.io.Serializable
 
-interface Property<T> : Serializable {
+interface IProperty<T> : Serializable {
 
     var value: T
 

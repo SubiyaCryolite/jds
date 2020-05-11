@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Double] values
  * @param value the backing value
  */
-data class DoubleProperty(override var value: Double = 0.0) : Property<Double>
+data class DoubleProperty(override var value: Double = 0.0) : IProperty<Double>

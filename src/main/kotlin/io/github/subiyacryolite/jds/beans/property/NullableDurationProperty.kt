@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.time.Duration
 
 /**
  * Class allowing for the wrapping and persistence of [Duration] values
  * @param value the backing value
  */
-data class NullableDurationProperty(override var value: Duration? = null) : Property<Duration?>
+data class NullableDurationProperty(override var value: Duration? = null) : IProperty<Duration?>

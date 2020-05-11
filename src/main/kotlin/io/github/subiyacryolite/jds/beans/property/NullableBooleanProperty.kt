@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Boolean] values
  * @param value the backing value
  */
-data class NullableBooleanProperty(override var value: Boolean? = null) : Property<Boolean?>
+data class NullableBooleanProperty(override var value: Boolean? = null) : IProperty<Boolean?>

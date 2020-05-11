@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Int] values
  * @param value the backing value
  */
-data class IntegerProperty(override var value: Int = 0) : Property<Int>
+data class IntegerProperty(override var value: Int = 0) : IProperty<Int>

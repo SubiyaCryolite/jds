@@ -17,12 +17,12 @@ import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.StringProperty
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import io.github.subiyacryolite.jds.enums.FieldType
 
 @EntityAnnotation(id = 3, name = "entitya")
 open class EntityA(
-        private val _field: Property<String> = StringProperty("A")
+        private val _field: IProperty<String> = StringProperty("A")
 ) : Entity() {
 
     init {

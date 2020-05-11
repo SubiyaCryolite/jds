@@ -13,10 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of binary values within a backing [Enum]
  * @param value the backing value
  */
-data class NullableEnumProperty<T : Enum<T>>(override var value: T? = null) : Property<T?>
+data class NullableEnumProperty<T : Enum<T>>(override var value: T? = null) : IProperty<T?>

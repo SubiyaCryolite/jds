@@ -13,13 +13,13 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
  * @param value the initial value
  */
-data class NullableBlobProperty(override var value: ByteArray? = null) : Property<ByteArray?> {
+data class NullableBlobProperty(override var value: ByteArray? = null) : IProperty<ByteArray?> {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

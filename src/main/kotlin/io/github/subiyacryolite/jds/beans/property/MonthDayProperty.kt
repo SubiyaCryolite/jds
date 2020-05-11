@@ -13,11 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import java.time.MonthDay
 
 /**
  * Class allowing for the wrapping and persistence of [MonthDay] values
  * @param value the backing value
  */
-data class MonthDayProperty(override var value: MonthDay = MonthDay.now()) : Property<MonthDay>
+data class MonthDayProperty(override var value: MonthDay = MonthDay.now()) : IProperty<MonthDay>

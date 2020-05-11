@@ -13,13 +13,13 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 
 /**
  * Class allowing for the wrapping and persistence of [Short] values
  * @param value the backing value
  */
-data class ShortProperty(override var value: Short = 0) : Property<Short> {
+data class ShortProperty(override var value: Short = 0) : IProperty<Short> {
 
     override fun toString(): String {
         return "$value"

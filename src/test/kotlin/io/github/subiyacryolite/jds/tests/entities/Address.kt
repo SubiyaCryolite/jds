@@ -16,20 +16,20 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
-import io.github.subiyacryolite.jds.interfaces.Property
+import io.github.subiyacryolite.jds.interfaces.IProperty
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDateTime
 
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
 data class Address(
-        private val _streetName: Property<String> = StringProperty(),
-        private val _plotNumber: Property<Short?> = NullableShortProperty(),
-        private val _area: Property<String> = StringProperty(),
-        private val _city: Property<String> = StringProperty(),
-        private val _provinceOrState: Property<String> = StringProperty(),
-        private val _country: Property<String> = StringProperty(),
-        private val _primaryAddress: Property<Boolean?> = NullableBooleanProperty(),
-        private val _timestamp: Property<LocalDateTime> = LocalDateTimeProperty()
+        private val _streetName: IProperty<String> = StringProperty(),
+        private val _plotNumber: IProperty<Short?> = NullableShortProperty(),
+        private val _area: IProperty<String> = StringProperty(),
+        private val _city: IProperty<String> = StringProperty(),
+        private val _provinceOrState: IProperty<String> = StringProperty(),
+        private val _country: IProperty<String> = StringProperty(),
+        private val _primaryAddress: IProperty<Boolean?> = NullableBooleanProperty(),
+        private val _timestamp: IProperty<LocalDateTime> = LocalDateTimeProperty()
 ) : Entity() {
 
     init {
