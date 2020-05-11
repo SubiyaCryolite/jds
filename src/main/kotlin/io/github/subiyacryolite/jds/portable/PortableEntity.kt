@@ -15,8 +15,8 @@ package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Entity
-import io.github.subiyacryolite.jds.IEntity
 import io.github.subiyacryolite.jds.context.DbContext
+import io.github.subiyacryolite.jds.interfaces.IEntity
 
 /**
  * Class used to represent [JdsEntity][Entity] objects in a portable manner
@@ -124,7 +124,13 @@ data class PortableEntity(
         val mapIntKeyValues: MutableCollection<StoreMapIntKey> = ArrayList(),
 
         @get:JsonProperty("h1")
-        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList()
+        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList(),
+
+        @get:JsonProperty("i1")
+        val codedEnumCollections: MutableCollection<StoreIntegerCollection> = ArrayList(),
+
+        @get:JsonProperty("j1")
+        val codedEnumValues: MutableCollection<StoreInteger> = ArrayList()
 ) {
 
     @Throws(Exception::class)
@@ -132,6 +138,6 @@ data class PortableEntity(
         if (entity is Entity) {
             SavePortable.assign(entity, dbContext, this)
         }
-        overview = EntityOverview(entity.overview.id, entity.overview.editVersion, entity.overview.entityId, fieldId)
+        overview = EntityOverview(entity.overview, fieldId)
     }
 }
