@@ -29,5 +29,5 @@ data class StoreEnumCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Int> = ArrayList()
+        var values: Collection<Int> = ArrayList()
 )

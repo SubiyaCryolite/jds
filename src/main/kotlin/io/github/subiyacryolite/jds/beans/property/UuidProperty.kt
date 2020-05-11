@@ -13,15 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
 import java.util.*
 
 /**
  * Class allowing for the wrapping and persistence of [UUID] values
  * @param value the backing value
  */
-data class UuidProperty(override var value: UUID = UUID.randomUUID()) : WritableProperty<UUID> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class UuidProperty(override var value: UUID = UUID.randomUUID()) : Property<UUID>

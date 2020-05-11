@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of [Long] values
  * @param value the backing value
  */
-data class NullableLongProperty(override var value: Long? = null) : WritableProperty<Long?> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class NullableLongProperty(override var value: Long? = null) : Property<Long?>

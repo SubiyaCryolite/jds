@@ -30,5 +30,5 @@ data class StoreDateTimeCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Timestamp> = ArrayList()
+        var values: Collection<Timestamp> = ArrayList()
 )

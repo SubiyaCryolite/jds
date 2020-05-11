@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Base class allowing for the wrapping and persistence of [Object] values
  * @param value the initial value
  */
-data class ObjectProperty<T>(override var value: T) : WritableProperty<T> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class ObjectProperty<T>(override var value: T) : Property<T>

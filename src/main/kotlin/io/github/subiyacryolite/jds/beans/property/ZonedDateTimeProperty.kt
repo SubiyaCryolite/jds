@@ -13,15 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
 import java.time.ZonedDateTime
 
 /**
  * Class allowing for the wrapping and persistence of [ZonedDateTime] values
  * @param value the backing value
  */
-data class ZonedDateTimeProperty(override var value: ZonedDateTime = ZonedDateTime.now()) : WritableProperty<ZonedDateTime> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class ZonedDateTimeProperty(override var value: ZonedDateTime = ZonedDateTime.now()) : Property<ZonedDateTime>

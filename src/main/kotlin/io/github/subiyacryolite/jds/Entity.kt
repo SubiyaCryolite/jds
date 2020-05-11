@@ -47,13 +47,13 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
-import io.github.subiyacryolite.jds.extensions.filterIgnored
-import io.github.subiyacryolite.jds.extensions.toByteArray
-import io.github.subiyacryolite.jds.portable.*
+import io.github.subiyacryolite.jds.interfaces.ICodedEnum
+import io.github.subiyacryolite.jds.interfaces.IEntity
+import io.github.subiyacryolite.jds.interfaces.IOverview
+import io.github.subiyacryolite.jds.interfaces.Property
 import io.github.subiyacryolite.jds.utility.DeepCopy
 import java.io.Serializable
 import java.sql.Connection
-import java.sql.Timestamp
 import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -65,62 +65,62 @@ import kotlin.collections.HashMap
  * [IOverview] to store overview data
  */
 abstract class Entity : IEntity {
-    
+
     @set:JsonIgnore
     @get:JsonIgnore
     final override var overview: IOverview = Overview()
 
     //temporals
     @get:JsonIgnore
-    internal val localDateTimeValues: MutableMap<Int, WritableProperty<LocalDateTime?>> = HashMap()
+    internal val localDateTimeValues: MutableMap<Int, Property<LocalDateTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val zonedDateTimeValues: MutableMap<Int, WritableProperty<ZonedDateTime?>> = HashMap()
+    internal val zonedDateTimeValues: MutableMap<Int, Property<ZonedDateTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val localDateValues: MutableMap<Int, WritableProperty<LocalDate?>> = HashMap()
+    internal val localDateValues: MutableMap<Int, Property<LocalDate?>> = HashMap()
 
     @get:JsonIgnore
-    internal val localTimeValues: MutableMap<Int, WritableProperty<LocalTime?>> = HashMap()
+    internal val localTimeValues: MutableMap<Int, Property<LocalTime?>> = HashMap()
 
     @get:JsonIgnore
-    internal val monthDayValues: MutableMap<Int, WritableProperty<MonthDay?>> = HashMap()
+    internal val monthDayValues: MutableMap<Int, Property<MonthDay?>> = HashMap()
 
     @get:JsonIgnore
-    internal val yearMonthValues: MutableMap<Int, WritableProperty<YearMonth?>> = HashMap()
+    internal val yearMonthValues: MutableMap<Int, Property<YearMonth?>> = HashMap()
 
     @get:JsonIgnore
-    internal val periodValues: MutableMap<Int, WritableProperty<Period?>> = HashMap()
+    internal val periodValues: MutableMap<Int, Property<Period?>> = HashMap()
 
     @get:JsonIgnore
-    internal val durationValues: MutableMap<Int, WritableProperty<Duration?>> = HashMap()
+    internal val durationValues: MutableMap<Int, Property<Duration?>> = HashMap()
 
     //strings
     @get:JsonIgnore
-    internal val stringValues: MutableMap<Int, WritableProperty<String?>> = HashMap()
+    internal val stringValues: MutableMap<Int, Property<String?>> = HashMap()
 
     //boolean
     @get:JsonIgnore
-    internal val booleanValues: MutableMap<Int, WritableProperty<Boolean?>> = HashMap()
+    internal val booleanValues: MutableMap<Int, Property<Boolean?>> = HashMap()
 
     //numeric
     @get:JsonIgnore
-    internal val shortValues: MutableMap<Int, WritableProperty<Short?>> = HashMap()
+    internal val shortValues: MutableMap<Int, Property<Short?>> = HashMap()
 
     @get:JsonIgnore
-    internal val floatValues: MutableMap<Int, WritableProperty<Float?>> = HashMap()
+    internal val floatValues: MutableMap<Int, Property<Float?>> = HashMap()
 
     @get:JsonIgnore
-    internal val doubleValues: MutableMap<Int, WritableProperty<Double?>> = HashMap()
+    internal val doubleValues: MutableMap<Int, Property<Double?>> = HashMap()
 
     @get:JsonIgnore
-    internal val longValues: MutableMap<Int, WritableProperty<Long?>> = HashMap()
+    internal val longValues: MutableMap<Int, Property<Long?>> = HashMap()
 
     @get:JsonIgnore
-    internal val integerValues: MutableMap<Int, WritableProperty<Int?>> = HashMap()
+    internal val integerValues: MutableMap<Int, Property<Int?>> = HashMap()
 
     @get:JsonIgnore
-    internal val uuidValues: MutableMap<Int, WritableProperty<UUID?>> = HashMap()
+    internal val uuidValues: MutableMap<Int, Property<UUID?>> = HashMap()
 
     //collections
     @get:JsonIgnore
@@ -152,20 +152,26 @@ abstract class Entity : IEntity {
 
     //enums
     @get:JsonIgnore
-    internal val enumValues: MutableMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+    internal val enumValues: MutableMap<Int, Property<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
-    internal val stringEnumValues: MutableMap<Int, WritableProperty<Enum<*>?>> = HashMap()
+    internal val codedEnumValues: MutableMap<Int, Property<ICodedEnum<*>?>> = HashMap()
+
+    @get:JsonIgnore
+    internal val stringEnumValues: MutableMap<Int, Property<Enum<*>?>> = HashMap()
 
     @get:JsonIgnore
     internal val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
+
+    @get:JsonIgnore
+    internal val codedEnumCollections: MutableMap<Int, MutableCollection<ICodedEnum<*>>> = HashMap()
 
     @get:JsonIgnore
     internal val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
 
     //objects
     @get:JsonIgnore
-    internal val objectValues: MutableMap<FieldEntity<*>, WritableProperty<IEntity>> = HashMap()
+    internal val objectValues: MutableMap<FieldEntity<*>, Property<IEntity>> = HashMap()
 
     //maps
     @get:JsonIgnore
@@ -176,7 +182,7 @@ abstract class Entity : IEntity {
 
     //blobs
     @get:JsonIgnore
-    internal val blobValues: MutableMap<Int, WritableProperty<ByteArray?>> = HashMap()
+    internal val blobValues: MutableMap<Int, Property<ByteArray?>> = HashMap()
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -191,14 +197,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Short, propertyName: String = "") = map(field, ShortProperty(value), propertyName)
 
     @JvmName("mapShort")
-    protected fun map(field: Field, property: WritableProperty<Short>, propertyName: String = ""): WritableProperty<Short> {
+    protected fun map(field: Field, property: Property<Short>, propertyName: String = ""): Property<Short> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Short?>, propertyName)
+        map(field, property as Property<Short?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableShort")
-    protected fun map(field: Field, property: WritableProperty<Short?>, propertyName: String = ""): WritableProperty<Short?> {
+    protected fun map(field: Field, property: Property<Short?>, propertyName: String = ""): Property<Short?> {
         validateShort(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return shortValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -208,14 +214,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Double, propertyName: String = "") = map(field, DoubleProperty(value), propertyName)
 
     @JvmName("mapDouble")
-    protected fun map(field: Field, property: WritableProperty<Double>, propertyName: String = ""): WritableProperty<Double> {
+    protected fun map(field: Field, property: Property<Double>, propertyName: String = ""): Property<Double> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Double?>, propertyName)
+        map(field, property as Property<Double?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableDouble")
-    protected fun map(field: Field, property: WritableProperty<Double?>, propertyName: String = ""): WritableProperty<Double?> {
+    protected fun map(field: Field, property: Property<Double?>, propertyName: String = ""): Property<Double?> {
         validateDouble(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return doubleValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -225,14 +231,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Int, propertyName: String = "") = map(field, IntegerProperty(value), propertyName)
 
     @JvmName("mapInt")
-    protected fun map(field: Field, property: WritableProperty<Int>, propertyName: String = ""): WritableProperty<Int> {
+    protected fun map(field: Field, property: Property<Int>, propertyName: String = ""): Property<Int> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Int?>, propertyName)
+        map(field, property as Property<Int?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableInt")
-    protected fun map(field: Field, property: WritableProperty<Int?>, propertyName: String = ""): WritableProperty<Int?> {
+    protected fun map(field: Field, property: Property<Int?>, propertyName: String = ""): Property<Int?> {
         validateInt(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return integerValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -242,14 +248,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Long, propertyName: String = "") = map(field, LongProperty(value), propertyName)
 
     @JvmName("mapLong")
-    protected fun map(field: Field, property: WritableProperty<Long>, propertyName: String = ""): WritableProperty<Long> {
+    protected fun map(field: Field, property: Property<Long>, propertyName: String = ""): Property<Long> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Long?>, propertyName)
+        map(field, property as Property<Long?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableLong")
-    protected fun map(field: Field, property: WritableProperty<Long?>, propertyName: String = ""): WritableProperty<Long?> {
+    protected fun map(field: Field, property: Property<Long?>, propertyName: String = ""): Property<Long?> {
         validateLong(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return longValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -259,14 +265,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Float, propertyName: String = "") = map(field, FloatProperty(value), propertyName)
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, property: WritableProperty<Float>, propertyName: String = ""): WritableProperty<Float> {
+    protected fun map(field: Field, property: Property<Float>, propertyName: String = ""): Property<Float> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Float?>, propertyName)
+        map(field, property as Property<Float?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableFloat")
-    protected fun map(field: Field, property: WritableProperty<Float?>, propertyName: String = ""): WritableProperty<Float?> {
+    protected fun map(field: Field, property: Property<Float?>, propertyName: String = ""): Property<Float?> {
         validateFloat(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return floatValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -276,14 +282,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Boolean, propertyName: String = "") = map(field, BooleanProperty(value), propertyName)
 
     @JvmName("mapBoolean")
-    protected fun map(field: Field, property: WritableProperty<Boolean>, propertyName: String = ""): WritableProperty<Boolean> {
+    protected fun map(field: Field, property: Property<Boolean>, propertyName: String = ""): Property<Boolean> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Boolean?>, propertyName)
+        map(field, property as Property<Boolean?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableBoolean")
-    protected fun map(field: Field, property: WritableProperty<Boolean?>, propertyName: String = ""): WritableProperty<Boolean?> {
+    protected fun map(field: Field, property: Property<Boolean?>, propertyName: String = ""): Property<Boolean?> {
         validateBoolean(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return booleanValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -293,14 +299,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: UUID, propertyName: String = "") = map(field, UuidProperty(value), propertyName)
 
     @JvmName("mapUuid")
-    protected fun map(field: Field, property: WritableProperty<UUID>, propertyName: String = ""): WritableProperty<UUID> {
+    protected fun map(field: Field, property: Property<UUID>, propertyName: String = ""): Property<UUID> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<UUID?>, propertyName)
+        map(field, property as Property<UUID?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableUuid")
-    protected fun map(field: Field, property: WritableProperty<UUID?>, propertyName: String = ""): WritableProperty<UUID?> {
+    protected fun map(field: Field, property: Property<UUID?>, propertyName: String = ""): Property<UUID?> {
         validateUuid(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return uuidValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -310,14 +316,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: String, propertyName: String = "") = map(field, StringProperty(value), propertyName)
 
     @JvmName("mapString")
-    protected fun map(field: Field, property: WritableProperty<String>, propertyName: String = ""): WritableProperty<String> {
+    protected fun map(field: Field, property: Property<String>, propertyName: String = ""): Property<String> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<String?>, propertyName)
+        map(field, property as Property<String?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableString")
-    protected fun map(field: Field, property: WritableProperty<String?>, propertyName: String = ""): WritableProperty<String?> {
+    protected fun map(field: Field, property: Property<String?>, propertyName: String = ""): Property<String?> {
         validateString(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return stringValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -327,14 +333,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: LocalDateTime, propertyName: String = "") = map(field, LocalDateTimeProperty(value), propertyName)
 
     @JvmName("mapDateTime")
-    protected fun map(field: Field, property: WritableProperty<LocalDateTime>, propertyName: String = ""): WritableProperty<LocalDateTime> {
+    protected fun map(field: Field, property: Property<LocalDateTime>, propertyName: String = ""): Property<LocalDateTime> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<LocalDateTime?>, propertyName)
+        map(field, property as Property<LocalDateTime?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableDateTime")
-    protected fun map(field: Field, property: WritableProperty<LocalDateTime?>, propertyName: String = ""): WritableProperty<LocalDateTime?> {
+    protected fun map(field: Field, property: Property<LocalDateTime?>, propertyName: String = ""): Property<LocalDateTime?> {
         validateDateTime(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return localDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -344,14 +350,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: ZonedDateTime, propertyName: String = "") = map(field, ZonedDateTimeProperty(value), propertyName)
 
     @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, property: WritableProperty<ZonedDateTime>, propertyName: String = ""): WritableProperty<ZonedDateTime> {
+    protected fun map(field: Field, property: Property<ZonedDateTime>, propertyName: String = ""): Property<ZonedDateTime> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<ZonedDateTime?>, propertyName)
+        map(field, property as Property<ZonedDateTime?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableZonedDateTime")
-    protected fun map(field: Field, property: WritableProperty<ZonedDateTime?>, propertyName: String = ""): WritableProperty<ZonedDateTime?> {
+    protected fun map(field: Field, property: Property<ZonedDateTime?>, propertyName: String = ""): Property<ZonedDateTime?> {
         validateZonedDateTime(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return zonedDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -361,14 +367,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: LocalDate, propertyName: String = "") = map(field, LocalDateProperty(value), propertyName)
 
     @JvmName("mapDate")
-    protected fun map(field: Field, property: WritableProperty<LocalDate>, propertyName: String = ""): WritableProperty<LocalDate> {
+    protected fun map(field: Field, property: Property<LocalDate>, propertyName: String = ""): Property<LocalDate> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<LocalDate?>, propertyName)
+        map(field, property as Property<LocalDate?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableDate")
-    protected fun map(field: Field, property: WritableProperty<LocalDate?>, propertyName: String = ""): WritableProperty<LocalDate?> {
+    protected fun map(field: Field, property: Property<LocalDate?>, propertyName: String = ""): Property<LocalDate?> {
         validateDate(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return localDateValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -378,14 +384,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: LocalTime, propertyName: String = "") = map(field, LocalTimeProperty(value), propertyName)
 
     @JvmName("mapTime")
-    protected fun map(field: Field, property: WritableProperty<LocalTime>, propertyName: String = ""): WritableProperty<LocalTime> {
+    protected fun map(field: Field, property: Property<LocalTime>, propertyName: String = ""): Property<LocalTime> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<LocalTime?>, propertyName)
+        map(field, property as Property<LocalTime?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableTime")
-    protected fun map(field: Field, property: WritableProperty<LocalTime?>, propertyName: String = ""): WritableProperty<LocalTime?> {
+    protected fun map(field: Field, property: Property<LocalTime?>, propertyName: String = ""): Property<LocalTime?> {
         validateTime(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return localTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -395,14 +401,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: ByteArray, propertyName: String = "") = map(field, BlobProperty(value), propertyName)
 
     @JvmName("mapBlob")
-    protected fun map(field: Field, property: WritableProperty<ByteArray>, propertyName: String = ""): WritableProperty<ByteArray> {
+    protected fun map(field: Field, property: Property<ByteArray>, propertyName: String = ""): Property<ByteArray> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<ByteArray?>, propertyName)
+        map(field, property as Property<ByteArray?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableBlob")
-    protected fun map(field: Field, property: WritableProperty<ByteArray?>, propertyName: String = ""): WritableProperty<ByteArray?> {
+    protected fun map(field: Field, property: Property<ByteArray?>, propertyName: String = ""): Property<ByteArray?> {
         validateBlob(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return blobValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -412,14 +418,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: MonthDay, propertyName: String = "") = map(field, MonthDayProperty(value), propertyName)
 
     @JvmName("mapMonthDay")
-    protected fun map(field: Field, property: WritableProperty<MonthDay>, propertyName: String = ""): WritableProperty<MonthDay> {
+    protected fun map(field: Field, property: Property<MonthDay>, propertyName: String = ""): Property<MonthDay> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<MonthDay?>, propertyName)
+        map(field, property as Property<MonthDay?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableMonthDay")
-    protected fun map(field: Field, property: WritableProperty<MonthDay?>, propertyName: String = ""): WritableProperty<MonthDay?> {
+    protected fun map(field: Field, property: Property<MonthDay?>, propertyName: String = ""): Property<MonthDay?> {
         validateMonthDay(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return monthDayValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -429,14 +435,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: YearMonth, propertyName: String = "") = map(field, YearMonthProperty(value), propertyName)
 
     @JvmName("mapYearMonth")
-    protected fun map(field: Field, property: WritableProperty<YearMonth>, propertyName: String = ""): WritableProperty<YearMonth> {
+    protected fun map(field: Field, property: Property<YearMonth>, propertyName: String = ""): Property<YearMonth> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<YearMonth?>, propertyName)
+        map(field, property as Property<YearMonth?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableYearMonth")
-    protected fun map(field: Field, property: WritableProperty<YearMonth?>, propertyName: String = ""): WritableProperty<YearMonth?> {
+    protected fun map(field: Field, property: Property<YearMonth?>, propertyName: String = ""): Property<YearMonth?> {
         validateYearMonth(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return yearMonthValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -446,14 +452,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Period, propertyName: String = "") = map(field, PeriodProperty(value), propertyName)
 
     @JvmName("mapPeriod")
-    protected fun map(field: Field, property: WritableProperty<Period>, propertyName: String = ""): WritableProperty<Period> {
+    protected fun map(field: Field, property: Property<Period>, propertyName: String = ""): Property<Period> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Period?>, propertyName)
+        map(field, property as Property<Period?>, propertyName)
         return property
     }
 
     @JvmName("mapNullablePeriod")
-    protected fun map(field: Field, property: WritableProperty<Period?>, propertyName: String = ""): WritableProperty<Period?> {
+    protected fun map(field: Field, property: Property<Period?>, propertyName: String = ""): Property<Period?> {
         validatePeriod(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return periodValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -463,14 +469,14 @@ abstract class Entity : IEntity {
     protected fun map(field: Field, value: Duration, propertyName: String = "") = map(field, DurationProperty(value), propertyName)
 
     @JvmName("mapDuration")
-    protected fun map(field: Field, property: WritableProperty<Duration>, propertyName: String = ""): WritableProperty<Duration> {
+    protected fun map(field: Field, property: Property<Duration>, propertyName: String = ""): Property<Duration> {
         @Suppress("UNCHECKED_CAST")
-        map(field, property as WritableProperty<Duration?>, propertyName)
+        map(field, property as Property<Duration?>, propertyName)
         return property
     }
 
     @JvmName("mapNullableDuration")
-    protected fun map(field: Field, property: WritableProperty<Duration?>, propertyName: String = ""): WritableProperty<Duration?> {
+    protected fun map(field: Field, property: Property<Duration?>, propertyName: String = ""): Property<Duration?> {
         validateDuration(field)
         FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
         return durationValues.getOrPut(mapField(overview.entityId, field.bind())) { property }
@@ -480,12 +486,12 @@ abstract class Entity : IEntity {
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T, propertyName: String = "") = map(fieldEnum, NullableEnumProperty(value), propertyName)
 
     @JvmName("mapNullableEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T?>, propertyName: String = ""): WritableProperty<T?> {
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: Property<T?>, propertyName: String = ""): Property<T?> {
         validateEnum(fieldEnum.field)
         if (fieldEnum.field.type == FieldType.Enum) {
-            enumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
+            enumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
         } else {
-            stringEnumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
+            stringEnumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
         }
         fieldEnum.field.bind()
         FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
@@ -495,12 +501,18 @@ abstract class Entity : IEntity {
     }
 
     @JvmName("mapEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: WritableProperty<T>, propertyName: String = ""): WritableProperty<T> {
+    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: Property<T>, propertyName: String = ""): Property<T> {
         validateEnum(fieldEnum.field)
-        if (fieldEnum.field.type == FieldType.Enum) {
-            enumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
-        } else {
-            stringEnumValues[fieldEnum.field.id] = property as WritableProperty<Enum<*>?>
+        when (fieldEnum.field.type) {
+            FieldType.Enum -> {
+                enumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
+            }
+            FieldType.CodedEnum -> {
+                codedEnumValues[fieldEnum.field.id] = property as Property<ICodedEnum<*>?>
+            }
+            else -> {
+                stringEnumValues[fieldEnum.field.id] = property as Property<Enum<*>?>
+            }
         }
         fieldEnum.field.bind()
         FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
@@ -581,13 +593,23 @@ abstract class Entity : IEntity {
 
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
-        if (fieldEnum.field.type != FieldType.EnumCollection && fieldEnum.field.type != FieldType.EnumStringCollection) {
+        if (
+                fieldEnum.field.type != FieldType.EnumCollection &&
+                fieldEnum.field.type != FieldType.EnumStringCollection &&
+                fieldEnum.field.type != FieldType.CodedEnumCollection
+        ) {
             throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
         }
-        if (fieldEnum.field.type == FieldType.EnumCollection) {
-            enumCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
-        } else {
-            enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
+        when (fieldEnum.field.type) {
+            FieldType.EnumCollection -> {
+                enumCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
+            }
+            FieldType.CodedEnumCollection -> {
+                codedEnumCollections[fieldEnum.field.id] = collection as MutableCollection<ICodedEnum<*>>
+            }
+            else -> {
+                enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
+            }
         }
         validateEnumCollection(fieldEnum.field)
         fieldEnum.field.bind()
@@ -597,17 +619,17 @@ abstract class Entity : IEntity {
         return collection
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T, propertyName: String = ""): WritableProperty<T> {
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T, propertyName: String = ""): Property<T> {
         return map(fieldEntity, ObjectProperty(entity), propertyName)
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, property: WritableProperty<T>, propertyName: String = ""): WritableProperty<T> {
+    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, property: Property<T>, propertyName: String = ""): Property<T> {
         if (fieldEntity.field.type != FieldType.Entity) {
             throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
-            objectValues[fieldEntity] = property as WritableProperty<IEntity>
+            objectValues[fieldEntity] = property as Property<IEntity>
             FieldDictionary.addEntityField(overview.entityId, fieldEntity.field.id, propertyName)
             mapField(overview.entityId, fieldEntity.field.id)
         } else {
@@ -646,7 +668,7 @@ abstract class Entity : IEntity {
      * @param source The entity to copy values from
      * @param <T>    A valid JDSEntity
     </T> */
-    fun <T : Entity> copy(source: T) {
+    fun <T : Entity> deepCopy(source: T) {
         this.overview.id = source.overview.id
         this.overview.editVersion = source.overview.editVersion
         this.overview.entityId = source.overview.entityId
@@ -729,6 +751,9 @@ abstract class Entity : IEntity {
         enumValues.clear()
         enumValues.putAll(DeepCopy.clone(source.enumValues))
 
+        codedEnumValues.clear()
+        codedEnumValues.putAll(DeepCopy.clone(source.codedEnumValues))
+
         stringEnumValues.clear()
         stringEnumValues.putAll(DeepCopy.clone(source.stringEnumValues))
 
@@ -737,6 +762,9 @@ abstract class Entity : IEntity {
 
         enumStringCollections.clear()
         enumStringCollections.putAll(DeepCopy.clone(source.enumStringCollections))
+
+        codedEnumCollections.clear()
+        codedEnumCollections.putAll(DeepCopy.clone(source.codedEnumCollections))
 
         objectValues.clear()
         objectValues.putAll(DeepCopy.clone(source.objectValues))
@@ -793,6 +821,9 @@ abstract class Entity : IEntity {
             }
             FieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId)) {
                 enumCollections[fieldId] = ArrayList()
+            }
+            FieldType.CodedEnumCollection -> if (!enumStringCollections.containsKey(fieldId)) {
+                enumStringCollections[fieldId] = ArrayList()
             }
             FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
                 zonedDateTimeValues[fieldId] = NullableZonedDateTimeProperty()

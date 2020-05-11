@@ -26,7 +26,7 @@ JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses
 
 # Design
 
-The concept behind JDS is quite simple. Extend a base **Entity** class, define strongly-typed **Fields** and then **map** them against implementations of the **WritableProperty** interface.
+The concept behind JDS is quite simple. Extend a base **Entity** class, define strongly-typed **Fields** and then **map** them against implementations of the **Property** interface.
 
 ## Features
 
@@ -243,25 +243,25 @@ Kindly note that none of the JavaFX beans are serializable, however JDS supports
 | IntCollection        | MutableCollection\<Integer\>                               | mapInts               | map          |
 | LongCollection       | MutableCollection\<Long\>                                  | mapLongs              | map          |
 | StringCollection     | MutableCollection\<String\>                                | mapStrings            | map          |
-| Boolean              | WritableProperty\<Boolean\>                                | mapBoolean            | map          |
-| Blob                 | WritableProperty\<ByteArray\>                              | map                   | map          |
+| Boolean              | Property\<Boolean\>                                | mapBoolean            | map          |
+| Blob                 | Property\<ByteArray\>                              | map                   | map          |
 | Entity               | Class\<? extends Entity\>                                  | map                   | map          |
-| Date                 | WritableProperty\<LocalDate\>                              | mapDate               | map          |
-| DateTime             | WritableProperty\<LocalDateTime\>                          | mapDateTime           | map          |
-| Double               | WritableProperty\<Double\>                                 | mapNumeric            | map          |
-| Duration             | WritableProperty\<Duration\>                               | mapDuration           | map          |
-| Enum                 | WritableProperty\<Enum\>                                   | mapEnum               | map          |
+| Date                 | Property\<LocalDate\>                              | mapDate               | map          |
+| DateTime             | Property\<LocalDateTime\>                          | mapDateTime           | map          |
+| Double               | Property\<Double\>                                 | mapNumeric            | map          |
+| Duration             | Property\<Duration\>                               | mapDuration           | map          |
+| Enum                 | Property\<Enum\>                                   | mapEnum               | map          |
 | EnumCollection       | Collection\<Enum\>                                         | mapEnums              | map          |
-| Float                | WritableProperty\<Float\>                                  | mapNumeric            | map          |
-| Int                  | WritableProperty\<Integer\>                                | mapNumeric            | map          |
-| Long                 | WritableProperty\<Long\>                                   | mapNumeric            | map          |
-| MonthDay             | WritableProperty\<MonthDay\>                               | mapMonthDay           | map          |
-| Period               | WritableProperty\<Period\>                                 | mapPeriod             | map          |
-| String               | WritableProperty\<String\>                                 | mapString             | map          |
-| Time                 | WritableProperty\<LocalTime\>                              | mapTime               | map          |
-| YearMonth            | WritableProperty\<YearMonth\>                              | mapYearMonth          | map          |
-| ZonedDateTime        | WritableProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
-| Uuid                 | WritableProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Float                | Property\<Float\>                                  | mapNumeric            | map          |
+| Int                  | Property\<Integer\>                                | mapNumeric            | map          |
+| Long                 | Property\<Long\>                                   | mapNumeric            | map          |
+| MonthDay             | Property\<MonthDay\>                               | mapMonthDay           | map          |
+| Period               | Property\<Period\>                                 | mapPeriod             | map          |
+| String               | Property\<String\>                                 | mapString             | map          |
+| Time                 | Property\<LocalTime\>                              | mapTime               | map          |
+| YearMonth            | Property\<YearMonth\>                              | mapYearMonth          | map          |
+| ZonedDateTime        | Property\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Uuid                 | Property\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
 
 To simplify the mapping Process Jds has the followin helper classes defined:
 

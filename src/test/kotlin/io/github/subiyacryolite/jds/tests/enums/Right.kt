@@ -13,12 +13,14 @@
  */
 package io.github.subiyacryolite.jds.tests.enums
 
-enum class Right(private val caption: String) {
-    Login("This user can login"),
-    CreateUser("This account can create and manage users"),
-    DeleteUser("This account can delete users"),
-    CreateRecord("This account can create system records"),
-    DeleteRecord("This account can delete system records");
+import io.github.subiyacryolite.jds.interfaces.ICodedEnum
+
+enum class Right(private val caption: String, override val code: Int) : ICodedEnum<Right> {
+    Login("This user can login", 1),
+    CreateUser("This account can create and manage users", 2),
+    DeleteUser("This account can delete users", 3),
+    CreateRecord("This account can create system records", 4),
+    DeleteRecord("This account can delete system records", 5);
 
     override fun toString(): String {
         return caption

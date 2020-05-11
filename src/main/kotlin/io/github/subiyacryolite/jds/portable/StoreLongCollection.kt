@@ -29,5 +29,5 @@ data class StoreLongCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Long> = ArrayList()
+        var values: Collection<Long> = ArrayList()
 )

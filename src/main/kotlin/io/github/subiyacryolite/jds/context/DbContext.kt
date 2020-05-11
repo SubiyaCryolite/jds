@@ -23,6 +23,7 @@ import io.github.subiyacryolite.jds.enums.Implementation
 import io.github.subiyacryolite.jds.enums.Procedure
 import io.github.subiyacryolite.jds.enums.Table
 import io.github.subiyacryolite.jds.extensions.Extensions
+import io.github.subiyacryolite.jds.interfaces.IDbContext
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream

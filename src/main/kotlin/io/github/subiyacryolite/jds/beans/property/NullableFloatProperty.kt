@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of [Float] values
  * @param value the backing value
  */
-data class NullableFloatProperty(override var value: Float? = null) : WritableProperty<Float?> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class NullableFloatProperty(override var value: Float? = null) : Property<Float?>

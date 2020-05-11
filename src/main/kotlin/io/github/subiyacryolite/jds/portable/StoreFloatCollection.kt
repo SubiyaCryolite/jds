@@ -29,5 +29,5 @@ data class StoreFloatCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Float> = ArrayList()
+        var values: Collection<Float> = ArrayList()
 )

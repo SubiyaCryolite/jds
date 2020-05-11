@@ -13,11 +13,13 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
  * @param value the initial value
  */
-data class BlobProperty(override var value: ByteArray = ByteArray(0)) : WritableProperty<ByteArray> {
+data class BlobProperty(override var value: ByteArray = ByteArray(0)) : Property<ByteArray> {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -30,9 +32,5 @@ data class BlobProperty(override var value: ByteArray = ByteArray(0)) : Writable
 
     override fun hashCode(): Int {
         return value.contentHashCode()
-    }
-
-    override fun toString(): String {
-        return "$value"
     }
 }

@@ -23,5 +23,5 @@ data class StoreUuidCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<ByteArray> = ArrayList()
+        var values: Collection<ByteArray> = ArrayList()
 )

@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of [String] values
  * @param value the backing value
  */
-data class StringProperty(override var value: String = "") : WritableProperty<String> {
-
-    override fun toString(): String {
-        return value
-    }
-}
+data class StringProperty(override var value: String = "") : Property<String>

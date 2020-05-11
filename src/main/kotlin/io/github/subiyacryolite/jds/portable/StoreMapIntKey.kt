@@ -28,5 +28,5 @@ data class StoreMapIntKey(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableMap<Int, String> = HashMap()
+        var values: Map<Int, String> = HashMap()
 )

@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.interfaces.IEntity
 import java.io.Serializable
 import java.util.*
 

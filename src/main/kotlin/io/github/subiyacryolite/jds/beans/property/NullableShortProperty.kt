@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of [Short] values
  * @param value the backing value
  */
-data class NullableShortProperty(override var value: Short? = null) : WritableProperty<Short?> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class NullableShortProperty(override var value: Short? = null) : Property<Short?>

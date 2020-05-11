@@ -13,15 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
 import java.time.Duration
 
 /**
  * Class allowing for the wrapping and persistence of [Duration] values
  * @param value the backing value
  */
-data class DurationProperty(override var value: Duration = Duration.ZERO) : WritableProperty<Duration> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class DurationProperty(override var value: Duration = Duration.ZERO) : Property<Duration>

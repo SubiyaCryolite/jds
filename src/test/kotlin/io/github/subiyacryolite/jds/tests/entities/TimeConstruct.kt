@@ -16,15 +16,16 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
+import io.github.subiyacryolite.jds.interfaces.Property
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.*
 
 @EntityAnnotation(name = "TimeConstruct", id = 9)
 data class TimeConstruct(
-        private val _period: WritableProperty<Period> = PeriodProperty(Period.ZERO),
-        private val _duration: WritableProperty<Duration> = DurationProperty(Duration.ZERO),
-        private val _monthDay: WritableProperty<MonthDay> = MonthDayProperty(MonthDay.of(Month.APRIL, 14)),
-        private val _yearMonth: WritableProperty<YearMonth> = YearMonthProperty(YearMonth.of(1991, 7))
+        private val _period: Property<Period> = PeriodProperty(Period.ZERO),
+        private val _duration: Property<Duration> = DurationProperty(Duration.ZERO),
+        private val _monthDay: Property<MonthDay> = MonthDayProperty(MonthDay.of(Month.APRIL, 14)),
+        private val _yearMonth: Property<YearMonth> = YearMonthProperty(YearMonth.of(1991, 7))
 ) : Entity() {
 
     init {

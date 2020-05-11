@@ -29,5 +29,5 @@ data class StoreDoubleCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Double> = ArrayList()
+        var values: Collection<Double> = ArrayList()
 )

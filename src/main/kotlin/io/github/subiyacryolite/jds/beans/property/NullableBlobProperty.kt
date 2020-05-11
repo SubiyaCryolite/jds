@@ -13,11 +13,13 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of binary values within a backing [ByteArray]
  * @param value the initial value
  */
-data class NullableBlobProperty(override var value: ByteArray? = null) : WritableProperty<ByteArray?> {
+data class NullableBlobProperty(override var value: ByteArray? = null) : Property<ByteArray?> {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -33,9 +35,5 @@ data class NullableBlobProperty(override var value: ByteArray? = null) : Writabl
 
     override fun hashCode(): Int {
         return value?.contentHashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "$value"
     }
 }

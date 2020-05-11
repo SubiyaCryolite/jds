@@ -13,15 +13,11 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
 import java.time.LocalTime
 
 /**
  * Class allowing for the wrapping and persistence of [LocalTime] values
  * @param value the backing value
  */
-data class LocalTimeProperty(override var value: LocalTime = LocalTime.now()) : WritableProperty<LocalTime> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class LocalTimeProperty(override var value: LocalTime = LocalTime.now()) : Property<LocalTime>

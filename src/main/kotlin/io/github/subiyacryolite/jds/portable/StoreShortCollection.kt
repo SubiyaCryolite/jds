@@ -16,5 +16,5 @@ data class StoreShortCollection(
 
         @get:JsonProperty("v")
         @set:JsonProperty("v")
-        var values: MutableCollection<Short> = ArrayList()
+        var values: Collection<Short> = ArrayList()
 )

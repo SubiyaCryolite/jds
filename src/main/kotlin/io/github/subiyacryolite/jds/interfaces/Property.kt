@@ -1,8 +1,8 @@
-package io.github.subiyacryolite.jds.beans.property
+package io.github.subiyacryolite.jds.interfaces
 
 import java.io.Serializable
 
-interface WritableProperty<T> : Serializable {
+interface Property<T> : Serializable {
 
     var value: T
 

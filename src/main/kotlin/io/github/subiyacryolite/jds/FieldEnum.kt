@@ -13,6 +13,7 @@
  */
 package io.github.subiyacryolite.jds
 
+import io.github.subiyacryolite.jds.interfaces.ICodedEnum
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.HashSet
@@ -36,6 +37,10 @@ data class FieldEnum<T : Enum<T>>(
 
     fun valueOf(ordinal: Int): T? {
         return values.firstOrNull { it.ordinal == ordinal }
+    }
+
+    fun codedValueOf(ordinal: Int): ICodedEnum<*>? {
+        return values.filter { it is ICodedEnum<*> }.map { it as ICodedEnum<*> }.firstOrNull { it.code == ordinal }
     }
 
     fun valueOf(name: String): T? {

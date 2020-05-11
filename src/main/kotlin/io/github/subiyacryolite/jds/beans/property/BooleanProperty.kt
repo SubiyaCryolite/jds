@@ -13,13 +13,10 @@
  */
 package io.github.subiyacryolite.jds.beans.property
 
+import io.github.subiyacryolite.jds.interfaces.Property
+
 /**
  * Class allowing for the wrapping and persistence of [Boolean] values
  * @param value the backing value
  */
-data class BooleanProperty(override var value: Boolean = false) : WritableProperty<Boolean> {
-
-    override fun toString(): String {
-        return "$value"
-    }
-}
+data class BooleanProperty(override var value: Boolean = false) : Property<Boolean>
