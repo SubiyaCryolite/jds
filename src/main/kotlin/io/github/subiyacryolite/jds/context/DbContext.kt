@@ -148,6 +148,7 @@ abstract class DbContext(
      * @param table an enum that maps to the components concrete implementation
      */
     private fun initiateDatabaseComponent(connection: Connection, table: Table) {
+        @Suppress("NON_EXHAUSTIVE_WHEN")
         when (table) {
             Table.Entity -> executeSqlFromString(connection, createStoreEntities())
             Table.EntityEnum -> executeSqlFromString(connection, createBindEntityEnums())

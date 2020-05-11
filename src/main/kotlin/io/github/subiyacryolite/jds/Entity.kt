@@ -478,6 +478,7 @@ abstract class Entity : IEntity {
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T, propertyName: String = "") = map(fieldEnum, NullableEnumProperty(value), propertyName)
 
     @JvmName("mapNullableEnum")
+    @Suppress("UNCHECKED_CAST")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: IProperty<T?>, propertyName: String = ""): IProperty<T?> {
         validateEnum(fieldEnum.field)
         if (fieldEnum.field.type == FieldType.Enum) {
@@ -493,6 +494,7 @@ abstract class Entity : IEntity {
     }
 
     @JvmName("mapEnum")
+    @Suppress("UNCHECKED_CAST")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, property: IProperty<T>, propertyName: String = ""): IProperty<T> {
         validateEnum(fieldEnum.field)
         when (fieldEnum.field.type) {
@@ -581,6 +583,7 @@ abstract class Entity : IEntity {
     }
 
     @JvmName("mapEnums")
+    @Suppress("UNCHECKED_CAST")
     protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
         if (
                 fieldEnum.field.type != FieldType.EnumCollection &&
@@ -614,6 +617,7 @@ abstract class Entity : IEntity {
         }
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
+            @Suppress("UNCHECKED_CAST")
             objectValues[fieldEntity] = property as IProperty<IEntity>
             FieldDictionary.addEntityField(overview.entityId, fieldEntity.field.id, propertyName)
             mapField(overview.entityId, fieldEntity.field.id)
@@ -633,6 +637,7 @@ abstract class Entity : IEntity {
         }
         if (!objectCollections.containsKey(fieldEntity)) {
             bindFieldIdToEntity(fieldEntity)
+            @Suppress("UNCHECKED_CAST")
             objectCollections[fieldEntity] = collection as MutableCollection<IEntity>
             FieldDictionary.addEntityField(overview.entityId, fieldEntity.field.id, propertyName)
             mapField(overview.entityId, fieldEntity.field.id)
@@ -658,6 +663,7 @@ abstract class Entity : IEntity {
     /**
      * This method enforces forward compatibility by ensuring that every WritableProperty is present even if the field is not defined or known locally
      */
+    @Suppress("NON_EXHAUSTIVE_WHEN")
     private fun initBackingWritablePropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
         when (fieldType) {
             FieldType.String -> if (!stringValues.containsKey(fieldId)) {
