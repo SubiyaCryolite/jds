@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.extensions
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.interfaces.IEntity
-import io.github.subiyacryolite.jds.interfaces.IProperty
+import io.github.subiyacryolite.jds.interfaces.IValue
 import io.github.subiyacryolite.jds.context.DbContext
 import java.nio.ByteBuffer
 import java.time.temporal.Temporal
@@ -43,7 +43,7 @@ fun UUID?.toByteArray(): ByteArray? = if (this == null) {
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterTemporalValue")
-internal fun Map<Int, IProperty<out Temporal?>>.filterIgnored(dbContext: DbContext): Map<Int, IProperty<out Temporal?>> = if (dbContext.options.ignoreTags.isEmpty()) {
+internal fun Map<Int, IValue<out Temporal?>>.filterIgnored(dbContext: DbContext): Map<Int, IValue<out Temporal?>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
     this.filter { kvp ->
@@ -58,7 +58,7 @@ internal fun Map<Int, IProperty<out Temporal?>>.filterIgnored(dbContext: DbConte
  * When sensitive data is not being saved, fields marked as sensitive will be excluded
  */
 @JvmName("filterValue")
-internal fun <T> Map<Int, IProperty<T>>.filterIgnored(dbContext: DbContext): Map<Int, IProperty<T>> = if (dbContext.options.ignoreTags.isEmpty()) {
+internal fun <T> Map<Int, IValue<T>>.filterIgnored(dbContext: DbContext): Map<Int, IValue<T>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
     this.filter { kvp ->

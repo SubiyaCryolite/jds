@@ -16,7 +16,7 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
-import io.github.subiyacryolite.jds.interfaces.IProperty
+import io.github.subiyacryolite.jds.interfaces.IValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,17 +25,17 @@ import java.time.ZonedDateTime
 
 @EntityAnnotation(id = 6, name = "TypeClass")
 data class Example(
-        private val _stringField: IProperty<String> = StringProperty(),
-        private val _timeField: IProperty<LocalTime> = LocalTimeProperty(),
-        private val _dateField: IProperty<LocalDate> = LocalDateProperty(),
-        private val _dateTimeField: IProperty<LocalDateTime> = LocalDateTimeProperty(),
-        private val _zonedDateTimeField: IProperty<ZonedDateTime> = ZonedDateTimeProperty(),
-        private val _longField: IProperty<Long> = LongProperty(),
-        private val _intField: IProperty<Int?> = NullableIntegerProperty(),
-        private val _doubleField: IProperty<Double> = DoubleProperty(),
-        private val _floatField: IProperty<Float> = FloatProperty(),
-        private val _booleanField: IProperty<Boolean> = BooleanProperty(),
-        private val _blobField: IProperty<ByteArray> = BlobProperty(byteArrayOf(0, 1, 1, 1, 1, 0))
+        private val _stringField: IValue<String> = StringValue(),
+        private val _timeField: IValue<LocalTime> = LocalTimeValue(),
+        private val _dateField: IValue<LocalDate> = LocalDateValue(),
+        private val _dateTimeField: IValue<LocalDateTime> = LocalDateTimeValue(),
+        private val _zonedDateTimeField: IValue<ZonedDateTime> = ZonedDateTimeValue(),
+        private val _longField: IValue<Long> = LongValue(),
+        private val _intField: IValue<Int?> = NullableIntegerValue(),
+        private val _doubleField: IValue<Double> = DoubleValue(),
+        private val _floatField: IValue<Float> = FloatValue(),
+        private val _booleanField: IValue<Boolean> = BooleanValue(),
+        private val _blobField: IValue<ByteArray> = BlobValue(byteArrayOf(0, 1, 1, 1, 1, 0))
 ) : Entity() {
 
     init {

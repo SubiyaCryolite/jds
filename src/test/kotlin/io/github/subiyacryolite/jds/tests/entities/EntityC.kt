@@ -15,13 +15,13 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.StringProperty
-import io.github.subiyacryolite.jds.interfaces.IProperty
+import io.github.subiyacryolite.jds.beans.property.StringValue
+import io.github.subiyacryolite.jds.interfaces.IValue
 import io.github.subiyacryolite.jds.enums.FieldType
 
 @EntityAnnotation(id = 5, name = "entityc", tags = ["entitya", "entityb"])
 data class EntityC(
-        private val _field: IProperty<String> = StringProperty("C")
+        private val _field: IValue<String> = StringValue("C")
 ) : EntityB() {
 
     init {

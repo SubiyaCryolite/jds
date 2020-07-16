@@ -20,9 +20,9 @@ apply plugin: "org.jetbrains.dokka"
 apply plugin: "io.codearte.nexus-staging"
 
 group = "io.github.subiyacryolite"
-version = "19.2-SNAPSHOT"
+version = "20.0-SNAPSHOT"
 archivesBaseName = project.name
-description = "A dynamic, cross platform, high performance, ORM data-mapper. Designed to assist in rapid development and data mining"
+description = "A dynamic, cross platform and high performance data-mapper. JDS is designed to assist in rapid development and the creation of robust, strongly typed, field dictionaries"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 
 project.ext.jacksonVersion = "2.10.1"

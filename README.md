@@ -230,7 +230,7 @@ Behind the scenes these Enums will be stored as either:
 
 ### 1.1.4 Binding Properties
 
-Depending on the type of Field, JDS will require that you set you objects properties to one of the following IProperty container types.
+Depending on the type of Field, JDS will require that you set you objects properties to one of the following IValue container types.
 
 | JDS Field Type       | Container                                                  | Java Mapping Call     |Kotlin Mapping Call |
 | -------------------- | -----------------------------------------------------------| --------------------- | ------------ |
@@ -241,68 +241,68 @@ Depending on the type of Field, JDS will require that you set you objects proper
 | IntCollection        | MutableCollection\<Integer\>                               | mapInts               | map          |
 | LongCollection       | MutableCollection\<Long\>                                  | mapLongs              | map          |
 | StringCollection     | MutableCollection\<String\>                                | mapStrings            | map          |
-| Boolean              | IProperty\<Boolean\>                                | mapBoolean            | map          |
-| Blob                 | IProperty\<ByteArray\>                              | map                   | map          |
+| Boolean              | IValue\<Boolean\>                                          | mapBoolean            | map          |
+| Blob                 | IValue\<ByteArray\>                                        | map                   | map          |
 | Entity               | Class\<? extends Entity\>                                  | map                   | map          |
-| Date                 | IProperty\<LocalDate\>                              | mapDate               | map          |
-| DateTime             | IProperty\<LocalDateTime\>                          | mapDateTime           | map          |
-| Double               | IProperty\<Double\>                                 | mapNumeric            | map          |
-| Duration             | IProperty\<Duration\>                               | mapDuration           | map          |
-| Enum                 | IProperty\<Enum\>                                   | mapEnum               | map          |
+| Date                 | IValue\<LocalDate\>                                        | mapDate               | map          |
+| DateTime             | IValue\<LocalDateTime\>                                    | mapDateTime           | map          |
+| Double               | IValue\<Double\>                                           | mapNumeric            | map          |
+| Duration             | IValue\<Duration\>                                         | mapDuration           | map          |
+| Enum                 | IValue\<Enum\>                                             | mapEnum               | map          |
 | EnumCollection       | Collection\<Enum\>                                         | mapEnums              | map          |
-| Float                | IProperty\<Float\>                                  | mapNumeric            | map          |
-| Int                  | IProperty\<Integer\>                                | mapNumeric            | map          |
-| Long                 | IProperty\<Long\>                                   | mapNumeric            | map          |
-| MonthDay             | IProperty\<MonthDay\>                               | mapMonthDay           | map          |
-| Period               | IProperty\<Period\>                                 | mapPeriod             | map          |
-| String               | IProperty\<String\>                                 | mapString             | map          |
-| Time                 | IProperty\<LocalTime\>                              | mapTime               | map          |
-| YearMonth            | IProperty\<YearMonth\>                              | mapYearMonth          | map          |
-| ZonedDateTime        | IProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
-| Uuid                 | IProperty\<ZonedDateTime\>                          | mapZonedDateTime      | map          |
+| Float                | IValue\<Float\>                                            | mapNumeric            | map          |
+| Int                  | IValue\<Integer\>                                          | mapNumeric            | map          |
+| Long                 | IValue\<Long\>                                             | mapNumeric            | map          |
+| MonthDay             | IValue\<MonthDay\>                                         | mapMonthDay           | map          |
+| Period               | IValue\<Period\>                                           | mapPeriod             | map          |
+| String               | IValue\<String\>                                           | mapString             | map          |
+| Time                 | IValue\<LocalTime\>                                        | mapTime               | map          |
+| YearMonth            | IValue\<YearMonth\>                                        | mapYearMonth          | map          |
+| ZonedDateTime        | IValue\<ZonedDateTime\>                                    | mapZonedDateTime      | map          |
+| Uuid                 | IValue\<ZonedDateTime\>                                    | mapZonedDateTime      | map          |
 
 To simplify the mapping Process Jds has the following helper classes defined:
 
  - Generic containers (Entities and Enums)
-     - ObjectProperty<T>
+     - ObjectValue<T>
  - Non null containers
-     - BlobProperty
-     - BooleanProperty
-     - DoubleProperty
-     - DurationProperty
-     - EnumProperty
-     - FloatProperty
-     - IntegerProperty
-     - LocalDateProperty
-     - LocalDateTimeProperty
-     - LocalTimeProperty
-     - LongProperty
-     - MonthDayProperty
-     - PeriodProperty
-     - ShortProperty
-     - StringProperty
-     - UuidProperty
-     - YearMonthProperty
-     - ZonedDateTimeProperty
+     - BlobValue
+     - BooleanValue
+     - DoubleValue
+     - DurationValue
+     - EnumValue
+     - FloatValue
+     - IntegerValue
+     - LocalDateValue
+     - LocalDateTimeValue
+     - LocalTimeValue
+     - LongValue
+     - MonthDayValue
+     - PeriodValue
+     - ShortValue
+     - StringValue
+     - UuidValue
+     - YearMonthValue
+     - ZonedDateTimeValue
  - Nullable containers
-     - NullableBlobProperty
-     - NullableBooleanProperty
-     - NullableDoubleProperty
-     - NullableDurationProperty
-     - NullableEnumProperty
-     - NullableFloatProperty
-     - NullableIntegerProperty
-     - NullableLocalDateProperty
-     - NullableLocalDateTimeProperty
-     - NullableLocalTimeProperty
-     - NullableLongProperty
-     - NullableMonthDayProperty
-     - NullablePeriodProperty
-     - NullableShortProperty
-     - NullableStringProperty
-     - NullableUuidProperty
-     - NullableYearMonthProperty
-     - NullableZonedDateTimeProperty
+     - NullableBlobValue
+     - NullableBooleanValue
+     - NullableDoubleValue
+     - NullableDurationValue
+     - NullableEnumValue
+     - NullableFloatValue
+     - NullableIntegerValue
+     - NullableLocalDateValue
+     - NullableLocalDateTimeValue
+     - NullableLocalTimeValue
+     - NullableLongValue
+     - NullableMonthDayValue
+     - NullablePeriodValue
+     - NullableShortValue
+     - NullableStringValue
+     - NullableUuidValue
+     - NullableYearMonthValue
+     - NullableZonedDateTimeValue
 
 **Note:** JDS assumes that all collection types will **not** contain null entries.
 
@@ -325,8 +325,8 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.NullableBooleanProperty
-import io.github.subiyacryolite.jds.beans.property.NullableShortProperty
+import io.github.subiyacryolite.jds.beans.property.NullableBooleanValue
+import io.github.subiyacryolite.jds.beans.property.NullableShortValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDateTime
 
@@ -334,12 +334,12 @@ import java.time.LocalDateTime
 class Address : Entity() {
 
     private val _streetName = map(Fields.StreetName, "", "streetName")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortProperty(), "plotNumber")
+    private val _plotNumber = map(Fields.PlotNumber, NullableShortValue(), "plotNumber")
     private val _area = map(Fields.ResidentialArea, "", "area")
     private val _city = map(Fields.City, "", "city")
     private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
     private val _country = map(Fields.Country, "", "country")
-    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanProperty(), "primaryAddress")
+    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanValue(), "primaryAddress")
     private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(), "timestamp")
 
     var primaryAddress: Boolean?
@@ -676,18 +676,6 @@ Once you have defined your class you can initialise them. A dynamic **id** is cr
 
 ### 1.2.5 Loading objects
 ...
-
-## 1.4 Backend Design
-
-The underlying database is based off of the star schema.
-
-Each **jds*str*** table stores live data and are always up-to-date.
-
-The **jds*ref*** tables are used as reference tables.
-
-The **jds*entity*** tables are used to store all high level meta-data regarding every Jds Entity in the database.
-
-<img src="https://github.com/SubiyaCryolite/jds/blob/master/database_design.svg" width="100%"/>
 
 # Development
 

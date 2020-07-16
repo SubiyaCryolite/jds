@@ -35,10 +35,10 @@ data class PortableContainer(
         entities.forEach { entity ->
             val validClass = Entity.getEntityAnnotation(entity.javaClass)
             if (validClass != null) {
-                val embeddedObject = PortableEntity()
-                embeddedObject.fieldId = null
-                embeddedObject.init(dbContext, entity)
-                portableEntities.add(embeddedObject)
+                val portableEntity = PortableEntity()
+                portableEntity.fieldId = null
+                portableEntity.init(dbContext, entity)
+                portableEntities.add(portableEntity)
             } else {
                 throw RuntimeException("You must annotate the class [${entity.javaClass.canonicalName}] or its parent with [${EntityAnnotation::class.java}]")
             }

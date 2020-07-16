@@ -13,7 +13,7 @@
  */
 package io.github.subiyacryolite.jds.tests
 
-import io.github.subiyacryolite.jds.beans.property.BlobProperty
+import io.github.subiyacryolite.jds.beans.property.BlobValue
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import org.junit.jupiter.api.Test
@@ -37,7 +37,7 @@ class Serialization : BaseTestConfig("Serialization") {
 
     @Test
     fun testBlobSerialization() {
-        val simpleBlobProperty = BlobProperty(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
+        val simpleBlobProperty = BlobValue(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
         val canonicalName = simpleBlobProperty.javaClass.canonicalName
         serialize(simpleBlobProperty, canonicalName)
         val out = deserialize(canonicalName, simpleBlobProperty.javaClass)
