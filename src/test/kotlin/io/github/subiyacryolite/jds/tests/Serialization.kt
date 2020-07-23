@@ -13,22 +13,23 @@
  */
 package io.github.subiyacryolite.jds.tests
 
+import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.beans.property.BlobValue
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.io.*
 
-class Serialization : BaseTestConfig("Serialization") {
+class Serialization : BaseTestConfig(Description) {
 
-    @Throws(Exception::class)
-    override fun testImpl(dbContext: DbContext) {
-        testSerialization(dbContext)
+    companion object {
+        private const val Description = "Tests serialisation of all defined entities"
     }
 
-    @Test
-    fun testSerialization(dbContext: DbContext) {
-        for (jdsEntity in dbContext.classes.values) {
+    override fun testImpl(dbContext: DbContext) {
+        for (jdsEntity in Entity.classes.values) {
             val canonicalName = jdsEntity.canonicalName
             serialize(jdsEntity, canonicalName)
             deserialize(canonicalName, jdsEntity)
@@ -36,14 +37,45 @@ class Serialization : BaseTestConfig("Serialization") {
     }
 
     @Test
+    @Tag("standalone")
     fun testBlobSerialization() {
         val simpleBlobProperty = BlobValue(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
         val canonicalName = simpleBlobProperty.javaClass.canonicalName
         serialize(simpleBlobProperty, canonicalName)
         val out = deserialize(canonicalName, simpleBlobProperty.javaClass)
-        System.out.printf("pre %s\n", simpleBlobProperty.value?.contentToString())
-        System.out.printf("post %s\n", out!!.value?.contentToString())
+        System.out.printf("pre %s\n", simpleBlobProperty.value.contentToString())
+        System.out.printf("post %s\n", out!!.value.contentToString())
     }
+
+    @Test
+    @Tag("PostGreSQL")
+    @DisplayName("PostGreSQL: $Description")
+    fun postGreSql() = testPostgreSql()
+
+    @Test
+    @Tag("SQLite")
+    @DisplayName("SQLite: $Description")
+    fun sqlLite() = testSqLite()
+
+    @Test
+    @Tag("MariaDb")
+    @DisplayName("MariaDb: $Description")
+    fun mariaDb() = testMariaDb()
+
+    @Test
+    @Tag("MySq")
+    @DisplayName("MySq: $Description")
+    fun mySql() = testMySql()
+
+    @Test
+    @Tag("Oracle")
+    @DisplayName("Oracle: $Description")
+    fun oracle() = testOracle()
+
+    @Test
+    @Tag("TSql")
+    @DisplayName("T-SQL: $Description")
+    fun transactionalSql() = testTransactionalSql()
 
     private fun <T> serialize(objectToSerialize: T?, fileName: String?) {
         if (fileName == null) {
@@ -86,35 +118,5 @@ class Serialization : BaseTestConfig("Serialization") {
             exception.printStackTrace(System.err)
         }
         return objectOut
-    }
-
-    @Test
-    fun postGreSql() {
-        testPostgreSql()
-    }
-
-    @Test
-    fun sqlLite() {
-        testSqLite()
-    }
-
-    @Test
-    fun mariaDb() {
-        testMariaDb()
-    }
-
-    @Test
-    fun mySql() {
-        testMySql()
-    }
-
-    @Test
-    fun oracle() {
-        testOracle()
-    }
-
-    @Test
-    fun transactionalSql() {
-        testTransactionalSql()
     }
 }

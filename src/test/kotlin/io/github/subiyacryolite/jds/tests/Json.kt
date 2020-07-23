@@ -13,52 +13,31 @@
  */
 package io.github.subiyacryolite.jds.tests
 
+import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
-import io.github.subiyacryolite.jds.context.DbContext
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class Json :BaseTestConfig("Json tests"){
+class Json : BaseTestConfig(Description) {
 
-    @Throws(Exception::class)
-    override fun testImpl(dbContext: DbContext) {}
+    companion object {
+        private const val Description = "Json tests"
+    }
+
+    override fun testImpl(dbContext: DbContext) {
+        serialization()
+    }
 
     @Test
+    @Tag("standalone")
+    @DisplayName("Simple test that converts an entity to JSON")
     @Throws(Exception::class)
     fun serialization() {
         val output = objectMapper.writeValueAsString(TestData.addressBook)
         Assertions.assertNotNull(output, "Something went bonkers")
         println(output)
-    }
-
-    @Test
-    fun postGreSql() {
-        testPostgreSql()
-    }
-
-    @Test
-    fun sqlLite() {
-        testSqLite()
-    }
-
-    @Test
-    fun mariaDb() {
-        testMariaDb()
-    }
-
-    @Test
-    fun mySql() {
-        testMySql()
-    }
-
-    @Test
-    fun oracle() {
-        testOracle()
-    }
-
-    @Test
-    fun transactionalSql() {
-        testTransactionalSql()
     }
 }

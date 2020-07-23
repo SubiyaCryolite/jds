@@ -356,7 +356,7 @@ class LoadPortable<T : Entity>(
         entity.objectCollections.filter { entry ->
             entry.key.field.id == fieldId
         }.forEach { entry ->
-            val referenceClass = dbContext.classes[entityId]
+            val referenceClass = Entity.classes[entityId]
             if (referenceClass != null) {
                 val subEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 subEntity.overview.id = id
@@ -369,7 +369,7 @@ class LoadPortable<T : Entity>(
         entity.objectValues.filter { entry ->
             entry.key.field.id == fieldId
         }.forEach { entry ->
-            val referenceClass = dbContext.classes[entityId]
+            val referenceClass = Entity.classes[entityId]
             if (referenceClass != null) {
                 entry.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
                 entry.value.value.overview.id = id

@@ -760,53 +760,6 @@ abstract class Entity : IEntity {
     }
 
     /**
-     * @param dbContext
-     * @param fieldId
-     * @param entityId
-     * @param id
-     * @param innerObjects
-     * @param compositeKeys
-     */
-    internal fun populateObjects(
-            dbContext: DbContext,
-            fieldId: Int?,
-            entityId: Int,
-            id: String,
-            editVersion: Int,
-            innerObjects: MutableCollection<Entity>,
-            compositeKeys: MutableCollection<CompositeKey>
-    ) {
-        try {
-            if (fieldId == null) return
-            objectCollections.filter { entry ->
-                entry.key.field.id == fieldId
-            }.forEach { kvp ->
-                val entity = dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance()
-                entity.overview.id = id
-                entity.overview.editVersion = editVersion
-                if (entity is IEntity) {
-                    kvp.value.add(entity)
-                }
-                innerObjects.add(entity)
-                compositeKeys.add(CompositeKey(id, editVersion))
-            }
-            objectValues.filter { entry ->
-                entry.key.field.id == fieldId
-            }.forEach { entry ->
-                entry.value.set(dbContext.classes[entityId]!!.getDeclaredConstructor().newInstance())
-                entry.value.value.overview.id = id
-                entry.value.value.overview.editVersion = editVersion
-                val jdsEntity = entry.value.value as Entity
-                innerObjects.add(jdsEntity)
-                compositeKeys.add(CompositeKey(id, editVersion))
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace(System.err)
-        }
-    }
-
-
-    /**
      * Binds all the fieldIds attached to an entity, updates the fieldIds dictionary
      * @param connection the SQL connection to use for DB operations
      */
@@ -823,7 +776,7 @@ abstract class Entity : IEntity {
         val populateFieldTag = dbContext.getCallOrStatement(connection, dbContext.populateFieldTag())
         val populateFieldAlternateCode = dbContext.getCallOrStatement(connection, dbContext.populateFieldAlternateCode())
 
-        getFields(overview.entityId).forEach { fieldId ->
+        getFieldsImp(overview.entityId).forEach { fieldId ->
             val field = Field.values.getValue(fieldId)
 
             clearFieldTag.setInt(1, field.id)
@@ -891,8 +844,8 @@ abstract class Entity : IEntity {
             dbContext: DbContext,
             connection: Connection
     ) {
-        populateRefEnum(dbContext, connection, getEnums(overview.entityId))
-        populateRefEntityEnum(dbContext, connection, overview.entityId, getEnums(overview.entityId))
+        populateRefEnum(dbContext, connection, getEnumsImp(overview.entityId))
+        populateRefEntityEnum(dbContext, connection, overview.entityId, getEnumsImp(overview.entityId))
         if (dbContext.options.logOutput) {
             System.out.printf("Mapped Enums for Entity[%s]\n", overview.entityId)
         }
@@ -958,9 +911,11 @@ abstract class Entity : IEntity {
 
         private const val serialVersionUID = 20180106_2125L
 
-        private val jdsFields = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
+        private val fields = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
 
-        private val jdsEnums = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
+        private val enums = ConcurrentHashMap<Int, LinkedHashSet<Int>>()
+
+        internal val classes = ConcurrentHashMap<Int, Class<out Entity>>()
 
         internal var initialising: Boolean = false
 
@@ -994,18 +949,39 @@ abstract class Entity : IEntity {
 
         protected fun mapField(entityId: Int, fieldId: Int): Int {
             if (initialising) {
-                getFields(entityId).add(fieldId)
+                getFieldsImp(entityId).add(fieldId)
             }
             return fieldId
         }
 
         protected fun mapEnums(entityId: Int, fieldId: Int): Int {
-            getEnums(entityId).add(fieldId)
+            getEnumsImp(entityId).add(fieldId)
             return fieldId
         }
 
-        private fun getFields(entityId: Int) = jdsFields.getOrPut(entityId) { LinkedHashSet() }
+        private fun getFieldsImp(entityId: Int) = fields.getOrPut(entityId) { LinkedHashSet() }
 
-        private fun getEnums(entityId: Int) = jdsEnums.getOrPut(entityId) { LinkedHashSet() }
+        private fun getEnumsImp(entityId: Int) = enums.getOrPut(entityId) { LinkedHashSet() }
+
+        /**
+         * Public facing method to query the underlying [Field] integer ids (read-only).
+         * Only the ids of mapped [Field] entries will appear in this collection
+         */
+        fun getFields(entityId: Int): Collection<Int> = getFieldsImp(entityId).toSet()
+
+        /**
+         * Public facing method to query the underlying [FieldEnum] integer ids (read-only).
+         * Only the ids of mapped [FieldEnum] entries will appear in this collection
+         */
+        fun getEnums(entityId: Int): Collection<Int> = getEnumsImp(entityId).toSet()
+
+        /**
+         * Public facing method to query the underlying values.
+         * Only mapped [FieldEntity] entries will appear in this collection
+         */
+        fun findAll(entityIds: Collection<Int>): Collection<Class<out Entity>> {
+            return classes.filter { kvp -> entityIds.contains(kvp.key) }.map { kvp -> kvp.value }
+        }
+
     }
 }

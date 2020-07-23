@@ -47,5 +47,13 @@ data class FieldEnum<T : Enum<T>>(
         private const val serialVersionUID = 20171109_0853L
 
         val enums: HashMap<Int, FieldEnum<*>> = HashMap()
+
+        /**
+         * Public facing method to query the underlying values.
+         * Only mapped [FieldEnum] entries will appear in this collection
+         */
+        fun findAll(fieldIds: Collection<Int>): Collection<FieldEnum<*>> {
+            return enums.filter { fieldIds.contains(it.key) }.map { it.value }
+        }
     }
 }

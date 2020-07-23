@@ -27,5 +27,13 @@ data class FieldEntity<T : IEntity>(
         private const val serialVersionUID = 20171109_0853L
 
         internal val values = HashMap<Int, FieldEntity<*>>()
+
+        /**
+         * Public facing method to query the underlying values.
+         * Only mapped [FieldEntity] entries will appear in this collection
+         */
+        fun findAll(fieldIds: Collection<Int>): Collection<FieldEntity<*>> {
+            return values.filter { kvp -> fieldIds.contains(kvp.key) }.map { kvp -> kvp.value }
+        }
     }
 }

@@ -51,5 +51,13 @@ data class Field(
         private const val serialVersionUID = 20171109_0853L
 
         internal val values = HashMap<Int, Field>()
+
+        /**
+         * Public facing method to query the underlying values.
+         * Only mapped [Field] entries will appear in this collection
+         */
+        fun findAll(fieldIds: Collection<Int>): Collection<Field> {
+            return values.filter { fieldIds.contains(it.key) }.map { it.value }
+        }
     }
 }

@@ -22,11 +22,16 @@ import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.tests.entities.*
 import io.github.subiyacryolite.jds.tests.enums.Right
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class PortableSaveStructure : BaseTestConfig("Portable save structures") {
+class PortableSaveStructure : BaseTestConfig(Description) {
 
-    @Throws(Exception::class)
+    companion object {
+        private const val Description = "Convert several entities to the portable format"
+    }
+
     override fun testImpl(dbContext: DbContext) {
         addressBook(dbContext)
         timeConstruct(dbContext)
@@ -36,26 +41,48 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
     }
 
     @Test
-    @Throws(Exception::class)
-    fun addressBook(dbContext: DbContext) {
+    @Tag("PostGreSQL")
+    @DisplayName("PostGreSQL: $Description")
+    fun postGreSql() = testPostgreSql()
+
+    @Test
+    @Tag("SQLite")
+    @DisplayName("SQLite: $Description")
+    fun sqlLite() = testSqLite()
+
+    @Test
+    @Tag("MariaDb")
+    @DisplayName("MariaDb: $Description")
+    fun mariaDb() = testMariaDb()
+
+    @Test
+    @Tag("MySq")
+    @DisplayName("MySq: $Description")
+    fun mySql() = testMySql()
+
+    @Test
+    @Tag("Oracle")
+    @DisplayName("Oracle: $Description")
+    fun oracle() = testOracle()
+
+    @Test
+    @Tag("TSql")
+    @DisplayName("T-SQL: $Description")
+    fun transactionalSql() = testTransactionalSql()
+
+    private fun addressBook(dbContext: DbContext) {
         testPortableSave(dbContext, listOf(TestData.addressBook), AddressBook::class.java)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun timeConstruct(dbContext: DbContext) {
+    private fun timeConstruct(dbContext: DbContext) {
         testPortableSave(dbContext, listOf(TestData.timeConstruct), TimeConstruct::class.java)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun example(dbContext: DbContext) {
+    private fun example(dbContext: DbContext) {
         testPortableSave(dbContext, TestData.collection, Example::class.java)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun mapTests(dbContext: DbContext) {
+    private fun mapTests(dbContext: DbContext) {
         val mapExample = MapExample()
         mapExample.intMap[5] = "Five"
         mapExample.intMap[6] = "Six"
@@ -64,16 +91,13 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
         testPortableSave(dbContext, setOf(mapExample), MapExample::class.java)
     }
 
-    @Test
-    @Throws(Exception::class)
-    fun enumTests(dbContext: DbContext) {
+    private fun enumTests(dbContext: DbContext) {
         val login = Login()
         login.rights.add(Right.CreateUser)
         login.rights.add(Right.DeleteUser)
         testPortableSave(dbContext, setOf(login), Login::class.java)
     }
 
-    @Throws(Exception::class)
     private fun testPortableSave(dbContext: DbContext, entity: Collection<Entity>, clazz: Class<out Entity>) {
         val portableContainer = SavePortable(dbContext, entity).call()
 
@@ -103,35 +127,5 @@ class PortableSaveStructure : BaseTestConfig("Portable save structures") {
 
         val equal = memoryPayload == jsonPayload
         println("Equal? $equal")
-    }
-
-    @Test
-    fun postGreSql() {
-        testPostgreSql()
-    }
-
-    @Test
-    fun sqlLite() {
-        testSqLite()
-    }
-
-    @Test
-    fun mariaDb() {
-        testMariaDb()
-    }
-
-    @Test
-    fun mySql() {
-        testMySql()
-    }
-
-    @Test
-    fun oracle() {
-        testOracle()
-    }
-
-    @Test
-    fun transactionalSql() {
-        testTransactionalSql()
     }
 }

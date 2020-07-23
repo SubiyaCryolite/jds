@@ -50,7 +50,6 @@ abstract class DbContext(
         val schema: String = ""
 ) : IDbContext, Serializable {
 
-    val classes = ConcurrentHashMap<Int, Class<out Entity>>()
     val options = Options()
     var dimensionTable = ""
 
@@ -493,8 +492,8 @@ abstract class DbContext(
     fun map(entity: Class<out Entity>) {
         val entityAnnotation = Entity.getEntityAnnotation(entity)
         if (entityAnnotation != null) {
-            if (!classes.containsKey(entityAnnotation.id)) {
-                classes[entityAnnotation.id] = entity
+            if (!Entity.classes.containsKey(entityAnnotation.id)) {
+                Entity.classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
                     Entity.initialising = true
@@ -935,4 +934,5 @@ abstract class DbContext(
      * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.Field]
      */
     protected abstract fun getDataTypeImpl(fieldType: FieldType, max: Int = 0): String
+
 }

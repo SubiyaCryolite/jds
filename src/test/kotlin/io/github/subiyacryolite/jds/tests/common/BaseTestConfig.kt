@@ -131,7 +131,7 @@ abstract class BaseTestConfig(private val testName: String) {
         testImpl(dbContext)
     }
 
-    protected abstract fun testImpl(dbContext: DbContext)
+    open fun testImpl(dbContext: DbContext){}
 
     @Test
     @Throws(Exception::class)
