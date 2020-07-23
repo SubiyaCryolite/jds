@@ -26,11 +26,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class PortableSaveStructure : BaseTestConfig(Description) {
-
-    companion object {
-        private const val Description = "Convert several entities to the portable format"
-    }
+@DisplayName("Convert several entities to the portable format")
+class PortableSaveStructure : BaseTestConfig() {
 
     override fun testImpl(dbContext: DbContext) {
         addressBook(dbContext)
@@ -39,36 +36,6 @@ class PortableSaveStructure : BaseTestConfig(Description) {
         mapTests(dbContext)
         enumTests(dbContext)
     }
-
-    @Test
-    @Tag("PostGreSQL")
-    @DisplayName("PostGreSQL: $Description")
-    fun postGreSql() = testPostgreSql()
-
-    @Test
-    @Tag("SQLite")
-    @DisplayName("SQLite: $Description")
-    fun sqlLite() = testSqLite()
-
-    @Test
-    @Tag("MariaDb")
-    @DisplayName("MariaDb: $Description")
-    fun mariaDb() = testMariaDb()
-
-    @Test
-    @Tag("MySq")
-    @DisplayName("MySq: $Description")
-    fun mySql() = testMySql()
-
-    @Test
-    @Tag("Oracle")
-    @DisplayName("Oracle: $Description")
-    fun oracle() = testOracle()
-
-    @Test
-    @Tag("TSql")
-    @DisplayName("T-SQL: $Description")
-    fun transactionalSql() = testTransactionalSql()
 
     private fun addressBook(dbContext: DbContext) {
         testPortableSave(dbContext, listOf(TestData.addressBook), AddressBook::class.java)

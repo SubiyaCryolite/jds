@@ -21,11 +21,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class Json : BaseTestConfig(Description) {
-
-    companion object {
-        private const val Description = "Json tests"
-    }
+@DisplayName("Json tests")
+class Json : BaseTestConfig() {
 
     override fun testImpl(dbContext: DbContext) {
         serialization()
@@ -34,7 +31,6 @@ class Json : BaseTestConfig(Description) {
     @Test
     @Tag("standalone")
     @DisplayName("Simple test that converts an entity to JSON")
-    @Throws(Exception::class)
     fun serialization() {
         val output = objectMapper.writeValueAsString(TestData.addressBook)
         Assertions.assertNotNull(output, "Something went bonkers")

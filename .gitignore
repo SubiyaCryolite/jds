@@ -1,6 +1,7 @@
 *.iws
 *.ipr
 *.iml
+*.tmp
 /.idea/
 /.nb-gradle/
 /.gradle/

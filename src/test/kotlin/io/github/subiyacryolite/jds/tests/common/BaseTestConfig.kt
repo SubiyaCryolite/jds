@@ -17,16 +17,16 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.tests.connectivity.*
 import io.github.subiyacryolite.jds.tests.entities.*
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 
-abstract class BaseTestConfig(private val testName: String) {
+abstract class BaseTestConfig {
 
     companion object {
         const val DOUBLE_DELTA = 1e-15
@@ -38,7 +38,7 @@ abstract class BaseTestConfig(private val testName: String) {
             return jdsDb
         }
 
-        fun initialisePostgeSqlBackend(): DbContext {
+        fun initialisePostGreSqlBackend(): DbContext {
             val jdsDb = PostGreSqlContextImplementation()
             initJds(jdsDb)
             return jdsDb
@@ -88,7 +88,7 @@ abstract class BaseTestConfig(private val testName: String) {
         private val logger = LoggerFactory.getLogger(BaseTestConfig::class.java)
     }
 
-   init {
+    init {
 
         val tsqlConfigFile = File("db.tsql.properties")
         if (!tsqlConfigFile.exists()) {
@@ -126,47 +126,36 @@ abstract class BaseTestConfig(private val testName: String) {
         }
     }
 
-    fun test(dbContext: DbContext) {
-        logger.info("JDS (${dbContext.implementation}) :: $testName")
+    private fun test(dbContext: DbContext) {
+        logger.info("JDS (${dbContext.implementation})")
         testImpl(dbContext)
     }
 
-    open fun testImpl(dbContext: DbContext){}
+    open fun testImpl(dbContext: DbContext) {}
 
     @Test
-    @Throws(Exception::class)
-    fun testPostgreSql() = test(initialisePostgeSqlBackend())
+    @Tag("PostGreSql")
+    fun testPostGreSql() = test(initialisePostGreSqlBackend())
 
     @Test
-    @Throws(Exception::class)
+    @Tag("Oracle")
     fun testOracle() = test(initialiseOracleBackend())
 
     @Test
-    @Throws(Exception::class)
+    @Tag("TSql")
     fun testTransactionalSql() = test(initialiseTSqlBackend())
 
     @Test
-    @Throws(Exception::class)
+    @Tag("SqLite")
     fun testSqLite() = test(initialiseSqLiteBackend())
 
     @Test
-    @Throws(Exception::class)
+    @Tag("Mysql")
     fun testMySql() = test(initialiseMysqlBackend())
 
     @Test
-    @Throws(Exception::class)
+    @Tag("MariaDb")
     fun testMariaDb() = test(initialiseMariaDbBackend())
-
-    @Test
-    @Throws(Exception::class)
-    fun testAll() {
-        testSqLite()
-        testTransactionalSql()
-        testPostgreSql()
-        testMySql()
-        testOracle()
-        testMariaDb()
-    }
 
     protected val objectMapper: ObjectMapper
         get() {

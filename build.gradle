@@ -83,8 +83,9 @@ jar {
 }
 
 test {
-    //prevent problems with TravisCI
-    exclude "**"
+    useJUnitPlatform {
+        includeTags 'standalone', 'SqLite'
+    }
 }
 
 dokka {

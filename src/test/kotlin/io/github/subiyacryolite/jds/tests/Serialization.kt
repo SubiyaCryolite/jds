@@ -22,60 +22,32 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import java.io.*
 
-class Serialization : BaseTestConfig(Description) {
-
-    companion object {
-        private const val Description = "Tests serialisation of all defined entities"
-    }
+@DisplayName("Tests serialisation of all defined entities")
+class Serialization : BaseTestConfig() {
 
     override fun testImpl(dbContext: DbContext) {
         for (jdsEntity in Entity.classes.values) {
             val canonicalName = jdsEntity.canonicalName
-            serialize(jdsEntity, canonicalName)
-            deserialize(canonicalName, jdsEntity)
+            val fileName = "$canonicalName.tmp"
+            serialize(jdsEntity, fileName)
+            deserialize(fileName, jdsEntity)
+            File(fileName).delete()
         }
     }
 
     @Test
     @Tag("standalone")
+    @DisplayName("Test basic serialisation and deserialization")
     fun testBlobSerialization() {
         val simpleBlobProperty = BlobValue(byteArrayOf(0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC8.toByte(), 0xCA.toByte(), 0xBC.toByte(), 0xCC.toByte(), 0xCE.toByte(), 0xB9.toByte(), 0xC9.toByte(), 0xCB.toByte(), 0xBB.toByte()))
         val canonicalName = simpleBlobProperty.javaClass.canonicalName
-        serialize(simpleBlobProperty, canonicalName)
-        val out = deserialize(canonicalName, simpleBlobProperty.javaClass)
+        val fileName = "$canonicalName.tmp"
+        serialize(simpleBlobProperty, fileName)
+        val out = deserialize(fileName, simpleBlobProperty.javaClass)
         System.out.printf("pre %s\n", simpleBlobProperty.value.contentToString())
         System.out.printf("post %s\n", out!!.value.contentToString())
+        File(fileName).delete()
     }
-
-    @Test
-    @Tag("PostGreSQL")
-    @DisplayName("PostGreSQL: $Description")
-    fun postGreSql() = testPostgreSql()
-
-    @Test
-    @Tag("SQLite")
-    @DisplayName("SQLite: $Description")
-    fun sqlLite() = testSqLite()
-
-    @Test
-    @Tag("MariaDb")
-    @DisplayName("MariaDb: $Description")
-    fun mariaDb() = testMariaDb()
-
-    @Test
-    @Tag("MySq")
-    @DisplayName("MySq: $Description")
-    fun mySql() = testMySql()
-
-    @Test
-    @Tag("Oracle")
-    @DisplayName("Oracle: $Description")
-    fun oracle() = testOracle()
-
-    @Test
-    @Tag("TSql")
-    @DisplayName("T-SQL: $Description")
-    fun transactionalSql() = testTransactionalSql()
 
     private fun <T> serialize(objectToSerialize: T?, fileName: String?) {
         if (fileName == null) {
