@@ -18,7 +18,7 @@ import java.io.Serializable
 import java.util.*
 
 data class FieldEntity<T : IEntity>(
-        var entity: Class<out T>,
+        var entity: Class<T>,
         var field: Field
 ) : Serializable {
 

@@ -16,13 +16,14 @@ package io.github.subiyacryolite.jds.tests.entities
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.tests.constants.Entities
+import io.github.subiyacryolite.jds.tests.interfactes.IAddress
 
 @EntityAnnotation(id = 2, name = "address_book")
 data class AddressBook(
-        val addresses: MutableCollection<Address> = ArrayList()
+        val addresses: MutableCollection<IAddress> = ArrayList()
 ) : Entity() {
 
     init {
-        map(Entities.Addresses, addresses,"addresses")
+        map(Entities.Addresses, addresses, "addresses")
     }
 }

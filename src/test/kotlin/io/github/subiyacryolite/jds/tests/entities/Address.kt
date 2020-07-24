@@ -14,13 +14,15 @@
 package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
-import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.*
+import io.github.subiyacryolite.jds.beans.property.LocalDateTimeValue
+import io.github.subiyacryolite.jds.beans.property.NullableBooleanValue
+import io.github.subiyacryolite.jds.beans.property.NullableShortValue
+import io.github.subiyacryolite.jds.beans.property.StringValue
 import io.github.subiyacryolite.jds.interfaces.IValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
+import io.github.subiyacryolite.jds.tests.interfactes.IAddress
 import java.time.LocalDateTime
 
-@EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
 data class Address(
         private val _streetName: IValue<String> = StringValue(),
         private val _plotNumber: IValue<Short?> = NullableShortValue(),
@@ -30,7 +32,7 @@ data class Address(
         private val _country: IValue<String> = StringValue(),
         private val _primaryAddress: IValue<Boolean?> = NullableBooleanValue(),
         private val _timestamp: IValue<LocalDateTime> = LocalDateTimeValue()
-) : Entity() {
+) : Entity(), IAddress {
 
     init {
         map(Fields.StreetName, _streetName, "streetName")
@@ -43,35 +45,35 @@ data class Address(
         map(Fields.TimeStamp, _timestamp, "timestamp")
     }
 
-    var primaryAddress: Boolean?
+    override var primaryAddress: Boolean?
         get() = _primaryAddress.get()
         set(value) = _primaryAddress.set(value)
 
-    var streetName: String
+    override var streetName: String
         get() = _streetName.get()
         set(value) = _streetName.set(value)
 
-    var plotNumber: Short?
+    override var plotNumber: Short?
         get() = _plotNumber.get()
         set(value) = _plotNumber.set(value)
 
-    var area: String
+    override var area: String
         get() = _area.get()
         set(value) = _area.set(value)
 
-    var city: String
+    override var city: String
         get() = _city.get()
         set(value) = _city.set(value)
 
-    var provinceOrState: String
+    override var provinceOrState: String
         get() = _provinceOrState.get()
         set(value) = _provinceOrState.set(value)
 
-    var country: String
+    override var country: String
         get() = _country.get()
         set(value) = _country.set(value)
 
-    var timeOfEntry: LocalDateTime
+    override var timeOfEntry: LocalDateTime
         get() = _timestamp.get()
         set(timeOfEntry) = _timestamp.set(timeOfEntry)
 }

@@ -14,8 +14,8 @@
 package io.github.subiyacryolite.jds.tests.constants
 
 import io.github.subiyacryolite.jds.FieldEntity
-import io.github.subiyacryolite.jds.tests.entities.Address
+import io.github.subiyacryolite.jds.tests.interfactes.IAddress
 
 object Entities {
-    val Addresses = FieldEntity(Address::class.java, Fields.Addresses)
+    val Addresses = FieldEntity(IAddress::class.java, Fields.Addresses)
 }
