@@ -13,45 +13,20 @@
  */
 package io.github.subiyacryolite.jds
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import io.github.subiyacryolite.jds.Validate.validateBlob
-import io.github.subiyacryolite.jds.Validate.validateBoolean
-import io.github.subiyacryolite.jds.Validate.validateDate
-import io.github.subiyacryolite.jds.Validate.validateDateTime
-import io.github.subiyacryolite.jds.Validate.validateDateTimeCollection
-import io.github.subiyacryolite.jds.Validate.validateDouble
-import io.github.subiyacryolite.jds.Validate.validateDoubleCollection
-import io.github.subiyacryolite.jds.Validate.validateDuration
-import io.github.subiyacryolite.jds.Validate.validateEnum
-import io.github.subiyacryolite.jds.Validate.validateEnumCollection
-import io.github.subiyacryolite.jds.Validate.validateFloat
-import io.github.subiyacryolite.jds.Validate.validateFloatCollection
-import io.github.subiyacryolite.jds.Validate.validateInt
-import io.github.subiyacryolite.jds.Validate.validateIntCollection
-import io.github.subiyacryolite.jds.Validate.validateIntMap
-import io.github.subiyacryolite.jds.Validate.validateLong
-import io.github.subiyacryolite.jds.Validate.validateLongCollection
-import io.github.subiyacryolite.jds.Validate.validateMonthDay
-import io.github.subiyacryolite.jds.Validate.validatePeriod
-import io.github.subiyacryolite.jds.Validate.validateShort
-import io.github.subiyacryolite.jds.Validate.validateShortCollection
-import io.github.subiyacryolite.jds.Validate.validateString
-import io.github.subiyacryolite.jds.Validate.validateStringCollection
-import io.github.subiyacryolite.jds.Validate.validateStringMap
-import io.github.subiyacryolite.jds.Validate.validateTime
-import io.github.subiyacryolite.jds.Validate.validateUuid
-import io.github.subiyacryolite.jds.Validate.validateUuidCollection
-import io.github.subiyacryolite.jds.Validate.validateYearMonth
-import io.github.subiyacryolite.jds.Validate.validateZonedDateTime
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
+import io.github.subiyacryolite.jds.extensions.filterIgnored
+import io.github.subiyacryolite.jds.extensions.filterIgnoredEnums
+import io.github.subiyacryolite.jds.extensions.toByteArray
+import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.interfaces.IEntity
 import io.github.subiyacryolite.jds.interfaces.IOverview
 import io.github.subiyacryolite.jds.interfaces.IValue
+import io.github.subiyacryolite.jds.portable.*
 import java.io.Serializable
-import java.sql.Connection
+import java.sql.Timestamp
 import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -62,119 +37,178 @@ import kotlin.collections.HashMap
  * This class allows for all mapping operations in JDS, it also uses
  * [IOverview] to store overview data
  */
-abstract class Entity : IEntity {
+abstract class Entity(
 
-    @set:JsonIgnore
-    @get:JsonIgnore
-    final override var overview: IOverview = Overview()
+        /**
+         * Use JsonIgnoreProperties or similar annotations to ignore this property in subclasses if need be
+         */
+        final override var overview: IOverview = Overview(),
 
-    //temporals
-    @get:JsonIgnore
-    internal val localDateTimeValues: MutableMap<Int, IValue<LocalDateTime?>> = HashMap()
+        /**
+         *
+         */
+        private val localDateTimeValues: MutableMap<Int, IValue<LocalDateTime?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val zonedDateTimeValues: MutableMap<Int, IValue<ZonedDateTime?>> = HashMap()
+        /**
+         *
+         */
+        private val zonedDateTimeValues: MutableMap<Int, IValue<ZonedDateTime?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val localDateValues: MutableMap<Int, IValue<LocalDate?>> = HashMap()
+        /**
+         *
+         */
+        private val localDateValues: MutableMap<Int, IValue<LocalDate?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val localTimeValues: MutableMap<Int, IValue<LocalTime?>> = HashMap()
+        /**
+         *
+         */
+        private val localTimeValues: MutableMap<Int, IValue<LocalTime?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val monthDayValues: MutableMap<Int, IValue<MonthDay?>> = HashMap()
+        /**
+         *
+         */
+        private val monthDayValues: MutableMap<Int, IValue<MonthDay?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val yearMonthValues: MutableMap<Int, IValue<YearMonth?>> = HashMap()
+        /**
+         *
+         */
+        private val yearMonthValues: MutableMap<Int, IValue<YearMonth?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val periodValues: MutableMap<Int, IValue<Period?>> = HashMap()
+        /**
+         *
+         */
+        private val periodValues: MutableMap<Int, IValue<Period?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val durationValues: MutableMap<Int, IValue<Duration?>> = HashMap()
+        /**
+         *
+         */
+        private val durationValues: MutableMap<Int, IValue<Duration?>> = HashMap(),
 
-    //strings
-    @get:JsonIgnore
-    internal val stringValues: MutableMap<Int, IValue<String?>> = HashMap()
+        /**
+         *
+         */
+        private val stringValues: MutableMap<Int, IValue<String?>> = HashMap(),
 
-    //boolean
-    @get:JsonIgnore
-    internal val booleanValues: MutableMap<Int, IValue<Boolean?>> = HashMap()
+        /**
+         *
+         */
+        private val booleanValues: MutableMap<Int, IValue<Boolean?>> = HashMap(),
 
-    //numeric
-    @get:JsonIgnore
-    internal val shortValues: MutableMap<Int, IValue<Short?>> = HashMap()
+        /**
+         *
+         */
+        private val shortValues: MutableMap<Int, IValue<Short?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val floatValues: MutableMap<Int, IValue<Float?>> = HashMap()
+        /**
+         *
+         */
+        private val floatValues: MutableMap<Int, IValue<Float?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val doubleValues: MutableMap<Int, IValue<Double?>> = HashMap()
+        /**
+         *
+         */
+        private val doubleValues: MutableMap<Int, IValue<Double?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val longValues: MutableMap<Int, IValue<Long?>> = HashMap()
+        /**
+         *
+         */
+        private val longValues: MutableMap<Int, IValue<Long?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val integerValues: MutableMap<Int, IValue<Int?>> = HashMap()
+        /**
+         *
+         */
+        private val integerValues: MutableMap<Int, IValue<Int?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val uuidValues: MutableMap<Int, IValue<UUID?>> = HashMap()
+        /**
+         *
+         */
+        private val uuidValues: MutableMap<Int, IValue<UUID?>> = HashMap(),
 
-    //collections
-    @get:JsonIgnore
-    internal val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
+        /**
+         *
+         */
+        private val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val stringCollections: MutableMap<Int, MutableCollection<String>> = HashMap()
+        /**
+         *
+         */
+        private val stringCollections: MutableMap<Int, MutableCollection<String>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val dateTimeCollections: MutableMap<Int, MutableCollection<LocalDateTime>> = HashMap()
+        /**
+         *
+         */
+        private val dateTimeCollections: MutableMap<Int, MutableCollection<LocalDateTime>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val floatCollections: MutableMap<Int, MutableCollection<Float>> = HashMap()
+        /**
+         *
+         */
+        private val floatCollections: MutableMap<Int, MutableCollection<Float>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val doubleCollections: MutableMap<Int, MutableCollection<Double>> = HashMap()
+        /**
+         *
+         */
+        private val doubleCollections: MutableMap<Int, MutableCollection<Double>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val longCollections: MutableMap<Int, MutableCollection<Long>> = HashMap()
+        /**
+         *
+         */
+        private val longCollections: MutableMap<Int, MutableCollection<Long>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val integerCollections: MutableMap<Int, MutableCollection<Int>> = HashMap()
+        /**
+         *
+         */
+        private val integerCollections: MutableMap<Int, MutableCollection<Int>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val shortCollections: MutableMap<Int, MutableCollection<Short>> = HashMap()
+        /**
+         *
+         */
+        private val shortCollections: MutableMap<Int, MutableCollection<Short>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val uuidCollections: MutableMap<Int, MutableCollection<UUID>> = HashMap()
+        /**
+         *
+         */
+        private val uuidCollections: MutableMap<Int, MutableCollection<UUID>> = HashMap(),
 
-    //enums
-    @get:JsonIgnore
-    internal val enumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap()
+        /**
+         *
+         */
+        private val enumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val stringEnumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap()
+        /**
+         *
+         */
+        private val stringEnumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
+        /**
+         *
+         */
+        private val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap()
+        /**
+         *
+         */
+        private val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
 
-    //objects
-    @get:JsonIgnore
-    internal val objectValues: MutableMap<FieldEntity<*>, IValue<IEntity>> = HashMap()
+        /**
+         *
+         */
+        private val objectValues: MutableMap<FieldEntity<*>, IValue<IEntity>> = HashMap(),
 
-    //maps
-    @get:JsonIgnore
-    internal val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap()
+        /**
+         *
+         */
+        private val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap(),
 
-    @get:JsonIgnore
-    internal val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap()
+        /**
+         *
+         */
+        private val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap(),
 
-    //blobs
-    @get:JsonIgnore
-    internal val blobValues: MutableMap<Int, IValue<ByteArray?>> = HashMap()
+        /**
+         *
+         */
+        private val blobValues: MutableMap<Int, IValue<ByteArray?>> = HashMap()
+) : IEntity {
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -185,444 +219,624 @@ abstract class Entity : IEntity {
         }
     }
 
-    @JvmName("mapShort")
-    protected fun map(field: Field, value: Short, propertyName: String = "") = map(field, ShortValue(value), propertyName)
+    /**
+     *
+     */
+    private fun <T> map(
+            field: Field,
+            value: IValue<T>,
+            fieldType: Collection<FieldType>,
+            destination: MutableMap<Int, IValue<T>>,
+            propertyName: String = ""
+    ): IValue<T> {
+        return destination.getOrPut(mapField(overview.entityId, field.bind(fieldType), propertyName)) { value }
+    }
 
     @JvmName("mapShort")
-    protected fun map(field: Field, value: IValue<Short>, propertyName: String = ""): IValue<Short> {
+    protected fun map(
+            field: Field,
+            value: Short,
+            propertyName: String = ""
+    ): IValue<Short> = map(field, ShortValue(value), propertyName)
+
+    @JvmName("mapShort")
+    protected fun map(
+            field: Field,
+            value: IValue<Short>,
+            propertyName: String = ""
+    ): IValue<Short> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Short?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableShort")
-    protected fun map(field: Field, value: IValue<Short?>, propertyName: String = ""): IValue<Short?> {
-        validateShort(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return shortValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Short?>,
+            propertyName: String = ""
+    ): IValue<Short?> = map(field, value, setOf(FieldType.Short), shortValues, propertyName)
 
     @JvmName("mapDouble")
-    protected fun map(field: Field, value: Double, propertyName: String = "") = map(field, DoubleValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Double,
+            propertyName: String = ""
+    ) = map(field, DoubleValue(value), propertyName)
 
     @JvmName("mapDouble")
-    protected fun map(field: Field, value: IValue<Double>, propertyName: String = ""): IValue<Double> {
+    protected fun map(
+            field: Field,
+            value: IValue<Double>,
+            propertyName: String = ""
+    ): IValue<Double> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Double?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableDouble")
-    protected fun map(field: Field, value: IValue<Double?>, propertyName: String = ""): IValue<Double?> {
-        validateDouble(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return doubleValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Double?>,
+            propertyName: String = ""
+    ): IValue<Double?> = map(field, value, setOf(FieldType.Double), doubleValues, propertyName)
 
     @JvmName("mapInt")
-    protected fun map(field: Field, value: Int, propertyName: String = "") = map(field, IntegerValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Int,
+            propertyName: String = ""
+    ) = map(field, IntegerValue(value), propertyName)
 
     @JvmName("mapInt")
-    protected fun map(field: Field, value: IValue<Int>, propertyName: String = ""): IValue<Int> {
+    protected fun map(
+            field: Field,
+            value: IValue<Int>,
+            propertyName: String = ""
+    ): IValue<Int> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Int?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableInt")
-    protected fun map(field: Field, value: IValue<Int?>, propertyName: String = ""): IValue<Int?> {
-        validateInt(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return integerValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Int?>,
+            propertyName: String = ""
+    ): IValue<Int?> = map(field, value, setOf(FieldType.Int), integerValues, propertyName)
 
     @JvmName("mapLong")
-    protected fun map(field: Field, value: Long, propertyName: String = "") = map(field, LongValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Long,
+            propertyName: String = ""
+    ) = map(field, LongValue(value), propertyName)
 
     @JvmName("mapLong")
-    protected fun map(field: Field, value: IValue<Long>, propertyName: String = ""): IValue<Long> {
+    protected fun map(
+            field: Field,
+            value: IValue<Long>,
+            propertyName: String = ""
+    ): IValue<Long> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Long?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableLong")
-    protected fun map(field: Field, value: IValue<Long?>, propertyName: String = ""): IValue<Long?> {
-        validateLong(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return longValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Long?>,
+            propertyName: String = ""
+    ): IValue<Long?> = map(field, value, setOf(FieldType.Long), longValues, propertyName)
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: Float, propertyName: String = "") = map(field, FloatValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Float,
+            propertyName: String = ""
+    ) = map(field, FloatValue(value), propertyName)
 
     @JvmName("mapFloat")
-    protected fun map(field: Field, value: IValue<Float>, propertyName: String = ""): IValue<Float> {
+    protected fun map(
+            field: Field,
+            value: IValue<Float>,
+            propertyName: String = ""
+    ): IValue<Float> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Float?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableFloat")
-    protected fun map(field: Field, value: IValue<Float?>, propertyName: String = ""): IValue<Float?> {
-        validateFloat(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return floatValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Float?>,
+            propertyName: String = ""
+    ): IValue<Float?> = map(field, value, setOf(FieldType.Float), floatValues, propertyName)
 
     @JvmName("mapBoolean")
-    protected fun map(field: Field, value: Boolean, propertyName: String = "") = map(field, BooleanValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Boolean,
+            propertyName: String = ""
+    ) = map(field, BooleanValue(value), propertyName)
 
     @JvmName("mapBoolean")
-    protected fun map(field: Field, value: IValue<Boolean>, propertyName: String = ""): IValue<Boolean> {
+    protected fun map(
+            field: Field,
+            value: IValue<Boolean>,
+            propertyName: String = ""
+    ): IValue<Boolean> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Boolean?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableBoolean")
-    protected fun map(field: Field, value: IValue<Boolean?>, propertyName: String = ""): IValue<Boolean?> {
-        validateBoolean(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return booleanValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Boolean?>,
+            propertyName: String = ""
+    ): IValue<Boolean?> = map(field, value, setOf(FieldType.Boolean), booleanValues, propertyName)
 
     @JvmName("mapUuid")
-    protected fun map(field: Field, value: UUID, propertyName: String = "") = map(field, UuidValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: UUID,
+            propertyName: String = ""
+    ) = map(field, UuidValue(value), propertyName)
 
     @JvmName("mapUuid")
-    protected fun map(field: Field, value: IValue<UUID>, propertyName: String = ""): IValue<UUID> {
+    protected fun map(
+            field: Field,
+            value: IValue<UUID>,
+            propertyName: String = ""
+    ): IValue<UUID> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<UUID?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableUuid")
-    protected fun map(field: Field, value: IValue<UUID?>, propertyName: String = ""): IValue<UUID?> {
-        validateUuid(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return uuidValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<UUID?>,
+            propertyName: String = ""
+    ): IValue<UUID?> = map(field, value, setOf(FieldType.Uuid), uuidValues, propertyName)
 
     @JvmName("mapString")
-    protected fun map(field: Field, value: String, propertyName: String = "") = map(field, StringValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: String,
+            propertyName: String = ""
+    ) = map(field, StringValue(value), propertyName)
 
     @JvmName("mapString")
-    protected fun map(field: Field, value: IValue<String>, propertyName: String = ""): IValue<String> {
+    protected fun map(
+            field: Field,
+            value: IValue<String>,
+            propertyName: String = ""
+    ): IValue<String> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<String?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableString")
-    protected fun map(field: Field, value: IValue<String?>, propertyName: String = ""): IValue<String?> {
-        validateString(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return stringValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<String?>,
+            propertyName: String = ""
+    ): IValue<String?> = map(field, value, setOf(FieldType.String), stringValues, propertyName)
 
     @JvmName("mapDateTime")
-    protected fun map(field: Field, value: LocalDateTime, propertyName: String = "") = map(field, LocalDateTimeValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: LocalDateTime,
+            propertyName: String = ""
+    ) = map(field, LocalDateTimeValue(value), propertyName)
 
     @JvmName("mapDateTime")
-    protected fun map(field: Field, value: IValue<LocalDateTime>, propertyName: String = ""): IValue<LocalDateTime> {
+    protected fun map(
+            field: Field,
+            value: IValue<LocalDateTime>,
+            propertyName: String = ""
+    ): IValue<LocalDateTime> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<LocalDateTime?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableDateTime")
-    protected fun map(field: Field, value: IValue<LocalDateTime?>, propertyName: String = ""): IValue<LocalDateTime?> {
-        validateDateTime(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return localDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<LocalDateTime?>,
+            propertyName: String = ""
+    ): IValue<LocalDateTime?> = map(field, value, setOf(FieldType.DateTime), localDateTimeValues, propertyName)
 
     @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, value: ZonedDateTime, propertyName: String = "") = map(field, ZonedDateTimeValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: ZonedDateTime,
+            propertyName: String = ""
+    ) = map(field, ZonedDateTimeValue(value), propertyName)
 
     @JvmName("mapZonedDateTime")
-    protected fun map(field: Field, value: IValue<ZonedDateTime>, propertyName: String = ""): IValue<ZonedDateTime> {
+    protected fun map(
+            field: Field,
+            value: IValue<ZonedDateTime>,
+            propertyName: String = ""
+    ): IValue<ZonedDateTime> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<ZonedDateTime?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableZonedDateTime")
-    protected fun map(field: Field, value: IValue<ZonedDateTime?>, propertyName: String = ""): IValue<ZonedDateTime?> {
-        validateZonedDateTime(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return zonedDateTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<ZonedDateTime?>,
+            propertyName: String = ""
+    ): IValue<ZonedDateTime?> = map(field, value, setOf(FieldType.ZonedDateTime), zonedDateTimeValues, propertyName)
 
     @JvmName("mapDate")
-    protected fun map(field: Field, value: LocalDate, propertyName: String = "") = map(field, LocalDateValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: LocalDate,
+            propertyName: String = ""
+    ) = map(field, LocalDateValue(value), propertyName)
 
     @JvmName("mapDate")
-    protected fun map(field: Field, value: IValue<LocalDate>, propertyName: String = ""): IValue<LocalDate> {
+    protected fun map(
+            field: Field,
+            value: IValue<LocalDate>,
+            propertyName: String = ""
+    ): IValue<LocalDate> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<LocalDate?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableDate")
-    protected fun map(field: Field, value: IValue<LocalDate?>, propertyName: String = ""): IValue<LocalDate?> {
-        validateDate(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return localDateValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<LocalDate?>,
+            propertyName: String = ""
+    ): IValue<LocalDate?> = map(field, value, setOf(FieldType.Date), localDateValues, propertyName)
 
     @JvmName("mapTime")
-    protected fun map(field: Field, value: LocalTime, propertyName: String = "") = map(field, LocalTimeValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: LocalTime,
+            propertyName: String = ""
+    ) = map(field, LocalTimeValue(value), propertyName)
 
     @JvmName("mapTime")
-    protected fun map(field: Field, value: IValue<LocalTime>, propertyName: String = ""): IValue<LocalTime> {
+    protected fun map(
+            field: Field,
+            value: IValue<LocalTime>,
+            propertyName: String = ""
+    ): IValue<LocalTime> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<LocalTime?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableTime")
-    protected fun map(field: Field, value: IValue<LocalTime?>, propertyName: String = ""): IValue<LocalTime?> {
-        validateTime(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return localTimeValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<LocalTime?>,
+            propertyName: String = ""
+    ): IValue<LocalTime?> = map(field, value, setOf(FieldType.Time), localTimeValues, propertyName)
 
     @JvmName("mapBlob")
-    protected fun map(field: Field, value: ByteArray, propertyName: String = "") = map(field, BlobValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: ByteArray,
+            propertyName: String = ""
+    ) = map(field, BlobValue(value), propertyName)
 
     @JvmName("mapBlob")
-    protected fun map(field: Field, value: IValue<ByteArray>, propertyName: String = ""): IValue<ByteArray> {
+    protected fun map(
+            field: Field,
+            value: IValue<ByteArray>,
+            propertyName: String = ""
+    ): IValue<ByteArray> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<ByteArray?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableBlob")
-    protected fun map(field: Field, value: IValue<ByteArray?>, propertyName: String = ""): IValue<ByteArray?> {
-        validateBlob(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return blobValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<ByteArray?>,
+            propertyName: String = ""
+    ): IValue<ByteArray?> = map(field, value, setOf(FieldType.Blob), blobValues, propertyName)
 
     @JvmName("mapMonthDay")
-    protected fun map(field: Field, value: MonthDay, propertyName: String = "") = map(field, MonthDayValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: MonthDay,
+            propertyName: String = ""
+    ) = map(field, MonthDayValue(value), propertyName)
 
     @JvmName("mapMonthDay")
-    protected fun map(field: Field, value: IValue<MonthDay>, propertyName: String = ""): IValue<MonthDay> {
+    protected fun map(
+            field: Field,
+            value: IValue<MonthDay>,
+            propertyName: String = ""
+    ): IValue<MonthDay> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<MonthDay?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableMonthDay")
-    protected fun map(field: Field, value: IValue<MonthDay?>, propertyName: String = ""): IValue<MonthDay?> {
-        validateMonthDay(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return monthDayValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<MonthDay?>,
+            propertyName: String = ""
+    ): IValue<MonthDay?> = map(field, value, setOf(FieldType.MonthDay), monthDayValues, propertyName)
 
     @JvmName("mapYearMonth")
-    protected fun map(field: Field, value: YearMonth, propertyName: String = "") = map(field, YearMonthValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: YearMonth,
+            propertyName: String = ""
+    ) = map(field, YearMonthValue(value), propertyName)
 
     @JvmName("mapYearMonth")
-    protected fun map(field: Field, value: IValue<YearMonth>, propertyName: String = ""): IValue<YearMonth> {
+    protected fun map(
+            field: Field,
+            value: IValue<YearMonth>,
+            propertyName: String = ""
+    ): IValue<YearMonth> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<YearMonth?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableYearMonth")
-    protected fun map(field: Field, value: IValue<YearMonth?>, propertyName: String = ""): IValue<YearMonth?> {
-        validateYearMonth(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return yearMonthValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<YearMonth?>,
+            propertyName: String = ""
+    ): IValue<YearMonth?> = map(field, value, setOf(FieldType.YearMonth), yearMonthValues, propertyName)
 
     @JvmName("mapPeriod")
-    protected fun map(field: Field, value: Period, propertyName: String = "") = map(field, PeriodValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Period,
+            propertyName: String = ""
+    ) = map(field, PeriodValue(value), propertyName)
 
     @JvmName("mapPeriod")
-    protected fun map(field: Field, value: IValue<Period>, propertyName: String = ""): IValue<Period> {
+    protected fun map(
+            field: Field,
+            value: IValue<Period>,
+            propertyName: String = ""
+    ): IValue<Period> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Period?>, propertyName)
         return value
     }
 
     @JvmName("mapNullablePeriod")
-    protected fun map(field: Field, value: IValue<Period?>, propertyName: String = ""): IValue<Period?> {
-        validatePeriod(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return periodValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Period?>,
+            propertyName: String = ""
+    ): IValue<Period?> = map(field, value, setOf(FieldType.Period), periodValues, propertyName)
 
     @JvmName("mapDuration")
-    protected fun map(field: Field, value: Duration, propertyName: String = "") = map(field, DurationValue(value), propertyName)
+    protected fun map(
+            field: Field,
+            value: Duration,
+            propertyName: String = ""
+    ) = map(field, DurationValue(value), propertyName)
 
     @JvmName("mapDuration")
-    protected fun map(field: Field, value: IValue<Duration>, propertyName: String = ""): IValue<Duration> {
+    protected fun map(
+            field: Field,
+            value: IValue<Duration>,
+            propertyName: String = ""
+    ): IValue<Duration> {
         @Suppress("UNCHECKED_CAST")
         map(field, value as IValue<Duration?>, propertyName)
         return value
     }
 
     @JvmName("mapNullableDuration")
-    protected fun map(field: Field, value: IValue<Duration?>, propertyName: String = ""): IValue<Duration?> {
-        validateDuration(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return durationValues.getOrPut(mapField(overview.entityId, field.bind())) { value }
-    }
+    protected fun map(
+            field: Field,
+            value: IValue<Duration?>,
+            propertyName: String = ""
+    ): IValue<Duration?> = map(field, value, setOf(FieldType.Duration), durationValues, propertyName)
 
     @JvmName("mapNullableEnum")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: T, propertyName: String = "") = map(fieldEnum, NullableEnumValue(value), propertyName)
+    protected fun <T : Enum<T>> map(
+            fieldEnum: FieldEnum<T>,
+            value: T,
+            propertyName: String = ""
+    ) = map(fieldEnum, NullableEnumValue(value), propertyName)
 
     @JvmName("mapNullableEnum")
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: IValue<T?>, propertyName: String = ""): IValue<T?> {
-        validateEnum(fieldEnum.field)
+    protected fun <T : Enum<T>> map(
+            fieldEnum: FieldEnum<T>,
+            value: IValue<T?>,
+            propertyName: String = ""
+    ): IValue<T?> {
+        val fieldId = fieldEnum.field.bind(setOf(FieldType.Enum, FieldType.EnumString))
         if (fieldEnum.field.type == FieldType.Enum) {
-            enumValues[fieldEnum.field.id] = value as IValue<Enum<*>?>
+            @Suppress("UNCHECKED_CAST")
+            enumValues[fieldId] = value as IValue<Enum<*>?>
         } else {
-            stringEnumValues[fieldEnum.field.id] = value as IValue<Enum<*>?>
+            @Suppress("UNCHECKED_CAST")
+            stringEnumValues[fieldId] = value as IValue<Enum<*>?>
         }
-        fieldEnum.field.bind()
-        FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
-        mapField(overview.entityId, fieldEnum.field.id)
-        mapEnums(overview.entityId, fieldEnum.field.id)
+        mapField(overview.entityId, fieldId, propertyName)
+        mapEnums(overview.entityId, fieldId)
         return value
     }
 
     @JvmName("mapEnum")
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, value: IValue<T>, propertyName: String = ""): IValue<T> {
-        validateEnum(fieldEnum.field)
+    protected fun <T : Enum<T>> map(
+            fieldEnum: FieldEnum<T>,
+            value: IValue<T>,
+            propertyName: String = ""
+    ): IValue<T> {
+        val fieldId = fieldEnum.field.bind(setOf(FieldType.Enum, FieldType.EnumString))
         when (fieldEnum.field.type) {
             FieldType.Enum -> {
-                enumValues[fieldEnum.field.id] = value as IValue<Enum<*>?>
+                @Suppress("UNCHECKED_CAST")
+                enumValues[fieldId] = value as IValue<Enum<*>?>
             }
             else -> {
-                stringEnumValues[fieldEnum.field.id] = value as IValue<Enum<*>?>
+                @Suppress("UNCHECKED_CAST")
+                stringEnumValues[fieldId] = value as IValue<Enum<*>?>
             }
         }
-        fieldEnum.field.bind()
-        FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
-        mapField(overview.entityId, fieldEnum.field.id)
-        mapEnums(overview.entityId, fieldEnum.field.id)
+        mapField(overview.entityId, fieldId, propertyName)
+        mapEnums(overview.entityId, fieldId)
         return value
     }
 
     @JvmName("mapStrings")
-    protected fun map(field: Field, collection: MutableCollection<String>, propertyName: String = ""): MutableCollection<String> {
-        validateStringCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return stringCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<String>,
+            propertyName: String = ""
+    ): MutableCollection<String> {
+        return stringCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.StringCollection), propertyName)) { collection }
     }
 
     @JvmName("mapDateTimes")
-    protected fun map(field: Field, collection: MutableCollection<LocalDateTime>, propertyName: String = ""): MutableCollection<LocalDateTime> {
-        validateDateTimeCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return dateTimeCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<LocalDateTime>,
+            propertyName: String = ""
+    ): MutableCollection<LocalDateTime> {
+        return dateTimeCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.DateTimeCollection), propertyName)) { collection }
     }
 
     @JvmName("mapFloats")
-    protected fun map(field: Field, collection: MutableCollection<Float>, propertyName: String = ""): MutableCollection<Float> {
-        validateFloatCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return floatCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<Float>,
+            propertyName: String = ""
+    ): MutableCollection<Float> {
+        return floatCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.FloatCollection), propertyName)) { collection }
     }
 
     @JvmName("mapIntegers")
-    protected fun map(field: Field, collection: MutableCollection<Int>, propertyName: String = ""): MutableCollection<Int> {
-        validateIntCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return integerCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<Int>,
+            propertyName: String = ""
+    ): MutableCollection<Int> {
+        return integerCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.IntCollection), propertyName)) { collection }
     }
 
     @JvmName("mapShorts")
-    protected fun map(field: Field, collection: MutableCollection<Short>, propertyName: String = ""): MutableCollection<Short> {
-        validateShortCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return shortCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<Short>,
+            propertyName: String = ""
+    ): MutableCollection<Short> {
+        return shortCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.ShortCollection), propertyName)) { collection }
     }
 
     @JvmName("mapUuids")
-    protected fun map(field: Field, collection: MutableCollection<UUID>, propertyName: String = ""): MutableCollection<UUID> {
-        validateUuidCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return uuidCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<UUID>,
+            propertyName: String = ""
+    ): MutableCollection<UUID> {
+        return uuidCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.UuidCollection), propertyName)) { collection }
     }
 
     @JvmName("mapDoubles")
-    protected fun map(field: Field, collection: MutableCollection<Double>, propertyName: String = ""): MutableCollection<Double> {
-        validateDoubleCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return doubleCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<Double>,
+            propertyName: String = ""
+    ): MutableCollection<Double> {
+        return doubleCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.DoubleCollection), propertyName)) { collection }
     }
 
     @JvmName("mapLongs")
-    protected fun map(field: Field, collection: MutableCollection<Long>, propertyName: String = ""): MutableCollection<Long> {
-        validateLongCollection(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return longCollections.getOrPut(mapField(overview.entityId, field.bind())) { collection }
+    protected fun map(
+            field: Field,
+            collection: MutableCollection<Long>,
+            propertyName: String = ""
+    ): MutableCollection<Long> {
+        return longCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.LongCollection), propertyName)) { collection }
     }
 
     @JvmName("mapIntMap")
-    protected fun map(field: Field, map: MutableMap<Int, String>, propertyName: String = ""): MutableMap<Int, String> {
-        validateIntMap(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return mapIntKeyValues.getOrPut(mapField(overview.entityId, field.bind())) { map }
+    protected fun map(
+            field: Field,
+            map: MutableMap<Int, String>,
+            propertyName: String = ""
+    ): MutableMap<Int, String> {
+        return mapIntKeyValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapIntKey), propertyName)) { map }
     }
 
     @JvmName("mapStringMap")
-    protected fun map(field: Field, map: MutableMap<String, String>, propertyName: String = ""): MutableMap<String, String> {
-        validateStringMap(field)
-        FieldDictionary.addEntityField(overview.entityId, field.id, propertyName)
-        return mapStringKeyValues.getOrPut(mapField(overview.entityId, field.bind())) { map }
+    protected fun map(
+            field: Field,
+            map: MutableMap<String, String>,
+            propertyName: String = ""
+    ): MutableMap<String, String> {
+        return mapStringKeyValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapStringKey), propertyName)) { map }
     }
 
     @JvmName("mapEnums")
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T : Enum<T>> map(fieldEnum: FieldEnum<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
-        if (
-                fieldEnum.field.type != FieldType.EnumCollection &&
-                fieldEnum.field.type != FieldType.EnumStringCollection
-        ) {
-            throw RuntimeException("Incorrect type supplied for field [$fieldEnum.field]")
-        }
+    protected fun <T : Enum<T>> map(
+            fieldEnum: FieldEnum<T>,
+            collection: MutableCollection<T>,
+            propertyName: String = ""
+    ): MutableCollection<T> {
+        val fieldId = fieldEnum.field.bind(setOf(FieldType.EnumCollection, FieldType.EnumStringCollection))
         when (fieldEnum.field.type) {
             FieldType.EnumCollection -> {
-                enumCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
+                @Suppress("UNCHECKED_CAST")
+                enumCollections[fieldId] = collection as MutableCollection<Enum<*>>
             }
             else -> {
-                enumStringCollections[fieldEnum.field.id] = collection as MutableCollection<Enum<*>>
+                @Suppress("UNCHECKED_CAST")
+                enumStringCollections[fieldId] = collection as MutableCollection<Enum<*>>
             }
         }
-        validateEnumCollection(fieldEnum.field)
-        fieldEnum.field.bind()
-        FieldDictionary.addEntityField(overview.entityId, fieldEnum.field.id, propertyName)
-        mapField(overview.entityId, fieldEnum.field.id)
-        mapEnums(overview.entityId, fieldEnum.field.id)
+        mapField(overview.entityId, fieldId, propertyName)
+        mapEnums(overview.entityId, fieldId)
         return collection
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, entity: T, propertyName: String = ""): IValue<T> {
+    protected fun <T : IEntity> map(
+            fieldEntity: FieldEntity<T>,
+            entity: T,
+            propertyName: String = ""
+    ): IValue<T> {
         return map(fieldEntity, ObjectValue(entity), propertyName)
     }
 
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, value: IValue<T>, propertyName: String = ""): IValue<T> {
-        if (fieldEntity.field.type != FieldType.Entity) {
-            throw RuntimeException("Please assign the correct type to field [$fieldEntity]")
-        }
+    protected fun <T : IEntity> map(
+            fieldEntity: FieldEntity<T>,
+            value: IValue<T>,
+            propertyName: String = ""
+    ): IValue<T> {
         if (!objectCollections.containsKey(fieldEntity) && !objectValues.containsKey(fieldEntity)) {
-            bindFieldIdToEntity(fieldEntity)
+            bindFieldIdToEntity(fieldEntity, FieldType.Entity)
             @Suppress("UNCHECKED_CAST")
             objectValues[fieldEntity] = value as IValue<IEntity>
-            FieldDictionary.addEntityField(overview.entityId, fieldEntity.field.id, propertyName)
-            mapField(overview.entityId, fieldEntity.field.id)
+            mapField(overview.entityId, fieldEntity.field.id, propertyName)
         } else {
-            throw RuntimeException("You can only bind a class to one WritableProperty. This class is already bound to one object or object array")
+            throw RuntimeException("You can only bind a class to one Value. This class is already bound to one object or object array")
         }
         return value
     }
@@ -631,280 +845,83 @@ abstract class Entity : IEntity {
      * @param fieldEntity
      * @param collection
      */
-    protected fun <T : IEntity> map(fieldEntity: FieldEntity<T>, collection: MutableCollection<T>, propertyName: String = ""): MutableCollection<T> {
-        if (fieldEntity.field.type != FieldType.EntityCollection) {
-            throw RuntimeException("Please supply a valid type for JdsFieldEntity")
-        }
+    protected fun <T : IEntity> map(
+            fieldEntity: FieldEntity<T>,
+            collection: MutableCollection<T>,
+            propertyName: String = ""
+    ): MutableCollection<T> {
         if (!objectCollections.containsKey(fieldEntity)) {
-            bindFieldIdToEntity(fieldEntity)
+            bindFieldIdToEntity(fieldEntity, FieldType.EntityCollection)
             @Suppress("UNCHECKED_CAST")
             objectCollections[fieldEntity] = collection as MutableCollection<IEntity>
-            FieldDictionary.addEntityField(overview.entityId, fieldEntity.field.id, propertyName)
-            mapField(overview.entityId, fieldEntity.field.id)
+            mapField(overview.entityId, fieldEntity.field.id, propertyName)
         } else {
-            throw RuntimeException("You can only bind a class to one WritableProperty. This class is already bound to one object or object array")
+            throw RuntimeException("You can only bind a class to one Value. This class is already bound to one object or object array")
         }
         return collection
     }
 
-    private fun <T : IEntity> bindFieldIdToEntity(fieldEntity: FieldEntity<T>) {
-        fieldEntity.field.bind()
-        FieldEntity.values[fieldEntity.field.id] = fieldEntity
+    private fun <T : IEntity> bindFieldIdToEntity(
+            fieldEntity: FieldEntity<T>,
+            fieldType: FieldType
+    ) {
+        val fieldId = fieldEntity.field.bind(fieldType)
+        FieldEntity.values[fieldId] = fieldEntity
     }
 
-    internal fun populateProperty(dbContext: DbContext, fieldId: Int, fieldType: FieldType): Boolean {
+    private fun populateProperty(
+            dbContext: DbContext,
+            fieldId: Int,
+            fieldType: FieldType
+    ): Boolean {
         if (dbContext.options.ignoreTags.any { tag -> Field.values[fieldId]!!.tags.contains(tag) }) {
             return false
         }
-        initBackingWritablePropertyIfNotDefined(fieldType, fieldId)
+        initBackingValueIfNotDefined(fieldType, fieldId)
         return true
     }
 
     /**
-     * This method enforces forward compatibility by ensuring that every WritableProperty is present even if the field is not defined or known locally
+     * This method enforces forward compatibility by ensuring that every Value is present even if the field is not defined or known locally
      */
     @Suppress("NON_EXHAUSTIVE_WHEN")
-    private fun initBackingWritablePropertyIfNotDefined(fieldType: FieldType, fieldId: Int) {
-        when (fieldType) {
-            FieldType.String -> if (!stringValues.containsKey(fieldId)) {
-                stringValues[fieldId] = NullableStringValue()
-            }
-            FieldType.DoubleCollection -> if (!doubleCollections.containsKey(fieldId)) {
-                doubleCollections[fieldId] = ArrayList()
-            }
-            FieldType.FloatCollection -> if (!floatCollections.containsKey(fieldId)) {
-                floatCollections[fieldId] = ArrayList()
-            }
-            FieldType.LongCollection -> if (!longCollections.containsKey(fieldId)) {
-                longCollections[fieldId] = ArrayList()
-            }
-            FieldType.IntCollection -> if (!integerCollections.containsKey(fieldId)) {
-                integerCollections[fieldId] = ArrayList()
-            }
-            FieldType.ShortCollection -> if (!shortCollections.containsKey(fieldId)) {
-                shortCollections[fieldId] = ArrayList()
-            }
-            FieldType.UuidCollection -> if (!uuidCollections.containsKey(fieldId)) {
-                uuidCollections[fieldId] = ArrayList()
-            }
-            FieldType.StringCollection -> if (!stringCollections.containsKey(fieldId)) {
-                stringCollections[fieldId] = ArrayList()
-            }
-            FieldType.DateTimeCollection -> if (!dateTimeCollections.containsKey(fieldId)) {
-                dateTimeCollections[fieldId] = ArrayList()
-            }
-            FieldType.EnumCollection -> if (!enumCollections.containsKey(fieldId)) {
-                enumCollections[fieldId] = ArrayList()
-            }
-            FieldType.ZonedDateTime -> if (!zonedDateTimeValues.containsKey(fieldId)) {
-                zonedDateTimeValues[fieldId] = NullableZonedDateTimeValue()
-            }
-            FieldType.Date -> if (!localDateValues.containsKey(fieldId)) {
-                localDateValues[fieldId] = NullableLocalDateValue()
-            }
-            FieldType.Time -> if (!localTimeValues.containsKey(fieldId)) {
-                localTimeValues[fieldId] = NullableLocalTimeValue()
-            }
-            FieldType.Duration -> if (!durationValues.containsKey(fieldId)) {
-                durationValues[fieldId] = NullableDurationValue()
-            }
-            FieldType.MonthDay -> if (!monthDayValues.containsKey(fieldId)) {
-                monthDayValues[fieldId] = NullableMonthDayValue()
-            }
-            FieldType.YearMonth -> if (!yearMonthValues.containsKey(fieldId)) {
-                yearMonthValues[fieldId] = NullableYearMonthValue()
-            }
-            FieldType.Period -> if (!periodValues.containsKey(fieldId)) {
-                periodValues[fieldId] = NullablePeriodValue()
-            }
-            FieldType.DateTime -> if (!localDateTimeValues.containsKey(fieldId)) {
-                localDateTimeValues[fieldId] = NullableLocalDateTimeValue()
-            }
-            FieldType.Blob -> if (!blobValues.containsKey(fieldId)) {
-                blobValues[fieldId] = NullableBlobValue()
-            }
-            FieldType.Enum -> if (!enumValues.containsKey(fieldId)) {
-                enumValues[fieldId] = ObjectValue<Enum<*>?>(null)
-            }
-            FieldType.EnumString -> if (!stringEnumValues.containsKey(fieldId)) {
-                stringEnumValues[fieldId] = ObjectValue<Enum<*>?>(null)
-            }
-            FieldType.Float -> if (!floatValues.containsKey(fieldId)) {
-                floatValues[fieldId] = NullableFloatValue()
-            }
-            FieldType.Double -> if (!doubleValues.containsKey(fieldId)) {
-                doubleValues[fieldId] = NullableDoubleValue()
-            }
-            FieldType.Short -> if (!shortValues.containsKey(fieldId)) {
-                shortValues[fieldId] = NullableShortValue()
-            }
-            FieldType.Long -> if (!longValues.containsKey(fieldId)) {
-                longValues[fieldId] = NullableLongValue()
-            }
-            FieldType.Int -> if (!integerValues.containsKey(fieldId)) {
-                integerValues[fieldId] = NullableIntegerValue()
-            }
-            FieldType.Uuid -> if (!uuidValues.containsKey(fieldId)) {
-                uuidValues[fieldId] = NullableUuidValue()
-            }
-            FieldType.Boolean -> if (!booleanValues.containsKey(fieldId)) {
-                booleanValues[fieldId] = NullableBooleanValue()
-            }
-            FieldType.MapIntKey -> if (!mapIntKeyValues.containsKey(fieldId)) {
-                mapIntKeyValues[fieldId] = HashMap()
-            }
-            FieldType.MapStringKey -> if (!mapStringKeyValues.containsKey(fieldId)) {
-                mapStringKeyValues[fieldId] = HashMap()
-            }
-        }
-    }
-
-    /**
-     * Binds all the fieldIds attached to an entity, updates the fieldIds dictionary
-     * @param connection the SQL connection to use for DB operations
-     */
-    internal fun populateRefFieldRefEntityField(
-            dbContext: DbContext,
-            connection: Connection
-    ) = try {
-
-        val clearFieldTag = connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldTag)} WHERE field_id = ?")
-        val clearFieldAlternateCode = connection.prepareStatement("DELETE FROM ${dbContext.getName(io.github.subiyacryolite.jds.enums.Table.FieldAlternateCode)} WHERE field_id = ?")
-        val populateField = dbContext.getCallOrStatement(connection, dbContext.populateField())
-        val populateEntityField = dbContext.getCallOrStatement(connection, dbContext.populateEntityField())
-        val populateFieldEntity = dbContext.getCallOrStatement(connection, dbContext.populateFieldEntity())
-        val populateFieldTag = dbContext.getCallOrStatement(connection, dbContext.populateFieldTag())
-        val populateFieldAlternateCode = dbContext.getCallOrStatement(connection, dbContext.populateFieldAlternateCode())
-
-        getFieldsImp(overview.entityId).forEach { fieldId ->
-            val field = Field.values.getValue(fieldId)
-
-            clearFieldTag.setInt(1, field.id)
-            clearFieldTag.addBatch()
-
-            clearFieldAlternateCode.setInt(1, field.id)
-            clearFieldAlternateCode.addBatch()
-
-            populateField.setInt(1, field.id)
-            populateField.setString(2, field.name)
-            populateField.setString(3, field.description)
-            populateField.setInt(4, field.type.ordinal)
-            populateField.addBatch()
-
-            populateEntityField.setInt(1, overview.entityId)
-            populateEntityField.setInt(2, field.id)
-            populateEntityField.addBatch()
-
-            field.tags.forEach { tag ->
-                populateFieldTag.setInt(1, field.id)
-                populateFieldTag.setString(2, tag)
-                populateFieldTag.addBatch()
-            }
-
-            field.alternateCodes.forEach { (alternateCode, value) ->
-                populateFieldAlternateCode.setInt(1, field.id)
-                populateFieldAlternateCode.setString(2, alternateCode)
-                populateFieldAlternateCode.setString(3, value)
-                populateFieldAlternateCode.addBatch()
-            }
-
-            if (field.type == FieldType.Entity || field.type == FieldType.EntityCollection) {
-                val fieldEntity = FieldEntity.values[field.id]
-                if (fieldEntity != null) {
-                    val entityAnnotation = getEntityAnnotation(fieldEntity.entity)
-                    if (entityAnnotation != null) {
-                        populateFieldEntity.setInt(1, field.id)
-                        populateFieldEntity.setInt(2, entityAnnotation.id)
-                        populateFieldEntity.addBatch()
-                    }
-                }
-            }
-        }
-
-        clearFieldTag.use { it.executeBatch() }
-        clearFieldAlternateCode.use { it.executeBatch() }
-        populateField.use { it.executeBatch() }
-        populateEntityField.use { it.executeBatch() }
-        populateFieldTag.use { it.executeBatch() }
-        populateFieldAlternateCode.use { it.executeBatch() }
-        populateFieldEntity.use { it.executeBatch() }
-
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
-    }
-
-    /**
-     * Binds all the enumValues attached to an entity
-     * @param connection
-     * @param entityId
-     * @param dbContext
-     */
-    @Synchronized
-    internal fun populateRefEnumRefEntityEnum(
-            dbContext: DbContext,
-            connection: Connection
+    private fun initBackingValueIfNotDefined(
+            fieldType: FieldType,
+            fieldId: Int
     ) {
-        populateRefEnum(dbContext, connection, getEnumsImp(overview.entityId))
-        populateRefEntityEnum(dbContext, connection, overview.entityId, getEnumsImp(overview.entityId))
-        if (dbContext.options.logOutput) {
-            System.out.printf("Mapped Enums for Entity[%s]\n", overview.entityId)
+        when (fieldType) {
+            FieldType.String -> stringValues.putIfAbsent(fieldId, NullableStringValue())
+            FieldType.DoubleCollection -> doubleCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.FloatCollection -> floatCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.LongCollection -> longCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.IntCollection -> integerCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.ShortCollection -> shortCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.UuidCollection -> uuidCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.StringCollection -> stringCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
+            FieldType.ZonedDateTime -> zonedDateTimeValues.putIfAbsent(fieldId, NullableZonedDateTimeValue())
+            FieldType.Date -> localDateValues.putIfAbsent(fieldId, NullableLocalDateValue())
+            FieldType.Time -> localTimeValues.putIfAbsent(fieldId, NullableLocalTimeValue())
+            FieldType.Duration -> durationValues.putIfAbsent(fieldId, NullableDurationValue())
+            FieldType.MonthDay -> monthDayValues.putIfAbsent(fieldId, NullableMonthDayValue())
+            FieldType.YearMonth -> yearMonthValues.putIfAbsent(fieldId, NullableYearMonthValue())
+            FieldType.Period -> periodValues.putIfAbsent(fieldId, NullablePeriodValue())
+            FieldType.DateTime -> localDateTimeValues.putIfAbsent(fieldId, NullableLocalDateTimeValue())
+            FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
+            FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
+            FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
+            FieldType.Float -> floatValues.putIfAbsent(fieldId, NullableFloatValue())
+            FieldType.Double -> doubleValues.putIfAbsent(fieldId, NullableDoubleValue())
+            FieldType.Short -> shortValues.putIfAbsent(fieldId, NullableShortValue())
+            FieldType.Long -> longValues.putIfAbsent(fieldId, NullableLongValue())
+            FieldType.Int -> integerValues.putIfAbsent(fieldId, NullableIntegerValue())
+            FieldType.Uuid -> uuidValues.putIfAbsent(fieldId, NullableUuidValue())
+            FieldType.Boolean -> booleanValues.putIfAbsent(fieldId, NullableBooleanValue())
+            FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
+            FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
         }
-    }
-
-    /**
-     * Binds all the enumValues attached to an entity
-     * @param dbContext
-     * @param connection the SQL connection to use for DB operations
-     * @param entityId the value representing the entity
-     * @param fieldIds the entity's enumValues
-     */
-    @Synchronized
-    private fun populateRefEntityEnum(
-            dbContext: DbContext,
-            connection: Connection,
-            entityId: Int,
-            fieldIds: Set<Int>
-    ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEntityEnum()) else connection.prepareStatement(dbContext.populateEntityEnum())).use { statement ->
-            for (fieldId in fieldIds) {
-                val jdsFieldEnum = FieldEnum.enums[fieldId]!!
-                statement.setInt(1, entityId)
-                statement.setInt(2, jdsFieldEnum.field.id)
-                statement.addBatch()
-            }
-            statement.executeBatch()
-        }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
-    }
-
-    /**
-     * Binds all the values attached to an enum
-     * @param dbContext
-     * @param connection the SQL connection to use for DB operations
-     * @param fieldIds the jdsField enum
-     */
-    @Synchronized
-    private fun populateRefEnum(
-            dbContext: DbContext,
-            connection: Connection,
-            fieldIds: Set<Int>
-    ) = try {
-        (if (dbContext.supportsStatements) connection.prepareCall(dbContext.populateEnum()) else connection.prepareStatement(dbContext.populateEnum())).use { statement ->
-            for (fieldId in fieldIds) {
-                val jdsFieldEnum = FieldEnum.enums[fieldId]!!
-                jdsFieldEnum.values.forEach { enum ->
-                    statement.setInt(1, jdsFieldEnum.field.id)
-                    statement.setInt(2, enum.ordinal)
-                    statement.setString(3, enum.name)
-                    statement.setString(4, enum.toString())
-                    statement.addBatch()
-                }
-            }
-            statement.executeBatch()
-        }
-    } catch (ex: Exception) {
-        ex.printStackTrace(System.err)
     }
 
     companion object : Serializable {
@@ -917,12 +934,20 @@ abstract class Entity : IEntity {
 
         internal val classes = ConcurrentHashMap<Int, Class<out Entity>>()
 
-        internal var initialising: Boolean = false
-
         internal fun getEntityAnnotation(clazz: Class<*>?): EntityAnnotation? {
 
             var interfaceAnnotation: EntityAnnotation? = null
             var classHit: EntityAnnotation? = null
+
+            clazz?.declaredAnnotations?.forEach { annotation ->
+                if (annotation is EntityAnnotation) {
+                    classHit = annotation
+                    return@forEach
+                }
+            }
+            if (classHit != null) {
+                return classHit//prioritise classes
+            }
 
             clazz?.interfaces?.forEach { clazzInterface ->
                 val interfaceMatch = getEntityAnnotation(clazzInterface)
@@ -932,24 +957,17 @@ abstract class Entity : IEntity {
                 }
             }
 
-            clazz?.declaredAnnotations?.forEach { annotation ->
-                if (annotation is EntityAnnotation) {
-                    classHit = annotation
-                    return@forEach
-                }
-            }
-
-            if (classHit != null) {
-                return classHit//prioritise classes
-            } else if (interfaceAnnotation != null) {
+            if (interfaceAnnotation != null) {
                 return interfaceAnnotation//then interfaces
             }
+
             return null
         }
 
-        protected fun mapField(entityId: Int, fieldId: Int): Int {
-            if (initialising) {
+        protected fun mapField(entityId: Int, fieldId: Int, propertyName: String): Int {
+            if (DbContext.initialising) {
                 getFieldsImp(entityId).add(fieldId)
+                FieldDictionary.registerField(entityId, fieldId, propertyName)
             }
             return fieldId
         }
@@ -983,5 +1001,438 @@ abstract class Entity : IEntity {
             return classes.filter { kvp -> entityIds.contains(kvp.key) }.map { kvp -> kvp.value }
         }
 
+        private fun toByteArrayCollection(values: MutableCollection<UUID>): Collection<ByteArray> {
+            val output = ArrayList<ByteArray>()
+            values.forEach { value ->
+                output.add(value.toByteArray()!!)
+            }
+            return output
+        }
+
+        private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) = values.map { Timestamp.valueOf(it) }
+
+        private fun toIntCollection(values: MutableCollection<out Enum<*>>) = values.map { it.ordinal }
+
+        private fun toStringCollection(values: MutableCollection<out Enum<*>>) = values.map { it.name }
+
+        internal fun assign(entity: Entity, dbContext: DbContext, portableEntity: PortableEntity) {
+            //==============================================
+            //PRIMITIVES, also saved to array struct to streamline json
+            //==============================================
+            entity.booleanValues.filterIgnored(dbContext).forEach { entry ->
+                val input = when (entry.value.value) {
+                    true -> 1
+                    false -> 0
+                    else -> null
+                }
+                portableEntity.booleanValues.add(StoreBoolean(entry.key, input))
+            }
+            entity.stringValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.stringValues.add(StoreString(entry.key, entry.value.value))
+            }
+            entity.floatValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
+            }
+            entity.doubleValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
+            }
+            entity.shortValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
+            }
+            entity.longValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
+            }
+            entity.integerValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
+            }
+            entity.uuidValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
+            }
+            //==============================================
+            //Dates & Time
+            //==============================================
+            entity.zonedDateTimeValues.filterIgnored(dbContext).forEach { entry ->
+                val zonedDateTime = entry.value.value as ZonedDateTime?
+                portableEntity.zonedDateTimeValues.add(StoreZonedDateTime(entry.key, zonedDateTime?.toInstant()?.toEpochMilli()))
+            }
+            entity.localTimeValues.filterIgnored(dbContext).forEach { entry ->
+                val localTime = entry.value.value as LocalTime?
+                portableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
+            }
+            entity.durationValues.filterIgnored(dbContext).forEach { entry ->
+                val duration = entry.value.value
+                portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
+            }
+            entity.localDateTimeValues.filterIgnored(dbContext).forEach { entry ->
+                val localDateTime = entry.value.value as LocalDateTime?
+                portableEntity.dateTimeValues.add(StoreDateTime(entry.key, localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()))
+            }
+            entity.localDateValues.filterIgnored(dbContext).forEach { entry ->
+                val localDate = entry.value.value as LocalDate?
+                portableEntity.dateValues.add(StoreDate(entry.key, localDate?.toEpochDay()))
+            }
+            entity.monthDayValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
+            }
+            entity.yearMonthValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
+            }
+            entity.periodValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
+            }
+            //==============================================
+            //BLOB
+            //==============================================
+            entity.blobValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
+            }
+            //==============================================
+            //Enums
+            //==============================================
+            entity.enumValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
+            }
+            entity.stringEnumValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
+            }
+            entity.enumCollections.filterIgnoredEnums(dbContext).forEach { entry ->
+                portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
+            }
+            entity.enumStringCollections.filterIgnoredEnums(dbContext).forEach { entry ->
+                portableEntity.enumStringCollections.add(StoreEnumStringCollection(entry.key, toStringCollection(entry.value)))
+            }
+            //==============================================
+            //ARRAYS
+            //==============================================
+            entity.stringCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
+            }
+            entity.dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.dateTimeCollection.add(StoreDateTimeCollection(entry.key, toTimeStampCollection(entry.value)))
+            }
+            entity.floatCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
+            }
+            entity.doubleCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
+            }
+            entity.longCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
+            }
+            entity.integerCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
+            }
+            entity.shortCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
+            }
+            entity.uuidCollections.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
+            }
+            //==============================================
+            // Maps
+            //==============================================
+            entity.mapIntKeyValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.mapIntKeyValues.add(StoreMapIntKey(entry.key, entry.value))
+            }
+            entity.mapStringKeyValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.mapStringKeyValues.add(StoreMapStringKey(entry.key, entry.value))
+            }
+            //==============================================
+            //EMBEDDED OBJECTS
+            //==============================================
+            entity.objectCollections.forEach { (fieldEntity, mutableCollection) ->
+                mutableCollection.forEach { entity ->
+                    val embeddedObject = PortableEntity()
+                    embeddedObject.fieldId = fieldEntity.field.id
+                    embeddedObject.init(dbContext, entity)
+                    portableEntity.entityOverviews.add(embeddedObject)
+                }
+            }
+            entity.objectValues.forEach { (fieldEntity, objectValue) ->
+                val embeddedPortableEntity = PortableEntity()
+                embeddedPortableEntity.fieldId = fieldEntity.field.id
+                embeddedPortableEntity.init(dbContext, objectValue.value)
+                portableEntity.entityOverviews.add(embeddedPortableEntity)
+            }
+        }
+
+        internal fun populate(entity: Entity, dbContext: DbContext, portableEntity: PortableEntity) {
+            portableEntity.blobValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Blob)) {
+                    entity.blobValues.getValue(field.key).value = when (value) {
+                        is ByteArray -> value
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.booleanValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Boolean)) {
+                    entity.booleanValues.getValue(field.key).value = when (value) {
+                        is Int -> value == 1
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.dateValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Date)) {
+                    entity.localDateValues.getValue(field.key).value = when (value) {
+                        is Long -> LocalDate.ofEpochDay(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.doubleValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Double)) {
+                    entity.doubleValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.durationValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Duration)) {
+                    entity.durationValues.getValue(field.key).value = when (value) {
+                        is Long -> Duration.ofNanos(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.dateTimeValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.DateTime)) {
+                    entity.localDateTimeValues.getValue(field.key).value = when (value) {
+                        is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.floatValue.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Float)) {
+                    entity.floatValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.integerValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Int)) {
+                    entity.integerValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.shortValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Short)) {
+                    entity.shortValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.uuidValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Uuid)) {
+                    entity.uuidValues.getValue(field.key).value = value?.toUuid()
+                }
+            }
+            portableEntity.longValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Long)) {
+                    entity.longValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.monthDayValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.MonthDay)) {
+                    entity.monthDayValues.getValue(field.key).value = when (value) {
+                        is String -> MonthDay.parse(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.periodValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Period)) {
+                    entity.periodValues.getValue(field.key).value = when (value) {
+                        is String -> Period.parse(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.stringValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.String)) {
+                    entity.stringValues.getValue(field.key).value = value
+                }
+            }
+            portableEntity.timeValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.Time)) {
+                    entity.localTimeValues.getValue(field.key).value = when (value) {
+                        is Long -> LocalTime.ofNanoOfDay(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.yearMonthValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.YearMonth)) {
+                    entity.yearMonthValues.getValue(field.key).value = when (value) {
+                        is String -> YearMonth.parse(value)
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.zonedDateTimeValues.forEach { field ->
+                val value = field.value
+                if (entity.populateProperty(dbContext, field.key, FieldType.ZonedDateTime)) {
+                    entity.zonedDateTimeValues.getValue(field.key).value = when (value) {
+                        is Long -> ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
+                        else -> null
+                    }
+                }
+            }
+            portableEntity.enumValues.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.Enum)) {
+                    val fieldEnum = FieldEnum.enums[field.key]
+                    val value = field.value
+                    if (fieldEnum != null && value != null) {
+                        entity.enumValues.getValue(field.key).value = fieldEnum.valueOf(value)
+                    }
+                }
+            }
+            portableEntity.enumStringValues.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.EnumString)) {
+                    val fieldEnum = FieldEnum.enums[field.key]
+                    val value = field.value
+                    if (fieldEnum != null && value != null) {
+                        entity.stringEnumValues.getValue(field.key).value = fieldEnum.valueOf(value)
+                    }
+                }
+            }
+            portableEntity.dateTimeCollection.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.DateTimeCollection)) {
+                    val dest = entity.dateTimeCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add((value).toLocalDateTime()) }
+                }
+            }
+            portableEntity.doubleCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.DoubleCollection)) {
+                    val dest = entity.doubleCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.floatCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.FloatCollection)) {
+                    val dest = entity.floatCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.integerCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.IntCollection)) {
+                    val dest = entity.integerCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.shortCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.ShortCollection)) {
+                    val dest = entity.shortCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.uuidCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.UuidCollection)) {
+                    val dest = entity.uuidCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value.toUuid()!!) }
+                }
+            }
+            portableEntity.longCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.LongCollection)) {
+                    val dest = entity.longCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.stringCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.StringCollection)) {
+                    val dest = entity.stringCollections.getValue(field.key)
+                    field.values.forEach { value -> dest.add(value) }
+                }
+            }
+            portableEntity.enumCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.EnumCollection)) {
+                    val dest = entity.enumCollections.getValue(field.key)
+                    val fieldEnum = FieldEnum.enums[field.key]
+                    if (fieldEnum != null) {
+                        field.values.forEach { enumOrdinal ->
+                            val enumValues = fieldEnum.values
+                            if (enumOrdinal < enumValues.size) {
+                                dest.add(enumValues.find { enumValue -> enumValue.ordinal == enumOrdinal }!!)
+                            }
+                        }
+                    }
+                }
+            }
+            portableEntity.enumStringCollections.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.EnumStringCollection)) {
+                    val dest = entity.enumStringCollections.getValue(field.key)
+                    val fieldEnum = FieldEnum.enums[field.key]
+                    if (fieldEnum != null) {
+                        field.values.forEach { enumString ->
+                            val enumVal = fieldEnum.valueOf(enumString)
+                            if (enumVal != null)
+                                dest.add(enumVal)
+                        }
+                    }
+                }
+            }
+            portableEntity.mapIntKeyValues.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.MapIntKey)) {
+                    entity.mapIntKeyValues.getValue(field.key).putAll(field.values)
+                }
+            }
+            portableEntity.mapStringKeyValues.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.MapStringKey)) {
+                    entity.mapStringKeyValues.getValue(field.key).putAll(field.values)
+                }
+            }
+            //==============================================
+            portableEntity.entityOverviews.forEach { subEntities ->
+                populateObjects(entity, dbContext, subEntities.overview.fieldId, subEntities.overview.entityId, subEntities.overview.id, subEntities.overview.editVersion, subEntities)
+            }
+        }
+
+        private fun populateObjects(
+                entity: Entity,
+                dbContext: DbContext,
+                fieldId: Int?,
+                entityId: Int,
+                id: String,
+                editVersion: Int,
+                portableEntity: PortableEntity
+        ) {
+            if (fieldId == null) return
+            entity.objectCollections.filter { entry ->
+                entry.key.field.id == fieldId
+            }.forEach { entry ->
+                val referenceClass = classes[entityId]
+                if (referenceClass != null) {
+                    val subEntity = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                    subEntity.overview.id = id
+                    subEntity.overview.editVersion = editVersion
+                    populate(subEntity, dbContext, portableEntity)
+                    entry.value.add(subEntity)
+                }
+            }
+            //find existing elements
+            entity.objectValues.filter { entry ->
+                entry.key.field.id == fieldId
+            }.forEach { entry ->
+                val referenceClass = classes[entityId]
+                if (referenceClass != null) {
+                    entry.value.value = referenceClass.getDeclaredConstructor().newInstance()//create array element
+                    entry.value.value.overview.id = id
+                    entry.value.value.overview.editVersion = editVersion
+                    val subEntity = entry.value.value as Entity
+                    populate(subEntity, dbContext, portableEntity)
+                }
+            }
+        }
     }
 }

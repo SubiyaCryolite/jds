@@ -34,9 +34,12 @@ data class Field(
         var tags: Set<String> = emptySet()
 ) : Serializable {
 
-    internal fun bind(): Int {
-        if (values.containsKey(this.id)) {
-            val existingField = values.getValue(this.id)
+    internal fun bind(type: FieldType): Int = bind(setOf(type))
+
+    internal fun bind(types: Collection<FieldType>): Int {
+        validate(this, types)
+        val existingField = values[this.id]
+        if (existingField != null) {
             if (this != existingField) {
                 throw RuntimeException("The field id [${this.id}] is already bound to [${existingField}]")
             }
@@ -51,6 +54,12 @@ data class Field(
         private const val serialVersionUID = 20171109_0853L
 
         internal val values = HashMap<Int, Field>()
+
+        private fun validate(field: Field, types: Collection<FieldType>) {
+            if (!types.contains(field.type)) {
+                throw RuntimeException("Incorrect type supplied for field [$field]")
+            }
+        }
 
         /**
          * Public facing method to query the underlying values.

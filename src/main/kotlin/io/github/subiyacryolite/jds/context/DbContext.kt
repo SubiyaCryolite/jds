@@ -14,6 +14,8 @@
 package io.github.subiyacryolite.jds.context
 
 import io.github.subiyacryolite.jds.Entity
+import io.github.subiyacryolite.jds.EntityUtils.populateRefEnumRefEntityEnum
+import io.github.subiyacryolite.jds.EntityUtils.populateRefFieldRefEntityField
 import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.FieldDictionary
 import io.github.subiyacryolite.jds.Options
@@ -32,7 +34,6 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import javax.sql.DataSource
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
@@ -52,6 +53,11 @@ abstract class DbContext(
 
     val options = Options()
     var dimensionTable = ""
+
+    companion object : Serializable {
+
+        var initialising: Boolean = false
+    }
 
     /**
      * Initialise JDS base tables
@@ -154,7 +160,7 @@ abstract class DbContext(
             Table.EntityField -> executeSqlFromString(connection, createBindEntityFields())
             Table.FieldEntity -> executeSqlFromString(connection, createBindFieldEntities())
             Table.Enum -> executeSqlFromString(connection, createRefEnumValues())
-            Table.FieldType ->       executeSqlFromString(connection, createRefFieldTypes())
+            Table.FieldType -> executeSqlFromString(connection, createRefFieldTypes())
             Table.Field -> executeSqlFromString(connection, createRefFields())
             Table.EntityInheritance -> executeSqlFromString(connection, createRefInheritance())
             Table.FieldDictionary -> executeSqlFromString(connection, createFieldDictionary())
@@ -489,6 +495,7 @@ abstract class DbContext(
         ex.printStackTrace(System.err)
     }
 
+    @Synchronized
     fun map(entity: Class<out Entity>) {
         val entityAnnotation = Entity.getEntityAnnotation(entity)
         if (entityAnnotation != null) {
@@ -496,7 +503,7 @@ abstract class DbContext(
                 Entity.classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
-                    Entity.initialising = true
+                    initialising = true
                     dataSource.connection.use { connection ->
                         connection.autoCommit = false
                         val parentEntities = HashSet<Int>()
@@ -504,8 +511,8 @@ abstract class DbContext(
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         Extensions.determineParents(entity, parentEntities)
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description, entityAnnotation.tags)
-                        jdsEntity.populateRefFieldRefEntityField(this, connection)
-                        jdsEntity.populateRefEnumRefEntityEnum(this, connection)
+                        populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
+                        populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         FieldDictionary.update(this, connection, jdsEntity.overview.entityId)
                         mapParentEntities(connection, parentEntities, jdsEntity.overview.entityId)
                         connection.commit()
@@ -516,7 +523,7 @@ abstract class DbContext(
                 } catch (ex: Exception) {
                     ex.printStackTrace(System.err)
                 } finally {
-                    Entity.initialising = false
+                    initialising = false
                 }
             }
         } else
@@ -533,7 +540,7 @@ abstract class DbContext(
             statement.executeBatch()
         }
     }
-  
+
     /**
      * SQL call to save entity overview values
      * @return the default or overridden SQL statement for this operation

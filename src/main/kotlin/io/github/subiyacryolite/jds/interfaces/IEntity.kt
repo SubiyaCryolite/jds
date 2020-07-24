@@ -16,5 +16,9 @@ package io.github.subiyacryolite.jds.interfaces;
 import java.io.Serializable
 
 interface IEntity : Serializable {
+
+    /**
+     *
+     */
     val overview: IOverview
 }

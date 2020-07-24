@@ -8,14 +8,22 @@ object FieldDictionary {
 
     private val dictionary: ConcurrentHashMap<Int, HashSet<Pair<Int, String>>> = ConcurrentHashMap()
 
-    fun addEntityField(entityId: Int, fieldId: Int, propertyName: String) {
-        if (Entity.initialising) {
-            addEntityField(entityId, Pair(fieldId, propertyName))
+    /**
+     * Only performed during initialization (map stage)
+     * [propertyName] may unique per entity, thu must be called once for each
+     */
+    fun registerField(entityId: Int, fieldId: Int, propertyName: String) {
+        if (DbContext.initialising) {
+            registerField(entityId, Pair(fieldId, propertyName))
         }
     }
 
-    private fun addEntityField(entityId: Int, pair: Pair<Int, String>) {
-        if (Entity.initialising) {
+    /**
+     * Only performed during initialization (map stage)
+     * [pair] may contain a unique name per entity, thu must be called once for each
+     */
+    private fun registerField(entityId: Int, pair: Pair<Int, String>) {
+        if (DbContext.initialising) {
             val dict = dictionary.getOrPut(entityId) { HashSet() }
             dict.add(pair)
         }

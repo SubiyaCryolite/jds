@@ -130,7 +130,7 @@ data class PortableEntity(
     @Throws(Exception::class)
     fun init(dbContext: DbContext, entity: IEntity) {
         if (entity is Entity) {
-            SavePortable.assign(entity, dbContext, this)
+            Entity.assign(entity, dbContext, this)
         }
         overview = EntityOverview(entity.overview, fieldId)
     }

@@ -53,7 +53,11 @@ interface IDbContext {
      * @param tableName  the table to inspect
      * @return true if the specified index exists the the database
      */
-    fun doesColumnExist(connection: Connection, tableName: String, columnName: String): Boolean
+    fun doesColumnExist(
+            connection: Connection,
+            tableName: String,
+            columnName: String
+    ): Boolean
 
     /**
      * Checks if the specified table exists the the database
@@ -62,7 +66,10 @@ interface IDbContext {
      * @param table the table to look up
      * @return true if the specified table exists the the database
      */
-    fun doesTableExist(connection: Connection, table: Table): Boolean
+    fun doesTableExist(
+            connection: Connection,
+            table: Table
+    ): Boolean
 
     /**
      * Checks if the specified table exists the the database
@@ -71,7 +78,10 @@ interface IDbContext {
      * @param tableName the table to look up
      * @return true if the specified table exists the the database
      */
-    fun doesTableExist(connection: Connection, tableName: String): Boolean
+    fun doesTableExist(
+            connection: Connection,
+            tableName: String
+    ): Boolean
 
     /**
      * Checks if the specified procedure exists the the database
@@ -80,7 +90,10 @@ interface IDbContext {
      * @param procedure the procedure to look up
      * @return true if the specified procedure exists the the database
      */
-    fun doesProcedureExist(connection: Connection, procedure: Procedure): Boolean
+    fun doesProcedureExist(
+            connection: Connection,
+            procedure: Procedure
+    ): Boolean
 
     /**
      * Checks if the specified procedure exists the the database
@@ -89,7 +102,10 @@ interface IDbContext {
      * @param procedureName the procedure to look up
      * @return true if the specified procedure exists the the database
      */
-    fun doesProcedureExist(connection: Connection, procedureName: String): Boolean
+    fun doesProcedureExist(
+            connection: Connection,
+            procedureName: String
+    ): Boolean
 
     /**
      * Gets the correct syntax needed to add a new column to the underlying database implementation
@@ -110,14 +126,27 @@ interface IDbContext {
      * @param max the maximum length of the database type, applied against [io.github.subiyacryolite.jds.enums.FieldType.String] and [io.github.subiyacryolite.jds.enums.FieldType.Blob] types
      * @return the underlying database type of the supplied [io.github.subiyacryolite.jds.Field]
      */
-    fun getDataType(fieldType: FieldType, max: Int): String
+    fun getDataType(
+            fieldType: FieldType,
+            max: Int
+    ): String
 
     /**
      * @param
      * @columnName
      * @indexName
      */
-    fun getDbCreateIndexSyntax(tableName: String, columnName: String, indexName: String): String
+    fun getDbCreateIndexSyntax(
+            tableName: String,
+            columnName: String,
+            indexName: String
+    ): String
 
-    fun createOrAlterProc(procedureName: String, tableName: String, columns: Map<String, String>, uniqueColumns: Collection<String>, doNothingOnConflict: Boolean = false): String
+    fun createOrAlterProc(
+            procedureName: String,
+            tableName: String,
+            columns: Map<String, String>,
+            uniqueColumns: Collection<String>,
+            doNothingOnConflict: Boolean = false
+    ): String
 }

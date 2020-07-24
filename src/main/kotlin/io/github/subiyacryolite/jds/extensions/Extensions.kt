@@ -15,9 +15,9 @@ package io.github.subiyacryolite.jds.extensions
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.Field
+import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.interfaces.IEntity
 import io.github.subiyacryolite.jds.interfaces.IValue
-import io.github.subiyacryolite.jds.context.DbContext
 import java.nio.ByteBuffer
 import java.time.temporal.Temporal
 import java.util.*
@@ -59,6 +59,20 @@ internal fun Map<Int, IValue<out Temporal?>>.filterIgnored(dbContext: DbContext)
  */
 @JvmName("filterValue")
 internal fun <T> Map<Int, IValue<T>>.filterIgnored(dbContext: DbContext): Map<Int, IValue<T>> = if (dbContext.options.ignoreTags.isEmpty()) {
+    this
+} else {
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
+}
+
+/**
+ * Extension method which filters the map of fields which are persisted to disk.
+ * When sensitive data is not being saved, fields marked as sensitive will be excluded
+ */
+internal fun Map<Int, MutableCollection<out Enum<*>>>.filterIgnoredEnums(dbContext: DbContext): Map<Int, MutableCollection<out Enum<*>>> = if (dbContext.options.ignoreTags.isEmpty()) {
     this
 } else {
     this.filter { kvp ->
