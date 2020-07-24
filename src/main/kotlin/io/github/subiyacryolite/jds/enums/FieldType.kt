@@ -18,38 +18,174 @@ package io.github.subiyacryolite.jds.enums;
  * @param type field id
  */
 enum class FieldType(val type: kotlin.Int) {
+
+    /**
+     *
+     */
     Float(0),
+
+    /**
+     *
+     */
     Int(1),
+
+    /**
+     *
+     */
     Double(2),
+
+    /**
+     *
+     */
     Long(3),
+
+    /**
+     *
+     */
     String(4),
+
+    /**
+     *
+     */
     DateTime(5),
+
+    /**
+     *
+     */
     FloatCollection(6),
+
+    /**
+     *
+     */
     IntCollection(7),
+
+    /**
+     *
+     */
     DoubleCollection(8),
+
+    /**
+     *
+     */
     LongCollection(9),
+
+    /**
+     *
+     */
     StringCollection(10),
+
+    /**
+     *
+     */
     DateTimeCollection(11),
+
+    /**
+     *
+     */
     EnumCollection(12),
+
+    /**
+     *
+     */
     Boolean(13),
+
+    /**
+     *
+     */
     ZonedDateTime(14),
+
+    /**
+     *
+     */
     Date(15),
+
+    /**
+     *
+     */
     Time(16),
+
+    /**
+     *
+     */
     Blob(17),
+
+    /**
+     *
+     */
     Enum(18),
+
+    /**
+     *
+     */
     Entity(19),
+
+    /**
+     *
+     */
     MonthDay(20),
+
+    /**
+     *
+     */
     YearMonth(21),
+
+    /**
+     *
+     */
     Period(22),
+
+    /**
+     *
+     */
     Duration(23),
+
+    /**
+     *
+     */
     EntityCollection(24),
+
+    /**
+     *Why does this exist
+     */
     Unknown(25),
+
+    /**
+     *
+     */
     EnumString(26),
+
+    /**
+     *
+     */
     EnumStringCollection(27),
+
+    /**
+     *
+     */
     Short(28),
+
+    /**
+     *
+     */
     Uuid(29),
+
+    /**
+     *
+     */
     UuidCollection(30),
+
+    /**
+     *
+     */
     ShortCollection(31),
+
+    /**
+     *
+     */
     MapIntKey(32),
+
+    /**
+     *
+     */
     MapStringKey(33);
 }

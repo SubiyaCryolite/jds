@@ -16,6 +16,6 @@ package io.github.subiyacryolite.jds.context
 import io.github.subiyacryolite.jds.enums.Implementation
 
 /**
- * The MariaDb implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The MariaDb implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class MariaDbContext : MySqlContext(Implementation.MariaDb, true)

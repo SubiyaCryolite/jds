@@ -21,7 +21,7 @@ import java.sql.Connection
 import java.util.*
 
 /**
- * The Oracle implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The Oracle implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class OracleContext : DbContext(Implementation.Oracle, true) {
 

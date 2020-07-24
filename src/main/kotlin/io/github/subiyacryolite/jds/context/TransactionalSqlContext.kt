@@ -21,7 +21,7 @@ import java.sql.Connection
 import java.util.*
 
 /**
- * The TSQL implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The TSQL implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class TransactionalSqlContext : DbContext(Implementation.TSql, true, "jds.", "jds") {
 

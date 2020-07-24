@@ -20,7 +20,7 @@ import io.github.subiyacryolite.jds.enums.Table
 import java.sql.Connection
 
 /**
- * The SQLite implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The SQLite implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class SqLiteDbContext : DbContext(Implementation.SqLite, false) {
 

@@ -21,7 +21,7 @@ import java.sql.Connection
 import java.util.*
 
 /**
- * The PostgreSQL implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The PostgreSQL implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class PostGreSqlContext : DbContext(Implementation.PostGreSql, true, "jds.", "jds") {
 

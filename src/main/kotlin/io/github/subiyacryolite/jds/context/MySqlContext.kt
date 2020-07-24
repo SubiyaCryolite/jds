@@ -21,7 +21,7 @@ import java.sql.Connection
 import java.util.*
 
 /**
- * The MySQL implementation of [io.github.subiyacryolite.jds.DbContext]
+ * The MySQL implementation of [io.github.subiyacryolite.jds.context.DbContext]
  */
 abstract class MySqlContext : DbContext {
 
