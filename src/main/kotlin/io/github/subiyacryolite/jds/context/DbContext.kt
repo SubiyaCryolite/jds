@@ -499,7 +499,7 @@ abstract class DbContext(
     fun map(entity: Class<out Entity>) {
         val entityAnnotation = Entity.getEntityAnnotation(entity)
         if (entityAnnotation != null) {
-            if (!Entity.classes.containsKey(entityAnnotation.id)) {
+            if (!Entity.classes.containsKey(entityAnnotation.id)) {//map each class exactly once
                 Entity.classes[entityAnnotation.id] = entity
                 //do the thing
                 try {
@@ -508,6 +508,7 @@ abstract class DbContext(
                         connection.autoCommit = false
                         val parentEntities = HashSet<Int>()
                         val jdsEntity = entity.getDeclaredConstructor().newInstance()
+                        jdsEntity.bind()
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         Extensions.determineParents(entity, parentEntities)
                         populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description, entityAnnotation.tags)
@@ -526,8 +527,9 @@ abstract class DbContext(
                     initialising = false
                 }
             }
-        } else
+        } else {
             throw RuntimeException("You must annotate the class [${entity.canonicalName}] or its parent with [${EntityAnnotation::class.java}]")
+        }
     }
 
     private fun populateFieldTypes(connection: Connection) {

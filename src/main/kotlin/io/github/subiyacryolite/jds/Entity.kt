@@ -220,6 +220,12 @@ abstract class Entity(
     }
 
     /**
+     * See source interface IEntity [map()][IEntity.bind] documentation
+     */
+    override fun bind() {
+    }
+
+    /**
      *
      */
     private fun <T> map(
@@ -1142,21 +1148,23 @@ abstract class Entity(
             //==============================================
             entity.objectCollections.forEach { (fieldEntity, mutableCollection) ->
                 mutableCollection.forEach { entity ->
-                    val embeddedObject = PortableEntity()
-                    embeddedObject.fieldId = fieldEntity.field.id
-                    embeddedObject.init(dbContext, entity)
-                    portableEntity.entityOverviews.add(embeddedObject)
+                    val innerPortableEntity = PortableEntity()
+                    innerPortableEntity.fieldId = fieldEntity.field.id
+                    innerPortableEntity.init(dbContext, entity)
+                    portableEntity.entityOverviews.add(innerPortableEntity)
                 }
             }
             entity.objectValues.forEach { (fieldEntity, objectValue) ->
-                val embeddedPortableEntity = PortableEntity()
-                embeddedPortableEntity.fieldId = fieldEntity.field.id
-                embeddedPortableEntity.init(dbContext, objectValue.value)
-                portableEntity.entityOverviews.add(embeddedPortableEntity)
+                val innerPortableEntity = PortableEntity()
+                innerPortableEntity.fieldId = fieldEntity.field.id
+                innerPortableEntity.init(dbContext, objectValue.value)
+                portableEntity.entityOverviews.add(innerPortableEntity)
             }
         }
 
         internal fun populate(entity: Entity, dbContext: DbContext, portableEntity: PortableEntity) {
+            entity.bind()
+
             portableEntity.blobValues.forEach { field ->
                 val value = field.value
                 if (entity.populateProperty(dbContext, field.key, FieldType.Blob)) {

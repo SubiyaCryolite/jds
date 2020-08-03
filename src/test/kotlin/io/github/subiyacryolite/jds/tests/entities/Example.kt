@@ -38,7 +38,8 @@ data class Example(
         private val _blobField: IValue<ByteArray> = BlobValue(byteArrayOf(0, 1, 1, 1, 1, 0))
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Fields.String, _stringField)
         map(Fields.Time, _timeField)
         map(Fields.Date, _dateField)

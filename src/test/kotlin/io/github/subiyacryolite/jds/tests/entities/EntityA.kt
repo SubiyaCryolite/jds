@@ -25,7 +25,8 @@ open class EntityA(
         private val _field: IValue<String> = StringValue("A")
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(ENTITY_A_FIELD, _field, "fieldA")
     }
 

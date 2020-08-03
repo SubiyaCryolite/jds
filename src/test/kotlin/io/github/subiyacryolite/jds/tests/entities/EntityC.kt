@@ -24,7 +24,8 @@ data class EntityC(
         private val _field: IValue<String> = StringValue("C")
 ) : EntityB() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(ENTITY_C_FIELD, _field, "fieldC")
     }
 

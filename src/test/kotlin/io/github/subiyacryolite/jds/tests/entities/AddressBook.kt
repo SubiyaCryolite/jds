@@ -23,7 +23,8 @@ data class AddressBook(
         val addresses: MutableCollection<IAddress> = ArrayList()
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Entities.Addresses, addresses, "addresses")
     }
 }

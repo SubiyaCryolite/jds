@@ -36,7 +36,7 @@ data class PortableContainer(
             val validClass = Entity.getEntityAnnotation(entity.javaClass)
             if (validClass != null) {
                 val portableEntity = PortableEntity()
-                portableEntity.fieldId = null
+                portableEntity.fieldId = null//top level entities will not have a field ID
                 portableEntity.init(dbContext, entity)
                 portableEntities.add(portableEntity)
             } else {

@@ -23,7 +23,8 @@ data class MapExample(
         val stringMap: MutableMap<String, String> = HashMap()
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Fields.IntMap, intMap)
         map(Fields.StringMap, stringMap)
     }

@@ -15,7 +15,10 @@ package io.github.subiyacryolite.jds.tests.entities
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
-import io.github.subiyacryolite.jds.beans.property.*
+import io.github.subiyacryolite.jds.beans.property.DurationValue
+import io.github.subiyacryolite.jds.beans.property.MonthDayValue
+import io.github.subiyacryolite.jds.beans.property.PeriodValue
+import io.github.subiyacryolite.jds.beans.property.YearMonthValue
 import io.github.subiyacryolite.jds.interfaces.IValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.*
@@ -28,7 +31,8 @@ data class TimeConstruct(
         private val _yearMonth: IValue<YearMonth> = YearMonthValue(YearMonth.of(1991, 7))
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Fields.Period, _period)
         map(Fields.Duration, _duration)
         map(Fields.MonthDay, _monthDay)

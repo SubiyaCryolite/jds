@@ -34,7 +34,8 @@ data class Address(
         private val _timestamp: IValue<LocalDateTime> = LocalDateTimeValue()
 ) : Entity(), IAddress {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Fields.StreetName, _streetName, "streetName")
         map(Fields.PlotNumber, _plotNumber, "plotNumber")
         map(Fields.ResidentialArea, _area, "area")

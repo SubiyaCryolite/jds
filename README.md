@@ -28,13 +28,15 @@ JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses
 
 The concept behind JDS is quite simple. Extend a base **Entity** class, define strongly-typed **Fields** and then **map** them against implementations of the **Property** interface.
 
+JDS was designed to avoid reflection, and its potential performance implications, as such mapping is used as oppossed to using Annotations .
+
 ## Features
 
 * Transparent persistence
-* Supports the persistence of NULL values for JVM primitive types
+* Supports the persistence of NULL values for boxed types (e.g Integer, Double)
 * Full support for generics and inheritance
 * Easily integrates with new or existing databases
-* Portable format which can be serialised to JSON allows for the flexibility of EAV without the drawbacks
+* Portable format which can be serialised to JSON allows for the flexibility of EAV without its drawbacks
 * Supports MySQL, T-SQL, PostgreSQL, Oracle 11G, MariaDB and SQLite
 * Supports a robust Field Dictonary allowing for metadata such as Tags and Alternate Coding to be applied to Fields and Entities.
 

@@ -23,7 +23,8 @@ data class Login(
         private val _rights: MutableCollection<Right> = ArrayList()
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Enums.Rights, _rights)
     }
 

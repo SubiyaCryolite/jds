@@ -21,4 +21,14 @@ interface IEntity : Serializable {
      *
      */
     val overview: IOverview
+
+    /**
+     * Must be called whenever:
+     *  - Initialising JDS and verifying the integrity of an entity (ensure strong-typing, at least once).
+     *  - Writing to the portable format
+     *  - Reading from the portable format
+     *
+     *  Apart from initialisation, this method will not be invoked unless an instance of this class is either serialised to or de-serialised from the portable format
+     */
+    fun bind()
 }

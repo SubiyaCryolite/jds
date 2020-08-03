@@ -129,6 +129,7 @@ data class PortableEntity(
 
     @Throws(Exception::class)
     fun init(dbContext: DbContext, entity: IEntity) {
+        entity.bind()
         if (entity is Entity) {
             Entity.assign(entity, dbContext, this)
         }
