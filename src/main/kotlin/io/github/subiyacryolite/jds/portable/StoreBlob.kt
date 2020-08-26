@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
+import java.io.Serializable
 import java.util.*
 
 /**
@@ -30,7 +31,7 @@ data class StoreBlob(
         @get:JsonProperty("v")
         @set:JsonProperty("v")
         var value: ByteArray? = null
-) {
+): Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

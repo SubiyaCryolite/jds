@@ -50,14 +50,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>19.1-SNAPSHOT</version>
+    <version>20.4-SNAPSHOT</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:19.1-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:20.4-SNAPSHOT'
 ```
 
 # Dependencies
@@ -86,7 +86,7 @@ Classes that use JDS need to extend Entity.
 ```kotlin
 import io.github.subiyacryolite.jds.Entity;
 
-public class Address extends Entity(){}
+public class Address : Entity
 ```
 
 However, if you plan on using interfaces they must extend IEntity. Concrete classes can then extend Entity
@@ -95,19 +95,20 @@ However, if you plan on using interfaces they must extend IEntity. Concrete clas
 import io.github.subiyacryolite.jds.Entity;
 import io.github.subiyacryolite.jds.IEntity;
 
-public interface IAddress extends IEntity{}
-public class Address extends Entity implements IAddress{}
+public interface IAddress : IEntity
+
+public class Address : IAddress
 ```
 
 Following that the following steps need to be taken.
 
 ### 1.1.1 Annotating Classes
 
-Every class that extends Entity must have its own unique Entity Id as well as an Entity Name. This is done by annotating the class in the following manner
+Every class that extends Entity must have its own unique Entity Id as well as an Entity Name. This is done by annotating the class, or its parent interface, in the following manner
 
 ```kotlin
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {}
+class Address : Entity()
 ```
 
 Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
@@ -332,17 +333,28 @@ import io.github.subiyacryolite.jds.beans.property.NullableShortValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDateTime
 
-@EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {
+data class Address(
+        private val _streetName: IValue<String> = StringValue(),
+        private val _plotNumber: IValue<Short?> = NullableShortValue(),
+        private val _area: IValue<String> = StringValue(),
+        private val _city: IValue<String> = StringValue(),
+        private val _provinceOrState: IValue<String> = StringValue(),
+        private val _country: IValue<String> = StringValue(),
+        private val _primaryAddress: IValue<Boolean?> = NullableBooleanValue(),
+        private val _timestamp: IValue<LocalDateTime> = LocalDateTimeValue()
+) : Entity(), IAddress {
 
-    private val _streetName = map(Fields.StreetName, "", "streetName")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortValue(), "plotNumber")
-    private val _area = map(Fields.ResidentialArea, "", "area")
-    private val _city = map(Fields.City, "", "city")
-    private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
-    private val _country = map(Fields.Country, "", "country")
-    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanValue(), "primaryAddress")
-    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(), "timestamp")
+    override fun bind() {
+        super.bind()
+        map(Fields.StreetName, _streetName, "streetName")
+        map(Fields.PlotNumber, _plotNumber, "plotNumber")
+        map(Fields.ResidentialArea, _area, "area")
+        map(Fields.City, _city, "city")
+        map(Fields.ProvinceOrState, _provinceOrState, "provinceOrState")
+        map(Fields.Country, _country, "country")
+        map(Fields.PrimaryAddress, _primaryAddress, "primaryAddress")
+        map(Fields.TimeStamp, _timestamp, "timestamp")
+    }
 
     var primaryAddress: Boolean?
         get() = _primaryAddress.get()
@@ -409,10 +421,11 @@ import io.github.subiyacryolite.jds.tests.constants.Entities
 
 @EntityAnnotation(id = 2, name = "address_book")
 data class AddressBook(
-        val addresses: MutableCollection<Address> = ArrayList()
+        val addresses: MutableCollection<IAddress> = ArrayList()
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Entities.Addresses, addresses, "addresses")
     }
 }
@@ -673,10 +686,10 @@ Once you have defined your class you can initialise them. A dynamic **id** is cr
     primaryAddress.primaryAddress = PrimaryAddress.YES
 ```
 
-### 1.2.4 Saving objects
+### 1.2.4 Saving objects (Portable Format)
 ...
 
-### 1.2.5 Loading objects
+### 1.2.5 Loading objects (Portable Format)
 ...
 
 # Development

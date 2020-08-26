@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.interfaces.IEntity
+import java.io.Serializable
 
 /**
  * Class used to represent [JdsEntity][Entity] objects in a portable manner
@@ -125,7 +126,7 @@ data class PortableEntity(
 
         @get:JsonProperty("h1")
         val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList()
-) {
+): Serializable {
 
     @Throws(Exception::class)
     fun init(dbContext: DbContext, entity: IEntity) {

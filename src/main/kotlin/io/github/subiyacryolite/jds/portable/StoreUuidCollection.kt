@@ -14,6 +14,7 @@
 package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.io.Serializable
 import java.util.*
 
 data class StoreUuidCollection(
@@ -24,4 +25,4 @@ data class StoreUuidCollection(
         @get:JsonProperty("v")
         @set:JsonProperty("v")
         var values: Collection<ByteArray> = ArrayList()
-)
+): Serializable
