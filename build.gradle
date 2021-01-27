@@ -92,8 +92,16 @@ test {
 }
 
 dokka {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/dokka"
+    outputFormat = 'html' // use 'javadoc' to get standard java docs
+    outputDirectory = "$buildDir/javadoc"
+
+    configuration {
+        includeNonPublic = false
+        skipEmptyPackages = true
+        skipDeprecated = true
+        reportUndocumented = true
+        jdkVersion = 8
+    }
 }
 
 task javadocJar(type: Jar) {
