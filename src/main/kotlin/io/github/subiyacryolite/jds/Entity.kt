@@ -686,7 +686,7 @@ abstract class Entity(
         map: MutableMap<String, MutableCollection<String>>,
         propertyName: String = ""
     ): Map<String, Collection<String>> {
-        return mapOfCollectionsValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapOfCollections), propertyName)) { map }
+        return mapOfCollectionsValues.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.MapOfCollections), propertyName)) { map }
     }
 
     @JvmName("mapEnums")
