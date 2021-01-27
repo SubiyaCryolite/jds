@@ -45,4 +45,5 @@ object Fields {
     val Right = Field(28, "rights", FieldType.EnumCollection)
     val IntMap = Field(29, "intMap", FieldType.MapIntKey)
     val StringMap = Field(30, "stringMap", FieldType.MapStringKey)
+    val MapCollection = Field(31, "mapCollection", FieldType.MapOfCollections)
 }

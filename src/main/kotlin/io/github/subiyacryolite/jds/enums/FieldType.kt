@@ -187,5 +187,10 @@ enum class FieldType(val type: kotlin.Int) {
     /**
      *
      */
-    MapStringKey(33);
+    MapStringKey(33),
+
+    /**
+     *
+     */
+    MapOfCollections(34);
 }

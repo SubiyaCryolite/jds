@@ -119,6 +119,17 @@ internal fun Map<Int, MutableMap<String, String>>.filterIgnored(dbContext: DbCon
     }
 }
 
+@JvmName("filterMapCollection")
+internal fun Map<Int, MutableMap<String, MutableCollection<String>>>.filterIgnored(dbContext: DbContext): Map<Int, MutableMap<String, MutableCollection<String>>> = if (dbContext.options.ignoreTags.isEmpty()) {
+    this
+} else {
+    this.filter { kvp ->
+        Field.values.getValue(kvp.key).tags.none { tag ->
+            dbContext.options.ignoreTags.contains(tag)
+        }
+    }
+}
+
 object Extensions {
 
     /**

@@ -124,7 +124,10 @@ data class PortableEntity(
         val mapIntKeyValues: MutableCollection<StoreMapIntKey> = ArrayList(),
 
         @get:JsonProperty("h1")
-        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList()
+        val mapStringKeyValues: MutableCollection<StoreMapStringKey> = ArrayList(),
+
+        @get:JsonProperty("i1")
+        val mapOfCollectionsValues: MutableCollection<StoreMapCollection> = ArrayList(),
 ) {
 
     @Throws(Exception::class)

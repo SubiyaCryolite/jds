@@ -23,8 +23,6 @@ import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.tests.entities.*
 import io.github.subiyacryolite.jds.tests.enums.Right
 import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
 
 @DisplayName("Convert several entities to the portable format")
 class PortableSaveStructure : BaseTestConfig() {
@@ -55,6 +53,8 @@ class PortableSaveStructure : BaseTestConfig() {
         mapExample.intMap[6] = "Six"
         mapExample.stringMap["latitude"] = "50.0"
         mapExample.stringMap["longitude"] = "50.0"
+        mapExample.mapCollection["Vowels"] = HashSet()
+        mapExample.mapCollection["Vowels"]?.addAll(setOf("a", "e", "i", "o", "u"))
         testPortableSave(dbContext, setOf(mapExample), MapExample::class.java)
     }
 

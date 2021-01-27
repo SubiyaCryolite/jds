@@ -20,12 +20,14 @@ import io.github.subiyacryolite.jds.tests.constants.Fields
 @EntityAnnotation(id = 8, name = "map_example")
 data class MapExample(
         val intMap: MutableMap<Int, String> = HashMap(),
-        val stringMap: MutableMap<String, String> = HashMap()
+        val stringMap: MutableMap<String, String> = HashMap(),
+        val mapCollection: MutableMap<String, MutableCollection<String>> = HashMap()
 ) : Entity() {
 
     override fun bind() {
         super.bind()
         map(Fields.IntMap, intMap)
         map(Fields.StringMap, stringMap)
+        map(Fields.MapCollection, mapCollection)
     }
 }

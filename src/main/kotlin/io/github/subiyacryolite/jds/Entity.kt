@@ -207,6 +207,11 @@ abstract class Entity(
         /**
          *
          */
+        private val mapOfCollectionsValues: MutableMap<Int, MutableMap<String, MutableCollection<String>>> = HashMap(),
+
+        /**
+         *
+         */
         private val blobValues: MutableMap<Int, IValue<ByteArray?>> = HashMap()
 ) : IEntity {
 
@@ -801,6 +806,15 @@ abstract class Entity(
         return mapStringKeyValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapStringKey), propertyName)) { map }
     }
 
+    @JvmName("mapOfCollections")
+    protected fun map(
+        field: Field,
+        map: MutableMap<String, MutableCollection<String>>,
+        propertyName: String = ""
+    ): Map<String, Collection<String>> {
+        return mapOfCollectionsValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapOfCollections), propertyName)) { map }
+    }
+
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(
             fieldEnum: FieldEnum<T>,
@@ -927,6 +941,7 @@ abstract class Entity(
             FieldType.Boolean -> booleanValues.putIfAbsent(fieldId, NullableBooleanValue())
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
+            FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
         }
     }
 
@@ -1142,6 +1157,9 @@ abstract class Entity(
             }
             entity.mapStringKeyValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.mapStringKeyValues.add(StoreMapStringKey(entry.key, entry.value))
+            }
+            entity.mapOfCollectionsValues.filterIgnored(dbContext).forEach { entry ->
+                portableEntity.mapOfCollectionsValues.add(StoreMapCollection(entry.key, entry.value))
             }
             //==============================================
             //EMBEDDED OBJECTS
@@ -1398,6 +1416,11 @@ abstract class Entity(
             portableEntity.mapStringKeyValues.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key, FieldType.MapStringKey)) {
                     entity.mapStringKeyValues.getValue(field.key).putAll(field.values)
+                }
+            }
+            portableEntity.mapOfCollectionsValues.forEach { field ->
+                if (entity.populateProperty(dbContext, field.key, FieldType.MapOfCollections)) {
+                    entity.mapOfCollectionsValues.getValue(field.key).putAll(field.values)
                 }
             }
             //==============================================
