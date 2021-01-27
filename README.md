@@ -28,7 +28,9 @@ JDS is licensed under the [3-Clause BSD License](https://opensource.org/licenses
 
 The concept behind JDS is quite simple. Extend a base **Entity** class, define strongly-typed **Fields** and then **map** them against implementations of the **Property** interface.
 
-JDS was designed to avoid reflection, and its potential performance implications, as such mapping is used as oppossed to using Annotations .
+JDS was designed to avoid reflection and its potential performance pitfalls. 
+As such mapping functions which are overridden, and invoked at least once at runtime, are used to enforce/validate typing as instead of annotations. 
+This is discussed below in section 1.1.4 "Binding properties".
 
 ## Features
 
@@ -50,14 +52,14 @@ Maven
 <dependency>
     <groupId>io.github.subiyacryolite</groupId>
     <artifactId>jds</artifactId>
-    <version>19.1-SNAPSHOT</version>
+    <version>20.4</version>
 </dependency>
 ```
 
 Gradle
 
 ```groovy
-compile 'io.github.subiyacryolite:jds:19.1-SNAPSHOT'
+compile 'io.github.subiyacryolite:jds:20.4'
 ```
 
 # Dependencies
@@ -86,7 +88,7 @@ Classes that use JDS need to extend Entity.
 ```kotlin
 import io.github.subiyacryolite.jds.Entity;
 
-public class Address extends Entity(){}
+public class Address : Entity
 ```
 
 However, if you plan on using interfaces they must extend IEntity. Concrete classes can then extend Entity
@@ -95,26 +97,30 @@ However, if you plan on using interfaces they must extend IEntity. Concrete clas
 import io.github.subiyacryolite.jds.Entity;
 import io.github.subiyacryolite.jds.IEntity;
 
-public interface IAddress extends IEntity{}
-public class Address extends Entity implements IAddress{}
-```
+public interface IAddress : IEntity
 
-Following that the following steps need to be taken.
+public class Address : IAddress
+```
 
 ### 1.1.1 Annotating Classes
 
-Every class that extends Entity must have its own unique Entity Id as well as an Entity Name. This is done by annotating the class in the following manner
+Every class/interface which extends Entity/IEntity must have its own unique Entity ID as well as an Entity Name. 
+This is done by annotating the class, or its (parent) interface.
 
 ```kotlin
 @EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {}
+class Address : Entity()
 ```
 
-Entity IDs MUST be unique in your application, any value of type long is valid. Entity Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data.
+Entity IDs MUST be unique in your application, any value of type long is valid. 
+Entity Names do not enforce unique constraints but its best to use a unique name regardless. 
+These values can be referenced to mine data.
 
 ### 1.1.2 Defining Fields
 
-Fields are big part of the JDS framework. Each Field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name regardless. These values can be referenced to mine data. Every Field that you define can be one of the following types.
+Fields are big part of the JDS framework. 
+Each Field MUST have a unique Field Id. Field Names do not enforce unique constraints but its best to use a unique name 
+regardless. These values can be referenced to mine data. Every Field that you define can be one of the following types.
 
 | JDS Field Type       | Java Type                                  | Description                                                   |
 | -------------------- | ------------------------------------------ | --------------------------------------------------------------|
@@ -166,7 +172,7 @@ object Fields {
 }
 ```
 
-Furthermore you can add descriptions, of up to **256 characters**, to each field
+Furthermore, you can add descriptions, of up to **256 characters**, to each field
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field;
@@ -180,7 +186,9 @@ object Fields {
 }
 ```
 
-JDS also supports **Tags** which can be applied to each **Field** and **Entity** definitions. Tags are implemented as a set of strings, there is no limit on how many tags a field can have. This can be useful for categorising certain kinds of information
+JDS also supports **Tags** which can be applied to each **Field** and **Entity** definitions. Tags can be defined as a 
+set of strings, there is no limit on how many tags a field can have. This can be useful for categorising certain kinds 
+of information
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field;
@@ -194,9 +202,9 @@ object Fields {
 
 ### 1.1.3 Defining Enums
 
-Enums are an extension of **Fields**. However, they are designed for cases where one or more constant values are required. Usually these values would be represented by Check Boxes, Radio Buttons or Combo Boxes in a UI. In this example we will define the type of an address as an enumerated value with the following options (YES, NO).
+JDS Enums are an extension of **Fields**. Usually these values would be represented by Check Boxes, Radio Buttons or Combo Boxes on the front-end. 
 
-First of all we'd have to define a standard Field of type **Enum**.
+First we'd define a standard JDS Field of type **Enum**.
 
 ```kotlin
 import io.github.subiyacryolite.jds.Field
@@ -215,6 +223,8 @@ enum class Direction {
     North, West, South, East
 }
 ```
+
+Lastly, we create an instance of the JDS Field Enum type.
 
 ```kotlin
 import io.github.subiyacryolite.jds.FieldEnum
@@ -310,7 +320,8 @@ To simplify the mapping Process Jds has the following helper classes defined:
 
 **Note:** Collection types can be of any valid type e.g. ArrayList, LinkedList, HashSet etc
 
-After your class and its properties have been defined you must map the property to its corresponding Field using the **map()** method. I recommend doing this in your primary constructor.
+After your class and its properties have been defined you must map the property to its corresponding Field using the **map()** method. 
+I recommend doing this in your primary constructor.
 
 The example below shows a class definition with valid properties and bindings. With this your class can be persisted.
 
@@ -318,7 +329,7 @@ Note that the example below has a 3rd parameter to the map method, this is the *
  
 The **Property Name** is used by the JDS **Field Dictionary** to know which **property** a particular **Field** is mapped to within an **Entity**.
 
-This is necessary as one **Field** definition may be mapped to a different property amongst different **Entities**.
+This is necessary as one **Field** definition can be mapped to a different property amongst different **Entities**.
 
 For example a **Field** called "FirstName" could be mapped to a property called "firstName" in one **Entity** and a property called "givenName" in another.
 
@@ -332,17 +343,28 @@ import io.github.subiyacryolite.jds.beans.property.NullableShortValue
 import io.github.subiyacryolite.jds.tests.constants.Fields
 import java.time.LocalDateTime
 
-@EntityAnnotation(id = 1, name = "address", description = "An entity representing address information")
-class Address : Entity() {
+data class Address(
+        private val _streetName: IValue<String> = StringValue(),
+        private val _plotNumber: IValue<Short?> = NullableShortValue(),
+        private val _area: IValue<String> = StringValue(),
+        private val _city: IValue<String> = StringValue(),
+        private val _provinceOrState: IValue<String> = StringValue(),
+        private val _country: IValue<String> = StringValue(),
+        private val _primaryAddress: IValue<Boolean?> = NullableBooleanValue(),
+        private val _timestamp: IValue<LocalDateTime> = LocalDateTimeValue()
+) : Entity(), IAddress {
 
-    private val _streetName = map(Fields.StreetName, "", "streetName")
-    private val _plotNumber = map(Fields.PlotNumber, NullableShortValue(), "plotNumber")
-    private val _area = map(Fields.ResidentialArea, "", "area")
-    private val _city = map(Fields.City, "", "city")
-    private val _provinceOrState = map(Fields.ProvinceOrState, "provinceOrState")
-    private val _country = map(Fields.Country, "", "country")
-    private val _primaryAddress = map(Fields.PrimaryAddress, NullableBooleanValue(), "primaryAddress")
-    private val _timestamp = map(Fields.TimeStamp, LocalDateTime.now(), "timestamp")
+    override fun bind() {
+        super.bind()
+        map(Fields.StreetName, _streetName, "streetName")
+        map(Fields.PlotNumber, _plotNumber, "plotNumber")
+        map(Fields.ResidentialArea, _area, "area")
+        map(Fields.City, _city, "city")
+        map(Fields.ProvinceOrState, _provinceOrState, "provinceOrState")
+        map(Fields.Country, _country, "country")
+        map(Fields.PrimaryAddress, _primaryAddress, "primaryAddress")
+        map(Fields.TimeStamp, _timestamp, "timestamp")
+    }
 
     var primaryAddress: Boolean?
         get() = _primaryAddress.get()
@@ -409,10 +431,11 @@ import io.github.subiyacryolite.jds.tests.constants.Entities
 
 @EntityAnnotation(id = 2, name = "address_book")
 data class AddressBook(
-        val addresses: MutableCollection<Address> = ArrayList()
+        val addresses: MutableCollection<IAddress> = ArrayList()
 ) : Entity() {
 
-    init {
+    override fun bind() {
+        super.bind()
         map(Entities.Addresses, addresses, "addresses")
     }
 }
@@ -673,10 +696,10 @@ Once you have defined your class you can initialise them. A dynamic **id** is cr
     primaryAddress.primaryAddress = PrimaryAddress.YES
 ```
 
-### 1.2.4 Saving objects
+### 1.2.4 Saving objects (Portable Format)
 ...
 
-### 1.2.5 Loading objects
+### 1.2.5 Loading objects (Portable Format)
 ...
 
 # Development

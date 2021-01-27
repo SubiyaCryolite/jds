@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
+import java.io.Serializable
 
 /**
  * Used to store values of type in a portable manner
@@ -29,4 +30,4 @@ data class StoreShort(
         @get:JsonProperty("v")
         @set:JsonProperty("v")
         var value: Short? = null
-)
+): Serializable

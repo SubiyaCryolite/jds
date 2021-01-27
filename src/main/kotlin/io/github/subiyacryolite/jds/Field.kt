@@ -34,26 +34,26 @@ data class Field(
         var tags: Set<String> = emptySet()
 ) : Serializable {
 
-    internal fun bind(type: FieldType): Int = bind(setOf(type))
-
-    internal fun bind(types: Collection<FieldType>): Int {
-        validate(this, types)
-        val existingField = values[this.id]
-        if (existingField != null) {
-            if (this != existingField) {
-                throw RuntimeException("The field id [${this.id}] is already bound to [${existingField}]")
-            }
-        } else {
-            values[this.id] = this
-        }
-        return this.id
-    }
-
     companion object : Serializable {
 
         private const val serialVersionUID = 20171109_0853L
 
         internal val values = HashMap<Int, Field>()
+
+        internal fun bind(field: Field, type: FieldType): Int = bind(field, setOf(type))
+
+        internal fun bind(field: Field, types: Collection<FieldType>): Int {
+            validate(field, types)
+            val existingField = values[field.id]
+            if (existingField != null) {
+                if (field != existingField) {
+                    throw RuntimeException("The field id [${field.id}] is already bound to [${existingField}]")
+                }
+            } else {
+                values[field.id] = field
+            }
+            return field.id
+        }
 
         private fun validate(field: Field, types: Collection<FieldType>) {
             if (!types.contains(field.type)) {

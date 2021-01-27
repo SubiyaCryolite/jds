@@ -18,6 +18,8 @@ import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.portable.LoadPortable
 import io.github.subiyacryolite.jds.portable.PortableContainer
 import io.github.subiyacryolite.jds.portable.SavePortable
+import io.github.subiyacryolite.jds.tests.Serialization.Companion.fromByteArray
+import io.github.subiyacryolite.jds.tests.Serialization.Companion.toByteArray
 import io.github.subiyacryolite.jds.tests.common.BaseTestConfig
 import io.github.subiyacryolite.jds.tests.common.TestData
 import io.github.subiyacryolite.jds.tests.entities.*
@@ -68,31 +70,44 @@ class PortableSaveStructure : BaseTestConfig() {
     private fun testPortableSave(dbContext: DbContext, entity: Collection<Entity>, clazz: Class<out Entity>) {
         val portableContainer = SavePortable(dbContext, entity).call()
 
-        val outputJds = objectMapper.writeValueAsString(portableContainer)
+        val portableContainerAsJson = objectMapper.writeValueAsString(portableContainer)
         val outputReg = objectMapper.writeValueAsString(entity)
-        println("")
-        println("")
-        println("================ Object Reg JSON ================")
-        println(outputReg)
-        println("================ Object JDS JSON ================")
-        println(outputJds)
+
+        val portableContainerAsBinary = portableContainer.toByteArray()
+
+        println("================================")
+        println("Standard JSON: $outputReg")
+        println("jds JSON: $portableContainerAsJson")
+        println("jds Bytes: $portableContainerAsBinary")
+        println("================================")
         println("")
 
         val loadFromMemory = LoadPortable(dbContext, clazz, portableContainer)
         val memoryPayload = loadFromMemory.call()
 
-        val portableContainerFromJson = objectMapper.readValue(outputJds, PortableContainer::class.java)
-        val loadFromJson = LoadPortable(dbContext, clazz, portableContainerFromJson)
+        val jsonPortableContainer = objectMapper.readValue(portableContainerAsJson, PortableContainer::class.java)
+        val loadFromJson = LoadPortable(dbContext, clazz, jsonPortableContainer)
         val jsonPayload = loadFromJson.call()
+
+        val binaryPortableContainer: PortableContainer = fromByteArray(portableContainerAsBinary)
+        val loadFromBinary = LoadPortable(dbContext, clazz, binaryPortableContainer)
+        val binaryPayload = loadFromBinary.call()
 
         println("Original: $entity")
         println("Memory instance  = $memoryPayload")
         println("JSON instance= $jsonPayload")
+        println("Binary instance= $binaryPayload")
 
-        val isTheSame = portableContainerFromJson == portableContainer
-        println("Is the same after deserialisation? $isTheSame")
+        var isTheSame = portableContainer == jsonPortableContainer
+        println("Memory container equal to JSON container? $isTheSame")
 
-        val equal = memoryPayload == jsonPayload
-        println("Equal? $equal")
+        isTheSame = portableContainer == binaryPortableContainer
+        println("Memory container equal to Binary container? $isTheSame")
+
+        isTheSame = memoryPayload == jsonPayload
+        println("Memory payload equal to JSON payload? $isTheSame")
+
+        isTheSame = memoryPayload == binaryPayload
+        println("Memory payload equal to Binary payload? $isTheSame")
     }
 }

@@ -240,15 +240,8 @@ abstract class Entity(
             destination: MutableMap<Int, IValue<T>>,
             propertyName: String = ""
     ): IValue<T> {
-        return destination.getOrPut(mapField(overview.entityId, field.bind(fieldType), propertyName)) { value }
+        return destination.getOrPut(mapField(overview.entityId, Field.bind(field, fieldType), propertyName)) { value }
     }
-
-    @JvmName("mapShort")
-    protected fun map(
-            field: Field,
-            value: Short,
-            propertyName: String = ""
-    ): IValue<Short> = map(field, ShortValue(value), propertyName)
 
     @JvmName("mapShort")
     protected fun map(
@@ -271,13 +264,6 @@ abstract class Entity(
     @JvmName("mapDouble")
     protected fun map(
             field: Field,
-            value: Double,
-            propertyName: String = ""
-    ) = map(field, DoubleValue(value), propertyName)
-
-    @JvmName("mapDouble")
-    protected fun map(
-            field: Field,
             value: IValue<Double>,
             propertyName: String = ""
     ): IValue<Double> {
@@ -292,13 +278,6 @@ abstract class Entity(
             value: IValue<Double?>,
             propertyName: String = ""
     ): IValue<Double?> = map(field, value, setOf(FieldType.Double), doubleValues, propertyName)
-
-    @JvmName("mapInt")
-    protected fun map(
-            field: Field,
-            value: Int,
-            propertyName: String = ""
-    ) = map(field, IntegerValue(value), propertyName)
 
     @JvmName("mapInt")
     protected fun map(
@@ -321,13 +300,6 @@ abstract class Entity(
     @JvmName("mapLong")
     protected fun map(
             field: Field,
-            value: Long,
-            propertyName: String = ""
-    ) = map(field, LongValue(value), propertyName)
-
-    @JvmName("mapLong")
-    protected fun map(
-            field: Field,
             value: IValue<Long>,
             propertyName: String = ""
     ): IValue<Long> {
@@ -342,13 +314,6 @@ abstract class Entity(
             value: IValue<Long?>,
             propertyName: String = ""
     ): IValue<Long?> = map(field, value, setOf(FieldType.Long), longValues, propertyName)
-
-    @JvmName("mapFloat")
-    protected fun map(
-            field: Field,
-            value: Float,
-            propertyName: String = ""
-    ) = map(field, FloatValue(value), propertyName)
 
     @JvmName("mapFloat")
     protected fun map(
@@ -371,13 +336,6 @@ abstract class Entity(
     @JvmName("mapBoolean")
     protected fun map(
             field: Field,
-            value: Boolean,
-            propertyName: String = ""
-    ) = map(field, BooleanValue(value), propertyName)
-
-    @JvmName("mapBoolean")
-    protected fun map(
-            field: Field,
             value: IValue<Boolean>,
             propertyName: String = ""
     ): IValue<Boolean> {
@@ -392,13 +350,6 @@ abstract class Entity(
             value: IValue<Boolean?>,
             propertyName: String = ""
     ): IValue<Boolean?> = map(field, value, setOf(FieldType.Boolean), booleanValues, propertyName)
-
-    @JvmName("mapUuid")
-    protected fun map(
-            field: Field,
-            value: UUID,
-            propertyName: String = ""
-    ) = map(field, UuidValue(value), propertyName)
 
     @JvmName("mapUuid")
     protected fun map(
@@ -421,13 +372,6 @@ abstract class Entity(
     @JvmName("mapString")
     protected fun map(
             field: Field,
-            value: String,
-            propertyName: String = ""
-    ) = map(field, StringValue(value), propertyName)
-
-    @JvmName("mapString")
-    protected fun map(
-            field: Field,
             value: IValue<String>,
             propertyName: String = ""
     ): IValue<String> {
@@ -442,13 +386,6 @@ abstract class Entity(
             value: IValue<String?>,
             propertyName: String = ""
     ): IValue<String?> = map(field, value, setOf(FieldType.String), stringValues, propertyName)
-
-    @JvmName("mapDateTime")
-    protected fun map(
-            field: Field,
-            value: LocalDateTime,
-            propertyName: String = ""
-    ) = map(field, LocalDateTimeValue(value), propertyName)
 
     @JvmName("mapDateTime")
     protected fun map(
@@ -471,13 +408,6 @@ abstract class Entity(
     @JvmName("mapZonedDateTime")
     protected fun map(
             field: Field,
-            value: ZonedDateTime,
-            propertyName: String = ""
-    ) = map(field, ZonedDateTimeValue(value), propertyName)
-
-    @JvmName("mapZonedDateTime")
-    protected fun map(
-            field: Field,
             value: IValue<ZonedDateTime>,
             propertyName: String = ""
     ): IValue<ZonedDateTime> {
@@ -492,13 +422,6 @@ abstract class Entity(
             value: IValue<ZonedDateTime?>,
             propertyName: String = ""
     ): IValue<ZonedDateTime?> = map(field, value, setOf(FieldType.ZonedDateTime), zonedDateTimeValues, propertyName)
-
-    @JvmName("mapDate")
-    protected fun map(
-            field: Field,
-            value: LocalDate,
-            propertyName: String = ""
-    ) = map(field, LocalDateValue(value), propertyName)
 
     @JvmName("mapDate")
     protected fun map(
@@ -521,13 +444,6 @@ abstract class Entity(
     @JvmName("mapTime")
     protected fun map(
             field: Field,
-            value: LocalTime,
-            propertyName: String = ""
-    ) = map(field, LocalTimeValue(value), propertyName)
-
-    @JvmName("mapTime")
-    protected fun map(
-            field: Field,
             value: IValue<LocalTime>,
             propertyName: String = ""
     ): IValue<LocalTime> {
@@ -542,13 +458,6 @@ abstract class Entity(
             value: IValue<LocalTime?>,
             propertyName: String = ""
     ): IValue<LocalTime?> = map(field, value, setOf(FieldType.Time), localTimeValues, propertyName)
-
-    @JvmName("mapBlob")
-    protected fun map(
-            field: Field,
-            value: ByteArray,
-            propertyName: String = ""
-    ) = map(field, BlobValue(value), propertyName)
 
     @JvmName("mapBlob")
     protected fun map(
@@ -571,13 +480,6 @@ abstract class Entity(
     @JvmName("mapMonthDay")
     protected fun map(
             field: Field,
-            value: MonthDay,
-            propertyName: String = ""
-    ) = map(field, MonthDayValue(value), propertyName)
-
-    @JvmName("mapMonthDay")
-    protected fun map(
-            field: Field,
             value: IValue<MonthDay>,
             propertyName: String = ""
     ): IValue<MonthDay> {
@@ -592,13 +494,6 @@ abstract class Entity(
             value: IValue<MonthDay?>,
             propertyName: String = ""
     ): IValue<MonthDay?> = map(field, value, setOf(FieldType.MonthDay), monthDayValues, propertyName)
-
-    @JvmName("mapYearMonth")
-    protected fun map(
-            field: Field,
-            value: YearMonth,
-            propertyName: String = ""
-    ) = map(field, YearMonthValue(value), propertyName)
 
     @JvmName("mapYearMonth")
     protected fun map(
@@ -621,13 +516,6 @@ abstract class Entity(
     @JvmName("mapPeriod")
     protected fun map(
             field: Field,
-            value: Period,
-            propertyName: String = ""
-    ) = map(field, PeriodValue(value), propertyName)
-
-    @JvmName("mapPeriod")
-    protected fun map(
-            field: Field,
             value: IValue<Period>,
             propertyName: String = ""
     ): IValue<Period> {
@@ -642,13 +530,6 @@ abstract class Entity(
             value: IValue<Period?>,
             propertyName: String = ""
     ): IValue<Period?> = map(field, value, setOf(FieldType.Period), periodValues, propertyName)
-
-    @JvmName("mapDuration")
-    protected fun map(
-            field: Field,
-            value: Duration,
-            propertyName: String = ""
-    ) = map(field, DurationValue(value), propertyName)
 
     @JvmName("mapDuration")
     protected fun map(
@@ -671,17 +552,10 @@ abstract class Entity(
     @JvmName("mapNullableEnum")
     protected fun <T : Enum<T>> map(
             fieldEnum: FieldEnum<T>,
-            value: T,
-            propertyName: String = ""
-    ) = map(fieldEnum, NullableEnumValue(value), propertyName)
-
-    @JvmName("mapNullableEnum")
-    protected fun <T : Enum<T>> map(
-            fieldEnum: FieldEnum<T>,
             value: IValue<T?>,
             propertyName: String = ""
     ): IValue<T?> {
-        val fieldId = fieldEnum.field.bind(setOf(FieldType.Enum, FieldType.EnumString))
+        val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
         if (fieldEnum.field.type == FieldType.Enum) {
             @Suppress("UNCHECKED_CAST")
             enumValues[fieldId] = value as IValue<Enum<*>?>
@@ -700,7 +574,7 @@ abstract class Entity(
             value: IValue<T>,
             propertyName: String = ""
     ): IValue<T> {
-        val fieldId = fieldEnum.field.bind(setOf(FieldType.Enum, FieldType.EnumString))
+        val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
         when (fieldEnum.field.type) {
             FieldType.Enum -> {
                 @Suppress("UNCHECKED_CAST")
@@ -722,7 +596,7 @@ abstract class Entity(
             collection: MutableCollection<String>,
             propertyName: String = ""
     ): MutableCollection<String> {
-        return stringCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.StringCollection), propertyName)) { collection }
+        return stringCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.StringCollection), propertyName)) { collection }
     }
 
     @JvmName("mapDateTimes")
@@ -731,7 +605,7 @@ abstract class Entity(
             collection: MutableCollection<LocalDateTime>,
             propertyName: String = ""
     ): MutableCollection<LocalDateTime> {
-        return dateTimeCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.DateTimeCollection), propertyName)) { collection }
+        return dateTimeCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.DateTimeCollection), propertyName)) { collection }
     }
 
     @JvmName("mapFloats")
@@ -740,7 +614,7 @@ abstract class Entity(
             collection: MutableCollection<Float>,
             propertyName: String = ""
     ): MutableCollection<Float> {
-        return floatCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.FloatCollection), propertyName)) { collection }
+        return floatCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.FloatCollection), propertyName)) { collection }
     }
 
     @JvmName("mapIntegers")
@@ -749,7 +623,7 @@ abstract class Entity(
             collection: MutableCollection<Int>,
             propertyName: String = ""
     ): MutableCollection<Int> {
-        return integerCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.IntCollection), propertyName)) { collection }
+        return integerCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.IntCollection), propertyName)) { collection }
     }
 
     @JvmName("mapShorts")
@@ -758,7 +632,7 @@ abstract class Entity(
             collection: MutableCollection<Short>,
             propertyName: String = ""
     ): MutableCollection<Short> {
-        return shortCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.ShortCollection), propertyName)) { collection }
+        return shortCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.ShortCollection), propertyName)) { collection }
     }
 
     @JvmName("mapUuids")
@@ -767,7 +641,7 @@ abstract class Entity(
             collection: MutableCollection<UUID>,
             propertyName: String = ""
     ): MutableCollection<UUID> {
-        return uuidCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.UuidCollection), propertyName)) { collection }
+        return uuidCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName)) { collection }
     }
 
     @JvmName("mapDoubles")
@@ -776,7 +650,7 @@ abstract class Entity(
             collection: MutableCollection<Double>,
             propertyName: String = ""
     ): MutableCollection<Double> {
-        return doubleCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.DoubleCollection), propertyName)) { collection }
+        return doubleCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.DoubleCollection), propertyName)) { collection }
     }
 
     @JvmName("mapLongs")
@@ -785,7 +659,7 @@ abstract class Entity(
             collection: MutableCollection<Long>,
             propertyName: String = ""
     ): MutableCollection<Long> {
-        return longCollections.getOrPut(mapField(overview.entityId, field.bind(FieldType.LongCollection), propertyName)) { collection }
+        return longCollections.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.LongCollection), propertyName)) { collection }
     }
 
     @JvmName("mapIntMap")
@@ -794,7 +668,7 @@ abstract class Entity(
             map: MutableMap<Int, String>,
             propertyName: String = ""
     ): MutableMap<Int, String> {
-        return mapIntKeyValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapIntKey), propertyName)) { map }
+        return mapIntKeyValues.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.MapIntKey), propertyName)) { map }
     }
 
     @JvmName("mapStringMap")
@@ -803,7 +677,7 @@ abstract class Entity(
             map: MutableMap<String, String>,
             propertyName: String = ""
     ): MutableMap<String, String> {
-        return mapStringKeyValues.getOrPut(mapField(overview.entityId, field.bind(FieldType.MapStringKey), propertyName)) { map }
+        return mapStringKeyValues.getOrPut(mapField(overview.entityId, Field.bind(field, FieldType.MapStringKey), propertyName)) { map }
     }
 
     @JvmName("mapOfCollections")
@@ -821,7 +695,7 @@ abstract class Entity(
             collection: MutableCollection<T>,
             propertyName: String = ""
     ): MutableCollection<T> {
-        val fieldId = fieldEnum.field.bind(setOf(FieldType.EnumCollection, FieldType.EnumStringCollection))
+        val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.EnumCollection, FieldType.EnumStringCollection))
         when (fieldEnum.field.type) {
             FieldType.EnumCollection -> {
                 @Suppress("UNCHECKED_CAST")
@@ -885,7 +759,7 @@ abstract class Entity(
             fieldEntity: FieldEntity<T>,
             fieldType: FieldType
     ) {
-        val fieldId = fieldEntity.field.bind(fieldType)
+        val fieldId = Field.bind(fieldEntity.field, fieldType)
         FieldEntity.values[fieldId] = fieldEntity
     }
 
@@ -1425,7 +1299,15 @@ abstract class Entity(
             }
             //==============================================
             portableEntity.entityOverviews.forEach { subEntities ->
-                populateObjects(entity, dbContext, subEntities.overview.fieldId, subEntities.overview.entityId, subEntities.overview.id, subEntities.overview.editVersion, subEntities)
+                populateObjects(
+                        entity,
+                        dbContext,
+                        subEntities.overview.fieldId,
+                        subEntities.overview.entityId,
+                        subEntities.overview.id,
+                        subEntities.overview.editVersion,
+                        subEntities
+                )
             }
         }
 

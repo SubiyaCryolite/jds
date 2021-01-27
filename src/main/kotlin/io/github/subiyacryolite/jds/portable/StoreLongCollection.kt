@@ -15,6 +15,7 @@ package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
+import java.io.Serializable
 import java.util.ArrayList
 
 /**
@@ -30,4 +31,4 @@ data class StoreLongCollection(
         @get:JsonProperty("v")
         @set:JsonProperty("v")
         var values: Collection<Long> = ArrayList()
-)
+): Serializable

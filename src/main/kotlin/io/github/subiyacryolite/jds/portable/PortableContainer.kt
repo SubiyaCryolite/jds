@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.context.DbContext
+import java.io.Serializable
 import java.util.*
 
 /**
@@ -25,7 +26,7 @@ import java.util.*
 data class PortableContainer(
         @get:JsonProperty("e")
         val portableEntities: MutableCollection<PortableEntity> = ArrayList()
-) {
+) : Serializable {
     /**
      * @param dbContext an instance of [DbContext]
      * @param entities a collection of [Entity] objects to store in the embedded format
