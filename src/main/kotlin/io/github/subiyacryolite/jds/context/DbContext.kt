@@ -45,10 +45,10 @@ import kotlin.collections.LinkedHashMap
  * @param supportsStatements
  */
 abstract class DbContext(
-        val implementation: Implementation,
-        val supportsStatements: Boolean,
-        val objectPrefix: String = "jds_",
-        val schema: String = ""
+    val implementation: Implementation,
+    val supportsStatements: Boolean,
+    val objectPrefix: String = "jds_",
+    val schema: String = ""
 ) : IDbContext, Serializable {
 
     val options = Options()
@@ -153,7 +153,6 @@ abstract class DbContext(
      * @param table an enum that maps to the components concrete implementation
      */
     private fun initiateDatabaseComponent(connection: Connection, table: Table) {
-        @Suppress("NON_EXHAUSTIVE_WHEN")
         when (table) {
             Table.Entity -> executeSqlFromString(connection, createStoreEntities())
             Table.EntityEnum -> executeSqlFromString(connection, createBindEntityEnums())
@@ -167,6 +166,7 @@ abstract class DbContext(
             Table.FieldTag -> executeSqlFromString(connection, createFieldTag())
             Table.EntityTag -> executeSqlFromString(connection, createEntityTag())
             Table.FieldAlternateCode -> executeSqlFromString(connection, createFieldAlternateCode())
+            else -> {}
         }
     }
 
@@ -300,11 +300,11 @@ abstract class DbContext(
     abstract fun tableExists(connection: Connection, tableName: String): Int
 
     fun createOrAlterProc(
-            procedure: Procedure,
-            table: Table,
-            columns: Map<String, String>,
-            uniqueColumns: Collection<String>,
-            doNothingOnConflict: Boolean
+        procedure: Procedure,
+        table: Table,
+        columns: Map<String, String>,
+        uniqueColumns: Collection<String>,
+        doNothingOnConflict: Boolean
     ): String {
         return createOrAlterProc(getName(procedure), getName(table), columns, uniqueColumns, doNothingOnConflict)
     }
@@ -317,11 +317,11 @@ abstract class DbContext(
      * @param doNothingOnConflict
      */
     abstract override fun createOrAlterProc(
-            procedureName: String,
-            tableName: String,
-            columns: Map<String, String>,
-            uniqueColumns: Collection<String>,
-            doNothingOnConflict: Boolean
+        procedureName: String,
+        tableName: String,
+        columns: Map<String, String>,
+        uniqueColumns: Collection<String>,
+        doNothingOnConflict: Boolean
     ): String
 
     /**
@@ -333,12 +333,12 @@ abstract class DbContext(
      * @param indexes LinkedHashMap<constraintName -> index columns>
      */
     private fun createTable(
-            table: Table,
-            columns: Map<String, String>,
-            uniqueColumns: Map<String, String> = HashMap(),
-            primaryKeys: Map<String, String> = HashMap(),
-            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
-            indexes: Map<String, String> = HashMap()
+        table: Table,
+        columns: Map<String, String>,
+        uniqueColumns: Map<String, String> = HashMap(),
+        primaryKeys: Map<String, String> = HashMap(),
+        foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
+        indexes: Map<String, String> = HashMap()
     ): String {
         return createTable(getName(table), columns, uniqueColumns, primaryKeys, foreignKeys, indexes)
     }
@@ -352,12 +352,12 @@ abstract class DbContext(
      * @param indexes LinkedHashMap<constraintName -> index columns>
      */
     private fun createTable(
-            tableName: String,
-            columns: Map<String, String>,
-            uniqueColumns: Map<String, String> = HashMap(),
-            primaryKeys: Map<String, String> = HashMap(),
-            foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
-            indexes: Map<String, String> = HashMap()
+        tableName: String,
+        columns: Map<String, String>,
+        uniqueColumns: Map<String, String> = HashMap(),
+        primaryKeys: Map<String, String> = HashMap(),
+        foreignKeys: LinkedHashMap<String, LinkedHashMap<String, String>> = LinkedHashMap(),
+        indexes: Map<String, String> = HashMap()
     ): String {
         val sqlBuilder = StringBuilder()
         sqlBuilder.append("CREATE TABLE $tableName(\n")
@@ -394,7 +394,14 @@ abstract class DbContext(
             foreignKeys.forEach { (_, columnBinding) ->
                 columnBinding.forEach { (localColumns, _) ->
                     if (!localColumns.contains(",")) {
-                        indexJoiner.add("CREATE INDEX ${tableName.replace("jds.", "")}_$localColumns ON $tableName($localColumns);")
+                        indexJoiner.add(
+                            "CREATE INDEX ${
+                                tableName.replace(
+                                    "jds.",
+                                    ""
+                                )
+                            }_$localColumns ON $tableName($localColumns);"
+                        )
                     }
                 }
             }
@@ -445,7 +452,9 @@ abstract class DbContext(
      * @param entityCode     the value representing the entity
      */
     private fun mapParentEntities(connection: Connection, parentEntities: Collection<Int>, entityCode: Int) = try {
-        (if (supportsStatements) connection.prepareCall(populateEntityInheritance()) else connection.prepareStatement(populateEntityInheritance())).use { statement ->
+        (if (supportsStatements) connection.prepareCall(populateEntityInheritance()) else connection.prepareStatement(
+            populateEntityInheritance()
+        )).use { statement ->
             for (parentEntity in parentEntities) {
                 if (parentEntity != entityCode) {
                     statement.setInt(1, parentEntity)
@@ -468,29 +477,36 @@ abstract class DbContext(
      * @param description a description of the entity
      * @param tags a description of the entity
      */
-    private fun populateRefEntity(connection: Connection, id: Int, name: String, description: String, tags: Array<String>) = try {
-        connection.prepareStatement("DELETE FROM ${getName(Table.EntityTag)} WHERE entity_id = ?").use { clearEntityTag ->
-            getCallOrStatement(connection, populateEntityTag()).use { populateEntityTag ->
-                getCallOrStatement(connection, populateEntity()).use { statement ->
-                    statement.setInt(1, id)
-                    statement.setString(2, name)
-                    statement.setString(3, description)
-                    statement.executeUpdate()
-                    if (options.logOutput)
-                        println("Mapped Entity [$name - $id]")
+    private fun populateRefEntity(
+        connection: Connection,
+        id: Int,
+        name: String,
+        description: String,
+        tags: Array<String>
+    ) = try {
+        connection.prepareStatement("DELETE FROM ${getName(Table.EntityTag)} WHERE entity_id = ?")
+            .use { clearEntityTag ->
+                getCallOrStatement(connection, populateEntityTag()).use { populateEntityTag ->
+                    getCallOrStatement(connection, populateEntity()).use { statement ->
+                        statement.setInt(1, id)
+                        statement.setString(2, name)
+                        statement.setString(3, description)
+                        statement.executeUpdate()
+                        if (options.logOutput)
+                            println("Mapped Entity [$name - $id]")
 
-                    clearEntityTag.setInt(1, id)
-                    clearEntityTag.executeUpdate()
+                        clearEntityTag.setInt(1, id)
+                        clearEntityTag.executeUpdate()
 
-                    tags.forEach { tag ->
-                        populateEntityTag.setInt(1, id)
-                        populateEntityTag.setString(2, tag)
-                        populateEntityTag.addBatch()
+                        tags.forEach { tag ->
+                            populateEntityTag.setInt(1, id)
+                            populateEntityTag.setString(2, tag)
+                            populateEntityTag.addBatch()
+                        }
+                        populateEntityTag.executeBatch()
                     }
-                    populateEntityTag.executeBatch()
                 }
             }
-        }
     } catch (ex: Exception) {
         ex.printStackTrace(System.err)
     }
@@ -501,7 +517,6 @@ abstract class DbContext(
         if (entityAnnotation != null) {
             if (!Entity.classes.containsKey(entityAnnotation.id)) {//map each class exactly once
                 Entity.classes[entityAnnotation.id] = entity
-                //do the thing
                 try {
                     initialising = true
                     dataSource.connection.use { connection ->
@@ -511,7 +526,13 @@ abstract class DbContext(
                         jdsEntity.bind()
                         parentEntities.add(jdsEntity.overview.entityId)//add this own entity to the chain
                         Extensions.determineParents(entity, parentEntities)
-                        populateRefEntity(connection, jdsEntity.overview.entityId, entityAnnotation.name, entityAnnotation.description, entityAnnotation.tags)
+                        populateRefEntity(
+                            connection,
+                            jdsEntity.overview.entityId,
+                            entityAnnotation.name,
+                            entityAnnotation.description,
+                            entityAnnotation.tags
+                        )
                         populateRefFieldRefEntityField(this, connection, jdsEntity.overview.entityId)
                         populateRefEnumRefEntityEnum(this, connection, jdsEntity.overview.entityId)
                         FieldDictionary.update(this, connection, jdsEntity.overview.entityId)
@@ -534,7 +555,7 @@ abstract class DbContext(
 
     private fun populateFieldTypes(connection: Connection) {
         getCallOrStatement(connection, populateFieldType()).use { statement ->
-            FieldType.values().forEach { fieldType ->
+            FieldType.entries.forEach { fieldType ->
                 statement.setInt(1, fieldType.ordinal)
                 statement.setString(2, fieldType.name)
                 statement.addBatch()
@@ -648,10 +669,10 @@ abstract class DbContext(
 
     private fun getStoreColumns(kvp: Pair<String, String>): LinkedHashMap<String, String> {
         return linkedMapOf(
-                "id" to getDataType(FieldType.String, 36),
-                "edit_version" to getDataType(FieldType.Int),
-                "field_id" to getDataType(FieldType.Int),
-                kvp.first to kvp.second
+            "id" to getDataType(FieldType.String, 36),
+            "edit_version" to getDataType(FieldType.Int),
+            "field_id" to getDataType(FieldType.Int),
+            kvp.first to kvp.second
         )
     }
 
@@ -777,9 +798,9 @@ abstract class DbContext(
         val table = Table.FieldDictionary
         val objectName = table.table
         val columns = linkedMapOf(
-                "entity_id" to getDataTypeImpl(FieldType.Int),
-                "field_id" to getDataTypeImpl(FieldType.Int),
-                "property_name" to getDataTypeImpl(FieldType.String, 64)
+            "entity_id" to getDataTypeImpl(FieldType.Int),
+            "field_id" to getDataTypeImpl(FieldType.Int),
+            "property_name" to getDataTypeImpl(FieldType.String, 64)
         )
         val uniqueColumns = linkedMapOf("${objectName}_u" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -792,8 +813,8 @@ abstract class DbContext(
         val table = Table.FieldTag
         val objectName = table.table
         val columns = linkedMapOf(
-                "field_id" to getDataTypeImpl(FieldType.Int),
-                "tag" to getDataTypeImpl(FieldType.String, 16)
+            "field_id" to getDataTypeImpl(FieldType.Int),
+            "tag" to getDataTypeImpl(FieldType.String, 16)
         )
         val uniqueColumns = linkedMapOf("${objectName}_u" to "field_id, tag")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -806,8 +827,8 @@ abstract class DbContext(
         val table = Table.EntityTag
         val objectName = table.table
         val columns = linkedMapOf(
-                "entity_id" to getDataTypeImpl(FieldType.Int),
-                "tag" to getDataTypeImpl(FieldType.String, 16)
+            "entity_id" to getDataTypeImpl(FieldType.Int),
+            "tag" to getDataTypeImpl(FieldType.String, 16)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, tag")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -819,9 +840,9 @@ abstract class DbContext(
     private fun createFieldAlternateCode(): String {
         val objectName = Table.FieldAlternateCode.table
         val columns = linkedMapOf(
-                "field_id" to getDataTypeImpl(FieldType.Int),
-                "alternate_code" to getDataTypeImpl(FieldType.String, 16),
-                "value" to getDataTypeImpl(FieldType.String, 64)
+            "field_id" to getDataTypeImpl(FieldType.Int),
+            "alternate_code" to getDataTypeImpl(FieldType.String, 16),
+            "value" to getDataTypeImpl(FieldType.String, 64)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "field_id, alternate_code")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -832,9 +853,9 @@ abstract class DbContext(
     private fun createStoreEntities(): String {
         val objectName = Table.Entity.table
         val columns = linkedMapOf(
-                "id" to getDataTypeImpl(FieldType.Int),
-                "name" to getDataTypeImpl(FieldType.String, 64),
-                "description" to getDataTypeImpl(FieldType.String, 256)
+            "id" to getDataTypeImpl(FieldType.Int),
+            "name" to getDataTypeImpl(FieldType.String, 64),
+            "description" to getDataTypeImpl(FieldType.String, 256)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "id")
         return createTable(Table.Entity, columns, HashMap(), primaryKey, LinkedHashMap())
@@ -843,10 +864,10 @@ abstract class DbContext(
     private fun createRefEnumValues(): String {
         val objectName = Table.Enum.table
         val columns = linkedMapOf(
-                "field_id" to getDataTypeImpl(FieldType.Int),
-                "seq" to getDataTypeImpl(FieldType.Int),
-                "name" to getDataTypeImpl(FieldType.String, 128),
-                "caption" to getDataTypeImpl(FieldType.String, 128)
+            "field_id" to getDataTypeImpl(FieldType.Int),
+            "seq" to getDataTypeImpl(FieldType.Int),
+            "name" to getDataTypeImpl(FieldType.String, 128),
+            "caption" to getDataTypeImpl(FieldType.String, 128)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "field_id, seq")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -857,22 +878,23 @@ abstract class DbContext(
     private fun createRefFields(): String {
         val objectName = Table.Field.table
         val columns = linkedMapOf(
-                "id" to getDataTypeImpl(FieldType.Int),
-                "caption" to getDataTypeImpl(FieldType.String, 64),
-                "description" to getDataTypeImpl(FieldType.String, 256),
-                "field_type_ordinal" to getDataTypeImpl(FieldType.Int)
+            "id" to getDataTypeImpl(FieldType.Int),
+            "caption" to getDataTypeImpl(FieldType.String, 64),
+            "description" to getDataTypeImpl(FieldType.String, 256),
+            "field_type_ordinal" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
-        foreignKeys["${objectName}_jds_fk_1"] = linkedMapOf("field_type_ordinal" to "${objectPrefix}${Table.FieldType.table} (ordinal)")
+        foreignKeys["${objectName}_jds_fk_1"] =
+            linkedMapOf("field_type_ordinal" to "${objectPrefix}${Table.FieldType.table} (ordinal)")
         return createTable(Table.Field, columns, HashMap(), primaryKey, foreignKeys)
     }
 
     private fun createRefFieldTypes(): String {
         val objectName = Table.FieldType.table
         val columns = linkedMapOf(
-                "ordinal" to getDataTypeImpl(FieldType.Int),
-                "caption" to getDataTypeImpl(FieldType.String, 64)
+            "ordinal" to getDataTypeImpl(FieldType.Int),
+            "caption" to getDataTypeImpl(FieldType.String, 64)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "ordinal")
         return createTable(Table.FieldType, columns, HashMap(), primaryKey, LinkedHashMap())
@@ -881,8 +903,8 @@ abstract class DbContext(
     private fun createBindEntityFields(): String {
         val objectName = Table.EntityField.table
         val columns = linkedMapOf(
-                "entity_id" to getDataTypeImpl(FieldType.Int),
-                "field_id" to getDataTypeImpl(FieldType.Int)
+            "entity_id" to getDataTypeImpl(FieldType.Int),
+            "field_id" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -894,8 +916,8 @@ abstract class DbContext(
     private fun createBindFieldEntities(): String {
         val objectName = Table.FieldEntity.table
         val columns = linkedMapOf(
-                "field_id" to getDataTypeImpl(FieldType.Int),
-                "entity_id" to getDataTypeImpl(FieldType.Int)
+            "field_id" to getDataTypeImpl(FieldType.Int),
+            "entity_id" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -907,8 +929,8 @@ abstract class DbContext(
     private fun createBindEntityEnums(): String {
         val objectName = Table.EntityEnum.table
         val columns = linkedMapOf(
-                "entity_id" to getDataTypeImpl(FieldType.Int),
-                "field_id" to getDataTypeImpl(FieldType.Int)
+            "entity_id" to getDataTypeImpl(FieldType.Int),
+            "field_id" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "entity_id, field_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
@@ -920,8 +942,8 @@ abstract class DbContext(
     private fun createRefInheritance(): String {
         val objectName = Table.EntityInheritance.table
         val columns = linkedMapOf(
-                "parent_entity_id" to getDataTypeImpl(FieldType.Int),
-                "child_entity_id" to getDataTypeImpl(FieldType.Int)
+            "parent_entity_id" to getDataTypeImpl(FieldType.Int),
+            "child_entity_id" to getDataTypeImpl(FieldType.Int)
         )
         val primaryKey = linkedMapOf("${objectName}_pk" to "parent_entity_id, child_entity_id")
         val foreignKeys = LinkedHashMap<String, LinkedHashMap<String, String>>()
