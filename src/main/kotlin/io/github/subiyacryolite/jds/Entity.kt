@@ -74,14 +74,8 @@ abstract class Entity(
     /**
      *
      */
-    private val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap(),
-
-    /**
-     *
-     */
-    private val mapOfCollectionsValues: MutableMap<Int, MutableMap<String, MutableCollection<String>>> = HashMap(),
-
-    ) : IEntity {
+    private val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap()
+) : IEntity {
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -910,16 +904,18 @@ abstract class Entity(
     @JvmName("mapOfCollections")
     protected fun map(
         field: Field,
-        map: MutableMap<String, MutableCollection<String>>,
+        map: Map<String, MutableCollection<String>>,
         propertyName: String = ""
     ): Map<String, Collection<String>> {
-        return mapOfCollectionsValues.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.MapOfCollections),
-                propertyName
-            )
-        ) { map }
+        if (options.assign) {
+            options.portableEntity?.mapOfCollectionsValues?.add(StoreMapCollection(field.id, map))
+        } else if (populate(field)) {
+            options.portableEntity?.mapOfCollectionsValues?.filter { it.key == field.id }?.forEach { match ->
+                if (map is MutableMap) map.putAll(match.values)
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.MapOfCollections), propertyName, options.skip())
+        return emptyMap()
     }
 
     @JvmName("mapEnums")
@@ -1055,7 +1051,6 @@ abstract class Entity(
         when (fieldType) {
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
-            FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
             else -> {}
         }
     }
@@ -1171,9 +1166,6 @@ abstract class Entity(
             entity.mapStringKeyValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.mapStringKeyValues.add(StoreMapStringKey(entry.key, entry.value))
             }
-            entity.mapOfCollectionsValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.mapOfCollectionsValues.add(StoreMapCollection(entry.key, entry.value))
-            }
             //==============================================
             //EMBEDDED OBJECTS
             //==============================================
@@ -1210,11 +1202,6 @@ abstract class Entity(
             portableEntity.mapStringKeyValues.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.mapStringKeyValues.getValue(field.key).putAll(field.values)
-                }
-            }
-            portableEntity.mapOfCollectionsValues.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.mapOfCollectionsValues.getValue(field.key).putAll(field.values)
                 }
             }
             //==============================================
