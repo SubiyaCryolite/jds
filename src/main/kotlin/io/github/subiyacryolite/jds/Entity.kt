@@ -69,11 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val doubleCollections: MutableMap<Int, MutableCollection<Double>> = HashMap(),
-
-    /**
-     *
-     */
     private val longCollections: MutableMap<Int, MutableCollection<Long>> = HashMap(),
 
     /**
@@ -832,16 +827,20 @@ abstract class Entity(
     @JvmName("mapDoubles")
     protected fun map(
         field: Field,
-        collection: MutableCollection<Double>,
+        collection: Collection<Double>,
         propertyName: String = ""
-    ): MutableCollection<Double> {
-        return doubleCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.DoubleCollection),
-                propertyName
-            )
-        ) { collection }
+    ): Collection<Double> {
+        if (options.assign) {
+            options.portableEntity?.doubleCollections?.add(StoreDoubleCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.doubleCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.DoubleCollection), propertyName, options.skip())
+        return listOf()
     }
 
     @JvmName("mapLongs")
@@ -1002,7 +1001,6 @@ abstract class Entity(
         fieldId: Int
     ) {
         when (fieldType) {
-            FieldType.DoubleCollection -> doubleCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.LongCollection -> longCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.IntCollection -> integerCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.ShortCollection -> shortCollections.putIfAbsent(fieldId, ArrayList())
@@ -1159,9 +1157,6 @@ abstract class Entity(
                     )
                 )
             }
-            entity.doubleCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
-            }
             entity.longCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
             }
@@ -1246,12 +1241,6 @@ abstract class Entity(
                 if (entity.populateProperty(dbContext, field.key)) {
                     val dest = entity.dateTimeCollections.getValue(field.key)
                     field.values.forEach { value -> dest.add((value).toLocalDateTime()) }
-                }
-            }
-            portableEntity.doubleCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.doubleCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
                 }
             }
             portableEntity.integerCollections.forEach { field ->
