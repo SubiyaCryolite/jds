@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val uuidValues: MutableMap<Int, IValue<UUID?>> = HashMap(),
-
-    /**
-     *
-     */
     private val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap(),
 
     /**
@@ -372,7 +367,16 @@ abstract class Entity(
         field: Field,
         value: IValue<UUID?>,
         propertyName: String = ""
-    ): IValue<UUID?> = map(field, value, setOf(FieldType.Uuid), uuidValues, propertyName)
+    ): IValue<UUID?> {
+        if (options.assign) {
+            options.portableEntity?.uuidValues?.add(StoreUuid(field.id, value.value.toByteArray()))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.uuidValues?.filter { it.key == field.id }?.forEach {
+                value.set(it.value?.toUuid())
+            }
+        }
+        return map(field, value, setOf(FieldType.Uuid), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapString")
     protected fun map(
@@ -1009,7 +1013,6 @@ abstract class Entity(
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
             FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
-            FieldType.Uuid -> uuidValues.putIfAbsent(fieldId, NullableUuidValue())
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
@@ -1120,12 +1123,6 @@ abstract class Entity(
                 entity.options.portableEntity = null
             }
             //==============================================
-            //PRIMITIVES, also saved to array struct to streamline json
-            //==============================================
-            entity.uuidValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
-            }
-            //==============================================
             //BLOB
             //==============================================
             entity.blobValues.filterIgnored(dbContext).forEach { entry ->
@@ -1231,12 +1228,6 @@ abstract class Entity(
                         is ByteArray -> value
                         else -> null
                     }
-                }
-            }
-            portableEntity.uuidValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.uuidValues.getValue(field.key).value = value?.toUuid()
                 }
             }
             portableEntity.enumValues.forEach { field ->
