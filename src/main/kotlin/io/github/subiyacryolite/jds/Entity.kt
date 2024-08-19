@@ -69,11 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val dateTimeCollections: MutableMap<Int, MutableCollection<LocalDateTime>> = HashMap(),
-
-    /**
-     *
-     */
     private val enumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
 
     /**
@@ -90,8 +85,6 @@ abstract class Entity(
      *
      */
     private val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
-
-
 
     /**
      *
@@ -726,16 +719,25 @@ abstract class Entity(
     @JvmName("mapDateTimes")
     protected fun map(
         field: Field,
-        collection: MutableCollection<LocalDateTime>,
+        collection: Collection<LocalDateTime>,
         propertyName: String = ""
-    ): MutableCollection<LocalDateTime> {
-        return dateTimeCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.DateTimeCollection),
-                propertyName
+    ): Collection<LocalDateTime> {
+        if (options.assign) {
+            options.portableEntity?.dateTimeCollection?.add(
+                StoreDateTimeCollection(
+                    field.id,
+                    toTimeStampCollection(collection)
+                )
             )
-        ) { collection }
+        } else if (populate(field)) {
+            options.portableEntity?.dateTimeCollection?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value.toLocalDateTime())
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.DateTimeCollection), propertyName, options.skip())
+        return emptyList()
     }
 
     @JvmName("mapFloats")
@@ -806,7 +808,12 @@ abstract class Entity(
         propertyName: String = ""
     ): Collection<UUID> {
         if (options.assign) {
-            options.portableEntity?.uuidCollections?.add(StoreUuidCollection(field.id, toByteArrayCollection(collection)))
+            options.portableEntity?.uuidCollections?.add(
+                StoreUuidCollection(
+                    field.id,
+                    toByteArrayCollection(collection)
+                )
+            )
         } else if (populate(field)) {
             options.portableEntity?.uuidCollections?.filter { it.key == field.id }?.forEach { match ->
                 match.values.forEach { value ->
@@ -814,8 +821,8 @@ abstract class Entity(
                 }
             }
         }
-       mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName, options.skip())
-       return emptyList()
+        mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName, options.skip())
+        return emptyList()
     }
 
     @JvmName("mapDoubles")
@@ -999,7 +1006,6 @@ abstract class Entity(
         fieldId: Int
     ) {
         when (fieldType) {
-            FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
@@ -1140,17 +1146,7 @@ abstract class Entity(
                     )
                 )
             }
-            //==============================================
-            //ARRAYS
-            //==============================================
-            entity.dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.dateTimeCollection.add(
-                    StoreDateTimeCollection(
-                        entry.key,
-                        toTimeStampCollection(entry.value)
-                    )
-                )
-            }
+
             //==============================================
             // Maps
             //==============================================
@@ -1217,12 +1213,6 @@ abstract class Entity(
                     if (fieldEnum != null && value != null) {
                         entity.stringEnumValues.getValue(field.key).value = fieldEnum.valueOf(value)
                     }
-                }
-            }
-            portableEntity.dateTimeCollection.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.dateTimeCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add((value).toLocalDateTime()) }
                 }
             }
             portableEntity.enumCollections.forEach { field ->
