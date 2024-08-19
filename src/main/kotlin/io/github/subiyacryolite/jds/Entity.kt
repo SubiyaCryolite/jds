@@ -69,21 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val longCollections: MutableMap<Int, MutableCollection<Long>> = HashMap(),
-
-    /**
-     *
-     */
-    private val integerCollections: MutableMap<Int, MutableCollection<Int>> = HashMap(),
-
-    /**
-     *
-     */
-    private val shortCollections: MutableMap<Int, MutableCollection<Short>> = HashMap(),
-
-    /**
-     *
-     */
     private val uuidCollections: MutableMap<Int, MutableCollection<UUID>> = HashMap(),
 
     /**
@@ -782,31 +767,39 @@ abstract class Entity(
     @JvmName("mapIntegers")
     protected fun map(
         field: Field,
-        collection: MutableCollection<Int>,
+        collection: Collection<Int>,
         propertyName: String = ""
-    ): MutableCollection<Int> {
-        return integerCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.IntCollection),
-                propertyName
-            )
-        ) { collection }
+    ): Collection<Int> {
+        if (options.assign) {
+            options.portableEntity?.integerCollections?.add(StoreIntegerCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.integerCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.IntCollection), propertyName, options.skip())
+        return emptyList()
     }
 
     @JvmName("mapShorts")
     protected fun map(
         field: Field,
-        collection: MutableCollection<Short>,
+        collection: Collection<Short>,
         propertyName: String = ""
-    ): MutableCollection<Short> {
-        return shortCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.ShortCollection),
-                propertyName
-            )
-        ) { collection }
+    ): Collection<Short> {
+        if (options.assign) {
+            options.portableEntity?.shortCollections?.add(StoreShortCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.shortCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.ShortCollection), propertyName, options.skip())
+        return emptyList()
     }
 
     @JvmName("mapUuids")
@@ -816,11 +809,7 @@ abstract class Entity(
         propertyName: String = ""
     ): MutableCollection<UUID> {
         return uuidCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.UuidCollection),
-                propertyName
-            )
+            mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName, options.skip())
         ) { collection }
     }
 
@@ -846,16 +835,20 @@ abstract class Entity(
     @JvmName("mapLongs")
     protected fun map(
         field: Field,
-        collection: MutableCollection<Long>,
+        collection: Collection<Long>,
         propertyName: String = ""
-    ): MutableCollection<Long> {
-        return longCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.LongCollection),
-                propertyName
-            )
-        ) { collection }
+    ): Collection<Long> {
+        if (options.assign) {
+            options.portableEntity?.longCollections?.add(StoreLongCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.longCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.LongCollection), propertyName, options.skip())
+        return listOf()
     }
 
     @JvmName("mapIntMap")
@@ -1001,9 +994,6 @@ abstract class Entity(
         fieldId: Int
     ) {
         when (fieldType) {
-            FieldType.LongCollection -> longCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.IntCollection -> integerCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.ShortCollection -> shortCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.UuidCollection -> uuidCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
@@ -1157,15 +1147,6 @@ abstract class Entity(
                     )
                 )
             }
-            entity.longCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.longCollections.add(StoreLongCollection(entry.key, entry.value))
-            }
-            entity.integerCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.integerCollections.add(StoreIntegerCollection(entry.key, entry.value))
-            }
-            entity.shortCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.shortCollections.add(StoreShortCollection(entry.key, entry.value))
-            }
             entity.uuidCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
             }
@@ -1243,28 +1224,10 @@ abstract class Entity(
                     field.values.forEach { value -> dest.add((value).toLocalDateTime()) }
                 }
             }
-            portableEntity.integerCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.integerCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
-                }
-            }
-            portableEntity.shortCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.shortCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
-                }
-            }
             portableEntity.uuidCollections.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
                     val dest = entity.uuidCollections.getValue(field.key)
                     field.values.forEach { value -> dest.add(value.toUuid()!!) }
-                }
-            }
-            portableEntity.longCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.longCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
                 }
             }
             portableEntity.enumCollections.forEach { field ->
