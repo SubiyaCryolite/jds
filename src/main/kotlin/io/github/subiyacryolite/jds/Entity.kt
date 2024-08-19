@@ -69,11 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val uuidCollections: MutableMap<Int, MutableCollection<UUID>> = HashMap(),
-
-    /**
-     *
-     */
     private val enumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
 
     /**
@@ -805,12 +800,20 @@ abstract class Entity(
     @JvmName("mapUuids")
     protected fun map(
         field: Field,
-        collection: MutableCollection<UUID>,
+        collection: Collection<UUID>,
         propertyName: String = ""
-    ): MutableCollection<UUID> {
-        return uuidCollections.getOrPut(
-            mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName, options.skip())
-        ) { collection }
+    ): Collection<UUID> {
+        if (options.assign) {
+            options.portableEntity?.uuidCollections?.add(StoreUuidCollection(field.id, toByteArrayCollection(collection)))
+        } else if (populate(field)) {
+            options.portableEntity?.uuidCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value.toUuid()!!)
+                }
+            }
+        }
+       mapField(overview.entityId, Field.bind(field, FieldType.UuidCollection), propertyName, options.skip())
+       return emptyList()
     }
 
     @JvmName("mapDoubles")
@@ -994,7 +997,6 @@ abstract class Entity(
         fieldId: Int
     ) {
         when (fieldType) {
-            FieldType.UuidCollection -> uuidCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
@@ -1085,7 +1087,7 @@ abstract class Entity(
             return classes.filter { kvp -> entityIds.contains(kvp.key) }.map { kvp -> kvp.value }
         }
 
-        private fun toByteArrayCollection(values: MutableCollection<UUID>): Collection<ByteArray> {
+        private fun toByteArrayCollection(values: Collection<UUID>): Collection<ByteArray> {
             val output = ArrayList<ByteArray>()
             values.forEach { value ->
                 output.add(value.toByteArray()!!)
@@ -1093,12 +1095,12 @@ abstract class Entity(
             return output
         }
 
-        private fun toTimeStampCollection(values: MutableCollection<LocalDateTime>) =
+        private fun toTimeStampCollection(values: Collection<LocalDateTime>) =
             values.map { Timestamp.valueOf(it) }
 
-        private fun toIntCollection(values: MutableCollection<out Enum<*>>) = values.map { it.ordinal }
+        private fun toIntCollection(values: Collection<Enum<*>>) = values.map { it.ordinal }
 
-        private fun toStringCollection(values: MutableCollection<out Enum<*>>) = values.map { it.name }
+        private fun toStringCollection(values: Collection<Enum<*>>) = values.map { it.name }
 
         internal fun assign(entity: Entity, dbContext: DbContext, portableEntity: PortableEntity) {
 
@@ -1146,9 +1148,6 @@ abstract class Entity(
                         toTimeStampCollection(entry.value)
                     )
                 )
-            }
-            entity.uuidCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.uuidCollections.add(StoreUuidCollection(entry.key, toByteArrayCollection(entry.value)))
             }
             //==============================================
             // Maps
@@ -1222,12 +1221,6 @@ abstract class Entity(
                 if (entity.populateProperty(dbContext, field.key)) {
                     val dest = entity.dateTimeCollections.getValue(field.key)
                     field.values.forEach { value -> dest.add((value).toLocalDateTime()) }
-                }
-            }
-            portableEntity.uuidCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.uuidCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value.toUuid()!!) }
                 }
             }
             portableEntity.enumCollections.forEach { field ->
