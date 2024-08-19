@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val booleanValues: MutableMap<Int, IValue<Boolean?>> = HashMap(),
-
-    /**
-     *
-     */
     private val shortValues: MutableMap<Int, IValue<Short?>> = HashMap(),
 
     /**
@@ -317,7 +312,29 @@ abstract class Entity(
         field: Field,
         value: IValue<Boolean?>,
         propertyName: String = ""
-    ): IValue<Boolean?> = map(field, value, setOf(FieldType.Boolean), booleanValues, propertyName)
+    ): IValue<Boolean?> {
+        if (options.assign) {
+            options.portableEntity?.booleanValues?.add(
+                StoreBoolean(
+                    field.id, when (value.value) {
+                        true -> 1
+                        false -> 0
+                        else -> null
+                    }
+                )
+            )
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.booleanValues?.filter { it.key == field.id }?.forEach {
+                value.set(
+                    when (it.value) {
+                        is Int -> it.value == 1
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.Boolean), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapUuid")
     protected fun map(
@@ -978,7 +995,6 @@ abstract class Entity(
             FieldType.Long -> longValues.putIfAbsent(fieldId, NullableLongValue())
             FieldType.Int -> integerValues.putIfAbsent(fieldId, NullableIntegerValue())
             FieldType.Uuid -> uuidValues.putIfAbsent(fieldId, NullableUuidValue())
-            FieldType.Boolean -> booleanValues.putIfAbsent(fieldId, NullableBooleanValue())
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
@@ -1091,14 +1107,7 @@ abstract class Entity(
             //==============================================
             //PRIMITIVES, also saved to array struct to streamline json
             //==============================================
-            entity.booleanValues.filterIgnored(dbContext).forEach { entry ->
-                val input = when (entry.value.value) {
-                    true -> 1
-                    false -> 0
-                    else -> null
-                }
-                portableEntity.booleanValues.add(StoreBoolean(entry.key, input))
-            }
+
             entity.floatValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
             }
@@ -1225,16 +1234,6 @@ abstract class Entity(
                     }
                 }
             }
-            portableEntity.booleanValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.booleanValues.getValue(field.key).value = when (value) {
-                        is Int -> value == 1
-                        else -> null
-                    }
-                }
-            }
-
             portableEntity.doubleValues.forEach { field ->
                 val value = field.value
                 if (entity.populateProperty(dbContext, field.key)) {
