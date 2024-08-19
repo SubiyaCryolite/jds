@@ -69,16 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val enumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
-
-    /**
-     *
-     */
-    private val stringEnumValues: MutableMap<Int, IValue<Enum<*>?>> = HashMap(),
-
-    /**
-     *
-     */
     private val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
 
     /**
@@ -660,18 +650,32 @@ abstract class Entity(
         fieldEnum: FieldEnum<T>,
         value: IValue<T?>,
         propertyName: String = ""
-    ): IValue<T?> {
+    ){
         val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
         if (fieldEnum.field.type == FieldType.Enum) {
-            @Suppress("UNCHECKED_CAST")
-            enumValues[fieldId] = value as IValue<Enum<*>?>
+            if (options.assign) {
+                options.portableEntity?.enumValues?.add(StoreEnum(fieldEnum.field.id, value.value?.ordinal))
+            } else if (populate(fieldEnum.field)) {
+                options.portableEntity?.enumValues?.filter { it.key == fieldEnum.field.id }?.forEach {
+                    value.set(fieldEnum.valueOf(it.value!!))
+                }
+            }
         } else {
-            @Suppress("UNCHECKED_CAST")
-            stringEnumValues[fieldId] = value as IValue<Enum<*>?>
+            if (options.assign) {
+                options.portableEntity?.enumStringValues?.add(
+                    StoreEnumString(
+                        fieldEnum.field.id,
+                        value.value?.name
+                    )
+                )
+            } else if (populate(fieldEnum.field)) {
+                options.portableEntity?.enumStringValues?.filter { it.key == fieldEnum.field.id }?.forEach {
+                    value.set(fieldEnum.valueOf(it.value!!))
+                }
+            }
         }
-        mapField(overview.entityId, fieldId, propertyName)
+        mapField(overview.entityId, fieldId, propertyName, options.skip())
         mapEnums(overview.entityId, fieldId)
-        return value
     }
 
     @JvmName("mapEnum")
@@ -679,22 +683,32 @@ abstract class Entity(
         fieldEnum: FieldEnum<T>,
         value: IValue<T>,
         propertyName: String = ""
-    ): IValue<T> {
+    ) {
         val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
-        when (fieldEnum.field.type) {
-            FieldType.Enum -> {
-                @Suppress("UNCHECKED_CAST")
-                enumValues[fieldId] = value as IValue<Enum<*>?>
+        if (fieldEnum.field.type == FieldType.Enum) {
+            if (options.assign) {
+                options.portableEntity?.enumValues?.add(StoreEnum(fieldEnum.field.id, value.value?.ordinal))
+            } else if (populate(fieldEnum.field)) {
+                options.portableEntity?.enumValues?.filter { it.key == fieldEnum.field.id }?.forEach {
+                    value.set(fieldEnum.valueOf(it.value!!)!!)
+                }
             }
-
-            else -> {
-                @Suppress("UNCHECKED_CAST")
-                stringEnumValues[fieldId] = value as IValue<Enum<*>?>
+        } else {
+            if (options.assign) {
+                options.portableEntity?.enumStringValues?.add(
+                    StoreEnumString(
+                        fieldEnum.field.id,
+                        value.value.name
+                    )
+                )
+            } else if (populate(fieldEnum.field)) {
+                options.portableEntity?.enumStringValues?.filter { it.key == fieldEnum.field.id }?.forEach {
+                    value.set(fieldEnum.valueOf(it.value!!)!!)
+                }
             }
         }
-        mapField(overview.entityId, fieldId, propertyName)
+        mapField(overview.entityId, fieldId, propertyName, options.skip())
         mapEnums(overview.entityId, fieldId)
-        return value
     }
 
     @JvmName("mapStrings")
@@ -1009,8 +1023,6 @@ abstract class Entity(
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
-            FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
-            FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
@@ -1129,12 +1141,6 @@ abstract class Entity(
             //==============================================
             //Enums
             //==============================================
-            entity.enumValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.enumValues.add(StoreEnum(entry.key, entry.value.value?.ordinal))
-            }
-            entity.stringEnumValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.enumStringValues.add(StoreEnumString(entry.key, entry.value.value?.name))
-            }
             entity.enumCollections.filterIgnoredEnums(dbContext).forEach { entry ->
                 portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
             }
@@ -1194,24 +1200,6 @@ abstract class Entity(
                     entity.blobValues.getValue(field.key).value = when (value) {
                         is ByteArray -> value
                         else -> null
-                    }
-                }
-            }
-            portableEntity.enumValues.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val fieldEnum = FieldEnum.enums[field.key]
-                    val value = field.value
-                    if (fieldEnum != null && value != null) {
-                        entity.enumValues.getValue(field.key).value = fieldEnum.valueOf(value)
-                    }
-                }
-            }
-            portableEntity.enumStringValues.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val fieldEnum = FieldEnum.enums[field.key]
-                    val value = field.value
-                    if (fieldEnum != null && value != null) {
-                        entity.stringEnumValues.getValue(field.key).value = fieldEnum.valueOf(value)
                     }
                 }
             }
