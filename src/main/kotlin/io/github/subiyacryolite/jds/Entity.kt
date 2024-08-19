@@ -57,7 +57,12 @@ abstract class Entity(
     private val options: EntityOptions = EntityOptions(),
 
     /**
-     *
+     * Possible exceptions
+     */
+    private val objectValues: MutableMap<FieldEntity<*>, IValue<IEntity>> = HashMap(),
+
+    /**
+     * Possible exceptions
      */
     private val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap(),
 
@@ -86,10 +91,7 @@ abstract class Entity(
      */
     private val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
 
-    /**
-     *
-     */
-    private val objectValues: MutableMap<FieldEntity<*>, IValue<IEntity>> = HashMap(),
+
 
     /**
      *
