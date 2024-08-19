@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val localTimeValues: MutableMap<Int, IValue<LocalTime?>> = HashMap(),
-
-    /**
-     *
-     */
     private val monthDayValues: MutableMap<Int, IValue<MonthDay?>> = HashMap(),
 
     /**
@@ -514,7 +509,21 @@ abstract class Entity(
         field: Field,
         value: IValue<LocalTime?>,
         propertyName: String = ""
-    ): IValue<LocalTime?> = map(field, value, setOf(FieldType.Time), localTimeValues, propertyName)
+    ): IValue<LocalTime?> {
+        if (options.assign) {
+            options.portableEntity?.timeValues?.add(StoreTime(field.id, value.value?.toNanoOfDay()))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.timeValues?.filter { it.key == field.id }?.forEach {
+                value.set(
+                    when (it.value) {
+                        is Long -> LocalTime.ofNanoOfDay(it.value!!)
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.Time), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapBlob")
     protected fun map(
@@ -921,7 +930,6 @@ abstract class Entity(
             FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.Time -> localTimeValues.putIfAbsent(fieldId, NullableLocalTimeValue())
             FieldType.Duration -> durationValues.putIfAbsent(fieldId, NullableDurationValue())
             FieldType.MonthDay -> monthDayValues.putIfAbsent(fieldId, NullableMonthDayValue())
             FieldType.YearMonth -> yearMonthValues.putIfAbsent(fieldId, NullableYearMonthValue())
@@ -1077,10 +1085,6 @@ abstract class Entity(
             //==============================================
             //Dates & Time
             //==============================================
-            entity.localTimeValues.filterIgnored(dbContext).forEach { entry ->
-                val localTime = entry.value.value as LocalTime?
-                portableEntity.timeValues.add(StoreTime(entry.key, localTime?.toNanoOfDay()))
-            }
             entity.durationValues.filterIgnored(dbContext).forEach { entry ->
                 val duration = entry.value.value
                 portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
@@ -1272,15 +1276,6 @@ abstract class Entity(
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.periodValues.getValue(field.key).value = when (value) {
                         is String -> Period.parse(value)
-                        else -> null
-                    }
-                }
-            }
-            portableEntity.timeValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.localTimeValues.getValue(field.key).value = when (value) {
-                        is Long -> LocalTime.ofNanoOfDay(value)
                         else -> null
                     }
                 }
