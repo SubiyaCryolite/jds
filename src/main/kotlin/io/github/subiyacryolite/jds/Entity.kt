@@ -59,31 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val shortValues: MutableMap<Int, IValue<Short?>> = HashMap(),
-
-    /**
-     *
-     */
-    private val floatValues: MutableMap<Int, IValue<Float?>> = HashMap(),
-
-    /**
-     *
-     */
-    private val doubleValues: MutableMap<Int, IValue<Double?>> = HashMap(),
-
-    /**
-     *
-     */
-    private val longValues: MutableMap<Int, IValue<Long?>> = HashMap(),
-
-    /**
-     *
-     */
-    private val integerValues: MutableMap<Int, IValue<Int?>> = HashMap(),
-
-    /**
-     *
-     */
     private val uuidValues: MutableMap<Int, IValue<UUID?>> = HashMap(),
 
     /**
@@ -222,7 +197,16 @@ abstract class Entity(
         field: Field,
         value: IValue<Short?>,
         propertyName: String = ""
-    ): IValue<Short?> = map(field, value, setOf(FieldType.Short), shortValues, propertyName)
+    ): IValue<Short?> {
+        if (options.assign) {
+            options.portableEntity?.shortValues?.add(StoreShort(field.id, value.value))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.shortValues?.filter { it.key == field.id }?.forEach {
+                value.set(it.value)
+            }
+        }
+        return map(field, value, setOf(FieldType.Short), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapDouble")
     protected fun map(
@@ -240,7 +224,16 @@ abstract class Entity(
         field: Field,
         value: IValue<Double?>,
         propertyName: String = ""
-    ): IValue<Double?> = map(field, value, setOf(FieldType.Double), doubleValues, propertyName)
+    ): IValue<Double?> {
+        if (options.assign) {
+            options.portableEntity?.doubleValues?.add(StoreDouble(field.id, value.value))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.doubleValues?.filter { it.key == field.id }?.forEach {
+                value.set(it.value)
+            }
+        }
+        return map(field, value, setOf(FieldType.Double), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapInt")
     protected fun map(
@@ -258,7 +251,16 @@ abstract class Entity(
         field: Field,
         value: IValue<Int?>,
         propertyName: String = ""
-    ): IValue<Int?> = map(field, value, setOf(FieldType.Int), integerValues, propertyName)
+    ): IValue<Int?> {
+        if (options.assign) {
+            options.portableEntity?.integerValues?.add(StoreInteger(field.id, value.value))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.integerValues?.filter { it.key == field.id }?.forEach {
+                value.set(it.value)
+            }
+        }
+        return map(field, value, setOf(FieldType.Int), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapLong")
     protected fun map(
@@ -276,7 +278,16 @@ abstract class Entity(
         field: Field,
         value: IValue<Long?>,
         propertyName: String = ""
-    ): IValue<Long?> = map(field, value, setOf(FieldType.Long), longValues, propertyName)
+    ): IValue<Long?> {
+        if (options.assign) {
+            options.portableEntity?.longValues?.add(StoreLong(field.id, value.value))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.longValues?.filter { it.key == field.id }?.forEach {
+                value.set(it.value)
+            }
+        }
+        return map(field, value, setOf(FieldType.Long), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapFloat")
     protected fun map(
@@ -294,7 +305,16 @@ abstract class Entity(
         field: Field,
         value: IValue<Float?>,
         propertyName: String = ""
-    ): IValue<Float?> = map(field, value, setOf(FieldType.Float), floatValues, propertyName)
+    ): IValue<Float?> {
+        if (options.assign) {
+            options.portableEntity?.floatValue?.add(StoreFloat(field.id, value.value))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.floatValue?.filter { it.key == field.id }?.forEach {
+                value.set(it.value)
+            }
+        }
+        return map(field, value, setOf(FieldType.Float), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapBoolean")
     protected fun map(
@@ -989,11 +1009,6 @@ abstract class Entity(
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
             FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
-            FieldType.Float -> floatValues.putIfAbsent(fieldId, NullableFloatValue())
-            FieldType.Double -> doubleValues.putIfAbsent(fieldId, NullableDoubleValue())
-            FieldType.Short -> shortValues.putIfAbsent(fieldId, NullableShortValue())
-            FieldType.Long -> longValues.putIfAbsent(fieldId, NullableLongValue())
-            FieldType.Int -> integerValues.putIfAbsent(fieldId, NullableIntegerValue())
             FieldType.Uuid -> uuidValues.putIfAbsent(fieldId, NullableUuidValue())
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
@@ -1107,22 +1122,6 @@ abstract class Entity(
             //==============================================
             //PRIMITIVES, also saved to array struct to streamline json
             //==============================================
-
-            entity.floatValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.floatValue.add(StoreFloat(entry.key, entry.value.value))
-            }
-            entity.doubleValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.doubleValues.add(StoreDouble(entry.key, entry.value.value))
-            }
-            entity.shortValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.shortValues.add(StoreShort(entry.key, entry.value.value))
-            }
-            entity.longValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.longValues.add(StoreLong(entry.key, entry.value.value))
-            }
-            entity.integerValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.integerValues.add(StoreInteger(entry.key, entry.value.value))
-            }
             entity.uuidValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
             }
@@ -1234,40 +1233,10 @@ abstract class Entity(
                     }
                 }
             }
-            portableEntity.doubleValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.doubleValues.getValue(field.key).value = value
-                }
-            }
-            portableEntity.floatValue.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.floatValues.getValue(field.key).value = value
-                }
-            }
-            portableEntity.integerValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.integerValues.getValue(field.key).value = value
-                }
-            }
-            portableEntity.shortValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.shortValues.getValue(field.key).value = value
-                }
-            }
             portableEntity.uuidValues.forEach { field ->
                 val value = field.value
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.uuidValues.getValue(field.key).value = value?.toUuid()
-                }
-            }
-            portableEntity.longValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.longValues.getValue(field.key).value = value
                 }
             }
             portableEntity.enumValues.forEach { field ->
