@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val localDateTimeValues: MutableMap<Int, IValue<LocalDateTime?>> = HashMap(),
-
-    /**
-     *
-     */
     private val zonedDateTimeValues: MutableMap<Int, IValue<ZonedDateTime?>> = HashMap(),
 
     /**
@@ -415,7 +410,27 @@ abstract class Entity(
         field: Field,
         value: IValue<LocalDateTime?>,
         propertyName: String = ""
-    ): IValue<LocalDateTime?> = map(field, value, setOf(FieldType.DateTime), localDateTimeValues, propertyName)
+    ): IValue<LocalDateTime?> {
+        if (options.assign) {
+            options.portableEntity?.dateTimeValues?.add(
+                StoreDateTime(
+                    field.id,
+                    value.value?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
+                )
+            )
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.dateTimeValues?.filter { it.key == field.id }?.forEach {
+                val src = it.value
+                value.set(
+                    when (src) {
+                        is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(src), ZoneId.of("UTC"))
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.DateTime), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapZonedDateTime")
     protected fun map(
@@ -897,7 +912,6 @@ abstract class Entity(
             FieldType.MonthDay -> monthDayValues.putIfAbsent(fieldId, NullableMonthDayValue())
             FieldType.YearMonth -> yearMonthValues.putIfAbsent(fieldId, NullableYearMonthValue())
             FieldType.Period -> periodValues.putIfAbsent(fieldId, NullablePeriodValue())
-            FieldType.DateTime -> localDateTimeValues.putIfAbsent(fieldId, NullableLocalDateTimeValue())
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
             FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
@@ -1066,15 +1080,6 @@ abstract class Entity(
                 val duration = entry.value.value
                 portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
             }
-            entity.localDateTimeValues.filterIgnored(dbContext).forEach { entry ->
-                val localDateTime = entry.value.value as LocalDateTime?
-                portableEntity.dateTimeValues.add(
-                    StoreDateTime(
-                        entry.key,
-                        localDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
-                    )
-                )
-            }
 
             entity.monthDayValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.monthDayValues.add(StoreMonthDay(entry.key, entry.value.value?.toString()))
@@ -1214,15 +1219,6 @@ abstract class Entity(
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.durationValues.getValue(field.key).value = when (value) {
                         is Long -> Duration.ofNanos(value)
-                        else -> null
-                    }
-                }
-            }
-            portableEntity.dateTimeValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.localDateTimeValues.getValue(field.key).value = when (value) {
-                        is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
                         else -> null
                     }
                 }
