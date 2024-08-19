@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val yearMonthValues: MutableMap<Int, IValue<YearMonth?>> = HashMap(),
-
-    /**
-     *
-     */
     private val periodValues: MutableMap<Int, IValue<Period?>> = HashMap(),
 
     /**
@@ -586,7 +581,21 @@ abstract class Entity(
         field: Field,
         value: IValue<YearMonth?>,
         propertyName: String = ""
-    ): IValue<YearMonth?> = map(field, value, setOf(FieldType.YearMonth), yearMonthValues, propertyName)
+    ): IValue<YearMonth?> {
+        if (options.assign) {
+            options.portableEntity?.yearMonthValues?.add(StoreYearMonth(field.id, value.value?.toString()))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.yearMonthValues?.filter { it.key == field.id }?.forEach {
+                value.set(
+                    when (it.value) {
+                        is String -> YearMonth.parse(it.value!!)
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.YearMonth), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapPeriod")
     protected fun map(
@@ -940,7 +949,6 @@ abstract class Entity(
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.Duration -> durationValues.putIfAbsent(fieldId, NullableDurationValue())
-            FieldType.YearMonth -> yearMonthValues.putIfAbsent(fieldId, NullableYearMonthValue())
             FieldType.Period -> periodValues.putIfAbsent(fieldId, NullablePeriodValue())
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
@@ -1096,9 +1104,6 @@ abstract class Entity(
             entity.durationValues.filterIgnored(dbContext).forEach { entry ->
                 val duration = entry.value.value
                 portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
-            }
-            entity.yearMonthValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.yearMonthValues.add(StoreYearMonth(entry.key, entry.value.value?.toString()))
             }
             entity.periodValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.periodValues.add(StorePeriod(entry.key, entry.value.value?.toString()))
@@ -1271,15 +1276,6 @@ abstract class Entity(
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.periodValues.getValue(field.key).value = when (value) {
                         is String -> Period.parse(value)
-                        else -> null
-                    }
-                }
-            }
-            portableEntity.yearMonthValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.yearMonthValues.getValue(field.key).value = when (value) {
-                        is String -> YearMonth.parse(value)
                         else -> null
                     }
                 }
