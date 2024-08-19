@@ -64,17 +64,7 @@ abstract class Entity(
     /**
      *
      */
-    private val stringCollections: MutableMap<Int, MutableCollection<String>> = HashMap(),
-
-    /**
-     *
-     */
     private val dateTimeCollections: MutableMap<Int, MutableCollection<LocalDateTime>> = HashMap(),
-
-    /**
-     *
-     */
-    private val floatCollections: MutableMap<Int, MutableCollection<Float>> = HashMap(),
 
     /**
      *
@@ -195,7 +185,7 @@ abstract class Entity(
     ): IValue<Short?> {
         if (options.assign) {
             options.portableEntity?.shortValues?.add(StoreShort(field.id, value.value))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.shortValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -222,7 +212,7 @@ abstract class Entity(
     ): IValue<Double?> {
         if (options.assign) {
             options.portableEntity?.doubleValues?.add(StoreDouble(field.id, value.value))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.doubleValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -249,7 +239,7 @@ abstract class Entity(
     ): IValue<Int?> {
         if (options.assign) {
             options.portableEntity?.integerValues?.add(StoreInteger(field.id, value.value))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.integerValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -276,7 +266,7 @@ abstract class Entity(
     ): IValue<Long?> {
         if (options.assign) {
             options.portableEntity?.longValues?.add(StoreLong(field.id, value.value))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.longValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -303,7 +293,7 @@ abstract class Entity(
     ): IValue<Float?> {
         if (options.assign) {
             options.portableEntity?.floatValue?.add(StoreFloat(field.id, value.value))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.floatValue?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -338,7 +328,7 @@ abstract class Entity(
                     }
                 )
             )
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.booleanValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -370,7 +360,7 @@ abstract class Entity(
     ): IValue<UUID?> {
         if (options.assign) {
             options.portableEntity?.uuidValues?.add(StoreUuid(field.id, value.value.toByteArray()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.uuidValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value?.toUuid())
             }
@@ -397,7 +387,7 @@ abstract class Entity(
     ): IValue<String?> {
         if (options.assign) {
             options.portableEntity?.stringValues?.add(StoreString(field.id, value.get()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.stringValues?.filter { it.key == field.id }?.forEach {
                 value.set(it.value)
             }
@@ -429,7 +419,7 @@ abstract class Entity(
                     value.value?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
                 )
             )
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.dateTimeValues?.filter { it.key == field.id }?.forEach {
                 val src = it.value
                 value.set(
@@ -467,7 +457,7 @@ abstract class Entity(
                     value.value?.toInstant()?.toEpochMilli()
                 )
             )
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.zonedDateTimeValues?.filter { it.key == field.id }?.forEach {
                 val src = it.value
                 value.set(
@@ -500,7 +490,7 @@ abstract class Entity(
     ): IValue<LocalDate?> {
         if (options.assign) {
             options.portableEntity?.dateValues?.add(StoreDate(field.id, value.get()?.toEpochDay()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.dateValues?.filter { it.key == field.id }?.forEach {
                 val src = it.value
                 value.set(
@@ -533,7 +523,7 @@ abstract class Entity(
     ): IValue<LocalTime?> {
         if (options.assign) {
             options.portableEntity?.timeValues?.add(StoreTime(field.id, value.value?.toNanoOfDay()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.timeValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -583,7 +573,7 @@ abstract class Entity(
     ): IValue<MonthDay?> {
         if (options.assign) {
             options.portableEntity?.monthDayValues?.add(StoreMonthDay(field.id, value.value?.toString()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.monthDayValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -615,7 +605,7 @@ abstract class Entity(
     ): IValue<YearMonth?> {
         if (options.assign) {
             options.portableEntity?.yearMonthValues?.add(StoreYearMonth(field.id, value.value?.toString()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.yearMonthValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -647,7 +637,7 @@ abstract class Entity(
     ): IValue<Period?> {
         if (options.assign) {
             options.portableEntity?.periodValues?.add(StorePeriod(field.id, value.value?.toString()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.periodValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -682,7 +672,7 @@ abstract class Entity(
             //TODO portable entity.values
             //TODO this can be extended in different languages
             options.portableEntity?.durationValues?.add(StoreDuration(field.id, value.value?.toNanos()))
-        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+        } else if (populate(field)) {
             options.portableEntity?.durationValues?.filter { it.key == field.id }?.forEach {
                 value.set(
                     when (it.value) {
@@ -740,16 +730,20 @@ abstract class Entity(
     @JvmName("mapStrings")
     protected fun map(
         field: Field,
-        collection: MutableCollection<String>,
+        collection: Collection<String>,
         propertyName: String = ""
-    ): MutableCollection<String> {
-        return stringCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.StringCollection),
-                propertyName
-            )
-        ) { collection }
+    ): Collection<String> {
+        if (options.assign) {
+            options.portableEntity?.stringCollections?.add(StoreStringCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.stringCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.StringCollection), propertyName, options.skip())
+        return listOf()
     }
 
     @JvmName("mapDateTimes")
@@ -770,16 +764,24 @@ abstract class Entity(
     @JvmName("mapFloats")
     protected fun map(
         field: Field,
-        collection: MutableCollection<Float>,
-        propertyName: String = ""
-    ): MutableCollection<Float> {
-        return floatCollections.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.FloatCollection),
-                propertyName
-            )
-        ) { collection }
+        collection: Collection<Float>,
+        name: String = ""
+    ): Collection<Float> {
+        if (options.assign) {
+            options.portableEntity?.floatCollections?.add(StoreFloatCollection(field.id, collection))
+        } else if (populate(field)) {
+            options.portableEntity?.floatCollections?.filter { it.key == field.id }?.forEach { match ->
+                match.values.forEach { value ->
+                    if (collection is MutableCollection) collection.add(value)
+                }
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.FloatCollection), name, options.skip())
+        return listOf()
+    }
+
+    private fun populate(field: Field): Boolean {
+        return options.populate && populateProperty(DbContext.instance, field.id)
     }
 
     @JvmName("mapIntegers")
@@ -1001,12 +1003,10 @@ abstract class Entity(
     ) {
         when (fieldType) {
             FieldType.DoubleCollection -> doubleCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.FloatCollection -> floatCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.LongCollection -> longCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.IntCollection -> integerCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.ShortCollection -> shortCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.UuidCollection -> uuidCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.StringCollection -> stringCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
@@ -1151,9 +1151,6 @@ abstract class Entity(
             //==============================================
             //ARRAYS
             //==============================================
-            entity.stringCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.stringCollections.add(StoreStringCollection(entry.key, entry.value))
-            }
             entity.dateTimeCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.dateTimeCollection.add(
                     StoreDateTimeCollection(
@@ -1161,9 +1158,6 @@ abstract class Entity(
                         toTimeStampCollection(entry.value)
                     )
                 )
-            }
-            entity.floatCollections.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.floatCollections.add(StoreFloatCollection(entry.key, entry.value))
             }
             entity.doubleCollections.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.doubleCollections.add(StoreDoubleCollection(entry.key, entry.value))
@@ -1260,12 +1254,6 @@ abstract class Entity(
                     field.values.forEach { value -> dest.add(value) }
                 }
             }
-            portableEntity.floatCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.floatCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
-                }
-            }
             portableEntity.integerCollections.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
                     val dest = entity.integerCollections.getValue(field.key)
@@ -1287,12 +1275,6 @@ abstract class Entity(
             portableEntity.longCollections.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
                     val dest = entity.longCollections.getValue(field.key)
-                    field.values.forEach { value -> dest.add(value) }
-                }
-            }
-            portableEntity.stringCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.stringCollections.getValue(field.key)
                     field.values.forEach { value -> dest.add(value) }
                 }
             }
