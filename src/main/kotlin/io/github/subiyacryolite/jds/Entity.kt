@@ -59,11 +59,6 @@ abstract class Entity(
     /**
      *
      */
-    private val durationValues: MutableMap<Int, IValue<Duration?>> = HashMap(),
-
-    /**
-     *
-     */
     private val booleanValues: MutableMap<Int, IValue<Boolean?>> = HashMap(),
 
     /**
@@ -640,7 +635,24 @@ abstract class Entity(
         field: Field,
         value: IValue<Duration?>,
         propertyName: String = ""
-    ): IValue<Duration?> = map(field, value, setOf(FieldType.Duration), durationValues, propertyName)
+    ): IValue<Duration?> {
+        if (options.assign) {
+            //TODO replace with generic JSON for better compatibility, all fields in map type <String, Any?>
+            //TODO portable entity.values
+            //TODO this can be extended in different languages
+            options.portableEntity?.durationValues?.add(StoreDuration(field.id, value.value?.toNanos()))
+        } else if (options.populate && populateProperty(DbContext.instance, field.id)) {
+            options.portableEntity?.durationValues?.filter { it.key == field.id }?.forEach {
+                value.set(
+                    when (it.value) {
+                        is Long -> Duration.ofNanos(it.value!!)
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.Duration), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapNullableEnum")
     protected fun <T : Enum<T>> map(
@@ -957,7 +969,6 @@ abstract class Entity(
             FieldType.DateTimeCollection -> dateTimeCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
             FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.Duration -> durationValues.putIfAbsent(fieldId, NullableDurationValue())
             FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.Enum -> enumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
             FieldType.EnumString -> stringEnumValues.putIfAbsent(fieldId, ObjectValue<Enum<*>?>(null))
@@ -1107,13 +1118,6 @@ abstract class Entity(
                 portableEntity.uuidValues.add(StoreUuid(entry.key, entry.value.value.toByteArray()))
             }
             //==============================================
-            //Dates & Time
-            //==============================================
-            entity.durationValues.filterIgnored(dbContext).forEach { entry ->
-                val duration = entry.value.value
-                portableEntity.durationValues.add(StoreDuration(entry.key, duration?.toNanos()))
-            }
-            //==============================================
             //BLOB
             //==============================================
             entity.blobValues.filterIgnored(dbContext).forEach { entry ->
@@ -1235,15 +1239,6 @@ abstract class Entity(
                 val value = field.value
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.doubleValues.getValue(field.key).value = value
-                }
-            }
-            portableEntity.durationValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.durationValues.getValue(field.key).value = when (value) {
-                        is Long -> Duration.ofNanos(value)
-                        else -> null
-                    }
                 }
             }
             portableEntity.floatValue.forEach { field ->
