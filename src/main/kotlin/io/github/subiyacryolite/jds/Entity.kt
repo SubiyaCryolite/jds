@@ -17,7 +17,6 @@ import io.github.subiyacryolite.jds.annotations.EntityAnnotation
 import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
-import io.github.subiyacryolite.jds.extensions.filterIgnored
 import io.github.subiyacryolite.jds.extensions.toByteArray
 import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.interfaces.IEntity
@@ -63,12 +62,7 @@ abstract class Entity(
     /**
      * Possible exceptions
      */
-    private val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap(),
-
-    /**
-     *
-     */
-    private val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap()
+    private val objectCollections: MutableMap<FieldEntity<*>, MutableCollection<IEntity>> = HashMap()
 ) : IEntity {
 
     init {
@@ -868,16 +862,18 @@ abstract class Entity(
     @JvmName("mapIntMap")
     protected fun map(
         field: Field,
-        map: MutableMap<Int, String>,
+        map: Map<Int, String>,
         propertyName: String = ""
-    ): MutableMap<Int, String> {
-        return mapIntKeyValues.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.MapIntKey),
-                propertyName
-            )
-        ) { map }
+    ): Map<Int, String> {
+        if (options.assign) {
+            options.portableEntity?.mapIntKeyValues?.add(StoreMapIntKey(field.id, map))
+        } else if (populate(field)) {
+            options.portableEntity?.mapIntKeyValues?.filter { it.key == field.id }?.forEach { match ->
+                if (map is MutableMap) map.putAll(match.values)
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.MapIntKey), propertyName, options.skip())
+        return emptyMap()
     }
 
     @JvmName("mapStringMap")
@@ -1034,22 +1030,6 @@ abstract class Entity(
         return populate
     }
 
-    /**
-     * This method enforces forward compatibility by ensuring that every Value is present even if the field is not defined or known locally
-     * Delete this block
-     */
-    @Deprecated("No longer needed as the concept of backing values will be deleted entirely")
-    @Suppress("NON_EXHAUSTIVE_WHEN")
-    private fun initBackingValueIfNotDefined(
-        fieldType: FieldType,
-        fieldId: Int
-    ) {
-        when (fieldType) {
-            FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
-            else -> {}
-        }
-    }
-
     companion object : Serializable {
 
         private const val serialVersionUID = 20180106_2125L
@@ -1148,32 +1128,23 @@ abstract class Entity(
             entity.options.portableEntity = portableEntity
             try {
                 entity.bind()
+                entity.objectCollections.forEach { (fieldEntity, mutableCollection) ->
+                    mutableCollection.forEach { entity ->
+                        val innerPortableEntity = PortableEntity()
+                        innerPortableEntity.fieldId = fieldEntity.field.id
+                        innerPortableEntity.init(dbContext, entity)
+                        portableEntity.entityOverviews.add(innerPortableEntity)
+                    }
+                }
+                entity.objectValues.forEach { (fieldEntity, objectValue) ->
+                    val innerPortableEntity = PortableEntity()
+                    innerPortableEntity.fieldId = fieldEntity.field.id
+                    innerPortableEntity.init(dbContext, objectValue.value)
+                    portableEntity.entityOverviews.add(innerPortableEntity)
+                }
             } finally {
                 entity.options.assign = false
                 entity.options.portableEntity = null
-            }
-            //==============================================
-            // Maps
-            //==============================================
-            entity.mapIntKeyValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.mapIntKeyValues.add(StoreMapIntKey(entry.key, entry.value))
-            }
-            //==============================================
-            //EMBEDDED OBJECTS
-            //==============================================
-            entity.objectCollections.forEach { (fieldEntity, mutableCollection) ->
-                mutableCollection.forEach { entity ->
-                    val innerPortableEntity = PortableEntity()
-                    innerPortableEntity.fieldId = fieldEntity.field.id
-                    innerPortableEntity.init(dbContext, entity)
-                    portableEntity.entityOverviews.add(innerPortableEntity)
-                }
-            }
-            entity.objectValues.forEach { (fieldEntity, objectValue) ->
-                val innerPortableEntity = PortableEntity()
-                innerPortableEntity.fieldId = fieldEntity.field.id
-                innerPortableEntity.init(dbContext, objectValue.value)
-                portableEntity.entityOverviews.add(innerPortableEntity)
             }
         }
 
@@ -1182,26 +1153,20 @@ abstract class Entity(
             entity.options.portableEntity = portableEntity
             try {
                 entity.bind()
+                portableEntity.entityOverviews.forEach { subEntities ->
+                    populateObjects(
+                        entity,
+                        dbContext,
+                        subEntities.overview.fieldId,
+                        subEntities.overview.entityId,
+                        subEntities.overview.id,
+                        subEntities.overview.editVersion,
+                        subEntities
+                    )
+                }
             } finally {
                 entity.options.populate = false
                 entity.options.portableEntity = null
-            }
-            portableEntity.mapIntKeyValues.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.mapIntKeyValues.getValue(field.key).putAll(field.values)
-                }
-            }
-            //==============================================
-            portableEntity.entityOverviews.forEach { subEntities ->
-                populateObjects(
-                    entity,
-                    dbContext,
-                    subEntities.overview.fieldId,
-                    subEntities.overview.entityId,
-                    subEntities.overview.id,
-                    subEntities.overview.editVersion,
-                    subEntities
-                )
             }
         }
 
