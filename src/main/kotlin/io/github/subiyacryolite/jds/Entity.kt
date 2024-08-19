@@ -31,15 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-data class EntityOptions(
-    var populate: Boolean = false,
-    var assign: Boolean = false,
-    var portableEntity: PortableEntity? = null
-) {
-    fun skip(): Boolean {
-        return assign || populate
-    }
-}
 
 /**
  * This class allows for all mapping operations in JDS, it also uses
