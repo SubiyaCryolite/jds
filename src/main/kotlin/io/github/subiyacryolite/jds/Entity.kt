@@ -18,7 +18,6 @@ import io.github.subiyacryolite.jds.beans.property.*
 import io.github.subiyacryolite.jds.context.DbContext
 import io.github.subiyacryolite.jds.enums.FieldType
 import io.github.subiyacryolite.jds.extensions.filterIgnored
-import io.github.subiyacryolite.jds.extensions.filterIgnoredEnums
 import io.github.subiyacryolite.jds.extensions.toByteArray
 import io.github.subiyacryolite.jds.extensions.toUuid
 import io.github.subiyacryolite.jds.interfaces.IEntity
@@ -69,12 +68,7 @@ abstract class Entity(
     /**
      *
      */
-    private val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap(),
-
-    /**
-     *
-     */
-    private val mapStringKeyValues: MutableMap<Int, MutableMap<String, String>> = HashMap()
+    private val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap()
 ) : IEntity {
 
     init {
@@ -681,7 +675,7 @@ abstract class Entity(
         val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
         if (fieldEnum.field.type == FieldType.Enum) {
             if (options.assign) {
-                options.portableEntity?.enumValues?.add(StoreEnum(fieldEnum.field.id, value.value?.ordinal))
+                options.portableEntity?.enumValues?.add(StoreEnum(fieldEnum.field.id, value.value.ordinal))
             } else if (populate(fieldEnum.field)) {
                 options.portableEntity?.enumValues?.filter { it.key == fieldEnum.field.id }?.forEach {
                     value.set(fieldEnum.valueOf(it.value!!)!!)
@@ -889,16 +883,18 @@ abstract class Entity(
     @JvmName("mapStringMap")
     protected fun map(
         field: Field,
-        map: MutableMap<String, String>,
+        map: Map<String, String>,
         propertyName: String = ""
-    ): MutableMap<String, String> {
-        return mapStringKeyValues.getOrPut(
-            mapField(
-                overview.entityId,
-                Field.bind(field, FieldType.MapStringKey),
-                propertyName
-            )
-        ) { map }
+    ): Map<String, String> {
+        if (options.assign) {
+            options.portableEntity?.mapStringKeyValues?.add(StoreMapStringKey(field.id, map))
+        } else if (populate(field)) {
+            options.portableEntity?.mapStringKeyValues?.filter { it.key == field.id }?.forEach { match ->
+                if (map is MutableMap) map.putAll(match.values)
+            }
+        }
+        mapField(overview.entityId, Field.bind(field, FieldType.MapStringKey), propertyName, options.skip())
+        return emptyMap()
     }
 
     @JvmName("mapOfCollections")
@@ -1050,7 +1046,6 @@ abstract class Entity(
     ) {
         when (fieldType) {
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
-            FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
             else -> {}
         }
     }
@@ -1163,9 +1158,6 @@ abstract class Entity(
             entity.mapIntKeyValues.filterIgnored(dbContext).forEach { entry ->
                 portableEntity.mapIntKeyValues.add(StoreMapIntKey(entry.key, entry.value))
             }
-            entity.mapStringKeyValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.mapStringKeyValues.add(StoreMapStringKey(entry.key, entry.value))
-            }
             //==============================================
             //EMBEDDED OBJECTS
             //==============================================
@@ -1197,11 +1189,6 @@ abstract class Entity(
             portableEntity.mapIntKeyValues.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
                     entity.mapIntKeyValues.getValue(field.key).putAll(field.values)
-                }
-            }
-            portableEntity.mapStringKeyValues.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.mapStringKeyValues.getValue(field.key).putAll(field.values)
                 }
             }
             //==============================================
