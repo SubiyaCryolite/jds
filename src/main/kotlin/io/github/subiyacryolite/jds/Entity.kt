@@ -69,16 +69,6 @@ abstract class Entity(
     /**
      *
      */
-    private val enumCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
-
-    /**
-     *
-     */
-    private val enumStringCollections: MutableMap<Int, MutableCollection<Enum<*>>> = HashMap(),
-
-    /**
-     *
-     */
     private val mapIntKeyValues: MutableMap<Int, MutableMap<Int, String>> = HashMap(),
 
     /**
@@ -91,11 +81,7 @@ abstract class Entity(
      */
     private val mapOfCollectionsValues: MutableMap<Int, MutableMap<String, MutableCollection<String>>> = HashMap(),
 
-    /**
-     *
-     */
-    private val blobValues: MutableMap<Int, IValue<ByteArray?>> = HashMap()
-) : IEntity {
+    ) : IEntity {
 
     init {
         val entityAnnotation = getEntityAnnotation(javaClass)
@@ -512,7 +498,21 @@ abstract class Entity(
         field: Field,
         value: IValue<ByteArray?>,
         propertyName: String = ""
-    ): IValue<ByteArray?> = map(field, value, setOf(FieldType.Blob), blobValues, propertyName)
+    ): IValue<ByteArray?> {
+        if (options.assign) {
+            options.portableEntity?.blobValues?.add(StoreBlob(field.id, value.value ?: ByteArray(0)))
+        } else if (populate(field)) {
+            options.portableEntity?.blobValues?.filter { it.key == field.id }?.forEach {
+                value.set(
+                    when (it.value) {
+                        is ByteArray -> it.value
+                        else -> null
+                    }
+                )
+            }
+        }
+        return map(field, value, setOf(FieldType.Blob), mutableMapOf(), propertyName)
+    }
 
     @JvmName("mapMonthDay")
     protected fun map(
@@ -650,7 +650,7 @@ abstract class Entity(
         fieldEnum: FieldEnum<T>,
         value: IValue<T?>,
         propertyName: String = ""
-    ){
+    ) {
         val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.Enum, FieldType.EnumString))
         if (fieldEnum.field.type == FieldType.Enum) {
             if (options.assign) {
@@ -925,22 +925,55 @@ abstract class Entity(
     @JvmName("mapEnums")
     protected fun <T : Enum<T>> map(
         fieldEnum: FieldEnum<T>,
-        collection: MutableCollection<T>,
+        collection: Collection<T>,
         propertyName: String = ""
-    ): MutableCollection<T> {
+    ): Collection<T> {
         val fieldId = Field.bind(fieldEnum.field, setOf(FieldType.EnumCollection, FieldType.EnumStringCollection))
         when (fieldEnum.field.type) {
             FieldType.EnumCollection -> {
-                @Suppress("UNCHECKED_CAST")
-                enumCollections[fieldId] = collection as MutableCollection<Enum<*>>
+                if (options.assign) {
+                    options.portableEntity?.enumCollections?.add(
+                        StoreEnumCollection(
+                            fieldEnum.field.id,
+                            toIntCollection(collection)
+                        )
+                    )
+                } else if (populate(fieldEnum.field)) {
+                    options.portableEntity?.enumCollections?.filter { it.key == fieldEnum.field.id }?.forEach { match ->
+                        match.values.forEach { ordinal ->
+                            if (collection is MutableCollection) {
+                                fieldEnum.values
+                                    .filter { enumValue -> enumValue.ordinal == ordinal }
+                                    .forEach { collection.add(it) }
+                            }
+                        }
+                    }
+                }
             }
 
             else -> {
-                @Suppress("UNCHECKED_CAST")
-                enumStringCollections[fieldId] = collection as MutableCollection<Enum<*>>
+                if (options.assign) {
+                    options.portableEntity?.enumStringCollections?.add(
+                        StoreEnumStringCollection(
+                            fieldEnum.field.id,
+                            toStringCollection(collection)
+                        )
+                    )
+                } else if (populate(fieldEnum.field)) {
+                    options.portableEntity?.enumStringCollections?.filter { it.key == fieldEnum.field.id }
+                        ?.forEach { match ->
+                            match.values.forEach { value ->
+                                if (collection is MutableCollection) {
+                                    val enumVal = fieldEnum.valueOf(value)
+                                    if (enumVal != null)
+                                        collection.add(enumVal)
+                                }
+                            }
+                        }
+                }
             }
         }
-        mapField(overview.entityId, fieldId, propertyName)
+        mapField(overview.entityId, fieldId, propertyName, options.skip())
         mapEnums(overview.entityId, fieldId)
         return collection
     }
@@ -1020,9 +1053,6 @@ abstract class Entity(
         fieldId: Int
     ) {
         when (fieldType) {
-            FieldType.EnumCollection -> enumCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.EnumStringCollection -> enumStringCollections.putIfAbsent(fieldId, ArrayList())
-            FieldType.Blob -> blobValues.putIfAbsent(fieldId, NullableBlobValue())
             FieldType.MapIntKey -> mapIntKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapStringKey -> mapStringKeyValues.putIfAbsent(fieldId, HashMap())
             FieldType.MapOfCollections -> mapOfCollectionsValues.putIfAbsent(fieldId, HashMap())
@@ -1133,27 +1163,6 @@ abstract class Entity(
                 entity.options.portableEntity = null
             }
             //==============================================
-            //BLOB
-            //==============================================
-            entity.blobValues.filterIgnored(dbContext).forEach { entry ->
-                portableEntity.blobValues.add(StoreBlob(entry.key, entry.value.value ?: ByteArray(0)))
-            }
-            //==============================================
-            //Enums
-            //==============================================
-            entity.enumCollections.filterIgnoredEnums(dbContext).forEach { entry ->
-                portableEntity.enumCollections.add(StoreEnumCollection(entry.key, toIntCollection(entry.value)))
-            }
-            entity.enumStringCollections.filterIgnoredEnums(dbContext).forEach { entry ->
-                portableEntity.enumStringCollections.add(
-                    StoreEnumStringCollection(
-                        entry.key,
-                        toStringCollection(entry.value)
-                    )
-                )
-            }
-
-            //==============================================
             // Maps
             //==============================================
             entity.mapIntKeyValues.filterIgnored(dbContext).forEach { entry ->
@@ -1192,43 +1201,6 @@ abstract class Entity(
             } finally {
                 entity.options.populate = false
                 entity.options.portableEntity = null
-            }
-
-            portableEntity.blobValues.forEach { field ->
-                val value = field.value
-                if (entity.populateProperty(dbContext, field.key)) {
-                    entity.blobValues.getValue(field.key).value = when (value) {
-                        is ByteArray -> value
-                        else -> null
-                    }
-                }
-            }
-            portableEntity.enumCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.enumCollections.getValue(field.key)
-                    val fieldEnum = FieldEnum.enums[field.key]
-                    if (fieldEnum != null) {
-                        field.values.forEach { enumOrdinal ->
-                            val enumValues = fieldEnum.values
-                            if (enumOrdinal < enumValues.size) {
-                                dest.add(enumValues.find { enumValue -> enumValue.ordinal == enumOrdinal }!!)
-                            }
-                        }
-                    }
-                }
-            }
-            portableEntity.enumStringCollections.forEach { field ->
-                if (entity.populateProperty(dbContext, field.key)) {
-                    val dest = entity.enumStringCollections.getValue(field.key)
-                    val fieldEnum = FieldEnum.enums[field.key]
-                    if (fieldEnum != null) {
-                        field.values.forEach { enumString ->
-                            val enumVal = fieldEnum.valueOf(enumString)
-                            if (enumVal != null)
-                                dest.add(enumVal)
-                        }
-                    }
-                }
             }
             portableEntity.mapIntKeyValues.forEach { field ->
                 if (entity.populateProperty(dbContext, field.key)) {
