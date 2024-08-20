@@ -56,6 +56,7 @@ abstract class DbContext(
 
     companion object : Serializable {
 
+        var instance: DbContext? = null
         var initialising: Boolean = false
     }
 
@@ -65,6 +66,7 @@ abstract class DbContext(
     @JvmOverloads
     fun init(dimensionTable: String = "${objectPrefix}entity_overview") {
         try {
+            instance = this
             this.dimensionTable = dimensionTable
             dataSource.connection.use { connection ->
                 prepareJdsComponents(connection)

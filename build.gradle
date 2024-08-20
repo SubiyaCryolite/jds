@@ -7,8 +7,6 @@ buildscript {
 
     repositories {
         mavenCentral()
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
     }
 
     dependencies {
@@ -24,7 +22,7 @@ apply plugin: "org.jetbrains.dokka"
 apply plugin: "io.codearte.nexus-staging"
 
 group = "io.github.subiyacryolite"
-version = "20.5-SNAPSHOT"
+version = "20.8-SNAPSHOT"
 archivesBaseName = project.name
 description = "A dynamic, cross platform and high performance data-mapper. JDS is designed to assist in rapid development and the creation of robust, strongly typed, field dictionaries"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
@@ -33,9 +31,6 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven { url "https://maven.atlassian.com/3rdparty/" }
-    maven { url "https://clojars.org/repo/" }
 }
 
 dependencies {
@@ -52,7 +47,7 @@ dependencies {
     testImplementation 'org.postgresql:postgresql:42.7.2'
     testImplementation 'com.mysql:mysql-connector-j:9.0.0'
     testImplementation 'org.mariadb.jdbc:mariadb-java-client:3.0.5'
-    testImplementation "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
+    testImplementation "com.oracle.database.jdbc:ojdbc11-production:23.4.0.24.05"
     testImplementation "com.zaxxer:HikariCP:5.0.1"
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.9.0"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.9.0"
