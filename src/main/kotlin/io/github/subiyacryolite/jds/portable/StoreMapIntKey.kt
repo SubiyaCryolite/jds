@@ -23,11 +23,11 @@ import java.io.Serializable
  * @param values the corresponding value
  */
 data class StoreMapIntKey(
-        @get:JsonProperty("k")
-        @set:JsonProperty("k")
-        var key: Int = 0,
+    @get:JsonProperty("k")
+    @set:JsonProperty("k")
+    var key: Int = 0,
 
-        @get:JsonProperty("v")
-        @set:JsonProperty("v")
-        var values: Map<Int, String> = HashMap()
-): Serializable
+    @get:JsonProperty("v")
+    @set:JsonProperty("v")
+    var values: Map<Int, String> = HashMap()
+) : Serializable

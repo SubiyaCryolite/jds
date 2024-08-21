@@ -271,11 +271,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<UUID?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.uuidValues?.add(StoreUuid(field.id, value.value.toByteArray()))
+            options.portableEntity?.uuidValues?.add(StoreUuid(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.uuidValues?.filter { it.key == field.id }?.forEach {
-                value.set(it.value?.toUuid())
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.Uuid), mutableMapOf(), propertyName)
@@ -330,19 +330,13 @@ abstract class Entity(
             options.portableEntity?.dateTimeValues?.add(
                 StoreDateTime(
                     field.id,
-                    value.value?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
+                    value.value
                 )
             )
         }
         if (populate(field)) {
             options.portableEntity?.dateTimeValues?.filter { it.key == field.id }?.forEach {
-                val src = it.value
-                value.set(
-                    when (src) {
-                        is Long -> LocalDateTime.ofInstant(Instant.ofEpochMilli(src), ZoneId.of("UTC"))
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.DateTime), mutableMapOf(), propertyName)
@@ -394,17 +388,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<LocalDate?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.dateValues?.add(StoreDate(field.id, value.get()?.toEpochDay()))
+            options.portableEntity?.dateValues?.add(StoreDate(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.dateValues?.filter { it.key == field.id }?.forEach {
-                val src = it.value
-                value.set(
-                    when (src) {
-                        is Long -> LocalDate.ofEpochDay(src)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.Date), mutableMapOf(), propertyName)
@@ -428,16 +416,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<LocalTime?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.timeValues?.add(StoreTime(field.id, value.value?.toNanoOfDay()))
+            options.portableEntity?.timeValues?.add(StoreTime(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.timeValues?.filter { it.key == field.id }?.forEach {
-                value.set(
-                    when (it.value) {
-                        is Long -> LocalTime.ofNanoOfDay(it.value!!)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.Time), mutableMapOf(), propertyName)
@@ -494,16 +477,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<MonthDay?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.monthDayValues?.add(StoreMonthDay(field.id, value.value?.toString()))
+            options.portableEntity?.monthDayValues?.add(StoreMonthDay(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.monthDayValues?.filter { it.key == field.id }?.forEach {
-                value.set(
-                    when (it.value) {
-                        is String -> MonthDay.parse(it.value!!)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.MonthDay), mutableMapOf(), propertyName)
@@ -527,16 +505,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<YearMonth?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.yearMonthValues?.add(StoreYearMonth(field.id, value.value?.toString()))
+            options.portableEntity?.yearMonthValues?.add(StoreYearMonth(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.yearMonthValues?.filter { it.key == field.id }?.forEach {
-                value.set(
-                    when (it.value) {
-                        is String -> YearMonth.parse(it.value!!)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.YearMonth), mutableMapOf(), propertyName)
@@ -560,16 +533,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<Period?> {
         if (options.action == EntityAction.ASSIGN) {
-            options.portableEntity?.periodValues?.add(StorePeriod(field.id, value.value?.toString()))
+            options.portableEntity?.periodValues?.add(StorePeriod(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.periodValues?.filter { it.key == field.id }?.forEach {
-                value.set(
-                    when (it.value) {
-                        is String -> Period.parse(it.value!!)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.Period), mutableMapOf(), propertyName)
@@ -593,19 +561,11 @@ abstract class Entity(
         propertyName: String = ""
     ): IValue<Duration?> {
         if (options.action == EntityAction.ASSIGN) {
-            //TODO replace with generic JSON for better compatibility, all fields in map type <String, Any?>
-            //TODO portable entity.values
-            //TODO this can be extended in different languages
-            options.portableEntity?.durationValues?.add(StoreDuration(field.id, value.value?.toNanos()))
+            options.portableEntity?.durationValues?.add(StoreDuration(field.id, value.value))
         }
         if (populate(field)) {
             options.portableEntity?.durationValues?.filter { it.key == field.id }?.forEach {
-                value.set(
-                    when (it.value) {
-                        is Long -> Duration.ofNanos(it.value!!)
-                        else -> null
-                    }
-                )
+                value.set(it.get())
             }
         }
         return map(field, value, setOf(FieldType.Duration), mutableMapOf(), propertyName)
@@ -826,8 +786,8 @@ abstract class Entity(
         }
         if (populate(field)) {
             options.portableEntity?.doubleCollections?.filter { it.key == field.id }?.forEach { match ->
-                match.values.forEach { value ->
-                    if (collection is MutableCollection) collection.add(value)
+                match.values.forEach {
+                    if (collection is MutableCollection) collection.add(it)
                 }
             }
         }
@@ -845,10 +805,8 @@ abstract class Entity(
             options.portableEntity?.longCollections?.add(StoreLongCollection(field.id, collection))
         }
         if (populate(field)) {
-            options.portableEntity?.longCollections?.filter { it.key == field.id }?.forEach { match ->
-                match.values.forEach { value ->
-                    if (collection is MutableCollection) collection.add(value)
-                }
+            options.portableEntity?.longCollections?.filter { it.key == field.id }?.forEach {
+                it.values.forEach { if (collection is MutableCollection) collection.add(it) }
             }
         }
         mapField(overview.entityId, Field.bind(field, FieldType.LongCollection), propertyName, options.skip())
@@ -865,8 +823,8 @@ abstract class Entity(
             options.portableEntity?.mapIntKeyValues?.add(StoreMapIntKey(field.id, map))
         }
         if (populate(field)) {
-            options.portableEntity?.mapIntKeyValues?.filter { it.key == field.id }?.forEach { match ->
-                if (map is MutableMap) map.putAll(match.values)
+            options.portableEntity?.mapIntKeyValues?.filter { it.key == field.id }?.forEach {
+                if (map is MutableMap) map.putAll(it.values)
             }
         }
         mapField(overview.entityId, Field.bind(field, FieldType.MapIntKey), propertyName, options.skip())
@@ -883,8 +841,8 @@ abstract class Entity(
             options.portableEntity?.mapStringKeyValues?.add(StoreMapStringKey(field.id, map))
         }
         if (populate(field)) {
-            options.portableEntity?.mapStringKeyValues?.filter { it.key == field.id }?.forEach { match ->
-                if (map is MutableMap) map.putAll(match.values)
+            options.portableEntity?.mapStringKeyValues?.filter { it.key == field.id }?.forEach {
+                if (map is MutableMap) map.putAll(it.values)
             }
         }
         mapField(overview.entityId, Field.bind(field, FieldType.MapStringKey), propertyName, options.skip())
@@ -901,8 +859,8 @@ abstract class Entity(
             options.portableEntity?.mapOfCollectionsValues?.add(StoreMapCollection(field.id, map))
         }
         if (populate(field)) {
-            options.portableEntity?.mapOfCollectionsValues?.filter { it.key == field.id }?.forEach { match ->
-                if (map is MutableMap) map.putAll(match.values)
+            options.portableEntity?.mapOfCollectionsValues?.filter { it.key == field.id }?.forEach {
+                if (map is MutableMap) map.putAll(it.values)
             }
         }
         mapField(overview.entityId, Field.bind(field, FieldType.MapOfCollections), propertyName, options.skip())
@@ -953,9 +911,7 @@ abstract class Entity(
                         ?.forEach { match ->
                             match.values.forEach { value ->
                                 if (collection is MutableCollection) {
-                                    val enumVal = fieldEnum.valueOf(value)
-                                    if (enumVal != null)
-                                        collection.add(enumVal)
+                                    fieldEnum.valueOf(value)?.let { collection.add(it) }
                                 }
                             }
                         }
@@ -1116,14 +1072,6 @@ abstract class Entity(
          * Only the ids of mapped [FieldEnum] entries will appear in this collection
          */
         fun getEnums(entityId: Int): Collection<Int> = getEnumsImp(entityId).toSet()
-
-        /**
-         * Public facing method to query the underlying values.
-         * Only mapped [FieldEntity] entries will appear in this collection
-         */
-        fun findAll(entityIds: Collection<Int>): Collection<Class<out Entity>> {
-            return classes.filter { kvp -> entityIds.contains(kvp.key) }.map { kvp -> kvp.value }
-        }
 
         private fun toByteArrayCollection(values: Collection<UUID>): Collection<ByteArray> {
             val output = ArrayList<ByteArray>()
