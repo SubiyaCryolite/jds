@@ -16,11 +16,10 @@ package io.github.subiyacryolite.jds
 import io.github.subiyacryolite.jds.portable.*
 
 data class EntityOptions(
-    var populate: Boolean = false,
-    var assign: Boolean = false,
+    var action: EntityAction = EntityAction.NONE,
     var portableEntity: PortableEntity? = null
 ) {
     fun skip(): Boolean {
-        return assign || populate
+        return action != EntityAction.NONE
     }
 }

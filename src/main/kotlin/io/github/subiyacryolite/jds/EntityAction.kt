@@ -11,36 +11,10 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.github.subiyacryolite.jds.portable
+package io.github.subiyacryolite.jds
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import io.github.subiyacryolite.jds.Field
-import java.io.Serializable
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
-
-/**
- * Used to store values of type in a portable manner
- * @param key the value within [Field.id]
- * @param value the corresponding value
- */
-data class StoreZonedDateTime(
-    @get:JsonProperty("k")
-    @set:JsonProperty("k")
-    var key: Int = 0,
-
-    @get:JsonProperty("v")
-    @set:JsonProperty("v")
-    var value: Long? = null
-) : Serializable {
-
-    constructor(key: Int, src: ZonedDateTime?) : this(key) {
-        value = src?.toInstant()?.toEpochMilli()
-    }
-
-    fun get(): ZonedDateTime? = when (val src = value) {
-        is Long -> ZonedDateTime.ofInstant(Instant.ofEpochMilli(src), ZoneId.of("UTC"))
-        else -> null
-    }
+enum class EntityAction {
+    NONE,
+    POPULATE,
+    ASSIGN
 }
