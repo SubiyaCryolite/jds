@@ -16,6 +16,10 @@ package io.github.subiyacryolite.jds.portable
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
 import java.io.Serializable
+import java.time.Instant
+import java.time.MonthDay
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * Used to store values of type in a portable manner
@@ -30,4 +34,14 @@ data class StoreMonthDay(
         @get:JsonProperty("v")
         @set:JsonProperty("v")
         var value: String? = null
-): Serializable
+): Serializable{
+
+        constructor(key: Int, src: MonthDay?) : this(key) {
+                value = src.toString()
+        }
+
+        fun get(): MonthDay? = when (val src = value) {
+                is String -> MonthDay.parse(src)
+                else -> null
+        }
+}
