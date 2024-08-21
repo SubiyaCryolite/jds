@@ -15,7 +15,12 @@ package io.github.subiyacryolite.jds.portable
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
+import io.github.subiyacryolite.jds.extensions.toByteArray
+import io.github.subiyacryolite.jds.extensions.toUuid
 import java.io.Serializable
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 /**
@@ -24,14 +29,21 @@ import java.util.*
  * @param value the corresponding value
  */
 data class StoreUuid(
-        @get:JsonProperty("k")
-        @set:JsonProperty("k")
-        var key: Int = 0,
+    @get:JsonProperty("k")
+    @set:JsonProperty("k")
+    var key: Int = 0,
 
-        @get:JsonProperty("v")
-        @set:JsonProperty("v")
-        var value: ByteArray? = null
-): Serializable {
+    @get:JsonProperty("v")
+    @set:JsonProperty("v")
+    var value: ByteArray? = null
+) : Serializable {
+
+    constructor(key: Int, src: UUID?) : this(key) {
+        value = src?.toByteArray()
+    }
+
+    fun get(): UUID? = value.toUuid()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
