@@ -17,6 +17,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.subiyacryolite.jds.Field
 import java.io.Serializable
 import java.sql.Timestamp
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * Used to store values of type in a portable manner
@@ -24,11 +28,21 @@ import java.sql.Timestamp
  * @param value the corresponding value
  */
 data class StoreDate(
-        @get:JsonProperty("k")
-        @set:JsonProperty("k")
-        var key: Int = 0,
+    @get:JsonProperty("k")
+    @set:JsonProperty("k")
+    var key: Int = 0,
 
-        @get:JsonProperty("v")
-        @set:JsonProperty("v")
-        var value: Long? = null
-): Serializable
+    @get:JsonProperty("v")
+    @set:JsonProperty("v")
+    var value: Long? = null
+) : Serializable {
+
+    constructor(key: Int, src: LocalDate?) : this(key) {
+        value = src?.toEpochDay()
+    }
+
+    fun get(): LocalDate? = when (val src = value) {
+        is Long -> LocalDate.ofEpochDay(src)
+        else -> null
+    }
+}
