@@ -18,9 +18,6 @@ import io.github.subiyacryolite.jds.Field
 import io.github.subiyacryolite.jds.extensions.toByteArray
 import io.github.subiyacryolite.jds.extensions.toUuid
 import java.io.Serializable
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.util.*
 
 /**
@@ -58,7 +55,7 @@ data class StoreUuid(
 
     override fun hashCode(): Int {
         var result = key.hashCode()
-        result = 31 * result + (value?.let { it.contentHashCode() } ?: 0)
+        result = 31 * result + (value?.contentHashCode() ?: 0)
         return result
     }
 }

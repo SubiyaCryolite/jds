@@ -15,12 +15,7 @@ package io.github.subiyacryolite.jds.portable
 
 import io.github.subiyacryolite.jds.Entity
 import io.github.subiyacryolite.jds.context.DbContext
-import io.github.subiyacryolite.jds.extensions.toByteArray
-import java.sql.Timestamp
-import java.time.LocalDateTime
-import java.util.*
 import java.util.concurrent.Callable
-import kotlin.collections.ArrayList
 
 /**
  * A helper class to transform [Entity] objects or collections in a portable format that can be serialized to JSON, XML, YAML or any other format of choice

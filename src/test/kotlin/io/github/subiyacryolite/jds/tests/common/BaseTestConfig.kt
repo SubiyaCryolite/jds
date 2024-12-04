@@ -29,8 +29,6 @@ import java.io.File
 abstract class BaseTestConfig {
 
     companion object {
-        const val DOUBLE_DELTA = 1e-15
-        const val FLOAT_DELTA = 1e-2f
 
         fun initialiseSqLiteBackend(): DbContext {
             val jdsDb = SqLiteDbContextImplementation()
@@ -93,35 +91,35 @@ abstract class BaseTestConfig {
         val tsqlConfigFile = File("db.tsql.properties")
         if (!tsqlConfigFile.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream("tsql.src.properties").use { inputStream ->
-                inputStream.reader().use { inputStreamReader -> tsqlConfigFile.writeText(inputStreamReader.readText()) }
+                inputStream?.reader()?.use { inputStreamReader -> tsqlConfigFile.writeText(inputStreamReader.readText()) }
             }
         }
 
         val pgConfigFile = File("db.pg.properties")
         if (!pgConfigFile.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream("pg.src.properties").use { inputStream ->
-                inputStream.reader().use { inputStreamReader -> pgConfigFile.writeText(inputStreamReader.readText()) }
+                inputStream?.reader()?.use { inputStreamReader -> pgConfigFile.writeText(inputStreamReader.readText()) }
             }
         }
 
         val oraConfigFile = File("db.ora.properties")
         if (!oraConfigFile.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream("ora.src.properties").use { inputStream ->
-                inputStream.reader().use { inputStreamReader -> oraConfigFile.writeText(inputStreamReader.readText()) }
+                inputStream?.reader()?.use { inputStreamReader -> oraConfigFile.writeText(inputStreamReader.readText()) }
             }
         }
 
         val mysqlConfigFile = File("db.mysql.properties")
         if (!mysqlConfigFile.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream("mysql.src.properties").use { inputStream ->
-                inputStream.reader().use { inputStreamReader -> mysqlConfigFile.writeText(inputStreamReader.readText()) }
+                inputStream?.reader()?.use { inputStreamReader -> mysqlConfigFile.writeText(inputStreamReader.readText()) }
             }
         }
 
         val mariaConfigFile = File("db.mariadb.properties")
         if (!mariaConfigFile.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream("mysql.src.properties").use { inputStream ->
-                inputStream.reader().use { inputStreamReader -> mariaConfigFile.writeText(inputStreamReader.readText()) }
+                inputStream?.reader()?.use { inputStreamReader -> mariaConfigFile.writeText(inputStreamReader.readText()) }
             }
         }
     }
@@ -167,6 +165,6 @@ abstract class BaseTestConfig {
             objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
             objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_INDEX)
             objectMapper.enable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-            return objectMapper;
+            return objectMapper
         }
 }

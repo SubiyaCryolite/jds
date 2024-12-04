@@ -21,7 +21,7 @@ import io.github.subiyacryolite.jds.enums.FieldType
 
 @EntityAnnotation(id = 4, name = "entityb", tags = ["entitya"])
 open class EntityB(
-        private val _field: IValue<String> = StringValue("B")
+    private val _field: IValue<String> = StringValue("B")
 ) : EntityA() {
 
     override fun bind() {
@@ -38,6 +38,16 @@ open class EntityB(
     }
 
     companion object {
-        private val ENTITY_B_FIELD = Field(5001, "entity_b_field", FieldType.String, "", alternateCodes = mapOf("FAKE:CODING:SYSA" to "FAKE:CODING:VAL:1", "FAKE:CODING:SYSB" to "FAKE:CODING:VAL:2"), tags = setOf("extends_entity_a"))
+        private val ENTITY_B_FIELD = Field(
+            5001,
+            "entity_b_field",
+            FieldType.String,
+            "",
+            alternateCodes = mapOf(
+                "FAKE:CODING:SYSA" to "FAKE:CODING:VAL:1",
+                "FAKE:CODING:SYSB" to "FAKE:CODING:VAL:2"
+            ),
+            tags = setOf("extends_entity_a")
+        )
     }
 }
